@@ -11,8 +11,8 @@ A `ready(cause = wake)` line completes the task's next WAIT in program order,
 so its row carries that WAIT's channel kind from the run file (`input`, `timer`,
 `chain`, …; metrics doc §6.1).
 
-Alongside the rows it returns the guard messages the metrics doc names: tail
-iterations versus head ticks per chain, the `deadline` cross-check on
+Alongside the rows it returns the guard messages the metrics doc names: more
+tail iterations than consumed head ticks per chain, the `deadline` cross-check on
 single-stage chains, stimulus counts — `input`-channel wake lines against the
 run file's input wake events — a wake line past the last WAIT of its task's
 program, and the schedule cross-check (an applied entry the schedule does not
@@ -298,13 +298,18 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
         # consumptions was skipped: a job with no work and no completion, missed.
         # The j-th consumption is the tail's j-th iteration, since a skipped tick
         # sends no wake down the chain and wakes queue with depth.
+        # The tail can fall short at T_end and that is no error: an iteration still
+        # running there is not completed within the window (metrics doc §4), and a
+        # tick consumed shortly before T_end has no time to finish its frame (9.16
+        # D3). So only a tail with more completions than consumed ticks fails; a
+        # wake lost mid-run, which also leaves the tail short, is not caught here.
         consumed = [tk for tk in hs.ticks if tk <= t_end]
         if not consumed:
             continue
         t0 = consumed[0]
         indices = [(tk - t0) // period for tk in consumed]
         ends = [e for e in ts.iter_ends if e <= t_end]
-        if len(ends) != len(consumed):
+        if len(ends) > len(consumed):
             guards.append(f"chain {head}: tail {tail} completed {len(ends)} iteration(s) "
                           f"for {len(consumed)} consumed head tick(s) inside the window")
         jobs = []                                   # (tick index, completion or None, skipped)

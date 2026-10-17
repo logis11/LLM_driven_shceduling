@@ -28,10 +28,11 @@ seed_count: 100
 # The primary is the values OSTEP chapter 8's worked examples use — three queues and
 # a 10 ms top slice (Example 1), doubling per level (Figure 8.6), a 100 ms boost
 # (Figure 8.4) (recognition-vocabulary §2, 2026-09-11; 9.11 D8). It sits on the
-# measured call's demotion edge: about a fifth of the call's audio-frame cycles
-# consume a 10 ms slice (9.14). Each alternative is the same configuration with
-# only the top slice changed; the reason for each point is on the sensitivity line
-# below (statement `boot-default-sweep`).
+# measured call's demotion edge: about one in twenty of the call's audio-frame
+# cycles consume a 10 ms slice — 4.9 % from the measured table, 5.5 % in the
+# compiled meeting files (9.14; restated 9.16 D1). Each alternative is the same
+# configuration with only the top slice changed; the reason for each point is on
+# the sensitivity line below (statement `boot-default-sweep`).
 boot_defaults:
   primary: ostep
   alternatives: [ostep-slice-500us, ostep-slice-700us, ostep-slice-900us, ostep-slice-1200us,
@@ -118,15 +119,15 @@ reporting_lines:
                     ostep-slice-2000us, ostep-slice-3000us, ostep-slice-5000us, ostep-slice-14000us,
                     ostep-slice-20000us, ostep-slice-100000us]
     reasons:
-      ostep: "the primary: the values OSTEP chapter 8's worked examples use, a 10 ms top slice (recognition-vocabulary §2); it sits on the measured call's demotion edge, about a fifth of its audio-frame cycles consuming the slice"
+      ostep: "the primary: the values OSTEP chapter 8's worked examples use, a 10 ms top slice (recognition-vocabulary §2); it sits on the measured call's demotion edge, about one in twenty of its audio-frame cycles consuming the slice (4.9 % from the measured table, 5.5 % in the compiled meeting files; 9.16 D1)"
       ostep-slice-500us: "backbone: the config schema's lower bound on the top slice"
       ostep-slice-700us: "backbone: Linux's base slice at one CPU, 0.70 ms since v6.15 (linux-sched-fair) — design, the one-CPU value for the simulator's one lane, the runner running 2.1 ms at its 4 CPUs (9.11 D25); also below the C2 gaming pair's 834 µs chain slack per frame (its chain 15 833 µs of 16 667, the Steam client taking about 250 µs of the slack on average), so a boosted intruder's slice fits inside a frame"
       ostep-slice-900us: "threshold: above the C2 gaming pair's 834 µs chain slack, below the gaming base's 1 668 µs (its chain 14 999 µs); demotes the gaming base's nine chain stages at 992 to 1 436 µs"
       ostep-slice-1200us: "threshold: above the 1 ms post-boost point (arithmetic on the boost: 1 % of the 100 ms interval) and the gaming base's cluster of stages at 992 to 1 191 µs, below its longest stage, 1 436 µs; demotes four C2 stages (1 220 to 2 131 µs)"
       ostep-slice-2000us: "backbone: illumos TS's top-level quantum (illumos-ts); also above every gaming-base stage and the C2 pair's 1 733 µs stage, below its 2 099 and 2 131 µs stages"
-      ostep-slice-3000us: "threshold: above every chain stage (the longest 2 131 µs); inside the video player's cycle range (decile cuts 2.3 to 7.5 ms), demoting about seven in ten of its cycles"
-      ostep-slice-5000us: "threshold: between the video player's median cycle (4.0 ms) and its upper decile (7.5 ms); the 2026-09 reason, the 6 667 µs compositor burst, left with the compositor task (9.9)"
-      ostep-slice-14000us: "threshold: above the call's 12.2 ms ninth-decile cycle, below its 18.9 ms and the video player's 16.0 ms maxima, so the call is demoted in under a tenth of its cycles and the player almost never (added 2026-10-09)"
+      ostep-slice-3000us: "threshold: above every chain stage (the longest 2 131 µs); inside the video player's cycle range (its deciles 2.8 to 5.4 ms; 2.3 and 7.5 ms its 1st and 99.9th percentiles), demoting about eight in ten of its cycles"
+      ostep-slice-5000us: "threshold: between the video player's median cycle (4.0 ms) and its upper decile (5.4 ms); the 2026-09 reason, the 6 667 µs compositor burst, left with the compositor task (9.9)"
+      ostep-slice-14000us: "threshold: above the call's 12.2 ms 99th-percentile cycle (its ninth decile 7.4 ms), below the measured tables' maxima, the call's 18.9 ms and the video player's 16.0 ms, so the call is demoted in about 0.04 % of its cycles and the player almost never (added 2026-10-09)"
       ostep-slice-20000us: "backbone: sched_ext's default slice, 20 ms (linux-sched-ext); above every periodic task's longest cycle, so no periodic task is ever demoted"
       ostep-slice-100000us: "backbone: the config schema's upper bound on the top slice"
   # 8.1 decision 4: the verdict count recomputed under a band of latency floors at scoring time
@@ -173,13 +174,13 @@ reporting_lines:
     name: chain-x1.4
     axis: chain_scale
     value: "1.4"
-    reason: "the chain's RUN values scaled by 1.4, the deck's bound; at this factor the chain exceeds the lane in all three files (1.14 and 1.26 lanes), so the expected reading is that the gaming verdicts depend on the literature-grounded archetype's scale — its stated limitation, not a result"
+    reason: "the chain's RUN values scaled by 1.4, the deck's bound; at this factor the chain exceeds the lane in all three files (1.33 and 1.26 lanes), so the expected reading is that the gaming verdicts depend on the literature-grounded archetype's scale — its stated limitation, not a result"
     files: {c2-p2a: c2-p2a@chain-x1.4, c2-p2b: c2-p2b@chain-x1.4, c7-gaming: c7-gaming@chain-x1.4}
   - type: variant_set
     name: seg1-30s
     axis: segment_length
     value: "30s"
-    reason: "the C2 pairs' first segment, the one authored length a judging file has (60 s, design, 9.10 D31), at 30 s; every other judging length is a job's measured CPU total (9.10 D169's sweep)"
+    reason: "the C2 pairs' first segment, the one authored length a judging file has (60 s, design, 9.10 D31), at 30 s; every other judging length follows from a job's measured CPU total (9.10 D169's sweep), with the editor's beside it on the batch C1 bases and c2-p3a; c1-render's 60 s is design"
     files: {c2-p1a: c2-p1a@seg1-30s, c2-p2a: c2-p2a@seg1-30s, c2-p2b: c2-p2b@seg1-30s, c2-p3a: c2-p3a@seg1-30s}
   - type: variant_set
     name: seg1-120s
@@ -239,12 +240,15 @@ reporting_lines:
     text: >
       Judging since 2026-10-09 (9.14 decision 2): the measured call is one task
       with a job per 10 ms audio frame whose cycle run consumes the boot slice in
-      about a fifth of its cycles; demoted, it waits behind the upgrade's slice
-      until the next boost, while under either EDF row it is deadline class and
-      misses only its own overruns, about 5 %. The tie with fixed that made it
-      reporting-only in 8.8 held on the old 2.5 ms and 6.67 ms bursts and is
-      gone; the cap axis is inert and the gap reads EDF against the drawn
-      algorithm, as on c7-gaming. The call's own overruns set a floor under its
+      about one cycle in twenty (4.9 % from the measured table, 5.5 % in the
+      compiled file), so in about 4 of 10 boost intervals (arithmetic: 1 − 0.95¹⁰,
+      the cycles taken as independent, ten to a 100 ms boost) the call is demoted
+      and waits behind the upgrade's slice until the next boost (9.16 D1), while
+      under either EDF row it is deadline class and misses only its own overruns,
+      about 5 %. The tie
+      with fixed that made it reporting-only in 8.8 held on the old 2.5 ms and
+      6.67 ms bursts and is gone; the cap axis is inert and the gap reads EDF
+      against the drawn algorithm, as on c7-gaming. The call's own overruns set a floor under its
       miss rate under every row.
   - type: note
     workload: c7-media
@@ -297,7 +301,8 @@ statements:
       an idle task only when no other-class task is runnable, under every
       algorithm (9.11 D5; 9.13), and the cap is work-conserving, so no row's
       share or cap reaches the background task: its turnaround or progress is
-      identical under every row and the editor's wait is untouched by it. The
+      identical under every row and the editor's wait is untouched by it
+      (statement `simulator-conformance`, item (e), the strict idle class). The
       six files are reporting-only by the judging rule's own reason for the
       interactive C1 bases — nothing the row choice can move runs behind the
       foreground — with the prediction stated here before any run: no headroom
@@ -412,9 +417,11 @@ statements:
       either side of the steps the rebuilt judging files' periodic tasks have (9.14
       decision 9): the chain's slack per frame (834 µs in the C2 pair, 1 668 µs in
       the gaming base), its stages' demotion edges (the base's longest 1 436 µs, the
-      pair's 2 131 µs), the video player's cycle range (2.3 to 7.5 ms at the decile
-      cuts, 16.0 ms at most) and the call's demotion edge (about a fifth of its
-      cycles above 10 ms, its ninth decile 12.2 ms, its maximum 18.9 ms). A slice
+      pair's 2 131 µs), the video player's cycle range (its deciles 2.8 to 5.4 ms,
+      2.3 and 7.5 ms its 1st and 99.9th percentiles, 16.0 ms the measured table's
+      maximum) and the call's demotion edge (about one in twenty of its cycles
+      above 10 ms, its ninth decile 7.4 ms, its 99th percentile 12.2 ms, the
+      measured table's maximum 18.9 ms; 9.16 D1). A slice
       below a stage's run demotes that stage; a slice shorter than the slack lets
       a boosted intruder's slice fit inside a frame. Every point's reason is on
       the sensitivity line. If the verdict count changes across the sweep, the
@@ -440,13 +447,13 @@ statements:
       under dataset/replay/, each stating its landing). A verdict count that moves under any line makes the verdict
       a range over that axis. The input-wake-count line prints, per judging file
       and interaction-latency term, the number of wakes its P99 rests on: a 26 s
-      counterpart holds about a hundred keystrokes and c3-workday's browser seven,
+      counterpart holds 49 to 101 keystrokes and c3-workday's browser seven,
       so a P99 there is the top one or two waits. The comparison across conditions
       is on one file's wakes; across the pair, a counterpart's keystroke window is
       a slice of its base's at the base's stimulus offset (9.18), so its input
-      wakes are those of the base's first 26.385 s less the ones inside its own
-      operations. The longest-wait line prints each run's longest ready_wait
-      against the 30 s floor; any run past 15 s reopens the executor-net question
+      wakes are those of the base's input window up to 24.385 s less the ones
+      inside its own operations. The longest-wait line prints each run's longest
+      ready_wait against the 30 s floor; any run past 15 s reopens the executor-net question
       with 인경민 before the verdict is read (9.11 D19).
   - id: re-measurement-contingency
     text: >
@@ -500,12 +507,12 @@ statements:
       for a true row, its C7 counterpart for a false row, plus any C2 or C3 segment
       labelled with that row.
 
-# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-17 and 2026-10-16, the 9.15 entries;
+# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-17, the 9.16 entry; 2026-10-17 and 2026-10-16, the 9.15 entries;
 # 2026-10-15 and 2026-10-14, the 9.23 entries; 2026-10-12, the 9.20 entry; 2026-10-11, the 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
-  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 2ad757b6196ae1839a76b4f1b2a96d156eee84b40375dec9bd5f66116b6ca14e}
-  guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.1", sha256: 24ccb875ff666615de75d80bc5351b7f5c62713d605438844938f9ab6ef1676c}
-  driver_table: {path: daemon/driver-table/prior.yaml, sha256: 0fba4b3c9822054fad19ef150d1395d91e679d42b6299166b9a89f50ad27960c}
+  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: f7d1df4cfd974951ae9fad035e0a494108c49f05d1d0e0f9943990f02fc182ff}
+  guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.2", sha256: c2dad06fb02466c0fb4bb3036d5899971ec3bfe9417d2026dc52a9a8553408ca}
+  driver_table: {path: daemon/driver-table/prior.yaml, sha256: e1155a72d7458a40778b19c5a9a18062de8efeb8b1663340435da3e9b800f617}
   dataset:      {path: dataset/build.manifest.json, sha256: 0f0af422d4dd92282903342b51cd6617d704d3cad9488d350388a47d7ff3417f}
   variants:
     all: {path: dataset/build.variants.manifest.json, sha256: cdc143191fcd28aec80595e3060f4f391c91ba52c341e076043589124bb579f6}

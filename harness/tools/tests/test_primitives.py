@@ -117,10 +117,12 @@ def test_no_demand_row_for_unbounded_program():
     assert r.guards == []
 
 
-def test_lost_wake_trips_the_chain_guard():
-    # head ticks twice, the tail only runs once: iteration count != tick count
-    run = runfile(200, [task("h", period=100, targets=["t"]), task("t")], chains=[["h", "t"]])
-    events = [
+CHAIN_TASKS = [task("h", period=100, targets=["t"]), task("t", waits=["chain"] * 3)]
+
+
+def _chain_trace(lines):
+    """A two-stage chain h -> t, both arriving at 0, h's TIMER consuming tick 0 at once."""
+    return [
         {"event": "task_arrive", "t": 0, "task": "h", "source": "file"},
         {"event": "task_arrive", "t": 0, "task": "t", "source": "file"},
         {"event": "ready", "t": 0, "task": "h", "cause": "arrive"},
@@ -131,14 +133,54 @@ def test_lost_wake_trips_the_chain_guard():
         {"event": "run_start", "t": 5, "task": "t"},
         {"event": "ready", "t": 5, "task": "t", "cause": "wake"},
         {"event": "run_end", "t": 20, "task": "t", "reason": "block", "blocked_on": "wait"},
+    ] + lines
+
+
+def test_a_frame_still_running_at_t_end_is_no_chain_guard():
+    """The head consumes tick 1 at 100 and the tail's iteration for it is still running at
+    T_end = 110: not completed within the window (metrics doc §4), no job row, no guard
+    (9.16 D3)."""
+    run = runfile(110, CHAIN_TASKS, chains=[["h", "t"]])
+    events = _chain_trace([
+        {"event": "ready", "t": 100, "task": "h", "cause": "timer_tick"},
+        {"event": "run_start", "t": 100, "task": "h"},
+        {"event": "run_end", "t": 105, "task": "h", "reason": "block", "blocked_on": "timer"},
+        {"event": "run_start", "t": 105, "task": "t"},
+        {"event": "ready", "t": 105, "task": "t", "cause": "wake"},
+        {"event": "run_end", "t": 125, "task": "t", "reason": "block", "blocked_on": "wait"},   # past T_end
+    ])
+    r = compute(run, events)
+    assert [x["value"] for x in rows_of(r, "job", "h")] == [20]
+    assert r.guards == []
+
+
+def test_a_lost_wake_mid_run_is_not_caught_by_the_chain_guard():
+    """The guard's stated weakness (metrics doc §6.2): the head consumes tick 1 at 100, the
+    wake to the tail is lost, and the tail falls short as it would at T_end — no guard."""
+    run = runfile(200, CHAIN_TASKS, chains=[["h", "t"]])
+    events = _chain_trace([
         {"event": "ready", "t": 100, "task": "h", "cause": "timer_tick"},
         {"event": "run_start", "t": 100, "task": "h"},
         {"event": "run_end", "t": 105, "task": "h", "reason": "block", "blocked_on": "timer"},
         # the wake to t is lost: no ready(wake), no second iteration
-    ]
+    ])
     r = compute(run, events)
     assert [x["value"] for x in rows_of(r, "job", "h")] == [20]
-    assert any("h" in g and "tick" in g for g in r.guards)
+    assert r.guards == []
+
+
+def test_more_tail_completions_than_consumed_ticks_trips_the_chain_guard():
+    """The head consumes one tick inside the window and the tail completes two iterations:
+    a wake the head never sent."""
+    run = runfile(90, CHAIN_TASKS, chains=[["h", "t"]])
+    events = _chain_trace([
+        {"event": "ready", "t": 30, "task": "t", "cause": "wake"},
+        {"event": "run_start", "t": 30, "task": "t"},
+        {"event": "run_end", "t": 40, "task": "t", "reason": "block", "blocked_on": "wait"},
+    ])
+    r = compute(run, events)
+    assert any(g.startswith("chain h: tail t completed 2 iteration(s) for 1 consumed head tick(s)")
+               for g in r.guards)
 
 
 def test_deadline_disagreement_on_single_stage_is_a_guard():

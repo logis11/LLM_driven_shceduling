@@ -75,11 +75,17 @@
 #   terms that delivered no CPU at all is an empty trace that parsed.
 #
 # tick_count — structural. The primitives' own consistency checks (metrics doc
-#   §6.2 guard: a chain tail's iteration count equals its head's tick count; the
-#   `deadline` cross-check; the stimulus count against the run file's wake
-#   events; config_applied lines against the schedule): their messages, returned
-#   by the records build, are this guard's input. Any message is a fail. A run
-#   whose messages were not recorded fails: the check was not run.
+#   §6.2 guard: a chain tail completes no more iterations inside the window than
+#   its head consumed ticks there; the `deadline` cross-check; the stimulus count
+#   against the run file's wake events; config_applied lines against the
+#   schedule): their messages, returned by the records build, are this guard's
+#   input. Any message is a fail. A run whose messages were not recorded fails:
+#   the check was not run. A tail short of the head's count is not a message: an
+#   iteration still running at T_end is not completed within the window (metrics
+#   doc §4), and a tick consumed shortly before T_end may leave its frame no time
+#   to finish — c7-gaming's last consumed tick lies 1,139 µs before T_end against
+#   a 14,999 µs frame (9.16 D3). Its weakness: a wake the simulator drops mid-run
+#   also leaves the tail short, and this guard no longer catches it.
 #
 # validation_matches_provenance — structural. One query produces one schedule
 #   entry, so the log's `validation` sequence equals the schedule's `provenance`
@@ -113,9 +119,10 @@
 # the RQ0 gate spec. 1.1 (2026-10-09, sub-task 9.14) carries 9.11's starvation floor (30 s),
 # provenance-share grounding and P1 flag, the grounding-kind labels, the pair guard's reading of
 # configuration sequences, the retired `fixed_identical` flag, and the two name-table conditions
-# in place of `whitelist` (9.12 D6). Pinned anew by the RQ0 gate spec; a change after it is a new
-# version and a changelog entry.
-version: "1.1"
+# in place of `whitelist` (9.12 D6). 1.2 (2026-10-17, sub-task 9.16) reads the chain check of
+# `tick_count` by the window rule (9.16 D3). Pinned anew by the RQ0 gate spec; a change after it
+# is a new version and a changelog entry.
+version: "1.2"
 
 guards:
   - id: provenance_share
@@ -183,7 +190,10 @@ guards:
     grounding: >
       Structural: the primitives' consistency messages (metrics doc §6.2 guard, the
       stimulus count, the deadline cross-check, config_applied against the schedule)
-      returned by the records build; any message fails the run.
+      returned by the records build; any message fails the run. The chain check fails
+      only on more tail completions than consumed head ticks inside the window: an
+      iteration still running at T_end is not completed (metrics doc §4; 9.16 D3), so
+      a wake dropped mid-run is not caught by this guard.
 
   - id: validation_matches_provenance
     reads: schedule+log

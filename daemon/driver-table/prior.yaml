@@ -29,15 +29,16 @@
 #   watchdog enforces (guard spec; 9.11 D7, D19). A LOTTERY row's batch_share equals its cap.
 # - Two executor rules sit below every row (9.11 D5, D16; 9.13): a task whose declared class is
 #   idle — the Tracker indexer, the Déjà Dup backup — runs only when no other-class task is
-#   runnable and is preempted at once when one wakes, so no row's share or cap reaches it; and the
-#   cap reaches a task only while it is in the behavioural batch class. Where either rule makes a
+#   runnable and is preempted at once when one wakes, so no row's share or cap reaches it (RQ0
+#   gate spec conformance item (e), the strict idle class); and the cap reaches a task only while
+#   it is in the behavioural batch class. Where either rule makes a
 #   row's knob inert on the file that exercises it, the row says so.
 # - Params are the boot values (recognition-vocabulary §2, provenance table: OSTEP's 10 ms slice,
 #   three queues, doubling, a 100 ms boost; the same 10 ms for EDF's residual slice and LOTTERY's
 #   quantum by the same-granularity rule, design); no held reference names a different value for a
 #   situation, so the rows differ by algorithm and cap only.
 # - The editors the rows protect are measured programs (9.5). A keystroke costs the office writer
-#   and the mail client about 5 ms of CPU and the browser next to nothing, so those block inside one
+#   and the mail client about 5 ms of CPU and the browser about 4 ms, so those block inside one
 #   10 ms slice and stay on top under MLFQ (rule 4b); a keystroke costs VS Code about 78 ms, several
 #   slices, so MLFQ demotes it within the keystroke (rule 4a) and the 100 ms boost is what returns
 #   it. The wake-to-run wait the scoring measures is protected whenever the editor is in Q0 at the
@@ -211,7 +212,7 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.333
     default: EDF
-    justification: "Game frames are periodic deadlines (the chain's 16.7 ms period, scored as game.chain.1's miss rate) and a download the user started is wanted background weighed 0.5 against the frames' 1.0 in c2-p2a, so the batch class gets a third. The measured download runs back to back and is batch class, but the chain takes 0.95 of the lane under EDF, so what it leaves is below any cap and the download's progress is expected no headroom (scoring spec)."
+    justification: "Game frames are periodic deadlines (the chain's 16.7 ms period, scored as game.chain.1's miss rate) and a download the user started is wanted background weighed 0.5 against the frames' 1.0 in c2-p2a, so the batch class gets a third. The measured download's whole program is batch class over 74 % of its CPU, but the part the file gives it under EDF, where the chain takes 0.95 of the lane, is about 1 s of its launch phase of short runs, not batch class; either way no cap acts on it, the boot MLFQ gives it more (3.0 s against 1.1 s), and the download's progress is expected no headroom (scoring spec)."
     sources: [liu-jacm73, waldspurger-osdi94]
     entries:
       EDF:
@@ -289,7 +290,7 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.5
     default: LOTTERY
-    justification: "A build the user started while editing: c1-compile weighs the makespan 1.0 against the editor's 1.0, so the build's share is half — the measured kernel build's 2,908 object jobs progress at a stated rate and the editor is guaranteed the other half while it is runnable."
+    justification: "A build the user started while editing: c1-compile weighs the makespan 1.0 against the editor's 1.0, so the build's share is half — the measured kernel build's 2,908 object jobs progress at a stated rate and the editor is guaranteed the other half while it is runnable and its run since its last block is within one 10 ms slice — at the keystroke's wake, where the scored wait is taken. Past that the editor is batch class and shares the batch class's draws evenly with up to eight build members, 83 % of c1-compile's editor CPU (the LOTTERY entry's rule)."
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
@@ -315,7 +316,7 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.333
     default: LOTTERY
-    justification: "A training run the user started is a stated share of the lane, not a nuisance: c2-p1a weighs its progress 0.5 against the editor's 1.0, so the batch class gets a third and the editor's keystrokes the rest while they are runnable."
+    justification: "A training run the user started is a stated share of the lane, not a nuisance: c2-p1a weighs its progress 0.5 against the editor's 1.0, so the batch class gets a third and the editor's keystrokes the rest while the editor is runnable and its run since its last block is within one 10 ms slice — at the keystroke's wake, where the scored wait is taken. Past that the editor is batch class and shares the batch class's draws evenly with the training run, 87.5 % of c2-p1a's editor CPU (pair review, p1 row)."
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
@@ -333,7 +334,7 @@ rows:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "One CPU-bound job under an interactive editor is MLFQ's textbook case (OSTEP ch. 8); the floor cap bounds the bottom queue; boot params."
+        justification: "MLFQ sinks the CPU-bound job by demotion (OSTEP ch. 8); the editor here is VS Code, demoted within each keystroke (the header's editors), so its waits meet the job in the queue they share and the floor cap bounds the job there; boot params."
         sources: [ostep]
 
   # ------------------------------------------------------------ render
@@ -393,7 +394,7 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.5
     default: LOTTERY
-    justification: "An indexing run the user asked for (c1-indexing: the reindex's turnaround weighed 1.0 against the editor's 1.0): equal shares, the cap derived as w_batch / (w_fg + w_batch) like compile/true. The measured indexer declares the idle class, so the executor runs it only in the editor's gaps and this share never reaches it: the row stands by the rule above and is inert on the file that exercises it (9.11 D5, D16; the depicted desktop gives the indexer's slice about 23 % against the editor's, a stated limitation)."
+    justification: "An indexing run the user asked for (c1-indexing: the reindex's turnaround weighed 1.0 against the editor's 1.0): equal shares, the cap derived as w_batch / (w_fg + w_batch) like compile/true. The measured indexer declares the idle class, so the executor runs it only in the editor's gaps and this share never reaches it (RQ0 gate spec conformance item (e), the strict idle class): the row stands by the rule above and is inert on the file that exercises it (9.11 D5, D16; the depicted desktop gives the indexer's slice about 23 % against the editor's, a stated limitation)."
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
@@ -405,13 +406,13 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "An indexer's first index nobody called (c2-p1b's and c7-indexing's Tracker under an editor): sink it and hold it to the floor; the only scored term is the editor's keystroke echo. The indexer declares the idle class, so it already runs only in the editor's gaps under every row; the floor is inert on it and the pair's attribute is unmeasured here (pair review)."
+    justification: "An indexer's first index nobody called (c2-p1b's and c7-indexing's Tracker under an editor): sink it and hold it to the floor; the only scored term is the editor's keystroke echo. The indexer declares the idle class, so it already runs only in the editor's gaps under every row (RQ0 gate spec conformance item (e), the strict idle class); the floor is inert on it and the pair's attribute is unmeasured here (pair review)."
     sources: [ostep]
     entries:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "One CPU-bound intruder under an interactive editor is MLFQ's textbook case (OSTEP ch. 8); the floor cap bounds the bottom queue; boot params."
+        justification: "MLFQ sinks a CPU-bound intruder by demotion (OSTEP ch. 8); the editor here is VS Code, demoted within each keystroke (the header's editors). On the files that exercise this row the intruder, Tracker's indexer, is idle class, so it runs only in the editor's gaps and neither the demotion nor the floor cap reaches it (RQ0 gate spec conformance item (e), the strict idle class); boot params."
         sources: [ostep]
 
   # ------------------------------------------------------------ backup
@@ -419,7 +420,7 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.2
     default: LOTTERY
-    justification: "A scheduled backup the user wants but nobody is waiting on (Déjà Dup's weekly incremental in c1-backup and c2-p3b): progress weighs 0.25 against the editor's 1.0, so its share is a fifth — wanted, never starved, below a user-initiated render. The measured backup declares the idle class, so the executor runs it only in the editor's gaps and this share never reaches it: the row stands by the rule above and is inert on the files that exercise it (9.11 D5, D16; on the depicted desktop the backup shares the editor's task group and the idle class acts as here)."
+    justification: "A scheduled backup the user wants but nobody is waiting on (Déjà Dup's weekly incremental in c1-backup and c2-p3b): its turnaround weighs 0.25 against the editor's 1.0, so its share is a fifth — wanted, never starved, below a user-initiated render. The measured backup declares the idle class, so the executor runs it only in the editor's gaps and this share never reaches it (RQ0 gate spec conformance item (e), the strict idle class): the row stands by the rule above and is inert on the files that exercise it (9.11 D5, D16; on the depicted desktop the backup shares the editor's task group and the idle class acts as here)."
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
@@ -431,7 +432,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "A backup nobody asked for behind interactive work (c7-backup, flipped by intent — a pre-committed miss): sink it and hold it to the floor. The backup declares the idle class, so the floor is inert on it, as on indexing/false."
+    justification: "A backup nobody asked for behind interactive work (c7-backup, flipped by intent — a pre-committed miss): sink it and hold it to the floor. The backup declares the idle class, so the floor is inert on it (RQ0 gate spec conformance item (e), the strict idle class), as on indexing/false."
     sources: [ostep]
     entries:
       MLFQ:

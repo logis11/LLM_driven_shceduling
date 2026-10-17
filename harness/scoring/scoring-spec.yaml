@@ -29,7 +29,10 @@
 # background_wanted to false repeats the base's terms minus the batch terms
 # (turnaround, progress). A term reads a task that moves under some row: a
 # job that finishes under every row scores its turnaround, one that cannot
-# finish inside its file scores its delivered CPU (9.14 decision 6).
+# finish inside its file scores its delivered CPU (9.14 decision 6). The
+# builds of c1-compile and c4-compile finish under every row; their turnaround
+# is `make`'s exit (RQ0 gate spec conformance item (g), an orchestrator's WAIT
+# children:<id> completing when every child it spawned has ended).
 #
 # Expected "no headroom" (metrics doc §9 floors), stated here so it is not
 # discovered later, on the rebuilt files and the ratified executor (9.14):
@@ -38,7 +41,8 @@
 #   the executor runs an idle task only when no other-class task is runnable
 #   and the cap is work-conserving, so no row reaches the background task; its
 #   turnaround or progress is identical under every row and the editor's wait
-#   is untouched by it. A consequence of the rule, not of the depicted
+#   is untouched by it (RQ0 gate spec conformance item (e), the strict idle
+#   class). A consequence of the rule, not of the depicted
 #   desktop, where the indexer's slice would take about 23 % (9.11 D16). All
 #   six are reporting-only (RQ0 gate spec).
 # - c1-media, the C5 ladder and c1-meeting: the periodic tasks alone or beside
@@ -48,10 +52,12 @@
 #   period and the longest wait the boot MLFQ imposes on it is one 20 ms Q1
 #   slice after a rare demotion, 32 ms in all; the music job's 2.4 ms against
 #   49.6 ms never comes near. A 1.3 ms margin, a knife edge stated.
-# - c2-p2a's download: batch class now (the measured SteamCMD runs back to back),
-#   but the chain takes 0.95 of the lane under EDF so the residual is below any
-#   cap, and the boot MLFQ hands it more through its boost slices — the oracle's
-#   improvement is negative and reads as no headroom.
+# - c2-p2a's download: the measured SteamCMD's whole program is batch class over
+#   74 % of its CPU, but the part the file gives it under EDF (about 1 s), where
+#   the chain takes 0.95 of the lane, is its launch phase of short runs, not
+#   batch class; either way no cap acts on it, and the boot MLFQ hands it more
+#   through its boost slices (3.0 s against 1.1 s in the 9.16 audit's simulator
+#   run) — the oracle's improvement is negative and reads as no headroom.
 # - c3-creation's transcode: uncontended after 240 s but for the editor's idle
 #   wakes, so the cap barely bites.
 # - c7-mail: its keystroke window is a slice of c1-mail's (9.18: the compiler
@@ -61,11 +67,17 @@
 #   attribute pair is unmeasured (9.14 decision 2 as amended).
 # - c3-evening's chain term stays scored on a reporting-only file: its 1.45
 #   lane share is design (9.10 D31), a chain that cannot meet its frames alone,
-#   so under the TIMER skip rule the term reads the policies' ordering above a
-#   floor of about 0.31 missed under every policy.
+#   so under the TIMER skip rule (RQ0 gate spec conformance item (b), a TIMER
+#   reached after ticks passed consuming the latest and skipping the rest) the
+#   term reads the policies' ordering above a floor of about 0.31 missed under
+#   every policy.
 # c7-meeting is not on this list any more: the measured call's cycle run
-# consumes the boot slice in about a fifth of its cycles and is demoted, so
-# the tie with fixed that held on the old 2.5 ms and 6.67 ms bursts is gone.
+# consumes the boot slice in about one cycle in twenty (4.9 % from the measured
+# table, 5.5 % in the compiled file), so in about 4 of 10 boost intervals
+# (arithmetic: 1 − 0.95¹⁰, the cycles taken as independent, ten to a 100 ms
+# boost) the call is demoted and waits behind the upgrade until the next boost
+# (9.16 D1); the tie with fixed that held on the old 2.5 ms and 6.67 ms bursts
+# is gone.
 # The audio : video weighting 1.0 : 0.5 on the media files is a stated
 # assumption (an audio dropout is heard at once; a dropped frame at 60 Hz
 # often is not).
@@ -95,7 +107,8 @@
 # the censored bound, the file's end less the arrival (metrics doc §9), worse
 # than every finishing value; two such rows tie (9.23 D3). Expected no
 # headroom: the idle-class placements (indexing, backup), whose job ends at the
-# same time under every row, as for the six core files above.
+# same time under every row (RQ0 gate spec conformance item (e), the strict idle
+# class), as for the six core files above.
 
 files:
 
@@ -167,9 +180,10 @@ files:
   # ---- C2 — intent pairs. Latency and frame terms over the second segment,
   # 60 s to the file's end — each window is that ground-truth segment, which the
   # lint checks (9.14 decision 5); the files end where 9.10 bound their jobs:
-  # 99.435 s (P1), 86.385 s (P2), 326 s (P3). Progress terms unwindowed (the batch
-  # task arrives at 60 s and does not finish inside the file); the P3 render
-  # finishes under every row and scores its turnaround (9.14 decision 6).
+  # 99.435 s (P1), 86.385 s (P2), 326 s (P3). Batch terms unwindowed (the batch
+  # task arrives at 60 s); P1's and P2's batch tasks do not finish inside the file
+  # and score progress; P3's two jobs, the render and the backup, finish under
+  # every row and score their turnaround (9.14 decision 6; 9.16 D4).
   c2-p1a:
     terms:
       - {entity: editor, metric: ready_wait, cause: wake, channel: input, window: {start_us: 60000000, end_us: 99435000}, aggregate: p99, direction: lower, weight: 1.0}
@@ -178,9 +192,10 @@ files:
     terms:
       - {entity: editor, metric: ready_wait, cause: wake, channel: input, window: {start_us: 60000000, end_us: 99435000}, aggregate: p99, direction: lower, weight: 1.0}
   c2-p2a:
-    # The download is batch class (the measured SteamCMD, 9.7, runs back to back); under EDF the
-    # deadline-class chain takes 0.95 of the lane, so the residual it gets is below any cap and the
-    # progress term is expected "no headroom" (the header; 9.14 decision 6).
+    # The measured SteamCMD's (9.7) whole program is batch class over 74 % of its CPU; under EDF the
+    # deadline-class chain takes 0.95 of the lane, and the part the file gives the download (about 1 s)
+    # is its launch phase of short runs, not batch class, so no cap acts on it and the progress term is
+    # expected "no headroom" (the header; 9.14 decision 6).
     terms:
       - {entity: game.chain.1, metric: job, window: {start_us: 60000000, end_us: 86385000}, aggregate: miss_rate, direction: lower, weight: 1.0}
       - {entity: download, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
@@ -201,11 +216,13 @@ files:
       - {entity: editor, metric: ready_wait, cause: wake, channel: timer, window: {start_us: 60000000, end_us: 326000000}, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: bulk, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
   c2-p3b:
-    # the idle-class backup gets the editor's idle lane only, about 162 s of its 165.7 s, and does
-    # not finish: progress, expected "no headroom" (the header)
+    # the idle-class backup gets the editor's idle lane only, about 166 s of it against its 165.7 s of
+    # CPU and 0.2 s of sleeps, and finishes about 0.3 s before the end under every row (RQ0 gate spec
+    # conformance item (e), the strict idle class): turnaround by the header's rule, as c1-backup's
+    # (9.16 D4), expected "no headroom" (the header)
     terms:
       - {entity: editor, metric: ready_wait, cause: wake, channel: timer, window: {start_us: 60000000, end_us: 326000000}, aggregate: p99, direction: lower, weight: 1.0}
-      - {entity: bulk, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.25}
+      - {entity: bulk, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.25}
 
   # ---- C3 — transition arcs. Per-task terms; focus and task lifetimes window them.
   c3-workday:
@@ -276,7 +293,9 @@ files:
   # ---- C7 — attribute counterparts (Phase 7 spec decision 10): the C1 base's
   # terms, minus the batch term where the label flips it to unwanted. The
   # injected unattended upgrade (9.10 D3) and the renamed or flipped batch job
-  # carry no term, so the false row's floor cap is free to act.
+  # carry no term, so the false row's floor cap is free to act — except on
+  # c7-indexing and c7-backup, whose flipped job is idle class (both
+  # reporting-only).
   c7-browsing:
     base: c1-browsing
     terms:

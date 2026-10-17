@@ -75,7 +75,7 @@ def test_c2_weights_and_windows(spec):
     assert [t["entity"] for t in terms(spec, "c2-p2b")] == ["game.chain.1"]
     assert one(spec, "c2-p3a", "bulk", "turnaround")["weight"] == 0.5     # the measured export finishes (9.14 decision 6)
     assert one(spec, "c2-p3a", "editor", "ready_wait")["channel"] == "timer"  # Kdenlive carries no keystroke stream
-    assert one(spec, "c2-p3b", "bulk", "cpu_delivered")["weight"] == 0.25
+    assert one(spec, "c2-p3b", "bulk", "turnaround")["weight"] == 0.25    # the backup finishes in the idle lane (9.16 D4)
 
 
 def test_c1_terms(spec):
