@@ -154,7 +154,7 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 13 open rows. The file has 1
 - Cross-ref: W-0890; W-0933; W-0998
 - Notes: found in N5. K14's file: a follow-up chunk.
 
-### W-1007 · open
+### W-1007 · applied
 - At: `docs/guidebook/dataset/07-build-gate-manifests-ci-tests.md` §7.6, line 1461 at HEAD `63c44936` ("harness의 suite(`harness/tools/tests/`, 2026-10-14에 298개, 2026-10-17에 301개 collect)"); §7.7's harness paragraph (299 passed, 2 deselected, 16분 05초)
 - Change: Once P1's harness change commits (`mock-simulator@2`; `test_a_wake_stored_before_the_arrival_completes_the_arrival_wait` in `harness/tools/tests/test_mock_simulator.py`; W-0982–W-0984), the harness counts restated: 302 collected, `make test` 300 passed, with its recorded time. In the volume's Korean.
 - Final word: `logs/P1.md` ## Checks (`make -C harness test`: 300 passed, 2 deselected, 16 min 34 s, with the one new test); `logs/P8.md` ## Decisions 4 (the counts follow committed HEAD: 301 collected, 299 passed).

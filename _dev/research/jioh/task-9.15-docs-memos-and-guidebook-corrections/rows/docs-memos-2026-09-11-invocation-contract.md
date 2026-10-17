@@ -16,7 +16,7 @@ Chunk K17, Memos (wave 4). 2 open rows. The file has 57 lines at `d5cc7711`.
 - Sources: S12-054 (9.12 D6, `task-9.12-related-work-prose/changelog.md:114`); SX-0146 (TODO 9.15 line (from 9.12 D6), `_dev/TODO.md:179`)
 - Notes: Checked: `harness/tools/harness/evaluator.py:47` CONDITIONS lists exactly the eight names above; `harness/guards/guard-spec.yaml:126`. Other parts of the memo may be stale against the invocation contract since 9.17 (the `--telemetry focus|names` flag, `docs/data-contracts.md:498`, added 2026-10-11 by `fb673690`) — not a raw row here; the heads-up memo's format row (W-0701) names the flag. The memo also gets its one open/closed header line at assembly.
 
-### W-1005 · open
+### W-1005 · applied
 - At: `docs/memos/2026-09-11-invocation-contract.md` line 4, the open header line ("열림 — 규범인 `docs/data-contracts.md` §11(contract 10)의 명령 모양대로 실행되는 두 프로그램이 남았어요: simulator는 아직 위치 인자로 workload와 schedule을 받고 trace를 stdout에 써요 …")
 - Change: Optional: the line adds that the RQ0 gate spec's `simulator-conformance` item (h), added 2026-10-17, requires the simulator run through contract 10 before the RQ0 run. In the memo's Korean; the one header line only (spec decision 10).
 - Final word: 인지오's answer (c) of 2026-10-17 to K17 (item (h)); `harness/experiments/rq0-gate.yaml:348–355` (item (h)); W-0997 (applied 2026-10-17 in the harness's second step).
