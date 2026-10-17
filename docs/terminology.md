@@ -345,10 +345,15 @@ the new config became active.
 bears no relation to real elapsed time.
 
 **Slice** — how long a process may run before the scheduler reconsiders.
-Typically single-digit milliseconds.
+The boot default's is 10 ms: MLFQ's top queue, doubling at each lower level,
+and the same for EDF's residual class and for one LOTTERY draw
+(`recognition-vocabulary.md` §2).
 
-**Drain** — waiting for the current slice to finish before applying a new
-config, rather than preempting mid-slice.
+**Drain** — waiting until the lane is free — the running task's slice or
+current RUN ends, or it is preempted or departs — before applying a switch out
+of MLFQ, EDF or LOTTERY, rather than preempting the running task. A switch out
+of FIFO and an entry with the same algorithm apply at their time, unless an
+earlier switch is still draining (docs/data-contracts.md §7).
 
 **t_observe, t_return, t_apply** — the three instants around a config change:
 when telemetry was snapshotted, when the daemon's answer landed, and when the
