@@ -1249,7 +1249,7 @@ simulator가 이 view에 기대는 계약은 세 가지입니다.
 
 `declared_class`는 events와 함께 simulator에 도착하므로, simulator가 strict idle 규칙을 적용해야 합니다(2.9).
 
-> **열린 자리 — simulator가 거부하는 파일.** 2026-10-10 감사의 blocker 1은 simulator의 loader(`simulator/src/sim.cpp`)가 `WAKE`의 대상을 top-level `arrive` id에서만 찾는다는 것을 찾았습니다. 재구축된 build 구조에서는 object 작업 하나의 여섯 process가 spawn table 안에서 서로를 `WAKE`로 깨우므로(9.6 D19, 2.5의 `c1-compile` 예), core set의 다섯 파일 — `c1-compile`, `c7-compile`(둘 다 판정 파일), `c3-workday`, `c4-compile`, `c6-dual` — 과 RQ0 gate spec이 돌리는 compile variant 여덟(`c1-compile`과 `c7-compile`의 `corner-low`, `corner-high`, `venue-x0.8`, `venue-x1.25`), compile을 품은 generated 파일 188개가 거부됩니다. schema는 어떤 task id든 대상으로 허락합니다. 2026-10-17의 simulator code도 여전히 "WAKE target is not a top-level task"로 멈춥니다(876행; 이 파일은 2026-10-10 이후 바뀌지 않았습니다). 고치는 쪽은 simulator입니다. 2026-10-15의 9.23 D14(인지오의 결정)가 compile 안의 canonical lint에 "spawn된 자식의 WAKE 대상도 top-level task의 것처럼 풀린다"를 넣어, 데이터셋은 이 쓰임을 그대로 지킵니다. 감사는 "schema가 허락하고, 쓰임이 새로우며, 경민에게 알리지 않았다"고 적고 바로 알리기를 권했지만, 그 알림은 보내지 않았습니다(2026-10-16, 인지오의 답). 그래서 문서 정리 sub-task 9.15가 끝에 인경민과 박이안에게 보낼 마지막 memo가 이 거부를 처음 알립니다. simulator가 이 파일들을 받아들일 때까지 이 자리는 열려 있습니다.
+> **열린 자리 — simulator가 거부하는 파일.** 2026-10-10 감사의 blocker 1은 simulator의 loader(`simulator/src/sim.cpp`)가 `WAKE`의 대상을 top-level `arrive` id에서만 찾는다는 것을 찾았습니다. 재구축된 build 구조에서는 object 작업 하나의 여섯 process가 spawn table 안에서 서로를 `WAKE`로 깨우므로(9.6 D19, 2.5의 `c1-compile` 예), core set의 다섯 파일 — `c1-compile`, `c7-compile`(둘 다 판정 파일), `c3-workday`, `c4-compile`, `c6-dual` — 과 RQ0 gate spec이 돌리는 compile variant 여덟(`c1-compile`과 `c7-compile`의 `corner-low`, `corner-high`, `venue-x0.8`, `venue-x1.25`), compile을 품은 generated 파일 188개가 거부됩니다. schema는 어떤 task id든 대상으로 허락합니다. 2026-10-17의 simulator code도 여전히 "WAKE target is not a top-level task"로 멈춥니다(876행; 이 파일은 2026-10-10 이후 바뀌지 않았습니다). 고치는 쪽은 simulator입니다. 2026-10-15의 9.23 D14(인지오의 결정)가 compile 안의 canonical lint에 "spawn된 자식의 WAKE 대상도 top-level task의 것처럼 풀린다"를 넣어, 데이터셋은 이 쓰임을 그대로 지킵니다. 감사는 "schema가 허락하고, 쓰임이 새로우며, 경민에게 알리지 않았다"고 적고 바로 알리기를 권했지만, 그 알림은 따로 보내지 않았습니다(2026-10-16, 인지오의 답). 2026-10-17에 문서 정리 sub-task 9.15의 최종 memo(`docs/memos/2026-10-17-workload-dataset-rebuild.md`)가 인경민과 박이안에게 이 거부를 처음 알렸고, 인경민에게 loader가 spawn table의 자식 id에서도 `WAKE` 대상을 찾도록 고쳐 달라고 부탁했습니다. 데이터셋은 바뀌지 않습니다. simulator가 이 파일들을 받아들일 때까지 이 자리는 열려 있습니다.
 
 ## 7.3 daemon: visible projection과 telemetry
 
@@ -1411,7 +1411,7 @@ timeline 한 줄 편집
 
 **답하는 질문**: 데이터셋의 숫자와 구조는 어떤 기준으로 근거를 얻고, 우리가 직접 잰 것은 어떻게 재고 확인했으며, 틀린 것은 어떻게 찾아내 고쳤나.
 
-이 권의 6장이 한 바퀴만 돈 출처 체계를 바닥까지 다룹니다. 인용 장치(`references.md`, `sources.yaml`, `source` tag), 재구축 phase(Phase 9)의 다섯 검증 결정, 2026-09-13의 검증과 critical findings, 검증 기록을 저장하고 측정 도구를 고친 일(9.1, 9.3), CI runner 위의 측정 campaign, 안정성 규칙과 멈춤 규칙, 측정이 측정을 망치지 않았는지 확인한 검사와 대조군, 원자료와 재현, 측정값 하나(`package-upgrade`의 26.385초)를 끝까지 따라가기, runner가 볼 수 없는 것, 9.4부터 9.12까지의 연구 조각, 그 뒤의 검토와 감사, 그리고 아직 남은 것(9.15, 9.16)을 다룹니다.
+이 권의 6장이 한 바퀴만 돈 출처 체계를 바닥까지 다룹니다. 인용 장치(`references.md`, `sources.yaml`, `source` tag), 재구축 phase(Phase 9)의 다섯 검증 결정, 2026-09-13의 검증과 critical findings, 검증 기록을 저장하고 측정 도구를 고친 일(9.1, 9.3), CI runner 위의 측정 campaign, 안정성 규칙과 멈춤 규칙, 측정이 측정을 망치지 않았는지 확인한 검사와 대조군, 원자료와 재현, 측정값 하나(`package-upgrade`의 26.385초)를 끝까지 따라가기, runner가 볼 수 없는 것, 9.4부터 9.12까지의 연구 조각, 그 뒤의 검토와 감사, 그리고 Phase 9의 마무리(9.15, 9.16)를 다룹니다.
 
 **이럴 때 펴세요**: 숫자 하나를 의심할 때, 논문에서 데이터셋의 근거와 한계를 서술해야 할 때, 새 출처를 더하거나 새 campaign을 돌려야 할 때.
 

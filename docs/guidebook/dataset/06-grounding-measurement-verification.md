@@ -12,7 +12,7 @@
 
 이 권의 이야기에는 날짜가 있습니다. 2026-09-13, 데이터셋의 출처를 원문(primary text)과 하나하나 대조한 검증에서 심각한 오류들이 나왔습니다. 대표적으로, 컴파일러 프로세스 수의 근거로 쓰던 "2,430개 프로세스"가 Linux kernel build의 숫자가 아니라 DynamoRio라는 다른 프로젝트의 build 숫자였습니다. 이 발견들(`docs/memos/2026-09-13-critical-findings.md`, 이하 critical findings memo)이 Phase 9, 곧 데이터셋 재건축의 방아쇠가 되었습니다. Phase 9는 검증 기준을 새로 세우고(2026-09-13), 측정 도구를 고치고, 영역별 연구 조각(research slice) 아홉 개로 모든 값을 다시 찾거나 다시 재었으며, 그 뒤에도 여러 번의 검토와 감사로 틀린 곳을 찾아 고쳤습니다. 이 권은 그 과정을 "숫자 하나가 믿을 수 있게 되는 길"로 따라갑니다.
 
-마지막으로 이 권은 아직 끝나지 않은 일을 숨기지 않습니다. 문서 전체를 데이터에 맞추는 정리 작업(9.15)과 최종 상태에서 검증을 다시 돌리는 exit audit(9.16)은 이 권을 쓰는 2026-10-14 현재 아직 끝나지 않았습니다. 그래서 이 권에는 "열린 자리"가 여럿 나옵니다. 각 자리마다 무엇이 열려 있고, 무엇이 먼저 있어야 하고, 누가 결정하는지를 적었습니다.
+마지막으로 이 권은 아직 끝나지 않은 일을 숨기지 않습니다. 문서 전체를 데이터에 맞추는 정리 작업(9.15)과 최종 상태에서 검증을 다시 돌리는 exit audit(9.16)은 이 권을 쓰는 2026-10-14 현재 아직 끝나지 않았습니다. 그래서 이 권에는 "열린 자리"가 여럿 나옵니다. 각 자리마다 무엇이 열려 있고, 무엇이 먼저 있어야 하고, 누가 결정하는지를 적었습니다. 9.15는 그 뒤 2026-10-17에 끝났습니다(14.1).
 
 ---
 
@@ -31,7 +31,7 @@
 11. [11장 · runner가 볼 수 없는 것](#11장--runner가-볼-수-없는-것)
 12. [12장 · 연구 조각을 연구로 읽기: 9.4부터 9.12까지](#12장--연구-조각을-연구로-읽기-94부터-912까지)
 13. [13장 · 그 뒤의 검토와 감사](#13장--그-뒤의-검토와-감사)
-14. [14장 · 아직 남은 것: 9.15, 9.16, 그리고 기록이 밝힌 한계](#14장--아직-남은-것-915-916-그리고-기록이-밝힌-한계)
+14. [14장 · Phase 9의 마무리: 9.15, 9.16, 그리고 기록이 밝힌 한계](#14장--phase-9의-마무리-915-916-그리고-기록이-밝힌-한계)
 15. [15장 · 용어 정리](#15장--용어-정리)
 
 ---
@@ -1627,9 +1627,9 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 
 ---
 
-# 14장 · 아직 남은 것: 9.15, 9.16, 그리고 기록이 밝힌 한계
+# 14장 · Phase 9의 마무리: 9.15, 9.16, 그리고 기록이 밝힌 한계
 
-이 장은 "Phase 9가 끝나려면 무엇이 남았고, 지금까지의 기록이 스스로 밝힌 한계는 무엇이며, 문서와 tree가 어디서 어긋나는가"라는 질문에 답합니다. 2026-10-14 현재 `_dev/TODO.md`의 인지오 절에서 9.15는 `[WIP]`, 9.16은 `[ ]`입니다. 실행 순서는 "… → 9.21 → 9.15 → 9.16"이므로, 9.15가 끝나야 9.16이 시작됩니다.
+이 장은 "Phase 9가 끝나려면 무엇이 남았고, 지금까지의 기록이 스스로 밝힌 한계는 무엇이며, 문서와 tree가 어디서 어긋나는가"라는 질문에 답합니다. `_dev/TODO.md`의 인지오 절에서 9.15는 2026-10-14에 `[WIP]`가 되어 2026-10-17에 끝났고(`[x]`), 9.16은 `[ ]`입니다. 실행 순서는 "… → 9.21 → 9.23 → 9.15 → 9.16"이므로, 다음은 9.16입니다.
 
 ## 14.1 9.15: 문서, memo, guidebook 정리
 
@@ -1639,12 +1639,12 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 
 - **decision 3, 출처들이 어긋날 때의 우선순위.** "Highest first: the code and data as they stand … ; the latest decision record on the matter for what code does not express, a later decision superseding an earlier; the hand-off text, which says where to look and not what to write; the current docs, never an authority." 그리고 "A new `docs/references.md` entry needs a verified passage on file; without one the entry is marked unverified, not invented." 이 권의 3장 결정 1이 9.15의 편집 규칙에도 그대로 이어집니다.
 - **decision 4, 문서의 범위.** 데이터셋을 설명하는 문서(`docs/workload/`, `dataset/README.md`, `docs/data-contracts.md`, harness guide의 records와 dataset 장)는 코드에 대어 전체를 다시 훑습니다. 이 권이 낡았다고 지적한 `grounding-sources.md`, `source-vetting.md`, `measurement-overview.md`, `dataset/README.md`가 여기에 들어갑니다.
-- **decision 5, `references.md`를 먼저.** "The `docs/references.md` chunk runs alone first." 2.2–2.4절의 열린 자리(`meas-local`, 발표 type, 등급 규칙 확장, `dhakal-chi18` 중복, `ocallahan-atc17` 문장)가 이 묶음의 일입니다.
+- **decision 5, `references.md`를 먼저.** "The `docs/references.md` chunk runs alone first." 2.2–2.4절이 적던 열린 자리(`meas-local`, 발표 type, 등급 규칙 확장, `dhakal-chi18` 중복, `ocallahan-atc17` 문장)가 이 묶음의 일이었고, 모두 닫혔습니다. 2.2–2.4절은 이제 고친 `docs/references.md`를 적고, registry(`dataset/sources.yaml`)도 2026-10-17부터 `lavd-ossna24`에 발표 type을 줍니다.
 - **decision 10, memo.** 원문은 고치지 않고 `## Correction (<date>)` 절을 덧붙이며, memo마다 닫힘/열림 한 줄을 답니다. critical findings memo와 2026-09-20 memo가 여기에 해당합니다.
 - **decision 11, `_dev/`는 개발 이력.** 기존 `_dev/` 파일은 건드리지 않습니다. 따라서 `measurement-campaign-record.md`의 Campaigns 표 누락(9.3절)은 9.15의 대상이 아닙니다.
 - **decision 12, LICENSE.** 코드는 MIT, 데이터와 release asset은 CC-BY-NC-SA-4.0(SWELL-KW를 출처로 밝힘), 저작권자는 Jioh In, Kyungmin Inn, Ian Park.
 
-> **열린 자리.** 9.15는 진행 중입니다. spec의 유일한 열린 항목은 "The final memo's language — decided at the memo step"입니다. 9.15가 끝나는 조건(decision 14)은 작업 목록의 모든 행이 닫히고, 모든 묶음이 검토자를 통과해 커밋되고, 인지오가 모든 묶음의 log를 읽고, 코드와 결정의 모든 불일치가 인지오의 답을 받고, 모든 memo가 열림/닫힘 줄을 갖고, 최종 memo가 커밋되는 것입니다. "9.16's exit audits run on that state."
+**어떻게 끝났나.** 9.15는 2026-10-17에 끝났습니다. 끝나는 조건(decision 14)이 모두 갖추어졌습니다. 작업 목록(`_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/work-list.md`)의 행 1,020개가 모두 닫혔고(적용, 정하고 기록함, code에 대어 해당 없음, 또는 다른 줄로 넘김), 대상 파일별 묶음과 그 뒤의 후속 묶음이 저마다 검토자를 통과해 커밋되었으며, 뒤집힌 결정은 모두 적용되었고, 인지오는 묶음의 log를 읽은 것으로 처리했습니다(2026-10-17, 인지오의 답). 그 log들(같은 폴더의 `logs/`)이 9.15의 기록입니다. 코드와 결정이 어긋난 곳은 모두 인지오의 답을 받았고, dataset의 data와 code를 바꾸는 답은 세 번의 rebuild(2026-10-16에 한 번, 2026-10-17에 두 번)로, harness의 code를 바꾸는 답은 따로 들어갔습니다(`harness/CHANGELOG.md`의 2026-10-16, 2026-10-17 항목). 모든 memo가 첫머리에 열림 또는 닫힘 줄을 답니다. spec의 유일한 열린 항목이던 최종 memo의 언어는 2026-10-17에 한국어로 정해졌고, 최종 memo는 `docs/memos/2026-10-17-workload-dataset-rebuild.md`로 같은 날 커밋되었습니다. licence는 저장소 root의 `LICENSE`(code, MIT)와 `dataset/LICENSE`(데이터와 release asset, CC-BY-NC-SA-4.0, SWELL-KW를 출처로 밝힘)입니다. "9.16's exit audits run on that state."
 
 ## 14.2 9.16: exit audits
 
@@ -1676,7 +1676,7 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 
 그리고 13.3절에서 본 대로, 2026-09-28의 coverage sweep이 9.5–9.9를 닫았으므로 "a later review of them is this audit's"입니다. 9.9 D27이 넘긴 "9.5–9.8 ran beside the same `php-fpm` and workflow loops"(다른 캠페인의 component에도 runner 배경의 wake가 섞였을 수 있음)도 이 감사가 볼 거리입니다.
 
-> **열린 자리.** 9.16은 아직 시작되지 않았습니다(미실행). 9.15가 먼저 끝나야 합니다. 9.16 자신의 spec은 아직 없습니다. 위 목록이 감사의 형식(누가, 어떤 도구로, 무엇을 "해결됨"으로 볼지)을 정하지는 않으므로, 그것은 9.16의 spec 세션에서 인지오가 정합니다.
+> **열린 자리.** 9.16은 아직 시작되지 않았습니다(미실행). 9.15가 먼저 끝나야 했고, 9.15는 2026-10-17에 끝났습니다. 9.16 자신의 spec은 아직 없습니다. 위 목록이 감사의 형식(누가, 어떤 도구로, 무엇을 "해결됨"으로 볼지)을 정하지는 않으므로, 그것은 9.16의 spec 세션에서 인지오가 정합니다.
 
 ## 14.3 기록이 스스로 밝힌 한계
 

@@ -26,14 +26,14 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0606
 - Notes: Waits on the outside-sweep rows on the header (another row: W-0778). Checked: `dataset/archetypes.yaml:1` at HEAD '# dataset/archetypes.yaml — Layer 1 archetype library (v0.1)'.
 
-### W-0602 · open
+### W-0602 · applied
 - At: `docs/guidebook/dataset/08-decision-chronicle.md` §12.1 9.15 — heading line 1741 ('WIP, 2026-10-14부터'), body lines 1743–1759 (incl. line 1745's 18,441-byte count), open note line 1761
 - Change: At 9.15's end, restate §12.1 from plan to outcome and close the note: the work list and chunk grouping reviewed by 인지오 (spec decision 1), the final memo's language decided, 9.15 finished on spec decision 14's conditions; the heading's WIP status and the TODO line's byte count follow.
 - Final word: 9.15 spec (2026-10-14): decision 1 — one combined work list, reviewed by 인지오 with the chunk grouping before any edit; the spec's only open item — the final memo's language, decided at the memo step; decision 14 — 9.15 is done when every work-list row is closed, every chunk has passed its reviewer and is committed, 인지오 has read every chunk log and every overturned decision is applied, every logged code-versus-decision mismatch has 인지오's answer, every memo carries its open or closed line, and the final memo is committed.
 - Sources: SX-1138 (guidebook dataset vol-08 open note (§12.1), `dataset/08-decision-chronicle.md:1761`)
 - Cross-ref: W-0603; W-0580
 - Deferred: after the final memo is committed (9.15 spec decision 13): applied by a follow-up on this file, not in the chunk's wave
-- Notes: Sequencing: as the vol-06 §14.1 row (W-0580), this runs last, with or after the final memo's commit (spec decision 13 puts the memo after the doc chunks).
+- Notes: Sequencing: as the vol-06 §14.1 row (W-0580), this runs last, with or after the final memo's commit (spec decision 13 puts the memo after the doc chunks). Applied 2026-10-17 in S2, the closing pass.
 
 ### W-0603 · applied
 - At: `docs/guidebook/dataset/08-decision-chronicle.md` §12.1, the '최종 memo가 실을 것' paragraph line 1763 (the quotation '… the simulator loads files up to 190 MB (`c6-dual`), the set 681 MB in all')
@@ -84,13 +84,13 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0606; W-0857; W-0601
 - Notes: found in K02. X7's other parts are carried by open rows whose apply-after rows K02 has applied: the dataset guidebook vol-01's §5.1, §5.2 and §5.6 notes (W-0498, W-0499, W-0500, W-0503) and vol-04 §13.8 (W-0549). Whether §12.8 is updated row by row or closed once 9.15's rows are applied is the editing agent's call (W-0606), as W-0857 says.
 
-### W-0934 · carried (after the final memo, with W-0602's pass)
+### W-0934 · applied
 - At: `docs/guidebook/dataset/08-decision-chronicle.md` §12.1 (9.15's section, W-0602's place); §10.7's closing sentence; §13's 2026-10-16 row
 - Change: In W-0602's pass, state in 9.15's outcome its 2026-10-16 batched rebuild (`37c2e233`) and the batch after wave 4; §10.7's closing sentence and §13's 2026-10-16 row point there.
 - Final word: K14's decisions 5 and 8: vol-08 gains §10.7, the account of 9.23; 9.15's own account stays W-0602's, deferred until the final memo is committed (9.15 spec decision 13). `37c2e233` (2026-10-16) is 9.15's batched rebuild (`harness/CHANGELOG.md`'s 2026-10-16 entry; W-0729's answer: one rebuild for the data and code edits answered before the waves).
 - Sources: `logs/K14.md` ## Rows for other chunks (X2), ## Decisions 5 and 8
 - Cross-ref: W-0602; W-0580; W-0932; W-0933
-- Notes: found in K14. K14's file: with W-0602, after the final memo.
+- Notes: found in K14. K14's file: with W-0602, after the final memo. Applied 2026-10-17 in S2, the closing pass.
 
 ### W-0955 · applied
 - At: `docs/guidebook/dataset/08-decision-chronicle.md` §8.4, the **replay** definition, line 1304 ("측정된 반복 하나의 실제 wake 순서를 그대로 재생해 task를 만드는 방식"); §14.2's glossary, the **replay** row, line 1982 (the same words)
@@ -100,13 +100,13 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0876; W-0951
 - Notes: found in G3. K14's file: a follow-up chunk.
 
-### W-0956 · carried (after the final memo, with W-0602's pass)
+### W-0956 · applied
 - At: `docs/guidebook/dataset/08-decision-chronicle.md` §12.8's table, rows 1 and 2, their 2026-10-17 cells, lines 1873–1874 ("`docs/README.md`의 coreset guide 설명 줄에는 "all 50 coreset files"가 남아 있음"; "… "the twelve archetypes"가 남아 있음")
 - Change: Mark both cells fixed: `docs/README.md`'s coreset-guide line now reads "the 29 archetypes" and "all 51 core-set files".
 - Final word: W-0710, applied 2026-10-17 in K18: `docs/README.md:77` restated (29 entries in `dataset/archetypes.yaml`; 51 artifacts in `dataset/build.manifest.json`; the coreset guide's §4 "archetype 29개" and §10 "51개 파일 상세").
 - Sources: `logs/K18.md` ## Rows for other chunks (X1); `dataset/archetypes.yaml`; `dataset/build.manifest.json`
 - Cross-ref: W-0710; W-0602; W-0934
-- Notes: found in K18. K14's file: with W-0602's pass, after the final memo (K18's note), as W-0934.
+- Notes: found in K18. K14's file: with W-0602's pass, after the final memo (K18's note), as W-0934. Applied 2026-10-17 in S2, the closing pass.
 
 ### W-0972 · applied
 - At: `docs/guidebook/dataset/08-decision-chronicle.md` §7.12's 9.12 D113 bullet, its last clause, line 1169 ("`dataset/sources.yaml`의 registry는 이 id를 여전히 `type: deployed-system`으로 둡니다(이 `type`은 lint하지 않습니다)")

@@ -1765,7 +1765,7 @@ recipe의 연산:
 
 **채점.** 편집기 P99(input) 하나. 원치 않는 build에는 term이 없습니다. RQ0 판정 파일이고 venue 둘, corner 둘의 variant가 붙습니다. corner variant는 DKMS 꼬리의 block 값(±8.35 %)을 움직입니다.
 
-> **열린 자리.** 2026-10-10 audit은 시뮬레이터 loader가 spawn table 안의 자식이 다른 자식을 깨우는 WAKE를 거부한다고 적습니다(`simulator/src/sim.cpp:874-904`). object job의 여섯 process가 부모-자식 순서로 WAIT/WAKE를 주고받기 때문입니다(9.6 D19). 거부되는 파일은 `c1-compile`, `c7-compile`(둘 다 판정 파일), `c3-workday`, `c4-compile`, `c6-dual`입니다. audit은 `c7-compile`의 자식 대상 WAKE를 25,269개, `c1-compile`의 것을 43,620개로 셉니다. 이 수정은 시뮬레이터 주인인 인경민의 Phase 10 전제 조건으로 남아 있습니다. 미실행.
+> **열린 자리.** 2026-10-10 audit은 시뮬레이터 loader가 spawn table 안의 자식이 다른 자식을 깨우는 WAKE를 거부한다고 적습니다(`simulator/src/sim.cpp:874-904`). object job의 여섯 process가 부모-자식 순서로 WAIT/WAKE를 주고받기 때문입니다(9.6 D19). 거부되는 파일은 `c1-compile`, `c7-compile`(둘 다 판정 파일), `c3-workday`, `c4-compile`, `c6-dual`입니다. audit은 `c7-compile`의 자식 대상 WAKE를 25,269개, `c1-compile`의 것을 43,620개로 셉니다. compile을 품은 generated 파일도 같은 이유로 거부됩니다. 고치는 쪽은 시뮬레이터이고 데이터는 그대로입니다. 2026-10-15의 9.23 D14가 compile 안의 lint에 spawn된 자식의 WAKE 대상이 풀리는지 확인하는 규칙을 넣었지만, 그 lint는 시뮬레이터의 거부를 바꾸지 않습니다. 2026-10-17의 Phase 9 최종 memo(`docs/memos/2026-10-17-workload-dataset-rebuild.md`)가 이 거부를 인경민에게 알리고 loader를 고쳐 달라고 부탁했습니다. 이 수정은 시뮬레이터 주인인 인경민의 Phase 10 전제 조건으로 남아 있습니다. 미실행.
 
 ## 10.8 `c7-indexing` — 로그인 때 저절로 돈 첫 index
 

@@ -176,13 +176,13 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 24 open rows. The file has 1
 - Cross-ref: W-0529
 - Notes: Checked at HEAD: the memo's lines 11–24. Same fix in vol-03 line 2143 (W-0529).
 
-### W-0506 · carried (after the final memo, with W-0580 and W-0602; its decided part applied in K11)
+### W-0506 · applied
 - At: `docs/guidebook/dataset/01-the-big-picture.md` §7.2 simulator: run file, open note line 1252
 - Change: Once the final memo to 인경민 and 박이안 is committed, restate the note: the memo reports the loader's refusal of child-targeted WAKEs for the five core files and every generated file holding a compile (9.23 D3), with 인지오's answer on whether the simulator or the dataset changes; the note stays open until the simulator accepts the files.
 - Final word: TODO 9.15 line (`_dev/TODO.md:179`, from the 2026-10-11 audit): the final memo carries the simulator loader's refusal of child-targeted WAKEs (`simulator/src/sim.cpp:874-904`; `c1-compile`, `c7-compile`, `c3-workday`, `c4-compile`, `c6-dual`; 9.6 D19, six processes per object job waking each other); 9.23 D3 adds the generated files holding a compile (the 212 jobs in them could not be run); 9.23 D14 lints that a spawned child's WAKE targets resolve, which leaves the simulator's refusal as it was.
 - Sources: SX-0889 (guidebook dataset vol-01 open note (§7.2), `dataset/01-the-big-picture.md:1252`)
 - Cross-ref: W-0547; the final-memo row W-0718 and the for-인지오 row W-0774
-- Notes: Checked at HEAD: `simulator/src/sim.cpp:876` dies with 'WAKE target is not a top-level task' (the file last changed 2026-10-10, `6bf9d850`). Apply with or after the final memo: the final-memo row W-0718 and the for-인지오 row W-0774 (; it asks 인지오 to confirm the simulator, not the dataset, changes). Same matter as vol-04 §10.7's note (W-0547).
+- Notes: Checked at HEAD: `simulator/src/sim.cpp:876` dies with 'WAKE target is not a top-level task' (the file last changed 2026-10-10, `6bf9d850`). Apply with or after the final memo: the final-memo row W-0718 and the for-인지오 row W-0774 (; it asks 인지오 to confirm the simulator, not the dataset, changes). Same matter as vol-04 §10.7's note (W-0547). Applied 2026-10-17 in S2, the closing pass.
 
 ### W-0865 · applied
 - At: `docs/guidebook/dataset/01-the-big-picture.md` §3.8 building plan의 "세 layer"와 scenario 목록, the diagram lines 695–697 ("Layer 1/2/3") and line 700 ("scenario 목록이 Layer 2입니다" and the "Layer 1" name note); the open notes on the name collision, §1.3 line 93 and §9.8 line 1630; the glossary preamble line 1461; §4.2 line 761 (quoting `dataset/archetypes.yaml:1`)

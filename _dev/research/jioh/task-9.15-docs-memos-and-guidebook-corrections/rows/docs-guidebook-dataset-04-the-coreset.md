@@ -114,13 +114,13 @@ Chunk K12, Dataset guidebook, volumes 3-4 (wave 3). 17 open rows. The file has 2
 - Cross-ref: W-0524
 - Notes: Named by 9.23 D7's hand-off (vol-04 `:1670`) and the 9.15 TODO line. The table already gives events with distinct times in brackets.
 
-### W-0547 · carried (after the final memo, with W-0580, W-0602 and W-0506)
+### W-0547 · applied
 - At: `docs/guidebook/dataset/04-the-coreset.md` §10.7 `c7-compile`, open note line 1755
 - Change: Once the final memo to 인경민 and 박이안 is committed, restate the note: the memo carries the refusal (with the generated files holding a compile, 9.23 D3) and 인지오's answer on whether the simulator or the dataset changes; it stays open until the simulator accepts the files. 9.23 D14's lint that a spawned child's WAKE targets resolve leaves the refusal as it was.
 - Final word: TODO 9.15 line (`_dev/TODO.md:179`, from the 2026-10-11 audit): the final memo carries the simulator loader's refusal of child-targeted WAKEs (`simulator/src/sim.cpp:874-904`; `c1-compile`, `c7-compile`, `c3-workday`, `c4-compile`, `c6-dual`; 9.6 D19, six processes per object job waking each other); 9.23 D3 adds the generated files holding a compile (the 212 jobs in them could not be run); 9.23 D14 lints that a spawned child's WAKE targets resolve, which leaves the simulator's refusal as it was.
 - Sources: SX-1009 (guidebook dataset vol-04 open note (§10.7), `dataset/04-the-coreset.md:1755`)
 - Cross-ref: W-0506
-- Notes: Checked at HEAD: `simulator/src/sim.cpp:876`. Apply with or after the final memo: the final-memo row W-0718 and the for-인지오 row W-0774.
+- Notes: Checked at HEAD: `simulator/src/sim.cpp:876`. Apply with or after the final memo: the final-memo row W-0718 and the for-인지오 row W-0774. Applied 2026-10-17 in S2, the closing pass.
 
 ### W-0548 · applied
 - At: `docs/guidebook/dataset/04-the-coreset.md` §12.4 CI가 강제하는 방식, line 1991

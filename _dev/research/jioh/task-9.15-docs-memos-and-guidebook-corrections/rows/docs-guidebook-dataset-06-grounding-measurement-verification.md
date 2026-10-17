@@ -149,14 +149,14 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 20 open rows. The file has 1
 - Waits on: W-0753 (인지오's answer; the row applies once it is given, or is logged as waiting)
 - Notes: Waits on the for-인지오 row from W-0753. §14.3 item 1 ('실제 데스크톱 검증은 미뤄짐') follows the same answer.
 
-### W-0580 · open
+### W-0580 · applied
 - At: `docs/guidebook/dataset/06-grounding-measurement-verification.md` §14 intro line 1628 ('9.15는 [WIP]'); §14.1 9.15: 문서, memo, guidebook 정리 — body lines 1632–1641 and open note line 1643
 - Change: At 9.15's end, restate §14.1 from plan to outcome and close the note: 9.15 done; the final memo's language as decided and where the final memo lives; the licences in place (root `LICENSE` MIT, `dataset/LICENSE` CC-BY-NC-SA-4.0); the chunk logs in 9.15's research folder as its record.
 - Final word: 9.15 spec (2026-10-14): the only open item is the final memo's language, decided at the memo step; 9.15 is done when spec decision 14's conditions hold — every work-list row closed, every chunk passed its reviewer and committed, 인지오 has read every chunk log and every overturned decision is applied, every logged code-versus-decision mismatch has 인지오's answer (any code work on its own `_dev/TODO.md` line), every memo carries its open or closed line, and the final memo is committed; 9.16's exit audits run on that state.
 - Sources: SX-1080 (guidebook dataset vol-06 open note (§14.1), `dataset/06-grounding-measurement-verification.md:1643`)
 - Cross-ref: W-0581; W-0602
 - Deferred: after the final memo is committed (9.15 spec decision 13): applied by a follow-up on this file, not in the chunk's wave
-- Notes: Sequencing: the final memo comes after the doc chunks (spec decision 13), so this edit runs last — with or after the final memo's commit, beside the vol-08 §12.1 row (W-0602). §14.2's note on 9.16 stays (W-0585).
+- Notes: Sequencing: the final memo comes after the doc chunks (spec decision 13), so this edit runs last — with or after the final memo's commit, beside the vol-08 §12.1 row (W-0602). §14.2's note on 9.16 stays (W-0585). Applied 2026-10-17 in S2, the closing pass.
 
 ### W-0581 · applied
 - At: `docs/guidebook/dataset/06-grounding-measurement-verification.md` §14.2 9.16: exit audits, the table of the 9.16 line's checks — row 'each sub-task's manifest and pin hashes' line 1662 (ends at 9.21) and the table's end
@@ -199,13 +199,13 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 20 open rows. The file has 1
 - Cross-ref: W-0882
 - Notes: found in K13. K13's file: a follow-up chunk after the batch after wave 4.
 
-### W-0932 · open
+### W-0932 · applied
 - At: `docs/guidebook/dataset/06-grounding-measurement-verification.md` §14.1, the decision-5 bullet (line 1640 after K13)
 - Change: Restate it with W-0580: the §2.1–§2.4 items it calls "열린 자리" are closed.
 - Final word: K13 closed the §2.1–§2.4 notes against the code (W-0562–W-0566, W-0847); §14.1 is W-0580's, deferred until the final memo is committed (9.15 spec decision 13).
 - Sources: `logs/K13.md` ## Rows for other chunks (X6), ## Decisions 9
 - Cross-ref: W-0580
-- Notes: found in K13. Applied with W-0580, after the final memo. L1 (2026-10-17) held it with W-0580: the bullet's "열린 자리" list does not name the registry's type; the registry has followed the talk type since 2026-10-17 (L1), so the restatement can say so.
+- Notes: found in K13. Applied with W-0580, after the final memo. L1 (2026-10-17) held it with W-0580: the bullet's "열린 자리" list does not name the registry's type; the registry has followed the talk type since 2026-10-17 (L1), so the restatement can say so. Applied 2026-10-17 in S2, the closing pass.
 
 ### W-0953 · applied
 - At: `docs/guidebook/dataset/06-grounding-measurement-verification.md` §15.1's glossary, the trace-replay check's row, line 1813 ("측정된 wake 순서를 그대로 재생한 variant로 판정이 같은지 보는 Phase 10의 점검")
