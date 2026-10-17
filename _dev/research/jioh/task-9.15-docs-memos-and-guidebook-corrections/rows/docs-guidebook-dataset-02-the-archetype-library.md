@@ -114,5 +114,5 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 6 open rows. The file has 16
 
 ## Also on this file, not for editing from this list
 
-- W-0517 · blocked, simulator TIMER (outside the spec's list) — §1.5 TIMER와 WAIT(timer), open note line 135
+- W-0517 · applied 2026-10-17 after 9.15's close in T1 (the skip rule in the guidebooks; was blocked, simulator TIMER) — §1.5 TIMER와 WAIT(timer), open note line 135
 - W-0734 · waits on 인지오 — Is the collection and privacy-scrub tool still promised? What the records and code say: grill 2026-08-26 D8 (`_dev/archive/2026-08-26-workload-generation-grill.md:29`) promised it ships 'as an open falsification invitat… Blocks: `docs/workload/building-plan.md:209`, `docs/workload/grounding-sources.md:48` (W-0295), the dataset guidebook vol-02 §12.2 note and vol-06's mismatch row, the…

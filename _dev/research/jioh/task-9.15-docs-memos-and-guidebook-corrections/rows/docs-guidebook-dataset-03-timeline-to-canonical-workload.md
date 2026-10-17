@@ -147,6 +147,6 @@ Chunk K12, Dataset guidebook, volumes 3-4 (wave 3). 14 open rows. The file has 2
 
 ## Also on this file, not for editing from this list
 
-- W-0532 · blocked, simulator TIMER (outside the spec's list) — §16.2 기록이 아직 정하지 않은 곳, item 4, line 2259
+- W-0532 · applied 2026-10-17 after 9.15's close in T1 (the skip rule in the guidebooks; was blocked, simulator TIMER) — §16.2 기록이 아직 정하지 않은 곳, item 4, line 2259
 - W-0743 · waits on 인지오 — Who wakes an orchestrator's `WAIT children:<id>`, and when? What the code says: `dataset/tools/wlc/compiler.py:714` (`build-orchestrator`) and `:799` (`module-build-orchestrator`) append `WAIT children:<iid>` after the… Blocks: The final memo's simulator asks (beside W-0718); the dataset guidebook vol-03 §7.7 note and §16.2 item 2; the interpretation contract's FORK paragraph.; also t…
 - W-0746 · waits on 인지오 — Keep or delete the unreached compiler paths? What the code says: `compiler.py`'s dispatch (`:140–155`) routes no current library entry to `_interactive_unroll`, `_finite_unroll` or `_unbounded_loop`, and nothing calls `… Blocks: The dataset guidebook vol-03 §16.2 item 5.; also §16.2 item 5 at docs/guidebook/dataset/03-timeline-to-canonical-workload.md:2261 and §9.5's paragraph on the p…

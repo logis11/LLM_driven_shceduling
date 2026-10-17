@@ -1193,9 +1193,9 @@ contract는 primitive를 여섯 개라고 셉니다(`FORK`와 `EXIT`를 한 줄�
 
 > **왜 이렇게 정했나.** "TIMER는 주기가 선언된 task에만"이라는 규칙은 9.5 D74(2026-09-26)입니다. 그 전에는 측정된 앱의 모든 timer 깨어남을 `TIMER` 명령어로 compile했는데, 그 주기는 "다음 깨어남까지의 간격"이라서 1 µs짜리 주기까지 생겼습니다. 그런데 소비자 셋(contract §3, EDF 알고리즘의 deadline class, harness의 `job` 지표)은 모두 `TIMER`를 "마감이 있는 주기적 job"으로 읽었습니다. 그래서 D74는 측정된 timer 깨어남을 "a `WAIT` on a per-task timer channel woken by an exogenous wake event at its measured absolute time; it carries no deadline"으로 바꾸었습니다. 마감이 없는 깨어남을 마감이 있는 명령어로 적지 않게 된 것입니다. 이때 compile된 TIMER 단계 약 160만 개가 사라졌다고 기록되어 있습니다.
 
-**TIMER의 늦은 tick 처리.** TIMER의 격자에서 task가 늦게 도착하면(앞 frame이 오래 걸려 다음 TIMER에 늦게 닿으면) 무슨 일이 일어날까요. schema의 TIMER 설명과 contract §3은 "late iterations accumulate as backlog"라고 적습니다. 밀린 tick을 하나씩 다 실행한다는 뜻입니다. 그러나 2026-10-07 memo(`docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`)가 이 규칙을 **skip 규칙**으로 바꾸었습니다. 늦게 TIMER에 닿으면 지금 시각 이전의 마지막 tick m을 즉시 소비해 그 frame을 실행하고, m보다 앞의 소비되지 않은 tick들은 건너뛰며 각각을 마감을 놓친 job으로 셉니다. memo는 근거로 interbench, ROS 2 executor, Lipari와 Palopoli의 주기 thread, rt-app의 기본 모드, 그리고 TIMER task가 대표하는 프로그램들(mpv는 늦은 영상 frame을 버림, GStreamer video sink는 5 ms 넘게 늦은 frame을 버림)을 듭니다. 2026-10-08 정정은 "none replays them"이라는 문장을 고쳐, 출처들이 공유하는 것은 "by default each skips"이고 늦은 job이 어느 tick의 것인지는 출처마다 다르며, memo의 선택(지나간 마지막 tick을 즉시 실행)은 video playback에서는 GStreamer sink의 것이고 audio와 게임 TIMER task에 대해서는 design이라고 적습니다.
+**TIMER의 늦은 tick 처리.** TIMER의 격자에서 task가 늦게 도착하면(앞 frame이 오래 걸려 다음 TIMER에 늦게 닿으면) 무슨 일이 일어날까요. 규칙은 **skip 규칙**입니다. 늦게 TIMER에 닿으면 지금 시각 이전의 마지막 tick m을 즉시 소비해 그 frame을 실행하고(마감은 tick m + 1), m보다 앞의 소비되지 않은 tick들은 일 없이 건너뛰며 각각을 마감을 놓친 job으로 셉니다. 2026-10-07에 인지오가 9.11 D3으로 정했고, `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`가 규칙(§1), 60 fps 격자의 예시(§2), 근거(§4)를 적습니다. 그 전의 규칙은 backlog였습니다. 밀린 tick을 하나씩 다 실행하는 것입니다. D3은 근거로 interbench, ROS 2 executor, Lipari와 Palopoli의 주기 thread, rt-app의 기본 모드, 그리고 TIMER task가 대표하는 프로그램들(mpv는 늦은 영상 frame을 버림, GStreamer video sink는 5 ms 넘게 늦은 frame을 버림)을 듭니다. 2026-10-08의 정정(9.11 D17, memo 끝의 정정 절)은 memo의 "none replays them"이라는 문장을 고쳐, 출처들이 공유하는 것은 "by default each skips"이고 늦은 job이 어느 tick의 것인지는 출처마다 다르며, memo의 선택(지나간 마지막 tick을 즉시 실행)은 video playback에서는 GStreamer sink의 것이고 audio와 게임 TIMER task에 대해서는 design이라고 적습니다.
 
-이 규칙은 simulator의 해석 규칙이지 파일의 모양이 아닙니다. canonical 파일의 `TIMER` 명령어는 규칙이 바뀌기 전과 후에 똑같습니다. 다만 schema와 contract의 설명 문장이 아직 backlog를 말하고 있어서, 그 문장은 낡은 것으로 읽어야 합니다(16장).
+이 규칙은 simulator의 해석 규칙이지 파일의 모양이 아닙니다. canonical 파일의 `TIMER` 명령어는 규칙이 바뀌기 전과 후에 똑같습니다. harness의 `job` 지표는 이 규칙으로 읽습니다(`docs/harness/metrics.md` §6.2). reference simulator의 TIMER(`simulator/src/sim.cpp`의 step K, "TIMER+backlog")는 아직 backlog 규칙으로 돌고, 2026-10-17의 final memo(`docs/memos/2026-10-17-workload-dataset-rebuild.md` §6.2)가 인경민에게 skip 규칙의 구현을 RQ0 gate spec의 simulator 적합성 항목 (b)로 부탁했습니다(16.2절의 4). 구현될 때까지 schema와 contract의 TIMER 설명 문장도 backlog를 그대로 말합니다(16.1절).
 
 `EDF` — Earliest Deadline First, 마감이 가장 이른 job부터 CPU를 주는 scheduling 알고리즘입니다. 이 연구의 scheduler가 고를 수 있는 넷 중 하나입니다. `job`(harness 지표) — 주기적 task의 한 주기 분량의 일입니다. harness는 job마다 마감을 지켰는지 셉니다.
 
@@ -2224,7 +2224,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 | workload schema의 TIMER 설명 | "late iterations accumulate as backlog (contract §3)" | 위와 같음 |
 | `docs/data-contracts.md` §4 예제 B | "missed ticks pile up as backlog" | 위와 같음 |
 
-이 셋은 9.15가 일부러 남겼습니다. harness는 skip 규칙을 읽고(`docs/harness/metrics.md` §6.2), reference simulator는 아직 backlog 규칙을 돌립니다(`simulator/src/sim.cpp`). simulator의 동작과 TIMER의 뜻을 적은 문장은 인경민의 simulator가 skip 규칙을 구현할 때 함께 고치기로 하고 `_dev/TODO.md`의 Phase 10 TIMER 줄로 넘겼습니다(9.15 spec 결정 9). canonical 파일의 `TIMER` 명령어는 어느 규칙에서나 같습니다(7.6절).
+이 셋은 9.15가 일부러 남겼습니다. harness는 skip 규칙을 읽고(`docs/harness/metrics.md` §6.2), reference simulator는 아직 backlog 규칙을 돌립니다(`simulator/src/sim.cpp`). simulator의 동작과 TIMER의 뜻을 적은 문장은 인경민의 simulator가 skip 규칙을 구현할 때 함께 고치기로 하고 `_dev/TODO.md`의 Phase 10 TIMER 줄로 넘겼습니다(9.15 spec 결정 9). 그 구현은 2026-10-17의 final memo가 RQ0 gate spec의 simulator 적합성 항목 (b)로 부탁했습니다(16.2절의 4). canonical 파일의 `TIMER` 명령어는 어느 규칙에서나 같습니다(7.6절).
 
 **`docs/memos/2026-10-08-declared-scheduling-class.md` §1.** 이름이 class를 정하지 않는다는 예로 `c5-t3`을 듭니다. 그 파일은 2026-10-12에 `c6-alias`로 옮겨졌습니다(9.20). memo는 날짜가 박힌 기록이라 고쳐 쓰지 않고, 9.15가 memo 끝에 정정 절을 덧붙입니다.
 
@@ -2248,7 +2248,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 
 **3. 파일보다 오래 사는 job의 demand — 닫힘.** 잘라 내지 않고, 문서들이 offered demand라고 문장으로 범위를 밝힙니다(12.4절).
 
-**4. TIMER skip 규칙의 비준과 구현.** memo 2026-10-07은 인경민에게 simulator 구현과 contract §3 행의 비준을 요청했습니다(memo §6). 9.14의 결정 1은 소비자 쪽(harness)을 이미 skip 규칙에 맞춰 쓰고, 실제 simulator의 적합성 확인을 "a named Phase 10 prerequisite"로 두었습니다. canonical 파일은 이 결정에 따라 바뀌지 않습니다. 미실행.
+**4. TIMER skip 규칙 — 규칙은 정해졌고 simulator의 구현을 기다림.** 규칙은 2026-10-07에 인지오가 9.11 D3으로 정했습니다. 늦게 TIMER에 닿은 task는 지나간 마지막 tick을 즉시 소비하고 그 앞의 tick을 건너뛰며, 건너뛴 tick 하나하나가 일 없이 마감을 놓친 job입니다(memo 2026-10-07 §1, 7.6절). harness는 이미 이 규칙으로 읽습니다(`docs/harness/metrics.md` §6.2). 9.14의 결정 1이 소비자 쪽을 모두 이 규칙에 맞춰 쓰고, 인경민의 구현을 "a named Phase 10 prerequisite"로 두었습니다. 열린 것은 reference simulator의 구현입니다. `simulator/src/sim.cpp`의 TIMER(step K, "TIMER+backlog")는 아직 밀린 tick을 하나씩 다 실행합니다. 2026-10-17의 final memo(`docs/memos/2026-10-17-workload-dataset-rebuild.md` §6.2)가 인경민에게 이것을 RQ0 gate spec의 simulator 적합성 항목 (b)로 부탁했고, 예를 하나 듭니다. 60 fps(주기 16,667 µs)의 task가 40,000 µs에야 TIMER에 닿으면, 지금 코드는 지나간 16,667과 33,334의 tick을 하나씩 다 처리해 frame 둘을 연달아 만들고, skip 규칙은 33,334의 tick만 처리하고 16,667의 tick을 `met: false`인 `deadline` 줄 하나로 남깁니다. 구현될 때까지 interpretation contract와 simulator guide는 backlog 문장을 그대로 두고, 구현되면 contract §3의 TIMER 행이 memo §6이 적어 둔 문장(16.1절의 표)으로 확정됩니다(memo 첫머리). canonical 파일은 이 규칙에 따라 바뀌지 않습니다. 인경민의 구현 대기, 미실행.
 
 **5. 닿지 않는 compiler 경로 — 닫힘.** 2026-10-16에 인지오가 지우기로 정했고, 그 자리에 맞는 경로가 없는 entry를 거절하는 분기가 들어왔습니다(9.5절).
 

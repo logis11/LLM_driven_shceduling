@@ -258,7 +258,7 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 24 open rows. The file has 1
 
 ## Also on this file, not for editing from this list
 
-- W-0507 · blocked, simulator TIMER (outside the spec's list) — §2.4 여섯 개의 primitive, open note line 288
+- W-0507 · applied 2026-10-17 after 9.15's close in T1 (the skip rule in the guidebooks; was blocked, simulator TIMER) — §2.4 여섯 개의 primitive, open note line 288
 - W-0508 · closed, carried — `_dev/TODO.md:190` (Phase 10: swap mocks for the real simulator … judge per the RQ0 gate spec, whose `simulator-conformance` statement lists item (e)) and the…
 - W-0509 · closed, carried — `_dev/TODO.md:200` (Backlog: 'Unwanted jobs to measure — how many the attribute's `false` side needs is decided in the RQ1 experiment spec's session …') carrie…
 - W-0510 · closed, carried — `_dev/TODO.md:180` (9.16 Exit audits — the claim, measurement and compiled-number audits re-run on the final state) carries it.
