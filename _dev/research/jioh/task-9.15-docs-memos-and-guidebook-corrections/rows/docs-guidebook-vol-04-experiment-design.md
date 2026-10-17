@@ -65,7 +65,7 @@ Chunk K16, Research guidebook, volumes 4-6 (wave 4). 8 open rows. The file has 1
 - Cross-ref: W-0662
 - Notes: 9.12 D5 leaves to Family 3's design whether it keeps an audio-workstation row; D35 and D66 hand only docs/research-proposal.md:640, whose figures vol-04 :1414 copies. W-0662's D5 part (merged at W-0662).
 
-### W-0979 · open
+### W-0979 · applied
 - At: `docs/guidebook/vol-04-experiment-design.md` line 221 ("앞 권에서 사슬의 앞쪽 셋, 즉 link 1과 link 2와 link 3이 모델과 무관하다고 했는데, 그 셋을 시험하는 도구가 바로 이 둘입니다")
 - Change: Restate per 인지오's answer (b) to K15's mismatch: `fixed` and `oracle`, with `random`, test link 1, by RQ0; link 3 is held by how the dataset is built, its limits measured by the pre-committed misses; link 2 has no falsification condition yet. In the volume's Korean. Lines 1423 and 1507 (what Family 2 targets) need no change.
 - Final word: 인지오's answer (b) of 2026-10-17 to "K15 (mismatch) · links 2 and 3 in Phase 1's committed spec", applied in N2 (`docs/research-claims.md:58–66`; the research guidebook vol-03); `harness/experiments/rq0-gate.yaml:18` (`conditions: [fixed, random, oracle]`), `:506–512` (`criterion` `k_of_n_gap`, `reference: oracle`, `compared: random`).

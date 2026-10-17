@@ -18,7 +18,7 @@ Chunk K17, Memos (wave 4). 2 open rows. The file has 101 lines at `d5cc7711`.
 - Resolved at merge: 9.12 D30 left the memo unrewritten, pointing to the declared-class memo; 9.15 spec decision 10 (later) sets the form: an appended correction naming the statement.
 - Notes: Checked: `harness/guards/guard-spec.yaml:143–146` (`starvation_floor`, threshold 30,000,000 µs); the simulator's status memo lists the cap as not implemented (`simulator/memo/memo_261010.md:25`). The memo also gets its one open/closed header line at assembly.
 
-### W-0975 · open
+### W-0975 · applied
 - At: `docs/memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md` its existing "## Correction (2026-10-17)" section (line 104); the corrected statements: §7's "is applied at its stamped time, as the config-schedule contract says for any entry" and §2's "t_apply lags t_return by at most one slice of the outgoing algorithm"
 - Change: Append bullets to the existing correction section, the original text untouched: §7's rule amended 2026-10-17 — an entry stamped while a switch is draining waits behind it, the entries applying in index order (`docs/data-contracts.md` §7 and §14, 2026-10-17; the reference simulator's U3); §2's bound does not hold for an EDF deadline-class holder, which has no slice, so the drain out of EDF lasts until its current RUN ends. Header `Updated` bumped. In the memo's language.
 - Final word: 9.15 spec decision 10 (a correction appended as a dated section, the memo's original text never edited); W-0949 (applied in N1) and 인지오's answer (b) of 2026-10-17 to F3 (M2); `simulator/src/sim.cpp:817–821` (`arm_lane`), `:317` (an EDF deadline-class holder has no horizon).

@@ -146,10 +146,18 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 13 open rows. The file has 1
 - Cross-ref: W-0957; W-0959; W-0960; W-0961; W-0962
 - Notes: found in H2. K14's file: a follow-up chunk.
 
-### W-0995 · open
+### W-0995 · applied
 - At: `docs/guidebook/dataset/07-build-gate-manifests-ci-tests.md` §1.7's timeline, the 2026-10-17 line, line 168 ("generated의 scenario tag를 한 규칙으로, …")
 - Change: Scope it to what the 2026-10-17 rebuild did: the transition grid's `focus` form, 214 timelines. The distractor grid's change gets its own line when the next data batch lands (W-0998). In the volume's Korean.
 - Final word: `logs/B1-data-rebuild.md` (W-0890 changed exactly 214 transition-grid `focus`-form timelines); `dataset/tools/gen/compose.py` `_compose_distractor` at `3ac13c42` (the distractor grid's second segment still copies A's label); 인지오's answer (b) of 2026-10-17 to B1, F1, F2, F4 (M1) (the distractor grid in the next data batch). N5 scoped vol-08 §13's 2026-10-17 row the same way (its N3).
 - Sources: `logs/N5.md` ## Rows for other chunks (X1)
 - Cross-ref: W-0890; W-0933; W-0998
 - Notes: found in N5. K14's file: a follow-up chunk.
+
+### W-1007 · open
+- At: `docs/guidebook/dataset/07-build-gate-manifests-ci-tests.md` §7.6, line 1461 at HEAD `63c44936` ("harness의 suite(`harness/tools/tests/`, 2026-10-14에 298개, 2026-10-17에 301개 collect)"); §7.7's harness paragraph (299 passed, 2 deselected, 16분 05초)
+- Change: Once P1's harness change commits (`mock-simulator@2`; `test_a_wake_stored_before_the_arrival_completes_the_arrival_wait` in `harness/tools/tests/test_mock_simulator.py`; W-0982–W-0984), the harness counts restated: 302 collected, `make test` 300 passed, with its recorded time. In the volume's Korean.
+- Final word: `logs/P1.md` ## Checks (`make -C harness test`: 300 passed, 2 deselected, 16 min 34 s, with the one new test); `logs/P8.md` ## Decisions 4 (the counts follow committed HEAD: 301 collected, 299 passed).
+- Sources: `logs/P8.md` ## Rows for other chunks (X1), ## Review round 1 (Tests)
+- Cross-ref: W-0984; W-0933
+- Notes: found in P8. K14's file: a follow-up chunk, after P1's harness change commits.

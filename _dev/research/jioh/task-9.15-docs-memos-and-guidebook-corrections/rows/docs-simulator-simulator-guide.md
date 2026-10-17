@@ -71,7 +71,7 @@ Chunk K09, Simulator and daemon docs (wave 2). 7 open rows. The file has 321 lin
 - Cross-ref: W-0447; W-0448
 - Notes: found in K17. K09's file: a follow-up chunk. Line 113 ("your §9.3 tie-break rule decides"), §9.5 (`:302`) and the glossary's tie-break row (`:318`) refer to §9.3's rule.
 
-### W-0985 · open
+### W-0985 · applied
 - At: `docs/simulator/simulator-guide.md` §3, the switch paragraph's same-algorithm sentence, line 117
 - Change: Add that under MLFQ the boost timer restarts at the applied instant, as on a switch into it. N3's drafted text: "under MLFQ the boost timer restarts at the applied instant, as on a switch into it (`simulator/src/sim.cpp:210`, `:597`)".
 - Final word: 인지오's answer (b) of 2026-10-17 to F3 (M1) (the simulator's restart holds), which names no change in this guide; `simulator/src/sim.cpp:210` (`Mlfq::start` re-arms the boost at `now + boost_interval_us`), `:597` (`++pol_epoch_` voids the earlier timer). Waits on N3's question under "Questions from the waves".
@@ -79,7 +79,7 @@ Chunk K09, Simulator and daemon docs (wave 2). 7 open rows. The file has 321 lin
 - Cross-ref: W-0986; W-0988; W-0974
 - Notes: found in N3, held back by its brief (reverted in its fix round 1). K09's file: a follow-up chunk, if 인지오's answer takes it. B3's log (not yet folded) lists the same site.
 
-### W-0986 · open
+### W-0986 · applied
 - At: `docs/simulator/simulator-guide.md` §3's schedule paragraph, line 115 ("unless it is a switch that drains (next paragraph)"); the glossary's config-application row, line 318 ("or, for a switch that drains, once the lane is free (§3)")
 - Change: Line 318: "or, for a switch that drains and every entry stamped behind it, once the lane is free (§3)". Line 115, optional (F3's reviewer held it unneeded, line 117 already stating the queued entry): "unless it is a switch that drains, or is stamped while one drains (next paragraph)".
 - Final word: 인지오's answer (b) of 2026-10-17 to F3 (M2) (the simulator's order holds), which names no change in this guide; `simulator/src/sim.cpp:574–577` (an entry queued while `pending_` is non-empty), `:825–828` (`dispatch` applies the queue in index order once the lane is free). Waits on N3's question under "Questions from the waves".
@@ -87,7 +87,7 @@ Chunk K09, Simulator and daemon docs (wave 2). 7 open rows. The file has 321 lin
 - Cross-ref: W-0985; W-0973; W-0949
 - Notes: found in N3, held back by its brief (reverted in its fix round 1). K09's file: a follow-up chunk, if 인지오's answer takes it.
 
-### W-0987 · open
+### W-0987 · applied
 - At: `docs/simulator/simulator-guide.md` §6, the paragraph after the trace, line 255 ("its first `ready` line, if it is ever woken, is the wake that completes that WAIT")
 - Change: Optional: scope the sentence to the case the code holds, the instruction after that WAIT settling on a RUN, e.g. "…, if it is ever woken and its next instruction is a RUN, is the wake that completes that WAIT"; the same change in metrics §11 item 5's wording (W-0981).
 - Final word: `simulator/src/sim.cpp:800–806` (`on_unblock` advances past the WAIT and calls `step`; a following WAIT, SLEEP, EXIT, the program's end or a FORK at its cap leaves no `ready` line at that wake). True of every WAIT-first program in the core set today: WAIT then RUN, a LOOP whose body starts WAIT then RUN, and four lone-WAIT tasks no wake targets.

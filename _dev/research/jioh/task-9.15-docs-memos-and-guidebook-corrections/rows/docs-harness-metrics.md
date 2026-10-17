@@ -45,7 +45,7 @@ Chunk K10, Harness guide and metrics (wave 3). 2 open rows. The file has 344 lin
 - Cross-ref: W-0758; W-0687
 - Notes: found in K17. K10's file: a follow-up chunk.
 
-### W-0973 · open
+### W-0973 · applied
 - At: `docs/harness/metrics.md` §11 item 8, line 313 ("a switch out of any other algorithm applies at the running task's slice boundary (the drain)")
 - Change: Restate the drain to the next time the lane is free: the running task's slice or current RUN ends, or it is preempted or departs; at once on a free lane. In the same change as the F3 (M2) answer's restatement of item 9 (entries apply in index order, one stamped during a drain waiting behind it).
 - Final word: `docs/data-contracts.md` §7's **Drain** and **Order** rules and its §14 entry of 2026-10-17 (W-0949, applied in N1; 인지오's answer (c)); 인지오's answer (b) of 2026-10-17 to F3 (M2); `simulator/src/sim.cpp:573–574` (the drain test and the queue), `:825–828` (`dispatch` applies the queue once the lane is free), `:817–821` (`arm_lane`: the Lane event at the slice's end or the RUN's end, whichever comes first).
@@ -53,10 +53,18 @@ Chunk K10, Harness guide and metrics (wave 3). 2 open rows. The file has 344 lin
 - Cross-ref: W-0949; W-0935; W-0974
 - Notes: found in N1. K10's file: a follow-up chunk. At this fold the working tree carries B3's uncommitted restatement of item 9 (the index order; `logs/B3-harness.md`, not yet folded); item 8's drain wording is untouched there.
 
-### W-0981 · open
+### W-0981 · applied
 - At: `docs/harness/metrics.md` §11's opening, line 304 ("items 5–6 are mock-local choices that fill gaps the contracts leave open"); item 4's last sentence, line 309 ("One mock does not yet: `mock-media`'s music player … owed"); item 5, line 310 ("blocks in its arrival step", stated unconditionally; "Its first `ready` line, if it is woken, is the wake that completes that WAIT")
 - Change: The opening: item 5 is the reference simulator's behaviour, the mocks following it. Item 4: the `mock-media` sentence dropped (W-0889 applied; the grid anchored at its arrival). Item 5: "with no wake already stored for it" added (a stored wake completes the WAIT at once and gives `ready(arrive)`). Optional, from N3's last review: item 5's first-`ready` sentence holds only when the instruction after that WAIT settles on a RUN, e.g. "if it is ever woken and its next instruction is a RUN" (with W-0987 on the simulator guide's copy).
 - Final word: 인지오's answer (c) of 2026-10-17 to K10 (X4); W-0889 (applied 2026-10-17 in the batch's harness part); `simulator/src/sim.cpp:688–691` (the WAIT completes on a stored wake), `:800–806` (`on_unblock` advances past the WAIT and calls `step`).
 - Sources: `logs/N3.md` ## Rows for other chunks, ## Review round 2 (non-blocking note 1); `logs/B2-harness.md` (review finding 3)
 - Cross-ref: W-0980; W-0984; W-0987; W-0973
 - Notes: found in N3. K10's file: a follow-up chunk. At this fold the working tree carries B3's uncommitted restatement of §11's opening, item 4's `mock-media` sentence and item 5's last clause (`logs/B3-harness.md`, not yet folded); item 5's stored-wake condition is not in it.
+
+### W-1003 · open
+- At: `docs/harness/metrics.md` §11 item 5, line 313, its last clause ("the mock simulator stores no wake sent before a task's arrival — it writes that wake's `ready` line and run at the wake's own instant, before the task's pinned arrival — a case no fixture has") and its first-`ready` sentence ("if it is woken and its next instruction is a RUN, its first `ready` line is the wake that completes that WAIT"); the top §13 entry of 2026-10-17, line 331 ("the mock simulator stores no wake sent before a task's arrival, writing it at its own instant, a case no fixture has")
+- Change: Both mock clauses restated to "The mocks do the same": since W-0984 (`mock-simulator@2`) the mock stores a wake sent before a task's arrival and a WAIT-first task completes its WAIT on it in the arrival step, the mock also writing item 1's zero-wait `ready(wake)` line for that WAIT beside `ready(arrive)`; no fixture has the case. With it, W-0981's optional part worded as the simulator guide's `:255` now is (W-0987, applied in P4): "if it is woken and the instructions after that WAIT reach a RUN without blocking or ending it".
+- Final word: W-0984 (applied 2026-10-17 in P1; `harness/tools/tests/mocks/simulator.py`, its decision 1 on the zero-wait line); 인지오's answer (c) of 2026-10-17 to K10 (X4) (the mocks follow the reference simulator); `simulator/src/sim.cpp:688–691` (the WAIT completes on a stored wake), `:800–806` (`on_unblock` advances past the WAIT and calls `step`; the task is enqueued with `ready` only if `step` settles on a RUN).
+- Sources: `logs/P1.md` ## Rows for other chunks (X1); `logs/P2.md` ## Rows for other chunks (X1), ## Fix round 1, ## Review round 2 (minor 1 and 2); `logs/P4.md` ## Rows for other chunks, ## Review round 1 (note 1)
+- Cross-ref: W-0981; W-0984; W-0987; W-0982; W-0983
+- Notes: found in P1 and P2 (their X1, one row), with P4's note on W-0981's optional part (not a row of its own). K10's file: a follow-up chunk, once P1's harness change (W-0982–W-0984) commits. §11's opening ("item 5 is the reference simulator's behaviour, which the mocks follow") then holds without the exception.

@@ -104,7 +104,7 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 6 open rows. The file has 16
 - Cross-ref: W-0970; W-0972
 - Notes: found in L1. K11's file: a follow-up chunk, with W-0970. If 인지오's answer to L1's M1 restates the notes, line 684's account of them follows.
 
-### W-0991 · open
+### W-0991 · applied
 - At: `docs/guidebook/dataset/02-the-archetype-library.md` line 889 at `3ac13c42`, 890 after N5's edit ("idle 재측정(9.10 D146)")
 - Change: Keep D146's 2,790 s reading on `kdenlive` 10 as history; add 9.15's span check: over `c3-creation`'s 2,851 s span, `kdenlive` 13 (`meas-ci-probes-2026-10-17`), the 180 s phase holds (CPU 0.3 %, wakes 2.9 %; at the worst 4.5 %, 3.8 %). In the volume's Korean.
 - Final word: As W-0989.

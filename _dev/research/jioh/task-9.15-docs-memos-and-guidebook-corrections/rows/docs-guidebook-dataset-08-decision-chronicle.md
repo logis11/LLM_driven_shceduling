@@ -116,7 +116,7 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0970; W-0971
 - Notes: found in L1. K14's file: a follow-up chunk.
 
-### W-0992 · open
+### W-0992 · applied
 - At: `docs/guidebook/dataset/08-decision-chronicle.md` line 1132 ("9.10 D143 이후(span probe)")
 - Change: Optional: add that 9.15 re-probed `video-editor`'s idle state over `c3-creation`'s span after D146's settle shortened what the earlier probe held. In the volume's Korean.
 - Final word: As W-0989.
@@ -124,7 +124,7 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0989; W-0991; W-0602
 - Notes: found in N4 (optional). K14's file: a follow-up chunk, or W-0602's pass, which states 9.15's outcome.
 
-### W-0999 · open
+### W-0999 · applied
 - At: `docs/guidebook/dataset/08-decision-chronicle.md` §2's D1 bullet, line 226 ("LAVD(Valve가 Steam Deck용으로 만든 Linux scheduler)"); §7.12's D113 bullet, line 1169 ("인지오의 답((b), 9.15 작업 목록)"), optional
 - Change: Line 226: LAVD is Changwoo Min's, developed at Igalia for SteamOS and the Steam Deck — e.g. "Igalia의 Changwoo Min이 SteamOS·Steam Deck을 위해 만든 Linux scheduler" — as N5 restated line 934 (its N2). Line 1169, optional: name both 2026-10-17 answers, both (b): the type and header (K13 (M2), K01 (M1)) and the notes (L1 (M1)).
 - Final word: `docs/references.md:759` (`edge-lwn26`: LAVD developed by Min "as part of his work at Igalia on SteamOS and the Steam Deck"); the `lavd-ossna24` slides (slide 1 and every footer name Changwoo Min); the work list's two answers of 2026-10-17.
@@ -132,7 +132,7 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0972
 - Notes: found in N5's last review. K14's file: a follow-up chunk.
 
-### W-1000 · open
+### W-1000 · applied
 - At: `docs/guidebook/dataset/08-decision-chronicle.md` the **conformance statement** definition, line 1279 ("(a)–(f)의 여섯이었고, 2026-10-16에 (g)가 더해져 일곱입니다"); §12.4 item 4, line 1817 (the conformance items); the glossary, line 2026 ("2026-10-16부터 (a)–(g)의 일곱입니다")
 - Change: Once W-0997 commits: item (h), the simulator run through the invocation contract, added and the count eight, dated with the spec's change. In the volume's Korean.
 - Final word: 인지오's answer (c) of 2026-10-17 to K17 (item (h); follow-up rows on the docs that count or list the items, the dataset guidebook vol-08 §12.4 item 4's seven named); `harness/experiments/rq0-gate.yaml` `simulator-conformance` at `3ac13c42` lists (a)–(g) (N5's M1).

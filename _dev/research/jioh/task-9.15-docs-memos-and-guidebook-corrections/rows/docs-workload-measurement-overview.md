@@ -132,13 +132,21 @@ Chunk K06, Measurement and grounding docs (wave 2). 15 open rows. The file has 1
 - Cross-ref: W-0274
 - Notes: found in K01. The two rows differ on the remedy: W-0274 removes the row, K01 restates it to `glam`.
 
-### W-0994 · open
+### W-0994 · applied
 - At: `docs/workload/measurement-overview.md` §8 "Spans longer than the phase", line 105 ("its probe ran 3,100 s past a 30 s settle, 2,890 s past the 240 s settle, and read over the span in whole 10 s slices (2,860 s), the phase at the placement every repeat takes keeps its CPU …")
 - Change: Optional: the run-on's two clauses split by a colon or semicolon before "the phase at the placement …", e.g. "… (2,860 s): at the placement every repeat takes, the phase keeps its CPU …". The facts unchanged.
 - Final word: N4's last review (minor, non-blocking).
 - Sources: `logs/N4.md` ## Review round 1
 - Cross-ref: W-0989
 - Notes: found in N4's last review (optional). K06's file: a follow-up chunk.
+
+### W-1006 · applied
+- At: `docs/workload/measurement-overview.md` §9, the probes paragraph, line 164 ("the probe behind `web-browser`'s settle is in no release, held only as run 35494199119's workflow artifact (`meas-long-probe-chrome-r1-probe`)")
+- Change: Name the release: run 35494199119 is in `meas-ci-probes-2026-09-20` (`meas-long-probe-chrome-r1-probe-35494199119.zip`), with the other four 9.5 long-phase probe runs.
+- Final word: 인지오's answer (a) of 2026-10-17 to N4 (Q1) (the probes released; §9's "in no release" restated to name the release); `logs/N4-probe-release.md`; `gh release view meas-ci-probes-2026-09-20`.
+- Sources: `logs/P7.md` ## Rows for other chunks (X1)
+- Cross-ref: W-0994; W-0990
+- Notes: found in P7. K06's file: applied in P9 (the same wave), as N4 (Q1)'s answer.
 
 ## Also on this file, not for editing from this list
 
