@@ -1,0 +1,236 @@
+== c1-backup T_end=277s :: 0-277s backup {'background_wanted': True, 'initiated': 'scheduled'}
+   editor         kdenlive         normal arr=0 dep=277 cpu=108.487s b1batch=0.072 burst_med=21 max=227669 sleep_med=None sleep_tot=0.000s
+   bulk           deja-dup         idle   arr=2 dep=0 cpu=165.668s b1batch=0.985 burst_med=225447.0 max=47166936 sleep_med=15 sleep_tot=0.315s
+== c1-browsing T_end=60s :: 0-60s browsing {'background_wanted': True}
+   browser        chrome           normal arr=0 dep=60 cpu=0.981s b1batch=0.143 burst_med=40.0 max=134589 sleep_med=None sleep_tot=0.000s KEYS n=123 med=4049 mean=4378 >=10ms=2
+   renderers.1    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=25 max=90 sleep_med=None sleep_tot=0.000s
+   renderers.2    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=25.0 max=102 sleep_med=None sleep_tot=0.000s
+   renderers.3    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=29.5 max=70 sleep_med=None sleep_tot=0.000s
+   renderers.4    chrome           normal arr=0 dep=60 cpu=0.001s b1batch=0.000 burst_med=28 max=111 sleep_med=None sleep_tot=0.000s
+   INPUT browser: n=123 first=5.751s last=57.680s
+== c1-compile T_end=1594s :: 0-1594s compile {'background_wanted': True}
+   editor         code             normal arr=0 dep=1594 cpu=275.298s b1batch=0.826 burst_med=32.0 max=1688408 sleep_med=None sleep_tot=0.000s KEYS n=2544 med=78637.0 mean=99234 >=10ms=2529
+   build          make             normal arr=2 dep=0 cpu=1.982s b1batch=0.995 burst_med=1981857 max=1981857 sleep_med=None sleep_tot=0.000s SPAWN n=17448 cap=48 cpu=1313.925s b1batch=0.948 never_batch=14449 classes={'normal': 17448}
+   INPUT editor: n=2544 first=11.161s last=1590.084s
+== c1-dev T_end=60s :: 0-60s dev {'background_wanted': True}
+   editor         code             normal arr=0 dep=60 cpu=19.913s b1batch=0.865 burst_med=34.0 max=573958 sleep_med=None sleep_tot=0.000s KEYS n=186 med=80142.0 mean=102564 >=10ms=184
+   INPUT editor: n=186 first=12.753s last=57.733s
+== c1-gaming T_end=60s :: 0-60s gaming {'background_wanted': True}
+   CHAIN game: members=17 sum=14999 period=16667 slack=1668 lanes=0.8999 head=631 top=[1436, 1191, 1171, 1159, 1124, 1113] classes={'normal'}
+   steam          steam            normal arr=0 dep=60 cpu=0.923s b1batch=0.009 burst_med=45.0 max=18399 sleep_med=None sleep_tot=0.000s
+== c1-idle T_end=60s :: 0-60s idle {'background_wanted': True}
+   audio-srv      pipewire         normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=None max=None sleep_med=None sleep_tot=0.000s KEYS n=1 med=0 mean=0 >=10ms=0
+   bus            dbus-daemon      normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=None max=None sleep_med=None sleep_tot=0.000s KEYS n=1 med=0 mean=0 >=10ms=0
+   init           systemd          normal arr=0 dep=60 cpu=0.001s b1batch=0.000 burst_med=125.0 max=138 sleep_med=None sleep_tot=0.000s
+   shell          gnome-shell      normal arr=0 dep=60 cpu=0.021s b1batch=0.000 burst_med=8 max=9542 sleep_med=None sleep_tot=0.000s
+== c1-indexing T_end=60s :: 0-60s indexing {'background_wanted': True, 'initiated': 'user', 'pre_committed_miss': True}
+   editor         code             normal arr=0 dep=60 cpu=5.429s b1batch=0.762 burst_med=32 max=1021601 sleep_med=None sleep_tot=0.000s KEYS n=47 med=65179 mean=97531 >=10ms=47
+   hog            tracker-miner-f  idle   arr=2 dep=0 cpu=39.435s b1batch=0.814 burst_med=82.0 max=3909247 sleep_med=115 sleep_tot=6.065s
+   INPUT editor: n=47 first=8.343s last=52.013s
+== c1-mail T_end=60s :: 0-60s mail {'background_wanted': True}
+   mailer         thunderbird-bin  normal arr=0 dep=60 cpu=1.720s b1batch=0.339 burst_med=25.0 max=111375 sleep_med=None sleep_tot=0.000s KEYS n=35 med=4807 mean=7384 >=10ms=1
+   INPUT mailer: n=35 first=45.936s last=53.066s
+== c1-media T_end=60s :: 0-60s media {'background_wanted': True}
+   music          mpv              normal arr=0 dep=60 cpu=0.426s TIMER[49635] cyc_med=331.0 max=823 >10ms=0/1210
+   video          mpv              normal arr=0 dep=60 cpu=7.254s TIMER[33348] cyc_med=3944 max=11463 >10ms=1/1801
+== c1-meeting T_end=60s :: 0-60s meeting {'background_wanted': True}
+   voice          chrome           normal arr=0 dep=60 cpu=14.320s TIMER[10001] cyc_med=1181 max=15233 >10ms=330/6001
+== c1-ml-train T_end=1612s :: 0-1612s ml-train {'background_wanted': True}
+   editor         code             normal arr=0 dep=1612 cpu=219.263s b1batch=0.806 burst_med=32 max=1308391 sleep_med=None sleep_tot=0.000s KEYS n=1984 med=79207.5 mean=98862 >=10ms=1967
+   hog            python           normal arr=2 dep=0 cpu=1389.885s b1batch=1.000 burst_med=9592.0 max=320328737 sleep_med=375 sleep_tot=0.012s
+   INPUT editor: n=1984 first=21.856s last=1609.743s
+== c1-office T_end=60s :: 0-60s office {'background_wanted': True}
+   browser        chrome           normal arr=0 dep=60 cpu=0.177s b1batch=0.000 burst_med=44.0 max=596 sleep_med=None sleep_tot=0.000s
+   mail           thunderbird-bin  normal arr=0 dep=60 cpu=0.080s b1batch=0.298 burst_med=31 max=27925 sleep_med=None sleep_tot=0.000s
+   renderers.1    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=26.0 max=81 sleep_med=None sleep_tot=0.000s
+   renderers.2    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=28 max=77 sleep_med=None sleep_tot=0.000s
+   renderers.3    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=26.5 max=93 sleep_med=None sleep_tot=0.000s
+   renderers.4    chrome           normal arr=0 dep=60 cpu=0.001s b1batch=0.000 burst_med=26 max=381 sleep_med=None sleep_tot=0.000s
+   writer         soffice.bin      normal arr=0 dep=60 cpu=1.359s b1batch=0.039 burst_med=2658 max=54370 sleep_med=None sleep_tot=0.000s KEYS n=270 med=3241.0 mean=4907 >=10ms=15
+   INPUT writer: n=270 first=2.059s last=57.611s
+== c1-photo T_end=60s :: 0-60s photo {'background_wanted': True}
+   photo-editor   gimp             normal arr=0 dep=60 cpu=2.655s b1batch=0.934 burst_med=69 max=2489848 sleep_med=None sleep_tot=0.000s
+== c1-render T_end=60s :: 0-60s render {'background_wanted': True, 'initiated': 'user'}
+   editor         kdenlive         normal arr=0 dep=60 cpu=27.486s b1batch=0.211 burst_med=17.0 max=271088 sleep_med=None sleep_tot=0.000s
+   bulk           kdenlive_render  normal arr=2 dep=0 cpu=16.545s b1batch=0.964 burst_med=28213.0 max=9861218 sleep_med=11 sleep_tot=0.008s
+== c1-transcode T_end=4762s :: 0-4762s transcode {'background_wanted': True, 'initiated': 'user'}
+   video-editor   kdenlive         normal arr=0 dep=4762 cpu=1787.903s b1batch=0.024 burst_med=26 max=215495 sleep_med=None sleep_tot=0.000s
+   batch          HandBrakeCLI     normal arr=2 dep=0 cpu=2970.871s b1batch=1.000 burst_med=20781211 max=167959437 sleep_med=169.5 sleep_tot=0.522s
+== c1-video-edit T_end=60s :: 0-60s video-edit {'background_wanted': True}
+   editor         kdenlive         normal arr=0 dep=60 cpu=27.515s b1batch=0.186 burst_med=16.0 max=234415 sleep_med=None sleep_tot=0.000s
+== c2-p1a T_end=99.435s :: 0-60s dev {'background_wanted': True} | 60-99.435s ml-train {'background_wanted': True}
+   editor         code             normal arr=0 dep=99.435 cpu=52.421s b1batch=0.875 burst_med=33.0 max=1067750 sleep_med=None sleep_tot=0.000s KEYS n=525 med=79723 mean=97248 >=10ms=522
+   hog            python           normal arr=60 dep=0 cpu=1389.885s b1batch=1.000 burst_med=21630.0 max=685714830 sleep_med=374 sleep_tot=0.009s
+   INPUT editor: n=525 first=2.090s last=95.831s
+== c2-p1b T_end=99.435s :: 0-60s dev {'background_wanted': True} | 60-99.435s indexing {'background_wanted': False, 'initiated': 'session'}
+   editor         code             normal arr=0 dep=99.435 cpu=52.421s b1batch=0.875 burst_med=33.0 max=1067750 sleep_med=None sleep_tot=0.000s KEYS n=525 med=79723 mean=97248 >=10ms=522
+   hog            tracker-miner-f  idle   arr=60 dep=0 cpu=39.435s b1batch=0.808 burst_med=80.0 max=2943411 sleep_med=115 sleep_tot=4.841s
+   INPUT editor: n=525 first=2.090s last=95.831s
+== c2-p2a-idle T_end=86.385s :: 0-60s gaming {'background_wanted': True} | 60-86.385s gaming {'background': 'download', 'background_wanted': True, 'initiated': 'user'}
+   CHAIN game: members=17 sum=15833 period=16667 slack=834 lanes=0.9500 head=225 top=[2131, 2099, 1733, 1220, 1084, 1062] classes={'normal'}
+   steam          steam            normal arr=0 dep=86.385 cpu=1.310s b1batch=0.000 burst_med=46.0 max=5843 sleep_med=None sleep_tot=0.000s
+   download       steam            idle   arr=60 dep=0 cpu=727.170s b1batch=0.743 burst_med=436 max=62581581 sleep_med=86.0 sleep_tot=42.902s
+== c2-p2a T_end=86.385s :: 0-60s gaming {'background_wanted': True} | 60-86.385s gaming {'background': 'download', 'background_wanted': True, 'initiated': 'user'}
+   CHAIN game: members=17 sum=15833 period=16667 slack=834 lanes=0.9500 head=225 top=[2131, 2099, 1733, 1220, 1084, 1062] classes={'normal'}
+   steam          steam            normal arr=0 dep=86.385 cpu=1.310s b1batch=0.000 burst_med=46.0 max=5843 sleep_med=None sleep_tot=0.000s
+   download       steam            normal arr=60 dep=0 cpu=727.170s b1batch=0.743 burst_med=436 max=62581581 sleep_med=86.0 sleep_tot=42.902s
+== c2-p2b T_end=86.385s :: 0-60s gaming {'background_wanted': True} | 60-86.385s gaming {'background': 'package-upgrade', 'background_wanted': False}
+   CHAIN game: members=17 sum=15833 period=16667 slack=834 lanes=0.9500 head=225 top=[2131, 2099, 1733, 1220, 1084, 1062] classes={'normal'}
+   steam          steam            normal arr=0 dep=86.385 cpu=1.310s b1batch=0.000 burst_med=46.0 max=5843 sleep_med=None sleep_tot=0.000s
+   download       unattended-upgr  normal arr=60 dep=0 cpu=26.385s b1batch=0.924 burst_med=246.5 max=1737849 sleep_med=27 sleep_tot=0.115s
+== c2-p3a T_end=326s :: 0-60s video-edit {'background_wanted': True} | 60-326s render {'background_wanted': True, 'initiated': 'user'}
+   editor         kdenlive         normal arr=0 dep=326 cpu=126.925s b1batch=0.049 burst_med=23.0 max=215478 sleep_med=None sleep_tot=0.000s
+   bulk           kdenlive_render  normal arr=60 dep=0 cpu=16.545s b1batch=0.831 burst_med=25824.0 max=1678739 sleep_med=10 sleep_tot=0.048s
+== c2-p3b T_end=326s :: 0-60s video-edit {'background_wanted': True} | 60-326s backup {'background_wanted': True, 'initiated': 'scheduled'}
+   editor         kdenlive         normal arr=0 dep=326 cpu=126.925s b1batch=0.049 burst_med=23.0 max=215478 sleep_med=None sleep_tot=0.000s
+   bulk           deja-dup         idle   arr=60 dep=0 cpu=165.668s b1batch=0.981 burst_med=262583 max=21760376 sleep_med=20.0 sleep_tot=0.190s
+== c3-creation T_end=3212s :: 0-120s photo {'background_wanted': True} | 120-240s video-edit {'background_wanted': True} | 240-3212s transcode {'background_wanted': True, 'initiated': 'user'}
+   photo-editor   gimp             normal arr=0 dep=120 cpu=1.813s b1batch=0.820 burst_med=71 max=1496422 sleep_med=None sleep_tot=0.000s
+   video-editor   kdenlive         normal arr=120 dep=3212 cpu=52.108s b1batch=0.153 burst_med=20.0 max=313934 sleep_med=None sleep_tot=0.000s
+   batch          HandBrakeCLI     normal arr=240 dep=0 cpu=2970.871s b1batch=1.000 burst_med=17946634.0 max=197394640 sleep_med=366 sleep_tot=0.416s
+== c3-evening T_end=420s :: 0-60s browsing {'background_wanted': True} | 60-300s gaming {'background_wanted': True} | 300-420s media {'background_wanted': True}
+   CHAIN game: members=17 sum=24166 period=16667 slack=-7499 lanes=1.4499 head=746 top=[2382, 2320, 1980, 1916, 1909, 1814] classes={'normal'}
+   browser        chrome           normal arr=0 dep=60 cpu=0.833s b1batch=0.235 burst_med=39.0 max=133648 sleep_med=None sleep_tot=0.000s KEYS n=77 med=4146 mean=4351 >=10ms=1
+   renderers.1    chrome           normal arr=0 dep=60 cpu=0.001s b1batch=0.000 burst_med=44 max=97 sleep_med=None sleep_tot=0.000s
+   renderers.2    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=27 max=77 sleep_med=None sleep_tot=0.000s
+   renderers.3    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=26 max=76 sleep_med=None sleep_tot=0.000s
+   renderers.4    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=27 max=54 sleep_med=None sleep_tot=0.000s
+   chat           element-desktop  normal arr=60 dep=300 cpu=3.345s b1batch=0.467 burst_med=19 max=283155 sleep_med=None sleep_tot=0.000s
+   steam          steam            normal arr=60 dep=300 cpu=10.171s b1batch=0.344 burst_med=37 max=652446 sleep_med=None sleep_tot=0.000s
+   music          mpv              normal arr=300 dep=420 cpu=1.096s TIMER[49635] cyc_med=330 max=65505 >10ms=6/2419
+   video          mpv              normal arr=300 dep=420 cpu=14.822s TIMER[33348] cyc_med=4060.5 max=59414 >10ms=3/3600
+   INPUT browser: n=77 first=33.070s last=57.817s
+== c3-workday T_end=1545s :: 0-60s browsing {'background_wanted': True} | 60-120s office {'background_wanted': True} | 120-1485s compile {'background_wanted': True} | 1485-1545s mail {'background_wanted': True}
+   browser        chrome           normal arr=0 dep=1545 cpu=4.745s b1batch=0.046 burst_med=44 max=133584 sleep_med=None sleep_tot=0.000s KEYS n=7 med=4647 mean=5466 >=10ms=1
+   renderers.1    chrome           normal arr=0 dep=1545 cpu=0.011s b1batch=0.000 burst_med=26.0 max=115 sleep_med=None sleep_tot=0.000s
+   renderers.2    chrome           normal arr=0 dep=1545 cpu=0.014s b1batch=0.000 burst_med=26.0 max=406 sleep_med=None sleep_tot=0.000s
+   renderers.3    chrome           normal arr=0 dep=1545 cpu=0.016s b1batch=0.000 burst_med=28.0 max=396 sleep_med=None sleep_tot=0.000s
+   renderers.4    chrome           normal arr=0 dep=1545 cpu=0.014s b1batch=0.000 burst_med=28.0 max=343 sleep_med=None sleep_tot=0.000s
+   writer         soffice.bin      normal arr=60 dep=1545 cpu=3.242s b1batch=0.385 burst_med=56 max=491168 sleep_med=None sleep_tot=0.000s KEYS n=139 med=3230 mean=5153 >=10ms=12
+   build          make             normal arr=120 dep=0 cpu=1.999s b1batch=0.995 burst_med=1999496 max=1999496 sleep_med=None sleep_tot=0.000s SPAWN n=17448 cap=48 cpu=1358.021s b1batch=0.949 never_batch=14468 classes={'normal': 17448}
+   mailer         thunderbird-bin  normal arr=1485 dep=1545 cpu=3.925s b1batch=0.382 burst_med=12 max=381930 sleep_med=None sleep_tot=0.000s KEYS n=60 med=5003.0 mean=6794 >=10ms=2
+   INPUT browser: n=7 first=43.529s last=44.891s
+   INPUT writer: n=139 first=62.078s last=117.898s
+   INPUT mailer: n=60 first=1487.562s last=1530.060s
+== c4-compile T_end=1594s :: 0-1594s compile {'background_wanted': True}
+   editor         code             normal arr=0 dep=1594 cpu=275.298s b1batch=0.826 burst_med=32.0 max=1688408 sleep_med=None sleep_tot=0.000s KEYS n=2544 med=78637.0 mean=99234 >=10ms=2529
+   build          make             normal arr=2 dep=0 cpu=1.982s b1batch=0.995 burst_med=1981857 max=1981857 sleep_med=None sleep_tot=0.000s SPAWN n=17448 cap=48 cpu=1313.925s b1batch=0.948 never_batch=14449 classes={'normal': 17448}
+   injected-browser chrome           normal arr=30 dep=60 cpu=1.687s b1batch=0.401 burst_med=24 max=212631 sleep_med=None sleep_tot=0.000s
+   injected-renderers.1 chrome           normal arr=30 dep=60 cpu=0.046s b1batch=0.169 burst_med=30 max=17743 sleep_med=None sleep_tot=0.000s
+   injected-renderers.2 chrome           normal arr=30 dep=60 cpu=0.045s b1batch=0.000 burst_med=28 max=9466 sleep_med=None sleep_tot=0.000s
+   injected-renderers.3 chrome           normal arr=30 dep=60 cpu=0.044s b1batch=0.273 burst_med=28 max=22014 sleep_med=None sleep_tot=0.000s
+   injected-renderers.4 chrome           normal arr=30 dep=60 cpu=0.045s b1batch=0.144 burst_med=32.5 max=16439 sleep_med=None sleep_tot=0.000s
+   INPUT editor: n=2544 first=11.161s last=1590.084s
+== c4-gaming T_end=60s :: 0-60s gaming {'background_wanted': True}
+   CHAIN game: members=17 sum=14999 period=16667 slack=1668 lanes=0.8999 head=631 top=[1436, 1191, 1171, 1159, 1124, 1113] classes={'normal'}
+   steam          steam            normal arr=0 dep=60 cpu=0.923s b1batch=0.009 burst_med=45.0 max=18399 sleep_med=None sleep_tot=0.000s
+   injected-chat  element-desktop  normal arr=30 dep=60 cpu=2.909s b1batch=0.555 burst_med=17 max=280424 sleep_med=None sleep_tot=0.000s
+== c4-office T_end=60s :: 0-60s office {'background_wanted': True}
+   browser        chrome           normal arr=0 dep=60 cpu=0.177s b1batch=0.000 burst_med=44.0 max=596 sleep_med=None sleep_tot=0.000s
+   mail           thunderbird-bin  normal arr=0 dep=60 cpu=0.080s b1batch=0.298 burst_med=31 max=27925 sleep_med=None sleep_tot=0.000s
+   renderers.1    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=26.0 max=81 sleep_med=None sleep_tot=0.000s
+   renderers.2    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=28 max=77 sleep_med=None sleep_tot=0.000s
+   renderers.3    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=26.5 max=93 sleep_med=None sleep_tot=0.000s
+   renderers.4    chrome           normal arr=0 dep=60 cpu=0.001s b1batch=0.000 burst_med=26 max=381 sleep_med=None sleep_tot=0.000s
+   writer         soffice.bin      normal arr=0 dep=60 cpu=1.359s b1batch=0.039 burst_med=2658 max=54370 sleep_med=None sleep_tot=0.000s KEYS n=270 med=3241.0 mean=4907 >=10ms=15
+   injected-burst 7z               normal arr=30 dep=0 cpu=6.000s b1batch=0.998 burst_med=6000000 max=6000000 sleep_med=None sleep_tot=0.000s
+   INPUT writer: n=270 first=2.059s last=57.611s
+== c5-t4 T_end=60s :: 0-60s media {'background_wanted': True}
+   music          audio-stream-he  normal arr=0 dep=60 cpu=0.426s TIMER[49635] cyc_med=331.0 max=823 >10ms=0/1210
+   video          video-playback-  normal arr=0 dep=60 cpu=7.254s TIMER[33348] cyc_med=3944 max=11463 >10ms=1/1801
+== c5-t5 T_end=60s :: 0-60s media {'background_wanted': True}
+   music          xkrr             normal arr=0 dep=60 cpu=0.426s TIMER[49635] cyc_med=331.0 max=823 >10ms=0/1210
+   video          qzvd             normal arr=0 dep=60 cpu=7.254s TIMER[33348] cyc_med=3944 max=11463 >10ms=1/1801
+== c6-alias T_end=60s :: 0-60s media {'background_wanted': True, 'pre_committed_miss': True, 'spoof': True}
+   music          tracker-miner-f  normal arr=0 dep=60 cpu=0.426s TIMER[49635] cyc_med=331.0 max=823 >10ms=0/1210
+   video          baloo_file       normal arr=0 dep=60 cpu=7.254s TIMER[33348] cyc_med=3944 max=11463 >10ms=1/1801
+== c6-dual T_end=12072s :: 0-12072s ambiguous {'dual_active': True}
+   CHAIN game: members=17 sum=10002 period=16667 slack=6665 lanes=0.6001 head=911 top=[1071, 971, 911, 836, 808, 799] classes={'normal'}
+   editor         code             normal arr=0 dep=12072 cpu=1518.599s b1batch=0.798 burst_med=32.0 max=2314573 sleep_med=None sleep_tot=0.000s KEYS n=13751 med=79393 mean=97882 >=10ms=13669
+   build          make             normal arr=10 dep=0 cpu=2.000s b1batch=0.995 burst_med=1999764 max=1999764 sleep_med=None sleep_tot=0.000s SPAWN n=17448 cap=48 cpu=1361.243s b1batch=0.949 never_batch=14458 classes={'normal': 17448}
+   INPUT editor: n=13751 first=2.087s last=11695.981s
+== c6-fold T_end=60s :: 0-30s browsing {'background_wanted': True} | 30-60s meeting {'background_wanted': True, 'pre_committed_miss': True}
+   browser        chrome           normal arr=0 dep=60 cpu=0.981s b1batch=0.143 burst_med=40.0 max=134589 sleep_med=None sleep_tot=0.000s KEYS n=123 med=4049 mean=4378 >=10ms=2
+   renderers.1    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=25 max=90 sleep_med=None sleep_tot=0.000s
+   renderers.2    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=25.0 max=102 sleep_med=None sleep_tot=0.000s
+   renderers.3    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=29.5 max=70 sleep_med=None sleep_tot=0.000s
+   renderers.4    chrome           normal arr=0 dep=60 cpu=0.001s b1batch=0.000 burst_med=28 max=111 sleep_med=None sleep_tot=0.000s
+   call           chrome           normal arr=30 dep=60 cpu=17.878s TIMER[10001] cyc_med=1031 max=324422 >10ms=192/3001
+   INPUT browser: n=123 first=5.751s last=57.680s
+== c6-spoof T_end=60s :: 0-20s browsing {'background_wanted': True} | 20-60s browsing {'background_wanted': False, 'pre_committed_miss': True, 'spoof': True}
+   browser        chrome           normal arr=0 dep=60 cpu=0.981s b1batch=0.143 burst_med=40.0 max=134589 sleep_med=None sleep_tot=0.000s KEYS n=123 med=4049 mean=4378 >=10ms=2
+   renderers.1    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=25 max=90 sleep_med=None sleep_tot=0.000s
+   renderers.2    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=25.0 max=102 sleep_med=None sleep_tot=0.000s
+   renderers.3    chrome           normal arr=0 dep=60 cpu=0.000s b1batch=0.000 burst_med=29.5 max=70 sleep_med=None sleep_tot=0.000s
+   renderers.4    chrome           normal arr=0 dep=60 cpu=0.001s b1batch=0.000 burst_med=28 max=111 sleep_med=None sleep_tot=0.000s
+   spoof          chrome           normal arr=20 dep=0 cpu=30.000s b1batch=1.000 burst_med=30000000 max=30000000 sleep_med=None sleep_tot=0.000s
+   INPUT browser: n=123 first=5.751s last=57.680s
+== c7-backup T_end=165.668s :: 0-165.668s backup {'background_wanted': False, 'initiated': 'scheduled', 'pre_committed_miss': True}
+   bulk           deja-dup         idle   arr=0 dep=0 cpu=165.668s b1batch=0.985 burst_med=225447.0 max=47166936 sleep_med=15 sleep_tot=0.315s
+   editor         kdenlive         normal arr=0 dep=165.668 cpu=66.793s b1batch=0.102 burst_med=20.0 max=227669 sleep_med=None sleep_tot=0.000s
+== c7-browsing T_end=26.385s :: 0-26.385s browsing {'background': 'package-upgrade', 'background_wanted': False}
+   browser        chrome           normal arr=0 dep=26.385 cpu=0.705s b1batch=0.199 burst_med=35.0 max=134589 sleep_med=None sleep_tot=0.000s KEYS n=84 med=4046.5 mean=4403 >=10ms=2
+   renderers.1    chrome           normal arr=0 dep=26.385 cpu=0.000s b1batch=0.000 burst_med=24 max=90 sleep_med=None sleep_tot=0.000s
+   renderers.2    chrome           normal arr=0 dep=26.385 cpu=0.000s b1batch=0.000 burst_med=23 max=25 sleep_med=None sleep_tot=0.000s
+   renderers.3    chrome           normal arr=0 dep=26.385 cpu=0.000s b1batch=0.000 burst_med=23 max=31 sleep_med=None sleep_tot=0.000s
+   renderers.4    chrome           normal arr=0 dep=26.385 cpu=0.000s b1batch=0.000 burst_med=31 max=111 sleep_med=None sleep_tot=0.000s
+   upgrade        unattended-upgr  normal arr=0 dep=0 cpu=26.385s b1batch=0.880 burst_med=250.0 max=1072891 sleep_med=27 sleep_tot=0.162s
+   INPUT browser: n=84 first=5.751s last=23.435s
+== c7-compile T_end=225.458s :: 0-225.458s compile {'background_wanted': False, 'initiated': 'scheduled'}
+   build          dkms             normal arr=0 dep=0 cpu=11.041s b1batch=0.902 burst_med=77.0 max=5660398 sleep_med=29.0 sleep_tot=0.203s SPAWN n=9980 cap=48 cpu=214.417s b1batch=0.892 never_batch=9390 classes={'normal': 9980}
+   editor         code             normal arr=0 dep=225.458 cpu=42.067s b1batch=0.830 burst_med=32 max=1563973 sleep_med=None sleep_tot=0.000s KEYS n=398 med=78968.5 mean=97657 >=10ms=395
+   INPUT editor: n=398 first=11.161s last=222.944s
+== c7-dev T_end=26.385s :: 0-26.385s dev {'background': 'package-upgrade', 'background_wanted': False}
+   editor         code             normal arr=0 dep=26.385 cpu=5.617s b1batch=0.847 burst_med=33 max=430621 sleep_med=None sleep_tot=0.000s KEYS n=49 med=81351 mean=106954 >=10ms=48
+   upgrade        unattended-upgr  normal arr=0 dep=0 cpu=26.385s b1batch=0.892 burst_med=237.5 max=2411364 sleep_med=27 sleep_tot=0.144s
+   INPUT editor: n=49 first=12.753s last=23.517s
+== c7-gaming T_end=26.385s :: 0-26.385s gaming {'background': 'package-upgrade', 'background_wanted': False}
+   CHAIN game: members=17 sum=14999 period=16667 slack=1668 lanes=0.8999 head=631 top=[1436, 1191, 1171, 1159, 1124, 1113] classes={'normal'}
+   steam          steam            normal arr=0 dep=26.385 cpu=0.396s b1batch=0.000 burst_med=45 max=312 sleep_med=None sleep_tot=0.000s
+   upgrade        unattended-upgr  normal arr=0 dep=0 cpu=26.385s b1batch=0.912 burst_med=237.0 max=1180456 sleep_med=27 sleep_tot=0.110s
+== c7-idle T_end=26.385s :: 0-26.385s idle {'background': 'package-upgrade', 'background_wanted': False}
+   audio-srv      pipewire         normal arr=0 dep=26.385 cpu=0.000s b1batch=0.000 burst_med=None max=None sleep_med=None sleep_tot=0.000s KEYS n=1 med=0 mean=0 >=10ms=0
+   bus            dbus-daemon      normal arr=0 dep=26.385 cpu=0.000s b1batch=0.000 burst_med=None max=None sleep_med=None sleep_tot=0.000s KEYS n=1 med=0 mean=0 >=10ms=0
+   init           systemd          normal arr=0 dep=26.385 cpu=0.000s b1batch=0.000 burst_med=137.5 max=138 sleep_med=None sleep_tot=0.000s
+   shell          gnome-shell      normal arr=0 dep=26.385 cpu=0.019s b1batch=0.000 burst_med=7.0 max=9542 sleep_med=None sleep_tot=0.000s
+   upgrade        unattended-upgr  normal arr=0 dep=0 cpu=26.385s b1batch=0.922 burst_med=264.0 max=1893228 sleep_med=27 sleep_tot=0.098s
+== c7-indexing T_end=39.435s :: 0-39.435s indexing {'background_wanted': False, 'initiated': 'session'}
+   editor         code             normal arr=0 dep=39.435 cpu=3.694s b1batch=0.776 burst_med=31 max=1021601 sleep_med=None sleep_tot=0.000s KEYS n=27 med=59430 mean=115267 >=10ms=27
+   hog            tracker-miner-f  idle   arr=0 dep=0 cpu=39.435s b1batch=0.814 burst_med=82.0 max=3909247 sleep_med=115 sleep_tot=6.065s
+   INPUT editor: n=27 first=8.343s last=37.233s
+== c7-mail T_end=26.385s :: 0-26.385s mail {'background': 'package-upgrade', 'background_wanted': False}
+   mailer         thunderbird-bin  normal arr=0 dep=26.385 cpu=1.437s b1batch=0.344 burst_med=25.0 max=111375 sleep_med=None sleep_tot=0.000s
+   upgrade        unattended-upgr  normal arr=0 dep=0 cpu=26.385s b1batch=0.899 burst_med=251 max=1292346 sleep_med=27.0 sleep_tot=0.133s
+== c7-media T_end=26.385s :: 0-26.385s media {'background': 'package-upgrade', 'background_wanted': False}
+   music          mpv              normal arr=0 dep=26.385 cpu=0.192s TIMER[49635] cyc_med=340 max=823 >10ms=0/533
+   upgrade        unattended-upgr  normal arr=0 dep=0 cpu=26.385s b1batch=0.904 burst_med=262.0 max=2429263 sleep_med=27 sleep_tot=0.129s
+   video          mpv              normal arr=0 dep=26.385 cpu=3.150s TIMER[33348] cyc_med=3910 max=7281 >10ms=0/793
+== c7-meeting T_end=26.385s :: 0-26.385s meeting {'background': 'package-upgrade', 'background_wanted': False}
+   upgrade        unattended-upgr  normal arr=0 dep=0 cpu=26.385s b1batch=0.881 burst_med=235.5 max=1047900 sleep_med=27 sleep_tot=0.180s
+   voice          chrome           normal arr=0 dep=26.385 cpu=6.333s TIMER[10001] cyc_med=1187.0 max=14301 >10ms=146/2640
+== c7-ml-train T_end=1389.88s :: 0-1389.88s ml-train {'background_wanted': False, 'initiated': 'scheduled', 'pre_committed_miss': True}
+   editor         code             normal arr=0 dep=1389.88 cpu=195.337s b1batch=0.810 burst_med=32 max=1308391 sleep_med=None sleep_tot=0.000s KEYS n=1753 med=79481 mean=100033 >=10ms=1737
+   hog            python           normal arr=0 dep=0 cpu=1389.885s b1batch=1.000 burst_med=9592.0 max=320328737 sleep_med=375 sleep_tot=0.012s
+   INPUT editor: n=1753 first=21.856s last=1387.184s
+== c7-office T_end=26.385s :: 0-26.385s office {'background': 'package-upgrade', 'background_wanted': False}
+   browser        chrome           normal arr=0 dep=26.385 cpu=0.075s b1batch=0.000 burst_med=45.0 max=596 sleep_med=None sleep_tot=0.000s
+   mail           thunderbird-bin  normal arr=0 dep=26.385 cpu=0.006s b1batch=0.000 burst_med=31 max=3241 sleep_med=None sleep_tot=0.000s
+   renderers.1    chrome           normal arr=0 dep=26.385 cpu=0.000s b1batch=0.000 burst_med=26.0 max=59 sleep_med=None sleep_tot=0.000s
+   renderers.2    chrome           normal arr=0 dep=26.385 cpu=0.000s b1batch=0.000 burst_med=32 max=77 sleep_med=None sleep_tot=0.000s
+   renderers.3    chrome           normal arr=0 dep=26.385 cpu=0.000s b1batch=0.000 burst_med=28.5 max=33 sleep_med=None sleep_tot=0.000s
+   renderers.4    chrome           normal arr=0 dep=26.385 cpu=0.001s b1batch=0.000 burst_med=52.0 max=381 sleep_med=None sleep_tot=0.000s
+   upgrade        unattended-upgr  normal arr=0 dep=0 cpu=26.385s b1batch=0.901 burst_med=246.0 max=1065453 sleep_med=27 sleep_tot=0.130s
+   writer         soffice.bin      normal arr=0 dep=26.385 cpu=0.580s b1batch=0.082 burst_med=2629.5 max=54370 sleep_med=None sleep_tot=0.000s KEYS n=101 med=3373 mean=5591 >=10ms=7
+   INPUT writer: n=101 first=2.059s last=20.639s
+== c7-photo T_end=26.385s :: 0-26.385s photo {'background': 'package-upgrade', 'background_wanted': False}
+   photo-editor   gimp             normal arr=0 dep=26.385 cpu=2.552s b1batch=0.972 burst_med=70.0 max=2489848 sleep_med=None sleep_tot=0.000s
+   upgrade        unattended-upgr  normal arr=0 dep=0 cpu=26.385s b1batch=0.918 burst_med=245.0 max=2513666 sleep_med=27 sleep_tot=0.102s
+== c7-render T_end=16.545s :: 0-16.545s render {'background_wanted': False, 'initiated': 'scheduled', 'pre_committed_miss': True}
+   bulk           kdenlive_render  normal arr=0 dep=0 cpu=16.545s b1batch=0.964 burst_med=28213.0 max=9861218 sleep_med=11 sleep_tot=0.008s
+   editor         kdenlive         normal arr=0 dep=16.545 cpu=10.240s b1batch=0.368 burst_med=8 max=221161 sleep_med=None sleep_tot=0.000s
+== c7-transcode T_end=2970.87s :: 0-2970.87s transcode {'background_wanted': False, 'initiated': 'scheduled', 'pre_committed_miss': True}
+   batch          HandBrakeCLI     normal arr=0 dep=0 cpu=2970.871s b1batch=1.000 burst_med=20781211 max=167959437 sleep_med=169.5 sleep_tot=0.522s
+   video-editor   kdenlive         normal arr=0 dep=2970.87 cpu=1107.389s b1batch=0.026 burst_med=25 max=215495 sleep_med=None sleep_tot=0.000s
+== c7-video-edit T_end=26.385s :: 0-26.385s video-edit {'background': 'package-upgrade', 'background_wanted': False}
+   editor         kdenlive         normal arr=0 dep=26.385 cpu=14.823s b1batch=0.326 burst_med=8.0 max=234415 sleep_med=None sleep_tot=0.000s
+   upgrade        unattended-upgr  normal arr=0 dep=0 cpu=26.385s b1batch=0.918 burst_med=259.5 max=1455745 sleep_med=27 sleep_tot=0.112s

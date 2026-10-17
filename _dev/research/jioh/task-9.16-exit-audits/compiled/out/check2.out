@@ -1,0 +1,47 @@
+## operations per report
+c1-browsing {'browser': [{'at_us': 30000000, 'duration_us': 462862, 'name': 'page-load'}]}
+c7-browsing {'browser': [{'at_us': 13192500, 'duration_us': 462862, 'name': 'page-load'}]}
+c1-office {}
+c7-office {}
+c1-dev {}
+c7-dev {}
+c1-indexing {}
+c7-indexing {}
+c1-mail {'mailer': [{'at_us': 40000000, 'duration_us': 2913140, 'name': 'send'}]}
+c7-mail {'mailer': [{'at_us': 17189821, 'duration_us': 2913140, 'name': 'send'}]}
+## input wakes in base first 26.385 s / counterpart
+c1-browsing 123 in cut 90 | c7-browsing 84 same times False base-not-in-cp 6
+c1-office 270 in cut 112 | c7-office 101 same times False base-not-in-cp 11
+c1-dev 186 in cut 49 | c7-dev 49 same times True base-not-in-cp 0
+c1-mail 35 in cut 0 | c7-mail 0 same times True base-not-in-cp 0
+c1-indexing 47 in cut 28 | c7-indexing 27 same times False base-not-in-cp 1
+## manifest demand
+c2-p1a 14.505 oversubscribed [0.5272, 35.7721]
+c2-p1b 0.9238 oversubscribed [0.5272, 1.5272]
+c2-p2a 9.3829 oversubscribed [0.9651, 28.5251]
+c2-p2b 1.2706 oversubscribed [0.9651, 1.9651]
+c2-p3a 0.4401 oversubscribed [0.3893, 0.4515]
+c2-p3b 0.8975 oversubscribed [0.3893, 1.0122]
+c2-p2a-idle 9.3829 oversubscribed [0.9651, 28.5251]
+c7-browsing 1.0268 / c1-browsing 0.0164 calibration
+c7-office 1.0251 / c1-office 0.0270 calibration
+c7-mail 1.0545 / c1-mail 0.0287 calibration
+c7-dev 1.2129 / c1-dev 0.3319 calibration
+c7-photo 1.0967 / c1-photo 0.0442 calibration
+c7-meeting 1.2400 / c1-meeting 0.2387 calibration
+c7-gaming 1.9149 / c1-gaming 0.9153 calibration
+c7-media 1.1267 / c1-media 0.1280 calibration
+c7-video-edit 1.5618 / c1-video-edit 0.4586 calibration
+c7-compile 1.1866 / c1-compile 0.9982 calibration
+c7-ml-train 1.1405 / c1-ml-train 0.9982 calibration
+c7-render 1.6189 / c1-render 0.7339 calibration
+c7-transcode 1.3727 / c1-transcode 0.9993 calibration
+c7-indexing 1.0937 / c1-indexing 0.7477 calibration
+c7-backup 1.4032 / c1-backup 0.9897 calibration
+c7-idle 1.0007 / c1-idle 0.0004 calibration
+## all demand classes Counter({'calibration': 40, 'oversubscribed': 11})
+## segments grid
+segments 67 ambiguous 1 false 19 true 47
+pcm 8 [('c1-indexing', 'indexing', True, 0.0), ('c6-alias', 'media', True, 0.0), ('c6-fold', 'meeting', True, 30.0), ('c6-spoof', 'browsing', False, 20.0), ('c7-backup', 'backup', False, 0.0), ('c7-ml-train', 'ml-train', False, 0.0), ('c7-render', 'render', False, 0.0), ('c7-transcode', 'transcode', False, 0.0)]
+cells 32
+## c6-dual gt [{'attributes': {'dual_active': True}, 'mode': 'ambiguous', 't_end': 12072000000, 't_start': 0}]
