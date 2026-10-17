@@ -135,3 +135,19 @@ Chunk K10, Harness guide and metrics (wave 3). 14 open rows. The file has 1400 l
 - Sources: `logs/G3.md` ## Rows for other chunks (X1); `dataset/replay/*.json.gz` `kind`; `dataset/tools/wlc/compiler.py` `_replay_window`; `dataset/variants.yaml`'s `trace-replay` comment since `7b024003`
 - Cross-ref: W-0876; W-0952; W-0953; W-0954; W-0955
 - Notes: found in G3. K10's file: a follow-up chunk. A quotation of the `replay` set's reason or the RQ0 gate spec's stays verbatim (`dataset/variants.yaml:91`, the set's `reason`, still says "one pooled repeat's measured wake sequence"; B1's log).
+
+### W-0974 · open
+- At: `docs/harness/harness-and-records-guide.md` the mock's simulator-assumptions table, lines 1093–1095: row 5 ("MLFQ로 switch된 뒤 boost timer는 `t_apply`에서 다시 시작"), row 6 ("FIFO에서 나가는 switch는 즉시 적용, 다른 algorithm에서 나갈 때는 slice 경계에서"), row 7 ("같은 algorithm의 entry(params나 cap만 바뀜)는 찍힌 시각에 바로 적용, queue level 유지")
+- Change: Row 6: "slice 경계에서" becomes the next time the lane is free (the running task's slice or current RUN ends, or it is preempted or departs). Row 7 gains the index order: an entry stamped while a switch drains waits behind it (decided 2026-10-17; `docs/data-contracts.md` §14). Row 5 follows the F3 (M1) answer in the same change: the boost timer restarts at every applied MLFQ entry, a same-algorithm one included. In the guide's Korean.
+- Final word: As W-0973; 인지오's answer (b) of 2026-10-17 to F3 (M1) (`simulator/src/sim.cpp:210`, `:597`).
+- Sources: `logs/N1.md` ## Rows for other chunks (X2)
+- Cross-ref: W-0973; W-0980
+- Notes: found in N1. K10's file: a follow-up chunk. B3's log (not yet folded) lists rows 5 and 7 of the same table (`:1093`); one change.
+
+### W-0980 · open
+- At: `docs/harness/harness-and-records-guide.md` §10, the `mock-c2-p1a` walkthrough: the editor's `ready(arrive)`, `run_start` and `run_end` at 0 (lines 789–791), "길이 0짜리 occupancy" (816), "이 mock이 정한 거예요 … 어느 쪽으로 할지는 인경민의 결정" (828), "ready line 5개 → row 5개" (834), the editor's `arrive` row (838), the occupancy [0,0] in `cpu_delivered` (849), the expected CSV's arrival row (890); §18's generator rule without the WAIT-first case (1332)
+- Change: Restate to the one WAIT-first behaviour: the editor blocks at its arrival with no `ready` line, no `run_start` and no occupancy, as the re-derived `mock-p1a` fixture and `harness/tools/tests/mocks/README.md:25` now hold; §18's rule gains the WAIT-first case. In the guide's Korean.
+- Final word: 인지오's answer (c) of 2026-10-17 to K10 (X4) (the mocks follow the reference simulator), applied in the batch's harness part (`1608ab6b`; `logs/B2-harness.md`) and in N3 (the simulator guide §6); `simulator/src/sim.cpp:686–695`, `:734–738`.
+- Sources: `logs/N3.md` ## Rows for other chunks; `logs/B2-harness.md` (its doc sites, review finding 1)
+- Cross-ref: W-0981; W-0982; W-0983; W-0984; W-0974
+- Notes: found in N3. K10's file: a follow-up chunk.

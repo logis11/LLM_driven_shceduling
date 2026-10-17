@@ -115,6 +115,14 @@ Chunk K16, Research guidebook, volumes 4-6 (wave 4). 9 open rows. The file has 4
 - Cross-ref: W-0964; W-0965
 - Notes: found in I1 and I2. K16's file: a follow-up chunk, with W-0964.
 
+### W-0996 · open
+- At: `docs/guidebook/vol-06-archetypes-and-grounding.md` lines 1063–1076 (the side-by-side quote of the registry `notes` and `game-task-chain`'s `modeling_notes` for the game talk)
+- Change: Both quotes are pre-9.4 text: the registry notes' "~300 tasks per game, … few-hundred-us average to few-ms max (wineserver ~260 us, worker ~1.65 ms), stable and predictable per task (s13) … observations … is our modeling" (9.4 D3 changed "per game"; since 2026-10-17 the notes state Min's reported figures of 2024-04-17, `dataset/sources.yaml:60–79`), and the `modeling_notes`' "… 15-20 frame-critical band … tail param values are our placeholder encoding of near-idle" (9.4 D3 removed the tail parameters; "frame-critical" is not in the deck, K2 C-lavd-11). Restate both quotes to the current text, or label them as the text of their date. In the volume's Korean.
+- Final word: 9.4's changelog D3; the 2026-09-13 verification's K2 C-lavd-11; `dataset/sources.yaml` `lavd-ossna24` `notes` as N5 leaves them (인지오's answer (b) of 2026-10-17 to L1 (M1)); `dataset/archetypes.yaml` `game-task-chain` `modeling_notes`.
+- Sources: `logs/N5.md` ## Rows for other chunks (X2)
+- Cross-ref: W-0971; W-0968
+- Notes: found in N5. K16's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0682 · blocked, simulator TIMER (on the spec's list) — ## 2.2 여섯 개를 하나씩 → ### TIMER lines 251–259 (the quoted contract row 253, '늦어진 반복은 backlog로 쌓이고' 255, the backlog paragraph 259); ## 2.5 주기…

@@ -111,3 +111,11 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 13 open rows. The file has 
 - Sources: `logs/K08.md` ## Rows for other chunks (X3)
 - Cross-ref: W-0742; W-0394; W-0915
 - Notes: found in K08. C1–C7 stay the core set's file groups wherever the volume names those.
+
+### W-0977 · open
+- At: `docs/guidebook/vol-03-the-research.md` the glossary's **drain** row, line 3791 at `3ac13c42` ("새 설정을 적용하기 전에 실행 중인 slice를 마저 쓰게 하는 것")
+- Change: As W-0976: waiting until the lane is free (the running task's slice or current RUN ends, or it is preempted or departs). Low priority. In the volume's Korean.
+- Final word: As W-0976.
+- Sources: `logs/N1.md` ## Rows for other chunks (X4)
+- Cross-ref: W-0976; W-0973
+- Notes: found in N1 (its X4, one row per target file). K15's file: a follow-up chunk.

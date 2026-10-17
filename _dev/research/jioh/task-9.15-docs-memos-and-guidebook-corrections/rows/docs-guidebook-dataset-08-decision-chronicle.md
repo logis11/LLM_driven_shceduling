@@ -108,13 +108,37 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0710; W-0602; W-0934
 - Notes: found in K18. K14's file: with W-0602's pass, after the final memo (K18's note), as W-0934.
 
-### W-0972 · open
+### W-0972 · applied
 - At: `docs/guidebook/dataset/08-decision-chronicle.md` §7.12's 9.12 D113 bullet, its last clause, line 1169 ("`dataset/sources.yaml`의 registry는 이 id를 여전히 `type: deployed-system`으로 둡니다(이 `type`은 lint하지 않습니다)")
 - Change: The last clause becomes: on 인지오's answer of 2026-10-17 ((b)) the registry follows D112 and D113; `lavd-ossna24`'s `type` is the talk, conference abstract or news report type, and the header's `type` rule is restated. In the volume's Korean.
 - Final word: 인지오's answer (b) of 2026-10-17 to the work list's "K13 (M2), K01 (M1) · the registry's `lavd-ossna24` type", applied in L1: `dataset/sources.yaml:58` gives `lavd-ossna24` the type "talk, conference abstract or news report", and the header's `type` rule (`:14–25`) lists `docs/references.md`'s id-rule types (scholarly, deployed-system, talk, conference abstract or news report, measurement) with each tier in the citation-tier rule's wording, condensed, none for measurement. The registry's 19 ids: scholarly 5, deployed-system 11, talk, conference abstract or news report 1 (`lavd-ossna24`), measurement 2 (L1's count by `yaml.safe_load`). L1 applied the same tally in the dataset guidebook vol-06 §2.1 (its N1, `:132`).
 - Sources: `logs/L1.md` ## Rows for other chunks (X3); `dataset/sources.yaml` as L1 leaves it
 - Cross-ref: W-0970; W-0971
 - Notes: found in L1. K14's file: a follow-up chunk.
+
+### W-0992 · open
+- At: `docs/guidebook/dataset/08-decision-chronicle.md` line 1132 ("9.10 D143 이후(span probe)")
+- Change: Optional: add that 9.15 re-probed `video-editor`'s idle state over `c3-creation`'s span after D146's settle shortened what the earlier probe held. In the volume's Korean.
+- Final word: As W-0989.
+- Sources: `logs/N4.md` ## Rows for other chunks (X4)
+- Cross-ref: W-0989; W-0991; W-0602
+- Notes: found in N4 (optional). K14's file: a follow-up chunk, or W-0602's pass, which states 9.15's outcome.
+
+### W-0999 · open
+- At: `docs/guidebook/dataset/08-decision-chronicle.md` §2's D1 bullet, line 226 ("LAVD(Valve가 Steam Deck용으로 만든 Linux scheduler)"); §7.12's D113 bullet, line 1169 ("인지오의 답((b), 9.15 작업 목록)"), optional
+- Change: Line 226: LAVD is Changwoo Min's, developed at Igalia for SteamOS and the Steam Deck — e.g. "Igalia의 Changwoo Min이 SteamOS·Steam Deck을 위해 만든 Linux scheduler" — as N5 restated line 934 (its N2). Line 1169, optional: name both 2026-10-17 answers, both (b): the type and header (K13 (M2), K01 (M1)) and the notes (L1 (M1)).
+- Final word: `docs/references.md:759` (`edge-lwn26`: LAVD developed by Min "as part of his work at Igalia on SteamOS and the Steam Deck"); the `lavd-ossna24` slides (slide 1 and every footer name Changwoo Min); the work list's two answers of 2026-10-17.
+- Sources: `logs/N5.md` ## Review round 1 (findings 1 and 3), ## New rows found in these files and applied (N2)
+- Cross-ref: W-0972
+- Notes: found in N5's last review. K14's file: a follow-up chunk.
+
+### W-1000 · open
+- At: `docs/guidebook/dataset/08-decision-chronicle.md` the **conformance statement** definition, line 1279 ("(a)–(f)의 여섯이었고, 2026-10-16에 (g)가 더해져 일곱입니다"); §12.4 item 4, line 1817 (the conformance items); the glossary, line 2026 ("2026-10-16부터 (a)–(g)의 일곱입니다")
+- Change: Once W-0997 commits: item (h), the simulator run through the invocation contract, added and the count eight, dated with the spec's change. In the volume's Korean.
+- Final word: 인지오's answer (c) of 2026-10-17 to K17 (item (h); follow-up rows on the docs that count or list the items, the dataset guidebook vol-08 §12.4 item 4's seven named); `harness/experiments/rq0-gate.yaml` `simulator-conformance` at `3ac13c42` lists (a)–(g) (N5's M1).
+- Sources: `logs/N5.md` ## The other answers against these files (K17), ## Code-versus-decision mismatches (M1), ## Review round 1 (finding 2)
+- Cross-ref: W-0997; W-0720
+- Notes: found in N5's last review (finding 2: carried to a named row). K14's file: a follow-up chunk, after W-0997. B3's log (not yet folded) lists the same three sites, with §12.4 item 4's count of owed items (five → six); one row.
 
 ## Also on this file, not for editing from this list
 

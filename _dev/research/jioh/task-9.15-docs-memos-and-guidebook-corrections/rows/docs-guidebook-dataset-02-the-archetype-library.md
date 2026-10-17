@@ -96,13 +96,21 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 6 open rows. The file has 16
 - Cross-ref: W-0874; W-0924
 - Notes: found in K18. K11's file: a follow-up chunk; `docs/guidebook/dataset/README.md` is K18's file, edited in the same change.
 
-### W-0971 · open
+### W-0971 · applied
 - At: `docs/guidebook/dataset/02-the-archetype-library.md` §2.8, line 407 ("(scholarly 5, deployed-system 12, measurement 2; python으로 세어 확인) … type은 셋입니다") and line 413 ("registry의 `type`은 셋뿐이라 `sources.yaml`에서는 `deployed-system`으로 남아 있습니다"); §4.1's `game-task-chain` "어디서 왔나" paragraph, line 684 ("registry(`sources.yaml`)에서 이 출처의 type은 deployed-system이고, notes는 "Slides are footnote-tier despite carrying numbers"라고 적습니다")
 - Change: Line 407: the tally becomes scholarly 5, deployed-system 11, talk, conference abstract or news report 1, measurement 2, and the types four. Line 413: the registry has given `lavd-ossna24` the talk type since 2026-10-17. Line 684: the type clause becomes talk, conference abstract or news report since 2026-10-17; the notes clause stays (the notes are unchanged). In the volume's Korean.
 - Final word: 인지오's answer (b) of 2026-10-17 to the work list's "K13 (M2), K01 (M1) · the registry's `lavd-ossna24` type", applied in L1: `dataset/sources.yaml:58` gives `lavd-ossna24` the type "talk, conference abstract or news report", and the header's `type` rule (`:14–25`) lists `docs/references.md`'s id-rule types (scholarly, deployed-system, talk, conference abstract or news report, measurement) with each tier in the citation-tier rule's wording, condensed, none for measurement. The registry's 19 ids: scholarly 5, deployed-system 11, talk, conference abstract or news report 1 (`lavd-ossna24`), measurement 2 (L1's count by `yaml.safe_load`). L1 applied the same tally in the dataset guidebook vol-06 §2.1 (its N1, `:132`). `lavd-ossna24`'s `notes` (`:60–73`) are unchanged and still end "Slides are footnote-tier despite carrying numbers" (`:72–73`); L1's M1, a question for 인지오.
 - Sources: `logs/L1.md` ## Rows for other chunks (X2), ## Fix round 2 (R2); `dataset/sources.yaml:58`, `:72–73`
 - Cross-ref: W-0970; W-0972
 - Notes: found in L1. K11's file: a follow-up chunk, with W-0970. If 인지오's answer to L1's M1 restates the notes, line 684's account of them follows.
+
+### W-0991 · open
+- At: `docs/guidebook/dataset/02-the-archetype-library.md` line 889 at `3ac13c42`, 890 after N5's edit ("idle 재측정(9.10 D146)")
+- Change: Keep D146's 2,790 s reading on `kdenlive` 10 as history; add 9.15's span check: over `c3-creation`'s 2,851 s span, `kdenlive` 13 (`meas-ci-probes-2026-10-17`), the 180 s phase holds (CPU 0.3 %, wakes 2.9 %; at the worst 4.5 %, 3.8 %). In the volume's Korean.
+- Final word: As W-0989.
+- Sources: `logs/N4.md` ## Rows for other chunks (X3)
+- Cross-ref: W-0989; W-0990; W-0992
+- Notes: found in N4. K11's file: a follow-up chunk.
 
 ## Also on this file, not for editing from this list
 

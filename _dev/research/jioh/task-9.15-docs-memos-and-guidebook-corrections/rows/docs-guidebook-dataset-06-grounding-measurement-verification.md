@@ -215,6 +215,14 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 20 open rows. The file has 1
 - Cross-ref: W-0876; W-0951
 - Notes: found in G3. K13's file: a follow-up chunk.
 
+### W-0990 · open
+- At: `docs/guidebook/dataset/06-grounding-measurement-verification.md` §9.2's release table, line 1104 (after `meas-ci-probes-2026-10-07`'s row); §8.4, line 1031 (the sentence naming the span probes' release)
+- Change: Add a row `meas-ci-probes-2026-10-17` | 9.15 Kdenlive idle span probe | `video-editor` 유휴 단계의 `c3-creation` span 읽기 (8.4절). In §8.4, say that the idle phase re-measured under 9.10 D146 was read again over `c3-creation`'s 2,851 s span in `meas-ci-probes-2026-10-17`, and held. In the volume's Korean.
+- Final word: As W-0989; the release `meas-ci-probes-2026-10-17` (one asset, `meas-long-probe-kdenlive-r13-probe-38976976741.zip`, target `c130bef6`; N4's review round 1).
+- Sources: `logs/N4.md` ## Rows for other chunks (X2)
+- Cross-ref: W-0989; W-0991; W-0932
+- Notes: found in N4. K13's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0582 · closed, carried — Waits on Phase 10's RQ0 run, nothing owed in 9.15: the Phase 10 section line `_dev/TODO.md:190` ('… judge per the RQ0 gate spec') carries it, and the RQ0 gate…

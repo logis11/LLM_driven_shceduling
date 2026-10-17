@@ -132,6 +132,14 @@ Chunk K06, Measurement and grounding docs (wave 2). 15 open rows. The file has 1
 - Cross-ref: W-0274
 - Notes: found in K01. The two rows differ on the remedy: W-0274 removes the row, K01 restates it to `glam`.
 
+### W-0994 · open
+- At: `docs/workload/measurement-overview.md` §8 "Spans longer than the phase", line 105 ("its probe ran 3,100 s past a 30 s settle, 2,890 s past the 240 s settle, and read over the span in whole 10 s slices (2,860 s), the phase at the placement every repeat takes keeps its CPU …")
+- Change: Optional: the run-on's two clauses split by a colon or semicolon before "the phase at the placement …", e.g. "… (2,860 s): at the placement every repeat takes, the phase keeps its CPU …". The facts unchanged.
+- Final word: N4's last review (minor, non-blocking).
+- Sources: `logs/N4.md` ## Review round 1
+- Cross-ref: W-0989
+- Notes: found in N4's last review (optional). K06's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0279 · answered (c), applied in K06 — The threat sentence's per-entry list (W-0273) carries "the two renderers 1.06–1.23×" and `video-editor` 1.3–1.4×, read on 2026-09-27. Since then `renderer-visible` left the library (9.10 D16), `renderer-hidden` was re-f… Blocks: the renderer and `video-editor` clauses of the threat sentence at docs/workload/measurement-overview.md:98 (W-0273); nothing else in the row

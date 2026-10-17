@@ -145,3 +145,11 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 13 open rows. The file has 1
 - Sources: `logs/H2.md` ## Rows for other chunks (X2); W-0957; `logs/H2.md` ## New rows found and applied (N1); `logs/K18.md` ## Fix round 1 (N6); `docs/workload/archetype-plan.md` §1
 - Cross-ref: W-0957; W-0959; W-0960; W-0961; W-0962
 - Notes: found in H2. K14's file: a follow-up chunk.
+
+### W-0995 · open
+- At: `docs/guidebook/dataset/07-build-gate-manifests-ci-tests.md` §1.7's timeline, the 2026-10-17 line, line 168 ("generated의 scenario tag를 한 규칙으로, …")
+- Change: Scope it to what the 2026-10-17 rebuild did: the transition grid's `focus` form, 214 timelines. The distractor grid's change gets its own line when the next data batch lands (W-0998). In the volume's Korean.
+- Final word: `logs/B1-data-rebuild.md` (W-0890 changed exactly 214 transition-grid `focus`-form timelines); `dataset/tools/gen/compose.py` `_compose_distractor` at `3ac13c42` (the distractor grid's second segment still copies A's label); 인지오's answer (b) of 2026-10-17 to B1, F1, F2, F4 (M1) (the distractor grid in the next data batch). N5 scoped vol-08 §13's 2026-10-17 row the same way (its N3).
+- Sources: `logs/N5.md` ## Rows for other chunks (X1)
+- Cross-ref: W-0890; W-0933; W-0998
+- Notes: found in N5. K14's file: a follow-up chunk.

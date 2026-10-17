@@ -78,6 +78,14 @@ Chunk K08, Related work, claims and vocabulary prose (wave 2). 8 open rows. The 
 - Cross-ref: W-0964; W-0967
 - Notes: found in I1 and I2. K08's file: a follow-up chunk.
 
+### W-0976 · open
+- At: `docs/terminology.md` the **Drain** entry, lines 350–351 ("waiting for the current slice to finish before applying a new config, rather than preempting mid-slice")
+- Change: Restate to waiting until the lane is free — the running task's slice or current RUN ends, or it is preempted or departs — before applying a new config. Low priority.
+- Final word: `docs/data-contracts.md` §7's **Drain** rule (W-0949, applied in N1); `simulator/src/sim.cpp:573`, `:825–828`.
+- Sources: `logs/N1.md` ## Rows for other chunks (X4)
+- Cross-ref: W-0977; W-0973
+- Notes: found in N1 (its X4, one row per target file). K08's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0427 · closed, not-found — The **Archetype** entry (`docs/terminology.md:53–56`) defines the term and names neither the retired three nor the nine measured entries; there is no text the…

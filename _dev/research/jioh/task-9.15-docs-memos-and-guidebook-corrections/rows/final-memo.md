@@ -1,6 +1,6 @@
 # Work-list rows — the final memo to 인경민 and 박이안
 
-Drafted after the doc chunks (spec decision 13). 19 rows.
+Drafted after the doc chunks (spec decision 13). 21 rows.
 
 ### W-0713 · final-memo
 - At: new
@@ -155,6 +155,14 @@ Drafted after the doc chunks (spec decision 13). 19 rows.
 - Sources: `simulator/src/notes.md` §4; `docs/simulator/simulator-guide.md` §5, §9.2; W-0446; W-0448; W-0869; 인지오's answer to K03's t₀ question (2026-10-16)
 - Cross-ref: W-0720
 - Notes: —
+
+### W-0978 · final-memo
+- At: new
+- Change: Tell 인경민 and 박이안 the 2026-10-17 entry of `docs/data-contracts.md` §14: the drain (a switch out of MLFQ, EDF or LOTTERY stamped while a task holds the lane applies the next time the lane is free) and the index order (the entries apply in list order, one stamped while a switch drains — a same-algorithm one included — waiting behind it and applying at the same instant, after it) are contract rules, in force as written; the reference simulator already applies both (its U3, since 2026-10-10); the 2026-09-09 rule (the switch memo's §7: a same-algorithm entry applied at its stamped time) is amended so.
+- Final word: 인지오's answer (c) of 2026-10-17 to W-0949 (in force as written, the phase's final memo carrying it to 인경민 and 박이안) and answer (b) of 2026-10-17 to F3 (M2) (a final-memo row telling 인경민 and 박이안 the 2026-09-09 rule is amended so).
+- Sources: `logs/N1.md` ## Rows for other chunks (X5); `docs/data-contracts.md` §7, §14 (the 2026-10-17 entry); `simulator/src/sim.cpp:570–580`, `:823–836`; `simulator/memo/memo_261010.md` Part B (U3)
+- Cross-ref: W-0720; W-0949; W-0975
+- Notes: found in N1, one row with the F3 (M2) answer's final-memo row. Nothing is owed by the simulator.
 
 ## Also aimed at the final memo, not for drafting from this list
 
