@@ -1,0 +1,246 @@
+{
+ "family": "desktop",
+ "archetypes": {
+  "renderer-hidden": {
+   "archetype": "renderer-hidden",
+   "app": "chrome-hidden",
+   "phase": "steady",
+   "repeats": 60,
+   "wakes_per_s": {
+    "measured": 0.21,
+    "compiled": 0.209
+   },
+   "bins": {
+    "1 ms": {
+     "measured": {
+      "median": 1.4045,
+      "min": 1.3435,
+      "max": 1.5229
+     },
+     "compiled": {
+      "median": 1.103,
+      "min": 1.017,
+      "max": 1.3331
+     },
+     "ratio": {
+      "median": 1.2558,
+      "min": 1.05,
+      "max": 1.4545
+     }
+    },
+    "10 ms": {
+     "measured": {
+      "median": 1.4779,
+      "min": 1.4106,
+      "max": 1.5739
+     },
+     "compiled": {
+      "median": 1.1475,
+      "min": 1.0319,
+      "max": 1.3977
+     },
+     "ratio": {
+      "median": 1.2825,
+      "min": 1.0295,
+      "max": 1.4281
+     }
+    },
+    "100 ms": {
+     "measured": {
+      "median": 1.5937,
+      "min": 1.4198,
+      "max": 2.0553
+     },
+     "compiled": {
+      "median": 1.1593,
+      "min": 1.0185,
+      "max": 1.4481
+     },
+     "ratio": {
+      "median": 1.4349,
+      "min": 0.9804,
+      "max": 1.8192
+     }
+    },
+    "1 s": {
+     "measured": {
+      "median": 1.8637,
+      "min": 1.7647,
+      "max": 2.0295
+     },
+     "compiled": {
+      "median": 1.0958,
+      "min": 0.9651,
+      "max": 1.3952
+     },
+     "ratio": {
+      "median": 1.709,
+      "min": 1.2648,
+      "max": 1.9443
+     }
+    }
+   },
+   "jobs": 5
+  },
+  "chat-client": {
+   "archetype": "chat-client",
+   "app": "element",
+   "phase": "idle",
+   "repeats": 18,
+   "wakes_per_s": {
+    "measured": 12.35,
+    "compiled": 12.206
+   },
+   "bins": {
+    "1 ms": {
+     "measured": {
+      "median": 11.6952,
+      "min": 10.4568,
+      "max": 12.6934
+     },
+     "compiled": {
+      "median": 3.5528,
+      "min": 3.3678,
+      "max": 3.724
+     },
+     "ratio": {
+      "median": 3.2747,
+      "min": 3.0177,
+      "max": 3.5872
+     }
+    },
+    "10 ms": {
+     "measured": {
+      "median": 49.2273,
+      "min": 45.2908,
+      "max": 51.3664
+     },
+     "compiled": {
+      "median": 7.6458,
+      "min": 6.7379,
+      "max": 8.2441
+     },
+     "ratio": {
+      "median": 6.4473,
+      "min": 6.0351,
+      "max": 7.2038
+     }
+    },
+    "100 ms": {
+     "measured": {
+      "median": 113.3691,
+      "min": 106.6672,
+      "max": 118.1503
+     },
+     "compiled": {
+      "median": 10.2106,
+      "min": 8.8305,
+      "max": 12.2344
+     },
+     "ratio": {
+      "median": 11.2552,
+      "min": 9.1756,
+      "max": 12.3619
+     }
+    },
+    "1 s": {
+     "measured": {
+      "median": 119.1683,
+      "min": 113.6883,
+      "max": 128.5046
+     },
+     "compiled": {
+      "median": 12.0312,
+      "min": 9.6486,
+      "max": 14.1236
+     },
+     "ratio": {
+      "median": 10.0309,
+      "min": 8.0495,
+      "max": 12.189
+     }
+    }
+   }
+  },
+  "game-client": {
+   "archetype": "game-client",
+   "app": "steam",
+   "phase": "shown",
+   "repeats": 12,
+   "wakes_per_s": {
+    "measured": 298.992,
+    "compiled": 299.515
+   },
+   "bins": {
+    "1 ms": {
+     "measured": {
+      "median": 3.4482,
+      "min": 3.343,
+      "max": 3.9229
+     },
+     "compiled": {
+      "median": 1.7833,
+      "min": 1.7735,
+      "max": 1.7979
+     },
+     "ratio": {
+      "median": 1.9382,
+      "min": 1.8593,
+      "max": 2.2001
+     }
+    },
+    "10 ms": {
+     "measured": {
+      "median": 4.3979,
+      "min": 3.6139,
+      "max": 5.3941
+     },
+     "compiled": {
+      "median": 2.1012,
+      "min": 2.0704,
+      "max": 2.1573
+     },
+     "ratio": {
+      "median": 2.0844,
+      "min": 1.7455,
+      "max": 2.5449
+     }
+    },
+    "100 ms": {
+     "measured": {
+      "median": 5.418,
+      "min": 3.6896,
+      "max": 6.0256
+     },
+     "compiled": {
+      "median": 1.8121,
+      "min": 1.7341,
+      "max": 1.8569
+     },
+     "ratio": {
+      "median": 2.9846,
+      "min": 1.9954,
+      "max": 3.4075
+     }
+    },
+    "1 s": {
+     "measured": {
+      "median": 1.3691,
+      "min": 1.0373,
+      "max": 2.6581
+     },
+     "compiled": {
+      "median": 1.539,
+      "min": 1.3864,
+      "max": 1.6975
+     },
+     "ratio": {
+      "median": 0.9128,
+      "min": 0.716,
+      "max": 1.9172
+     }
+    }
+   }
+  }
+ }
+}

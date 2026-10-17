@@ -41,7 +41,7 @@ Our own measurement runs on CI runners only. What a runner cannot observe comes 
 
 ### 6. Structure of the phase
 
-First, the 2026-09-13 verification records are persisted into the repository, and the measurement tools are fixed, including preserving the `meas-ci:names:2` run before its Actions artifacts expire on 2026-12-09. Then research-and-decision slices by domain, runnable in parallel: gaming; interactive and typing; compile; background and IO; browser and comms; daemons and session processes; scenarios and timelines; scheduler-side constants and groundings; related-work and proposal prose. Then one rebuild of the dataset. Then one consumer rework — scoring spec, guard spec, prior table and pair review, RQ0 gate spec — with one harness changelog entry and one re-pin. Last, one sweep of docs, memos and guidebook corrections.
+First, the 2026-09-13 verification records are persisted into the repository, and the measurement tools are fixed, including preserving the `meas-ci:names:2` run before its Actions artifacts expire on 2026-12-09. Then research-and-decision slices by domain, runnable in parallel: gaming; interactive and typing; compile; background and IO; browser and comms; daemons and session processes; scenarios and timelines; scheduler-side constants and groundings; related-work and proposal prose. Then one rebuild of the dataset. Then one consumer rework — scoring spec, guard spec, prior table and pair review, RQ0 gate spec — with one harness changelog entry and one re-pin. Last, one sweep of docs, memos and guidebook corrections. Before the sweep, added 2026-10-11: the telemetry's focus, the compiler and build-gate fixes, the generator and the grids, and their consumer work (decisions 9 and 10).
 
 ### 7. Team communication
 
@@ -49,7 +49,15 @@ A heads-up memo to 인경민 and 박이안 at the start of the phase: what will 
 
 ### 8. Exit criteria
 
-Every finding is resolved. The claim audit, the measurement audit and the compiled-number audit are re-run on the final repository state and return nothing unresolved: every claim meets decision 1, every archetype and every realism claim in a timeline meets decisions 2 and 3 or carries 인지오's recorded decision, every measured value reproduces from the released raw data and describes what its method measured, and no statement in the prior table, pair review, scoring spec, guard spec, RQ0 gate spec or memos is wrong or stale against the rebuilt data. The final memo is sent. The project stands where Phase 8 ended: the RQ0 gate spec committed and ready for the RQ0 run.
+Every finding is resolved. The claim audit, the measurement audit and the compiled-number audit are re-run on the final repository state and return nothing unresolved: every claim meets decision 1, every archetype and every realism claim in a timeline meets decisions 2 and 3 or carries 인지오's recorded decision, every measured value reproduces from the released raw data and describes what its method measured, and no statement in the prior table, pair review, scoring spec, guard spec, RQ0 gate spec or memos is wrong or stale against the rebuilt data. The final memo is sent. The project stands where Phase 8 ended: the RQ0 gate spec committed and ready for the RQ0 run. The generated layer reproduces from its generator and manifest.
+
+### 9. Generated layer (added 2026-10-11)
+
+A generated layer stands beside the core set. Each group whose claim is a rate has a generated set that enumerates the factor in full from the C1 task sets, labelled design with no realism claim; the authored files remain as existence cases. The naturalistic set stays in the backlog. Recorded in `_dev/docs/audit/jioh/2026-10-10-dataset-audit-before-9.15.md`.
+
+### 10. Focus in the telemetry (added 2026-10-11)
+
+The recognizer's snapshot carries the focus holder beside the name → count multiset; a focus change is a set change. Behaviour, labels and PIDs stay out.
 
 ## Open items
 

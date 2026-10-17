@@ -4,14 +4,20 @@ dataset:            ## derive variants + grid, compile timelines -> build/ + man
 	$(PY) tools/derive.py
 	$(PY) tools/compile.py
 
-lint:               ## repo + timeline + canonical lints (no writes)
-	$(PY) tools/lint.py
+variants:           ## the RQ0 gate spec's sensitivity variants -> build/ + variants manifest (needs `dataset`)
+	$(PY) tools/variants.py
+
+generated:          ## the generated layer: the sets grids.yaml names, composed or renamed from the C1 task sets -> generated/ (not committed) + build/ + one manifest per set
+	$(PY) tools/generate.py
+
+lint:               ## the checks before a compile: repo + timeline lints, the bound values' sources, the grid definition, the release map, and zero meas-pending among them (no writes; the canonical lints run inside the compile)
+	$(PY) tools/lint.py --freeze
 
 test:               ## invariant test suite
 	$(PY) -m pytest tools/tests -q
 
-check:              ## CI gate: verify derived files, grid (all 32 cells), and manifest
+check:              ## CI gate, after `dataset variants generated`: derived files, grid (all 32 cells), every manifest, derived timeline and the coverage grid equal to its committed bytes, build/ equal to the manifests' union
 	$(PY) tools/derive.py --check --require-coverage
-	$(PY) tools/compile.py --check
+	$(PY) tools/check_build.py
 
-.PHONY: dataset lint test check
+.PHONY: dataset variants generated lint test check

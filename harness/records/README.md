@@ -4,7 +4,7 @@ The records file is the harness's first product and the only thing every later s
 
 ## What a row is
 
-A row is one observation of one entity at one time: a task's wait after it became ready, one job's latency against its period, one switch window's excess, one recognition query's grade. The columns are the run's identity (`workload_id`, `condition`, `table`, `seed`, `boot_default`), the trace's identity (`sim`, `source_sha256`), the observation (`entity`, `metric`, `t`, `value`), and the attributes a metric may carry (`cause`, `provenance`, `algorithm`, `index`, `period_us`, `predicted`, `truth`, `validation`, `familiarity`, `hogs`, `pre_committed_miss`). Empty cells mean the attribute does not apply. `schema/records.schema.json` is the machine form; `docs/harness/metrics.md` §5 is the definition and §6 lists every metric.
+A row is one observation of one entity at one time: a task's wait after it became ready, one job's latency against its period, one switch window's excess, one recognition query's grade. The columns are the run's identity (`workload_id`, `condition`, `table`, `seed`, `boot_default`, `telemetry`), the trace's identity (`sim`, `source_sha256`), the observation (`entity`, `metric`, `t`, `value`), and the attributes a metric may carry (`cause`, `channel`, `provenance`, `algorithm`, `index`, `period_us`, `predicted`, `truth`, `validation`, `familiarity`, `hogs`, `pre_committed_miss`, `skipped`). Empty cells mean the attribute does not apply; a skipped tick's `job` row (`skipped` 1) has an empty `value`, since no work ran for it. `schema/records.schema.json` is the machine form; `docs/harness/metrics.md` §5 is the definition and §6 lists every metric. A generated file's axes — its pair, form, middle length, interval, split, relation, tier, carrier — are not columns: they are file-level facts kept in the set's manifest and joined to the rows by `workload_id` when a reporting line groups by them (`tools/harness/manifests.py`, 9.21); `familiarity` and `pre_committed_miss` stay on the row because the segment carries them.
 
 ## How it is produced
 
@@ -15,7 +15,7 @@ python3 tools/records.py --run RUN.json --trace TRACE.jsonl --schedule SCHEDULE.
         [--table prior|calibrated] [--seed N] [--boot-default STEM]
 ```
 
-The readers validate the trace line by line and refuse it at the first violation. The primitives fold the event stream into rows and also emit guard messages, printed on stderr: a chain whose tail iterations do not match its head ticks, a stimulus count that disagrees with the run file, an applied config entry the schedule does not carry. The runner does the same in process for every run and records the messages in its manifest.
+The readers validate the trace line by line and refuse it at the first violation. The primitives fold the event stream into rows and also emit guard messages, printed on stderr: a chain whose tail iterations do not match its head ticks, a stimulus count that disagrees with the run file's input wake events, a wake line past the last WAIT of its task's program, an applied config entry the schedule does not carry. The runner does the same in process for every run and records the messages in its manifest.
 
 Recognition rows, entity `recognizer`, come from a different input, the recognition log, and are written by `tools/grade.py` as one recognition records file per run. Same schema, same columns.
 
@@ -28,4 +28,5 @@ Recognition rows, entity `recognizer`, come from a different input, the recognit
 - Row order and column order are fixed, so two records files of the same run are byte-identical, which is what the determinism guard relies on.
 - Times are integer microseconds; values are integers or decimal strings, never floats.
 - `boot_default` is empty for a run on the primary boot default and names the stem of an alternative for a sensitivity `fixed` run.
+- `telemetry` is the shape the run's daemon showed the recognizer — `focus`, the name → count multiset with the focus holder, or `names`, the multiset alone (data-contracts §5, rule 6; 9.17).
 - The six hand-written traces under `tools/tests/fixtures/` come with their expected records, computed by hand; `make lint` validates those against this schema.

@@ -1,0 +1,14 @@
+c2-p3b editor cpu 60-326 s 99.805553 idle lane 166.194447
+c1-backup editor cpu 2-277 108.48729 idle lane 166.51271 backup needs cpu+sleep 165.983
+c7-backup editor cpu 66.792744 idle lane 98.875256
+c1-compile editor cpu in job span 275.27 job cpu(+sleep) 1315.907 lane 1592.0 margin s 0.823
+c1-ml-train editor cpu in job span 219.227 job cpu(+sleep) 1389.897 lane 1610.0 margin s 0.876
+c1-transcode editor cpu in job span 1787.903 job cpu(+sleep) 2971.393 lane 4760.0 margin s 0.704
+c1-render editor cpu in job span 27.486 job cpu(+sleep) 16.553 lane 58.0 margin s 13.961
+c2-p3a editor cpu in job span 99.806 job cpu(+sleep) 16.593 lane 266.0 margin s 149.601
+c1-indexing editor cpu in job span 5.406 job cpu(+sleep) 45.5 lane 58.0 margin s 7.094
+c3-creation kdenlive cpu 240-3212 s 0.217611 share 7.322039030955586e-05
+download first 1.3 s CPU: batch frac 0.001
+download first 5.0 s CPU: batch frac 0.394
+download first 26.385 s CPU: batch frac 0.762
+download first 1000000.0 s CPU: batch frac 0.743

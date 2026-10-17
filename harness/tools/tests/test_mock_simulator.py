@@ -2,6 +2,7 @@
 hand workload and over the whole coreset, the replay of the fixture traces,
 and the command."""
 
+import gc
 import gzip
 import json
 import subprocess
@@ -36,7 +37,8 @@ TINY = {
     "ground_truth": [],
     "events": [
         {"op": "arrive", "t": 0, "id": "editor", "name": "code", "depart": 1000,
-         "program": [{"op": "WAIT", "channel": "input:editor"}, {"op": "RUN", "us": 10}]},
+         "program": [{"op": "LOOP", "count": 3, "body": [
+             {"op": "WAIT", "channel": "input:editor"}, {"op": "RUN", "us": 10}]}]},
         {"op": "arrive", "t": 0, "id": "game.chain.1", "name": "game.exe", "depart": 1000,
          "program": [{"op": "LOOP", "count": "unbounded", "body": [
              {"op": "TIMER", "period_us": 300}, {"op": "RUN", "us": 5},
@@ -102,12 +104,15 @@ def test_header_and_config_lines(tmp_path):
 
 def test_one_unit_run_per_stimulus(tmp_path):
     _, lines = _lines(tmp_path)
-    # segment-bound editor: arrival, two queued wakes at one instant, one wake, the depart
+    # segment-bound editor, WAIT-first: blocked in its arrival step (no ready line, no run),
+    # two queued wakes at one instant, one wake, the depart
+    assert _of(lines, "editor", "task_arrive") == [{"event": "task_arrive", "t": 0, "task": "editor",
+                                                    "source": "file"}]
     assert [(l["t"], l["cause"]) for l in _of(lines, "editor", "ready")] == \
-        [(0, "arrive"), (500, "wake"), (500, "wake"), (700, "wake")]
-    assert [l["t"] for l in _of(lines, "editor", "run_start")] == [0, 500, 700]
+        [(500, "wake"), (500, "wake"), (700, "wake")]
+    assert [l["t"] for l in _of(lines, "editor", "run_start")] == [500, 700]
     assert [(l["t"], l["reason"], l["blocked_on"]) for l in _of(lines, "editor", "run_end")] == \
-        [(1, "block", "wait"), (501, "block", "wait"), (701, "block", "wait")]
+        [(501, "block", "wait"), (701, "block", "wait")]
     assert _of(lines, "editor", "task_end") == [{"event": "task_end", "t": 1000, "task": "editor",
                                                  "reason": "depart"}]
     # finite batch task: exits after its first run
@@ -126,9 +131,10 @@ def test_one_unit_run_per_stimulus(tmp_path):
     assert _of(lines, "game.chain.1", "deadline") == [
         {"event": "deadline", "t": t + 1, "task": "game.chain.1", "due": t + 300, "met": True,
          "slack_us": 299} for t in (0, 300, 600, 900)]
-    # chain stage: woken at each tick
+    # chain stage, WAIT-first: no ready(arrive) line, woken at each tick (its first at its arrival,
+    # the same instant, so no wake is stored for it)
     assert [(l["t"], l["cause"]) for l in _of(lines, "game.chain.2", "ready")] == \
-        [(0, "arrive"), (0, "wake"), (300, "wake"), (600, "wake"), (900, "wake")]
+        [(0, "wake"), (300, "wake"), (600, "wake"), (900, "wake")]
     assert _of(lines, "game.chain.2", "deadline") == []
     # orchestrator and children: children arrive with the parent, every one exits
     assert _of(lines, "build.c1", "task_arrive") == [{"event": "task_arrive", "t": 200,
@@ -144,12 +150,13 @@ def test_same_instant_order_is_config_arrivals_then_the_rest(tmp_path):
     at0 = [l["event"] for l in lines if l.get("t") == 0]
     assert at0[:2] == ["config_applied", "config_applied"]
     assert at0[2:5] == ["task_arrive"] * 3
-    # a run closing at t precedes a run opening at t (the 500 µs wake follows no run, so use 1)
+    # a run closing at t precedes a run opening at t (the editor's first run is the 500 µs wake's,
+    # its arrival being no run, so use 501)
     doc = json.loads(json.dumps(TINY))
-    doc["events"].append({"op": "wake", "t": 1, "channel": "input:editor", "target": "editor"})
+    doc["events"].append({"op": "wake", "t": 501, "channel": "input:editor", "target": "editor"})
     _, lines = _lines(tmp_path, doc)
-    at1 = [l["event"] for l in lines if l.get("task") == "editor" and l["t"] == 1]
-    assert at1 == ["run_end", "ready", "run_start"]
+    at501 = [l["event"] for l in lines if l.get("task") == "editor" and l["t"] == 501]
+    assert at501 == ["run_end", "ready", "run_start"]
 
 
 def test_records_build_is_consistent_on_the_hand_workload(tmp_path):
@@ -157,7 +164,7 @@ def test_records_build_is_consistent_on_the_hand_workload(tmp_path):
     rows, messages = build(tmp_path / "w.json", out, schedule_path=tmp_path / "s.json")
     assert messages == []
     by = {(r["entity"], r["metric"], r["t"]): r for r in rows}
-    assert by[("lane", "busy", 1000)]["value"] == 3 + 4 + 4 + 1 + 1 + 2
+    assert by[("lane", "busy", 1000)]["value"] == 2 + 4 + 4 + 1 + 1 + 2
     assert [by[("game.chain.1", "job", t)]["value"] for t in (0, 300, 600, 900)] == [1, 1, 1, 1]
     assert by[("batch", "completed", 101)]["value"] == 1
     assert by[("batch", "turnaround", 101)]["value"] == 1
@@ -166,6 +173,79 @@ def test_records_build_is_consistent_on_the_hand_workload(tmp_path):
     switches = [r for r in rows if r["metric"] == "switch_window"]
     assert [(r["index"], r["value"], r["hogs"]) for r in switches] == [(1, 0, 0), (2, 0, 0)]
     assert all(r["value"] == 0 for r in rows if r["metric"] == "ready_wait")
+
+
+def test_a_wait_first_task_blocks_in_its_arrival_step(tmp_path):
+    """A task whose first instruction is a WAIT, a spawned child included, blocks in its arrival
+    step as the reference simulator's does: no ready line and no run until a wake completes it;
+    a finite one that is never woken never runs and never ends."""
+    doc = {"meta": {"id": "tiny"}, "ground_truth": [], "events": [
+        {"op": "arrive", "t": 0, "id": "build", "name": "make", "fork_cap": 2,
+         "program": [{"op": "RUN", "us": 1}, {"op": "FORK"}, {"op": "FORK"}, {"op": "EXIT"}],
+         "spawn_table": [{"id": "build.j1", "name": "gcc",
+                          "program": [{"op": "WAIT", "channel": "job:build.j1"}, {"op": "RUN", "us": 3},
+                                      {"op": "EXIT"}]},
+                         {"id": "build.j2", "name": "gcc",
+                          "program": [{"op": "WAIT", "channel": "job:build.j2"}, {"op": "RUN", "us": 3},
+                                      {"op": "EXIT"}]}]},
+        {"op": "wake", "t": 50, "channel": "job:build.j1", "target": "build.j1"},
+    ]}
+    out, lines = _lines(tmp_path, doc, {**SCHEDULE, "schedule": SCHEDULE["schedule"][:1]})
+    assert _of(lines, "build.j1", "task_arrive")[0]["t"] == 0
+    assert [(l["t"], l["cause"]) for l in _of(lines, "build.j1", "ready")] == [(50, "wake")]
+    assert [l["t"] for l in _of(lines, "build.j1", "task_end")] == [51]
+    assert _of(lines, "build.j2", "task_arrive")[0]["source"] == "spawn"
+    assert [l["event"] for l in lines if l.get("task") == "build.j2"] == ["task_arrive"]
+    rows, messages = build(tmp_path / "w.json", out, schedule_path=tmp_path / "s.json")
+    assert messages == []
+    by = {(r["entity"], r["metric"]): r for r in rows}
+    assert by[("build.j2", "completed")]["value"] == 0 and by[("build.j2", "cpu_delivered")]["value"] == 0
+    assert not [r for r in rows if r["metric"] == "ready_wait" and r["cause"] == "arrive"
+                and r["entity"].startswith("build.j")]
+
+
+def test_a_wake_stored_before_the_arrival_completes_the_arrival_wait(tmp_path):
+    """A wake sent to a task before its arrival is stored for it, as the reference simulator's
+    channel store and mailbox keep one (`simulator/src/sim.cpp` `on_ext_wake`, `deliver`), and is
+    taken in the arrival step: a WAIT-first task's WAIT completes on it there, so the arrival is
+    `ready(arrive)` with its run (`step`'s WAIT, `on_arrive`), and each stored wake's `ready(wake)`
+    line, the zero-wait line of the WAIT it completes (metrics doc §11, item 1), is written at the
+    arrival. A chain stage arriving after its head's first tick has that tick's wake stored. No line
+    of a task precedes its arrival, and the primitives read the trace with no guard message."""
+    stage = {"op": "LOOP", "count": "unbounded", "body": [
+        {"op": "WAIT", "channel": "chain:stage"}, {"op": "RUN", "us": 5}]}
+    doc = {"meta": {"id": "tiny"}, "ground_truth": [], "events": [
+        {"op": "arrive", "t": 0, "id": "head", "name": "game.exe", "depart": 1000,
+         "program": [{"op": "LOOP", "count": "unbounded", "body": [
+             {"op": "TIMER", "period_us": 300}, {"op": "RUN", "us": 5},
+             {"op": "WAKE", "target": "stage"}]}]},
+        {"op": "wake", "t": 50, "channel": "job:once", "target": "once"},
+        {"op": "wake", "t": 60, "channel": "job:twice", "target": "twice"},
+        {"op": "wake", "t": 70, "channel": "job:twice", "target": "twice"},
+        {"op": "arrive", "t": 100, "id": "once", "name": "gcc",
+         "program": [{"op": "WAIT", "channel": "job:once"}, {"op": "RUN", "us": 3}, {"op": "EXIT"}]},
+        {"op": "arrive", "t": 100, "id": "twice", "name": "gcc",
+         "program": [{"op": "LOOP", "count": 2, "body": [
+             {"op": "WAIT", "channel": "job:twice"}, {"op": "RUN", "us": 3}]}, {"op": "EXIT"}]},
+        {"op": "arrive", "t": 200, "id": "stage", "name": "game.exe", "depart": 1000, "program": [stage]},
+    ]}
+    out, lines = _lines(tmp_path, doc, {**SCHEDULE, "schedule": SCHEDULE["schedule"][:1]})
+    assert [(l["event"], l["t"]) for l in lines if l.get("task") == "once"] == [
+        ("task_arrive", 100), ("ready", 100), ("ready", 100), ("run_start", 100), ("run_end", 101),
+        ("task_end", 101)]
+    assert [l["cause"] for l in _of(lines, "once", "ready")] == ["arrive", "wake"]
+    assert [(l["t"], l["cause"]) for l in _of(lines, "twice", "ready")] == \
+        [(100, "arrive"), (100, "wake"), (100, "wake")]
+    assert [l["t"] for l in _of(lines, "twice", "task_end")] == [101]
+    assert _of(lines, "stage", "task_arrive")[0]["t"] == 200
+    assert [(l["t"], l["cause"]) for l in _of(lines, "stage", "ready")] == \
+        [(200, "arrive"), (200, "wake"), (300, "wake"), (600, "wake"), (900, "wake")]
+    arrived = {l["task"]: l["t"] for l in lines if l["event"] == "task_arrive"}
+    assert all(l["t"] >= arrived[l["task"]] for l in lines if "task" in l)
+    rows, messages = build(tmp_path / "w.json", out, schedule_path=tmp_path / "s.json")
+    assert messages == []                     # each WAIT has its ready(wake) line; the chain's counts agree
+    # frame 0 ends when the stage, arriving at 200, takes the stored wake and runs (200, 201)
+    assert [r["value"] for r in rows if r["entity"] == "head" and r["metric"] == "job"] == [201, 1, 1, 1]
 
 
 def test_generation_is_byte_identical_across_reruns(tmp_path):
@@ -198,25 +278,30 @@ def test_contract_invalid_input_is_refused(tmp_path):
 
 
 @needs_build
+@pytest.mark.coreset_wide
 def test_every_coreset_file_flows_through_records_with_no_message(tmp_path):
     table = read_driver_table(PRIOR)
     boot = json.loads(BOOT.read_text())
-    files = sorted(BUILD.glob("*.workload.json"))
-    assert len(files) == 50
+    files = sorted(p for p in BUILD.glob("*.workload.json") if "@" not in p.name)   # the variants (9.14 D8) aside
+    assert len(files) == 51                                     # the blessed set of 2026-10-09 (9.13 D7)
     for path in files:
         doc = json.loads(path.read_text())
         wid = doc["meta"]["id"]
-        for condition in ("fixed", "oracle"):
-            schedule, _ = daemon.run(doc, condition, table, boot)
-            sp = _write(tmp_path, schedule, f"{wid}-{condition}.json")
-            out = tmp_path / f"{wid}-{condition}.trace.jsonl"
-            simulator.generate(path, sp, out)
+        schedules = {condition: _write(tmp_path, daemon.run(doc, condition, table, boot)[0], f"{wid}-{condition}.json")
+                     for condition in ("fixed", "oracle")}
+        del doc                                                   # 9.21 D12: one file's objects at a time — the
+        for condition, sp in schedules.items():                   # runner's 16 GB held c6-dual's doc, run file,
+            out = tmp_path / f"{wid}-{condition}.trace.jsonl"     # trace and fourteen million rows at once and killed
+            simulator.generate(path, sp, out)                     # the suite
             run = read_run_file(path)
             result = compute(run, read_trace(out), read_config_schedule(sp))
             assert result.guards == [], (wid, condition, result.guards)     # tick_count
             busy = next(r["value"] for r in result.rows
                         if r["entity"] == "lane" and r["metric"] == "busy")
             assert 0 < busy <= run.t_end, (wid, condition, busy, run.t_end)  # utilisation_sanity
+            del result, run
+            out.unlink()
+            gc.collect()
 
 
 # ------------------------------------------------------------------ replay

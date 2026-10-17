@@ -1,0 +1,66 @@
+job: 2 roots, 945 processes, 10.118 s CPU
+unit: {'upgrade.unit.result': 'success', 'upgrade.unit.status': '0', 'upgrade.uu.all_installed': '1', 'upgrade.reboot_required': 'yes', 'upgrade.glibc.not_at_new': '0'}
+new processes outside the census, the job and the harness: 375, of them the runner agent's 207 (827.9 ms)
+  outside pre-recording    1 x sleep                 0.216 ms  -  <- None [None]
+  pre     candidate      2 x cron                  8.338 ms  -  <- cron [/system.slice/cron.service]
+  pre     candidate      4 x iptables              6.201 ms  /usr/sbin/iptables  <- python3 [/azure.slice/walinuxagent.service]
+  pre     candidate      2 x sh                    3.062 ms  /bin/sh  <- cron [/system.slice/cron.service]
+  pre     candidate      2 x anacron               1.400 ms  /usr/sbin/anacron  <- anacron [/system.slice/anacron.service]
+  pre     candidate      1 x sh                    0.897 ms  /bin/sh  <- anacron [/system.slice/anacron.service]
+  pre     candidate      1 x run-parts             0.776 ms  /usr/bin/run-parts  <- anacron [/system.slice/anacron.service]
+  pre     candidate      1 x 0anacron              0.701 ms  /etc/cron.monthly/0anacron  <- anacron [/system.slice/anacron.service]
+  pre     candidate      1 x debian-sa1            0.602 ms  /usr/lib/sysstat/debian-sa1  <- cron [/system.slice/cron.service]
+  pre     pid1-helper    1 x (sd-close)            0.251 ms  -  <- systemd [/init.scope]
+  job     candidate      1 x packagekitd          42.811 ms  /usr/libexec/packagekitd  <- systemd [/init.scope]
+  job     pid1-helper  103 x (sd-close)           24.263 ms  -  <- systemd [/init.scope]
+  job     candidate      1 x systemd-sysv-ge      12.679 ms  /usr/lib/systemd/system-generators/systemd-sysv-generator  <- systemd [/init.scope]
+  job     pid1-helper    2 x (sd-exec-strv)        5.843 ms  -  <- systemd [/init.scope]
+  job     candidate      1 x systemd-fstab-g       3.839 ms  /usr/lib/systemd/system-generators/systemd-fstab-generator  <- systemd [/init.scope]
+  job     candidate      1 x systemd-getty-g       3.277 ms  /usr/lib/systemd/system-generators/systemd-getty-generator  <- systemd [/init.scope]
+  job     candidate      1 x netplan               3.254 ms  /usr/lib/systemd/system-generators/netplan  <- systemd [/init.scope]
+  job     candidate      1 x systemd-debug-g       3.241 ms  /usr/lib/systemd/system-generators/systemd-debug-generator  <- systemd [/init.scope]
+  job     candidate      1 x systemd-cryptse       3.206 ms  /usr/lib/systemd/system-generators/systemd-cryptsetup-generator  <- systemd [/init.scope]
+  job     candidate      1 x systemd-integri       3.174 ms  /usr/lib/systemd/system-generators/systemd-integritysetup-generator  <- systemd [/init.scope]
+  job     candidate      1 x systemd-rc-loca       3.084 ms  /usr/lib/systemd/system-generators/systemd-rc-local-generator  <- systemd [/init.scope]
+  job     candidate      1 x systemd-hiberna       3.050 ms  /usr/lib/systemd/system-generators/systemd-hibernate-resume-generator  <- systemd [/init.scope]
+  job     candidate      1 x systemd-run-gen       3.025 ms  /usr/lib/systemd/system-generators/systemd-run-generator  <- systemd [/init.scope]
+  job     candidate      1 x systemd-veritys       3.017 ms  /usr/lib/systemd/system-generators/systemd-veritysetup-generator  <- systemd [/init.scope]
+  job     candidate      1 x systemd-system-       3.006 ms  /usr/lib/systemd/system-generators/systemd-system-update-generator  <- systemd [/init.scope]
+  job     candidate      3 x mkdir                 2.700 ms  /usr/bin/mkdir  <- systemd [/init.scope]
+  job     candidate      1 x sshd-socket-gen       2.647 ms  /usr/lib/systemd/system-generators/sshd-socket-generator  <- systemd [/init.scope]
+  job     candidate      1 x ds-identify           2.078 ms  /usr/lib/cloud-init/ds-identify  <- systemd [/init.scope]
+  job     candidate      1 x podman-system-g       1.864 ms  /usr/lib/systemd/system-generators/podman-system-generator  <- systemd [/init.scope]
+  job     pid1-helper    1 x (sd-gens)             1.413 ms  -  <- systemd [/init.scope]
+  job     candidate      2 x ln                    1.396 ms  /usr/bin/ln  <- systemd [/init.scope]
+  job     candidate      1 x cloud-init-gene       1.313 ms  /usr/lib/systemd/system-generators/cloud-init-generator  <- systemd [/init.scope]
+  job     candidate      1 x sed                   1.290 ms  /usr/bin/sed  <- systemd [/init.scope]
+  job     candidate      1 x postgresql-gene       1.177 ms  /usr/lib/systemd/system-generators/postgresql-generator  <- systemd [/init.scope]
+  job     candidate      1 x ls                    1.061 ms  /usr/bin/ls  <- systemd [/init.scope]
+  job     candidate      1 x openvpn-generat       1.038 ms  /usr/lib/systemd/system-generators/openvpn-generator  <- systemd [/init.scope]
+  job     candidate      1 x friendly-recove       1.034 ms  /usr/lib/systemd/system-generators/friendly-recovery  <- systemd [/init.scope]
+  job     candidate      1 x linux-base-sgx        1.011 ms  /usr/lib/systemd/system-environment-generators/linux-base-sgx  <- systemd [/init.scope]
+  job     candidate      1 x snapd-generator       0.965 ms  /usr/lib/systemd/system-generators/snapd-generator  <- systemd [/init.scope]
+  job     candidate      1 x snapd-env-gener       0.854 ms  /usr/lib/systemd/system-environment-generators/snapd-env-generator  <- systemd [/init.scope]
+  job     candidate      1 x cat                   0.809 ms  /usr/bin/cat  <- systemd [/init.scope]
+  job     candidate      1 x uname                 0.806 ms  /usr/bin/uname  <- systemd [/init.scope]
+  post    candidate      8 x iptables             12.142 ms  /usr/sbin/iptables  <- python3 [/azure.slice/walinuxagent.service]
+  post    candidate      1 x sadc                  8.232 ms  /usr/lib/sysstat/sadc  <- systemd [/init.scope]
+  post    candidate      1 x cron                  4.113 ms  -  <- cron [/system.slice/cron.service]
+  post    candidate      1 x sh                    1.510 ms  /bin/sh  <- cron [/system.slice/cron.service]
+  post    candidate      1 x debian-sa1            0.560 ms  /usr/lib/sysstat/debian-sa1  <- cron [/system.slice/cron.service]
+  post    pid1-helper    2 x (sd-close)            0.549 ms  -  <- systemd [/init.scope]
+new in a later census: 5
+  job.start  bash             pid 29860   /system.slice/hosted-compute-agent.service  /usr/bin/bash -e /home/runner/work/_temp/2d2f4bfc-49cc-4f97-82c5-e490ef725866.sh
+  job.start  sleep            pid 29956   /system.slice/hosted-compute-agent.service  sleep 10
+  job.end    packagekitd      pid 30999   /system.slice/packagekit.service  /usr/libexec/packagekitd
+  job.end    sleep            pid 31088   /system.slice/hosted-compute-agent.service  sleep 10
+  probe.end  sleep            pid 31266   /system.slice/hosted-compute-agent.service  sleep 10
+entries (cpu ms/s, runs/s): pre  job  post
+  gnome-shell/gnome-shell: 0.2498/0.9333  0.1639/6.8845  0.2398/0.9233
+  pipewire/pipewire: 0.0/0.0  0.0/0.0  0.0/0.0
+  pipewire/wireplumber: 0.0104/0.2267  0.2423/8.0892  0.0079/0.2067
+  pipewire/pipewire-pulse: 0.0/0.0  0.0/0.0  0.0/0.0
+  systemd/pid1: 0.0371/0.19  32.0717/39.9299  0.0419/0.2133
+  systemd/user-manager: 0.0/0.0  0.0/0.0  0.0/0.0
+  dbus-daemon/system-bus: 0.0341/0.11  8.5353/41.4789  0.0375/0.1433
+  dbus-daemon/session-bus: 0.0/0.0  0.0/0.0  0.0/0.0

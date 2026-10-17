@@ -1,5 +1,10 @@
 # C1 — single-situation calibration: pure gaming (building-plan §3 C1).
-# gamescope -> video-playback: frame-periodic compositor approximation (ours).
+# The game's threads beyond the chain and `wineserver` are omitted: the source
+# puts 95% of scheduling in its top 30-40 tasks and describes none outside
+# them (lavd-ossna24 s12; 9.10 D19).
+# The Steam client is in its measured state: logged out, no account, no
+# library, no game behind it, no `gameoverlayui` (9.10 D22; 9.8 D6).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-gaming
   seed: 102
@@ -10,15 +15,14 @@ segments:
      scenario: [S9]}
 
 tasks:
-  - {id: game, name: game.exe, archetype: game-task-chain,
-     arrive: 0s, depart: 60s, bind: {lane_share: 0.9}}
-  - {id: steam, name: steam, archetype: electron-comms,
-     arrive: 0s, depart: 60s}
-  - {id: webhelper, name: steamwebhelper, archetype: electron-comms,
-     arrive: 0s, depart: 60s, count: 3}
-  - {id: wine, name: wineserver, archetype: system-daemon,
-     arrive: 0s, depart: 60s}
-  - {id: compositor, name: gamescope, archetype: video-playback,
+  - {id: game, name: Troy.exe, archetype: game-task-chain,
+     arrive: 0s, depart: 60s, bind: {lane_share: 0.9,
+           member_names: ["Task worker thr", "Task worker thr", "Task worker thr", "Task worker thr", dxvk-cs, dxvk-submit, winepulse_mainl, winepulse_timer, FAudio_AudioCli, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe]},
+     source: {lane_share: design, member_names: "lavd-ossna24:s16"}}
+  - {id: steam, name: steam, archetype: game-client,
      arrive: 0s, depart: 60s}
 
-focus: []
+input: []
+
+focus:
+  - {from: 0s, to: 60s, task: game}

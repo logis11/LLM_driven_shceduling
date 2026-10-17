@@ -1,0 +1,673 @@
+#!/usr/bin/env bash
+# run.sh <app> <repeat> <dry|probe|full> — one job of the 9.8 desktop campaign (changelog D13; method
+# _dev/research/jioh/task-9.8-browser-comms/campaign/method.md). One subject per job, so one subject's failure
+# does not cost the others:
+#
+#   chrome-hidden   one window, a foreground control tab and N measured background tabs at N loopback origins,
+#                   observed past the intensive-throttling grace
+#   chrome-visible  the same page set as N windows, one tab each; two steady phases, the second with the page's
+#                   timer removed by navigation rather than relaunch
+#   element         Element Desktop signed in to a Synapse homeserver on the harness CPUs; idle then traffic
+#   steam           Valve's desktop client, logged out, under a window manager; shown then minimised
+#   chrome-tabs     9.10 D126–D129: the hidden subject's window at five tabs, the page in use and four background
+#                   tabs at loopback addresses, launched twice — the spare renderer off, then on, or the reverse —
+#                   with Chrome's tree listed every 10 s through the phases; no perf
+#   launch-<arm>    9.10 D132–D135: an entry's own campaign's launch (9.5's soffice, thunderbird-send, kdenlive,
+#                   mpv-video, mpv-audio, chrome; 9.8's chrome-hidden, element, steam; webrtc, the call opened in a
+#                   running Chrome), run twice — the first through its settle and quit by the program's own command,
+#                   the second traced by perf from its exec to its settle's end (launch.sh, launch.py)
+#
+# Phases are a sequence with recorded edges (method §3), not one settle figure: launch, launch-settle, for the
+# hidden subject the recorded moment the tabs are backgrounded, grace-settle, then the steady phase(s). Only a
+# steady phase is carried.
+#
+# Single-core (pin.sh; 9.5 follow-ups spec decisions 2 and 5): this script and everything it starts — Xvfb, the
+# window manager, perf, the page server, Synapse, the traffic driver — run on the harness CPUs; only the
+# application tree is launched on the measured CPU.
+#
+# Settings: nothing from the trigger beyond the mode (D13). Every value the design fixes is a constant below,
+# because a pool whose repeats ran at different N or different phase lengths is not a pool. The trigger carries
+# mode, attempt, cpu_model, apps and repeats only.
+set -u
+export PROBE_OUT="${MEAS_OUT:-/tmp/meas}"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MEAS="$(cd "$HERE/.." && pwd)"
+source "$MEAS/probe/common.sh"          # OUT, KV, TOOLS, rec, finish_report, start_xvfb, wait_window, snap, screenshot
+source "$MEAS/pin.sh"
+pin_self_harness
+# 9.11 D4: in a dry job only — a repeat's venue stays as its pool's — every thread's scheduling policy, real-time
+# priority and nice over the job, logged when first seen and on each change (sched/classes.py), on the harness CPUs
+if [ "${3:-full}" = dry ]; then
+  python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")/../sched" && pwd)/classes.py" "$OUT/classes.tsv" 2 & CLASSES_PID=$!
+  trap 'kill "$CLASSES_PID" 2>/dev/null; wait "$CLASSES_PID" 2>/dev/null' EXIT
+fi
+source "$TOOLS/appdefs.sh"              # appdef, apt_install, ver, appdef_cleanup
+source "$HERE/launch.sh"                # launch_subject (9.10 D132–D135)
+APP="$1"; REPEAT="$2"; MODE_ARG="${3:-full}"
+# the untraced control (_dev/docs/spec/jioh/task-9.5-untraced-control.md): `control` runs full's lengths and
+# `control-dry` dry's, the subject's carried phase as a traced and an untraced run
+CONTROL=0; MODE="$MODE_ARG"
+case "$MODE_ARG" in control) CONTROL=1; MODE=full ;; control-dry) CONTROL=1; MODE=dry ;; esac
+# its decision 5: the pair's order alternates across jobs — odd jobs run it traced first, even jobs untraced first
+if [ $((REPEAT % 2)) -eq 1 ]; then ORDER="traced untraced"; else ORDER="untraced traced"; fi
+PH="$MEAS/phase.sh $OUT/phases.jsonl"
+export MEAS_PIN=harness                 # phase.sh here wraps drivers, which act on the pinned application from the harness CPUs
+APP_PID=0; WID=""; PAT="?"; RX="?"
+
+# ---- design constants (method §2, §3) ----------------------------------------------------------------------
+ORIGINS=12                  # N: distinct loopback origins, hence distinct site-locked renderers
+TAB_ORIGINS=4               # 9.10 D15: five tabs — the page in use and four others; never shortened by a dry run
+TABS_EVERY=10               # 9.10 D129: seconds between listings of Chrome's tree
+TIMER_MS=100                # the page's setInterval period; above both throttling caps
+PAGE_PORT=8099
+# The grace before intensive throttling is sixty seconds for a page that has finished loading and five minutes
+# by default. Per-tab load completion is not observable from outside the browser, so the grace-settle covers the
+# default: the steady phase then begins throttled whichever class Chromium put the pages in. 330 s of this is
+# that documented default; the remaining 300 s is design, set from the 2026-09-20 probe, whose steady phase was
+# still settling for its first 300 s — dropping them took the spread of 500 s windows from 11.3% to 3.7%
+# (method section 10, changelog D15). 9.10 D152 adds 400 s: past that 630 s the page's own thread still runs
+# longer for about 360 s (the 3,600 s span probe, 9.10 D149), covered with 9.10 D146's 40 s margin.
+GRACE_S=1030
+# The visible subject's two steady phases come from a page plan, not from driving the browser: the page holds
+# the timer for STEP1 seconds from its load and then none. STEP1 is generous because the run waits on what the
+# pages report rather than on this number; it only has to be long enough that the switch cannot fall inside the
+# first phase. The probe's period sweep is three probe pushes with TIMER_MS edited between them (D13: the way to
+# change a design value is to edit this file and bump the trigger's attempt), not three phases of one job.
+STEP_GAP=120                # margin over a phase, absorbing perf post-processing
+STEP_WAIT=600               # how long the run waits for every window to report the no-timer step
+STEAM_CLIENT_WAIT=900       # the bootstrap downloads the client on first run; the helpers are the signal
+HOMESERVER=synapse
+TRAFFIC_PER_MIN=60          # instrument setting, not a claim about users (method §2 subject 4)
+MATRIX_USER=meas; MATRIX_PASS=meas-9.8-local; MATRIX_SECRET=meas-9-8-registration-secret
+SYNAPSE_PORT=8008; SYNAPSE_DIR=/tmp/synapse
+
+# Steady-phase lengths come from the long-phase probe and are written into method §10 before the first batch
+# (method §3, 9.5 D35). A subject without one stops before measuring, as campaign/run.sh's settle_for() does.
+# Set from the 2026-09-20 probe (changelog D15). The launch-settle is per subject; the hidden subject's own
+# settling past its launch sits in GRACE_S above. The Steam client steps from about 325 to about 298 wakes/s at
+# 900 s and is flat after it, so that step is settled through rather than measured.
+launch_settle_for() {
+  case "$1" in
+    chrome-hidden|chrome-visible|chrome-tabs|element) echo 20 ;;
+    steam) echo 900 ;;
+    launch-*) echo launch ;;   # 9.10 D133: each subject's own settle, launch.sh's ln_settle_for
+    *) echo "" ;;
+  esac
+}
+# 600 s everywhere: the length at which every subject's spread of non-overlapping windows holds inside the 5%
+# tolerance across five repeats — element 2.7%, the visible subject 0.5% with its timer and 3.1% without it,
+# the hidden subject 3.7% past its settle, the Steam client 0.3% past its own.
+steady_for() {
+  case "$1" in
+    chrome-hidden|chrome-visible|chrome-tabs|element|steam) echo 600 ;;
+    launch-*) echo none ;;     # no steady phase: the launch is the phase (9.10 D133)
+    *) echo "" ;;
+  esac
+}
+
+if [ "$MODE" = dry ] && [ "${APP#launch-}" = "$APP" ]; then   # 9.10 D135: a launch dry run keeps the campaign's lengths
+  LAUNCH_SETTLE=20; STEADY=45; GRACE_S=75; ORIGINS=3; STEP_GAP=40; STEP_WAIT=180; STEAM_CLIENT_WAIT=900
+elif [ "$MODE" = probe ]; then
+  LAUNCH_SETTLE=20; STEADY=3600          # one long phase, read per 10 s slice by campaign/slices.py; 3,600 s since
+                                        # 9.10 D149, the hidden renderer's page thread still winding down at 1,500 s
+else
+  LAUNCH_SETTLE="$(launch_settle_for "$APP")"; STEADY="$(steady_for "$APP")"
+fi
+
+# ---- instruments -------------------------------------------------------------------------------------------
+
+edge() { printf '{"phase":"%s","edge":"%s","mono_ns":%s}\n' "$1" "$2" "$(date +%s%9N)" >> "$OUT/edges.jsonl"; }
+
+# phase <name> <seconds> <driver-cmd or ''> — copied from campaign/run.sh's phase() (D13: copied, not extracted;
+# 9.5 is still adding repeats through that file). perf over the whole phase, driver inside it.
+phase() {
+  local name="$1" secs="$2" driver="$3"
+  edge "$name" start
+  snap "$PAT" "" "$name.before"
+  pin_harness sudo perf sched record -k CLOCK_MONOTONIC -a -o "$OUT/perf.$name.data" -- sleep "$secs" > "$OUT/perf.$name.log" 2>&1 &
+  local perf_pid=$!
+  sleep 1
+  if [ -n "$driver" ]; then
+    $PH "$name-driver" -- bash -c "$driver" > "$OUT/driver.$name.log" 2>&1
+  fi
+  wait "$perf_pid"; rec "perf.$name.record.rc" "$?"
+  snap "$PAT" "" "$name.after"
+  screenshot "after-$name"
+  # --state: each row's switch-out state, the cross-check of the wakeup-row wake (9.5 D39)
+  sudo perf sched timehist --state -i "$OUT/perf.$name.data" 2>> "$OUT/perf.$name.log" | gzip > "$OUT/perf.$name.timehist.txt.gz"
+  rec "perf.$name.timehist.rc" "${PIPESTATUS[0]}"
+  rec "perf.$name.rows_matching" "$(gzip -dc "$OUT/perf.$name.timehist.txt.gz" | grep -cE "$RX" || echo 0)"
+  sudo perf sched timehist -w -i "$OUT/perf.$name.data" 2>> "$OUT/perf.$name.log" | grep -E "awakened|wakeup|\bwaker\b" | gzip > "$OUT/perf.$name.wakeups.txt.gz"
+  rec "perf.$name.wakeups.rows" "$(gzip -dc "$OUT/perf.$name.wakeups.txt.gz" | wc -l)"
+  if [ "$MODE" = dry ]; then gzip -f "$OUT/perf.$name.data"; else rm -f "$OUT/perf.$name.data"; fi
+  edge "$name" end
+}
+
+# quiet <name> <seconds> <driver-cmd or ''>: phase()'s untraced twin (the untraced control's decision 1) — the same
+# edges, snapshots, driver and length, and no perf
+quiet() {
+  local name="$1" secs="$2" driver="$3"
+  edge "$name" start
+  snap "$PAT" "" "$name.before"
+  sleep "$secs" &
+  local sleep_pid=$!
+  sleep 1
+  if [ -n "$driver" ]; then
+    $PH "$name-driver" -- bash -c "$driver" > "$OUT/driver.$name.log" 2>&1
+  fi
+  wait "$sleep_pid"
+  snap "$PAT" "" "$name.after"
+  screenshot "after-$name"
+  edge "$name" end
+}
+
+# pair <name> <seconds>: the subject's carried phase as its traced run <name> and its untraced run <name>-untraced,
+# adjacent, in the job's ORDER (decisions 1, 5, 6)
+pair() {
+  local name="$1" secs="$2" run first=1
+  for run in $ORDER; do
+    [ "$first" = 1 ] || sleep 10
+    first=0
+    if [ "$run" = traced ]; then phase "$name" "$secs" ""; else quiet "$name-untraced" "$secs" ""; fi
+  done
+}
+
+stop_recorded() {   # <gate-value> <message> — the machine gate's shape, for a state that makes the job worthless
+  rec gate "$1"; rec finished_utc "$(date -u +%FT%TZ)"; finish_report
+  echo "$2" >&2
+  kill -- "-$APP_PID" 2>/dev/null; appdef_cleanup
+  exit 0
+}
+
+# click_right_button <window-id> <key> — the right-hand button of a two-button modal, by position. Return is
+# never used: in steam-installer's dialog it selected Cancel and the log then read "steam: Installation
+# cancelled", and these dialogs put the affirmative button on the right.
+click_right_button() {
+  local wid="$1" key="$2" dy
+  pin_harness xdotool windowactivate --sync "$wid" 2>/dev/null
+  eval "$(pin_harness xdotool getwindowgeometry --shell "$wid" 2>/dev/null)"
+  for dy in 20 26 40 14; do
+    pin_harness xdotool mousemove $((X + WIDTH * 3 / 4)) $((Y + HEIGHT - dy)) click 1
+    rec "$key.click_dy" "$dy"
+    sleep 4
+    pin_harness xdotool getwindowname "$wid" > /dev/null 2>&1 || break
+  done
+}
+
+# check_tree <label> — the measured tree must not contain this script, Xvfb, the window manager or the
+# homeserver. A process pattern that matches run.sh's own command line roots the tree at the job itself and the
+# harness is then measured as if it were the application.
+check_tree() {
+  local n
+  snap "$PAT" "" "$1"
+  n="$(python3 -c 'import json,sys,re
+d=json.load(open(sys.argv[1]))
+bad=[p["cmd"][:60] for p in d["procs"] if re.search(r"desktop/run\.sh|Xvfb|openbox|synapse\.app|traffic\.py", p.get("cmd",""))]
+print(len(bad)); print("\n".join(bad), file=sys.stderr)' "$OUT/snap.$1.json" 2>>"$OUT/tree.$1.txt" || echo 0)"
+  rec "tree.$1.harness_procs" "$n"
+  [ "$n" = 0 ] || stop_recorded harness-in-tree "the measured tree contains $n harness process(es) — see tree.$1.txt; the process pattern is matching something of ours"
+}
+
+launch_app() {
+  # launched directly under taskset, not through pin_load: a function run in the background forks a subshell, so
+  # $! would be the subshell and not the session leader the kill and the affinity record need (campaign/run.sh)
+  if [ "$MEAS_PIN_AVAILABLE" = 1 ]; then taskset -c "$MEAS_CPU" setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 &
+  else setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 & fi
+  APP_PID=$!
+  rec app.affinity "$(taskset -p "$APP_PID" 2>/dev/null | sed 's/.*: //' || echo unknown)"
+}
+
+# ---- the renderer subjects ---------------------------------------------------------------------------------
+
+# renderer_gate <expected-minimum> — decision 9: the count is knowable right after the settle, and a job that
+# came up with too few renderers measured something else, with the steady phase still ahead of it. Extra
+# renderers (Chromium keeps a spare) are benign and fall into the components' residual, so the test is a
+# minimum. Roles are read exactly as campaign/analyze.py's pid_roles does, from the command line the snapshot
+# records — truncated to 120 characters, which --type=renderer sits well inside.
+renderer_gate() {
+  local want="$1" n
+  snap "$PAT" "" gate
+  n="$(python3 -c 'import json,sys; print(sum(1 for p in json.load(open(sys.argv[1]))["procs"] if "--type=renderer" in p.get("cmd","")))' "$OUT/snap.gate.json" 2>/dev/null || echo 0)"
+  rec renderers.observed "$n"; rec renderers.wanted_min "$want"
+  # every renderer's whole command line, which the snapshot truncates at 120 characters. The dry run of
+  # 2026-09-20 saw four renderers ticking at the timer rate against three windows and three origins, and a
+  # renderer's command line does not name the site it is locked to — these are the flags that might.
+  for r in $(pgrep -f -- "--type=renderer" 2>/dev/null); do
+    printf '%s\t%s\n' "$r" "$(tr '\0' ' ' < "/proc/$r/cmdline" 2>/dev/null)" >> "$OUT/renderers.tsv"
+  done
+  [ "$n" -ge "$want" ] || stop_recorded wrong-renderer-count "renderer gate: wanted at least $want renderers, observed $n — stopping before the steady phase"
+}
+
+# window_steps — one line per browser window: the step its page reports in its title. xdotool getwindowname
+# reads a window without focusing it, which is what makes this work where typing did not.
+window_steps() {
+  local w
+  for w in $(pin_harness xdotool search --onlyvisible --class "$CLASS" 2>/dev/null); do
+    pin_harness xdotool getwindowname "$w" 2>/dev/null | grep -oE 'idle-page .*' || true
+  done
+}
+
+# wait_for_step <label> <seconds> — block until every window's page reports <label> ("timer <n> ms" or "no
+# timer"), then record what was seen. The page walks its own schedule from its load (idle-page.html), so the run
+# SYNCHRONISES on what the pages report rather than assuming the phase boundary landed where it was planned —
+# the gap between phases is dominated by perf post-processing, whose length is not knowable in advance.
+wait_for_step() {
+  local want="$1" secs="$2" i n_all n_want
+  for i in $(seq 1 "$secs"); do
+    n_all="$(window_steps | wc -l | tr -d ' ')"
+    n_want="$(window_steps | grep -cF "$want" || true)"
+    [ "$n_all" -gt 0 ] && [ "$n_all" = "$n_want" ] && break
+    sleep 1
+  done
+  rec "step.$want.windows" "$n_all"; rec "step.$want.reporting" "$n_want"
+  window_steps > "$OUT/steps.$want.txt"
+  [ "$n_all" = "$n_want" ]
+}
+
+chrome_subject() {
+  export MEAS_ORIGINS="$ORIGINS" MEAS_TIMER_MS="$TIMER_MS" MEAS_PAGE_PORT="$PAGE_PORT"
+  if [ "$APP" = chrome-visible ]; then
+    export MEAS_PAGE_PLAN="$TIMER_MS:$((LAUNCH_SETTLE + STEADY + STEP_GAP)),0:$((STEADY + STEP_GAP + STEP_WAIT))"
+    rec page.plan "$MEAS_PAGE_PLAN"
+  fi
+  appdef "$APP" || exit 0
+  rec launch "$LAUNCH"; rec rx "$RX"; rec pat "$PAT"
+  launch_app
+  WID=$(wait_window "$CLASS" 120)
+  [ -n "$WID" ] || { screenshot no-window; stop_recorded no-window "no browser window after 120 s"; }
+  if [ -n "$POSTLAUNCH" ]; then bash -c "$POSTLAUNCH" > "$OUT/postlaunch.log" 2>&1; screenshot after-postlaunch; fi
+  edge launch-settle start; sleep "$LAUNCH_SETTLE"; edge launch-settle end
+  screenshot after-launch-settle
+  # `chrome-data` does not appear in this script's command line, whose argument is chrome-hidden — but that is a
+  # fact to check rather than to rely on, and it is the same check the other two subjects need
+  check_tree chrome-tree
+  if [ "$APP" = chrome-hidden ]; then
+    renderer_gate "$((ORIGINS + 1))"
+    # the measured tabs are background pages from the launch — the control tab is first and stays selected — so
+    # the grace runs from here, and the moment is recorded rather than folded into one settle figure
+    edge backgrounded mark
+    edge grace-settle start; sleep "$GRACE_S"; edge grace-settle end
+    if [ "$CONTROL" = 1 ]; then pair steady "$STEADY"; else phase steady "$STEADY" ""; fi
+  else
+    renderer_gate "$ORIGINS"
+    # every window must still be on the timer step, or the phase is not the phase it claims
+    wait_for_step "timer $TIMER_MS ms" 30 || rec step.timer.incomplete 1
+    # the untraced control carries steady-notimer alone (decision 3): the timer phase's time is kept unmeasured, so
+    # the pages reach their no-timer step on the schedule the campaign's jobs had
+    if [ "$CONTROL" = 1 ]; then edge timer-wait start; sleep "$STEADY"; edge timer-wait end
+    else phase steady-timer "$STEADY" ""; fi
+    # the pages switch themselves off on their own schedule; the run waits for every window to report it
+    wait_for_step "no timer" "$STEP_WAIT" || stop_recorded timer-not-stopped \
+      "not every window reported the no-timer step within ${STEP_WAIT}s — the second phase would carry timers the first already had"
+    screenshot after-notimer
+    if [ "$CONTROL" = 1 ]; then pair steady-notimer "$STEADY"; else phase steady-notimer "$STEADY" ""; fi
+  fi
+}
+
+# ---- the tab set (9.10 D126–D129) -------------------------------------------------------------------------------
+
+# tabs_hold <arm> <phase> <seconds> — the phase's edges, and a listing of Chrome's tree every TABS_EVERY seconds
+# through it, the last at its end
+tabs_hold() {
+  local arm="$1" ph="$2" end
+  edge "$arm.$ph" start
+  end=$(( $(date +%s) + $3 ))
+  while [ "$(date +%s)" -lt "$end" ]; do
+    pin_harness python3 "$HERE/tabs.py" list --arm "$arm" --phase "$ph" --t0 "$ARM_T0" --pattern "$PAT" >> "$OUT/tabs.tsv"
+    sleep "$TABS_EVERY"
+  done
+  pin_harness python3 "$HERE/tabs.py" list --arm "$arm" --phase "$ph" --t0 "$ARM_T0" --pattern "$PAT" >> "$OUT/tabs.tsv"
+  edge "$arm.$ph" end
+}
+
+# tabs_arm <off|on> — one launch in a fresh profile, through the phases renderer-hidden's values come from (D129):
+# launch settle, the grace, the steady phase. The tabs are background pages from the launch, as the hidden subject's.
+tabs_arm() {
+  local arm="$1" n0 i
+  if [ "$arm" = off ]; then LAUNCH="$LAUNCH_OFF"; else LAUNCH="$LAUNCH_ON"; fi
+  rec "tabs.$arm.launch" "$LAUNCH"
+  rm -rf /tmp/chrome-data
+  n0="$(grep -c 'GET /idle-page.html' /tmp/idle-page/httpd.log 2>/dev/null)"
+  ARM_T0="$(date +%s%9N)"
+  launch_app
+  rec "tabs.$arm.affinity" "$(taskset -p "$APP_PID" 2>/dev/null | sed 's/.*: //' || echo unknown)"
+  WID=$(wait_window "$CLASS" 120)
+  [ -n "$WID" ] || { screenshot "no-window-$arm"; stop_recorded no-window "no browser window after 120 s ($arm)"; }
+  tabs_hold "$arm" launch-settle "$LAUNCH_SETTLE"
+  screenshot "after-launch-settle-$arm"
+  check_tree "chrome-tree-$arm"
+  # one request for the page per tab: each tab loaded its page (D129)
+  rec "tabs.$arm.page_loads" "$(( $(grep -c 'GET /idle-page.html' /tmp/idle-page/httpd.log 2>/dev/null) - n0 ))"
+  edge "$arm.backgrounded" mark
+  tabs_hold "$arm" grace "$GRACE_S"
+  tabs_hold "$arm" steady "$STEADY"
+  screenshot "after-steady-$arm"
+  # every renderer's whole command line, which the listing reduces to its role
+  for r in $(pgrep -f -- "--type=renderer" 2>/dev/null); do
+    printf '%s\t%s\t%s\n' "$arm" "$r" "$(tr '\0' ' ' < "/proc/$r/cmdline" 2>/dev/null)" >> "$OUT/renderers.tsv"
+  done
+  kill -- "-$APP_PID" 2>/dev/null
+  for i in $(seq 1 30); do pgrep -f -- "$PAT" > /dev/null || break; sleep 1; done
+  pkill -9 -f -- "$PAT" 2>/dev/null
+  rec "tabs.$arm.exit_s" "$i"
+}
+
+tabs_subject() {
+  export MEAS_ORIGINS="$TAB_ORIGINS" MEAS_TIMER_MS="$TIMER_MS" MEAS_PAGE_PORT="$PAGE_PORT"
+  appdef "$APP" || exit 0
+  rec rx "$RX"; rec pat "$PAT"; rec tabs.tabs "$((TAB_ORIGINS + 1))"; rec tabs.every_s "$TABS_EVERY"
+  # D128: the order alternates — odd repeats the spare off first, even repeats the spare on first
+  local arms
+  if [ $((REPEAT % 2)) -eq 1 ]; then arms="off on"; else arms="on off"; fi
+  rec tabs.order "$arms"
+  for arm in $arms; do tabs_arm "$arm"; done
+  cp /tmp/idle-page/httpd.log "$OUT/httpd.log" 2>/dev/null
+  python3 "$HERE/tabs.py" summary "$OUT" >> "$KV"
+}
+
+# ---- the chat client -----------------------------------------------------------------------------------------
+
+synapse_start() {
+  # The .deb installs a systemd unit and systemd would own the process, defeating the pin; the unit is masked
+  # and the homeserver is started here under pin_harness (method §2 subject 4).
+  sudo apt-get install -y --no-install-recommends lsb-release wget apt-transport-https > "$OUT/apt.synapse-pre.log" 2>&1
+  wget -qO /tmp/matrix-org-archive-keyring.gpg https://packages.matrix.org/debian/matrix-org-archive-keyring.gpg
+  sudo cp /tmp/matrix-org-archive-keyring.gpg /usr/share/keyrings/
+  echo "deb [signed-by=/usr/share/keyrings/matrix-org-archive-keyring.gpg] https://packages.matrix.org/debian/ $(lsb_release -cs) main" \
+    | sudo tee /etc/apt/sources.list.d/matrix-org.list > /dev/null
+  sudo apt-get update > /dev/null 2>&1
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends matrix-synapse-py3 > "$OUT/apt.synapse.log" 2>&1
+  rec apt.synapse.rc "$?"
+  rec synapse.version "$(dpkg-query -W -f='${Version}' matrix-synapse-py3 2>/dev/null)"
+  sudo systemctl mask matrix-synapse.service > /dev/null 2>&1
+  sudo systemctl stop matrix-synapse.service > /dev/null 2>&1
+  mkdir -p "$SYNAPSE_DIR"
+  pin_harness /opt/venvs/matrix-synapse/bin/python -m synapse.app.homeserver \
+    --server-name meas.local --config-path "$SYNAPSE_DIR/homeserver.yaml" --generate-config \
+    --report-stats=no --data-directory "$SYNAPSE_DIR" > "$OUT/synapse.generate.log" 2>&1
+  rec synapse.generate.rc "$?"
+  # the generated config already listens on 8008 for the client API and carries a random
+  # registration_shared_secret; it is read back rather than overridden, so there is no second `listeners:` key
+  MATRIX_SECRET="$(sed -n 's/^registration_shared_secret: *"\{0,1\}\([^"]*\)"\{0,1\} *$/\1/p' "$SYNAPSE_DIR/homeserver.yaml" | head -1)"
+  rec synapse.secret_read "$([ -n "$MATRIX_SECRET" ] && echo yes || echo no)"
+  # --generate-config routes the server's own log to a file of its choosing, not to stdout: the dry run of
+  # 2026-09-20 grepped the stdout redirect for /sync, found nothing, and gated a job that was signed in.
+  SYNAPSE_LOG="$(grep -o 'will log to [^ ]*' "$OUT/synapse.generate.log" | head -1 | awk '{print $4}')"
+  rec synapse.logfile "${SYNAPSE_LOG:-unset}"
+  # keys the generated config does not set, so appending them makes no duplicate: no federation at all, which
+  # keeps the observation local and stops the server reaching the trusted key server it warns about
+  { echo "federation_domain_whitelist: []"; echo "suppress_key_server_warning: true"; } >> "$SYNAPSE_DIR/homeserver.yaml"
+  # longhand taskset, not pin_harness: a function backgrounded forks a subshell, so $! would be the subshell and
+  # element_cleanup would kill that instead of the homeserver
+  if [ "$MEAS_PIN_AVAILABLE" = 1 ]; then
+    taskset -c "$MEAS_HARNESS_CPUS" setsid /opt/venvs/matrix-synapse/bin/python -m synapse.app.homeserver \
+      --config-path "$SYNAPSE_DIR/homeserver.yaml" > "$OUT/synapse.log" 2>&1 &
+  else
+    setsid /opt/venvs/matrix-synapse/bin/python -m synapse.app.homeserver \
+      --config-path "$SYNAPSE_DIR/homeserver.yaml" > "$OUT/synapse.log" 2>&1 &
+  fi
+  echo $! > "$OUT/synapse.pid"
+  local i
+  for i in $(seq 1 60); do
+    curl -sf "http://127.0.0.1:$SYNAPSE_PORT/health" > /dev/null 2>&1 && break
+    sleep 2
+  done
+  rec synapse.health "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$SYNAPSE_PORT/health")"
+}
+
+element_setup() {
+  synapse_start
+  grep -q '^synapse.health=200$' "$KV" || stop_recorded no-homeserver "Synapse did not answer /health — stopping before any measurement"
+  # the account: register_new_matrix_user against the shared secret, so open registration is never left running
+  # -c, not -k: register_new_matrix_user reads the shared secret from the config itself, so the secret never
+  # makes a round trip through the shell. The dry run of 2026-09-20 failed here with "-k/--shared-secret:
+  # expected one argument" although the read-back had reported a value.
+  pin_harness /opt/venvs/matrix-synapse/bin/register_new_matrix_user \
+    -u "$MATRIX_USER" -p "$MATRIX_PASS" -a --exists-ok -c "$SYNAPSE_DIR/homeserver.yaml" \
+    "http://127.0.0.1:$SYNAPSE_PORT" > "$OUT/register.log" 2>&1
+  rec matrix.register.rc "$?"
+  wget -qO /tmp/element-io-archive-keyring.gpg https://packages.element.io/debian/element-io-archive-keyring.gpg
+  sudo cp /tmp/element-io-archive-keyring.gpg /usr/share/keyrings/
+  echo "deb [signed-by=/usr/share/keyrings/element-io-archive-keyring.gpg] https://packages.element.io/debian/ default main" \
+    | sudo tee /etc/apt/sources.list.d/element-io.list > /dev/null
+  sudo apt-get update > /dev/null 2>&1
+  sudo apt-get install -y --no-install-recommends element-desktop > "$OUT/apt.element.log" 2>&1
+  rec apt.element.rc "$?"
+  # under `timeout`, and from the package first: an Electron binary given --version may start its GUI instead of
+  # printing and exiting, and the dry runs of 2026-09-20 hung here twice — the last key recorded was
+  # apt.element.rc, and the next statement is this one.
+  rec element.version "$(dpkg-query -W -f='${Version}' element-desktop 2>/dev/null || timeout 20 element-desktop --version 2>&1 | head -1)"
+  # Element Desktop reads config.json from its user-data directory. The environment variable alone did not take:
+  # the dry run of 2026-09-20 reached the sign-in step showing matrix.org, the public server, which this job must
+  # never contact — no account of ours exists there and it is a third party's service.
+  mkdir -p "$HOME/.config/Element"
+  printf '{"default_server_config":{"m.homeserver":{"base_url":"http://127.0.0.1:%s","server_name":"meas.local"}},"disable_custom_urls":true,"show_labs_settings":false,"disable_guests":true}' \
+    "$SYNAPSE_PORT" > "$HOME/.config/Element/config.json"
+  rec element.config "$(cat "$HOME/.config/Element/config.json")"
+  export ELEMENT_DESKTOP_CONFIG_JSON="$HOME/.config/Element/config.json"
+  # --disable-gpu alone is what meas-gui.yml used, but Element 1.12.28 died with "GPU process launch failed:
+  # error_code=1002 … GPU process isn't usable. Goodbye." and showed its "System unsupported" page: Electron
+  # treats an unusable GPU process as fatal where Chrome tolerates it. The GPU sandbox is disabled with the
+  # rest, and /dev/shm is not used, which is the shape a hosted runner needs.
+  # --password-store=basic: a hosted runner has no gnome-keyring or kwallet, and Electron's safeStorage then
+  # puts up "Your system has an unsupported keyring meaning the database cannot be opened" — a modal the dry run
+  # of 2026-09-20 found sitting where the login form should have been, titled "System unsupported". The dialog
+  # names this argument as the fix. The client therefore stores its session with Electron's basic backend, which
+  # the entry's scope states.
+  LAUNCH="element-desktop --no-sandbox --disable-gpu --disable-gpu-sandbox --disable-software-rasterizer --disable-dev-shm-usage --password-store=basic"
+  # PAT must not match this script's own command line, `run.sh element 1 dry`: snapshot.py roots on any process
+  # whose command line or comm matches and then walks descendants, so the old `element-desktop|element` made
+  # run.sh the root and pulled in Xvfb, Synapse and the snapshot helper. The dry run of 2026-09-20 then read
+  # `python` — the homeserver — as the entry's largest component, the very process the method pins away.
+  CLASS="element|Element"; PAT="element-desktop"; RX="element|Element"
+  rec launch "$LAUNCH"; rec rx "$RX"; rec pat "$PAT"
+  launch_app
+  WID=$(wait_window "$CLASS" 180)
+  [ -n "$WID" ] || { screenshot no-window; stop_recorded no-window "no Element window after 180 s"; }
+  sleep 20; screenshot before-modal
+  # Electron's safeStorage finds no keyring on a hosted runner and Element puts up "Your system has an
+  # unsupported keyring meaning the database cannot be opened", titled "System unsupported", where the login
+  # form should be. --password-store=basic does not suppress it — isEncryptionAvailable() is false for that
+  # backend — so the dialog's own offer is taken: "Use weaker encryption", its right-hand button. The client
+  # therefore stores its session with Electron's basic backend, which the entry's scope states.
+  if pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "system unsupported"; then
+    rec element.keyring_modal 1
+    click_right_button "$WID" element.keyring
+    screenshot after-keyring-modal
+    W2=$(wait_window "$CLASS" 120); [ -n "$W2" ] && WID="$W2"
+    rec element.window_after_modal "$(pin_harness xdotool getwindowname "$WID" 2>/dev/null)"
+    sleep 15
+  fi
+  screenshot before-login
+  # Element opens on a welcome screen — "Be in your element", with Sign in and Create account — and the
+  # username and password fields exist only after Sign in is clicked. The dry run of 2026-09-20 typed the
+  # credentials into that screen, which has no fields, and the job stopped at gate=not-logged-in. Sign in sits
+  # centred, about a third of the way down the window. A screenshot follows each step so that a failure says
+  # which one.
+  pin_harness xdotool windowactivate --sync "$WID"
+  eval "$(pin_harness xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
+  pin_harness xdotool mousemove $((X + WIDTH / 2)) $((Y + HEIGHT * 35 / 100)) click 1
+  sleep 8; screenshot after-signin
+  # Recorded, not gated on: Element does not contact the homeserver until the credentials are submitted, so a
+  # count of zero here is normal and an earlier run stopped on it wrongly. That the config took is evidenced at
+  # submit time instead, by the /sync check below — and by the sign-in step naming the server, which the
+  # after-signin screenshot carries.
+  rec matrix.client_requests_before_submit "$(grep -c '/_matrix/client/' "${SYNAPSE_LOG:-/dev/null}" 2>/dev/null || echo 0)"
+  # With the homeserver preconfigured there is no intermediate step: the form is on the sign-in screen with the
+  # username field already focused. An earlier run clicked where a Continue button would have been and landed on
+  # the "Sign in with" dropdown.
+  pin_harness xdotool windowactivate --sync "$WID"
+  pin_harness xdotool type --delay 40 "$MATRIX_USER"
+  pin_harness xdotool key --clearmodifiers Tab; sleep 0.5
+  pin_harness xdotool type --delay 40 "$MATRIX_PASS"
+  sleep 1; screenshot after-credentials
+  # The Sign in button is clicked, not Return: the dry run of 2026-09-20 filled the form correctly — the
+  # screenshot shows meas.local, the username and a password of the right length — and Return did not submit
+  # it. It sits below the password field, about three fifths of the way down the window.
+  eval "$(pin_harness xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
+  pin_harness xdotool mousemove $((X + WIDTH * 60 / 100)) $((Y + HEIGHT * 59 / 100)) click 1
+  sleep 30; screenshot after-login
+  # verified from the server's side: a signed-in client holds a /sync long poll, and a signed-out one cannot
+  cp -f "${SYNAPSE_LOG:-/dev/null}" "$OUT/homeserver.log" 2>/dev/null
+  rec matrix.sync_rows "$(grep -c '/_matrix/client/.*/sync' "$OUT/homeserver.log" 2>/dev/null || echo 0)"
+  [ "$(grep -c '/_matrix/client/.*/sync' "$OUT/homeserver.log" 2>/dev/null || echo 0)" -gt 0 ] \
+    || stop_recorded not-logged-in "no /sync request reached the homeserver — the client is not signed in, so the idle phase is a login screen (D7)"
+  edge launch-settle start; sleep "$LAUNCH_SETTLE"; edge launch-settle end
+  check_tree element-tree
+}
+
+element_traffic_driver() {   # <seconds> — a client-server API script on the harness CPUs, not an Element window
+  echo "python3 $HERE/traffic.py --base http://127.0.0.1:$SYNAPSE_PORT --user $MATRIX_USER --password $MATRIX_PASS --per-min $TRAFFIC_PER_MIN --seconds $1 --out $OUT/traffic.jsonl"
+}
+
+element_cleanup() {
+  cp -f "${SYNAPSE_LOG:-/dev/null}" "$OUT/homeserver.log" 2>/dev/null   # the server's own log, into the artifact
+  kill "$(cat "$OUT/synapse.pid" 2>/dev/null)" 2>/dev/null
+}
+
+# ---- the Steam desktop client --------------------------------------------------------------------------------
+
+steam_setup() {
+  # this job alone runs a window manager: minimising is a window-manager operation, and the shown-against-
+  # minimised comparison is what turns D5's inference into an observation (method §2 subject 5)
+  apt_install openbox
+  if [ "$MEAS_PIN_AVAILABLE" = 1 ]; then taskset -c "$MEAS_HARNESS_CPUS" setsid openbox > "$OUT/openbox.log" 2>&1 &
+  else setsid openbox > "$OUT/openbox.log" 2>&1 & fi
+  echo $! > "$OUT/openbox.pid"; sleep 3
+  rec wm "openbox $(openbox --version 2>&1 | head -1)"
+  sudo dpkg --add-architecture i386 > /dev/null 2>&1; sudo apt-get update > /dev/null 2>&1
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y steam-installer > "$OUT/apt.steam.log" 2>&1
+  rec apt.steam.rc "$?"
+  # no account is used and none may be: Steam Subscriber Agreement §4.C and §1.C (D6). The job signs into
+  # nothing, drives no store and performs no account action.
+  LAUNCH="steam"
+  # as above: `steam` matched `run.sh steam 1 dry` and rooted the tree at this script, taking in Xvfb and the
+  # window manager. The install path appears in every Steam process's command line and in none of ours.
+  CLASS="Steam|steam"; PAT="debian-installation"; RX="steam|Steam"
+  rec launch "$LAUNCH"; rec rx "$RX"; rec pat "$PAT"
+  launch_app
+  # `steam-installer` is a bootstrap: the first `steam` opens a window named "Steam installer" which downloads
+  # the real client. The dry run of 2026-09-20 measured that dialog — `steam.helpers` 0 in both phases and no
+  # row matching the process regex — so the window alone is not the signal. The client is up when its CEF
+  # helpers exist, which is also what D5's open question is about, so that is what the run waits for.
+  WID=$(wait_window "$CLASS" 300)
+  [ -n "$WID" ] || { screenshot no-window; stop_recorded no-window "no Steam window after 300 s — the client may not hold a stable state logged out (D6's fallback)"; }
+  rec steam.first_window "$(pin_harness xdotool getwindowname "$WID" 2>/dev/null)"
+  # `steam-installer` ships a bootstrap, and its first run puts up a zenity consent dialog — "Steam is
+  # proprietary (binary-only) software … Steam will be installed into ~/.steam/debian-installation", Cancel or
+  # Install — and waits. The dry run of 2026-09-20 sat on it for 900 s. This accepts the package's own
+  # installation prompt, which is what D6 already decided when it said the probe installs and launches the
+  # client; it is not an account action, and none is taken anywhere.
+  if pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer"; then
+    rec steam.installer_dialog 1
+    pin_harness xdotool windowactivate --sync "$WID" 2>/dev/null
+    # The Install button is clicked by position, never by Return: the dry run of 2026-09-20 pressed Return and
+    # the log read "steam: Installation cancelled" — zenity's default button here is Cancel, on the left, with
+    # Install on the right of the bottom row.
+    click_right_button "$WID" steam.installer
+    rec steam.installer_dismissed "$(pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer" && echo no || echo yes)"
+    screenshot after-installer-consent
+  fi
+  for i in $(seq 1 "$STEAM_CLIENT_WAIT"); do
+    [ "$(pgrep -cf steamwebhelper 2>/dev/null | head -1)" -gt 0 ] && break
+    sleep 1
+  done
+  rec steam.helpers.at_launch "$(pgrep -cf steamwebhelper 2>/dev/null | head -1)"
+  [ "$(pgrep -cf steamwebhelper 2>/dev/null | head -1)" -gt 0 ] || {
+    screenshot no-client
+    stop_recorded no-steam-client "the bootstrap did not reach a running client within ${STEAM_CLIENT_WAIT}s — no steamwebhelper (D6's fallback: the binding retires to 9.10 instead of being measured)"
+  }
+  # the client's own window, once the bootstrap's dialog has gone
+  W2=$(wait_window "$CLASS" 120); [ -n "$W2" ] && WID="$W2"
+  rec steam.client_window "$(pin_harness xdotool getwindowname "$WID" 2>/dev/null)"
+  screenshot after-client
+  # the client's own build id: the dry run of 2026-09-20 found it in the web helper's command line, as
+  # -buildid=, beside -steamid=0 which is the logged-out state D6 requires
+  rec steam.package "$(dpkg-query -W -f='${Package} ${Version}' steam-installer 2>/dev/null)"
+  rec steam.buildid "$(tr '\0' ' ' < /proc/$(pgrep -f steamwebhelper | head -1)/cmdline 2>/dev/null | grep -o 'buildid=[0-9]*' | head -1 | cut -d= -f2)"
+  rec steam.steamid "$(tr '\0' ' ' < /proc/$(pgrep -f steamwebhelper | head -1)/cmdline 2>/dev/null | grep -o 'steamid=[0-9]*' | head -1 | cut -d= -f2)"
+  edge launch-settle start; sleep "$LAUNCH_SETTLE"; edge launch-settle end
+  check_tree steam-tree
+}
+
+steam_record_helpers() {   # <label> — D5's open question: each helper's --type= role and full command line
+  local label="$1"
+  for p in $(pgrep -f steamwebhelper 2>/dev/null); do
+    printf '%s\t%s\t%s\n' "$label" "$p" "$(tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null)" >> "$OUT/steam-helpers.tsv"
+  done
+  # pgrep -c prints its count and exits 1 when there are none, so `|| echo 0` printed a second line and `rec`
+  # wrote a bare `0` into report.kv
+  rec "steam.helpers.$label" "$(pgrep -cf steamwebhelper 2>/dev/null | head -1)"
+}
+
+# ---- the job ---------------------------------------------------------------------------------------------------
+
+rec family desktop; rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE_ARG"; rec control "$CONTROL"; rec started_utc "$(date -u +%FT%TZ)"
+[ "$CONTROL" = 1 ] && rec control.order "$ORDER"
+rec settings.origins "$ORIGINS"; rec settings.timer_ms "$TIMER_MS"; rec settings.grace_s "$GRACE_S"
+rec settings.homeserver "$HOMESERVER"; rec settings.traffic_per_min "$TRAFFIC_PER_MIN"
+rec launch_settle_s "${LAUNCH_SETTLE:-unset}"; rec steady_s "${STEADY:-unset}"
+pin_record | tee -a "$KV" | sed 's/^/  /' >&2
+python3 "$MEAS/runner_spec.py" > "$OUT/spec.json"
+# the untraced control's decision 9: the schedstats switch, which neither perf nor this job sets
+rec sysctl.sched_schedstats "$(cat /proc/sys/kernel/sched_schedstats 2>/dev/null || echo unknown)"
+
+# same-machine repeats (9.6 D10; 9.5 D26): a job that drew another CPU model stops here, recorded, before any
+# install or measurement
+source "$MEAS/machine_gate.sh"
+rec machine.model "$(machine_model)"; rec machine.wanted "${MEAS_CPU_MODEL:-}"
+if ! machine_gate "${MEAS_CPU_MODEL:-}"; then
+  rec gate wrong-machine; rec finished_utc "$(date -u +%FT%TZ)"; finish_report
+  echo "machine gate: wanted '${MEAS_CPU_MODEL}', drew '$(machine_model)' — stopping before any measurement" >&2
+  exit 0
+fi
+if [ -z "$LAUNCH_SETTLE" ] || [ -z "$STEADY" ]; then
+  rec gate no-phase-lengths; rec finished_utc "$(date -u +%FT%TZ)"; finish_report
+  echo "phases: no launch-settle or steady length stated for $APP (method §3) — stopping before any measurement" >&2
+  exit 0
+fi
+rec gate open
+
+sudo apt-get update > /dev/null 2>&1
+apt_install xdotool x11-apps dbus-x11 imagemagick
+sudo apt-get install -y --no-install-recommends linux-tools-common "linux-tools-$(uname -r)" > "$OUT/apt.perf.log" 2>&1; rec apt.perf.rc "$?"
+rec perf.version "$(perf --version 2>&1 | head -1)"
+rec kernel "$(uname -r)"
+grep -E "CONFIG_(PERF_EVENTS|SCHED_TRACER|TASKSTATS|TASK_DELAY_ACCT|HZ)" "/boot/config-$(uname -r)" > "$OUT/kconfig.txt" 2>/dev/null
+rec kernel.hz "$(grep -E '^CONFIG_HZ=' "/boot/config-$(uname -r)" 2>/dev/null | head -1)"
+start_xvfb
+
+case "$APP" in
+  chrome-hidden|chrome-visible) chrome_subject ;;
+  chrome-tabs) tabs_subject ;;
+  launch-*) launch_subject "${APP#launch-}" ;;
+  element)
+    element_setup
+    if [ "$CONTROL" = 1 ]; then pair idle "$STEADY"     # decision 3: the traffic phase is carried by no archetype
+    else
+      phase idle "$STEADY" ""
+      [ "$MODE" = probe ] || phase traffic "$STEADY" "$(element_traffic_driver "$STEADY")"
+    fi ;;
+  steam)
+    steam_setup
+    steam_record_helpers shown
+    if [ "$CONTROL" = 1 ]; then pair shown "$STEADY"    # decision 3: the minimised phase is carried by no archetype
+    else
+    phase shown "$STEADY" ""
+    if [ "$MODE" != probe ]; then
+      pin_harness xdotool windowminimize "$WID"; sleep 10; screenshot after-minimize
+      steam_record_helpers minimised
+      phase minimised "$STEADY" ""
+    fi
+    fi ;;
+  *) rec error "unknown app $APP" ;;
+esac
+
+kill -- "-$APP_PID" 2>/dev/null; sleep 2; kill -9 -- "-$APP_PID" 2>/dev/null
+appdef_cleanup
+case "$APP" in element|launch-element) element_cleanup ;; esac
+kill "$(cat "$OUT/openbox.pid" 2>/dev/null)" 2>/dev/null
+kill "$(cat "$OUT/xvfb.pid" 2>/dev/null)" 2>/dev/null
+rec finished_utc "$(date -u +%FT%TZ)"
+sudo chown -R "$(id -u):$(id -g)" "$OUT" 2>/dev/null
+finish_report

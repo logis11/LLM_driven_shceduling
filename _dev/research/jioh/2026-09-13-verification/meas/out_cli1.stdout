@@ -1,0 +1,168 @@
+{
+  "compiler_lifetime_median_us": {
+    "n_repeats": 5,
+    "median": 103548,
+    "min": 103106,
+    "max": 106629
+  },
+  "compiler_lifetime_sigma_log": {
+    "n_repeats": 5,
+    "median": 2.368,
+    "min": 2.361,
+    "max": 2.371
+  },
+  "compiler_children": {
+    "n_repeats": 5,
+    "median": 11844,
+    "min": 11806,
+    "max": 11914
+  },
+  "compiler_cpu_mean_us": {
+    "n_repeats": 5,
+    "median": 56610,
+    "min": 54720,
+    "max": 59456
+  },
+  "compiler_life_mean_us": {
+    "n_repeats": 5,
+    "median": 663139,
+    "min": 654007,
+    "max": 676121
+  },
+  "compiler_cold_lifetime_median_us": null,
+  "compiler_cold_lifetime_sigma_log": null,
+  "compiler_cold_children": null,
+  "compiler_cold_cpu_mean_us": null,
+  "compiler_cold_life_mean_us": null,
+  "make_dispatch_us": {
+    "n_repeats": 5,
+    "median": 253,
+    "min": 243,
+    "max": 255
+  },
+  "fork_rate_hz": {
+    "n_repeats": 5,
+    "median": 23.0,
+    "min": 22.5,
+    "max": 23.2
+  },
+  "rsync_duty": {
+    "n_repeats": 5,
+    "median": 1.135,
+    "min": 0.96,
+    "max": 1.211
+  },
+  "rsync_proc_duty": {
+    "n_repeats": 5,
+    "median": 0.259,
+    "min": 0.249,
+    "max": 0.283
+  },
+  "untar_duty": {
+    "n_repeats": 5,
+    "median": 1.347,
+    "min": 1.166,
+    "max": 1.365
+  },
+  "untar_proc_duty": {
+    "n_repeats": 5,
+    "median": 0.733,
+    "min": 0.726,
+    "max": 0.744
+  },
+  "clamscan_duty": {
+    "n_repeats": 5,
+    "median": 0.991,
+    "min": 0.986,
+    "max": 0.993
+  },
+  "clamscan_proc_duty": {
+    "n_repeats": 5,
+    "median": 1.0,
+    "min": 0.999,
+    "max": 1.0
+  },
+  "updatedb_duty": {
+    "n_repeats": 5,
+    "median": 0.84,
+    "min": 0.426,
+    "max": 0.848
+  },
+  "updatedb_proc_duty": null,
+  "wget_duty": {
+    "n_repeats": 5,
+    "median": 0.0,
+    "min": 0.0,
+    "max": 0.03
+  },
+  "wget_proc_duty": {
+    "n_repeats": 2,
+    "median": 0.022,
+    "min": 0.013,
+    "max": 0.031
+  },
+  "tar_cold_duty": null,
+  "tar_cold_proc_duty": null,
+  "rsync_cold_duty": null,
+  "rsync_cold_proc_duty": null,
+  "clamscan_cold_duty": null,
+  "clamscan_cold_proc_duty": null,
+  "updatedb_cold_duty": null,
+  "updatedb_cold_proc_duty": null,
+  "tracker": {
+    "procs": 0,
+    "gap": null,
+    "work": null
+  },
+  "chromium_peak_procs": {
+    "n_repeats": 5,
+    "median": 22,
+    "min": 21,
+    "max": 22
+  },
+  "element": {
+    "procs": 15,
+    "gap": {
+      "n": 15,
+      "median_us": 1848645,
+      "sigma_log": 1.088,
+      "p90_us": 3914474
+    },
+    "work": {
+      "n": 15,
+      "median_us": 289,
+      "sigma_log": 0.713,
+      "p90_us": 826
+    }
+  },
+  "chromium": {
+    "procs": 50,
+    "gap": {
+      "n": 50,
+      "median_us": 1609098,
+      "sigma_log": 1.718,
+      "p90_us": 12541667
+    },
+    "work": {
+      "n": 42,
+      "median_us": 647,
+      "sigma_log": 0.94,
+      "p90_us": 2936
+    }
+  },
+  "daemons": {
+    "procs": 51,
+    "gap": {
+      "n": 51,
+      "median_us": 11239013,
+      "sigma_log": 1.898,
+      "p90_us": 120600000
+    },
+    "work": {
+      "n": 29,
+      "median_us": 155,
+      "sigma_log": 0.809,
+      "p90_us": 280
+    }
+  }
+}

@@ -31,7 +31,7 @@ def runs_from_manifest(doc):
             paths = {k: (pathlib.Path(r[k]) if r.get(k) else None) for k in _PATHS}
             runs.append(Run(workload_id=r["workload_id"], condition=r["condition"],
                             table=str(r.get("table", "")), seed=str(r.get("seed", "")),
-                            boot_default=str(r.get("boot_default", "")),
+                            boot_default=str(r.get("boot_default", "")), telemetry=str(r.get("telemetry", "")),
                             guard_messages=r.get("guard_messages"), **paths))
         except KeyError as exc:
             raise GuardError(f"manifest run {i}: missing {exc}") from None

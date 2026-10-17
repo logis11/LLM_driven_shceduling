@@ -10,9 +10,10 @@ schema, the compiled files, the pinned scoring spec's terms, the guard
 registry, the registries of criterion and line types, and the pins' bytes.
 
 `evaluate` reads a spec and the harness's four output files — aggregates,
-scores, guards, grades — verifies the pins, computes every file's score per
-condition, applies the criterion, echoes the spec's pre-registered
-statements, and returns the report: one JSON document
+scores, guards, grades — verifies the pins, expands the spec's selections
+from the generated layer's manifests (9.21 decision 6; `manifests.py`),
+computes every file's score per condition, applies the criterion, echoes the
+spec's pre-registered statements, and returns the report: one JSON document
 (schema `report.schema.json`) whose every number carries the fields that
 locate it. A pin mismatch, an incomplete run set, or an unknown type is a
 refusal (`GateError`), never a verdict. A non-exempt guard failure on a run
@@ -35,7 +36,7 @@ import jsonschema
 import yaml
 
 from . import aggregates as agg
-from . import grader, guards, scorer, scoring
+from . import grader, guards, manifests, scorer, scoring
 from .outputs import read_csv
 
 HARNESS = pathlib.Path(__file__).resolve().parents[2]
@@ -43,7 +44,7 @@ EXPERIMENTS = HARNESS / "experiments"
 SPEC_SCHEMA = EXPERIMENTS / "schema" / "experiment-spec.schema.json"
 REPORT_SCHEMA = EXPERIMENTS / "schema" / "report.schema.json"
 
-CONDITIONS = ("fixed", "random", "whitelist", "llm_vocab", "llm_algo", "llm_full", "oracle")
+CONDITIONS = ("fixed", "random", "shipped_catalogue", "strongest_name_table", "llm_vocab", "llm_algo", "llm_full", "oracle")
 PINS = ("scoring_spec", "guard_spec", "driver_table", "dataset")
 PROVENANCE_AGGREGATES = tuple(f"time_share_{p}" for p in agg.PROVENANCES) + ("fallback_share",)
 PLACES = scorer.PLACES
@@ -89,8 +90,11 @@ def _schema_errors(spec):
 
 def _pin_errors(spec, root):
     errors = []
-    for name in PINS:
-        pin = (spec.get("pins") or {}).get(name)
+    pins = spec.get("pins") or {}
+    named = [(name, pins.get(name)) for name in PINS]
+    named += [(f"variants/{name}", pin) for name, pin in sorted((pins.get("variants") or {}).items())]
+    named += [(f"generated/{name}", pin) for name, pin in sorted((pins.get("generated") or {}).items())]
+    for name, pin in named:
         if not isinstance(pin, dict):
             continue
         path = pathlib.Path(root) / pin.get("path", "")
@@ -106,6 +110,21 @@ def _pin_errors(spec, root):
 def _listed(spec):
     files = spec.get("files") or {}
     return list(files.get("judging") or []), list(files.get("reporting") or [])
+
+
+def _expanded(spec, root):
+    """The spec with its selections expanded (9.21 decision 6), the selected files' compiled paths and their axes;
+    a selection that cannot be expanded is a `GateError`."""
+    try:
+        return manifests.expand(spec, root)
+    except ValueError as err:
+        raise GateError(str(err)) from None
+
+
+def _variants(spec):
+    """The variant files (9.14 decisions 10 and 12): rebuilt judging files the
+    sensitivity lines read — run under the primary boot default, never judged."""
+    return list((spec.get("files") or {}).get("variants") or [])
 
 
 # --------------------------------------------------------------------- lint
@@ -124,7 +143,12 @@ def lint_spec(spec_path, schema_path, build_dir, root):
     if errors:
         return errors
     build_dir = pathlib.Path(build_dir)
+    try:
+        spec, paths, _axes = manifests.expand(spec, root)          # 9.21 decision 6: the selections as ids
+    except ValueError as err:
+        return [str(err)] + _pin_errors(spec, root)
     judging, reporting = _listed(spec)
+    variants = _variants(spec)
     conditions = spec["conditions"]
 
     crit = spec["criterion"]
@@ -147,6 +171,18 @@ def lint_spec(spec_path, schema_path, build_dir, root):
                                   f"nor a boot default of the line")
         elif line["type"] == "note" and line["workload"] not in judging + reporting:
             errors.append(f"reporting_lines/{i}: note workload {line['workload']!r} is not a listed file")
+        elif line["type"] in ("variant_set", "trace_replay"):
+            for base, variant in (line.get("files") or {}).items():
+                if base not in judging:
+                    errors.append(f"reporting_lines/{i}: {base!r} is not a judging file")
+                if variant not in variants:
+                    errors.append(f"reporting_lines/{i}: {variant!r} is not a listed variant file")
+        elif line["type"] == "bounding_pair":
+            for key in ("a", "b"):
+                if line[key] not in judging + reporting + variants:
+                    errors.append(f"reporting_lines/{i}: {line[key]!r} is not a listed file")
+        elif line["type"] == "longest_wait" and int(line["reopen_us"]) > int(line["threshold_us"]):
+            errors.append(f"reporting_lines/{i}: reopen_us lies past threshold_us")
     for i, ex in enumerate(spec["guard_exemptions"]):
         if ex["guard"] not in guards.GUARDS:
             errors.append(f"guard_exemptions/{i}: guard {ex['guard']!r} is not in the guard registry")
@@ -158,11 +194,14 @@ def lint_spec(spec_path, schema_path, build_dir, root):
     both = sorted(set(judging) & set(reporting))
     if both:
         errors.append(f"files listed as both judging and reporting: {both}")
+    twice = sorted(set(variants) & set(judging + reporting))
+    if twice:
+        errors.append(f"files listed as variants and as judging or reporting: {twice}")
 
     # the compiled files and the derived exclusions
     with_miss = []
-    for wid in judging + reporting:
-        path = build_dir / f"{wid}.workload.json"
+    for wid in judging + reporting + variants:
+        path = manifests.workload_path(wid, paths, build_dir)
         if not path.is_file():
             errors.append(f"file {wid!r} is not in the build ({build_dir})")
             continue
@@ -171,7 +210,7 @@ def lint_spec(spec_path, schema_path, build_dir, root):
         except (OSError, ValueError, KeyError) as exc:
             errors.append(f"file {wid!r}: unreadable ground truth: {exc}")
             continue
-        if any(s.pre_committed_miss for s in segments):
+        if any(s.pre_committed_miss for s in segments) and wid not in variants:
             with_miss.append(wid)
     declared = sorted(spec["layer1_exclusions"])
     if declared != sorted(with_miss) and not any("is not in the build" in e for e in errors):
@@ -210,7 +249,8 @@ class _Set:
     def __init__(self, spec, agg_rows, score_rows, guard_rows, grade_rows):
         self.spec = spec
         self.judging, self.reporting = _listed(spec)
-        self.listed = self.judging + self.reporting
+        self.variants = _variants(spec)
+        self.listed = self.judging + self.reporting + self.variants
         self.agg_rows = [r for r in agg_rows if r["workload_id"] in self.listed]
         self.file_rows = {_identity(r): r for r in score_rows
                           if r["level"] == "file" and r["workload_id"] in self.listed}
@@ -220,30 +260,34 @@ class _Set:
         self.reference, self.compared = crit["reference"], crit["compared"]
         self.n_seeds = int(spec["seed_count"])
         self.boots = [""] + list(spec["boot_defaults"]["alternatives"])
+        # 9.17: the criterion is judged on the first telemetry shape the spec lists; runs under any other listed
+        # shape are scored and graded beside it and read by no criterion
+        self.telemetry = str(spec["telemetry"][0])
 
     def scored(self, wid, condition, boot):
-        """File-level score rows of `condition` on `wid` scored against `boot`, by seed."""
+        """File-level score rows of `condition` on `wid` scored against `boot`, by seed, under the judged shape."""
         return {k[3]: r for k, r in self.file_rows.items()
-                if k[0] == wid and k[1] == condition and k[4] == boot}
+                if k[0] == wid and k[1] == condition and k[4] == boot and k[5] == self.telemetry}
 
     def runs_feeding(self, wid, boot):
         """Identities (own) of the runs a gap under `boot` reads."""
         found = set()
         for key in self.file_rows:
-            if key[0] != wid:
+            if key[0] != wid or key[5] != self.telemetry:
                 continue
             cond = key[1]
             if cond == "fixed" and key[4] == boot:
                 # the scorer stamps fixed's rows with the group's table; the run itself has none
-                found.add((wid, "fixed", "", "", boot))
+                found.add((wid, "fixed", "", "", boot, key[5]))
             elif cond in (self.reference, self.compared) and key[4] == boot:
-                found.add((wid, cond, key[2], key[3], ""))
+                found.add((wid, cond, key[2], key[3], "", key[5]))
         return found
 
     def check_complete(self):
         for wid in self.judging:
             for boot in self.boots:
-                fixed = [k for k in self.file_rows if k[0] == wid and k[1] == "fixed" and k[4] == boot]
+                fixed = [k for k in self.file_rows
+                         if k[0] == wid and k[1] == "fixed" and k[4] == boot and k[5] == self.telemetry]
                 if not fixed:
                     raise GateError(f"{wid}: no fixed run scored against boot default {boot or 'the primary'!r}")
                 if not self.scored(wid, self.reference, boot):
@@ -260,6 +304,16 @@ class _Set:
                 if run not in guarded:
                     raise GateError(f"{wid}: no guard rows for run {run[1]}"
                                     f"{' seed ' + run[3] if run[3] else ''}; the guards were not run on it")
+        for wid in self.variants:                        # run under the primary boot default alone
+            if not [k for k in self.file_rows
+                    if k[0] == wid and k[1] == "fixed" and k[4] == "" and k[5] == self.telemetry]:
+                raise GateError(f"{wid}: no fixed run scored against the primary boot default (a variant file)")
+            if not self.scored(wid, self.reference, ""):
+                raise GateError(f"{wid}: no {self.reference} run scored against the primary (a variant file)")
+            seeds = self.scored(wid, self.compared, "")
+            if len(seeds) != self.n_seeds:
+                raise GateError(f"{wid}: {len(seeds)} {self.compared} seed(s) scored against the primary, the spec "
+                                f"names {self.n_seeds} (a variant file)")
 
 
 # ------------------------------------------------------------- criterion
@@ -280,8 +334,10 @@ def _gap_rows(rs: _Set, g: Fraction, file_rows=None, boots=None, unavailable=())
     rows = []
     for wid in rs.listed:
         for boot in (rs.boots if boots is None else boots):
-            ref = {k[3]: r for k, r in file_rows.items() if k[0] == wid and k[1] == rs.reference and k[4] == boot}
-            cmp = {k[3]: r for k, r in file_rows.items() if k[0] == wid and k[1] == rs.compared and k[4] == boot}
+            ref = {k[3]: r for k, r in file_rows.items()
+                   if k[0] == wid and k[1] == rs.reference and k[4] == boot and k[5] == rs.telemetry}
+            cmp = {k[3]: r for k, r in file_rows.items()
+                   if k[0] == wid and k[1] == rs.compared and k[4] == boot and k[5] == rs.telemetry}
             if not ref or not cmp:
                 continue
             ref_row = next(iter(ref.values()))
@@ -316,8 +372,7 @@ def k_of_n_gap(rs: _Set, crit, guard_report):
     condition's seed-mean score over the reference's, with a failed non-exempt
     guard on a run the criterion reads making the verdict invalid."""
     k, g = int(crit["k"]), Fraction(str(crit["g"]))
-    failing = {(r["workload_id"], r["condition"], r["table"], r["seed"], r["boot_default"]): r
-               for r in guard_report if r["result"] == "fail" and not r["exempt"]}
+    failing = {_identity(r): r for r in guard_report if r["result"] == "fail" and not r["exempt"]}
     unavailable = set()
     invalid_runs = []
     for wid in rs.judging:
@@ -457,10 +512,156 @@ def line_note(rs, params, ctx):
     return {"type": "note", "workload_id": params["workload"], "text": params["text"]}
 
 
+def _primary_gaps(ctx):
+    return {r["workload_id"]: r for r in ctx["gaps"] if r["boot_default"] == ""}
+
+
+def _gap_cell(r):
+    return ({"gap": r["gap"], "meets_g": r["meets_g"], "all_no_headroom": r["all_no_headroom"],
+             "available": r["available"]} if r is not None
+            else {"gap": "", "meets_g": None, "all_no_headroom": None, "available": False})
+
+
+def line_variant_set(rs, params, ctx):
+    """9.14 decision 10: the verdict count with each named judging file's gap taken
+    from its variant's runs — a rebuilt file (every measured RUN scaled, the chain
+    scaled, a segment length changed, the carried half-widths at a bound). Files
+    the line does not name keep their primary gap. A count that moves makes the
+    verdict a range over this axis."""
+    primary = _primary_gaps(ctx)
+    files = dict(params["files"])
+    rows = [{"workload_id": base, "variant": variant, "primary": _gap_cell(primary.get(base)),
+             "variant_result": _gap_cell(primary.get(variant))} for base, variant in sorted(files.items())]
+    met, judging, available = 0, 0, True
+    for wid in rs.judging:
+        r = primary.get(files.get(wid, wid))
+        if r is None:
+            available = False
+            continue
+        judging += 1
+        met += bool(r["meets_g"])
+        available = available and bool(r["available"])
+    verdict = ("pass" if met >= ctx["k"] else "fail") if available else None
+    return {"type": "variant_set", "name": params["name"], "axis": params["axis"], "value": str(params["value"]),
+            "reason": params.get("reason", ""), "met": met, "judging": judging, "verdict": verdict,
+            "primary_met": _count(ctx["gaps"], "", ctx["k"])["met"], "rows": rows}
+
+
+def line_trace_replay(rs, params, ctx):
+    """9.14 decision 10: each named judging file built twice — as compiled, and
+    on a pooled repeat's measured wake sequence — agrees when its gap falls on
+    the same side of g under both and differs by less than the tolerance."""
+    primary = _primary_gaps(ctx)
+    tol = Fraction(str(params["tolerance"]))
+    rows = []
+    for base, variant in sorted(params["files"].items()):
+        b, v = primary.get(base), primary.get(variant)
+        if b is None or v is None:
+            rows.append({"workload_id": base, "variant": variant, "gap": b["gap"] if b else "",
+                         "replayed_gap": v["gap"] if v else "", "difference": "", "same_side_of_g": None,
+                         "within_tolerance": None, "agrees": None})
+            continue
+        gb, gv = Fraction(b["gap"]), Fraction(v["gap"])
+        same, within = b["meets_g"] == v["meets_g"], abs(gv - gb) < tol
+        rows.append({"workload_id": base, "variant": variant, "gap": b["gap"], "replayed_gap": v["gap"],
+                     "difference": fmt(gv - gb), "same_side_of_g": same, "within_tolerance": within,
+                     "agrees": same and within})
+    decided = [r["agrees"] for r in rows if r["agrees"] is not None]
+    return {"type": "trace_replay", "tolerance": str(params["tolerance"]), "reason": params.get("reason", ""),
+            "rows": rows, "agreement": all(decided) if decided and len(decided) == len(rows) else None}
+
+
+def line_bounding_pair(rs, params, ctx):
+    """9.14 decision 10 (9.11 D21): two files that differ in one task's declared
+    class alone; each file's gap and verdict, and the difference between them."""
+    primary = _primary_gaps(ctx)
+    a, b = primary.get(params["a"]), primary.get(params["b"])
+    difference = fmt(Fraction(b["gap"]) - Fraction(a["gap"])) if a is not None and b is not None else ""
+    return {"type": "bounding_pair", "a": {"workload_id": params["a"], **_gap_cell(a)},
+            "b": {"workload_id": params["b"], **_gap_cell(b)}, "difference": difference,
+            "reason": params.get("reason", "")}
+
+
+def line_input_wake_count(rs, params, ctx):
+    """9.14 decision 10: per judging file and interaction-latency term, the number
+    of wakes the P99 rests on — the `ready_wait` count aggregate of the term's
+    entity, cause and channel inside its window, read on the fixed run under the
+    primary boot default."""
+    spec = scoring.load_spec(ctx["scoring_spec_path"])
+    rows = []
+    for wid in rs.judging:
+        for t in (spec["files"].get(wid) or {}).get("terms") or []:
+            if t["metric"] != "ready_wait":
+                continue
+            w = t.get("window") or {}
+            start, end = str(w.get("start_us", "")), str(w.get("end_us", ""))
+            value = next((r["value"] for r in rs.agg_rows
+                          if r["workload_id"] == wid and r["condition"] == "fixed" and r["boot_default"] == ""
+                          and r["telemetry"] == rs.telemetry
+                          and r["entity"] == t["entity"] and r["metric"] == "ready_wait"
+                          and r["aggregate"] == "count" and r["cause"] == t.get("cause", "")
+                          and r["channel"] == t.get("channel", "")
+                          and str(r["window_start_us"]) == start and str(r["window_end_us"]) == end), None)
+            rows.append({"workload_id": wid, "entity": t["entity"], "cause": t.get("cause", ""),
+                         "channel": t.get("channel", ""), "window_start_us": start, "window_end_us": end,
+                         "count": None if value is None else int(Decimal(value))})
+    return {"type": "input_wake_count", "rows": rows}
+
+
+def line_longest_wait(rs, params, ctx):
+    """9.14 decision 10 (9.11 D19): per run, the longest `ready_wait` over every
+    task and cause — what the starvation floor reads — its margin to the
+    threshold, and whether it lies past the point at which the executor-net
+    question reopens."""
+    threshold, reopen = int(params["threshold_us"]), int(params["reopen_us"])
+    per_run = {}
+    for r in rs.agg_rows:
+        if (r["metric"] == "ready_wait" and r["aggregate"] == "max" and not r["cause"] and not r["channel"]
+                and not r["window_start_us"] and not r["window_end_us"]):
+            key = _identity(r)
+            value = int(Decimal(r["value"]))
+            if value > per_run.get(key, (-1, ""))[0]:
+                per_run[key] = (value, r["entity"])
+    rows = [{**dict(zip(agg.IDENTITY, key)), "longest_wait_us": value, "entity": entity,
+             "margin_us": threshold - value, "past_reopen": value > reopen}
+            for key, (value, entity) in sorted(per_run.items())]
+    return {"type": "longest_wait", "threshold_us": threshold, "reopen_us": reopen, "rows": rows,
+            "longest_us": max((r["longest_wait_us"] for r in rows), default=None),
+            "any_past_reopen": any(r["past_reopen"] for r in rows)}
+
+
+def line_flip_cost(rs, params, ctx):
+    """9.21 decision 7 (the hold-time plan's step 1): per listed file and recognizing run, the number of
+    configuration changes the daemon applied, the number of those whose query the grader marked `config_correct`
+    0, the sum of the per-switch excess over the wrong changes that were switches into MLFQ (`aggregates.py`,
+    `flip_aggregates`), and the run's file score beside them, read off the scores file (empty where the file has no
+    scoring terms)."""
+    per_run = {}
+    for r in rs.agg_rows:
+        if (r["entity"] == "schedule" and r["metric"] == "config_interval" and r["aggregate"] in agg.FLIP_AGGREGATES
+                and not r["window_start_us"] and not r["window_end_us"]):
+            per_run.setdefault(_identity(r), {})[r["aggregate"]] = r["value"]
+    rows = []
+    for key in sorted(per_run):
+        values = per_run[key]
+        if not all(a in values for a in agg.FLIP_AGGREGATES):
+            continue
+        score = rs.file_rows.get(key)
+        rows.append({**dict(zip(agg.IDENTITY, key)),
+                     "changes": int(Decimal(values["change_count"])),
+                     "wrong_changes": int(Decimal(values["wrong_change_count"])),
+                     "wrong_switch_excess_us": values["wrong_switch_excess_sum"],
+                     "score": score["score"] if score else ""})
+    return {"type": "flip_cost", "rows": rows,
+            "changes_total": sum(r["changes"] for r in rows), "wrong_total": sum(r["wrong_changes"] for r in rows)}
+
+
 LINES = {"sensitivity": line_sensitivity, "g_band": line_g_band, "seed_standard_error": line_seed_standard_error,
          "floor_band": line_floor_band,
          "exclusion_accuracy": line_exclusion_accuracy, "layer1_headline": line_layer1_headline,
-         "random_beats_oracle": line_random_beats_oracle, "note": line_note}
+         "random_beats_oracle": line_random_beats_oracle, "note": line_note,
+         "variant_set": line_variant_set, "trace_replay": line_trace_replay, "bounding_pair": line_bounding_pair,
+         "input_wake_count": line_input_wake_count, "longest_wait": line_longest_wait, "flip_cost": line_flip_cost}
 
 
 # --------------------------------------------------------------- evaluate
@@ -490,7 +691,8 @@ def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, 
                                                                     guards_path, grades_path)
     except (OSError, ValueError) as exc:
         raise GateError(str(exc)) from None
-    rs = _Set(spec, agg_rows, score_rows, guard_rows, grade_rows)
+    expanded, _paths, axes = _expanded(spec, root)              # 9.21 decision 6
+    rs = _Set(expanded, agg_rows, score_rows, guard_rows, grade_rows)
     rs.check_complete()
 
     guard_report = []
@@ -500,7 +702,8 @@ def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, 
                              "exemption_reason": reason or "", "invalidating": False})
 
     verdict, detail, gaps, shown, ctx = CRITERIA[crit["type"]](rs, crit, guard_report)
-    ctx.update({"gaps": gaps, "scoring_spec_path": pathlib.Path(root) / spec["pins"]["scoring_spec"]["path"]})
+    ctx.update({"gaps": gaps, "scoring_spec_path": pathlib.Path(root) / spec["pins"]["scoring_spec"]["path"],
+                "axes": axes})                                   # {selected file: (manifest name, its axes)}
 
     scores_out = [{**{c: r[c] for c in agg.IDENTITY}, "score": r["score"], "weight_sum": r["weight_sum"],
                    "n_terms": int(r["n_terms"]), "n_no_headroom": int(r["n_no_headroom"]),
@@ -515,7 +718,8 @@ def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, 
 
     lines = [LINES[line["type"]](rs, line, ctx) for line in spec["reporting_lines"]]
     return {"experiment": spec["experiment"], "spec_sha256": _sha256(spec_path), "pins": spec["pins"],
-            "conditions": list(spec["conditions"]), "seed_count": int(spec["seed_count"]),
+            "conditions": list(spec["conditions"]), "telemetry": list(spec["telemetry"]),
+            "seed_count": int(spec["seed_count"]),
             "boot_defaults": spec["boot_defaults"], "criterion": shown,
             "verdict": verdict, "verdict_detail": detail, "gaps": gaps, "scores": scores_out,
             "provenance": prov_out, "guards": guard_report,
@@ -543,7 +747,8 @@ def _table(headers, rows):
 
 def _ident(r):
     return f"{r['workload_id']} · {r['condition']}" + (f" · {r['seed']}" if r["seed"] else "") \
-        + (f" · boot {r['boot_default']}" if r["boot_default"] else "")
+        + (f" · boot {r['boot_default']}" if r["boot_default"] else "") \
+        + (f" · telemetry {r['telemetry']}" if r.get("telemetry") else "")
 
 
 def render(report) -> str:
@@ -552,7 +757,9 @@ def render(report) -> str:
     d = report["verdict_detail"]
     out = [f"# Report — {report['experiment']}", "",
            f"**Verdict: {report['verdict']}** — {d['met']} of {d['judging']} judging files met the criterion "
-           f"(K = {d['k']}). Spec `{report['spec_sha256'][:12]}`.", ""]
+           f"(K = {d['k']}). Spec `{report['spec_sha256'][:12]}`. Telemetry shape judged: "
+           f"`{report['telemetry'][0]}`" + (f" (also run: {', '.join(f'`{t}`' for t in report['telemetry'][1:])})"
+                                            if len(report["telemetry"]) > 1 else "") + ".", ""]
     if d["invalid_runs"]:
         out.append("Invalidating guard failures (non-exempt, on runs the criterion reads):")
         out.append("")
@@ -618,6 +825,50 @@ def render(report) -> str:
                               [[r["workload_id"], r["flagged"], r["gap"]] for r in line["rows"]]))
         elif t == "note":
             out.append(f"**{line['workload_id']}** — {line['text'].strip()}")
+        elif t == "variant_set":
+            out.append(f"**{line['name']}** ({line['axis']} = {line['value']}): {line['met']} of {line['judging']} met, "
+                       f"verdict {line['verdict']} (primary {line['primary_met']} met)."
+                       + (f" {line['reason'].strip()}" if line["reason"] else ""))
+            out.append("")
+            out.append(_table(["workload", "variant", "gap", "meets g", "variant gap", "variant meets g",
+                               "variant no headroom"],
+                              [[r["workload_id"], r["variant"], r["primary"]["gap"], r["primary"]["meets_g"],
+                                r["variant_result"]["gap"], r["variant_result"]["meets_g"],
+                                r["variant_result"]["all_no_headroom"]] for r in line["rows"]]))
+        elif t == "trace_replay":
+            out.append(f"Agreement: {line['agreement']} (tolerance {line['tolerance']})."
+                       + (f" {line['reason'].strip()}" if line["reason"] else ""))
+            out.append("")
+            out.append(_table(["workload", "replayed as", "gap", "replayed gap", "difference", "same side of g",
+                               "within tolerance", "agrees"],
+                              [[r["workload_id"], r["variant"], r["gap"], r["replayed_gap"], r["difference"],
+                                r["same_side_of_g"], r["within_tolerance"], r["agrees"]] for r in line["rows"]]))
+        elif t == "bounding_pair":
+            out.append(_table(["file", "gap", "meets g", "all no headroom", "available"],
+                              [[x["workload_id"], x["gap"], x["meets_g"], x["all_no_headroom"], x["available"]]
+                               for x in (line["a"], line["b"])]))
+            out.append("")
+            out.append(f"Difference (b − a): {line['difference']}."
+                       + (f" {line['reason'].strip()}" if line["reason"] else ""))
+        elif t == "input_wake_count":
+            out.append(_table(["workload", "entity", "cause", "channel", "window", "wakes the P99 rests on"],
+                              [[r["workload_id"], r["entity"], r["cause"], r["channel"],
+                                f"[{r['window_start_us']}, {r['window_end_us']}]" if r["window_start_us"] else "(whole file)",
+                                r["count"]] for r in line["rows"]]))
+        elif t == "longest_wait":
+            out.append(f"Longest wait in any run: {line['longest_us']} µs against the {line['threshold_us']} µs floor; "
+                       f"any run past the {line['reopen_us']} µs reopen point: {line['any_past_reopen']}.")
+            out.append("")
+            out.append(_table(["run", "task", "longest wait (µs)", "margin (µs)", "past reopen"],
+                              [[_ident(r), r["entity"], r["longest_wait_us"], r["margin_us"], r["past_reopen"]]
+                               for r in line["rows"]]))
+        elif t == "flip_cost":
+            out.append(f"Configuration changes over the listed files' recognizing runs: {line['changes_total']}, "
+                       f"of which {line['wrong_total']} on a query graded config-incorrect.")
+            out.append("")
+            out.append(_table(["run", "changes", "wrong changes", "wrong-switch excess into MLFQ (µs)", "score"],
+                              [[_ident(r), r["changes"], r["wrong_changes"], r["wrong_switch_excess_us"], r["score"]]
+                               for r in line["rows"]]))
         out.append("")
     fails = [r for r in report["guards"] if r["result"] == "fail"]
     out += ["## Guards", "",

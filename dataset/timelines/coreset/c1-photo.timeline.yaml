@@ -1,5 +1,6 @@
 # C1 — single-situation calibration: pure photo (building-plan §3 C1; Phase 7
 # spec decision 8). Task set lifted from c3-creation segment 0 (gimp alone).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-photo
   seed: 109
@@ -10,8 +11,14 @@ segments:
      scenario: [S6]}
 
 tasks:
-  - {id: photo-editor, name: gimp, archetype: desktop-interactive,
+  - {id: photo-editor, name: gimp, archetype: image-editor,
      arrive: 0s, depart: 60s}
 
-focus:
+input:
   - {from: 2s, to: 58s, task: photo-editor}
+
+focus:
+  - {from: 0s, to: 60s, task: photo-editor}
+
+operations:
+  - {at: 30s, task: photo-editor, name: unsharp-mask}

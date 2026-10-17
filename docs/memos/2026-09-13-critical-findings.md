@@ -1,6 +1,7 @@
 # Critical findings from reading the archetype sources against their primary texts
 
-> Status: memo · Created 2026-09-13 · Updated 2026-09-13
+> Status: memo · Created 2026-09-13 · Updated 2026-10-17
+> Closed — Phase 9 rebuilt the workload dataset on these findings; what each one changed is recorded in the dataset guidebook vol-06 §4.4 (`docs/guidebook/dataset/06-grounding-measurement-verification.md`), the current values and their grounds in `dataset/archetypes.yaml`, `dataset/sources.yaml` and `docs/references.md`.
 
 Findings from checking `dataset/archetypes.yaml` and its grounding documents against the primary sources and against the compiler, measurement summary and raw measurement release. Each finding gives what the repository states (with file and line), what the primary text or artifact shows (with the copy read and the date), and what it affects. Nothing in the repository was changed; resolution is left to the owners of each file.
 
@@ -194,3 +195,7 @@ Both are marked `verified` in `docs/references.md`. The claims above that rest o
 | `rt-app` | github.com/scheduler-tools/rt-app at `d6f8be41` (`doc/tutorial.txt`, `doc/examples/template.json`) |
 | `ananicy-rules` | github.com/CachyOS/ananicy-rules at `03ef03fb` |
 | `meas-ci` | `dataset/meas/summary.json`; release `meas-ci-2026-08-28` (`meas-cli3.zip` `spec.json`: `nproc` 4, AMD EPYC 9V74, 16 GB, Ubuntu 24.04.4, run number 3) |
+
+## Correction (2026-10-17)
+
+- **A2 (the 16.7 ms frame budget), its primary text: "No slide contains 16.7, 16.67, 60 fps or "frame budget"."** No slide states 16.7 ms, a frame budget or a 60 fps target; a 60 FPS / 16.5 ms readout appears only, uncommented, in slide 29's EEVDF benchmark screenshot, whose overlay reads "60FPS" and "16.5ms", both screenshots listing "Refresh Rate: 60" (the 2026-09-13 LAVD read, `_dev/research/jioh/2026-09-13-verification/reads/R02-lavd.md:93`; the 9.16 claim audit, `_dev/research/jioh/task-9.16-exit-audits/claims/outside-findings.md`). The finding stands: the deck grounds no 16.7 ms frame period.

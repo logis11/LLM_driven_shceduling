@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
-"""Dataset linter CLI — repo lints, timeline lints, in-memory compile lints.
+"""Dataset linter CLI — the checks before a compile: repo lints, timeline lints, the grid definition's and the
+measurement release map's.
+
+The canonical lints run inside the compile, on every artifact as it is built
+(compile.py, variants.py); a `lint` pass repeats none of it (9.22 spec, decision 2).
 
 Usage: lint.py [--freeze] [--repo ROOT]
-  --freeze   reject meas-pending source tags (schema-freeze gate)
+  --freeze   reject meas-pending source tags, the library's and the timelines' bound values (schema-freeze gate)
 """
 
 import argparse
 import pathlib
 import sys
 
+import yaml
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-from wlc import Library, Timeline, TimelineError, compile_timeline  # noqa: E402
-from wlc.compiler import MODES  # noqa: E402
-from wlc.linter import lint_canonical, lint_repo, load_schema  # noqa: E402
+from wlc import Library, Timeline, TimelineError  # noqa: E402
+from gen import lint_grids  # noqa: E402
+from wlc.linter import lint_bound_sources, lint_releases, lint_repo  # noqa: E402
 
 
 def run(root, freeze=False):
@@ -21,18 +27,20 @@ def run(root, freeze=False):
     errors = lint_repo(dataset / "archetypes.yaml", dataset / "sources.yaml",
                        root / "docs" / "references.md", freeze=freeze)
     library = Library(dataset / "archetypes.yaml")
-    schema = load_schema(dataset / "schema" / "workload.schema.json")
-    for path in sorted((dataset / "timelines").glob("**/*.timeline.yaml")):
+    registry = yaml.safe_load((dataset / "sources.yaml").read_text())["sources"]
+    timelines = sorted((dataset / "timelines").glob("**/*.timeline.yaml"))
+    for path in timelines:
+        errors.extend(lint_bound_sources(path, registry, freeze=freeze))   # 9.18: every bound value tagged or labelled
         try:
-            timeline = Timeline(path, library)
+            Timeline(path, library)
         except TimelineError as err:
             errors.append(str(err))
-            continue
-        for mode in MODES:
-            canonical, report = compile_timeline(timeline, library, mode)
-            errors.extend(lint_canonical(canonical, schema, report=report,
-                                         mode=mode,
-                                         name=f"{timeline.id}[{mode}]"))
+    errors.extend(lint_grids(dataset / "grids.yaml", registry))   # 9.19: the generated layer's definition and its interval sources
+    # 9.15 (W-0732): every meas-ci campaign the library, the timelines, their variant recipes and the grid definition
+    # cite has its release mapped
+    cited = [dataset / "archetypes.yaml", dataset / "grids.yaml", *timelines,
+             *sorted((dataset / "timelines").glob("**/*.variant.yaml"))]
+    errors.extend(lint_releases(dataset / "meas-releases.yaml", cited))
     return errors
 
 

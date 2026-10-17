@@ -1,0 +1,25 @@
+{
+ "slice_s": 10.0,
+ "phase_s": 600.0,
+ "span_s": 3000.0,
+ "cpu_ms_per_s": {
+  "level": 0.0888,
+  "placement": -0.0719,
+  "worst": 0.1044,
+  "worst_at_s": 390.0,
+  "least": -0.078,
+  "largest": 0.1044,
+  "holds": false
+ },
+ "wakes_per_s": {
+  "level": 2.335,
+  "placement": -0.0328,
+  "worst": 0.0371,
+  "worst_at_s": 2350.0,
+  "least": -0.035,
+  "largest": 0.0371,
+  "holds": true
+ },
+ "holds": false,
+ "from_s": 600.0
+}

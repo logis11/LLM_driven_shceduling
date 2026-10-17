@@ -3,10 +3,14 @@
 10), served by the mock daemon in `daemon.py`.
 
     mock_daemon.py --workload WORKLOAD.json --condition fixed|oracle|random
+                   --telemetry focus|names
                    --driver-table TABLE.yaml --boot-default BOOT.json
                    --out-schedule SCHEDULE.json --out-log LOG.json [--seed N]
 
 Every flag is required; `--seed` exactly when the condition draws (`random`).
+`--telemetry` is the shape shown to the recognizer (data-contracts §5, rule 6;
+9.17): `focus`, the name → count multiset with the focus holder, or `names`,
+the multiset alone.
 Exit 0 after both outputs are written; any other code means neither is to be
 read. Nothing on stdout; diagnostics on stderr.
 """
@@ -21,13 +25,14 @@ sys.path.insert(0, str(HERE.parents[2]))        # tools/: the harness package
 sys.path.insert(0, str(HERE.parents[1]))        # tests/: the mocks package
 
 from harness.drivertable import DriverTableError, read_driver_table  # noqa: E402
-from mocks.daemon import CONDITIONS, MockDaemonError, run, write  # noqa: E402
+from mocks.daemon import CONDITIONS, TELEMETRY, MockDaemonError, run, write  # noqa: E402
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="mock_daemon.py", description=__doc__.split("\n\n")[0])
     ap.add_argument("--workload", required=True, help="canonical workload file")
     ap.add_argument("--condition", required=True, choices=CONDITIONS)
+    ap.add_argument("--telemetry", required=True, choices=TELEMETRY)
     ap.add_argument("--driver-table", required=True, dest="driver_table")
     ap.add_argument("--boot-default", required=True, dest="boot_default")
     ap.add_argument("--out-schedule", required=True, dest="out_schedule")
@@ -40,7 +45,7 @@ def main(argv=None) -> int:
         with open(args.boot_default, "r", encoding="utf-8") as f:
             boot = json.load(f)
         table = read_driver_table(args.driver_table)
-        schedule, log = run(doc, args.condition, table, boot, seed=args.seed)
+        schedule, log = run(doc, args.condition, table, boot, seed=args.seed, telemetry=args.telemetry)
     except (MockDaemonError, DriverTableError, OSError, ValueError, KeyError) as exc:
         print(f"mock_daemon: {exc}", file=sys.stderr)
         return 1

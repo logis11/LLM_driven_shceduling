@@ -7,15 +7,16 @@ from harness.primitives import compute
 from harness.reader import ConfigSchedule, RunFile, ScheduleEntry, TaskInfo
 
 
-def task(id, name="x", arrive=0, depart=None, demand=None, period=None, targets=()):
+def task(id, name="x", arrive=0, depart=None, demand=None, period=None, targets=(), waits=()):
+    """`waits`: the channel kinds of the task's WAITs in program order."""
     return TaskInfo(id=id, name=name, arrive=arrive, depart=depart, demand=demand,
-                    period_us=period, wake_targets=list(targets))
+                    period_us=period, wake_targets=list(targets), waits=list(waits))
 
 
-def runfile(t_end, tasks, chains=(), wakes=None):
+def runfile(t_end, tasks, chains=(), input_wakes=None):
     return RunFile(workload_id="w", t_end=t_end,
                    tasks={t.id: t for t in tasks}, chains=[list(c) for c in chains],
-                   wakes=wakes or {})
+                   input_wakes=input_wakes or {})
 
 
 def schedule(*entries):
@@ -112,14 +113,16 @@ def test_no_demand_row_for_unbounded_program():
     r = compute(run, events)
     assert rows_of(r, "demand", "v") == []
     assert rows_of(r, "job", "v") == [{"entity": "v", "metric": "job", "t": 0, "value": 10,
-                                       "period_us": 50}]
+                                       "period_us": 50, "skipped": 0}]
     assert r.guards == []
 
 
-def test_lost_wake_trips_the_chain_guard():
-    # head ticks twice, the tail only runs once: iteration count != tick count
-    run = runfile(200, [task("h", period=100, targets=["t"]), task("t")], chains=[["h", "t"]])
-    events = [
+CHAIN_TASKS = [task("h", period=100, targets=["t"]), task("t", waits=["chain"] * 3)]
+
+
+def _chain_trace(lines):
+    """A two-stage chain h -> t, both arriving at 0, h's TIMER consuming tick 0 at once."""
+    return [
         {"event": "task_arrive", "t": 0, "task": "h", "source": "file"},
         {"event": "task_arrive", "t": 0, "task": "t", "source": "file"},
         {"event": "ready", "t": 0, "task": "h", "cause": "arrive"},
@@ -130,14 +133,54 @@ def test_lost_wake_trips_the_chain_guard():
         {"event": "run_start", "t": 5, "task": "t"},
         {"event": "ready", "t": 5, "task": "t", "cause": "wake"},
         {"event": "run_end", "t": 20, "task": "t", "reason": "block", "blocked_on": "wait"},
+    ] + lines
+
+
+def test_a_frame_still_running_at_t_end_is_no_chain_guard():
+    """The head consumes tick 1 at 100 and the tail's iteration for it is still running at
+    T_end = 110: not completed within the window (metrics doc §4), no job row, no guard
+    (9.16 D3)."""
+    run = runfile(110, CHAIN_TASKS, chains=[["h", "t"]])
+    events = _chain_trace([
+        {"event": "ready", "t": 100, "task": "h", "cause": "timer_tick"},
+        {"event": "run_start", "t": 100, "task": "h"},
+        {"event": "run_end", "t": 105, "task": "h", "reason": "block", "blocked_on": "timer"},
+        {"event": "run_start", "t": 105, "task": "t"},
+        {"event": "ready", "t": 105, "task": "t", "cause": "wake"},
+        {"event": "run_end", "t": 125, "task": "t", "reason": "block", "blocked_on": "wait"},   # past T_end
+    ])
+    r = compute(run, events)
+    assert [x["value"] for x in rows_of(r, "job", "h")] == [20]
+    assert r.guards == []
+
+
+def test_a_lost_wake_mid_run_is_not_caught_by_the_chain_guard():
+    """The guard's stated weakness (metrics doc §6.2): the head consumes tick 1 at 100, the
+    wake to the tail is lost, and the tail falls short as it would at T_end — no guard."""
+    run = runfile(200, CHAIN_TASKS, chains=[["h", "t"]])
+    events = _chain_trace([
         {"event": "ready", "t": 100, "task": "h", "cause": "timer_tick"},
         {"event": "run_start", "t": 100, "task": "h"},
         {"event": "run_end", "t": 105, "task": "h", "reason": "block", "blocked_on": "timer"},
         # the wake to t is lost: no ready(wake), no second iteration
-    ]
+    ])
     r = compute(run, events)
     assert [x["value"] for x in rows_of(r, "job", "h")] == [20]
-    assert any("h" in g and "tick" in g for g in r.guards)
+    assert r.guards == []
+
+
+def test_more_tail_completions_than_consumed_ticks_trips_the_chain_guard():
+    """The head consumes one tick inside the window and the tail completes two iterations:
+    a wake the head never sent."""
+    run = runfile(90, CHAIN_TASKS, chains=[["h", "t"]])
+    events = _chain_trace([
+        {"event": "ready", "t": 30, "task": "t", "cause": "wake"},
+        {"event": "run_start", "t": 30, "task": "t"},
+        {"event": "run_end", "t": 40, "task": "t", "reason": "block", "blocked_on": "wait"},
+    ])
+    r = compute(run, events)
+    assert any(g.startswith("chain h: tail t completed 2 iteration(s) for 1 consumed head tick(s)")
+               for g in r.guards)
 
 
 def test_deadline_disagreement_on_single_stage_is_a_guard():
@@ -169,7 +212,7 @@ def test_config_interval_ignores_entries_at_or_after_t_end():
 
 
 def test_stimulus_count_guard_against_run_file_wakes():
-    run = runfile(100, [task("e")], wakes={"e": 2})
+    run = runfile(100, [task("e", waits=["input", "input"])], input_wakes={"e": 2})
     events = [
         {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
         {"event": "ready", "t": 0, "task": "e", "cause": "arrive"},
@@ -181,7 +224,74 @@ def test_stimulus_count_guard_against_run_file_wakes():
         # the second keystroke never produced a ready line
     ]
     r = compute(run, events)
-    assert any("e" in g and "wake" in g for g in r.guards)
+    assert any(g.startswith("task e:") and "input" in g for g in r.guards)
+
+
+def _wake_events(*wakes):
+    """Task `e` arrives at 0 and blocks; each (ready_t, run_start_t) is one
+    ready(wake) line, served by a 10 µs occupancy (run_start None: the line
+    falls inside the previous occupancy, which it extends by 10 µs)."""
+    events = [
+        {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
+        {"event": "ready", "t": 0, "task": "e", "cause": "arrive"},
+        {"event": "run_start", "t": 0, "task": "e"},
+    ]
+    end = 5
+    for ready_t, start in wakes:
+        if start is None:
+            events.append({"event": "ready", "t": ready_t, "task": "e", "cause": "wake"})
+            end = ready_t + 10
+            continue
+        events.append({"event": "run_end", "t": end, "task": "e", "reason": "block",
+                       "blocked_on": "wait"})
+        events.append({"event": "ready", "t": ready_t, "task": "e", "cause": "wake"})
+        events.append({"event": "run_start", "t": start, "task": "e"})
+        end = start + 10
+    events.append({"event": "run_end", "t": end, "task": "e", "reason": "block",
+                   "blocked_on": "wait"})
+    return events
+
+
+def test_wake_rows_carry_the_channel_of_the_wait_they_complete():
+    """9.5 D74: the k-th ready(wake) line of a task completes its k-th WAIT, so the
+    row carries that WAIT's channel kind — a keystroke `input`, a measured timer
+    wake `timer` — whether the line waited or fell inside an occupancy."""
+    run = runfile(1000, [task("e", waits=["input", "timer", "timer", "input"])],
+                  input_wakes={"e": 2})
+    events = _wake_events((100, 130), (135, None), (300, 320), (400, 450))
+    r = compute(run, events)
+    assert [(x["t"], x["value"], x["cause"], x.get("channel"))
+            for x in rows_of(r, "ready_wait", "e")] == [
+        (0, 0, "arrive", None),
+        (100, 30, "wake", "input"),
+        (135, 0, "wake", "timer"),
+        (300, 20, "wake", "timer"),
+        (400, 50, "wake", "input"),
+    ]
+    assert r.guards == []
+
+
+def test_stimulus_guard_counts_the_input_channel_only():
+    """Timer wakes are ready(wake) lines too since D74: three lines for one
+    keystroke among two timer wakes is no guard, and a keystroke lost among
+    timer wakes still is."""
+    events = _wake_events((100, 110), (200, 210), (300, 310))
+    run = runfile(1000, [task("e", waits=["timer", "input", "timer"])], input_wakes={"e": 1})
+    assert compute(run, events).guards == []
+    run = runfile(1000, [task("e", waits=["timer", "input", "timer", "input"])],
+                  input_wakes={"e": 2})
+    guards = compute(run, events).guards
+    assert len(guards) == 1 and guards[0].startswith("task e: 1 ") and "input" in guards[0]
+
+
+def test_wake_line_past_the_programs_last_wait_is_a_guard():
+    """A ready(wake) line with no WAIT left to complete has no channel: the trace
+    and the run file disagree, and the row is written without one."""
+    run = runfile(1000, [task("e", waits=["input"])], input_wakes={"e": 1})
+    r = compute(run, _wake_events((100, 110), (200, 210)))
+    assert [(x["t"], x.get("channel")) for x in rows_of(r, "ready_wait", "e")] == [
+        (0, None), (100, "input"), (200, None)]
+    assert len(r.guards) == 1 and r.guards[0].startswith("task e:") and "WAIT" in r.guards[0]
 
 
 # ------------------------------------------------------------ switch_window
@@ -313,6 +423,41 @@ def test_same_algorithm_entry_is_not_a_switch():
     assert len(rows_of(r, "config_interval")) == 2
 
 
+def test_boost_grid_restarts_at_a_same_algorithm_entry():
+    """The simulator restarts MLFQ's boost timer at every applied MLFQ entry, a
+    same-algorithm one included (`simulator/src/sim.cpp`: `apply_config` voids the
+    policy timers and `Mlfq::start` arms the boost at the applied time + its
+    `boost_interval_us`), so the boost grid restarts at the entry (metrics doc §6.10)."""
+    run = runfile(30000, [task("a", arrive=100)])
+    sched = schedule((0, "MLFQ", MLFQ_2MS), (1, "FIFO", {}),
+                     (2, "MLFQ", {"num_queues": 3, "timeslice_us": 3000,         # W_single 9000
+                                  "timeslice_growth": 2, "boost_interval_us": 5000}),
+                     (3, "MLFQ", {"num_queues": 2, "timeslice_us": 500,          # W_single 500
+                                  "timeslice_growth": 2, "boost_interval_us": 4000}))
+    events = [cfg(0, 0, "MLFQ"), cfg(10, 1, "FIFO"),
+              {"event": "task_arrive", "t": 100, "task": "a", "source": "file"},
+              {"event": "ready", "t": 100, "task": "a", "cause": "arrive"},
+              {"event": "run_start", "t": 100, "task": "a"},
+              cfg(1000, 2, "MLFQ")]
+    for t in range(2000, 30001, 1000):                    # a holds the lane, preempted every 1000 µs
+        if t == 8000:
+            events.append(cfg(8000, 3, "MLFQ"))           # same algorithm: the boost timer restarts
+        events.append({"event": "run_end", "t": t, "task": "a", "reason": "preempt"})
+        if t < 30000:
+            events.append({"event": "run_start", "t": t, "task": "a"})
+    r = compute(run, events, sched)
+    # Entry 2's grid from 1000 by 5000 gives 6000 before entry 3 applies at 8000; entry 3's
+    # from 8000 by 4000 gives 12000 … 28000 before T_end. The 6000 window (W_single 9000,
+    # reached at 15000) is clipped at the next boost, 12000; the rest close 500 µs after
+    # their instant. Kept on the switch's grid (1000 + k · 5000) they would fall at 6000
+    # (clipped at 11000), 11000, 16000, 21000 and 26000.
+    assert [(x["t"], x["value"], x["index"], x["hogs"]) for x in rows_of(r, "boost_window")] == [
+        (6000, 6000, 2, 1), (12000, 500, 3, 1), (16000, 500, 3, 1), (20000, 500, 3, 1),
+        (24000, 500, 3, 1), (28000, 500, 3, 1)]
+    assert [(x["t"], x["value"]) for x in rows_of(r, "switch_window")] == [(10, 0), (1000, 9000)]
+    assert r.guards == []
+
+
 def test_switch_at_or_after_t_end_is_ignored():
     run = runfile(1000, [])
     sched = schedule((0, "MLFQ", MLFQ_2MS), (1, "EDF", {"residual_timeslice_us": 2000}))
@@ -354,3 +499,133 @@ def test_schedule_disagreeing_with_the_trace_is_a_guard():
     assert any("index 1" in g and "EDF" in g and "FIFO" in g for g in r.guards)
     r = compute(run, [cfg(0, 0, "MLFQ"), cfg(10, 3, "EDF")], sched)
     assert any("index 3" in g for g in r.guards)
+
+
+# ---- the TIMER skip rule (metrics doc §6.2; 9.11 D3, D17; 9.14 decision 1)
+
+def _timer_trace(lines):
+    return [{"event": "task_arrive", "t": 0, "task": "v", "source": "file"},
+            {"event": "ready", "t": 0, "task": "v", "cause": "arrive"}] + lines
+
+
+def test_skipped_ticks_are_missed_job_rows_without_a_value():
+    """A head that reaches its TIMER after two ticks passed consumes the latest and skips
+    the one before: one job row per tick, the skipped one with no value and skipped 1."""
+    run = runfile(1000, [task("v", period=100)], chains=[["v"]])
+    # a TIMER reached at 250 with ticks 100 and 200 passed consumes 200 at once and skips 100:
+    events = _timer_trace([
+        {"event": "run_start", "t": 0, "task": "v"},
+        {"event": "ready", "t": 0, "task": "v", "cause": "timer_tick"},           # tick 0 consumed at 0
+        {"event": "deadline", "t": 250, "task": "v", "due": 100, "met": False, "slack_us": -150},   # job 0 missed
+        {"event": "deadline", "t": 250, "task": "v", "due": 200, "met": False, "slack_us": -50},    # tick 1 skipped
+        {"event": "ready", "t": 250, "task": "v", "cause": "timer_tick"},         # tick 2 consumed at 250
+        {"event": "run_end", "t": 270, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "deadline", "t": 270, "task": "v", "due": 300, "met": True, "slack_us": 30},     # job 2 met
+        {"event": "ready", "t": 300, "task": "v", "cause": "timer_tick"},         # tick 3 on time
+        {"event": "run_start", "t": 300, "task": "v"},
+        {"event": "run_end", "t": 310, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "deadline", "t": 310, "task": "v", "due": 400, "met": True, "slack_us": 90},
+    ])
+    r = compute(run, events)
+    jobs = rows_of(r, "job", "v")
+    assert [(j["t"], j.get("value"), j["skipped"]) for j in jobs] == [
+        (0, 250, 0), (100, None, 1), (200, 70, 0), (300, 10, 0)]
+    assert r.guards == []
+
+
+def test_t0_is_the_first_timer_tick_line_at_the_arrival_not_the_first_dispatch():
+    """A head arriving on a busy lane executes its leading TIMER in its arrival step: its first
+    ready(timer_tick) line is at the arrival, before its first dispatch, and the grid starts
+    there (metrics doc §11, item 4)."""
+    run = runfile(1000, [task("v", period=100)], chains=[["v"]])
+    events = _timer_trace([
+        {"event": "ready", "t": 0, "task": "v", "cause": "timer_tick"},           # t0 = 0, tick 0, at the arrival
+        {"event": "run_start", "t": 40, "task": "v"},                              # first dispatch: the lane frees at 40
+        {"event": "run_end", "t": 50, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "deadline", "t": 50, "task": "v", "due": 100, "met": True, "slack_us": 50},
+        {"event": "ready", "t": 100, "task": "v", "cause": "timer_tick"},         # tick 1 at 100
+        {"event": "run_start", "t": 100, "task": "v"},
+        {"event": "run_end", "t": 110, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "deadline", "t": 110, "task": "v", "due": 200, "met": True, "slack_us": 90},
+    ])
+    r = compute(run, events)
+    assert [(j["t"], j["value"]) for j in rows_of(r, "job", "v")] == [(0, 50), (100, 10)]
+    assert [(w["cause"], w["value"]) for w in rows_of(r, "ready_wait", "v") if w["t"] == 0] == \
+        [("arrive", 40), ("timer_tick", 40)]                                      # both wait for the dispatch
+    assert r.guards == []
+
+
+def test_a_skipped_ticks_deadline_line_is_read_by_met_alone():
+    run = runfile(1000, [task("v", period=100)], chains=[["v"]])
+    events = _timer_trace([
+        {"event": "run_start", "t": 0, "task": "v"},
+        {"event": "ready", "t": 0, "task": "v", "cause": "timer_tick"},
+        {"event": "deadline", "t": 250, "task": "v", "due": 100, "met": False, "slack_us": -150},
+        {"event": "deadline", "t": 250, "task": "v", "due": 200, "met": True, "slack_us": 0},      # wrong: skipped, says met
+        {"event": "ready", "t": 250, "task": "v", "cause": "timer_tick"},
+        {"event": "run_end", "t": 270, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "deadline", "t": 270, "task": "v", "due": 300, "met": True, "slack_us": 30},
+    ])
+    r = compute(run, events)
+    assert [g for g in r.guards if "says met where tick 1 was skipped" in g]
+
+
+def test_a_consumption_that_does_not_advance_the_tick_is_a_guard():
+    run = runfile(1000, [task("v", period=100)], chains=[["v"]])
+    events = _timer_trace([
+        {"event": "run_start", "t": 0, "task": "v"},
+        {"event": "ready", "t": 0, "task": "v", "cause": "timer_tick"},
+        {"event": "run_end", "t": 10, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "ready", "t": 50, "task": "v", "cause": "timer_tick"},          # before tick 1 at 100: still tick 0
+        {"event": "run_start", "t": 50, "task": "v"},
+        {"event": "run_end", "t": 60, "task": "v", "reason": "block", "blocked_on": "timer"},
+    ])
+    r = compute(run, events)
+    assert any("consumes tick 0, not after tick 0" in g for g in r.guards)
+
+
+# ---- the hog test and the CPU-since reading on long runs (9.14 D14) --------------------------------------------
+
+def test_the_hog_test_and_the_cpu_since_reading_match_their_scans_on_time_ordered_lists():
+    """`run_ends` and `occupancy` are appended in trace order, so the first run end past an instant and the
+    occupancy that reaches `need` are found by bisection; this pins them to the linear definitions (memo §4,
+    §6.9) over random time-ordered lists, every instant between and on the entries."""
+    import random
+    from harness.primitives import _TaskState, _is_hog, _time_of_cpu_since
+
+    def hog_scan(st, t):
+        if st.arrive_t is None or st.arrive_t > t:
+            return False
+        if st.end is not None and st.end[0] <= t:
+            return False
+        first = next(((te, reason) for (te, reason) in st.run_ends if te > t), None)
+        return first is not None and first[1] == "preempt"
+
+    def cpu_since_scan(occupancy, t0, need):
+        got = 0
+        for (start, end) in occupancy:
+            if end <= t0:
+                continue
+            start = max(start, t0)
+            if got + (end - start) >= need:
+                return start + (need - got)
+            got += end - start
+        return None
+
+    rng = random.Random(914)
+    for _ in range(200):
+        t, occupancy, run_ends = 0, [], []
+        for _ in range(rng.randint(0, 12)):
+            start = t + rng.randint(1, 20)
+            end = start + rng.randint(1, 20)
+            occupancy.append((start, end))
+            run_ends.append((end, rng.choice(("preempt", "block", "exit"))))
+            t = end
+        st = _TaskState(arrive_t=rng.choice((None, 0, 5)), end=rng.choice((None, (t + 3, "exit"), (t // 2 or 1, "exit"))),
+                        run_ends=run_ends, occupancy=occupancy)
+        instants = sorted({0, t, t + 10} | {x for (a, b) in occupancy for x in (a - 1, a, b - 1, b, b + 1)})
+        for t_apply in instants:
+            assert _is_hog(st, t_apply) == hog_scan(st, t_apply), (st, t_apply)
+            for need in (1, 7, 30, 10_000):
+                assert _time_of_cpu_since(occupancy, t_apply, need) == cpu_since_scan(occupancy, t_apply, need), \
+                    (occupancy, t_apply, need)

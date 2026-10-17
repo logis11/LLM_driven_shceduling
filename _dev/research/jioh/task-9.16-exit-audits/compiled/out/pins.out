@@ -1,0 +1,8 @@
+core artifacts 51 mismatch 0
+variant artifacts 78 mismatch 0
+{
+2ad757b6196ae1839a76b4f1b2a96d156eee84b40375dec9bd5f66116b6ca14e  harness/scoring/scoring-spec.yaml
+24ccb875ff666615de75d80bc5351b7f5c62713d605438844938f9ab6ef1676c  harness/guards/guard-spec.yaml
+0fba4b3c9822054fad19ef150d1395d91e679d42b6299166b9a89f50ad27960c  daemon/driver-table/prior.yaml
+0f0af422d4dd92282903342b51cd6617d704d3cad9488d350388a47d7ff3417f  dataset/build.manifest.json
+cdc143191fcd28aec80595e3060f4f391c91ba52c341e076043589124bb579f6  dataset/build.variants.manifest.json

@@ -1,0 +1,930 @@
+"""Constructed cases for the meas-ci instruments and analyzer."""
+
+import json
+import subprocess
+
+from meas import analyze, proc_sampler, verify_names
+
+
+def _stat(pid, comm, utime, stime, threads, starttime):
+    fields = ["S", "1", str(pid), str(pid), "0", "-1", "0", "0", "0", "0", "0",
+              str(utime), str(stime), "0", "0", "20", "0", str(threads), "0",
+              str(starttime)]
+    return f"{pid} ({comm}) " + " ".join(fields) + "\n"
+
+
+def _status(volun, nonvol):
+    return (f"Name:\tx\nvoluntary_ctxt_switches:\t{volun}\n"
+            f"nonvoluntary_ctxt_switches:\t{nonvol}\n")
+
+
+def _fake_proc(root, threads):
+    """A /proc tree with one process (pid 100) whose threads carry the given
+    voluntary counts; /proc/100/status shows the main thread only."""
+    pid_dir = root / "100"
+    (pid_dir / "task").mkdir(parents=True)
+    (pid_dir / "stat").write_text(
+        _stat(100, "worker", 250, 30, len(threads), 5000))
+    (pid_dir / "status").write_text(_status(threads[100], 1))
+    for tid, volun in threads.items():
+        (pid_dir / "task" / str(tid)).mkdir()
+        (pid_dir / "task" / str(tid) / "status").write_text(_status(volun, 1))
+    (root / "meminfo").write_text("MemTotal: 1 kB\n")
+
+
+def test_sampler_records_every_thread(tmp_path):
+    _fake_proc(tmp_path, {100: 5, 101: 40, 102: 7})
+    record = proc_sampler.sample(True, proc=str(tmp_path))["procs"][0]
+    assert (record["vctxt"], record["threads"]) == (5, 3)
+    assert record["tctxt"] == {"100": [5, 1], "101": [40, 1], "102": [7, 1]}
+
+
+def _write_samples(repeat_dir, samples):
+    repeat_dir.mkdir()
+    with (repeat_dir / "proc_samples.jsonl").open("w") as out:
+        for t_s, procs in samples:
+            out.write(json.dumps({"t": t_s * 1_000_000, "procs": procs}) + "\n")
+
+
+def _proc(ticks, main_volun, tctxt=None):
+    proc = {"pid": 100, "starttime": 5000, "comm": "worker", "utime": ticks,
+            "stime": 0, "vctxt": main_volun, "nvctxt": 0}
+    if tctxt is not None:
+        proc["tctxt"] = tctxt
+    return proc
+
+
+def test_wakes_sum_thread_deltas(tmp_path):
+    repeat = tmp_path / "r1"
+    _write_samples(repeat, [
+        (10, [_proc(0, 5, {"100": [5, 0], "101": [40, 0]})]),
+        (20, [_proc(10, 6, {"100": [6, 0], "101": [60, 0], "102": [3, 0]})]),
+    ])
+    (entry,) = analyze.wake_stats(repeat, (0, 86_399), lambda c: c == "worker")
+    assert entry["wakes"] == 1 + 20  # thread 102 appeared once: no delta
+    assert entry["work_us"] == 10 * analyze.TICK_US / 21
+    assert analyze.has_thread_ctxt(repeat)
+
+
+def test_wakes_fall_back_to_main_thread(tmp_path):
+    repeat = tmp_path / "r1"
+    _write_samples(repeat, [(10, [_proc(0, 5)]), (20, [_proc(10, 15)])])
+    (entry,) = analyze.wake_stats(repeat, (0, 86_399), lambda c: c == "worker")
+    assert entry["wakes"] == 10
+    assert not analyze.has_thread_ctxt(repeat)
+
+
+def test_wake_stats_pid_filter(tmp_path):
+    repeat = tmp_path / "r1"
+    _write_samples(repeat, [(10, [_proc(0, 5)]), (20, [_proc(10, 15)])])
+    assert analyze.wake_stats(repeat, (0, 86_399), lambda c: True,
+                              pids={999}) == []
+
+
+def test_lognormal_fit_reports_zeros():
+    fit = analyze.lognormal_fit([0, 0, 100, 200, 400])
+    assert (fit["n"], fit["median_us"], fit["p90_us"]) == (3, 200, 400)
+    assert (fit["n_nonpositive"], fit["median_all_us"]) == (2, 100)
+    assert "n_nonpositive" not in analyze.lognormal_fit([100, 200, 400])
+
+
+LIFECYCLE = """\
+Time     Event     PID Info   Duration Process
+00:00:10 fork     3775 parent          make -C /tmp/linux-6.6 -j8
+00:00:10 fork     3776 child           make -C /tmp/linux-6.6 -j8
+00:00:11 fork     3776 parent          /bin/sh -c gcc -c foo.c
+00:00:11 fork     3777 child           /bin/sh -c gcc -c foo.c
+00:00:12 fork     3790 parent          /usr/bin/make -f ./scripts/Makefile.build obj=init
+00:00:12 fork     3791 child           /usr/bin/make -f ./scripts/Makefile.build obj=init
+00:00:40 fork     3775 parent          make -C /tmp/linux-6.6 -j8
+00:00:40 fork     3799 child           make -C /tmp/linux-6.6 -j8
+00:00:15 exit     4001      0   0.350s /snap/chromium/current/usr/lib/chromium-browser/chrome --type=renderer --renderer-client-id=6
+00:00:16 comm     4010                 /snap/chromium/current/usr/lib/chromium-browser/chrome --type=zygote
+00:00:17 exit     4020      0   9.000s /snap/chromium/current/usr/lib/chromium-browser/chrome --type=renderer --renderer-client-id=5
+"""
+
+
+def test_forks_counted_by_parent_only(tmp_path):
+    repeat = tmp_path / "r1"
+    repeat.mkdir()
+    (repeat / "lifecycle.log").write_text(LIFECYCLE)
+    # make's own forks inside the window; the shell's fork of gcc is not make's
+    assert analyze.count_forks_by(repeat, (10, 30), {"make"}) == 2
+
+
+def test_renderer_pids_from_lifecycle(tmp_path):
+    repeat = tmp_path / "r1"
+    repeat.mkdir()
+    (repeat / "lifecycle.log").write_text(LIFECYCLE)
+    assert analyze.pids_with_arg(repeat, (10, 30), "--type=renderer") == {4001, 4020}
+
+
+def test_name_level_needs_the_catalog_name():
+    gcc_only = {"gcc": "gcc -O2 -c /tmp/probe.c"}
+    assert verify_names.decide_level("cc1", ["/usr/bin/gcc"], gcc_only) == "binary-only"
+    cc1 = {"cc1": "/usr/libexec/gcc/x86_64-linux-gnu/13/cc1 -quiet probe.c"}
+    assert verify_names.decide_level("cc1", ["/usr/bin/gcc"], cc1) == "runtime"
+    assert verify_names.decide_level("cc1", [], {"error": "ENOENT"}) == "package-no-binary"
+    assert verify_names.decide_level("borg", [], None) == "package-no-binary"
+
+
+def test_name_level_matches_truncated_comm():
+    truncated = {"tracker-miner-f": "/usr/libexec/tracker-miner-fs-3"}
+    assert verify_names.name_observed("tracker-miner-fs-3", truncated)
+    assert verify_names.name_observed("tracker-miner-fs-3",
+                                      {"tracker-miner-f": ""})
+    assert not verify_names.name_observed("tracker-miner-fs-3",
+                                          {"tracker-extract": ""})
+
+
+def test_snap_stub_is_not_a_binary(tmp_path):
+    stub = tmp_path / "thunderbird"
+    stub.write_text("#!/bin/sh\necho 'install the snap: snap install thunderbird'\n")
+    elf = tmp_path / "rsync"
+    elf.write_bytes(b"\x7fELF\x02\x01\x01")
+    assert verify_names.is_snap_stub(stub)
+    assert not verify_names.is_snap_stub(elf)
+
+
+def test_package_binaries_include_sbin(monkeypatch):
+    listing = "/.\n/usr/sbin/dkms\n/usr/share/man/man8/dkms.8.gz\n/usr/lib/dkms/common.postinst\n"
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(
+        a, 0, stdout=listing, stderr=""))
+    assert verify_names.package_binaries("ubuntu", "dkms") == [
+        "/usr/sbin/dkms", "/usr/lib/dkms/common.postinst"]
+
+
+# ---- campaign analyzer: the wake definition (9.5 follow-ups spec, decision 4) ----
+
+import pytest  # noqa: E402
+from meas.campaign import analyze as campaign  # noqa: E402
+from meas.build import analyze as build  # noqa: E402
+
+
+def _row(t_in, run_ms, tid=7, comm="app"):
+    return campaign.Row(t_in, t_in, t_in + run_ms / 1000, run_ms, comm, tid, 100)
+
+
+def _bseg(t_in, run_ms, state, tid=7, comm="app"):
+    return build.Seg(t_in, t_in, t_in + run_ms / 1000, run_ms, comm, tid, 100, state, 3)
+
+
+def test_resume_after_preemption_extends_the_preceding_wake():
+    # one thread: woken at 1.000, runs 2 ms, preempted, resumes at 1.0025 for 1 ms
+    # with no wakeup in between; then sleeps, is woken at 1.0095 and runs 0.5 ms
+    rows = [_row(1.000, 2.0), _row(1.0025, 1.0), _row(1.010, 0.5)]
+    wakeups = {7: [0.9999, 1.0095]}
+    wakes, merged = campaign.merge_resumes(rows, wakeups)
+    assert merged == 1
+    got = [x for w in wakes for x in (w.t_in, w.run, w.t_end)]
+    assert got == pytest.approx([1.000, 3.0, 1.0035, 1.010, 0.5, 1.0105])
+
+
+def test_a_waking_row_before_the_switch_out_still_makes_a_wake():
+    # a 3 µs run that blocks on a ~7 µs I/O wait: the waker's sched_waking fires at 1.000002, while the thread is
+    # still switching out (recorded at 1.000003); it fires only for a thread already in a sleep state (kernel
+    # try_to_wake_up: trace_sched_waking after ttwu_state_match), so it wakes the sleep that follows
+    rows = [_row(1.000, 0.003), _row(1.000010, 0.003)]
+    wakes, merged = campaign.merge_resumes(rows, {7: [0.9999, 1.000002]})
+    assert merged == 0 and len(wakes) == 2
+    wakes, merged = build.merge_resumes([_bseg(1.000, 0.003, "D"), _bseg(1.000010, 0.003, "S")], {7: [0.9999, 1.000002]})
+    assert merged == 0 and len(wakes) == 2
+
+
+def test_the_switch_out_state_decides_where_it_was_recorded():
+    # 9.7 D21: S or D before the gap is a wake, R a resume, whatever the rows say; the disagreements are counted
+    check = {}
+    segs = [_bseg(1.000, 0.003, "S"), _bseg(1.000010, 0.003, "R"), _bseg(1.000020, 0.003, "D"), _bseg(1.000030, 0.003, "S")]
+    wakes, merged = build.merge_resumes(segs, {7: [1.000015, 1.000026]}, check)
+    # gap 1 (after S, no row): a wake; gap 2 (after R, a row at 1.000015): a resume; gap 3 (after D, a row): a wake
+    assert [w.t_in for w in wakes] == [1.000, 1.000010, 1.000030] and merged == 1
+    assert check == {"slept_without_row": 1, "preempted_with_row": 1}
+    wakes, merged = build.merge_resumes([s._replace(state="") for s in segs], {7: [1.000015, 1.000026]})
+    assert [w.t_in for w in wakes] == [1.000, 1.000020, 1.000030]   # no state recorded: the rows decide
+
+
+def test_a_row_before_the_last_schedule_in_belongs_to_the_earlier_sleep():
+    rows = [_row(1.000, 0.003), _row(1.000010, 0.003)]
+    wakes, merged = campaign.merge_resumes(rows, {7: [0.999999]})   # woke the first segment, not the second
+    assert merged == 1
+
+
+def test_first_row_without_a_wakeup_in_the_capture_is_a_wake():
+    rows = [_row(1.000, 2.0), _row(1.005, 1.0)]
+    wakes, merged = campaign.merge_resumes(rows, {})  # no wakeups file rows for this thread
+    assert merged == 1 and len(wakes) == 1 and wakes[0].run == 3.0
+
+
+def test_threads_are_merged_independently():
+    rows = sorted([_row(1.000, 2.0, tid=7), _row(1.001, 1.0, tid=8), _row(1.0025, 1.0, tid=7)], key=lambda r: r.t_in)
+    wakes, merged = campaign.merge_resumes(rows, {7: [0.9999], 8: [1.0009]})
+    assert merged == 1
+    assert sorted((w.tid, w.run) for w in wakes) == [(7, 3.0), (8, 1.0)]
+
+
+def test_the_row_decides_and_the_state_checks_it():
+    # 9.5 D39: the campaign keeps the row window for every repeat; a recorded switch-out state only counts where the
+    # row disagrees with it, per comm, and a folded resume carries its own switch-out state into the wake
+    check = {}
+    rows = [_row(1.000, 0.003)._replace(state="S"), _row(1.000010, 0.003)._replace(state="R"),
+            _row(1.000020, 0.003)._replace(state="D"), _row(1.000030, 0.003)._replace(state="S")]
+    wakes, merged = campaign.merge_resumes(rows, {7: [1.000015, 1.000026]}, check)
+    # gap 1 (after S, no row): folded by the row; gap 2 (after R, a row): a wake by the row; gap 3 (after D, a row): a wake
+    assert [w.t_in for w in wakes] == [1.000, 1.000020, 1.000030] and merged == 1
+    assert wakes[0].state == "R"
+    assert check == {"app": {"gaps": 3, "slept_without_row": 1, "preempted_with_row": 1}}
+    check = {}
+    campaign.merge_resumes([r._replace(state="") for r in rows], {7: [1.000015, 1.000026]}, check)
+    assert check == {}   # no state recorded (the campaign's earlier repeats): nothing to check
+
+
+def test_the_state_decides_for_the_send_campaign():
+    # 9.5 D40: by_state — the recorded switch-out state decides, the row is counted against it; no state, the row decides
+    check = {}
+    rows = [_row(1.000, 0.003)._replace(state="S"), _row(1.000010, 0.003)._replace(state="R"),
+            _row(1.000020, 0.003)._replace(state="D"), _row(1.000030, 0.003)._replace(state="S")]
+    wakes, merged = campaign.merge_resumes(rows, {7: [1.000015, 1.000026]}, check, by_state=True)
+    # gap 1 (after S): a wake; gap 2 (after R): a resume, whatever the row says; gap 3 (after D): a wake
+    assert [w.t_in for w in wakes] == [1.000, 1.000010, 1.000030] and merged == 1
+    assert check == {"app": {"gaps": 3, "slept_without_row": 1, "preempted_with_row": 1}}
+    wakes, merged = campaign.merge_resumes([r._replace(state="") for r in rows], {7: [1.000015, 1.000026]}, by_state=True)
+    assert [w.t_in for w in wakes] == [1.000, 1.000020, 1.000030]   # no state recorded: the rows decide
+
+
+def test_a_gecko_pool_is_one_component_in_the_send_campaign():
+    # 9.5 D38: thunderbird-send keys a component by the thread's name without its trailing " #<n>"
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)   # pool.py imports its sibling as `analyze`; another test may hold build's
+    try:
+        campaign_pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    assert campaign_pool.component_key("thunderbird-send", "BgIOThr~Pool #3") == "BgIOThr~Pool"
+    assert campaign_pool.component_key("thunderbird-send", "StreamTrans #64") == "StreamTrans"
+    assert campaign_pool.component_key("thunderbird-send", "DOM Worker") == "DOM Worker"
+    assert campaign_pool.component_key("thunderbird", "BgIOThr~Pool #3") == "BgIOThr~Pool #3"   # the current campaign
+    # 9.5 D90: Gecko shortens a name past 15 characters to its first 7, "~" and its last 7, so a pool's later threads
+    # take another spelling (`StreamTrans #99`, `StreamT~ns #114`; `IndexedDB IO #9`, `Indexed~ IO #10`); each folds
+    # back into its pool
+    for comm, pool_name in (("StreamTrans #99", "StreamTrans"), ("StreamT~ns #114", "StreamTrans"),
+                            ("StreamT~s #1000", "StreamTrans"), ("IndexedDB IO #9", "IndexedDB IO"),
+                            ("Indexed~ IO #10", "IndexedDB IO"), ("Indexed~IO #100", "IndexedDB IO"),
+                            ("TaskCon~ller #0", "TaskCon~ller"), ("Softwar~cThread", "Softwar~cThread")):
+        assert campaign_pool.component_key("thunderbird-send", comm) == pool_name, comm
+
+
+def test_no_pooled_gecko_pool_is_split_across_two_spellings(repo_root):
+    # 9.5 D90 on the committed records: no shortened spelling of a listed pool is left as a name of its own
+    import importlib
+    import json as _json
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        campaign_pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    campaign = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+    for sub in ("results-same-machine", "results-re-measured", "results-control"):
+        run = _json.load(open(campaign / sub / "pool-thunderbird-send.json"))["runs"]["thunderbird-send"]
+        for phase, ph in run["phases"].items():
+            names = set(ph.get("threads") or {})
+            for pool_name in campaign_pool.GECKO_POOLS:
+                short = {campaign_pool.gecko_short(f"{pool_name} #{n}")[:-len(f" #{n}")] for n in range(1, 1000)} - {pool_name}
+                assert not names & short, (sub, phase, names & short)
+
+
+def test_a_transient_child_is_woken_by_its_own_wakeup_rows(tmp_path):
+    # 9.5 D41: a process the op phase admits by the appdef's RX (kdenlive_render, pid 200, not in the snapshots) has its
+    # wakeup rows read like the tree's; before, every sleep of it found no row and was folded as a resume
+    import json as _json
+    (tmp_path / "report.json").write_text(_json.dumps({"app": "kdenlive", "repeat": 1, "mode": "full", "rx": "kdenlive_render"}))
+    for s in ("before", "after"):
+        (tmp_path / f"snap.op.{s}.json").write_text(_json.dumps({"procs": [{"pid": 100, "comm": "kdenlive"}]}))
+    (tmp_path / "perf.op.timehist.txt").write_text(
+        "   1.000100 [0003]  kdenlive_render[201/200]    0.000      0.002      0.100      S\n"
+        "   1.010100 [0003]  kdenlive_render[201/200]    9.900      0.002      0.100      S\n")
+    (tmp_path / "perf.op.wakeups.txt").write_text("   1.005000 [0001]  Xvfb[400]  awakened: kdenlive_render[201/200]\n"
+                                                  "   1.009990 [0001]  melt[300]  awakened: kdenlive_render[201/200]\n")
+    res, _ = campaign.analyze_run(str(tmp_path))
+    op = res["phases"]["op"]
+    assert op["transient_pids"] == {200: ["kdenlive_render"]}
+    assert op["x_wakes_by_comm"] == {"kdenlive_render": 1}   # the X-server wake count reads the admitted child too
+    assert op["segments"] == 2 and op["resumes_merged"] == 0 and op["rows"] == 2
+    assert op["wake_check"] == {"kdenlive_render": {"gaps": 1, "slept_without_row": 0, "preempted_with_row": 0}}
+
+
+def test_the_idle_phase_is_read_from_a_stated_second_past_its_first_row(tmp_path):
+    # 9.5 D83: the idle phase read from idle_from_s on — its span, its rows and its CPU (D13's idle rate) over the rest
+    import json as _json
+    (tmp_path / "report.json").write_text(_json.dumps({"app": "code", "repeat": 1, "mode": "full"}))
+    for s in ("before", "after"):
+        (tmp_path / f"snap.idle.{s}.json").write_text(_json.dumps({"procs": [{"pid": 100, "comm": "code"}]}))
+    (tmp_path / "perf.idle.timehist.txt").write_text(
+        "   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"      # the capture's first row
+        "   5.090000 [0003]  code[101/100]    0.000      0.001     90.000      S\n"   # in at 5.0 s: launch work
+        "  25.020000 [0003]  code[101/100]    0.000      0.001     20.000      S\n"   # in at 25.0 s
+        "  30.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n")     # the capture's last row
+    (tmp_path / "perf.idle.wakeups.txt").write_text(
+        "   4.999000 [0001]  x[9]  awakened: code[101/100]\n"
+        "  24.999000 [0001]  x[9]  awakened: code[101/100]\n")
+    whole, _ = campaign.analyze_run(str(tmp_path))
+    assert (whole["phases"]["idle"]["span_s"], whole["phases"]["idle"]["rows"]) == (30.0, 2)
+    res, raw = campaign.analyze_run(str(tmp_path), idle_from_s=10.0)
+    idle = res["phases"]["idle"]
+    assert (idle["span_s"], idle["rows"], idle["cpu_share"]) == (20.0, 1, 0.001)   # 20 ms over 20 s
+    assert raw["phases"]["idle"]["t0"] == pytest.approx(10.00001)
+
+
+def test_slice_profile_of_the_steady_phase(tmp_path):
+    # 9.5 D35, D42: CPU ms/s and wakes/s per slice from the phase's first row; a run counts in its schedule-in's slice
+    import json as _json
+    from meas.campaign import slices
+    (tmp_path / "report.json").write_text(_json.dumps({"app": "thunderbird-send", "repeat": 1, "mode": "probe"}))
+    for s in ("before", "after"):
+        (tmp_path / f"snap.idle.{s}.json").write_text(_json.dumps({"procs": [{"pid": 100, "comm": "thunderbird"}]}))
+    (tmp_path / "perf.idle.timehist.txt").write_text(
+        "   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"      # the capture's first row
+        "   5.001000 [0003]  thunderbird[101/100]    0.000      0.001      1.000      S\n"
+        "  15.002000 [0003]  thunderbird[101/100]    9.000      0.001      2.000      R\n"      # preempted
+        "  15.003000 [0003]  thunderbird[101/100]    0.000      0.001      1.000      S\n"
+        "  30.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")     # the capture's last row: 30 s
+    (tmp_path / "perf.idle.wakeups.txt").write_text(
+        "   5.000000 [0001]  x[9]  awakened: thunderbird[101/100]\n"
+        "  14.999500 [0001]  x[9]  awakened: thunderbird[101/100]\n")   # the third follows an R: a resume
+    phase, cpu, wakes = slices.profile(str(tmp_path))
+    assert phase == "idle" and cpu == [0.1, 0.3, 0.0] and wakes == [0.1, 0.1, 0.0]
+
+
+def test_a_component_absent_from_a_repeat_is_sporadic_not_carried():
+    # 9.5 D43: carried only if its gap and run means exist in every repeat (two wakes in each repeat's phase); the
+    # residual is judged as a whole
+    import importlib
+    import sys
+    from array import array
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+
+    def comm(wakes):   # per repeat: wake count, evenly spread gaps of 100 ms, runs of 0.1 ms
+        return {"wakes": dict(wakes), "threads": {r: 1 for r in wakes},
+                "gaps": {r: array("d", [100.0] * (n - 1)) for r, n in wakes.items() if n > 1},
+                "runs": {r: array("d", [0.1] * n) for r, n in wakes.items() if n},
+                "t_in": {r: array("d", [i * 0.1 for i in range(n)]) for r, n in wakes.items() if n}}
+    reps, spans = [1, 2, 3], {1: 100.0, 2: 100.0, 3: 100.0}
+    comms = {"main": comm({1: 150, 2: 150, 3: 150}), "tick": comm({1: 10, 2: 10, 3: 10}),
+             "dbus": comm({1: 0, 2: 6, 3: 0})}
+    chosen, residual, cov = pool.select_components(comms, spans, reps)
+    assert chosen == ["main", "tick"] and residual is None
+    assert cov["sporadic"] == [{"comm": "residual", "comms": ["dbus"], "repeats": [2], "wakes_per_s": 0.02}]
+    comms["dbus"] = comm({1: 3, 2: 6, 3: 2})   # present in every repeat: the residual is carried
+    chosen, residual, cov = pool.select_components(comms, spans, reps)
+    assert residual["comms"] == ["dbus"] and cov["sporadic"] == []
+    # a selected component that wakes fewer than twice in one repeat is dropped too, not carried
+    comms = {"main": comm({1: 150, 2: 150, 3: 150}), "tick": comm({1: 30, 2: 1, 3: 30})}
+    chosen, residual, cov = pool.select_components(comms, spans, reps)
+    assert chosen == ["main"] and [c["comm"] for c in cov["sporadic"]] == ["tick"]
+
+
+def test_a_heavy_event_leaves_the_component_rows():
+    # 9.5 D64: chrome's MemoryInfra pass of 54-61 ms is carried as its own event, its regular runs stay component wakes
+    import importlib
+    import sys
+    from types import SimpleNamespace as R
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    rows = [R(comm="MemoryInfra", t_in=1.0, run=7.7), R(comm="MemoryInfra", t_in=2.0, run=57.3),
+            R(comm="HangWatcher", t_in=3.0, run=40.0)]
+    kept, events = pool.split_events("chrome", "idle", rows)
+    assert [r.run for r in kept] == [7.7, 40.0] and events == [(2.0, 57.3)]
+    assert pool.split_events("chrome", "driven", rows) == (rows, None)
+    assert pool.split_events("code", "idle", rows) == (rows, None)
+
+
+def test_a_clock_event_leaves_the_component_rows_at_any_run():
+    # 9.5 D91: thunderbird-send's `glean.mps`, Glean's metrics-ping scheduler waking once a day at 04:00 local time,
+    # leaves the idle phase's component rows whatever its run, and is stated, not compiled
+    import importlib
+    import sys
+    from types import SimpleNamespace as R
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    rows = [R(comm="glean.mps", t_in=239.5, run=2.299), R(comm="glean.mps", t_in=300.0, run=0.01),
+            R(comm="BgIOThr~Pool #2", t_in=1.0, run=0.2)]
+    kept, events = pool.split_events("thunderbird-send", "idle", rows)
+    assert [r.comm for r in kept] == ["BgIOThr~Pool #2"] and events == [(239.5, 2.299), (300.0, 0.01)]
+    assert ("thunderbird-send", "idle") in pool.CLOCK_EVENTS and ("chrome", "idle") not in pool.CLOCK_EVENTS
+
+
+def test_mail_clients_clock_event_is_stated_not_compiled(repo_root, fold_95):
+    # 9.5 D91 on the committed records: the 04:00 `glean.mps` run is out of the idle residual, in the pooled record as
+    # an event the fold-in does not compile, and stated in mail-client's scope
+    import json as _json
+    import yaml
+    campaign = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+    idle = _json.load(open(campaign / "results-same-machine" / "pool-thunderbird-send.json"))["runs"]["thunderbird-send"]["phases"]["idle"]
+    h = idle["heavy_event"]
+    assert h["comm"] == "glean.mps" and h["compiled"] is False and sum(h["count"]) == 1 and h["runs_ms"] == [2.299]
+    assert "glean.mps" not in idle["components"]["residual"]["comms"]
+    entry = yaml.safe_load("archetypes:\n" + fold_95.read_text())["archetypes"]["mail-client"]
+    assert "heavy_events" not in entry["params"]
+    assert ("`glean.mps`, Glean's metrics-ping scheduler, wakes once a day at 04:00 local time (glean); it is stated, "
+            "not carried (D91): 1 run of 2.299 ms, 238.6 s into repeat 39's idle phase, the only one of the 77 whose "
+            "phase held 04:00 on the runner's clock (UTC); its run is out of the residual. ") in entry["validation_stats"]["scope"]
+
+
+def test_values_at_the_window_limit_are_reported_not_held_open():
+    # 9.5 D32, D46: thunderbird-send's input and operation values stop at its eight Outlook windows; the idle values
+    # keep adding repeats
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    crit = {n: {"passes": False} for n in ("idle Timer wakes/s", "op Timer wakes/s", "operation duration mean (ms)",
+                                           "input_run mean, SWELL-KW (ms)", "input_run mean, 136M (ms)")}
+    entry = {"repeats": list(range(1, 11)),
+             "phases": {"idle": {}, "driven": {"repeats": list(range(1, 9))}, "driven-alt": {"repeats": list(range(1, 9))},
+                        "op": {"repeats": list(range(1, 9))}}}
+    pool.mark_limited("thunderbird-send", entry, crit)
+    assert [n for n, c in crit.items() if c.get("limited")] == ["op Timer wakes/s", "operation duration mean (ms)",
+                                                                 "input_run mean, SWELL-KW (ms)", "input_run mean, 136M (ms)"]
+    entry["phases"]["op"]["repeats"] = list(range(1, 8))   # seven of eight windows landed: the op values still count
+    crit = {"op Timer wakes/s": {"passes": False}}
+    pool.mark_limited("thunderbird-send", entry, crit)
+    assert not crit["op Timer wakes/s"].get("limited")
+    crit = {"op gimp wakes/s": {"passes": False}}
+    pool.mark_limited("gimp", entry, crit)   # no recorded input limit
+    assert not crit["op gimp wakes/s"].get("limited")
+
+
+def test_timehist_rows_with_and_without_the_state_column(tmp_path):
+    p = tmp_path / "perf.idle.timehist.txt"
+    p.write_text("           time    cpu  task name                       wait time  sch delay   run time  state\n"
+                 "   1.000300 [0003]  vo[7/100]    0.000      0.004      0.300      S\n"
+                 "   1.000900 [0003]  vo[7/100]    0.100      0.002      0.200\n")
+    rows, _, _ = campaign.load_rows(str(p), {100})
+    assert [(r.comm, r.tid, r.run, r.state) for r in rows] == [("vo", 7, 0.3, "S"), ("vo", 7, 0.2, "")]
+
+
+def test_all_wakeups_indexed_by_wakee_tid(tmp_path):
+    p = tmp_path / "perf.idle.wakeups.txt"
+    p.write_text("   1.000500 [0001]  Xvfb[500]  awakened: app[7/100]\n"
+                 "   1.000600 [0002]  app[8/100]  awakened: app[7/100]\n"
+                 "   1.000700 [0002]  other[9/200]  awakened: other[9/200]\n")
+    assert campaign.load_all_wakeups(str(p), {100}) == {7: [1.0005, 1.0006]}
+
+
+# ---- campaign analyzer: operation windows (9.5 follow-ups spec, decisions 8–9) ----
+
+def test_operation_windows_cut_rows_and_measure_duration():
+    ops = [{"op": "x", "i": 0, "trigger_us": 1_000_000, "done_us": 1_200_000, "rc": 0},
+           {"op": "x", "i": 1, "trigger_us": 2_000_000, "done_us": 2_050_000, "rc": 2},   # failed: excluded
+           {"op": "x", "i": 2, "trigger_us": 3_000_000, "done_us": 3_400_000, "rc": 0}]
+    rows = [_row(0.5, 1.0), _row(1.05, 2.0), _row(1.10, 3.0), _row(2.01, 1.0), _row(3.1, 5.0), _row(3.5, 1.0)]
+    res = campaign.operation_windows(rows, ops)
+    assert res["durations_ms"] == [200.0, 400.0]
+    assert res["n_ok"] == 2 and res["n_failed"] == 1
+    assert [r.t_in for r in res["inside"]] == [1.05, 1.10, 3.1]
+    assert [r.t_in for r in res["outside"]] == [0.5, 2.01, 3.5]
+
+
+def test_one_comm_in_two_processes_is_two_components():
+    # 9.5 D67: chrome's Chrome_ChildIOT names a thread of the GPU process (thousands of wakes) and one of each utility
+    # process (one to six); pooled by comm alone, the utility threads' gaps of minutes move the component's gap mean
+    rows = [campaign.Row(t, t, t + 0.0001, 0.1, "Chrome_ChildIOT", 11, 100) for t in (1.0, 1.1, 1.2, 1.3)]
+    rows += [campaign.Row(t, t, t + 0.0001, 0.1, "Chrome_ChildIOT", 22, 200) for t in (1.0, 301.0)]
+    roles = {100: "gpu", 200: "utility"}
+    per = campaign.per_thread(rows, 600.0, roles)
+    assert sorted(per) == ["gpu/Chrome_ChildIOT", "utility/Chrome_ChildIOT"]
+    assert per["gpu/Chrome_ChildIOT"]["gap_ms"]["mean"] == pytest.approx(100.0)
+    assert per["utility/Chrome_ChildIOT"]["gap_ms"]["mean"] == pytest.approx(300_000.0)
+    # pooled by comm alone the two are one bucket, and the utility thread's single gap carries the mean away
+    assert campaign.per_thread(rows, 600.0)["Chrome_ChildIOT"]["gap_ms"]["mean"] == pytest.approx(75_075.0)
+    # a single-process tree keeps plain comm names: every thread's role is `main`
+    assert sorted(campaign.per_thread(rows, 600.0, {100: "main", 200: "main"})) == ["Chrome_ChildIOT"]
+
+
+def test_a_gecko_child_process_takes_its_process_name_as_its_role(tmp_path):
+    # 9.5 D94: Thunderbird's children start with -contentproc, not Chromium's --type=; the snapshots cut the command
+    # line before Gecko's type argument, so a child's role is its process name — in the op phase too, where
+    # ops.jsonl lists every process as `main`
+    import json as _json
+    procs = [{"pid": 100, "comm": "thunderbird-bin", "cmd": "/snap/thunderbird/1259/usr/lib/thunderbird/thunderbird-bin --profile /p"},
+             {"pid": 200, "comm": "WebExtensions", "cmd": "/snap/thunderbird/1259/usr/lib/thunderbird/thunderbird-bin -contentproc -isForBrowser -prefsHandle"},
+             {"pid": 300, "comm": "RDD Process", "cmd": "/snap/thunderbird/1259/usr/lib/thunderbird/thunderbird-bin -contentproc -parentBuildID 1"},
+             {"pid": 400, "comm": "chrome", "cmd": "/opt/google/chrome/chrome --type=renderer --lang=en"}]
+    for name in ("snap.idle.before.json", "snap.op.before.json"):
+        (tmp_path / name).write_text(_json.dumps({"procs": procs}))
+    (tmp_path / "ops.jsonl").write_text(_json.dumps({"op": "send", "procs": {"100": "main", "200": "main", "300": "main", "500": "main"}}) + "\n")
+    want = {100: "main", 200: "WebExtensions", 300: "RDD Process", 400: "renderer"}
+    assert campaign.pid_roles(str(tmp_path), "idle") == want
+    assert campaign.pid_roles(str(tmp_path), "op") == {**want, 500: "main"}
+    assert campaign.component_name("WebExtensions", "Timer") == "WebExtensions/Timer"
+
+
+def test_chromes_input_values_stop_at_its_recordings_last_window():
+    # 9.5 D32: a value of a phase only full repeats run stops at the recording's limit — chrome's 38 Internet Explorer
+    # windows — and is then carried with its half-width instead of holding the rule open
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    assert pool.WINDOW_LIMIT["chrome"] == 38
+    crit = {"input_run mean, SWELL-KW (ms)": {}, "input_run mean, 136M (ms)": {}, "idle gpu/Chrome_ChildIOT gap mean (ms)": {}}
+    entry = {"repeats": list(range(1, 39)), "phases": {"driven": {}, "driven-alt": {}, "idle": {}}}
+    pool.mark_limited("chrome", entry, crit)
+    assert crit["input_run mean, SWELL-KW (ms)"].get("limited")
+    assert crit["input_run mean, 136M (ms)"].get("limited")      # run.sh replays neither past the window's end
+    assert not crit["idle gpu/Chrome_ChildIOT gap mean (ms)"].get("limited")   # the idle phase keeps adding repeats
+    at37 = {"input_run mean, SWELL-KW (ms)": {}}
+    pool.mark_limited("chrome", {"repeats": list(range(1, 38)), "phases": {"driven": {}}}, at37)
+    assert not at37["input_run mean, SWELL-KW (ms)"].get("limited")
+
+
+def test_the_campaign_projection_past_twenty_repeats_takes_its_own_multiplier():
+    # sd 15 about 100: t(k-1) / sqrt(k) <= 1/3 first at k = 38; the k = 20 multiplier held past 20 gave 40
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    assert pool.repeats_needed([85.0, 100.0, 115.0]) == 38
+
+
+def test_the_pool_states_every_build_it_holds():
+    # 9.5 D69: a pool that kept only the first repeat's build could not show a build change — code's 1.139.0 in
+    # repeat 29, chrome's 153 in four repeats of thirty — so the record keeps one per repeat and states the census
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    assert pool.build_census({1: "1.138.0", 2: "1.138.0", 3: "1.138.0"}) == "1.138.0 (3 repeats)"
+    mixed = pool.build_census({17: "Chrome 152 ", 18: "Chrome 153", 19: "Chrome 152", 20: "Chrome 153", 21: "Chrome 152"})
+    assert mixed == "Chrome 152 (3 repeats), Chrome 153 (2: 18, 20)"
+    assert pool.build_census(None) == "?"          # a pool written before the field was per repeat
+    assert pool.build_census("Chrome 152 ") == "Chrome 152"
+
+
+def test_the_window_limit_reads_the_highest_window_not_the_repeat_count():
+    # 9.5 D32: the limit binds when the recording has no further window to give. A window left out under D47, or one
+    # whose recording holds no event (code's word-r43), leaves the phase's repeat count short of the limit while the
+    # recording is just as exhausted.
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    assert pool.WINDOW_LIMIT["code"] == 57                       # D99: the Word recording's 57 windows, not 44
+    reached = [r for r in range(1, 58) if r not in (5, 43)]       # 5 left out under D47, 43 replayed by none
+    crit = {"input_run mean, SWELL-KW (ms)": {}}
+    pool.mark_limited("code", {"repeats": reached, "phases": {"driven": {"repeats": reached}}}, crit)
+    assert crit["input_run mean, SWELL-KW (ms)"].get("limited")   # 55 repeats, and every window the recording has
+    crit2 = {"input_run mean, SWELL-KW (ms)": {}}
+    short = [r for r in range(1, 45) if r != 43]                  # code's campaign: windows 45–57 still to come
+    pool.mark_limited("code", {"repeats": short, "phases": {"driven": {"repeats": short}}}, crit2)
+    assert not crit2["input_run mean, SWELL-KW (ms)"].get("limited")
+
+
+def test_the_results_render_sorts_an_exclusion_that_names_its_run():
+    # 9.5 D66: pool_runs keys a window that landed twice as "<window>@<run id>"; the renderer sorted the keys as
+    # integers and stopped on the first such pool (chrome's window 16, code's window 29)
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        rr = importlib.import_module("meas.campaign.render_results")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    keys = {"29@35838600778": "a", "5": "b", "16": "c"}
+    assert [k for k, _ in sorted(keys.items(), key=rr.EXCLUDED_ORDER)] == ["5", "16", "29@35838600778"]
+
+
+def test_repeats_that_share_an_exclusion_reason_are_named_once():
+    # pool_runs states one --exclude-why per pool, so the rendered record named every excluded repeat with the whole
+    # text repeated; code's two exclusions printed the same paragraph twice
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        rr = importlib.import_module("meas.campaign.render_results")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    by_why = {}
+    for k, why in sorted({"29@358": "D63 and D69", "5": "D63 and D69"}.items(), key=rr.EXCLUDED_ORDER):
+        by_why.setdefault(why, []).append(str(k))
+    line = "; ".join(f"repeat{'s' if len(ks) > 1 else ''} {', '.join(ks)} — {why}" for why, ks in by_why.items())
+    assert line == "repeats 5, 29@358 — D63 and D69"
+
+
+# ------------------------------------------------------------------------------------------ 9.5 fold-in
+
+POOLS_95 = ([("results-same-machine", a) for a in ("gimp", "kdenlive", "mpv-audio", "mpv-video", "soffice")]
+            + [("results-re-measured", a) for a in ("chrome", "code", "webrtc", "thunderbird-send")])
+# D79: thunderbird-send's idle phase from the 43-repeat pool, every phase with or after the input from the keys-only one;
+# 9.10 D146: kdenlive's from its own campaign past its launch work (a path from the research root)
+IDLE_POOLS_95 = [(("task-9.5-interactive-typing", "campaign", "results-same-machine"), "thunderbird-send", None),
+                 (("task-9.10-scenarios-timelines", "campaign", "kdenlive-idle", "results"), "kdenlive",
+                  "meas-ci:interactive:2026-10-05")]   # thunderbird-send's idle tag is in TAGS_95
+TAGS_95 = ["--tag", "interactive=meas-ci:interactive:2026-09-18", "--tag", "playback=meas-ci:playback:2026-09-18",
+           "--tag", "thunderbird-send=meas-ci:interactive:2026-09-27", "--tag", "chrome=meas-ci:interactive:2026-09-20",
+           "--tag", "webrtc=meas-ci:playback:2026-09-20", "--tag", "code=meas-ci:interactive:2026-09-25",
+           "--idle-tag", "thunderbird-send=meas-ci:interactive:2026-09-19"]
+# the untraced control's record, each archetype's reading in its notes (the 9.5 untraced-control spec, decision 20)
+CONTROL_95 = ("results-control", "control.json")
+
+
+@pytest.fixture(scope="module")
+def fold_95(repo_root, tmp_path_factory):
+    """9.5's fold-in over its nine committed pools, as the campaign record's re-fold runs it."""
+    import shutil
+    import sys
+    d = tmp_path_factory.mktemp("fold95")
+    (d / "pools").mkdir()
+    campaign_dir = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+    for sub, app in POOLS_95:
+        shutil.copy(campaign_dir / sub / f"pool-{app}.json", d / "pools")
+    research = repo_root / "_dev" / "research" / "jioh"
+    idle = [a for parts, app, tag in IDLE_POOLS_95
+            for a in ("--idle-from", f"{app}={research.joinpath(*parts) / f'pool-{app}.json'}",
+                      *(("--idle-tag", f"{app}={tag}") if tag else ()))]
+    frag = d / "frag.yaml"
+    subprocess.run([sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "fold_in.py"),
+                    str(d / "pools"), str(frag), *TAGS_95, *idle,
+                    "--control", str(campaign_dir.joinpath(*CONTROL_95))], check=True, capture_output=True)
+    return frag
+
+
+def _scopes(frag):
+    import yaml
+    doc = yaml.safe_load("archetypes:\n" + frag.read_text())["archetypes"]
+    return {aid: e["validation_stats"]["scope"] for aid, e in doc.items()}
+
+
+def test_the_fold_in_regenerates_the_nine_entries_from_the_pooled_records(repo_root, fold_95, tmp_path):
+    # the nine entries in archetypes.yaml are fold_in.py's output on the committed pools, spliced, byte for byte
+    import shutil
+    import sys
+    lib = tmp_path / "archetypes.yaml"
+    shutil.copy(repo_root / "dataset" / "archetypes.yaml", lib)
+    subprocess.run([sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "splice.py"),
+                    str(fold_95), str(lib)], check=True, capture_output=True)
+    assert lib.read_bytes() == (repo_root / "dataset" / "archetypes.yaml").read_bytes()
+
+
+def test_every_measured_scope_states_the_stability_rule_over_its_repeats(fold_95):
+    # the workflow's rule (D26, D30, D78): every value within 5 % or 1 µs, a table read by the mean it carries, over the
+    # repeats the pool holds
+    repeats = {"office-writer": 14, "code-editor": 44, "mail-client": 77, "web-browser": 38, "image-editor": 5,
+               "video-editor": 16, "video-player": 24, "audio-player": 31, "video-call": 45}   # the idle pool's (D79)
+    scopes = _scopes(fold_95)
+    assert sorted(scopes) == sorted(repeats)
+    for aid, scope in scopes.items():
+        assert f"within 5 % or 1 µs over the {repeats[aid]} repeats obtained" in scope, aid
+        assert "a table read by the mean it carries, over every repeat's samples" in scope, aid
+
+
+def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
+    # D32, D46: the phases that replay a recording's window stop at its last; their values state their half-widths,
+    # each one outside the rule by name with the repeats the rule would need
+    s = _scopes(fold_95)
+    # D99: code stopped at window 44, short of its recording's 57; its per-input means are held to the rule
+    code = s["code-editor"]
+    assert "window limit" not in code.lower() and "outside the rule" not in code
+    assert "the campaign stopped at window 44, then read as the Word recording's last" in code
+    web = s["web-browser"]
+    assert "38 repeats" in web and "the per-input means and the page-load operation's values" in web
+    # D84: its renderers carried, the SWELL-KW per-input mean sits outside the rule at the recording's last window
+    assert ("outside the rule: the per-input run mean under SWELL-KW 4.274 ms ±5.90 % (the rule needs 52 repeats); "
+            "the other 38 hold within it, the widest ±3.37 %") in web
+    mail = s["mail-client"]
+    assert "8 repeats" in mail and "the per-input means and the send operation's values" in mail
+    # D79: the keys-only re-measure's eight windows; its 136M mean now holds the rule
+    assert "SWELL-KW 6.052 ms ±10.41 % (the rule needs 27 repeats)" in mail
+    assert "136M" not in mail.split("outside the rule:")[1].split("hold within it")[0]
+    # D90: the pool's two spellings folded into `StreamTrans`; D94: the WebExtensions process's threads apart
+    assert "the operation's `StreamTrans` wake rate 55.53 wakes/s ±6.51 % (the rule needs 12 repeats)" in mail
+    assert "the other 30 hold within it, the widest ±5.38 %" in mail   # SwComposite's run mean, by the 1 µs floor
+    for aid in ("office-writer", "image-editor", "video-editor", "video-player", "audio-player", "video-call"):
+        assert "window limit" not in s[aid].lower() and "(D99)" not in s[aid], aid
+
+
+def test_code_s_idle_phase_from_200_s_carries_libuv_worker_under_d57_again(fold_95):
+    # D83: code's idle phase read from 200 s past its start; utility/libuv-worker's wake rate and gap mean then ±5.63 %,
+    # carried under D57 as before D78 with its spread within one run re-read from 200 s — the only 9.5 entry with either
+    scopes = _scopes(fold_95)
+    code = scopes["code-editor"]
+    assert "The idle phase is read from 200 s past its start, past the launch work in it (D83)" in code
+    assert ("A component whose rate varies between sessions, its three values carried together (D57): "
+            "`utility/libuv-worker` wake rate 5.382 wakes/s ±5.63 % (3.133–7.327 wakes/s)") in code
+    assert "within one run its wake rate ±10.6 % (5.41–6.71 a second over 700 s windows slid along the D52 probe" in code
+    others = [aid for aid, scope in scopes.items() if aid != "code-editor"]
+    assert all("rate varies between sessions" not in scopes[a] and "(D83)" not in scopes[a] for a in others)
+
+
+# 9.5 D79: mail-client from two campaigns — the idle phase's values from the 43-repeat campaign, the phases with or after
+# the input from the keys-only re-measure
+
+IDLE_TAG_95 = "meas-ci:interactive:2026-09-19"
+KEYS_TAG_95 = "meas-ci:interactive:2026-09-27"
+
+
+def _pool_95(repo_root, sub, app):
+    path = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign" / sub / f"pool-{app}.json"
+    return json.loads(path.read_text())["runs"][app]
+
+
+def _fold_two_campaigns(repo_root, d, later, idle=None):
+    """9.5's fold-in with `later` as thunderbird-send's pool and its idle phase from `idle` (D79); without `idle`, every
+    value from `later`, under the idle pool's tag."""
+    import shutil
+    import sys
+    (d / "pools").mkdir(parents=True)
+    campaign_dir = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+    for sub, app in POOLS_95:
+        if app != "thunderbird-send":
+            shutil.copy(campaign_dir / sub / f"pool-{app}.json", d / "pools")
+    (d / "pools" / "pool-thunderbird-send.json").write_text(json.dumps({"runs": {"thunderbird-send": later}}))
+    tags = [x for pair in zip(TAGS_95[::2], TAGS_95[1::2]) if not pair[1].startswith("thunderbird-send=") for x in pair]
+    if idle is None:
+        tags += ["--tag", f"thunderbird-send={IDLE_TAG_95}"]
+    else:
+        (d / "idle.json").write_text(json.dumps({"runs": {"thunderbird-send": idle}}))
+        tags += ["--tag", f"thunderbird-send={KEYS_TAG_95}", "--idle-from", f"thunderbird-send={d / 'idle.json'}",
+                 "--idle-tag", f"thunderbird-send={IDLE_TAG_95}"]
+    frag = d / "frag.yaml"
+    subprocess.run([sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "fold_in.py"),
+                    str(d / "pools"), str(frag), *tags], check=True, capture_output=True)
+    return frag
+
+
+def _entry(frag, aid):
+    import yaml
+    return yaml.safe_load("archetypes:\n" + frag.read_text())["archetypes"][aid]
+
+
+def test_an_entry_from_two_campaigns_takes_the_idle_phase_from_one_and_the_rest_from_the_other(repo_root, tmp_path):
+    # D79: the idle phase runs before any input, so mail-client keeps its idle values from the 43-repeat campaign and
+    # takes the per-input and send values from the keys-only re-measure, each value naming the campaign it came from.
+    # Each pool carries a phase from another application where the other pool's is the one to take.
+    import copy
+    old = _pool_95(repo_root, "results-same-machine", "thunderbird-send")
+    later = copy.deepcopy(old)
+    later["phases"]["idle"] = _pool_95(repo_root, "results-same-machine", "soffice")["phases"]["idle"]
+    idle = copy.deepcopy(old)
+    chrome = _pool_95(repo_root, "results-re-measured", "chrome")
+    idle["phases"]["driven"], idle["phases"]["op"] = chrome["phases"]["driven"], chrome["phases"]["op"]
+    got = _entry(_fold_two_campaigns(repo_root, tmp_path / "two", later, idle), "mail-client")["params"]
+    want = _entry(_fold_two_campaigns(repo_root, tmp_path / "one", old), "mail-client")["params"]   # one pool, one tag
+    retag = lambda x: json.loads(json.dumps(x).replace(IDLE_TAG_95, KEYS_TAG_95))
+    assert got["components"] == want["components"]
+    assert got["input_run"] == retag(want["input_run"])
+    assert got["operations"] == retag(want["operations"])
+
+
+def test_an_entry_from_two_campaigns_names_each_campaign_its_repeats_and_its_build(repo_root, tmp_path):
+    # D79, D69: the run line, the build census and the scope say which campaign each phase's values come from
+    import copy
+    old = _pool_95(repo_root, "results-same-machine", "thunderbird-send")
+    later = copy.deepcopy(old)
+    later["repeats"] = list(range(1, 9))
+    later["run_id"] = {str(k): str(40000000000 + k) for k in later["repeats"]}
+    later["version"] = {str(k): "Mozilla Thunderbird 156.0.1" for k in later["repeats"]}
+    for key in ("cpu_model", "kernel"):
+        later[key] = {str(k): old[key][str(k)] for k in later["repeats"]}
+    e = _entry(_fold_two_campaigns(repo_root, tmp_path, later, old), "mail-client")["validation_stats"]
+    old_runs = ", ".join(sorted(set(old["run_id"].values())))
+    assert e["run"] == (f"interactive:2026-09-27, repeats {later['repeats']}, runs "
+                        + ", ".join(str(40000000000 + k) for k in later["repeats"])
+                        + f"; the idle phase interactive:2026-09-19, repeats {old['repeats']}, runs {old_runs}")
+    # D94: the idle pool's 34 added repeats ran 156.0.1
+    assert ("Mozilla Thunderbird 156.0.1 (8 repeats) in the phases with or after the input, "
+            "Mozilla Thunderbird 156.0 (43 repeats), Mozilla Thunderbird 156.0.1 (34: "
+            + ", ".join(str(k) for k in range(45, 79)) + ") in the idle phase") in e["scope"]
+    assert ("Two campaigns (D79): the idle phase's values from meas-ci:interactive:2026-09-19, 77 repeats; the phases "
+            "with or after the input from meas-ci:interactive:2026-09-27, 8 repeats; the idle phase runs before any input. "
+            ) in e["scope"]
+    assert "over the 77 repeats obtained" in e["scope"] and "8 repeats, every window of it that holds input" in e["scope"]
+
+
+# 9.5 D81: the stimulus-sensitivity check read per repeat, as 9.7 D36 reads a check
+
+def _campaign_pool():
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)   # pool.py imports its sibling as `analyze`; another test may hold build's
+    try:
+        return importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+
+
+def test_the_stimulus_check_is_read_against_the_interval_of_its_per_repeat_ratios():
+    # the ratio of each repeat's per-input run mean, 136M against SWELL-KW; a difference when the 95 % t interval of the
+    # ratios (k − 1 degrees of freedom, the stability rule's multiplier) excludes 1; the pooled medians' ratio beside it
+    pool = _campaign_pool()
+    a = {"p50": 4.0, "repeat_mean": [10.0, 10.0, 10.0, 10.0, 10.0]}
+    shifted = pool.stimulus_check(a, {"p50": 5.0, "repeat_mean": [11.0, 11.2, 10.9, 11.1, 11.0]})
+    import pytest
+    assert shifted["per_repeat"] == pytest.approx([1.1, 1.12, 1.09, 1.11, 1.1])
+    assert shifted["reading"] == "difference" and shifted["p50_ratio"] == 1.25
+    m, s = 1.104, 0.0114017542509914
+    assert shifted["per_repeat_mean"] == pytest.approx(m)
+    assert shifted["interval"] == pytest.approx([m - 2.776 * s / 5 ** 0.5, m + 2.776 * s / 5 ** 0.5])
+    scattered = pool.stimulus_check(a, {"p50": 4.0, "repeat_mean": [9.0, 11.0, 10.0, 12.0, 8.0]})
+    assert scattered["reading"] == "not resolved"
+
+
+def test_web_browser_s_scope_states_the_value_its_two_builds_differ_in(repo_root, fold_95):
+    # 9.5 D93: the 38 repeats pool Chrome 152 and 153 (D69); every carried value read by build against the 152 repeats'
+    # spread, one past the others — stated with figures the committed pool gives
+    import json as _json
+    import statistics as st
+    e = _json.load(open(repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+                        / "results-re-measured" / "pool-chrome.json"))["runs"]["chrome"]
+    ver = {int(k): v for k, v in e["version"].items()}
+    z = {}
+    def read(name, preps, vals):
+        a = [v for r, v in zip(preps, vals) if v is not None and ver[r].startswith("Google Chrome 152.")]
+        b = [v for r, v in zip(preps, vals) if v is not None and ver[r].startswith("Google Chrome 153.")]
+        z[name] = ((st.fmean(b) - st.fmean(a)) / st.stdev(a), a, b)
+    for p in ("idle", "op"):
+        ph = e["phases"][p]
+        preps = ph.get("repeats") or e["repeats"]
+        comps = [(c, ph["threads"][c]) for c in ph["components"]["selected"] if ph["threads"][c]["gap_ms"]["q"]]
+        comps += [("residual", ph["components"]["residual"])] if ph["components"]["residual"] else []
+        for c, t in comps:
+            read(f"{p} {c} wakes/s", preps, t["wakes_per_s"])
+            read(f"{p} {c} gap mean", preps, t["gap_ms"]["repeat_mean"])
+            read(f"{p} {c} run mean", preps, t["run_ms"]["repeat_mean"])
+    for p in ("driven", "driven-alt"):
+        read(f"{p} input_run", e["phases"][p].get("repeats") or e["repeats"],
+             e["phases"][p]["per_input"]["window"]["run_ms_minus_idle"]["repeat_mean"])
+    read("operation duration", e["phases"]["op"].get("repeats") or e["repeats"], e["phases"]["op"]["operation"]["duration_ms"]["repeat_mean"])
+    assert len(z) == 60
+    viz, a, b = z.pop("op gpu/VizCompositorTh run mean")
+    assert round(viz, 2) == -2.31 and sum(x < min(a) for x in b) == 8 and len(b) == 9
+    assert round(max(abs(v[0]) for v in z.values()), 2) == 1.80
+    assert ("Build bound (D69): the 38 repeats pool two builds, Google's repository serving only its current version. "
+            "Against the 152 repeats' own spread, 59 of the 60 carried values agree between the builds within 1.80 "
+            "standard deviations; the page load's `gpu/VizCompositorTh` run mean does not: 0.382 ms under 153 against "
+            "0.455 ms under 152 (−16.0 %, −2.31 standard deviations, 8 of the 9 repeats below every 152 repeat). The "
+            "carried 0.438 ms pools both, the 152 repeats' mean 4.0 % above it (D93).") in _scopes(fold_95)["web-browser"]
+
+
+def test_every_typing_scope_states_its_stimulus_check_read_per_repeat(fold_95):
+    # D81: the pre-registered p50 sentence keeps its p50s and adds the per-repeat reading of the means
+    s = _scopes(fold_95)
+    want = {"office-writer": "is 1.123 of SWELL-KW's (95 % interval 1.045–1.200 over 14 repeats), a difference",
+            "web-browser": "is 1.338 of SWELL-KW's (95 % interval 1.284–1.392 over 38 repeats), a difference",   # D84
+            "code-editor": "is 1.029 of SWELL-KW's (95 % interval 0.968–1.090 over 43 repeats), not resolved",   # D83
+            "mail-client": "is 0.909 of SWELL-KW's (95 % interval 0.824–0.994 over 8 repeats), a difference"}
+    for aid, phrase in want.items():
+        assert "read per repeat (D81), the per-input run mean under 136M " + phrase in s[aid], aid
+    assert "the per-input run p50 is 5.03 ms against 4.65 ms under SWELL-KW (+8 %)" in s["mail-client"]
+
+
+def test_the_results_page_reads_the_stimulus_check_per_repeat(repo_root, tmp_path):
+    # D81: under each application's pre-registered table, the per-repeat reading
+    import shutil
+    import sys
+    campaign_dir = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+    shutil.copytree(campaign_dir / "results-re-measured", tmp_path / "rr")
+    subprocess.run([sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "render_results.py"),
+                    str(tmp_path / "rr"), str(tmp_path / "rr.md"), "note"], check=True, capture_output=True)
+    page = (tmp_path / "rr.md").read_text()
+    assert ("Read per repeat (D81, as 9.7 D36 reads a check): the per-input run mean under 136M is 0.909 of SWELL-KW's, "
+            "95 % interval 0.824–0.994 over 8 repeats — a difference; the pooled medians' ratio 1.082.") in page

@@ -1,29 +1,35 @@
-"""Static demand estimate policy (task-2.3 spec §7).
+"""Static demand record (task-2.3 spec §7; 9.14 decision 4).
 
 The estimate itself is computed exactly during synthesis (compiler.py
-accumulates each task's CPU demand in context); this module owns the
-window policy: `-single` files must land in the measurable oversubscription
-regime unless their timeline declares the calibration demand class.
-The RQ0 admission test remains the real enforcement (building-plan §5a).
+accumulates each task's CPU demand in context). This module turns it into the
+manifest's demand record: the file's utilization over its whole length and,
+per ground-truth segment, the utilization inside the segment, each task's
+demand spread uniformly over its lifetime (its arrival to its pinned depart or
+the file's end).
+
+The demand window of the earlier policy — a single-lane file of demand class
+`oversubscribed` had to land in [1.00, 1.50] — retired as a gate on 2026-10-09
+(9.14 decision 4): every file's demand is a measured fact the manifest reports
+and the pair review reads per contended segment; no build fails on it.
 """
 
-LANE_WINDOW = (1.00, 1.50)
 
-
-def demand_estimate(report):
-    """Summarize a compile report into (utilization, in_window)."""
-    low, high = LANE_WINDOW
-    utilization = report["utilization"]
-    return utilization, low <= utilization <= high
-
-
-def check_window(report, mode):
-    """Returns a violation string, or None if the file passes policy."""
-    utilization, in_window = demand_estimate(report)
-    if mode != "single" or report["demand_class"] == "calibration":
-        return None
-    if not in_window:
-        low, high = LANE_WINDOW
-        return (f"-single demand estimate {utilization:.2f} outside "
-                f"[{low:.2f}, {high:.2f}] and demand class is not calibration")
-    return None
+def per_segment(builds, segments, duration_us):
+    """One record per ground-truth segment: its bounds and the utilization
+    inside it, each build's demand spread uniformly over its lifetime."""
+    out = []
+    for i, seg in enumerate(segments):
+        s0, s1 = int(seg["t_start"]), int(seg["t_end"])
+        total = 0.0
+        for b in builds:
+            a = int(b.arrive)
+            d = int(b.depart) if b.depart is not None else int(duration_us)
+            life = d - a
+            if life <= 0:
+                continue
+            overlap = max(0, min(d, s1) - max(a, s0))
+            if overlap:
+                total += b.demand_us * overlap / life
+        out.append({"index": i, "t_start_us": s0, "t_end_us": s1,
+                    "utilization": total / (s1 - s0)})
+    return out

@@ -16,9 +16,9 @@ from harness.scoring import LEGAL, SCHEMA_PATH, SPEC_PATH, lint_spec, load_spec
 BUILD = REPO / "dataset" / "build" / "coreset-single"
 RECIPES = REPO / "dataset" / "timelines" / "coreset"
 
-C2_WINDOWS = {"c2-p1a": (60000000, 180000000), "c2-p1b": (60000000, 180000000),
-              "c2-p2a": (60000000, 120000000), "c2-p2b": (60000000, 120000000),
-              "c2-p3a": (60000000, 120000000), "c2-p3b": (60000000, 120000000)}
+C2_WINDOWS = {"c2-p1a": (60000000, 99435000), "c2-p1b": (60000000, 99435000),
+              "c2-p2a": (60000000, 86385000), "c2-p2a-idle": (60000000, 86385000), "c2-p2b": (60000000, 86385000),
+              "c2-p3a": (60000000, 326000000), "c2-p3b": (60000000, 326000000)}   # each file's second segment (9.14 decision 5)
 
 
 @pytest.fixture(scope="module")
@@ -43,7 +43,7 @@ def test_committed_spec_lints_clean():
 
 
 def test_every_coreset_file_but_idle_has_terms(spec):
-    compiled = {p.name.replace(".workload.json", "") for p in BUILD.glob("*.workload.json")}
+    compiled = {p.name.replace(".workload.json", "") for p in BUILD.glob("*.workload.json") if "@" not in p.name}   # the blessed set; the variants (9.14 D8) read their base's terms
     assert compiled - set(spec["files"]) == {"c1-idle", "c7-idle"}
     assert set(spec["files"]) <= compiled
     assert all(f["terms"] for f in spec["files"].values())
@@ -66,13 +66,16 @@ def test_c2_weights_and_windows(spec):
             else:
                 assert "window" not in t, (wid, t)
     assert one(spec, "c2-p1a", "editor", "ready_wait")["cause"] == "wake"
+    assert one(spec, "c2-p1a", "editor", "ready_wait")["channel"] == "input"
     assert one(spec, "c2-p1a", "hog", "cpu_delivered")["weight"] == 0.5
     assert [t["entity"] for t in terms(spec, "c2-p1b")] == ["editor"]
     assert one(spec, "c2-p2a", "game.chain.1", "job")["aggregate"] == "miss_rate"
     assert one(spec, "c2-p2a", "download", "cpu_delivered")["weight"] == 0.5
+    assert spec["files"]["c2-p2a-idle"]["base"] == "c2-p2a" and terms(spec, "c2-p2a-idle") == terms(spec, "c2-p2a")
     assert [t["entity"] for t in terms(spec, "c2-p2b")] == ["game.chain.1"]
-    assert one(spec, "c2-p3a", "bulk", "cpu_delivered")["weight"] == 0.5
-    assert one(spec, "c2-p3b", "bulk", "cpu_delivered")["weight"] == 0.25
+    assert one(spec, "c2-p3a", "bulk", "turnaround")["weight"] == 0.5     # the measured export finishes (9.14 decision 6)
+    assert one(spec, "c2-p3a", "editor", "ready_wait")["channel"] == "timer"  # Kdenlive carries no keystroke stream
+    assert one(spec, "c2-p3b", "bulk", "turnaround")["weight"] == 0.25    # the backup finishes in the idle lane (9.16 D4)
 
 
 def test_c1_terms(spec):
@@ -82,8 +85,9 @@ def test_c1_terms(spec):
     assert one(spec, "c1-compile", "build", "turnaround")["weight"] == 1.0
     assert one(spec, "c1-media", "music", "job")["weight"] == 1.0
     assert one(spec, "c1-media", "video", "job")["weight"] == 0.5
-    assert one(spec, "c1-gaming", "game.chain.1", "job")["weight"] == 1.0
-    assert one(spec, "c1-gaming", "compositor", "job")["weight"] == 0.5
+    assert [(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c1-gaming")] == [("game.chain.1", "job", 1.0)]
+    assert [(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c1-meeting")] == [("voice", "job", 1.0)]
+    assert one(spec, "c1-office", "writer", "ready_wait")["channel"] == "input"
     for wid in ("c1-office", "c1-browsing", "c1-compile", "c1-media", "c1-gaming"):
         assert all("window" not in t for t in terms(spec, wid))
 
@@ -108,10 +112,13 @@ BATCH_C7 = {"compile", "ml-train", "render", "transcode", "indexing", "backup"}
 def test_derived_files_carry_their_base_terms_verbatim(spec):
     bases = {wid: f["base"] for wid, f in spec["files"].items() if "base" in f}
     expected = {"c4-office": "c1-office", "c4-compile": "c1-compile", "c4-gaming": "c1-gaming",
-                "c5-t3": "c1-media", "c5-t4": "c1-media", "c5-t5": "c1-media",
+                "c5-t4": "c1-media", "c5-t5": "c1-media", "c6-alias": "c1-media",
                 "c6-spoof": "c1-browsing", "c6-fold": "c1-browsing"}
-    expected.update({f"c7-{m}": f"c1-{m}" for m in C7_MODES})
-    assert bases == expected
+    expected.update({f"c7-{m}": f"c1-{m}" for m in C7_MODES if m != "mail"})
+    expected["c2-p2a-idle"] = "c2-p2a"
+    assert bases == expected          # c7-mail declares no base: its cut holds no keystroke (9.14 decision 2 as amended)
+    assert "base" not in spec["files"]["c7-mail"]
+    assert one(spec, "c7-mail", "mailer", "ready_wait")["channel"] == "timer"
     for wid, base in bases.items():
         if wid.startswith("c7-") and wid[3:] in BATCH_C7:
             continue
@@ -192,9 +199,22 @@ def test_weight_must_be_positive(tmp_path):
 
 
 def test_window_must_lie_inside_the_file(tmp_path):
-    bad = term(window={"start_us": 60000000, "end_us": 190000000})     # T_end is 180 s
+    bad = term(window={"start_us": 60000000, "end_us": 100000000})     # T_end is 99.435 s
     errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [bad]}}))
-    assert any("window" in e and "180000000" in e for e in errs)
+    assert any("window" in e and "99435000" in e for e in errs)
+
+
+def test_window_must_lie_on_segment_boundaries(tmp_path):
+    """9.14 decision 5: a window is a segment by design; a window inside the file but off its
+    segment boundaries fails the lint, in either direction."""
+    early = term(window={"start_us": 60000000, "end_us": 90000000})      # ends 9.435 s before the file
+    errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [early]}}))
+    assert any("segment boundaries" in e for e in errs), errs
+    late_start = term(window={"start_us": 61000000, "end_us": 99435000})
+    errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [late_start]}}))
+    assert any("segment boundaries" in e for e in errs), errs
+    good = term(window={"start_us": 60000000, "end_us": 99435000})
+    assert not [e for e in errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [good]}})) if "window" in e]
     bad = term(window={"start_us": 70000000, "end_us": 60000000})
     errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [bad]}}))
     assert any("window" in e for e in errs)
@@ -207,6 +227,21 @@ def test_ready_wait_needs_a_cause_and_others_must_not_carry_one(tmp_path):
     t = term(entity="hog", metric="cpu_delivered", aggregate="progress", direction="higher", cause="wake")
     errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [t]}}))
     assert any("cause" in e for e in errs)
+
+
+def test_channel_filters_a_wake_term_only(tmp_path):
+    """9.5 D74: a ready_wait term with cause wake may name the channel kind it reads
+    (`channel: input` for interaction latency); no other term may."""
+    errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [term(channel="input")]}}))
+    assert not any("channel" in e for e in errs)
+    errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [term(cause="arrive", channel="input")]}}))
+    assert any("channel" in e for e in errs)
+    t = term(entity="hog", metric="cpu_delivered", aggregate="progress", direction="higher",
+             channel="input")
+    errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [t]}}))
+    assert any("channel" in e for e in errs)
+    errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [term(channel="input:editor")]}}))
+    assert any("channel" in e or "input:editor" in e for e in errs)
 
 
 def test_declared_base_must_match_the_variant_recipe_and_terms_must_equal(tmp_path):
@@ -274,3 +309,161 @@ def test_cli_exit_codes(tmp_path):
     p = subprocess.run([sys.executable, str(TOOLS / "scoring_lint.py"), "--spec", str(bad)],
                        capture_output=True, text=True)
     assert p.returncode == 1
+
+
+# ------------------------------------------------------- the variant files
+
+def _workload(path, segments):
+    path.write_text(json.dumps({"meta": {"id": path.name.replace(".workload.json", "")},
+                                "ground_truth": [{"t_start": a, "t_end": b, "mode": "dev"} for a, b in segments],
+                                "events": []}))
+    return path
+
+
+def test_a_variant_file_reads_its_bases_terms_with_the_windows_on_its_own_segments(tmp_path):
+    # 9.14 decision 12: a rebuilt judging file is scored on its base's terms; a window is a segment by design
+    # (decision 5), so under a segment-length variant it follows the segment, not the number
+    from harness.scoring import with_variants, windows_from_spec
+    _workload(tmp_path / "c2-p1a.workload.json", [(0, 60_000_000), (60_000_000, 99_435_000)])
+    short = _workload(tmp_path / "c2-p1a@seg1-30s.workload.json", [(0, 30_000_000), (30_000_000, 69_435_000)])
+    same = _workload(tmp_path / "c2-p1a@venue-x0.8.workload.json", [(0, 60_000_000), (60_000_000, 99_435_000)])
+    _workload(tmp_path / "c1-idle.workload.json", [(0, 60_000_000)])
+    idle = _workload(tmp_path / "c1-idle@venue-x0.8.workload.json", [(0, 60_000_000)])
+    windowed = {"entity": "hog", "metric": "turnaround", "aggregate": "p50", "direction": "lower", "weight": 1,
+                "window": {"start_us": 60_000_000, "end_us": 99_435_000}}
+    whole = {"entity": "editor", "metric": "ready_wait", "aggregate": "p99", "cause": "wake", "channel": "input",
+             "direction": "lower", "weight": 1}
+    spec = {"files": {"c2-p1a": {"terms": [windowed, whole]}}}
+    out = with_variants(spec, {"c2-p1a@seg1-30s": short, "c2-p1a@venue-x0.8": same, "c1-idle@venue-x0.8": idle})
+    assert set(out["files"]) == {"c2-p1a", "c2-p1a@seg1-30s", "c2-p1a@venue-x0.8"}   # no terms, no entry
+    assert out["files"]["c2-p1a@seg1-30s"]["terms"][0]["window"] == {"start_us": 30_000_000, "end_us": 69_435_000}
+    assert out["files"]["c2-p1a@seg1-30s"]["terms"][1] == whole
+    assert out["files"]["c2-p1a@venue-x0.8"]["terms"] == [windowed, whole]
+    assert windows_from_spec(out, "c2-p1a@seg1-30s") == {("hog", "turnaround"): [(30_000_000, 69_435_000)]}
+    assert spec["files"].keys() == {"c2-p1a"} and spec["files"]["c2-p1a"]["terms"][0] is windowed   # a copy
+    odd = _workload(tmp_path / "c2-p1a@odd.workload.json", [(0, 99_435_000)])
+    with pytest.raises(ValueError, match="c2-p1a@odd.*segments"):
+        with_variants(spec, {"c2-p1a@odd": odd})
+
+
+# ---- 9.21: the generated layer's rule --------------------------------------------------------------------------------
+
+def _generated_manifest():
+    """A manifest in the dataset's form over four shapes of generated file (the records 9.21 decisions 1 and 4 add)."""
+    S = 1_000_000
+
+    def segs(*bounds):
+        return [{"index": i, "t_start_us": a, "t_end_us": b, "utilization": 0.0} for i, (a, b) in enumerate(bounds)]
+
+    files = {
+        "transition-grid-single/tr-compile-to-office-departs.workload.json": (
+            segs((0, 60 * S), (60 * S, 120 * S)),
+            [{"mode": "compile", "suffix": 0, "segments": [0], "input": True},
+             {"mode": "office", "suffix": 1, "segments": [1], "input": True}]),
+        "distractor-grid-single/dx-office-with-compile.workload.json": (
+            segs((0, 60 * S), (60 * S, 120 * S)),
+            [{"mode": "office", "suffix": 0, "segments": [0, 1], "input": True},
+             {"mode": "compile", "suffix": 1, "segments": [], "input": False}]),
+        "return-grid-single/rt-video-edit-to-office-2s.workload.json": (
+            segs((0, 60 * S), (60 * S, 62 * S), (62 * S, 122 * S)),
+            [{"mode": "video-edit", "suffix": 0, "segments": [0], "input": True},
+             {"mode": "office", "suffix": 1, "segments": [1], "input": False},
+             {"mode": "video-edit", "suffix": 2, "segments": [2], "input": True}]),
+        "familiarity-ladder-single/fl-idle-t5-all.workload.json": (
+            segs((0, 60 * S)), [{"mode": "idle", "suffix": 0, "segments": [0], "input": False}]),
+        "familiarity-ladder-single/fl-media-t4-all.workload.json": (
+            segs((0, 60 * S)), [{"mode": "media", "suffix": 0, "segments": [0], "input": False}]),
+        "transition-grid-single/tr-office-to-gaming-focus.workload.json": (
+            segs((0, 60 * S), (60 * S, 120 * S)),
+            [{"mode": "office", "suffix": 0, "segments": [0], "input": True},
+             {"mode": "gaming", "suffix": 1, "segments": [1], "input": False}]),
+    }
+    return {"artifacts": {rel: "0" * 64 for rel in files},
+            "demand": {rel: {"demand_class": "calibration", "utilization": 0.0, "segments": sg} for rel, (sg, _) in files.items()},
+            "grid": {rel: {"placements": pl, "segments": []} for rel, (_, pl) in files.items()}}
+
+
+_C1 = {
+    "c1-office": {"terms": [{"entity": "writer", "metric": "ready_wait", "cause": "wake", "channel": "input",
+                             "aggregate": "p99", "direction": "lower", "weight": 1.0}]},
+    "c1-compile": {"terms": [{"entity": "editor", "metric": "ready_wait", "cause": "wake", "channel": "input",
+                              "aggregate": "p99", "direction": "lower", "weight": 1.0},
+                             {"entity": "build", "metric": "turnaround", "aggregate": "turnaround", "direction": "lower",
+                              "weight": 1.0}]},
+    "c1-video-edit": {"terms": [{"entity": "editor", "metric": "ready_wait", "cause": "wake", "channel": "timer",
+                                 "aggregate": "p99", "direction": "lower", "weight": 1.0}]},
+    "c1-media": {"terms": [{"entity": "music", "metric": "job", "aggregate": "miss_rate", "direction": "lower",
+                            "weight": 1.0}]},
+    "c1-gaming": {"terms": [{"entity": "game.chain.1", "metric": "job", "aggregate": "miss_rate", "direction": "lower",
+                             "weight": 1.0}]},
+}
+
+
+def test_the_generated_rule_derives_each_placements_c1_terms_suffixed_and_windowed():
+    """9.21 decisions 1–3 on four shapes: a transition's two placements each windowed to its segment, the batch term
+    unwindowed; the distractor's A over the whole file (no window) and B labelled nowhere (no term); a 2 s middle
+    without an input window dropping its keystroke term while the timer-channel terms around it stay; an idle
+    placement deriving nothing (no entry); a periodic term without a window when the placement spans the file."""
+    from harness.scoring import generated_entries, with_generated, windows_from_spec
+    S = 1_000_000
+    spec = {"files": dict(_C1)}
+    entries = generated_entries(spec, _generated_manifest())
+    assert sorted(entries) == ["dx-office-with-compile", "fl-media-t4-all", "rt-video-edit-to-office-2s",
+                               "tr-compile-to-office-departs", "tr-office-to-gaming-focus"]
+    # the chain head's id is formed by the compiler from its task's, so the suffix sits before `.chain.1`
+    assert [(t["entity"], t.get("window")) for t in entries["tr-office-to-gaming-focus"]["terms"]] == [
+        ("writer-s0", {"start_us": 0, "end_us": 60 * S}), ("game-s1.chain.1", {"start_us": 60 * S, "end_us": 120 * S})]
+    tr = entries["tr-compile-to-office-departs"]["terms"]
+    assert [(t["entity"], t.get("window")) for t in tr] == [
+        ("editor-s0", {"start_us": 0, "end_us": 60 * S}), ("build-s0", None),
+        ("writer-s1", {"start_us": 60 * S, "end_us": 120 * S})]
+    assert tr[0]["channel"] == "input" and tr[0]["weight"] == 1.0 and tr[1]["metric"] == "turnaround"
+    assert entries["dx-office-with-compile"]["terms"] == [dict(_C1["c1-office"]["terms"][0], entity="writer-s0")]
+    rt = entries["rt-video-edit-to-office-2s"]["terms"]
+    assert [(t["entity"], t["channel"], t["window"]) for t in rt] == [
+        ("editor-s0", "timer", {"start_us": 0, "end_us": 60 * S}),
+        ("editor-s2", "timer", {"start_us": 62 * S, "end_us": 122 * S})]
+    assert entries["fl-media-t4-all"]["terms"] == [dict(_C1["c1-media"]["terms"][0], entity="music-s0")]
+    out = with_generated(spec, _generated_manifest(), only={"tr-compile-to-office-departs", "fl-idle-t5-all"})
+    assert set(out["files"]) == set(_C1) | {"tr-compile-to-office-departs"}
+    assert windows_from_spec(out, "tr-compile-to-office-departs") == {
+        ("editor-s0", "ready_wait"): [(0, 60 * S)], ("writer-s1", "ready_wait"): [(60 * S, 120 * S)]}
+    assert spec["files"].keys() == set(_C1)                       # a copy
+    with pytest.raises(ValueError, match="cannot also have an entry"):
+        with_generated({"files": dict(_C1, **{"dx-office-with-compile": {"terms": []}})}, _generated_manifest())
+
+
+def test_the_generated_rule_refuses_a_manifest_without_placements_and_a_non_contiguous_label():
+    from harness.scoring import generated_entries
+    m = _generated_manifest()
+    rel = "distractor-grid-single/dx-office-with-compile.workload.json"
+    old = m["grid"].pop(rel)
+    m["grid"][rel] = {"a": "office"}
+    with pytest.raises(ValueError, match="predates 9.21"):
+        generated_entries({"files": dict(_C1)}, m)
+    m["grid"][rel] = dict(old, placements=[{"mode": "office", "suffix": 0, "segments": [0, 2], "input": True}])
+    m["demand"][rel]["segments"].append({"index": 2, "t_start_us": 120_000_000, "t_end_us": 180_000_000, "utilization": 0.0})
+    with pytest.raises(ValueError, match="not contiguous"):
+        generated_entries({"files": dict(_C1)}, m)
+
+
+def test_the_committed_spec_derives_terms_for_the_toy_set_and_lints_clean_on_the_ladder():
+    """The rule over the committed spec: the fixture's toy set (a dev -> ml-train departs pair: the editor's keystroke
+    P99 in the first segment, the training run's editor P99 and job turnaround in the second), and — when the
+    generated build is present — every ladder file's derived terms against its compiled file."""
+    from harness.scoring import generated_entries, lint_generated
+    from harness import manifests
+    spec = load_spec(SPEC_PATH)
+    toy = manifests.load(REPO / "harness" / "tools" / "tests" / "fixtures" / "mock-experiment" / "build.toy-grid.manifest.json")
+    entries = generated_entries(spec, toy)
+    assert [(t["entity"], t["metric"], t.get("window")) for t in entries["tg-a"]["terms"]] == [
+        ("editor-s0", "ready_wait", {"start_us": 0, "end_us": 50_000}),
+        ("hog-s1", "turnaround", None)]                           # ml-train's keystroke term dropped: no input window
+    ladder = REPO / "dataset" / "build.familiarity-ladder.manifest.json"
+    if not (REPO / "dataset" / "build" / "familiarity-ladder-single").is_dir():
+        pytest.skip("the generated build is not present")
+    assert lint_generated(spec, ladder) == []
+    derived = generated_entries(spec, manifests.load(ladder))
+    assert "fl-idle-t4-all" not in derived and "fl-idle-t5-all" not in derived
+    assert len(derived) == 64 and all("-s0" in t["entity"] for e in derived.values() for t in e["terms"])
+    assert [t["entity"] for t in derived["fl-gaming-t5-all"]["terms"]] == ["game-s0.chain.1"]

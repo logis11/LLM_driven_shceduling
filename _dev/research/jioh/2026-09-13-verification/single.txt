@@ -1,0 +1,408 @@
+coreset-single == c1-backup.workload.json  gt=[(0, 60000000, 'backup', {'background_wanted': True, 'initiated': 'scheduled'})]
+  editor name=kdenlive t=0 depart=60000000 loop=False ops={'WAIT': 255, 'RUN': 255} RUN n=255 sum=28449559 min/med/mean/max=91/84543/111567/502728 WAIT=['input:editor'] ext_wakes=255
+  bulk name=borg t=2000000 depart=None loop=False ops={'RUN': 8447, 'SLEEP': 8447, 'EXIT': 1} RUN n=8447 sum=30001191 min/med/mean/max=325/2995/3552/28905 SLEEP n=8447 min/med/max=1033/9854/83358
+coreset-single == c1-browsing.workload.json  gt=[(0, 60000000, 'browsing', {'background_wanted': True})]
+  browser name=chrome t=0 depart=60000000 loop=False ops={'WAIT': 229, 'RUN': 229} RUN n=229 sum=26625247 min/med/mean/max=588/90427/116267/857492 WAIT=['input:browser'] ext_wakes=229
+  renderers.1 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=2384 min/med/mean/max=2384/2384/2384/2384 TIMER=[1106107]
+  renderers.10 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=771 min/med/mean/max=771/771/771/771 TIMER=[4110113]
+  renderers.11 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=158 min/med/mean/max=158/158/158/158 TIMER=[2719033]
+  renderers.12 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=716 min/med/mean/max=716/716/716/716 TIMER=[1357976]
+  renderers.2 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=157 min/med/mean/max=157/157/157/157 TIMER=[2235637]
+  renderers.3 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=107 min/med/mean/max=107/107/107/107 TIMER=[1341150]
+  renderers.4 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=86 min/med/mean/max=86/86/86/86 TIMER=[4017456]
+  renderers.5 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=291 min/med/mean/max=291/291/291/291 TIMER=[290135]
+  renderers.6 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=414 min/med/mean/max=414/414/414/414 TIMER=[3915244]
+  renderers.7 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=348 min/med/mean/max=348/348/348/348 TIMER=[4883988]
+  renderers.8 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=527 min/med/mean/max=527/527/527/527 TIMER=[2424710]
+  renderers.9 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=209 min/med/mean/max=209/209/209/209 TIMER=[636536]
+coreset-single == c1-compile.workload.json  gt=[(0, 60000000, 'compile', {'background_wanted': True})]
+  editor name=code t=0 depart=60000000 loop=False ops={'WAIT': 239, 'RUN': 239} RUN n=239 sum=28470806 min/med/mean/max=1009/79943/119125/1337206 WAIT=['input:editor'] ext_wakes=239
+  build name=make t=2000000 depart=None loop=False ops={'RUN': 100, 'FORK': 100, 'WAIT': 1, 'EXIT': 1} RUN n=100 sum=28423 min/med/mean/max=49/272/284/845 WAIT=['children:build']
+    spawn_table n=100 fork_cap=8 child RUN sum=3844400 med=4579 max=436563 name=cc1
+coreset-single == c1-dev.workload.json  gt=[(0, 60000000, 'dev', {'background_wanted': True})]
+  editor name=code t=0 depart=60000000 loop=False ops={'WAIT': 237, 'RUN': 237} RUN n=237 sum=27803882 min/med/mean/max=2814/87599/117316/729764 WAIT=['input:editor'] ext_wakes=237
+coreset-single == c1-gaming.workload.json  gt=[(0, 60000000, 'gaming', {'background_wanted': True})]
+  compositor name=gamescope t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=6667 min/med/mean/max=6667/6667/6667/6667 TIMER=[16667]
+  game.chain.1 name=game.exe t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=646 min/med/mean/max=646/646/646/646 TIMER=[16667] WAKE=['game.chain.2']
+  game.chain.10 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1218 min/med/mean/max=1218/1218/1218/1218 WAIT=['chain:game.chain.10'] WAKE=['game.chain.11']
+  game.chain.11 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1198 min/med/mean/max=1198/1198/1198/1198 WAIT=['chain:game.chain.11'] WAKE=['game.chain.12']
+  game.chain.12 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1016 min/med/mean/max=1016/1016/1016/1016 WAIT=['chain:game.chain.12'] WAKE=['game.chain.13']
+  game.chain.13 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1120 min/med/mean/max=1120/1120/1120/1120 WAIT=['chain:game.chain.13'] WAKE=['game.chain.14']
+  game.chain.14 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=794 min/med/mean/max=794/794/794/794 WAIT=['chain:game.chain.14'] WAKE=['game.chain.15']
+  game.chain.15 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=673 min/med/mean/max=673/673/673/673 WAIT=['chain:game.chain.15'] WAKE=['game.chain.16']
+  game.chain.16 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1} RUN n=1 sum=1186 min/med/mean/max=1186/1186/1186/1186 WAIT=['chain:game.chain.16']
+  game.chain.2 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1076 min/med/mean/max=1076/1076/1076/1076 WAIT=['chain:game.chain.2'] WAKE=['game.chain.3']
+  game.chain.3 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=869 min/med/mean/max=869/869/869/869 WAIT=['chain:game.chain.3'] WAKE=['game.chain.4']
+  game.chain.4 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1150 min/med/mean/max=1150/1150/1150/1150 WAIT=['chain:game.chain.4'] WAKE=['game.chain.5']
+  game.chain.5 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1470 min/med/mean/max=1470/1470/1470/1470 WAIT=['chain:game.chain.5'] WAKE=['game.chain.6']
+  game.chain.6 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=674 min/med/mean/max=674/674/674/674 WAIT=['chain:game.chain.6'] WAKE=['game.chain.7']
+  game.chain.7 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=293 min/med/mean/max=293/293/293/293 WAIT=['chain:game.chain.7'] WAKE=['game.chain.8']
+  game.chain.8 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1139 min/med/mean/max=1139/1139/1139/1139 WAIT=['chain:game.chain.8'] WAKE=['game.chain.9']
+  game.chain.9 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=477 min/med/mean/max=477/477/477/477 WAIT=['chain:game.chain.9'] WAKE=['game.chain.10']
+  game.tail.* x284 name=game.exe RUN min/med/max=49/200/1004 SLEEP min/med/max=107867/490904/3006520
+  steam name=steam t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=381 min/med/mean/max=381/381/381/381 TIMER=[3276124]
+  webhelper.1 name=steamwebhelper t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=293 min/med/mean/max=293/293/293/293 TIMER=[783111]
+  webhelper.2 name=steamwebhelper t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=331 min/med/mean/max=331/331/331/331 TIMER=[832702]
+  webhelper.3 name=steamwebhelper t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=53 min/med/mean/max=53/53/53/53 TIMER=[26866891]
+  wine name=wineserver t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=97 min/med/mean/max=97/97/97/97 SLEEP n=1 min/med/max=1225245899/1225245899/1225245899
+coreset-single == c1-idle.workload.json  gt=[(0, 60000000, 'idle', {'background_wanted': True})]
+  audio-srv name=pipewire t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=237 min/med/mean/max=237/237/237/237 SLEEP n=1 min/med/max=1460344/1460344/1460344
+  bus name=dbus-daemon t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=314 min/med/mean/max=314/314/314/314 SLEEP n=1 min/med/max=3489034/3489034/3489034
+  init name=systemd t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=63 min/med/mean/max=63/63/63/63 SLEEP n=1 min/med/max=463218/463218/463218
+  shell name=gnome-shell t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=99 min/med/mean/max=99/99/99/99 SLEEP n=1 min/med/max=2800306/2800306/2800306
+  xorg name=Xorg t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=65 min/med/mean/max=65/65/65/65 SLEEP n=1 min/med/max=5000581/5000581/5000581
+coreset-single == c1-indexing.workload.json  gt=[(0, 60000000, 'indexing', {'background_wanted': True, 'initiated': 'user', 'pre_committed_miss': True})]
+  editor name=code t=0 depart=60000000 loop=False ops={'WAIT': 238, 'RUN': 238} RUN n=238 sum=27302806 min/med/mean/max=630/73673/114718/759279 WAIT=['input:editor'] ext_wakes=238
+  hog name=tracker-miner-fs-3 t=2000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=30000000 min/med/mean/max=30000000/30000000/30000000/30000000
+coreset-single == c1-mail.workload.json  gt=[(0, 60000000, 'mail', {'background_wanted': True})]
+  mailer name=thunderbird t=0 depart=60000000 loop=False ops={'WAIT': 234, 'RUN': 234} RUN n=234 sum=28618451 min/med/mean/max=100/84300/122301/1095558 WAIT=['input:mailer'] ext_wakes=234
+  send name=thunderbird t=40000000 depart=None loop=False ops={'SLEEP': 2561, 'RUN': 2561, 'EXIT': 1} RUN n=2561 sum=3001111 min/med/mean/max=151/1035/1172/6696 SLEEP n=2561 min/med/max=3659/16506/83880
+coreset-single == c1-media.workload.json  gt=[(0, 60000000, 'media', {'background_wanted': True})]
+  music name=spotify t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=2500 min/med/mean/max=2500/2500/2500/2500 TIMER=[50000]
+  video name=mpv t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=6667 min/med/mean/max=6667/6667/6667/6667 TIMER=[16667]
+coreset-single == c1-meeting.workload.json  gt=[(0, 60000000, 'meeting', {'background_wanted': True})]
+  helper name=zoom t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=508 min/med/mean/max=508/508/508/508 TIMER=[1640483]
+  video name=zoom t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=6667 min/med/mean/max=6667/6667/6667/6667 TIMER=[16667]
+  voice name=zoom t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=2500 min/med/mean/max=2500/2500/2500/2500 TIMER=[50000]
+coreset-single == c1-ml-train.workload.json  gt=[(0, 60000000, 'ml-train', {'background_wanted': True})]
+  editor name=code t=0 depart=60000000 loop=False ops={'WAIT': 232, 'RUN': 232} RUN n=232 sum=28335723 min/med/mean/max=206/95498/122137/724342 WAIT=['input:editor'] ext_wakes=232
+  hog name=python3 t=2000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=30000000 min/med/mean/max=30000000/30000000/30000000/30000000
+coreset-single == c1-office.workload.json  gt=[(0, 60000000, 'office', {'background_wanted': True})]
+  browser name=chrome t=0 depart=60000000 loop=False ops={'WAIT': 1} WAIT=['input:browser']
+  mail name=thunderbird t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=71 min/med/mean/max=71/71/71/71 TIMER=[2020620]
+  renderers.1 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=345 min/med/mean/max=345/345/345/345 TIMER=[1098144]
+  renderers.2 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=127 min/med/mean/max=127/127/127/127 TIMER=[2480164]
+  renderers.3 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=467 min/med/mean/max=467/467/467/467 TIMER=[717750]
+  renderers.4 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=88 min/med/mean/max=88/88/88/88 TIMER=[9684398]
+  renderers.5 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=683 min/med/mean/max=683/683/683/683 TIMER=[447142]
+  renderers.6 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=603 min/med/mean/max=603/603/603/603 TIMER=[2668035]
+  renderers.7 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=157 min/med/mean/max=157/157/157/157 TIMER=[7745004]
+  renderers.8 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=749 min/med/mean/max=749/749/749/749 TIMER=[984553]
+  writer name=soffice.bin t=0 depart=60000000 loop=False ops={'WAIT': 234, 'RUN': 234} RUN n=234 sum=29834804 min/med/mean/max=1088/89716/127499/1035087 WAIT=['input:writer'] ext_wakes=234
+coreset-single == c1-photo.workload.json  gt=[(0, 60000000, 'photo', {'background_wanted': True})]
+  photo-editor name=gimp t=0 depart=60000000 loop=False ops={'WAIT': 226, 'RUN': 226} RUN n=226 sum=28060834 min/med/mean/max=60/85116/124163/1038021 WAIT=['input:photo-editor'] ext_wakes=226
+coreset-single == c1-render.workload.json  gt=[(0, 60000000, 'render', {'background_wanted': True, 'initiated': 'user'})]
+  editor name=kdenlive t=0 depart=60000000 loop=False ops={'WAIT': 230, 'RUN': 230} RUN n=230 sum=24124733 min/med/mean/max=144/83798/104890/1280753 WAIT=['input:editor'] ext_wakes=230
+  bulk name=ffmpeg t=2000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=30000000 min/med/mean/max=30000000/30000000/30000000/30000000
+coreset-single == c1-transcode.workload.json  gt=[(0, 60000000, 'transcode', {'background_wanted': True, 'initiated': 'user'})]
+  video-editor name=kdenlive t=0 depart=60000000 loop=False ops={'WAIT': 225, 'RUN': 225} RUN n=225 sum=28229255 min/med/mean/max=964/86677/125463/938310 WAIT=['input:video-editor'] ext_wakes=225
+  batch name=HandBrakeCLI t=2000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=30000000 min/med/mean/max=30000000/30000000/30000000/30000000
+coreset-single == c1-video-edit.workload.json  gt=[(0, 60000000, 'video-edit', {'background_wanted': True})]
+  editor name=kdenlive t=0 depart=60000000 loop=False ops={'WAIT': 238, 'RUN': 238} RUN n=238 sum=27532473 min/med/mean/max=2012/87284/115683/696131 WAIT=['input:editor'] ext_wakes=238
+coreset-single == c2-p1a.workload.json  gt=[(0, 60000000, 'dev', {'background_wanted': True}), (60000000, 180000000, 'ml-train', {'background_wanted': True})]
+  editor name=code t=0 depart=180000000 loop=False ops={'WAIT': 774, 'RUN': 774} RUN n=774 sum=86701525 min/med/mean/max=102/80406/112017/1341639 WAIT=['input:editor'] ext_wakes=774
+  hog name=python3 t=60000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=130000000 min/med/mean/max=130000000/130000000/130000000/130000000
+coreset-single == c2-p1b.workload.json  gt=[(0, 60000000, 'dev', {'background_wanted': True}), (60000000, 180000000, 'indexing', {'background_wanted': False})]
+  editor name=code t=0 depart=180000000 loop=False ops={'WAIT': 774, 'RUN': 774} RUN n=774 sum=86701525 min/med/mean/max=102/80406/112017/1341639 WAIT=['input:editor'] ext_wakes=774
+  hog name=tracker-miner-fs-3 t=60000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=130000000 min/med/mean/max=130000000/130000000/130000000/130000000
+coreset-single == c2-p2a.workload.json  gt=[(0, 60000000, 'gaming', {'background_wanted': True}), (60000000, 120000000, 'gaming', {'background': 'download', 'background_wanted': True})]
+  game.chain.1 name=game.exe t=0 depart=120000000 loop=True ops={'TIMER': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=230 min/med/mean/max=230/230/230/230 TIMER=[16667] WAKE=['game.chain.2']
+  game.chain.10 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=727 min/med/mean/max=727/727/727/727 WAIT=['chain:game.chain.10'] WAKE=['game.chain.11']
+  game.chain.11 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=2143 min/med/mean/max=2143/2143/2143/2143 WAIT=['chain:game.chain.11'] WAKE=['game.chain.12']
+  game.chain.12 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=838 min/med/mean/max=838/838/838/838 WAIT=['chain:game.chain.12'] WAKE=['game.chain.13']
+  game.chain.13 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=934 min/med/mean/max=934/934/934/934 WAIT=['chain:game.chain.13'] WAKE=['game.chain.14']
+  game.chain.14 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=2176 min/med/mean/max=2176/2176/2176/2176 WAIT=['chain:game.chain.14'] WAKE=['game.chain.15']
+  game.chain.15 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1085 min/med/mean/max=1085/1085/1085/1085 WAIT=['chain:game.chain.15'] WAKE=['game.chain.16']
+  game.chain.16 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1} RUN n=1 sum=1246 min/med/mean/max=1246/1246/1246/1246 WAIT=['chain:game.chain.16']
+  game.chain.2 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1012 min/med/mean/max=1012/1012/1012/1012 WAIT=['chain:game.chain.2'] WAKE=['game.chain.3']
+  game.chain.3 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=691 min/med/mean/max=691/691/691/691 WAIT=['chain:game.chain.3'] WAKE=['game.chain.4']
+  game.chain.4 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=312 min/med/mean/max=312/312/312/312 WAIT=['chain:game.chain.4'] WAKE=['game.chain.5']
+  game.chain.5 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=902 min/med/mean/max=902/902/902/902 WAIT=['chain:game.chain.5'] WAKE=['game.chain.6']
+  game.chain.6 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=385 min/med/mean/max=385/385/385/385 WAIT=['chain:game.chain.6'] WAKE=['game.chain.7']
+  game.chain.7 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1770 min/med/mean/max=1770/1770/1770/1770 WAIT=['chain:game.chain.7'] WAKE=['game.chain.8']
+  game.chain.8 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1106 min/med/mean/max=1106/1106/1106/1106 WAIT=['chain:game.chain.8'] WAKE=['game.chain.9']
+  game.chain.9 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=279 min/med/mean/max=279/279/279/279 WAIT=['chain:game.chain.9'] WAKE=['game.chain.10']
+  game.tail.* x284 name=game.exe RUN min/med/max=55/201/699 SLEEP min/med/max=107764/508049/2226471
+  steam name=steam t=0 depart=120000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=455 min/med/mean/max=455/455/455/455 TIMER=[2375659]
+  wine name=wineserver t=0 depart=120000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=212 min/med/mean/max=212/212/212/212 SLEEP n=1 min/med/max=2117324/2117324/2117324
+  download name=steam t=60000000 depart=None loop=False ops={'SLEEP': 22072, 'RUN': 22072, 'EXIT': 1} RUN n=22072 sum=25000851 min/med/mean/max=122/993/1133/6944 SLEEP n=22072 min/med/max=2637/16712/122189
+coreset-single == c2-p2b.workload.json  gt=[(0, 60000000, 'gaming', {'background_wanted': True}), (60000000, 120000000, 'gaming', {'background': 'av-scan', 'background_wanted': False})]
+  game.chain.1 name=game.exe t=0 depart=120000000 loop=True ops={'TIMER': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=230 min/med/mean/max=230/230/230/230 TIMER=[16667] WAKE=['game.chain.2']
+  game.chain.10 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=727 min/med/mean/max=727/727/727/727 WAIT=['chain:game.chain.10'] WAKE=['game.chain.11']
+  game.chain.11 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=2143 min/med/mean/max=2143/2143/2143/2143 WAIT=['chain:game.chain.11'] WAKE=['game.chain.12']
+  game.chain.12 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=838 min/med/mean/max=838/838/838/838 WAIT=['chain:game.chain.12'] WAKE=['game.chain.13']
+  game.chain.13 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=934 min/med/mean/max=934/934/934/934 WAIT=['chain:game.chain.13'] WAKE=['game.chain.14']
+  game.chain.14 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=2176 min/med/mean/max=2176/2176/2176/2176 WAIT=['chain:game.chain.14'] WAKE=['game.chain.15']
+  game.chain.15 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1085 min/med/mean/max=1085/1085/1085/1085 WAIT=['chain:game.chain.15'] WAKE=['game.chain.16']
+  game.chain.16 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1} RUN n=1 sum=1246 min/med/mean/max=1246/1246/1246/1246 WAIT=['chain:game.chain.16']
+  game.chain.2 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1012 min/med/mean/max=1012/1012/1012/1012 WAIT=['chain:game.chain.2'] WAKE=['game.chain.3']
+  game.chain.3 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=691 min/med/mean/max=691/691/691/691 WAIT=['chain:game.chain.3'] WAKE=['game.chain.4']
+  game.chain.4 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=312 min/med/mean/max=312/312/312/312 WAIT=['chain:game.chain.4'] WAKE=['game.chain.5']
+  game.chain.5 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=902 min/med/mean/max=902/902/902/902 WAIT=['chain:game.chain.5'] WAKE=['game.chain.6']
+  game.chain.6 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=385 min/med/mean/max=385/385/385/385 WAIT=['chain:game.chain.6'] WAKE=['game.chain.7']
+  game.chain.7 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1770 min/med/mean/max=1770/1770/1770/1770 WAIT=['chain:game.chain.7'] WAKE=['game.chain.8']
+  game.chain.8 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1106 min/med/mean/max=1106/1106/1106/1106 WAIT=['chain:game.chain.8'] WAKE=['game.chain.9']
+  game.chain.9 name=game.exe t=0 depart=120000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=279 min/med/mean/max=279/279/279/279 WAIT=['chain:game.chain.9'] WAKE=['game.chain.10']
+  game.tail.* x284 name=game.exe RUN min/med/max=55/201/699 SLEEP min/med/max=107764/508049/2226471
+  steam name=steam t=0 depart=120000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=455 min/med/mean/max=455/455/455/455 TIMER=[2375659]
+  wine name=wineserver t=0 depart=120000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=212 min/med/mean/max=212/212/212/212 SLEEP n=1 min/med/max=2117324/2117324/2117324
+  download name=clamscan t=60000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=25000000 min/med/mean/max=25000000/25000000/25000000/25000000
+coreset-single == c2-p3a.workload.json  gt=[(0, 60000000, 'video-edit', {'background_wanted': True}), (60000000, 120000000, 'render', {'background_wanted': True, 'initiated': 'user'})]
+  editor name=kdenlive t=0 depart=120000000 loop=False ops={'WAIT': 480, 'RUN': 480} RUN n=480 sum=59604365 min/med/mean/max=627/89375/124176/1206604 WAIT=['input:editor'] ext_wakes=480
+  bulk name=ffmpeg t=60000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=75000000 min/med/mean/max=75000000/75000000/75000000/75000000
+coreset-single == c2-p3b.workload.json  gt=[(0, 60000000, 'video-edit', {'background_wanted': True}), (60000000, 120000000, 'backup', {'background_wanted': True, 'initiated': 'scheduled'})]
+  editor name=kdenlive t=0 depart=120000000 loop=False ops={'WAIT': 480, 'RUN': 480} RUN n=480 sum=59604365 min/med/mean/max=627/89375/124176/1206604 WAIT=['input:editor'] ext_wakes=480
+  bulk name=borg t=60000000 depart=None loop=False ops={'RUN': 21078, 'SLEEP': 21078, 'EXIT': 1} RUN n=21078 sum=75002381 min/med/mean/max=319/2968/3558/38430 SLEEP n=21078 min/med/max=1097/10022/129588
+coreset-single == c3-creation.workload.json  gt=[(0, 120000000, 'photo', {'background_wanted': True}), (120000000, 240000000, 'video-edit', {'background_wanted': True}), (240000000, 420000000, 'transcode', {'background_wanted': True, 'initiated': 'user'})]
+  photo-editor name=gimp t=0 depart=120000000 loop=False ops={'WAIT': 488, 'RUN': 488} RUN n=488 sum=58209711 min/med/mean/max=64/87211/119282/897336 WAIT=['input:photo-editor'] ext_wakes=488
+  video-editor name=kdenlive t=120000000 depart=420000000 loop=False ops={'WAIT': 510, 'RUN': 510} RUN n=510 sum=56588674 min/med/mean/max=139/82802/110958/3298883 WAIT=['input:video-editor'] ext_wakes=510
+  batch name=HandBrakeCLI t=240000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=320000000 min/med/mean/max=320000000/320000000/320000000/320000000
+coreset-single == c3-evening.workload.json  gt=[(0, 60000000, 'browsing', {'background_wanted': True}), (60000000, 300000000, 'gaming', {'background_wanted': True}), (300000000, 420000000, 'media', {'background_wanted': True})]
+  browser name=chrome t=0 depart=60000000 loop=False ops={'WAIT': 229, 'RUN': 229} RUN n=229 sum=28741492 min/med/mean/max=926/86247/125509/985838 WAIT=['input:browser'] ext_wakes=229
+  renderers.1 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=383 min/med/mean/max=383/383/383/383 TIMER=[1471709]
+  renderers.10 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=138 min/med/mean/max=138/138/138/138 TIMER=[2013150]
+  renderers.2 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=886 min/med/mean/max=886/886/886/886 TIMER=[1808502]
+  renderers.3 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=306 min/med/mean/max=306/306/306/306 TIMER=[3534168]
+  renderers.4 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=134 min/med/mean/max=134/134/134/134 TIMER=[1001605]
+  renderers.5 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=287 min/med/mean/max=287/287/287/287 TIMER=[5820331]
+  renderers.6 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=580 min/med/mean/max=580/580/580/580 TIMER=[1695823]
+  renderers.7 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=178 min/med/mean/max=178/178/178/178 TIMER=[1290949]
+  renderers.8 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=173 min/med/mean/max=173/173/173/173 TIMER=[5506600]
+  renderers.9 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=110 min/med/mean/max=110/110/110/110 TIMER=[2273259]
+  game.chain.1 name=game.exe t=60000000 depart=300000000 loop=True ops={'TIMER': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=764 min/med/mean/max=764/764/764/764 TIMER=[16667] WAKE=['game.chain.2']
+  game.chain.10 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=2029 min/med/mean/max=2029/2029/2029/2029 WAIT=['chain:game.chain.10'] WAKE=['game.chain.11']
+  game.chain.11 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=964 min/med/mean/max=964/964/964/964 WAIT=['chain:game.chain.11'] WAKE=['game.chain.12']
+  game.chain.12 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=910 min/med/mean/max=910/910/910/910 WAIT=['chain:game.chain.12'] WAKE=['game.chain.13']
+  game.chain.13 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1192 min/med/mean/max=1192/1192/1192/1192 WAIT=['chain:game.chain.13'] WAKE=['game.chain.14']
+  game.chain.14 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1858 min/med/mean/max=1858/1858/1858/1858 WAIT=['chain:game.chain.14'] WAKE=['game.chain.15']
+  game.chain.15 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1058 min/med/mean/max=1058/1058/1058/1058 WAIT=['chain:game.chain.15'] WAKE=['game.chain.16']
+  game.chain.16 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1} RUN n=1 sum=1499 min/med/mean/max=1499/1499/1499/1499 WAIT=['chain:game.chain.16']
+  game.chain.2 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=2440 min/med/mean/max=2440/2440/2440/2440 WAIT=['chain:game.chain.2'] WAKE=['game.chain.3']
+  game.chain.3 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=964 min/med/mean/max=964/964/964/964 WAIT=['chain:game.chain.3'] WAKE=['game.chain.4']
+  game.chain.4 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1560 min/med/mean/max=1560/1560/1560/1560 WAIT=['chain:game.chain.4'] WAKE=['game.chain.5']
+  game.chain.5 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1963 min/med/mean/max=1963/1963/1963/1963 WAIT=['chain:game.chain.5'] WAKE=['game.chain.6']
+  game.chain.6 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1149 min/med/mean/max=1149/1149/1149/1149 WAIT=['chain:game.chain.6'] WAKE=['game.chain.7']
+  game.chain.7 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1956 min/med/mean/max=1956/1956/1956/1956 WAIT=['chain:game.chain.7'] WAKE=['game.chain.8']
+  game.chain.8 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=2377 min/med/mean/max=2377/2377/2377/2377 WAIT=['chain:game.chain.8'] WAKE=['game.chain.9']
+  game.chain.9 name=game.exe t=60000000 depart=300000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1485 min/med/mean/max=1485/1485/1485/1485 WAIT=['chain:game.chain.9'] WAKE=['game.chain.10']
+  game.tail.* x284 name=game.exe RUN min/med/max=57/194/1020 SLEEP min/med/max=80789/497963/2250095
+  overlay name=discord t=60000000 depart=300000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=558 min/med/mean/max=558/558/558/558 TIMER=[307488]
+  steam name=steam t=60000000 depart=300000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=131 min/med/mean/max=131/131/131/131 TIMER=[1821093]
+  wine name=wineserver t=60000000 depart=300000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=873 min/med/mean/max=873/873/873/873 SLEEP n=1 min/med/max=457381676/457381676/457381676
+  music name=spotify t=300000000 depart=420000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=2500 min/med/mean/max=2500/2500/2500/2500 TIMER=[50000]
+  video name=mpv t=300000000 depart=420000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=6667 min/med/mean/max=6667/6667/6667/6667 TIMER=[16667]
+coreset-single == c3-workday.workload.json  gt=[(0, 60000000, 'browsing', {'background_wanted': True}), (60000000, 120000000, 'office', {'background_wanted': True}), (120000000, 360000000, 'compile', {'background_wanted': True}), (360000000, 420000000, 'mail', {'background_wanted': True})]
+  browser name=chrome t=0 depart=420000000 loop=False ops={'WAIT': 242, 'RUN': 242} RUN n=242 sum=27456488 min/med/mean/max=1084/83393/113457/967732 WAIT=['input:browser'] ext_wakes=242
+  renderers.1 name=chrome t=0 depart=420000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=1217 min/med/mean/max=1217/1217/1217/1217 TIMER=[1880856]
+  renderers.2 name=chrome t=0 depart=420000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=437 min/med/mean/max=437/437/437/437 TIMER=[617753]
+  renderers.3 name=chrome t=0 depart=420000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=134 min/med/mean/max=134/134/134/134 TIMER=[10454112]
+  renderers.4 name=chrome t=0 depart=420000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=163 min/med/mean/max=163/163/163/163 TIMER=[2194695]
+  renderers.5 name=chrome t=0 depart=420000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=402 min/med/mean/max=402/402/402/402 TIMER=[986910]
+  renderers.6 name=chrome t=0 depart=420000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=529 min/med/mean/max=529/529/529/529 TIMER=[155911]
+  renderers.7 name=chrome t=0 depart=420000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=177 min/med/mean/max=177/177/177/177 TIMER=[2781872]
+  renderers.8 name=chrome t=0 depart=420000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=698 min/med/mean/max=698/698/698/698 TIMER=[13067911]
+  writer name=soffice.bin t=60000000 depart=420000000 loop=False ops={'WAIT': 244, 'RUN': 244} RUN n=244 sum=27785528 min/med/mean/max=160/84914/113875/893255 WAIT=['input:writer'] ext_wakes=244
+  build name=make t=120000000 depart=None loop=False ops={'RUN': 4200, 'FORK': 4200, 'WAIT': 1, 'EXIT': 1} RUN n=4200 sum=1105306 min/med/mean/max=45/230/263/1408 WAIT=['children:build']
+    spawn_table n=4200 fork_cap=8 child RUN sum=348959201 med=4309 max=5642976 name=cc1
+  mailer name=thunderbird t=360000000 depart=420000000 loop=False ops={'WAIT': 220, 'RUN': 220} RUN n=220 sum=27675875 min/med/mean/max=418/89180/125799/1295981 WAIT=['input:mailer'] ext_wakes=220
+  send name=thunderbird t=400000000 depart=None loop=False ops={'SLEEP': 2615, 'RUN': 2615, 'EXIT': 1} RUN n=2615 sum=3000228 min/med/mean/max=200/1021/1147/5390 SLEEP n=2615 min/med/max=3202/17050/92967
+coreset-single == c4-compile.workload.json  gt=[(0, 60000000, 'compile', {'background_wanted': True})]
+  editor name=code t=0 depart=60000000 loop=False ops={'WAIT': 239, 'RUN': 239} RUN n=239 sum=28470806 min/med/mean/max=1009/79943/119125/1337206 WAIT=['input:editor'] ext_wakes=239
+  build name=make t=2000000 depart=None loop=False ops={'RUN': 100, 'FORK': 100, 'WAIT': 1, 'EXIT': 1} RUN n=100 sum=28423 min/med/mean/max=49/272/284/845 WAIT=['children:build']
+    spawn_table n=100 fork_cap=8 child RUN sum=3844400 med=4579 max=436563 name=cc1
+  injected-browser name=chrome t=30000000 depart=60000000 loop=False ops={'WAIT': 1} WAIT=['input:injected-browser']
+  injected-renderers.1 name=chrome t=30000000 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=224 min/med/mean/max=224/224/224/224 TIMER=[7088100]
+  injected-renderers.2 name=chrome t=30000000 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=488 min/med/mean/max=488/488/488/488 TIMER=[3887230]
+  injected-renderers.3 name=chrome t=30000000 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=166 min/med/mean/max=166/166/166/166 TIMER=[766369]
+  injected-renderers.4 name=chrome t=30000000 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=240 min/med/mean/max=240/240/240/240 TIMER=[6400264]
+  injected-renderers.5 name=chrome t=30000000 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=185 min/med/mean/max=185/185/185/185 TIMER=[1597692]
+  injected-renderers.6 name=chrome t=30000000 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=712 min/med/mean/max=712/712/712/712 TIMER=[2920315]
+coreset-single == c4-gaming.workload.json  gt=[(0, 60000000, 'gaming', {'background_wanted': True})]
+  compositor name=gamescope t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=6667 min/med/mean/max=6667/6667/6667/6667 TIMER=[16667]
+  game.chain.1 name=game.exe t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=646 min/med/mean/max=646/646/646/646 TIMER=[16667] WAKE=['game.chain.2']
+  game.chain.10 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1218 min/med/mean/max=1218/1218/1218/1218 WAIT=['chain:game.chain.10'] WAKE=['game.chain.11']
+  game.chain.11 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1198 min/med/mean/max=1198/1198/1198/1198 WAIT=['chain:game.chain.11'] WAKE=['game.chain.12']
+  game.chain.12 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1016 min/med/mean/max=1016/1016/1016/1016 WAIT=['chain:game.chain.12'] WAKE=['game.chain.13']
+  game.chain.13 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1120 min/med/mean/max=1120/1120/1120/1120 WAIT=['chain:game.chain.13'] WAKE=['game.chain.14']
+  game.chain.14 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=794 min/med/mean/max=794/794/794/794 WAIT=['chain:game.chain.14'] WAKE=['game.chain.15']
+  game.chain.15 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=673 min/med/mean/max=673/673/673/673 WAIT=['chain:game.chain.15'] WAKE=['game.chain.16']
+  game.chain.16 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1} RUN n=1 sum=1186 min/med/mean/max=1186/1186/1186/1186 WAIT=['chain:game.chain.16']
+  game.chain.2 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1076 min/med/mean/max=1076/1076/1076/1076 WAIT=['chain:game.chain.2'] WAKE=['game.chain.3']
+  game.chain.3 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=869 min/med/mean/max=869/869/869/869 WAIT=['chain:game.chain.3'] WAKE=['game.chain.4']
+  game.chain.4 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1150 min/med/mean/max=1150/1150/1150/1150 WAIT=['chain:game.chain.4'] WAKE=['game.chain.5']
+  game.chain.5 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1470 min/med/mean/max=1470/1470/1470/1470 WAIT=['chain:game.chain.5'] WAKE=['game.chain.6']
+  game.chain.6 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=674 min/med/mean/max=674/674/674/674 WAIT=['chain:game.chain.6'] WAKE=['game.chain.7']
+  game.chain.7 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=293 min/med/mean/max=293/293/293/293 WAIT=['chain:game.chain.7'] WAKE=['game.chain.8']
+  game.chain.8 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1139 min/med/mean/max=1139/1139/1139/1139 WAIT=['chain:game.chain.8'] WAKE=['game.chain.9']
+  game.chain.9 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=477 min/med/mean/max=477/477/477/477 WAIT=['chain:game.chain.9'] WAKE=['game.chain.10']
+  game.tail.* x284 name=game.exe RUN min/med/max=49/200/1004 SLEEP min/med/max=107867/490904/3006520
+  steam name=steam t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=381 min/med/mean/max=381/381/381/381 TIMER=[3276124]
+  webhelper.1 name=steamwebhelper t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=293 min/med/mean/max=293/293/293/293 TIMER=[783111]
+  webhelper.2 name=steamwebhelper t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=331 min/med/mean/max=331/331/331/331 TIMER=[832702]
+  webhelper.3 name=steamwebhelper t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=53 min/med/mean/max=53/53/53/53 TIMER=[26866891]
+  wine name=wineserver t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=97 min/med/mean/max=97/97/97/97 SLEEP n=1 min/med/max=1225245899/1225245899/1225245899
+  injected-overlay name=discord t=30000000 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=590 min/med/mean/max=590/590/590/590 TIMER=[1708996]
+coreset-single == c4-office.workload.json  gt=[(0, 60000000, 'office', {'background_wanted': True})]
+  browser name=chrome t=0 depart=60000000 loop=False ops={'WAIT': 1} WAIT=['input:browser']
+  mail name=thunderbird t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=71 min/med/mean/max=71/71/71/71 TIMER=[2020620]
+  renderers.1 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=345 min/med/mean/max=345/345/345/345 TIMER=[1098144]
+  renderers.2 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=127 min/med/mean/max=127/127/127/127 TIMER=[2480164]
+  renderers.3 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=467 min/med/mean/max=467/467/467/467 TIMER=[717750]
+  renderers.4 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=88 min/med/mean/max=88/88/88/88 TIMER=[9684398]
+  renderers.5 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=683 min/med/mean/max=683/683/683/683 TIMER=[447142]
+  renderers.6 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=603 min/med/mean/max=603/603/603/603 TIMER=[2668035]
+  renderers.7 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=157 min/med/mean/max=157/157/157/157 TIMER=[7745004]
+  renderers.8 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=749 min/med/mean/max=749/749/749/749 TIMER=[984553]
+  writer name=soffice.bin t=0 depart=60000000 loop=False ops={'WAIT': 234, 'RUN': 234} RUN n=234 sum=29834804 min/med/mean/max=1088/89716/127499/1035087 WAIT=['input:writer'] ext_wakes=234
+  injected-burst name=7z t=30000000 depart=None loop=False ops={'RUN': 1651, 'SLEEP': 1651, 'EXIT': 1} RUN n=1651 sum=6000115 min/med/mean/max=342/3006/3634/20588 SLEEP n=1651 min/med/max=1614/9803/68517
+coreset-single == c5-t3.workload.json  gt=[(0, 60000000, 'media', {'background_wanted': True})]
+  music name=tracker-miner-fs-3 t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=2500 min/med/mean/max=2500/2500/2500/2500 TIMER=[50000]
+  video name=baloo_file t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=6667 min/med/mean/max=6667/6667/6667/6667 TIMER=[16667]
+coreset-single == c5-t4.workload.json  gt=[(0, 60000000, 'media', {'background_wanted': True})]
+  music name=audio-stream-helper t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=2500 min/med/mean/max=2500/2500/2500/2500 TIMER=[50000]
+  video name=video-playback-svc t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=6667 min/med/mean/max=6667/6667/6667/6667 TIMER=[16667]
+coreset-single == c5-t5.workload.json  gt=[(0, 60000000, 'media', {'background_wanted': True})]
+  music name=xkrr t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=2500 min/med/mean/max=2500/2500/2500/2500 TIMER=[50000]
+  video name=qzvd t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=6667 min/med/mean/max=6667/6667/6667/6667 TIMER=[16667]
+coreset-single == c6-dual.workload.json  gt=[(0, 240000000, 'ambiguous', {'dual_active': True})]
+  editor name=code t=0 depart=240000000 loop=False ops={'WAIT': 976, 'RUN': 976} RUN n=976 sum=117696222 min/med/mean/max=373/84368/120590/1314596 WAIT=['input:editor'] ext_wakes=976
+  game.chain.1 name=game.exe t=0 depart=240000000 loop=True ops={'TIMER': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=927 min/med/mean/max=927/927/927/927 TIMER=[16667] WAKE=['game.chain.2']
+  game.chain.10 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=700 min/med/mean/max=700/700/700/700 WAIT=['chain:game.chain.10'] WAKE=['game.chain.11']
+  game.chain.11 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=988 min/med/mean/max=988/988/988/988 WAIT=['chain:game.chain.11'] WAKE=['game.chain.12']
+  game.chain.12 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=813 min/med/mean/max=813/813/813/813 WAIT=['chain:game.chain.12'] WAKE=['game.chain.13']
+  game.chain.13 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1090 min/med/mean/max=1090/1090/1090/1090 WAIT=['chain:game.chain.13'] WAKE=['game.chain.14']
+  game.chain.14 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=455 min/med/mean/max=455/455/455/455 WAIT=['chain:game.chain.14'] WAKE=['game.chain.15']
+  game.chain.15 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=547 min/med/mean/max=547/547/547/547 WAIT=['chain:game.chain.15'] WAKE=['game.chain.16']
+  game.chain.16 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1} RUN n=1 sum=394 min/med/mean/max=394/394/394/394 WAIT=['chain:game.chain.16']
+  game.chain.2 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=265 min/med/mean/max=265/265/265/265 WAIT=['chain:game.chain.2'] WAKE=['game.chain.3']
+  game.chain.3 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=851 min/med/mean/max=851/851/851/851 WAIT=['chain:game.chain.3'] WAKE=['game.chain.4']
+  game.chain.4 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=182 min/med/mean/max=182/182/182/182 WAIT=['chain:game.chain.4'] WAKE=['game.chain.5']
+  game.chain.5 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=822 min/med/mean/max=822/822/822/822 WAIT=['chain:game.chain.5'] WAKE=['game.chain.6']
+  game.chain.6 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=454 min/med/mean/max=454/454/454/454 WAIT=['chain:game.chain.6'] WAKE=['game.chain.7']
+  game.chain.7 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=320 min/med/mean/max=320/320/320/320 WAIT=['chain:game.chain.7'] WAKE=['game.chain.8']
+  game.chain.8 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=493 min/med/mean/max=493/493/493/493 WAIT=['chain:game.chain.8'] WAKE=['game.chain.9']
+  game.chain.9 name=game.exe t=0 depart=240000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=699 min/med/mean/max=699/699/699/699 WAIT=['chain:game.chain.9'] WAKE=['game.chain.10']
+  game.tail.* x284 name=game.exe RUN min/med/max=59/190/1079 SLEEP min/med/max=111719/497240/2026370
+  wine name=wineserver t=0 depart=240000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=583 min/med/mean/max=583/583/583/583 SLEEP n=1 min/med/max=2769255/2769255/2769255
+  build name=make t=10000000 depart=None loop=False ops={'RUN': 85, 'FORK': 85, 'WAIT': 1, 'EXIT': 1} RUN n=85 sum=22018 min/med/mean/max=92/224/259/1012 WAIT=['children:build']
+    spawn_table n=85 fork_cap=8 child RUN sum=10562732 med=4066 max=2289021 name=cc1
+coreset-single == c6-fold.workload.json  gt=[(0, 30000000, 'browsing', {'background_wanted': True}), (30000000, 60000000, 'meeting', {'background_wanted': True})]
+  browser name=chrome t=0 depart=60000000 loop=False ops={'WAIT': 229, 'RUN': 229} RUN n=229 sum=26625247 min/med/mean/max=588/90427/116267/857492 WAIT=['input:browser'] ext_wakes=229
+  renderers.1 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=2384 min/med/mean/max=2384/2384/2384/2384 TIMER=[1106107]
+  renderers.10 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=771 min/med/mean/max=771/771/771/771 TIMER=[4110113]
+  renderers.11 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=158 min/med/mean/max=158/158/158/158 TIMER=[2719033]
+  renderers.12 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=716 min/med/mean/max=716/716/716/716 TIMER=[1357976]
+  renderers.2 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=157 min/med/mean/max=157/157/157/157 TIMER=[2235637]
+  renderers.3 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=107 min/med/mean/max=107/107/107/107 TIMER=[1341150]
+  renderers.4 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=86 min/med/mean/max=86/86/86/86 TIMER=[4017456]
+  renderers.5 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=291 min/med/mean/max=291/291/291/291 TIMER=[290135]
+  renderers.6 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=414 min/med/mean/max=414/414/414/414 TIMER=[3915244]
+  renderers.7 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=348 min/med/mean/max=348/348/348/348 TIMER=[4883988]
+  renderers.8 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=527 min/med/mean/max=527/527/527/527 TIMER=[2424710]
+  renderers.9 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=209 min/med/mean/max=209/209/209/209 TIMER=[636536]
+coreset-single == c6-spoof.workload.json  gt=[(0, 60000000, 'browsing', {'background_wanted': True, 'spoof': True})]
+  browser name=chrome t=0 depart=60000000 loop=False ops={'WAIT': 229, 'RUN': 229} RUN n=229 sum=26625247 min/med/mean/max=588/90427/116267/857492 WAIT=['input:browser'] ext_wakes=229
+  renderers.1 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=2384 min/med/mean/max=2384/2384/2384/2384 TIMER=[1106107]
+  renderers.10 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=771 min/med/mean/max=771/771/771/771 TIMER=[4110113]
+  renderers.11 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=158 min/med/mean/max=158/158/158/158 TIMER=[2719033]
+  renderers.12 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=716 min/med/mean/max=716/716/716/716 TIMER=[1357976]
+  renderers.2 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=157 min/med/mean/max=157/157/157/157 TIMER=[2235637]
+  renderers.3 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=107 min/med/mean/max=107/107/107/107 TIMER=[1341150]
+  renderers.4 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=86 min/med/mean/max=86/86/86/86 TIMER=[4017456]
+  renderers.5 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=291 min/med/mean/max=291/291/291/291 TIMER=[290135]
+  renderers.6 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=414 min/med/mean/max=414/414/414/414 TIMER=[3915244]
+  renderers.7 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=348 min/med/mean/max=348/348/348/348 TIMER=[4883988]
+  renderers.8 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=527 min/med/mean/max=527/527/527/527 TIMER=[2424710]
+  renderers.9 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=209 min/med/mean/max=209/209/209/209 TIMER=[636536]
+  spoof name=chrome t=20000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=30000000 min/med/mean/max=30000000/30000000/30000000/30000000
+coreset-single == c7-backup.workload.json  gt=[(0, 60000000, 'backup', {'background_wanted': False, 'initiated': 'scheduled', 'pre_committed_miss': True})]
+  editor name=kdenlive t=0 depart=60000000 loop=False ops={'WAIT': 255, 'RUN': 255} RUN n=255 sum=28449559 min/med/mean/max=91/84543/111567/502728 WAIT=['input:editor'] ext_wakes=255
+  bulk name=borg t=2000000 depart=None loop=False ops={'RUN': 8447, 'SLEEP': 8447, 'EXIT': 1} RUN n=8447 sum=30001191 min/med/mean/max=325/2995/3552/28905 SLEEP n=8447 min/med/max=1033/9854/83358
+coreset-single == c7-browsing.workload.json  gt=[(0, 60000000, 'browsing', {'background': 'av-scan', 'background_wanted': False})]
+  browser name=chrome t=0 depart=60000000 loop=False ops={'WAIT': 229, 'RUN': 229} RUN n=229 sum=26625247 min/med/mean/max=588/90427/116267/857492 WAIT=['input:browser'] ext_wakes=229
+  renderers.1 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=2384 min/med/mean/max=2384/2384/2384/2384 TIMER=[1106107]
+  renderers.10 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=771 min/med/mean/max=771/771/771/771 TIMER=[4110113]
+  renderers.11 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=158 min/med/mean/max=158/158/158/158 TIMER=[2719033]
+  renderers.12 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=716 min/med/mean/max=716/716/716/716 TIMER=[1357976]
+  renderers.2 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=157 min/med/mean/max=157/157/157/157 TIMER=[2235637]
+  renderers.3 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=107 min/med/mean/max=107/107/107/107 TIMER=[1341150]
+  renderers.4 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=86 min/med/mean/max=86/86/86/86 TIMER=[4017456]
+  renderers.5 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=291 min/med/mean/max=291/291/291/291 TIMER=[290135]
+  renderers.6 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=414 min/med/mean/max=414/414/414/414 TIMER=[3915244]
+  renderers.7 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=348 min/med/mean/max=348/348/348/348 TIMER=[4883988]
+  renderers.8 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=527 min/med/mean/max=527/527/527/527 TIMER=[2424710]
+  renderers.9 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=209 min/med/mean/max=209/209/209/209 TIMER=[636536]
+  scan name=clamscan t=0 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=60000000 min/med/mean/max=60000000/60000000/60000000/60000000
+coreset-single == c7-compile.workload.json  gt=[(0, 60000000, 'compile', {'background_wanted': False, 'initiated': 'scheduled'})]
+  editor name=code t=0 depart=60000000 loop=False ops={'WAIT': 239, 'RUN': 239} RUN n=239 sum=28470806 min/med/mean/max=1009/79943/119125/1337206 WAIT=['input:editor'] ext_wakes=239
+  build name=dkms t=2000000 depart=None loop=False ops={'RUN': 100, 'FORK': 100, 'WAIT': 1, 'EXIT': 1} RUN n=100 sum=28423 min/med/mean/max=49/272/284/845 WAIT=['children:build']
+    spawn_table n=100 fork_cap=8 child RUN sum=3844400 med=4579 max=436563 name=cc1
+coreset-single == c7-dev.workload.json  gt=[(0, 60000000, 'dev', {'background': 'av-scan', 'background_wanted': False})]
+  editor name=code t=0 depart=60000000 loop=False ops={'WAIT': 237, 'RUN': 237} RUN n=237 sum=27803882 min/med/mean/max=2814/87599/117316/729764 WAIT=['input:editor'] ext_wakes=237
+  scan name=clamscan t=0 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=60000000 min/med/mean/max=60000000/60000000/60000000/60000000
+coreset-single == c7-gaming.workload.json  gt=[(0, 60000000, 'gaming', {'background': 'av-scan', 'background_wanted': False})]
+  compositor name=gamescope t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=6667 min/med/mean/max=6667/6667/6667/6667 TIMER=[16667]
+  game.chain.1 name=game.exe t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=646 min/med/mean/max=646/646/646/646 TIMER=[16667] WAKE=['game.chain.2']
+  game.chain.10 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1218 min/med/mean/max=1218/1218/1218/1218 WAIT=['chain:game.chain.10'] WAKE=['game.chain.11']
+  game.chain.11 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1198 min/med/mean/max=1198/1198/1198/1198 WAIT=['chain:game.chain.11'] WAKE=['game.chain.12']
+  game.chain.12 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1016 min/med/mean/max=1016/1016/1016/1016 WAIT=['chain:game.chain.12'] WAKE=['game.chain.13']
+  game.chain.13 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1120 min/med/mean/max=1120/1120/1120/1120 WAIT=['chain:game.chain.13'] WAKE=['game.chain.14']
+  game.chain.14 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=794 min/med/mean/max=794/794/794/794 WAIT=['chain:game.chain.14'] WAKE=['game.chain.15']
+  game.chain.15 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=673 min/med/mean/max=673/673/673/673 WAIT=['chain:game.chain.15'] WAKE=['game.chain.16']
+  game.chain.16 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1} RUN n=1 sum=1186 min/med/mean/max=1186/1186/1186/1186 WAIT=['chain:game.chain.16']
+  game.chain.2 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1076 min/med/mean/max=1076/1076/1076/1076 WAIT=['chain:game.chain.2'] WAKE=['game.chain.3']
+  game.chain.3 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=869 min/med/mean/max=869/869/869/869 WAIT=['chain:game.chain.3'] WAKE=['game.chain.4']
+  game.chain.4 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1150 min/med/mean/max=1150/1150/1150/1150 WAIT=['chain:game.chain.4'] WAKE=['game.chain.5']
+  game.chain.5 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1470 min/med/mean/max=1470/1470/1470/1470 WAIT=['chain:game.chain.5'] WAKE=['game.chain.6']
+  game.chain.6 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=674 min/med/mean/max=674/674/674/674 WAIT=['chain:game.chain.6'] WAKE=['game.chain.7']
+  game.chain.7 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=293 min/med/mean/max=293/293/293/293 WAIT=['chain:game.chain.7'] WAKE=['game.chain.8']
+  game.chain.8 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=1139 min/med/mean/max=1139/1139/1139/1139 WAIT=['chain:game.chain.8'] WAKE=['game.chain.9']
+  game.chain.9 name=game.exe t=0 depart=60000000 loop=True ops={'WAIT': 1, 'RUN': 1, 'WAKE': 1} RUN n=1 sum=477 min/med/mean/max=477/477/477/477 WAIT=['chain:game.chain.9'] WAKE=['game.chain.10']
+  game.tail.* x284 name=game.exe RUN min/med/max=49/200/1004 SLEEP min/med/max=107867/490904/3006520
+  scan name=clamscan t=0 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=60000000 min/med/mean/max=60000000/60000000/60000000/60000000
+  steam name=steam t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=381 min/med/mean/max=381/381/381/381 TIMER=[3276124]
+  webhelper.1 name=steamwebhelper t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=293 min/med/mean/max=293/293/293/293 TIMER=[783111]
+  webhelper.2 name=steamwebhelper t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=331 min/med/mean/max=331/331/331/331 TIMER=[832702]
+  webhelper.3 name=steamwebhelper t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=53 min/med/mean/max=53/53/53/53 TIMER=[26866891]
+  wine name=wineserver t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=97 min/med/mean/max=97/97/97/97 SLEEP n=1 min/med/max=1225245899/1225245899/1225245899
+coreset-single == c7-idle.workload.json  gt=[(0, 60000000, 'idle', {'background': 'av-scan', 'background_wanted': False})]
+  audio-srv name=pipewire t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=237 min/med/mean/max=237/237/237/237 SLEEP n=1 min/med/max=1460344/1460344/1460344
+  bus name=dbus-daemon t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=314 min/med/mean/max=314/314/314/314 SLEEP n=1 min/med/max=3489034/3489034/3489034
+  init name=systemd t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=63 min/med/mean/max=63/63/63/63 SLEEP n=1 min/med/max=463218/463218/463218
+  scan name=clamscan t=0 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=60000000 min/med/mean/max=60000000/60000000/60000000/60000000
+  shell name=gnome-shell t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=99 min/med/mean/max=99/99/99/99 SLEEP n=1 min/med/max=2800306/2800306/2800306
+  xorg name=Xorg t=0 depart=60000000 loop=True ops={'SLEEP': 1, 'RUN': 1} RUN n=1 sum=65 min/med/mean/max=65/65/65/65 SLEEP n=1 min/med/max=5000581/5000581/5000581
+coreset-single == c7-indexing.workload.json  gt=[(0, 60000000, 'indexing', {'background_wanted': False, 'initiated': 'scheduled'})]
+  editor name=code t=0 depart=60000000 loop=False ops={'WAIT': 238, 'RUN': 238} RUN n=238 sum=27302806 min/med/mean/max=630/73673/114718/759279 WAIT=['input:editor'] ext_wakes=238
+  hog name=tracker-miner-fs-3 t=2000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=30000000 min/med/mean/max=30000000/30000000/30000000/30000000
+coreset-single == c7-mail.workload.json  gt=[(0, 60000000, 'mail', {'background': 'av-scan', 'background_wanted': False})]
+  mailer name=thunderbird t=0 depart=60000000 loop=False ops={'WAIT': 234, 'RUN': 234} RUN n=234 sum=28618451 min/med/mean/max=100/84300/122301/1095558 WAIT=['input:mailer'] ext_wakes=234
+  scan name=clamscan t=0 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=60000000 min/med/mean/max=60000000/60000000/60000000/60000000
+  send name=thunderbird t=40000000 depart=None loop=False ops={'SLEEP': 2561, 'RUN': 2561, 'EXIT': 1} RUN n=2561 sum=3001111 min/med/mean/max=151/1035/1172/6696 SLEEP n=2561 min/med/max=3659/16506/83880
+coreset-single == c7-media.workload.json  gt=[(0, 60000000, 'media', {'background': 'av-scan', 'background_wanted': False})]
+  music name=spotify t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=2500 min/med/mean/max=2500/2500/2500/2500 TIMER=[50000]
+  scan name=clamscan t=0 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=60000000 min/med/mean/max=60000000/60000000/60000000/60000000
+  video name=mpv t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=6667 min/med/mean/max=6667/6667/6667/6667 TIMER=[16667]
+coreset-single == c7-meeting.workload.json  gt=[(0, 60000000, 'meeting', {'background': 'av-scan', 'background_wanted': False})]
+  helper name=zoom t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=508 min/med/mean/max=508/508/508/508 TIMER=[1640483]
+  scan name=clamscan t=0 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=60000000 min/med/mean/max=60000000/60000000/60000000/60000000
+  video name=zoom t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=6667 min/med/mean/max=6667/6667/6667/6667 TIMER=[16667]
+  voice name=zoom t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=2500 min/med/mean/max=2500/2500/2500/2500 TIMER=[50000]
+coreset-single == c7-ml-train.workload.json  gt=[(0, 60000000, 'ml-train', {'background_wanted': False, 'initiated': 'scheduled', 'pre_committed_miss': True})]
+  editor name=code t=0 depart=60000000 loop=False ops={'WAIT': 232, 'RUN': 232} RUN n=232 sum=28335723 min/med/mean/max=206/95498/122137/724342 WAIT=['input:editor'] ext_wakes=232
+  hog name=python3 t=2000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=30000000 min/med/mean/max=30000000/30000000/30000000/30000000
+coreset-single == c7-office.workload.json  gt=[(0, 60000000, 'office', {'background': 'av-scan', 'background_wanted': False})]
+  browser name=chrome t=0 depart=60000000 loop=False ops={'WAIT': 1} WAIT=['input:browser']
+  mail name=thunderbird t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=71 min/med/mean/max=71/71/71/71 TIMER=[2020620]
+  renderers.1 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=345 min/med/mean/max=345/345/345/345 TIMER=[1098144]
+  renderers.2 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=127 min/med/mean/max=127/127/127/127 TIMER=[2480164]
+  renderers.3 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=467 min/med/mean/max=467/467/467/467 TIMER=[717750]
+  renderers.4 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=88 min/med/mean/max=88/88/88/88 TIMER=[9684398]
+  renderers.5 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=683 min/med/mean/max=683/683/683/683 TIMER=[447142]
+  renderers.6 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=603 min/med/mean/max=603/603/603/603 TIMER=[2668035]
+  renderers.7 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=157 min/med/mean/max=157/157/157/157 TIMER=[7745004]
+  renderers.8 name=chrome t=0 depart=60000000 loop=True ops={'TIMER': 1, 'RUN': 1} RUN n=1 sum=749 min/med/mean/max=749/749/749/749 TIMER=[984553]
+  scan name=clamscan t=0 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=60000000 min/med/mean/max=60000000/60000000/60000000/60000000
+  writer name=soffice.bin t=0 depart=60000000 loop=False ops={'WAIT': 234, 'RUN': 234} RUN n=234 sum=29834804 min/med/mean/max=1088/89716/127499/1035087 WAIT=['input:writer'] ext_wakes=234
+coreset-single == c7-photo.workload.json  gt=[(0, 60000000, 'photo', {'background': 'av-scan', 'background_wanted': False})]
+  photo-editor name=gimp t=0 depart=60000000 loop=False ops={'WAIT': 226, 'RUN': 226} RUN n=226 sum=28060834 min/med/mean/max=60/85116/124163/1038021 WAIT=['input:photo-editor'] ext_wakes=226
+  scan name=clamscan t=0 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=60000000 min/med/mean/max=60000000/60000000/60000000/60000000
+coreset-single == c7-render.workload.json  gt=[(0, 60000000, 'render', {'background_wanted': False, 'initiated': 'scheduled', 'pre_committed_miss': True})]
+  editor name=kdenlive t=0 depart=60000000 loop=False ops={'WAIT': 230, 'RUN': 230} RUN n=230 sum=24124733 min/med/mean/max=144/83798/104890/1280753 WAIT=['input:editor'] ext_wakes=230
+  bulk name=ffmpeg t=2000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=30000000 min/med/mean/max=30000000/30000000/30000000/30000000
+coreset-single == c7-transcode.workload.json  gt=[(0, 60000000, 'transcode', {'background_wanted': False, 'initiated': 'scheduled', 'pre_committed_miss': True})]
+  video-editor name=kdenlive t=0 depart=60000000 loop=False ops={'WAIT': 225, 'RUN': 225} RUN n=225 sum=28229255 min/med/mean/max=964/86677/125463/938310 WAIT=['input:video-editor'] ext_wakes=225
+  batch name=HandBrakeCLI t=2000000 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=30000000 min/med/mean/max=30000000/30000000/30000000/30000000
+coreset-single == c7-video-edit.workload.json  gt=[(0, 60000000, 'video-edit', {'background': 'av-scan', 'background_wanted': False})]
+  editor name=kdenlive t=0 depart=60000000 loop=False ops={'WAIT': 238, 'RUN': 238} RUN n=238 sum=27532473 min/med/mean/max=2012/87284/115683/696131 WAIT=['input:editor'] ext_wakes=238
+  scan name=clamscan t=0 depart=None loop=False ops={'RUN': 1, 'EXIT': 1} RUN n=1 sum=60000000 min/med/mean/max=60000000/60000000/60000000/60000000

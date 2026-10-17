@@ -2,6 +2,7 @@
  "workload_id": "mock-guards",
  "condition": "llm_vocab",
  "seed": null,
+ "telemetry": "names",
  "queries": [
   {"t_set_change": 0,
    "telemetry": {"t_us": 0, "processes": [{"name": "code", "count": 1}]},

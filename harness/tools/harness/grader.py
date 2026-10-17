@@ -70,9 +70,9 @@ BOOTSTRAP_SEED = 20260911        # metrics doc §10; pinned so reruns are byte-i
 BOOTSTRAP_REPETITIONS = 10_000   # metrics doc §10
 INTERVAL_LEVEL = Fraction(95, 100)
 
-IDENTITY = ("condition", "table", "seed")
+IDENTITY = ("condition", "table", "seed", "telemetry")
 COLUMNS = IDENTITY + ("pre_committed_miss_excluded", "over_seeds", "level", "axis",
-                      "statistic", "class", "truth", "predicted", "partner_condition",
+                      "statistic", "class", "truth", "predicted", "partner_condition", "partner_telemetry",
                       "value", "ci_low", "ci_high", "n", "n_files", "n_seeds")
 
 AXES = ("mode", "attribute", "algo_choice", "configuration", "latency")
@@ -139,10 +139,11 @@ class Run:
     log: pathlib.Path
     workload: pathlib.Path
     table_path: Optional[pathlib.Path] = None
+    telemetry: str = ""             # the telemetry shape the run's daemon showed (9.17)
 
     @property
     def identity(self):
-        return (self.condition, self.table, self.seed)
+        return (self.condition, self.table, self.seed, self.telemetry)
 
 
 def _sha256(path) -> str:
@@ -169,9 +170,11 @@ def grade_log(run: Run):
         raise GradeError(f"{run.table_path}: algorithm choice is graded against the calibrated "
                          f"table's default; this table's role is {table.role!r}")
 
+    if log.telemetry is not None and run.telemetry and log.telemetry != run.telemetry:
+        raise GradeError(f"{run.log}: the log says telemetry {log.telemetry!r}, the run {run.telemetry!r}")
     identity = {"workload_id": run.workload_id, "condition": run.condition,
                 "table": run.table, "seed": run.seed, "boot_default": run.boot_default,
-                "sim": "", "source_sha256": _sha256(run.log)}
+                "telemetry": run.telemetry, "sim": "", "source_sha256": _sha256(run.log)}
     rows, messages = [], []
 
     def emit(metric, t, value, attrs):
@@ -259,12 +262,12 @@ class Point:
 
 
 def points_by_run(rows) -> Dict[tuple, Dict[str, List[Point]]]:
-    """{(condition, table, seed): {workload_id: [Point, …]}}, files in id order."""
+    """{(condition, table, seed, telemetry): {workload_id: [Point, …]}}, files in id order."""
     joined: Dict[tuple, Dict[tuple, Point]] = {}
     for r in rows:
         if r.get("entity") != "recognizer":
             continue
-        ident = (r["condition"], str(r.get("table", "")), str(r.get("seed", "")))
+        ident = (r["condition"], str(r.get("table", "")), str(r.get("seed", "")), str(r.get("telemetry", "")))
         key = (r["workload_id"], int(r["t"]))
         p = joined.setdefault(ident, {}).get(key)
         if p is None:
@@ -423,11 +426,13 @@ def _statistic(name, points, axis):
 
 
 def _by_condition(by_run):
-    """{(condition, table): {seed: {workload_id: [Point]}}} — the seed is a
-    dimension inside a condition, never a condition of its own."""
+    """{(condition, table, telemetry): {seed: {workload_id: [Point]}}} — the seed
+    is a dimension inside a condition, never a condition of its own; the
+    telemetry shape is a group of its own, so two shapes of one condition are
+    paired like two conditions (9.17)."""
     out = {}
-    for (condition, table, seed), files in by_run.items():
-        out.setdefault((condition, table), {})[seed] = files
+    for (condition, table, seed, telemetry), files in by_run.items():
+        out.setdefault((condition, table, telemetry), {})[seed] = files
     return {k: dict(sorted(v.items())) for k, v in sorted(out.items())}
 
 
@@ -509,7 +514,7 @@ def _ident_of(rows, condition):
     """The one identity a condition names. These two samplers are inspection
     helpers over a single run group, so a condition run under several seeds is
     an error here rather than an arbitrary pick; `compute_grades` handles seeds."""
-    found = sorted({(condition, str(r.get("table", "")), str(r.get("seed", "")))
+    found = sorted({(condition, str(r.get("table", "")), str(r.get("seed", "")), str(r.get("telemetry", "")))
                     for r in rows if r.get("condition") == condition})
     if not found:
         raise GradeError(f"no rows for condition {condition!r}")
@@ -548,17 +553,17 @@ def compute_grades(rows, bootstrap: Optional[Bootstrap] = None):
     by_condition = _by_condition(points_by_run(rows))
     out = []
 
-    def row(condition, table, seed, excluded, over_seeds, level, axis, **kw):
-        base = {"condition": condition, "table": table, "seed": seed,
+    def row(condition, table, seed, excluded, over_seeds, level, axis, telemetry="", **kw):
+        base = {"condition": condition, "table": table, "seed": seed, "telemetry": telemetry,
                 "pre_committed_miss_excluded": 1 if excluded else 0,
                 "over_seeds": 1 if over_seeds else 0, "level": level, "axis": axis,
                 "statistic": "", "class": "", "truth": "", "predicted": "",
-                "partner_condition": "", "value": "", "ci_low": "", "ci_high": "",
+                "partner_condition": "", "partner_telemetry": "", "value": "", "ci_low": "", "ci_high": "",
                 "n": "", "n_files": "", "n_seeds": ""}
         base.update(kw)
         out.append(base)
 
-    def shapes(condition, table, seed, excluded, over_seeds, axis, seed_files, names):
+    def shapes(condition, table, seed, excluded, over_seeds, axis, seed_files, names, telemetry=""):
         """Per-class recall and confusion cells. Recall is a rate and averages over
         seeds; raw cell counts do not, so they are emitted per seed only."""
         per_seed = {sd: _pairs(_flat(f, names), axis) for sd, f in seed_files.items()}
@@ -574,17 +579,17 @@ def compute_grades(rows, bootstrap: Optional[Bootstrap] = None):
                 n = max(n, sum(1 for t, _, _ in pairs if t == klass))
             if not values:
                 continue
-            row(condition, table, seed, excluded, over_seeds, "class_recall", axis,
+            row(condition, table, seed, excluded, over_seeds, "class_recall", axis, telemetry=telemetry,
                 **{"class": klass}, value=fmt(Fraction(sum(values), len(values))),
                 n=n, n_files=len(names), n_seeds=len(values))
         if over_seeds:
             return
         for (truth, predicted), n in sorted(Counter(
                 (t, p) for pairs in per_seed.values() for t, p, _ in pairs).items()):
-            row(condition, table, seed, excluded, over_seeds, "confusion", axis,
+            row(condition, table, seed, excluded, over_seeds, "confusion", axis, telemetry=telemetry,
                 truth=truth, predicted=predicted, n=n, n_files=len(names), n_seeds=1)
 
-    for (condition, table), seeds in by_condition.items():
+    for (condition, table, telemetry), seeds in by_condition.items():
         # ---- one row set per seed, and one for the mean over them
         variants = [(sd, {sd: files}, False) for sd, files in seeds.items()]
         variants.append(("", seeds, True))
@@ -605,15 +610,15 @@ def compute_grades(rows, bootstrap: Optional[Bootstrap] = None):
                         lo = hi = ""
                         if bootstrap is not None and name != "majority_baseline":
                             lo, hi = _interval(selected, names, axis, name, bootstrap)
-                        row(condition, table, seed, excluded, over_seeds, "statistic", axis,
+                        row(condition, table, seed, excluded, over_seeds, "statistic", axis, telemetry=telemetry,
                             statistic=name, value=fmt(value), ci_low=lo, ci_high=hi,
                             n=n, n_files=len(names), n_seeds=k)
                     if axis in ("mode", "attribute", "algo_choice"):
                         shapes(condition, table, seed, excluded, over_seeds, axis,
-                               selected, names)
+                               selected, names, telemetry=telemetry)
 
-    # ---- paired differences: between distinct conditions only, seed-averaged,
-    # both sides rescored on identical draws of identical files
+    # ---- paired differences: between distinct groups — two conditions, or one condition under its two telemetry
+    # shapes (9.17) — seed-averaged, both sides rescored on identical draws of identical files
     groups = sorted(by_condition)
     for i, a in enumerate(groups):
         for b in groups[i + 1:]:
@@ -636,8 +641,8 @@ def compute_grades(rows, bootstrap: Optional[Bootstrap] = None):
                     if bootstrap is not None:
                         lo, hi = _bounds(sorted(_paired_sample(sa, sb, names, axis, name,
                                                                bootstrap)), bootstrap)
-                    row(a[0], a[1], "", excluded, True, "paired", axis, statistic=name,
-                        partner_condition=b[0], value=fmt(va - vb), ci_low=lo, ci_high=hi,
+                    row(a[0], a[1], "", excluded, True, "paired", axis, telemetry=a[2], statistic=name,
+                        partner_condition=b[0], partner_telemetry=b[2], value=fmt(va - vb), ci_low=lo, ci_high=hi,
                         n=na, n_files=len(names), n_seeds=ka)
 
     out.sort(key=sort_key)

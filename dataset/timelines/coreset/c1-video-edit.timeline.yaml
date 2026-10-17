@@ -1,6 +1,7 @@
 # C1 — single-situation calibration: pure video-edit (building-plan §3 C1;
 # Phase 7 spec decision 8). Task set lifted from c2-p3a segment 0 (kdenlive
 # alone).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-video-edit
   seed: 108
@@ -11,8 +12,14 @@ segments:
      scenario: [S7]}
 
 tasks:
-  - {id: editor, name: kdenlive, archetype: desktop-interactive,
+  - {id: editor, name: kdenlive, archetype: video-editor,
      arrive: 0s, depart: 60s}
 
-focus:
+input:
   - {from: 2s, to: 58s, task: editor}
+
+focus:
+  - {from: 0s, to: 60s, task: editor}
+
+operations:
+  - {at: 30s, task: editor, name: preview-render}

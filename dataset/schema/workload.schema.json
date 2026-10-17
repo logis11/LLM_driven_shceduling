@@ -4,7 +4,7 @@
   "title": "Canonical workload file",
   "description": "Machine form of docs/simulator/interpretation-contract.md §4 — the only format the simulator ever reads. One closed type per file, zero parser case-splits: every distribution is already sampled to concrete integer-microsecond values at compile time; run time resolves only scheduling-influenced timing (contract §2). Ordering of `events` by `t`, uniqueness of task ids, FORK⇔spawn_table consistency, and channel/target resolution are linter invariants, not expressible here.",
   "type": "object",
-  "required": ["meta", "ground_truth", "events"],
+  "required": ["meta", "ground_truth", "focus", "events"],
   "additionalProperties": false,
   "properties": {
     "meta": {
@@ -19,7 +19,7 @@
           "minLength": 1
         },
         "derived_from": {
-          "description": "Source timeline at the commit it was compiled from: `<timeline-path>@<git-hex>`.",
+          "description": "Source timeline and the git blob hash of its content as compiled (`git hash-object`): `<timeline-path>@<git-hex>`.",
           "type": "string",
           "pattern": "^.+@[0-9a-f]{7,40}$"
         },
@@ -31,7 +31,7 @@
           "properties": {
             "seed": {"type": "integer", "minimum": 0},
             "archetypes": {
-              "description": "`archetypes.yaml@<git-hex>` — the library commit sampled from.",
+              "description": "`archetypes.yaml@<git-hex>` — the git blob hash of the library's content sampled from (`git hash-object`).",
               "type": "string",
               "pattern": "^archetypes\\.yaml@[0-9a-f]{7,40}$"
             }
@@ -59,7 +59,7 @@
             "minLength": 1
           },
           "attributes": {
-            "description": "Mode attributes (e.g. wanted): flat scalar map.",
+            "description": "Mode attributes (e.g. background_wanted): flat scalar map.",
             "type": "object",
             "additionalProperties": {"type": ["string", "number", "boolean"]}
           },
@@ -69,6 +69,20 @@
             "minimum": 1,
             "maximum": 5
           }
+        }
+      }
+    },
+    "focus": {
+      "description": "The window-focus track (data-contracts §4, 2026-10-11, jioh 9.17): which top-level task holds the window focus over which pinned intervals, in time order, never overlapping; empty when no window holds it. Carried through compilation from the timeline's authored `focus` track. The visible projection shows each task's intervals; the telemetry shows the holder by name (§5, rule 6). Not an answer key: the recognizer is shown it.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["t_start", "t_end", "task"],
+        "additionalProperties": false,
+        "properties": {
+          "t_start": {"$ref": "#/$defs/time_us"},
+          "t_end": {"$ref": "#/$defs/time_us"},
+          "task": {"$ref": "#/$defs/task_id", "description": "A top-level `arrive` event's id."}
         }
       }
     },
@@ -94,10 +108,15 @@
       "type": "string",
       "minLength": 1
     },
+    "declared_class": {
+      "description": "The scheduling class the task's program declares for itself — the class of the archetype entry the task binds, never one read from its name (9.13; memo 2026-10-08-declared-scheduling-class). `normal`: the default policy. `idle`: SCHED_IDLE, run only when no task of another class is runnable and preempted at once when one wakes, under every algorithm. A batch or real-time value is added only when an entry carries work in that class.",
+      "type": "string",
+      "enum": ["normal", "idle"]
+    },
     "arrive_event": {
       "description": "A task comes into existence carrying its fully resolved program. `depart` is present iff the task is segment-bound; a top-level task without `depart` is finite and ends via EXIT at an emergent time; spawned tasks never appear here — they live in spawn tables (contract §5).",
       "type": "object",
-      "required": ["t", "op", "id", "name", "program"],
+      "required": ["t", "op", "id", "name", "declared_class", "program"],
       "additionalProperties": false,
       "properties": {
         "t": {"$ref": "#/$defs/time_us"},
@@ -108,6 +127,7 @@
           "type": "string",
           "minLength": 1
         },
+        "declared_class": {"$ref": "#/$defs/declared_class"},
         "program": {"$ref": "#/$defs/program"},
         "depart": {
           "description": "Pinned exogenous depart time (the user closing the app). Present iff segment-bound.",
@@ -119,14 +139,14 @@
           "items": {"$ref": "#/$defs/spawn_entry"}
         },
         "fork_cap": {
-          "description": "Parallelism cap for the fork/wait-for-slot loop (binding-time value, e.g. 8 for -j8). Only meaningful with spawn_table.",
+          "description": "Parallelism cap for the fork/wait-for-slot loop: the build's parallelism cap times the six entries of an object job (e.g. 48 for -j8). Only meaningful with spawn_table.",
           "type": "integer",
           "minimum": 1
         }
       }
     },
     "wake_event": {
-      "description": "Exogenous wake at a pinned absolute time (pre-sampled aperiodic input, e.g. keystrokes). The target task blocks on WAIT(channel) (contract §4).",
+      "description": "Exogenous wake at a pinned absolute time, pre-sampled at compile time: a replayed input event (keystrokes, on `input:<task>`) or a measured entry's timer-component wake (on `timer:<task>`). The target task blocks on WAIT(channel) (contract §4).",
       "type": "object",
       "required": ["t", "op", "target", "channel"],
       "additionalProperties": false,
@@ -138,13 +158,14 @@
       }
     },
     "spawn_entry": {
-      "description": "One spawn-table entry: a fully resolved child task. Ids are pre-assigned at compile time so runs stay RNG-free and traces stable.",
+      "description": "One spawn-table entry: a fully resolved child task. Ids are pre-assigned at compile time so runs stay RNG-free and traces stable. `declared_class` is the child entry's.",
       "type": "object",
-      "required": ["id", "name", "program"],
+      "required": ["id", "name", "declared_class", "program"],
       "additionalProperties": false,
       "properties": {
         "id": {"$ref": "#/$defs/task_id"},
         "name": {"type": "string", "minLength": 1},
+        "declared_class": {"$ref": "#/$defs/declared_class"},
         "program": {"$ref": "#/$defs/program"}
       }
     },

@@ -1,18 +1,50 @@
 """Coreset-level invariants (task-2.4 spec): derive idempotency, the C2
-one-entry-diff discipline on the real pair files, and window compliance."""
+one-entry-diff discipline on the real pair files, and the per-segment demand record."""
+
+import hashlib
+import json
 
 import pytest
 
 from wlc import Timeline, compile_timeline
 from wlc.deriver import DeriveError, apply_ops, run as derive_check
 from wlc.linter import lint_canonical
+from wlc.variants import shifted_timeline
+
+
+def _blessed(build_dir, rel, manifest):
+    """The artifact and its report read from the blessed build when both hash to the manifest's entries (9.18 spec,
+    decision 8); None otherwise."""
+    report_rel = rel[:-len(".workload.json")] + ".report.json"
+    pair = []
+    for path, pinned in ((build_dir / rel, manifest.get("artifacts", {}).get(rel)),
+                         (build_dir / report_rel, manifest.get("reports", {}).get(report_rel))):
+        if pinned is None or not path.is_file():
+            return None
+        data = path.read_bytes()
+        if hashlib.sha256(data).hexdigest() != pinned:
+            return None
+        pair.append(json.loads(data))
+    return tuple(pair)
 
 
 @pytest.fixture(scope="module")
 def coreset(repo_root, library):
+    """Every timeline's (canonical, report) in `single` mode: read from the blessed build where the artifact and its
+    report hash to the manifest's entries, compiled otherwise, so a run after `make dataset` costs the tests alone."""
+    dataset = repo_root / "dataset"
+    manifest_path = dataset / "build.manifest.json"
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
+    timelines_dir = dataset / "timelines"
     compiled = {}
-    for path in sorted((repo_root / "dataset" / "timelines").glob(
-            "**/*.timeline.yaml")):
+    for path in sorted(timelines_dir.glob("**/*.timeline.yaml")):
+        relative = path.relative_to(timelines_dir)
+        artifact_set = relative.parts[0] if len(relative.parts) > 1 else "adhoc"
+        rel = f"{artifact_set}-single/{path.name[:-len('.timeline.yaml')]}.workload.json"
+        blessed = _blessed(dataset / "build", rel, manifest)
+        if blessed is not None:
+            compiled[blessed[0]["meta"]["id"]] = blessed
+            continue
         timeline = Timeline(path, library)
         canonical, report = compile_timeline(timeline, library, "single")
         compiled[timeline.id] = (canonical, report)
@@ -27,23 +59,40 @@ def events_by_id(canonical):
     return {e["id"]: e for e in canonical["events"] if e["op"] == "arrive"}
 
 
-def test_p1_pair_rename_only(coreset):
-    """P1 is the load-bearing pair: byte-identical except the hog's name
-    and the second segment's label."""
+def test_p1_pair_differs_in_segment_one_only(coreset):
+    """9.10 D6, D80 (restating the rename-only pair): the editor's events and segment 0 byte-identical, the files
+    the same length; P1b's hog is the measured index, `file-indexer` shown as `tracker-miner-f`, arriving at 60 s
+    as P1a's training run does, shown as `python` (9.10 D84, D86), its segment 1 labelled indexing, false, C long."""
     base, _ = coreset["c2-p1a"]
     variant, _ = coreset["c2-p1b"]
-    base_events, variant_events = events_by_id(base), events_by_id(variant)
-    assert set(base_events) == set(variant_events)
-    for task_id, event in base_events.items():
-        if task_id == "hog":
-            assert variant_events[task_id]["name"] == "tracker-miner-fs-3"
-            assert {**variant_events[task_id], "name": "python3"} == event
-        else:
-            assert variant_events[task_id] == event
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"editor", "hog"}
+    assert b["editor"] == v["editor"]
+    assert (b["hog"]["name"], v["hog"]["name"]) == ("python", "tracker-miner-f")
+    assert b["hog"]["t"] == v["hog"]["t"] == 60_000_000
     assert base["ground_truth"][0] == variant["ground_truth"][0]
-    assert variant["ground_truth"][1]["mode"] == "indexing"
+    spans = lambda c: [(g["t_start"], g["t_end"]) for g in c["ground_truth"]]
+    assert spans(base) == spans(variant) == [(0, 60_000_000), (60_000_000, 60_000_000 + INDEX_C_US)]
+    assert ground_truth(variant)[1] == ("indexing", False)
+
+
+def test_idle_download_variant_differs_in_the_class_alone(coreset):
+    """9.11 D21 (9.13 spec decision 4): `c2-p2a-idle` is `c2-p2a` with the download bound to `game-download-idle` —
+    the same tables under the declared class `idle` — so the two compiled files differ in that task's class and
+    nowhere else: every other event, the download's program, the wakes and the ground truth byte-identical."""
+    base, _ = coreset["c2-p2a"]
+    variant, _ = coreset["c2-p2a-idle"]
+    assert variant["ground_truth"] == base["ground_truth"]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) and "download" in b
+    for task_id, event in b.items():
+        if task_id == "download":
+            assert (event["declared_class"], v[task_id]["declared_class"]) == ("normal", "idle")
+            assert {**v[task_id], "declared_class": "normal"} == event
+        else:
+            assert v[task_id] == event
     wakes = lambda c: [e for e in c["events"] if e["op"] == "wake"]
-    assert wakes(base) == wakes(variant)
+    assert wakes(variant) == wakes(base)
 
 
 @pytest.mark.parametrize("pair,changed", [
@@ -66,15 +115,17 @@ def test_c4_injection_only(coreset):
     base, _ = coreset["c1-gaming"]
     variant, _ = coreset["c4-gaming"]
     base_events, variant_events = events_by_id(base), events_by_id(variant)
-    assert set(variant_events) - set(base_events) == {"injected-overlay"}
+    assert set(variant_events) - set(base_events) == {"injected-chat"}   # 9.10 D23
     for task_id, event in base_events.items():
         assert variant_events[task_id] == event
 
 
 def test_c5_names_only(coreset):
+    """The authored ladder cells (tiers 4 and 5) and `c6-alias` (two indexers' names on the players; 9.20 decision 8)
+    are c1-media but for the names."""
     base, _ = coreset["c1-media"]
-    for tier in ("c5-t3", "c5-t4", "c5-t5"):
-        variant, _ = coreset[tier]
+    for wid in ("c5-t4", "c5-t5", "c6-alias"):
+        variant, _ = coreset[wid]
         base_events, variant_events = events_by_id(base), events_by_id(variant)
         assert set(base_events) == set(variant_events)
         for task_id, event in base_events.items():
@@ -82,9 +133,25 @@ def test_c5_names_only(coreset):
             assert trimmed == event  # identical but for the name
 
 
+def test_c6_alias_is_a_pre_committed_miss_without_a_familiarity_tier(coreset):
+    """9.20 decision 8: another program's real name is a name collision, not the player's own opaque name — the
+    segment carries `spoof` and `pre_committed_miss`, no `familiarity`."""
+    alias, _ = coreset["c6-alias"]
+    (segment,) = alias["ground_truth"]
+    assert segment["mode"] == "media"
+    assert segment["attributes"] == {"background_wanted": True, "spoof": True, "pre_committed_miss": True}
+    assert "familiarity" not in segment
+    names = sorted(e["name"] for e in alias["events"] if e["op"] == "arrive")
+    assert names == ["baloo_file", "tracker-miner-f"]
+    for wid, tier in (("c5-t4", 4), ("c5-t5", 5)):
+        (segment,) = coreset[wid][0]["ground_truth"]
+        assert segment["familiarity"] == tier
+
+
 C7_INTERACTIVE = ("browsing", "office", "mail", "dev", "photo", "meeting",
                   "gaming", "media", "video-edit", "idle")
-C7_SAME_NAME = ("ml-train", "render", "transcode", "indexing", "backup")
+C7_SAME_NAME = ()   # indexing, ml-train, transcode, render, backup: their bases' first C seconds (9.10 D78)
+INDEX_C_US = 39_435_000   # 9.10 D78, D80: the index's CPU total, total_work as compiled
 
 
 def ground_truth(canonical):
@@ -92,41 +159,199 @@ def ground_truth(canonical):
             for s in canonical["ground_truth"]]
 
 
-def test_c7_interactive_counterparts_inject_one_scan(coreset):
-    """Phase 7 spec decision 5: base plus exactly one task, clamscan on
-    cpu-batch alive for the whole segment; label flipped."""
+C7_C_US = 26_385_000   # 9.10 D41: the package-upgrade job's measured CPU total, meas-ci:background:2026-10-01
+
+
+def test_c7_interactive_counterparts_inject_the_upgrade(coreset):
+    """9.10 D41 (restating Phase 7 spec decision 5): the base's first C seconds — every base task by its id, name
+    and arrival, departing at C — plus exactly one task, the unattended upgrade at 0 s, alive for the whole segment
+    on one lane; one segment [0, C), label flipped."""
     for mode in C7_INTERACTIVE:
         base, _ = coreset[f"c1-{mode}"]
         variant, _ = coreset[f"c7-{mode}"]
         base_events, variant_events = events_by_id(base), events_by_id(variant)
-        assert set(variant_events) - set(base_events) == {"scan"}, mode
+        assert set(variant_events) - set(base_events) == {"upgrade"}, mode
         for task_id, event in base_events.items():
-            assert variant_events[task_id] == event, (mode, task_id)
-        scan = variant_events["scan"]
-        assert scan["name"] == "clamscan" and scan["t"] == 0
+            v = variant_events[task_id]
+            assert (v["name"], v["t"]) == (event["name"], event["t"]), (mode, task_id)
+            assert v.get("depart") == C7_C_US, (mode, task_id)
+        upgrade = variant_events["upgrade"]
+        assert upgrade["name"] == "unattended-upgr" and upgrade["t"] == 0
         assert ground_truth(base) == [(mode, True)]
         assert ground_truth(variant) == [(mode, False)]
+        assert (variant["ground_truth"][0]["t_start"], variant["ground_truth"][0]["t_end"]) == (0, C7_C_US)
 
 
-def test_c7_compile_is_a_rename_only(coreset):
-    """Phase 7 spec decision 6: the P1b move — the orchestrator's name and
-    the label, nothing else."""
+def input_wakes(canonical, task_id):
+    return {e["t"] for e in canonical["events"] if e["op"] == "wake" and e["channel"] == f"input:{task_id}"}
+
+
+# the counterparts that keep a keystroke window (c7.variant.yaml's twelve `set-input` ops), by the task typed into
+C7_TYPED = {"browsing": "browser", "office": "writer", "mail": "mailer", "dev": "editor", "photo": "photo-editor",
+            "video-edit": "editor", "indexing": "editor", "compile": "editor", "ml-train": "editor",
+            "render": "editor", "transcode": "video-editor", "backup": "editor"}
+
+
+def test_c7_input_wakes_are_a_subset_of_the_bases_in_the_first_c_seconds(coreset):
+    """9.18 spec, decisions 1–3 (audit A1, option ii): a counterpart's keystroke window is a slice of its base's, so
+    its input wakes are its base's over the counterpart's span — a subset, not the whole: the counterpart's
+    operations sit at their own positions (9.10 D44) and a keystroke inside an operation is not emitted. c1-mail's
+    keystrokes all fall past C, so c7-mail holds none (pair review finding 8)."""
+    shared = {}
+    for mode, task in C7_TYPED.items():
+        base, report = coreset[f"c1-{mode}"]
+        variant, variant_report = coreset[f"c7-{mode}"]
+        b, v = input_wakes(base, task), input_wakes(variant, task)
+        assert v <= b, mode
+        assert all(t < variant_report["duration_us"] for t in v), mode
+        shared[mode] = len(v)
+    assert shared["mail"] == 0
+    assert all(shared[mode] > 0 for mode in ("browsing", "office", "dev", "indexing", "compile", "ml-train"))
+
+
+C7_COMPILE_C_US = 225_458_000   # 9.10 D56: the module build's CPU as compiled under c7-compile's seed, to the ms below
+
+
+def test_c7_compile_is_the_module_build_in_place_of_the_users_build(coreset):
+    """9.10 D56 (restating Phase 7 spec decision 6): c1-compile's first C seconds — the editor by its id, name and
+    arrival, departing at C, its focus 2 s to C − 2 s — with the user's build replaced by the DKMS build, task `dkms`
+    on module-build-orchestrator, from 0 s; one segment, labelled false."""
     base, _ = coreset["c1-compile"]
     variant, _ = coreset["c7-compile"]
-    base_events, variant_events = events_by_id(base), events_by_id(variant)
-    assert set(base_events) == set(variant_events)
-    for task_id, event in base_events.items():
-        if task_id == "build":
-            assert variant_events[task_id]["name"] == "dkms"
-            assert {**variant_events[task_id], "name": "make"} == event
-        else:
-            assert variant_events[task_id] == event
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"editor", "build"}
+    assert (v["editor"]["name"], v["editor"]["t"], v["editor"]["depart"]) == (b["editor"]["name"], b["editor"]["t"], C7_COMPILE_C_US)
+    build = v["build"]
+    assert (build["name"], build["t"], build["fork_cap"]) == ("dkms", 0, 48)   # D55, D57: cap 8 × 6
+    assert {e["name"] for e in build["spawn_table"]} == {"sh", "x86_64-linux-gn", "cc1", "as", "fixdep", "rm", "mkdir", "dirname"}
+    assert sum(op["op"] == "FORK" for op in build["program"]) == len(build["spawn_table"])
     assert ground_truth(variant) == [("compile", False)]
+    assert (variant["ground_truth"][0]["t_start"], variant["ground_truth"][0]["t_end"]) == (0, C7_COMPILE_C_US)
+
+
+def test_c7_indexing_is_its_bases_first_c_seconds(coreset):
+    """9.10 D78 (D56's form): c1-indexing's first C seconds — the editor by its id, name and arrival, departing at
+    C, its focus 2 s to C − 2 s — the same index, `file-indexer` shown as `tracker-miner-f`, from 0 s; one segment,
+    labelled false, `initiated: session` (D79)."""
+    base, _ = coreset["c1-indexing"]
+    variant, _ = coreset["c7-indexing"]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"editor", "hog"}
+    assert (v["editor"]["name"], v["editor"]["t"], v["editor"]["depart"]) == (b["editor"]["name"], b["editor"]["t"], INDEX_C_US)
+    assert (b["hog"]["name"], b["hog"]["t"]) == ("tracker-miner-f", 2_000_000)
+    assert (v["hog"]["name"], v["hog"]["t"]) == ("tracker-miner-f", 0)
+    assert ground_truth(variant) == [("indexing", False)]
+    gt = variant["ground_truth"][0]
+    assert (gt["t_start"], gt["t_end"]) == (0, INDEX_C_US)
+    assert gt["attributes"].get("initiated") == "session" and not gt["attributes"].get("pre_committed_miss")
+
+
+ML_C_US = 1_389_885_000   # 9.10 D85, D88: the training run's CPU total, meas-ci:background:2026-10-03, total_work as compiled
+ML_BASE_US = 1_612_000_000   # c1-ml-train: the smallest whole second by which the run ends under every policy (D17, D78)
+
+
+def test_c7_ml_train_is_its_bases_first_c_seconds(coreset):
+    """9.10 D78's form for the training pair: c1-ml-train's first C seconds — the editor by its id, name and arrival,
+    departing at C, its focus 2 s to C − 2 s — the same run, `cpu-batch`'s `python3` shown as `python`, from 0 s; one
+    segment, labelled false, still a pre-committed miss. The base binds the run whole from 2 s and ends after it."""
+    base, _ = coreset["c1-ml-train"]
+    variant, _ = coreset["c7-ml-train"]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"editor", "hog"}
+    assert (v["editor"]["name"], v["editor"]["t"], v["editor"]["depart"]) == (b["editor"]["name"], b["editor"]["t"], ML_C_US)
+    assert (b["hog"]["name"], b["hog"]["t"]) == ("python", 2_000_000)
+    assert (v["hog"]["name"], v["hog"]["t"]) == ("python", 0)
+    assert b["editor"]["depart"] == base["ground_truth"][0]["t_end"] == ML_BASE_US
+    assert ground_truth(variant) == [("ml-train", False)]
+    gt = variant["ground_truth"][0]
+    assert (gt["t_start"], gt["t_end"]) == (0, ML_C_US)
+    assert gt["attributes"].get("initiated") == "scheduled" and gt["attributes"].get("pre_committed_miss") is True
+
+
+TRANSCODE_C_US = 2_970_871_000   # 9.10 D97: the encode's CPU total, meas-ci:background:2026-10-03b, total_work as compiled
+TRANSCODE_BASE_US = 4_762_000_000   # c1-transcode: the smallest whole second by which the encode ends under every policy
+
+
+def test_c7_transcode_is_its_bases_first_c_seconds(coreset):
+    """9.10 D78's form for the transcode pair: c1-transcode's first C seconds — the editor by its id, name and arrival,
+    departing at C, its focus 2 s to C − 2 s — the same encode, `video-transcoder` shown as `HandBrakeCLI`, from 0 s; one
+    segment, labelled false, still a pre-committed miss. The base binds the encode whole from 2 s and ends after it."""
+    base, _ = coreset["c1-transcode"]
+    variant, _ = coreset["c7-transcode"]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"video-editor", "batch"}
+    assert (v["video-editor"]["name"], v["video-editor"]["t"], v["video-editor"]["depart"]) == (
+        b["video-editor"]["name"], b["video-editor"]["t"], TRANSCODE_C_US)
+    assert (b["batch"]["name"], b["batch"]["t"]) == ("HandBrakeCLI", 2_000_000)
+    assert (v["batch"]["name"], v["batch"]["t"]) == ("HandBrakeCLI", 0)
+    assert b["video-editor"]["depart"] == base["ground_truth"][0]["t_end"] == TRANSCODE_BASE_US
+    assert ground_truth(variant) == [("transcode", False)]
+    gt = variant["ground_truth"][0]
+    assert (gt["t_start"], gt["t_end"]) == (0, TRANSCODE_C_US)
+    assert gt["attributes"].get("initiated") == "scheduled" and gt["attributes"].get("pre_committed_miss") is True
+
+
+RENDER_C_US = 16_545_000   # 9.10 D105: the export's measured CPU total, meas-ci:background:2026-10-03c
+
+
+def test_c7_render_is_its_bases_first_c_seconds(coreset):
+    """9.10 D78's form for the render pair: c1-render's first C seconds — the editor by its id, name and arrival,
+    departing at C, its focus 2 s to C − 2 s, the preview render at the window's middle (D44, D96) — the same export,
+    `cpu-batch`'s `kdenlive_render`, from 0 s; one segment, labelled false, still a pre-committed miss. The base keeps
+    its 60 s and binds the export whole from 2 s (D108's ground, D78)."""
+    base, _ = coreset["c1-render"]
+    variant, _ = coreset["c7-render"]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"editor", "bulk"}
+    assert (v["editor"]["name"], v["editor"]["t"], v["editor"]["depart"]) == (b["editor"]["name"], b["editor"]["t"], RENDER_C_US)
+    assert (b["bulk"]["name"], b["bulk"]["t"]) == ("kdenlive_render", 2_000_000)
+    assert (v["bulk"]["name"], v["bulk"]["t"]) == ("kdenlive_render", 0)
+    assert b["editor"]["depart"] == base["ground_truth"][0]["t_end"] == 60_000_000
+    assert ground_truth(variant) == [("render", False)]
+    gt = variant["ground_truth"][0]
+    assert (gt["t_start"], gt["t_end"]) == (0, RENDER_C_US)
+    assert gt["attributes"].get("initiated") == "scheduled" and gt["attributes"].get("pre_committed_miss") is True
+
+
+BACKUP_C_US = 165_668_000   # 9.10 D119: the scheduled incremental's measured CPU total, meas-ci:background:2026-10-04
+
+
+def test_c7_backup_is_its_bases_first_c_seconds(coreset):
+    """9.10 D78's form for the backup pair: c1-backup's first C seconds — the editor by its id, name and arrival,
+    departing at C, its focus 2 s to C − 2 s, the preview render at the window's middle (D44, D96) — the same scheduled
+    incremental, `incremental-backup` shown as `deja-dup`, from 0 s; one segment, labelled false, still a pre-committed
+    miss. The base binds the backup whole from 2 s and ends by the smallest whole second it needs (D90's form)."""
+    base, _ = coreset["c1-backup"]
+    variant, _ = coreset["c7-backup"]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"editor", "bulk"}
+    assert (v["editor"]["name"], v["editor"]["t"], v["editor"]["depart"]) == (b["editor"]["name"], b["editor"]["t"], BACKUP_C_US)
+    assert (b["bulk"]["name"], b["bulk"]["t"]) == ("deja-dup", 2_000_000)
+    assert (v["bulk"]["name"], v["bulk"]["t"]) == ("deja-dup", 0)
+    assert b["editor"]["depart"] == base["ground_truth"][0]["t_end"] == 277_000_000
+    assert ground_truth(variant) == [("backup", False)]
+    gt = variant["ground_truth"][0]
+    assert (gt["t_start"], gt["t_end"]) == (0, BACKUP_C_US)
+    assert gt["attributes"].get("initiated") == "scheduled" and gt["attributes"].get("pre_committed_miss") is True
+
+
+def test_p3_pair_segment_one_holds_the_backup_in_both_files(coreset):
+    """Pair P3's segment 1 runs 60–326 s in both files, which keep one length and differ only in segment 1's job — the
+    export in c2-p3a, the scheduled incremental shown as `deja-dup` in c2-p3b. The length is 9.10 D123's, set on a
+    shared lane; under the idle class (9.13) the backup does not end inside it and is scored by progress (9.14)."""
+    base, _ = coreset["c2-p3a"]
+    variant, _ = coreset["c2-p3b"]
+    spans = lambda c: [(g["t_start"], g["t_end"]) for g in c["ground_truth"]]
+    assert spans(base) == spans(variant) == [(0, 60_000_000), (60_000_000, 326_000_000)]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert (b["bulk"]["name"], b["bulk"]["t"]) == ("kdenlive_render", 60_000_000)
+    assert (v["bulk"]["name"], v["bulk"]["t"]) == ("deja-dup", 60_000_000)
+    assert b["editor"]["depart"] == v["editor"]["depart"] == 326_000_000
 
 
 def test_c7_same_name_counterparts_flip_the_label_only(coreset):
     """Phase 7 spec decision 3: events byte-identical to the base, only the
-    ground truth differs; four of the five are pre-committed misses."""
+    ground truth differs; each is a pre-committed miss (indexing: 9.10 D78)."""
     for mode in C7_SAME_NAME:
         base, _ = coreset[f"c1-{mode}"]
         variant, _ = coreset[f"c7-{mode}"]
@@ -134,7 +359,7 @@ def test_c7_same_name_counterparts_flip_the_label_only(coreset):
         assert base["events"] == variant["events"], mode
         assert ground_truth(variant) == [(mode, False)]
         attrs = variant["ground_truth"][0]["attributes"]
-        assert bool(attrs.get("pre_committed_miss")) is (mode != "indexing"), mode
+        assert attrs.get("pre_committed_miss") is True, mode
 
 
 def test_c7_and_derived_files_declare_calibration(repo_root):
@@ -149,20 +374,164 @@ def test_c7_and_derived_files_declare_calibration(repo_root):
             assert metas == [{"demand": "calibration"}], variant["id"]
 
 
-def test_c6_fold_tasks_unchanged(coreset):
+def test_c6_fold_names_unchanged(coreset):
+    # 9.10 D30: the meeting segment adds the call, a `chrome` task on video-call from 30 s; the browsing
+    # tasks are the base's and the process names stay {chrome} — only the count changes (9.23 D1)
     base, _ = coreset["c1-browsing"]
     variant, _ = coreset["c6-fold"]
-    assert events_by_id(base) == events_by_id(variant)
+    base_events, variant_events = events_by_id(base), events_by_id(variant)
+    assert set(variant_events) - set(base_events) == {"call"}
+    for task_id, event in base_events.items():
+        assert variant_events[task_id] == event
+    assert {e["name"] for e in variant_events.values()} == {e["name"] for e in base_events.values()} == {"chrome"}
     assert len(variant["ground_truth"]) == 2
 
 
-def test_windows(coreset, schema):
+def test_c6_limits_are_pre_committed_misses(coreset):
+    """9.23 D1, D2: each C6 segment whose label the names cannot reach carries `pre_committed_miss` —
+    `c6-alias` whole, `c6-fold` from the call's arrival, `c6-spoof` from the spoof's (its label `false`
+    there, nothing unwanted running before it); `c6-dual`'s segment is `ambiguous` and ungraded."""
+    def misses(wid):
+        return [((s["t_start"], s["t_end"]), bool((s.get("attributes") or {}).get("pre_committed_miss")))
+                for s in coreset[wid][0]["ground_truth"]]
+    assert misses("c6-alias") == [((0, 60_000_000), True)]
+    assert misses("c6-fold") == [((0, 30_000_000), False), ((30_000_000, 60_000_000), True)]
+    assert misses("c6-spoof") == [((0, 20_000_000), False), ((20_000_000, 60_000_000), True)]
+    spoof = coreset["c6-spoof"][0]["ground_truth"]
+    assert [s["attributes"]["background_wanted"] for s in spoof] == [True, False]
+    assert spoof[1]["attributes"]["spoof"] is True and "spoof" not in spoof[0]["attributes"]
+
+
+def test_no_file_fails_on_its_demand(coreset, schema):
+    """9.14 decision 4: the demand window retired as a gate; every file lints clean whatever its demand."""
     for name, (canonical, report) in coreset.items():
         assert lint_canonical(canonical, schema, report=report,
                               mode="single", name=name) == []
+
+
+def test_demand_is_recorded_per_segment(coreset):
+    """9.14 decision 4: one record per ground-truth segment, the tasks' demand spread over their lifetimes,
+    so the segments' time-weighted mean is the file's utilization."""
+    for name, (canonical, report) in coreset.items():
+        segs = report["per_segment"]
+        assert [(s["t_start_us"], s["t_end_us"]) for s in segs] == \
+            [(g["t_start"], g["t_end"]) for g in canonical["ground_truth"]]
+        weighted = sum(s["utilization"] * (s["t_end_us"] - s["t_start_us"]) for s in segs)
+        assert abs(weighted / report["duration_us"] - report["utilization"]) < 1e-6, name
 
 
 def test_variant_cannot_change_seed():
     with pytest.raises(DeriveError, match="unknown op"):
         apply_ops({"meta": {"seed": 1}, "tasks": [], "segments": []},
                   [{"set-seed": 2}], "test")
+
+
+def test_set_input_focus_and_operations_replace_the_lists():
+    """9.10 D44: a cut counterpart replaces its base's keystroke windows and operations whole; 9.17: and its focus
+    track; 9.18: a new window inside a base window of its task is written as its slice."""
+    base = {"meta": {"seed": 1}, "tasks": [], "segments": [],
+            "input": [{"from": "2s", "to": "58s", "task": "a"}], "focus": [{"from": "0s", "to": "60s", "task": "a"}],
+            "operations": [{"at": "30s", "task": "a", "name": "op"}]}
+    out = apply_ops(base, [{"set-input": [{"from": "2s", "to": "20s", "task": "a"}]},
+                           {"set-focus": [{"from": "0s", "to": "22s", "task": "a"}]},
+                           {"set-operations": [{"at": "11s", "task": "a", "name": "op"}]}], "test")
+    assert out["input"] == [{"from": "2s", "to": "20s", "task": "a", "slice_of": {"from": "2s", "to": "58s", "index": 0}}]
+    assert out["focus"] == [{"from": "0s", "to": "22s", "task": "a"}]
+    assert out["operations"] == [{"at": "11s", "task": "a", "name": "op"}]
+    assert base["input"][0]["to"] == "58s"   # the base is not touched
+
+
+def test_set_input_writes_the_bases_window_as_slice_of():
+    """9.18 spec, decisions 1–2: a new window wholly inside one of the base's windows of its task is that window's
+    slice — `slice_of` names the base window's edges and its index among the task's windows in time order; a window
+    inside none is its own; an authored `slice_of` stands."""
+    base = {"meta": {"seed": 1}, "tasks": [], "segments": [],
+            "input": [{"from": "100s", "to": "200s", "task": "b"}, {"from": "60s", "to": "90s", "task": "a"},
+                      {"from": "2s", "to": "58s", "task": "a"}], "focus": []}
+    out = apply_ops(base, [{"set-input": [{"from": "2s", "to": "24.385s", "task": "a"},
+                                          {"from": "61s", "to": "70s", "task": "a"},
+                                          {"from": "150s", "to": "160s", "task": "b"},
+                                          {"from": "300s", "to": "310s", "task": "a"},
+                                          {"from": "3s", "to": "4s", "task": "a",
+                                           "slice_of": {"from": "0s", "to": "10s", "index": 7}}]}], "test")
+    assert out["input"] == [
+        {"from": "2s", "to": "24.385s", "task": "a", "slice_of": {"from": "2s", "to": "58s", "index": 0}},
+        {"from": "61s", "to": "70s", "task": "a", "slice_of": {"from": "60s", "to": "90s", "index": 1}},
+        {"from": "150s", "to": "160s", "task": "b", "slice_of": {"from": "100s", "to": "200s", "index": 0}},
+        {"from": "300s", "to": "310s", "task": "a"},
+        {"from": "3s", "to": "4s", "task": "a", "slice_of": {"from": "0s", "to": "10s", "index": 7}}]
+
+
+def test_every_counterpart_keystroke_window_is_its_bases_slice(repo_root):
+    """The twelve `set-input` windows of c7.variant.yaml are written as slices of their bases' one window."""
+    import yaml
+    seen = 0
+    for path in sorted((repo_root / "dataset" / "timelines" / "coreset").glob("c7-*.timeline.yaml")):
+        for win in yaml.safe_load(path.read_text()).get("input") or []:
+            assert win["slice_of"]["index"] == 0 and win["slice_of"]["from"] == "2s", path.name
+            seen += 1
+    assert seen == 12
+
+
+def test_segment_shift_moves_a_slice_with_its_window():
+    """9.18 spec invariant: a shifted derived file keeps its outer windows shifted with their slices, so the slice
+    draws the same keystrokes."""
+    raw = {"meta": {"id": "x", "seed": 1},
+           "segments": [{"from": "0s", "to": "60s", "mode": "office", "attributes": {"background_wanted": True}},
+                        {"from": "60s", "to": "120s", "mode": "office", "attributes": {"background_wanted": True}}],
+           "tasks": [{"id": "ed", "name": "code", "archetype": "code-editor", "arrive": "0s", "depart": "120s"}],
+           "input": [{"from": "2s", "to": "58s", "task": "ed"},
+                     {"from": "62s", "to": "80s", "task": "ed", "slice_of": {"from": "62s", "to": "118s", "index": 1}}],
+           "focus": [{"from": "0s", "to": "120s", "task": "ed"}]}
+    out = shifted_timeline(raw, 0, 90_000_000)   # the first segment lengthened by 30 s: everything at or past 60 s moves
+    assert out["input"][0] == {"from": "2000000us", "to": "58000000us", "task": "ed"}
+    assert out["input"][1] == {"from": "92000000us", "to": "110000000us", "task": "ed",
+                               "slice_of": {"from": "92000000us", "to": "148000000us", "index": 1}}
+
+
+# 9.10 D168: the catalog scenario each bound program shows, as D33's rows name them; cpu-batch by its `program`
+SCENARIO_OF = {"office-writer": "S1", "web-browser": "S2", "renderer-hidden": "S2", "video-call": "S3",
+               "mail-client": "S4", "chat-client": "S5", "image-editor": "S6", "video-editor": "S7",
+               "video-transcoder": "S8", "game-task-chain": "S9", "game-client": "S9", "game-download": "S10",
+               "game-download-idle": "S10",   # the bounding check's idle half depicts the same download (9.13)
+               "code-editor": "S11", "build-orchestrator": "S11", "module-build-orchestrator": "S11",
+               "video-player": "S13", "audio-player": "S13", "file-indexer": "S14", "incremental-backup": "S15",
+               "file-archiver": "S16", "package-upgrade": "S17", "compositor-shell": "S18", "audio-server": "S18",
+               "service-manager": "S18", "message-bus": "S18"}
+SCENARIO_OF_PROGRAM = {"kdenlive_render": "S7", "python3": "S12", "spoof": "S2"}   # the spoof shows `chrome` (S2)
+
+
+def test_every_operation_starts_inside_an_input_window_of_its_task_one_per_window(repo_root, library):
+    # 9.10 D20 (its 'focus window' the `input` track since 9.17): an operation starts only inside its task's input
+    # window, and each input window of a task whose entry carries an operation holds one; the loader checks only the
+    # task's lifetime (timeline.py `_load_operations`)
+    count = 0
+    for path in sorted((repo_root / "dataset" / "timelines").glob("**/*.timeline.yaml")):
+        t = Timeline(path, library)
+        for op in t.operations:
+            assert any(w["task"] == op["task"] and w["from"] <= op["at"] < w["to"] for w in t.input), (t.id, op)
+        for w in t.input:
+            if library.operations(t.task_by_id[w["task"]]["archetype"]):
+                held = [op for op in t.operations if op["task"] == w["task"] and w["from"] <= op["at"] < w["to"]]
+                assert len(held) == 1, (t.id, w, held)
+        count += len(t.operations)
+    assert count == 23
+
+
+def test_every_segment_tags_the_scenarios_of_the_programs_it_shows(repo_root, library):
+    # a segment's `scenario` names each catalog scenario whose program is alive in it; a task with no `depart` (a batch
+    # job, ending inside its segment) counts in the segment its arrival falls in (9.10 D168)
+    for path in sorted((repo_root / "dataset" / "timelines").glob("**/*.timeline.yaml")):
+        t = Timeline(path, library)
+        for seg in t.segments:
+            a, b = seg["t_start"], seg["t_end"]
+            shown = set()
+            for task in t.tasks:
+                if task["depart"] is None:
+                    alive = a <= task["arrive"] < b
+                else:
+                    alive = task["arrive"] < b and task["depart"] > a
+                if alive:
+                    shown.add(SCENARIO_OF_PROGRAM[task["bind"]["program"]] if task["archetype"] == "cpu-batch"
+                              else SCENARIO_OF[task["archetype"]])
+            assert set(seg["scenario"]) == shown, f"{t.id} {seg['mode']} {a / 1e6:g}-{b / 1e6:g} s"

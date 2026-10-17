@@ -23,7 +23,7 @@ Weight sum 2.5.
 | `random-s2.csv` | `random` | prior | s2 | — |
 | `fixed-alt.csv` | `fixed` | — | — | `alt` |
 
-Every run has the same shape: `editor` with an `arrive` row at 0 and five `wake` rows at 5000, 20000, 40000, 60000, 80000 (the 5000 row lies outside the term's window); `video` with three `job` rows at 16667, 33334, 50001 (period 16667) and values 5000, 6000, 7000 in every run (all met); `train` with `cpu_delivered` and `demand` 80000 at `T_end`; `build` arriving at 10000 with `demand` 30000; `lane` `busy` at `T_end`; `schedule` `config_interval` rows (one `fallback` entry for the `fixed` runs; a zero-length `fallback` entry beside an `unmodified` one for the others).
+Every run has the same shape: `editor` with an `arrive` row at 0 and five `wake` rows at 5000, 20000, 40000, 60000, 80000 (the 5000 row lies outside the term's window); `video` with three `job` rows at 16667, 33334, 50001 (period 16667) and values 5000, 6000, 7000 in every run (all met); `train` arriving at 20000, with `cpu_delivered` and `demand` 80000 at `T_end`; `build` arriving at 10000 with `demand` 30000; `train` and `build` each with an `arrive` row at its arrival and an `arrival` row at `T_end` carrying it; `lane` `busy` at `T_end`; `schedule` `config_interval` rows (one `fallback` entry for the `fixed` runs; a zero-length `fallback` entry beside an `unmodified` one for the others).
 
 ## Term 1 — editor P99 (wake, window [10000, 100000])
 
@@ -61,7 +61,7 @@ Primary: `improvement(oracle)` = 0.25; s1 0.125 → share **0.5**; s2 0.05 → *
 
 ## Term 4 — build turnaround
 
-`build` arrives at 10000. Where it completes, the records carry `completed` 1 at the end time and `turnaround` = end − 10000; under s2 it does not complete (`completed` 0 at `T_end`, no `turnaround` row), so the aggregates carry `turnaround_censored` = `T_end − arrival` = 90000 and the term is marked censored.
+`build` arrives at 10000, which its `arrival` row carries. Where it completes, the records carry `completed` 1 at the end time and `turnaround` = end − 10000; under s2 it does not complete (`completed` 0 at `T_end`, no `turnaround` row), so the aggregates carry `turnaround_censored` = `T_end − arrival` = 90000 and the term is marked censored.
 
 | run | end | turnaround |
 |---|---|---|

@@ -1,0 +1,2981 @@
+{
+  "artifacts": {
+    "familiarity-ladder-single/fl-backup-t3.workload.json": "5965e03dfdc92fcb12636959d30baf7bea0647db31c1dadb14b43c4d574ac720",
+    "familiarity-ladder-single/fl-backup-t4-all.workload.json": "8137b79b2f8e94dcdb6945ed3e01c45572db48fc93f6a083b064ead427ce07a0",
+    "familiarity-ladder-single/fl-backup-t4-focus.workload.json": "3f89beebb8e3913b1165350441b0c6c7d07efebd702a1d2fa3fa5de9fb4a821e",
+    "familiarity-ladder-single/fl-backup-t4-others.workload.json": "57a2ec507a1854ca8661b7094026afc356a22c51aadd97b2173fc7474f98abd2",
+    "familiarity-ladder-single/fl-backup-t5-all.workload.json": "14615263d741876b2341b0a2fdd27a8801ac1af6b8c65f6d1e68fe62551f7731",
+    "familiarity-ladder-single/fl-backup-t5-focus.workload.json": "8777808897f02714a2c968936f3d983513a532f6e8751a338f6346b923e866d8",
+    "familiarity-ladder-single/fl-backup-t5-others.workload.json": "a6a0eb3ea18ca49581af5712d9d5e69d251fb9078f2256cf6c2d0a8c06213477",
+    "familiarity-ladder-single/fl-browsing-t4-all.workload.json": "d7129ae899ec8d7eb3af7d236d052c02cb375e8466706c374a6d4b84ee34ac42",
+    "familiarity-ladder-single/fl-browsing-t5-all.workload.json": "dcd60268e8c1bb0db7162fb3c88f57f4f1c563cbef5f6844ea680d4678eec264",
+    "familiarity-ladder-single/fl-compile-t4-all.workload.json": "a4f1abb37736cdfecc95fc1a52371d24a1391a790c497d52cfe307463854ac7e",
+    "familiarity-ladder-single/fl-compile-t4-focus.workload.json": "2ab99bfbaed925615b97d3616306cb91de9dfaab56955333372864ace9e1d4e0",
+    "familiarity-ladder-single/fl-compile-t4-others.workload.json": "716459be3a67977f61599261000e061c24bdc70a4235b02fe8b8fd19527103e0",
+    "familiarity-ladder-single/fl-compile-t5-all.workload.json": "1b99c4d9e56b094889adb2876429622914cd5bac7d94d65ed56a49b17415e70e",
+    "familiarity-ladder-single/fl-compile-t5-focus.workload.json": "8d5b03660ed381f274db6ad15c6e94965a9cfefeaed4732aad68f542fa329d68",
+    "familiarity-ladder-single/fl-compile-t5-others.workload.json": "901627a758a2abd7de6d61e7a432475244314586bb7d1ad2cdfbc52d2a9ad2f1",
+    "familiarity-ladder-single/fl-dev-t4-all.workload.json": "ebb25dccd500fa6a50afcfa47a42dbdf8ea72d604f868ec0a7b5df1b4d652dc6",
+    "familiarity-ladder-single/fl-dev-t5-all.workload.json": "b409835304de3c62e15b0d57352a03e0282b20a44f8a18839504f05281c84ba7",
+    "familiarity-ladder-single/fl-gaming-t4-all.workload.json": "6e0a628a0b025c372cb07720ebd570c12461b324ca4b1a02dc3f5228d0660784",
+    "familiarity-ladder-single/fl-gaming-t4-focus.workload.json": "62ce5a97cb51e339fbd83cf33ba76c65349a7f2d0d45b6e06385b83026dbfda9",
+    "familiarity-ladder-single/fl-gaming-t4-others.workload.json": "bddcf4cd277c9667b69e5b5ab2744c301f86124d4698aa9fa81c3d93a85bcb7f",
+    "familiarity-ladder-single/fl-gaming-t5-all.workload.json": "f3f902b1776cc93c40244d96ab90aabec33a89eab379e9d8a427f0b67a166c7b",
+    "familiarity-ladder-single/fl-gaming-t5-focus.workload.json": "16cbda0d66b63896f7dbd15ac35a780da2944ce84eb194fd853b30be44f1708f",
+    "familiarity-ladder-single/fl-gaming-t5-others.workload.json": "a1c558f25410361f897a53da4b0162013ccce82d970fe3a7ca6d081f45a7fcb0",
+    "familiarity-ladder-single/fl-idle-t4-all.workload.json": "d0f12092ea7f3796d9c8c0603643f74f9aa4dd01120e0656b2f6b8c90dbc40af",
+    "familiarity-ladder-single/fl-idle-t5-all.workload.json": "6348d1a1134d57eed62214ec7226d1f7cae8a87f2a7b1fb8a8ece5b6a0b02a66",
+    "familiarity-ladder-single/fl-indexing-t4-all.workload.json": "01bb8abad3698f71f72e516b3bb0d266ebc8d822ed4a143a882d414f8e053f30",
+    "familiarity-ladder-single/fl-indexing-t4-focus.workload.json": "9e0b82b0e6b31b1f120ffa6f2560f91c52e0a7f881b41f488404e7dd498b223a",
+    "familiarity-ladder-single/fl-indexing-t4-others.workload.json": "b5d38c5f95d61dcb26b23bc72d4dc4f98c70ef72cb3887eeac2b8ffcf4adea73",
+    "familiarity-ladder-single/fl-indexing-t5-all.workload.json": "fc65a36058635cb5f3d449eb90886222a9b185e9c13ec68cbd3aee1f30688876",
+    "familiarity-ladder-single/fl-indexing-t5-focus.workload.json": "90a0a6c4323a02390c1b6a8c2ea6558c6d4e753f526a113d32032b44ab2d26a9",
+    "familiarity-ladder-single/fl-indexing-t5-others.workload.json": "bae73e07c03db96d0bbba458dad6bf0bc3e5ba63561f57b68c5b5b49c814c748",
+    "familiarity-ladder-single/fl-mail-t4-all.workload.json": "d310926f11eb126b30fa88aab1c840303a302520ec5363e49dcc3ad8a314dbc0",
+    "familiarity-ladder-single/fl-mail-t5-all.workload.json": "39a8fb8607541c3c4c08950c7d39403676d35a76c7be9c106a825e76a8476b19",
+    "familiarity-ladder-single/fl-media-t4-all.workload.json": "b5dd032242c93cac0ca8bb28276328df46fe85da33d81e1ecf1daf0493b80daa",
+    "familiarity-ladder-single/fl-media-t5-all.workload.json": "2d2f9a5479d3129ffdacd3fcff4d39738517a78a97d8e2824999be276de712e8",
+    "familiarity-ladder-single/fl-meeting-t4-all.workload.json": "c698464d108a1978772d50f486d9819e1877a4151a3eb766c4fdc1b6af2b7ee7",
+    "familiarity-ladder-single/fl-meeting-t5-all.workload.json": "ec222a7b3a341b2fb97e8b7a0a7102e5c71b4f8fb54834ad228519a241e5159e",
+    "familiarity-ladder-single/fl-ml-train-t4-all.workload.json": "c62ddbf4ebc3f8159d10ef17fb9351f18c1f1d03d2a4ccd7b82fc0b9b16bde84",
+    "familiarity-ladder-single/fl-ml-train-t4-focus.workload.json": "970cdf63bbb5ef889524ff088ec61cddf6af4d1b823a2bd9e42016c37fc00084",
+    "familiarity-ladder-single/fl-ml-train-t4-others.workload.json": "feeebaf5b99c176845a705c76148356fab4ea49196a44255caf6f40d9995e1a9",
+    "familiarity-ladder-single/fl-ml-train-t5-all.workload.json": "6ae2a5aa1a9607f538659b625055a00bd8d600304e6b9bcd59433181d36f462b",
+    "familiarity-ladder-single/fl-ml-train-t5-focus.workload.json": "6d1406b605a5cae597f6aaede02ec9ca9b10e4a59f691141026ee54d440e8537",
+    "familiarity-ladder-single/fl-ml-train-t5-others.workload.json": "0abe32493fa348181ddfab3e9354883a6934bd6171f9a436d38ce812659504c6",
+    "familiarity-ladder-single/fl-office-t4-all.workload.json": "c5f00953c252d50c10591c0cb22c005f90643f97cc76fab17c19597b5738ca07",
+    "familiarity-ladder-single/fl-office-t4-focus.workload.json": "8c12a1fa9bcc61f1e9e1e50bf07561ab99138ef0d0fdbb61e4d906f5d610646d",
+    "familiarity-ladder-single/fl-office-t4-others.workload.json": "c94937fb134ba55b052d1ca268d1ab3754a2b1106f779568bc6f733e9e13861f",
+    "familiarity-ladder-single/fl-office-t5-all.workload.json": "463d87626e6e0264b9d897887b926d29494de9de55c070a5340b60dde3817afe",
+    "familiarity-ladder-single/fl-office-t5-focus.workload.json": "60724938390366b5fc4fedcce45a15f365b33d3223cee918f1c476057c3cd7f8",
+    "familiarity-ladder-single/fl-office-t5-others.workload.json": "cb20a6d4df116386f25a30d8dc73fcda5043cbd1f611dd5c123dfb6c8588874e",
+    "familiarity-ladder-single/fl-photo-t4-all.workload.json": "20c84f77ae149d82888669442cf0cb63bd694d9bf216dfa4921a6f08dc434485",
+    "familiarity-ladder-single/fl-photo-t5-all.workload.json": "299502df32be8e7e13718b5f5244c8304a58b72e64eb9e114076ad6c16405f61",
+    "familiarity-ladder-single/fl-render-t3.workload.json": "3f465d6edebb22590e8cd7f02b0e8b7afc3c3ff707e57fea19d079c3a1451a2e",
+    "familiarity-ladder-single/fl-render-t4-all.workload.json": "9c2f53a8733fac58a97ba0a054db033c21b96276f569da9b2dc5dc8dba308021",
+    "familiarity-ladder-single/fl-render-t4-focus.workload.json": "731dfc797520c16b5d8a240f04cfe1f33a7727d503a74710fc7585610898e803",
+    "familiarity-ladder-single/fl-render-t4-others.workload.json": "9d6dd287b8106c85e8af8be23f4c787629ce167782928ace9a7cebd895392bbc",
+    "familiarity-ladder-single/fl-render-t5-all.workload.json": "4baa9726bec699fd2c8c554515490f58db9a433300daa7027a3aefe6d27f7800",
+    "familiarity-ladder-single/fl-render-t5-focus.workload.json": "a2da1d17cd0c098ed4aca97ecedc1ad1579107ec03dc91e09d18a0ea1fd8b6ca",
+    "familiarity-ladder-single/fl-render-t5-others.workload.json": "3475476e276d5ecd8e446a971dc3419da756b0762f4fac8d905debd865bc37e9",
+    "familiarity-ladder-single/fl-transcode-t4-all.workload.json": "c25d3a862d53006d49ffcde28f1d632d497656b568c3ee1286cb69ee1ac3dbfd",
+    "familiarity-ladder-single/fl-transcode-t4-focus.workload.json": "6744a6e0d53bc768244a2dbed18e61630747cd903582db95c6889c6ae938e191",
+    "familiarity-ladder-single/fl-transcode-t4-others.workload.json": "0ce08d12b95fb952384a8671166210f7004deb4fab446a447c063d2e1dc5655c",
+    "familiarity-ladder-single/fl-transcode-t5-all.workload.json": "e301a8f19bb508bfd8faa9f4ee94d77f384bb1b1871b7781a02dc64fb3fda078",
+    "familiarity-ladder-single/fl-transcode-t5-focus.workload.json": "7770087005b17a73129fe58c5792aedea3a7732f0b758dfc3e236bd230cf4755",
+    "familiarity-ladder-single/fl-transcode-t5-others.workload.json": "e693a57785808747e43a582c2f2a8cf8a6e6ac2a184e5d176dc33da3dd552825",
+    "familiarity-ladder-single/fl-video-edit-t4-all.workload.json": "2bab4d48f12b8b4ae126ec5cef8c423658e5ae822854075bed9de79f1a9d4918",
+    "familiarity-ladder-single/fl-video-edit-t5-all.workload.json": "ed1d024197b080fc1c231629094d09b476a1cc3f57d985c029e20ffbfbf214f2"
+  },
+  "demand": {
+    "familiarity-ladder-single/fl-backup-t3.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0323
+        }
+      ],
+      "utilization": 1.0323
+    },
+    "familiarity-ladder-single/fl-backup-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0683
+        }
+      ],
+      "utilization": 1.0683
+    },
+    "familiarity-ladder-single/fl-backup-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0548
+        }
+      ],
+      "utilization": 1.0548
+    },
+    "familiarity-ladder-single/fl-backup-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0372
+        }
+      ],
+      "utilization": 1.0372
+    },
+    "familiarity-ladder-single/fl-backup-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0408
+        }
+      ],
+      "utilization": 1.0408
+    },
+    "familiarity-ladder-single/fl-backup-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0475
+        }
+      ],
+      "utilization": 1.0475
+    },
+    "familiarity-ladder-single/fl-backup-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0466
+        }
+      ],
+      "utilization": 1.0466
+    },
+    "familiarity-ladder-single/fl-browsing-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0081
+        }
+      ],
+      "utilization": 0.0081
+    },
+    "familiarity-ladder-single/fl-browsing-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0159
+        }
+      ],
+      "utilization": 0.0159
+    },
+    "familiarity-ladder-single/fl-compile-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0158
+        }
+      ],
+      "utilization": 1.0158
+    },
+    "familiarity-ladder-single/fl-compile-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.8727
+        }
+      ],
+      "utilization": 0.8727
+    },
+    "familiarity-ladder-single/fl-compile-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.1125
+        }
+      ],
+      "utilization": 1.1125
+    },
+    "familiarity-ladder-single/fl-compile-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0491
+        }
+      ],
+      "utilization": 1.0491
+    },
+    "familiarity-ladder-single/fl-compile-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9902
+        }
+      ],
+      "utilization": 0.9902
+    },
+    "familiarity-ladder-single/fl-compile-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0303
+        }
+      ],
+      "utilization": 1.0303
+    },
+    "familiarity-ladder-single/fl-dev-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.5655
+        }
+      ],
+      "utilization": 0.5655
+    },
+    "familiarity-ladder-single/fl-dev-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.4257
+        }
+      ],
+      "utilization": 0.4257
+    },
+    "familiarity-ladder-single/fl-gaming-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9151
+        }
+      ],
+      "utilization": 0.9151
+    },
+    "familiarity-ladder-single/fl-gaming-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.915
+        }
+      ],
+      "utilization": 0.915
+    },
+    "familiarity-ladder-single/fl-gaming-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.915
+        }
+      ],
+      "utilization": 0.915
+    },
+    "familiarity-ladder-single/fl-gaming-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9154
+        }
+      ],
+      "utilization": 0.9154
+    },
+    "familiarity-ladder-single/fl-gaming-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.915
+        }
+      ],
+      "utilization": 0.915
+    },
+    "familiarity-ladder-single/fl-gaming-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9152
+        }
+      ],
+      "utilization": 0.9152
+    },
+    "familiarity-ladder-single/fl-idle-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0001
+        }
+      ],
+      "utilization": 0.0001
+    },
+    "familiarity-ladder-single/fl-idle-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0002
+        }
+      ],
+      "utilization": 0.0002
+    },
+    "familiarity-ladder-single/fl-indexing-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0056
+        }
+      ],
+      "utilization": 1.0056
+    },
+    "familiarity-ladder-single/fl-indexing-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9224
+        }
+      ],
+      "utilization": 0.9224
+    },
+    "familiarity-ladder-single/fl-indexing-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7363
+        }
+      ],
+      "utilization": 0.7363
+    },
+    "familiarity-ladder-single/fl-indexing-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9717
+        }
+      ],
+      "utilization": 0.9717
+    },
+    "familiarity-ladder-single/fl-indexing-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9979
+        }
+      ],
+      "utilization": 0.9979
+    },
+    "familiarity-ladder-single/fl-indexing-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7275
+        }
+      ],
+      "utilization": 0.7275
+    },
+    "familiarity-ladder-single/fl-mail-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0149
+        }
+      ],
+      "utilization": 0.0149
+    },
+    "familiarity-ladder-single/fl-mail-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.024
+        }
+      ],
+      "utilization": 0.024
+    },
+    "familiarity-ladder-single/fl-media-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.1289
+        }
+      ],
+      "utilization": 0.1289
+    },
+    "familiarity-ladder-single/fl-media-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.1286
+        }
+      ],
+      "utilization": 0.1286
+    },
+    "familiarity-ladder-single/fl-meeting-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.2391
+        }
+      ],
+      "utilization": 0.2391
+    },
+    "familiarity-ladder-single/fl-meeting-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.2341
+        }
+      ],
+      "utilization": 0.2341
+    },
+    "familiarity-ladder-single/fl-ml-train-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.8492
+        }
+      ],
+      "utilization": 0.8492
+    },
+    "familiarity-ladder-single/fl-ml-train-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9822
+        }
+      ],
+      "utilization": 0.9822
+    },
+    "familiarity-ladder-single/fl-ml-train-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0916
+        }
+      ],
+      "utilization": 1.0916
+    },
+    "familiarity-ladder-single/fl-ml-train-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.1599
+        }
+      ],
+      "utilization": 1.1599
+    },
+    "familiarity-ladder-single/fl-ml-train-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0595
+        }
+      ],
+      "utilization": 1.0595
+    },
+    "familiarity-ladder-single/fl-ml-train-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0606
+        }
+      ],
+      "utilization": 1.0606
+    },
+    "familiarity-ladder-single/fl-office-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0224
+        }
+      ],
+      "utilization": 0.0224
+    },
+    "familiarity-ladder-single/fl-office-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0114
+        }
+      ],
+      "utilization": 0.0114
+    },
+    "familiarity-ladder-single/fl-office-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0185
+        }
+      ],
+      "utilization": 0.0185
+    },
+    "familiarity-ladder-single/fl-office-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0197
+        }
+      ],
+      "utilization": 0.0197
+    },
+    "familiarity-ladder-single/fl-office-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0088
+        }
+      ],
+      "utilization": 0.0088
+    },
+    "familiarity-ladder-single/fl-office-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0277
+        }
+      ],
+      "utilization": 0.0277
+    },
+    "familiarity-ladder-single/fl-photo-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0022
+        }
+      ],
+      "utilization": 0.0022
+    },
+    "familiarity-ladder-single/fl-photo-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0382
+        }
+      ],
+      "utilization": 0.0382
+    },
+    "familiarity-ladder-single/fl-render-t3.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7557
+        }
+      ],
+      "utilization": 0.7557
+    },
+    "familiarity-ladder-single/fl-render-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7705
+        }
+      ],
+      "utilization": 0.7705
+    },
+    "familiarity-ladder-single/fl-render-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7822
+        }
+      ],
+      "utilization": 0.7822
+    },
+    "familiarity-ladder-single/fl-render-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.6824
+        }
+      ],
+      "utilization": 0.6824
+    },
+    "familiarity-ladder-single/fl-render-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7609
+        }
+      ],
+      "utilization": 0.7609
+    },
+    "familiarity-ladder-single/fl-render-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7363
+        }
+      ],
+      "utilization": 0.7363
+    },
+    "familiarity-ladder-single/fl-render-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7037
+        }
+      ],
+      "utilization": 0.7037
+    },
+    "familiarity-ladder-single/fl-transcode-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0771
+        }
+      ],
+      "utilization": 1.0771
+    },
+    "familiarity-ladder-single/fl-transcode-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0666
+        }
+      ],
+      "utilization": 1.0666
+    },
+    "familiarity-ladder-single/fl-transcode-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0647
+        }
+      ],
+      "utilization": 1.0647
+    },
+    "familiarity-ladder-single/fl-transcode-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0587
+        }
+      ],
+      "utilization": 1.0587
+    },
+    "familiarity-ladder-single/fl-transcode-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0879
+        }
+      ],
+      "utilization": 1.0879
+    },
+    "familiarity-ladder-single/fl-transcode-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0754
+        }
+      ],
+      "utilization": 1.0754
+    },
+    "familiarity-ladder-single/fl-video-edit-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.426
+        }
+      ],
+      "utilization": 0.426
+    },
+    "familiarity-ladder-single/fl-video-edit-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.4804
+        }
+      ],
+      "utilization": 0.4804
+    }
+  },
+  "grid": {
+    "familiarity-ladder-single/fl-backup-t3.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "deja-dup": "duplicity"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 3
+        }
+      ],
+      "sources": {
+        "deja-dup": "meas-ci:background:2026-10-04"
+      },
+      "tier": 3
+    },
+    "familiarity-ladder-single/fl-backup-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "deja-dup": "backup-tool",
+        "kdenlive": "video-editor"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-backup-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive": "video-editor"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-backup-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "deja-dup": "backup-tool"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-backup-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "deja-dup": "cncp",
+        "kdenlive": "rrqy"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-backup-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive": "pqxi"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-backup-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "deja-dup": "kktf"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-browsing-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "browsing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "browsing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "chrome": "web-browser"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "browsing",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-browsing-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "browsing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "browsing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "chrome": "hnjz"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "browsing",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-compile-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "compile",
+      "placements": [
+        {
+          "input": true,
+          "mode": "compile",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "cc1": "c-compiler",
+        "code": "text-editor",
+        "make": "build-runner"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "compile",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-compile-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "compile",
+      "placements": [
+        {
+          "input": true,
+          "mode": "compile",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "code": "text-editor"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "compile",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-compile-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "compile",
+      "placements": [
+        {
+          "input": true,
+          "mode": "compile",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "cc1": "c-compiler",
+        "make": "build-runner"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "compile",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-compile-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "compile",
+      "placements": [
+        {
+          "input": true,
+          "mode": "compile",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "cc1": "xsfc",
+        "code": "owcp",
+        "make": "lgar"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "compile",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-compile-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "compile",
+      "placements": [
+        {
+          "input": true,
+          "mode": "compile",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "code": "pyzd"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "compile",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-compile-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "compile",
+      "placements": [
+        {
+          "input": true,
+          "mode": "compile",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "cc1": "mvhh",
+        "make": "qvho"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "compile",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-dev-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "dev",
+      "placements": [
+        {
+          "input": true,
+          "mode": "dev",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "code": "text-editor"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "dev",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-dev-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "dev",
+      "placements": [
+        {
+          "input": true,
+          "mode": "dev",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "code": "jsrx"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "dev",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-gaming-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "gaming",
+      "placements": [
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "FAudio_AudioCli": "audio-client",
+        "Task worker thr": "game-worker",
+        "Troy.exe": "game-engine",
+        "dxvk-cs": "gpu-cmd-stream",
+        "dxvk-submit": "gpu-submitter",
+        "steam": "game-launcher",
+        "winepulse_mainl": "audio-mainloop",
+        "winepulse_timer": "audio-timer"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-gaming-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "gaming",
+      "placements": [
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "Troy.exe": "game-engine"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-gaming-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "gaming",
+      "placements": [
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "FAudio_AudioCli": "audio-client",
+        "Task worker thr": "game-worker",
+        "dxvk-cs": "gpu-cmd-stream",
+        "dxvk-submit": "gpu-submitter",
+        "steam": "game-launcher",
+        "winepulse_mainl": "audio-mainloop",
+        "winepulse_timer": "audio-timer"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-gaming-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "gaming",
+      "placements": [
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "FAudio_AudioCli": "bkyi",
+        "Task worker thr": "adtc",
+        "Troy.exe": "jzyn",
+        "dxvk-cs": "osra",
+        "dxvk-submit": "peqg",
+        "steam": "siko",
+        "winepulse_mainl": "bapt",
+        "winepulse_timer": "ndig"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-gaming-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "gaming",
+      "placements": [
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "Troy.exe": "xqhe"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-gaming-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "gaming",
+      "placements": [
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "FAudio_AudioCli": "vdvu",
+        "Task worker thr": "xkej",
+        "dxvk-cs": "tqlm",
+        "dxvk-submit": "ogip",
+        "steam": "dgjr",
+        "winepulse_mainl": "wlad",
+        "winepulse_timer": "wkec"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-idle-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "others"
+      ],
+      "mode": "idle",
+      "placements": [
+        {
+          "input": false,
+          "mode": "idle",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "dbus-daemon": "message-bus",
+        "gnome-shell": "desktop-shell",
+        "pipewire": "audio-server",
+        "systemd": "service-mgr"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "idle",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-idle-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "others"
+      ],
+      "mode": "idle",
+      "placements": [
+        {
+          "input": false,
+          "mode": "idle",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "dbus-daemon": "xdhu",
+        "gnome-shell": "vvct",
+        "pipewire": "qumc",
+        "systemd": "eblo"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "idle",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-indexing-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "indexing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "indexing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "code": "text-editor",
+        "tracker-miner-f": "file-indexer"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "indexing",
+          "pre_committed_miss": true,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-indexing-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "indexing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "indexing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "code": "text-editor"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "indexing",
+          "pre_committed_miss": true,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-indexing-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "indexing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "indexing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "tracker-miner-f": "file-indexer"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "indexing",
+          "pre_committed_miss": true,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-indexing-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "indexing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "indexing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "code": "ntoo",
+        "tracker-miner-f": "iakw"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "indexing",
+          "pre_committed_miss": true,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-indexing-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "indexing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "indexing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "code": "lrja"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "indexing",
+          "pre_committed_miss": true,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-indexing-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "indexing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "indexing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "tracker-miner-f": "llcc"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "indexing",
+          "pre_committed_miss": true,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-mail-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "mail",
+      "placements": [
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "thunderbird-bin": "mail-reader"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-mail-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "mail",
+      "placements": [
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "thunderbird-bin": "iynp"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-media-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "media",
+      "placements": [
+        {
+          "input": false,
+          "mode": "media",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "mpv": "media-player"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "media",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-media-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "media",
+      "placements": [
+        {
+          "input": false,
+          "mode": "media",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "mpv": "tvvh"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "media",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-meeting-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "meeting",
+      "placements": [
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "chrome": "web-browser"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-meeting-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "meeting",
+      "placements": [
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "chrome": "nnhd"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-ml-train-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "ml-train",
+      "placements": [
+        {
+          "input": true,
+          "mode": "ml-train",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "code": "text-editor",
+        "python": "model-trainer"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "ml-train",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-ml-train-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "ml-train",
+      "placements": [
+        {
+          "input": true,
+          "mode": "ml-train",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "code": "text-editor"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "ml-train",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-ml-train-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "ml-train",
+      "placements": [
+        {
+          "input": true,
+          "mode": "ml-train",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "python": "model-trainer"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "ml-train",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-ml-train-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "ml-train",
+      "placements": [
+        {
+          "input": true,
+          "mode": "ml-train",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "code": "wzfc",
+        "python": "qmhy"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "ml-train",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-ml-train-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "ml-train",
+      "placements": [
+        {
+          "input": true,
+          "mode": "ml-train",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "code": "wirx"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "ml-train",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-ml-train-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "ml-train",
+      "placements": [
+        {
+          "input": true,
+          "mode": "ml-train",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "python": "hwgl"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "ml-train",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-office-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "office",
+      "placements": [
+        {
+          "input": true,
+          "mode": "office",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "chrome": "web-browser",
+        "soffice.bin": "doc-writer",
+        "thunderbird-bin": "mail-reader"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "office",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-office-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "office",
+      "placements": [
+        {
+          "input": true,
+          "mode": "office",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "soffice.bin": "doc-writer"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "office",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-office-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "office",
+      "placements": [
+        {
+          "input": true,
+          "mode": "office",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "chrome": "web-browser",
+        "thunderbird-bin": "mail-reader"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "office",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-office-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "office",
+      "placements": [
+        {
+          "input": true,
+          "mode": "office",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "chrome": "dlwd",
+        "soffice.bin": "nklw",
+        "thunderbird-bin": "ovqj"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "office",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-office-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "office",
+      "placements": [
+        {
+          "input": true,
+          "mode": "office",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "soffice.bin": "pmhn"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "office",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-office-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "office",
+      "placements": [
+        {
+          "input": true,
+          "mode": "office",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "chrome": "yeva",
+        "thunderbird-bin": "tlod"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "office",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-photo-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "photo",
+      "placements": [
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "gimp": "image-editor"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-photo-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "photo",
+      "placements": [
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "gimp": "wgbg"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-render-t3.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive_render": "melt-7"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 3
+        }
+      ],
+      "sources": {
+        "kdenlive_render": "meas-ci:background:2026-10-03c"
+      },
+      "tier": 3
+    },
+    "familiarity-ladder-single/fl-render-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive": "video-editor",
+        "kdenlive_render": "clip-exporter"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-render-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive": "video-editor"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-render-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive_render": "clip-exporter"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-render-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive": "pxzo",
+        "kdenlive_render": "jgex"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-render-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive": "iorq"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-render-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive_render": "qapo"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-transcode-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "transcode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "transcode",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "HandBrakeCLI": "video-encoder",
+        "kdenlive": "video-editor"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "transcode",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-transcode-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "transcode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "transcode",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive": "video-editor"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "transcode",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-transcode-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "transcode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "transcode",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "HandBrakeCLI": "video-encoder"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "transcode",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-transcode-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "transcode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "transcode",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "HandBrakeCLI": "deay",
+        "kdenlive": "tari"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "transcode",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-transcode-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "transcode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "transcode",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive": "ajlg"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "transcode",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-transcode-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "transcode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "transcode",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "HandBrakeCLI": "tijw"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "transcode",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-video-edit-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "video-edit",
+      "placements": [
+        {
+          "input": true,
+          "mode": "video-edit",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive": "video-editor"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "video-edit",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-video-edit-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "video-edit",
+      "placements": [
+        {
+          "input": true,
+          "mode": "video-edit",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
+      "renamed": {
+        "kdenlive": "qtrk"
+      },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "video-edit",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
+      "tier": 5
+    }
+  },
+  "inputs": {
+    "dataset/archetypes.yaml": "1e30860615a851baf93d7bda217318069f988afa058c77e587af6677023403f4",
+    "dataset/grids.yaml": "d920741e6441171d4c1eaa9b10359f044ccc1ecce8c4a88e8f07b45973efa06f",
+    "dataset/launch/launch-audio-player.json.gz": "133365bfc9e1d7d51980b1964ab82fe1d5c0b1ca5f24b4b39df9d331682c6983",
+    "dataset/launch/launch-chat-client.json.gz": "129ec3b810b3ea2db78af8695e2fbb73d93104547348169db690e43376068713",
+    "dataset/launch/launch-game-client.json.gz": "fe990becd92a6e9eb61bb5bf1f48c512b9a865c949c88aa62bb4064cf42cb91f",
+    "dataset/launch/launch-mail-client.json.gz": "7c880ffa172b44bf255cfe077cd22b4bcb873d28f09c86ef8f1e4bb3e1d7df64",
+    "dataset/launch/launch-office-writer.json.gz": "a6b2c084e1fd40bb91cde66c1375a14efad9586034f3c211e2679620cf6bb7ca",
+    "dataset/launch/launch-renderer-hidden.json.gz": "3a9843604c03e1eebbca7521c6320a571d3008058e5faa4d11ec91d0e69384e1",
+    "dataset/launch/launch-video-call.json.gz": "5fffba0cb11cf29a438c0ab4294bce52b17970befabfa75231f90f5e2c5466d2",
+    "dataset/launch/launch-video-editor.json.gz": "f8159cd6666c5f0c9d41401044a271dc0f9854f376780a93cde56f73e371b505",
+    "dataset/launch/launch-video-player.json.gz": "f31689f85413fa4592c7de7b00d83d26c1a0cbcbe871d00aa36ac130f79ef55c",
+    "dataset/launch/launch-web-browser.json.gz": "c771ca9d8c9d48c3d56858873a3578f81d8104fe5eb66b015dab133c73c47b5e",
+    "dataset/replay/replay-code-editor.json.gz": "153143212589f0ec40c0d85578a0cc0f71d38f25f11f0d18dd96c15d66d50d92",
+    "dataset/replay/replay-cpu-batch-python3.json.gz": "9dbe1e282b555af662e4456405513dc47e52aa5c5bfa5630f7764dcd8d291ec6",
+    "dataset/replay/replay-package-upgrade.json.gz": "3496e4263bd0ccc63118d2ffa3ca54232fbbd0214dfbac351793074249d83939",
+    "dataset/replay/replay-renderer-hidden.json.gz": "aa97e9b3f780318dc74573f7e0e4d20246695f32d491dd9af5d4c80457eeed29",
+    "dataset/replay/replay-video-call.json.gz": "fbf0b9e9833b0b77cbed4abc9348c6d2abe2cc53731ba9057cdb7653fe21cfaa",
+    "dataset/replay/replay-web-browser.json.gz": "c433285bdea549ebad1daf87aa9d2a52d9eda0836ce367d87afab750cd4e9632",
+    "dataset/schema/workload.schema.json": "0893bf8de7afbede2412400a6a9944afa31c45970ccb55bb9b7af35951d6be85",
+    "dataset/stimulus/swell-ie-c1.jsonl": "ebdf895722978516da3e5a51aa6b44251e45de80c0a42c8bb90b90783729c260",
+    "dataset/stimulus/swell-outlook-c23.jsonl": "491d6ead5277617b6cc8057bdc597ca27a11fcb60b47e40d645575cb8053dac2",
+    "dataset/stimulus/swell-word-c1.jsonl": "1175db0cd291df40f49950e8a8b377243c0148bf2fddaf9daf8e2fddc68062ff",
+    "dataset/timelines/coreset/c1-backup.timeline.yaml": "af09d83c5f148ec92a5d5d40fac00ceb85139684ae218b4bdb5755bdfdaa7892",
+    "dataset/timelines/coreset/c1-browsing.timeline.yaml": "946573bb8ff9589dce4d77ca5ed7397536a1cb3dc932c2be4bed06407ad03f1b",
+    "dataset/timelines/coreset/c1-compile.timeline.yaml": "e4a1fef0ef3bbbd4556a0d2ea03984d9558b87db5fce12bfb8ab368c6efb6050",
+    "dataset/timelines/coreset/c1-dev.timeline.yaml": "4015cc5eb9c9d470cdd734d02016175bedf18ae58e09f37d3369328ce8c99df2",
+    "dataset/timelines/coreset/c1-gaming.timeline.yaml": "e73ddeb57e64f1a3a5ae6d382c49c52053bee065e76cdf40c0c521f841fab5c4",
+    "dataset/timelines/coreset/c1-idle.timeline.yaml": "d00bf8d2be0ffb03113f8e8194c68696b1e448e2dfb686a17a098fee223f4c6a",
+    "dataset/timelines/coreset/c1-indexing.timeline.yaml": "8201acac0afcf989b645787cb2da277a689dbb4e2b74420c60cc71c6607c693a",
+    "dataset/timelines/coreset/c1-mail.timeline.yaml": "d5e98b0e8c02c6de90c51cabd6716d68f1b7e251a7446b2f38c6dd70d391fce8",
+    "dataset/timelines/coreset/c1-media.timeline.yaml": "91a1e38d1ce2363c146a67cc7f24a1d3f22a5c80912339b2b78650714b29bd7e",
+    "dataset/timelines/coreset/c1-meeting.timeline.yaml": "c242d484e52d1b3226dcbd8543273c0f48e6eb5531e3d05da31ccc4749a423ab",
+    "dataset/timelines/coreset/c1-ml-train.timeline.yaml": "bdaf8a2d4bff7cc4481c69ec285443a2d6bb2c914b65e7762d02df5bd918ae79",
+    "dataset/timelines/coreset/c1-office.timeline.yaml": "cf08b300e053ec4e22763240401ca73b0a9fec3b5c0caf9a4dc002012edc4035",
+    "dataset/timelines/coreset/c1-photo.timeline.yaml": "39b0dc7f17c08e56650916fa700e8ea3c27096e3ac9309dbd0c32b8f392bc46e",
+    "dataset/timelines/coreset/c1-render.timeline.yaml": "0de810f374de1f23ef1f0bc6f8fc897f2c68409fddd38174a83887cae0578cba",
+    "dataset/timelines/coreset/c1-transcode.timeline.yaml": "748f17e317aacab23c14a30d07851d94d7ac881087030522dc79d82e42ea5dc1",
+    "dataset/timelines/coreset/c1-video-edit.timeline.yaml": "9f636e0769e24ed79906e83345419c5f6ffef725df6840d262e109e16cf58a81",
+    "dataset/tools/compile.py": "2ca5ab71b3bf66651b67e11283fe7498382a58da966e974342d27060ce803481",
+    "dataset/tools/gen/__init__.py": "94da664e99bfac8a466c4f614f9015359615cdda32952f463c3cf74cf5c18eb3",
+    "dataset/tools/gen/cells.py": "5b8ef682222ecc0ac91306c8afb8bc560a52949b016c3b6b236f2b04f371ac7c",
+    "dataset/tools/gen/compose.py": "91c1d565be1931826eb22a03dbfcc5dd67d78b990b2169a15e9ff658ca7acb9a",
+    "dataset/tools/gen/coverage.py": "d6abaa6a3221f8015b9a78bd04cee8bca51b762247b2d5d99c3eca7c923116ab",
+    "dataset/tools/generate.py": "6dc108bf6c437759f2890a8cae128f93ce0baf0b981c2565a6adcc4b68f1dd2e",
+    "dataset/tools/wlc/__init__.py": "887fd71d43e1822a2b0db0fe81c7e915634bde1df58a268d0c7eb7f817e8d13f",
+    "dataset/tools/wlc/compiler.py": "49922655438d1245f7ca10bfce52fb76ae525752ea6e04b74f8d2d91bc652ef0",
+    "dataset/tools/wlc/deriver.py": "b8e3991397afc31a9007f682b38d3d61e4c3248e62a401337bc1368c9e1d1546",
+    "dataset/tools/wlc/estimate.py": "746294053801a55facba2e91dc9bdbe4040d618a2d72ce128a7691f7e38f5e5f",
+    "dataset/tools/wlc/grid.py": "31b2b9e0d1dd9b21858ce1d41006916941b892ad4243f382101f29344bdd7e43",
+    "dataset/tools/wlc/library.py": "9ada360cbe79c1dfcf3c36c5856a60e8ce68bc8af753f7b925138e4e22e0a66b",
+    "dataset/tools/wlc/linter.py": "651c64dfe8e3d65f747de08370367228cf49294f7613ca963c97d11c1a44b239",
+    "dataset/tools/wlc/sampling.py": "93d9b773490a2d5c6162d0654963d21a9d802da2c2b4d059f16ca95fcb59dc0d",
+    "dataset/tools/wlc/timeline.py": "95d2a2c862b3b680f95f16ccfc78d6a08a1d1d693cdbfda6f3132988a276b57e",
+    "dataset/tools/wlc/units.py": "2c32e9ee9ed08615769a15fdb7406c4b5a2eb6588dcc9acc09c30b6fb9ab2778",
+    "dataset/tools/wlc/variants.py": "3cea5000fac6b5330b1a0c48373ca3e8d2ee1aa7d53794e824a6ae79239ce692"
+  },
+  "reports": {
+    "familiarity-ladder-single/fl-backup-t3.report.json": "2fa2dca01afb155a71fe0ee595668cf254c3eb70ad032b1533a0bdcb1677f665",
+    "familiarity-ladder-single/fl-backup-t4-all.report.json": "9b4f40199bb2cba224c9e9da052779a2364ef90dd41a085635ff848b0f4bdac5",
+    "familiarity-ladder-single/fl-backup-t4-focus.report.json": "6193804ed76152d657aa566a51e5944e14ef1d83634664849fea12324e10ff37",
+    "familiarity-ladder-single/fl-backup-t4-others.report.json": "25a9e4125dc98b950f80ba87d45daa9440b0073961278e2b5cbc759476d4ce5d",
+    "familiarity-ladder-single/fl-backup-t5-all.report.json": "dc2d0358578f48e181d5d26ce28c1dbbb4ca3785c7d85f903e9ace2cf64f4715",
+    "familiarity-ladder-single/fl-backup-t5-focus.report.json": "06f94a4e44fa620db5963723498acc9f43d536982e6f659bcfe05044eb8ed0d3",
+    "familiarity-ladder-single/fl-backup-t5-others.report.json": "e2f82fd51229230140c31a565e196dcb7c52d727555e866f3d5b5a6541c0ee24",
+    "familiarity-ladder-single/fl-browsing-t4-all.report.json": "a60f7918445f93facd15a81ec378cf80f0f0b19f1513d5c122cbd32b27d2df97",
+    "familiarity-ladder-single/fl-browsing-t5-all.report.json": "a4f8d98b580913403f459713b5e10799a8a7c81cfd3716d983c9f5653d7954c0",
+    "familiarity-ladder-single/fl-compile-t4-all.report.json": "1dc57d34e83216945c89235740d78048f184d4d87c6702d07ad03deeaa3f779f",
+    "familiarity-ladder-single/fl-compile-t4-focus.report.json": "f13614101e70516c08c2f424283de30906c71a252768652ca10f8362bb3e5ebf",
+    "familiarity-ladder-single/fl-compile-t4-others.report.json": "282f596bdbc6466389420beca32268e76c8b6ec7f8a57e21c1bdd4c55f741c29",
+    "familiarity-ladder-single/fl-compile-t5-all.report.json": "52360e51179901e5de2e74022ccbc6320113320af16ac7874717f70df2e9961c",
+    "familiarity-ladder-single/fl-compile-t5-focus.report.json": "73fb061dab0cf2744820889f5becc6bec108787756e1ed216e61809b6e0b04ad",
+    "familiarity-ladder-single/fl-compile-t5-others.report.json": "5f09d0b27afe9db0a3f518bd665c883ce64756e25febab9a24e039e96e2e4a0c",
+    "familiarity-ladder-single/fl-dev-t4-all.report.json": "6a238c3ae6fa22528a25451ac2de794f35cac632f6a336bdf4b0c10442b7e7e2",
+    "familiarity-ladder-single/fl-dev-t5-all.report.json": "f9c6a3237e59bbaa9aae3c2159f62f89558910b2a269252e646f7a71ba84a403",
+    "familiarity-ladder-single/fl-gaming-t4-all.report.json": "3912bd238f7d0e11aee7d125ffe03a291e9068f36ce808bb6eb8948ae2f67844",
+    "familiarity-ladder-single/fl-gaming-t4-focus.report.json": "90a83f96a9ecc64f0bbb56a8e724aec24493b19f4ef0b1d95850b96db07630f1",
+    "familiarity-ladder-single/fl-gaming-t4-others.report.json": "badccaec70417c2a42106316ad6ce6a01260543940f4d1830ae7d5b667292b2f",
+    "familiarity-ladder-single/fl-gaming-t5-all.report.json": "337b84e2d965e3b286e5208c4b4be56ad4dca38434a94bedd43ff4272379c3bc",
+    "familiarity-ladder-single/fl-gaming-t5-focus.report.json": "e1eadc3f13e86b7be303e828e9fbfcd11711f9636548133c9472647085f83b0a",
+    "familiarity-ladder-single/fl-gaming-t5-others.report.json": "8f3078ce85a7183d1775be7e327b9140141ba48f05b8c8494e89d62c972341fd",
+    "familiarity-ladder-single/fl-idle-t4-all.report.json": "4eb07557890387ded8edecd9c3c19bd4740ecb3f31343ba824a16f02f8bd6551",
+    "familiarity-ladder-single/fl-idle-t5-all.report.json": "bc55d0089c131cb4afe63e9a83438e71254d71a67f84830e310f825c5408f05e",
+    "familiarity-ladder-single/fl-indexing-t4-all.report.json": "f153ff24fc045ad1d2cbe611aec6825bacccb68b03b6ff2987e42efa153c5a21",
+    "familiarity-ladder-single/fl-indexing-t4-focus.report.json": "8dc6c108e6cf44ead3f67d1581c8827548c24a806aa340b0ddf21024c9e604c4",
+    "familiarity-ladder-single/fl-indexing-t4-others.report.json": "73ead58a357da6ed8b9958067bdaf1bbe0f99fd4b5b48d77af33b722c2f9604b",
+    "familiarity-ladder-single/fl-indexing-t5-all.report.json": "a990264f57dd070da125bef761f9ac36e786a3f65a1856625752a9794e3882d5",
+    "familiarity-ladder-single/fl-indexing-t5-focus.report.json": "43a1279e8ccea383cb84e1277bce2b904d03a0e232496faef815fdc41f952617",
+    "familiarity-ladder-single/fl-indexing-t5-others.report.json": "2ee16b503ce3a463dc9b6258cc94d3c9699f17db69c9a58175494fcf8ed98365",
+    "familiarity-ladder-single/fl-mail-t4-all.report.json": "0b1e299d2aef1c428f77835612f1d515cdd90fbe93792f89306f9c262e0a956f",
+    "familiarity-ladder-single/fl-mail-t5-all.report.json": "547b4d4d3b8e170061edc048649978c51cbfbf93b0f160a7896ceed3b6100be1",
+    "familiarity-ladder-single/fl-media-t4-all.report.json": "ebf5176a2dfd18e93f1bcc1bacb94808e45915c3235ea5c1e7006c755ce479d5",
+    "familiarity-ladder-single/fl-media-t5-all.report.json": "e4c38582004343405c796d477f1b0006d642cdd1d1ff66fc437e61c58d61ce00",
+    "familiarity-ladder-single/fl-meeting-t4-all.report.json": "3a95f4e3f25dbb6364d16279ca8a8bdb132c407b0ffd1c63dac969521ad3158e",
+    "familiarity-ladder-single/fl-meeting-t5-all.report.json": "0ca9f3101b3162065f5221335f64bfbc417bd4bf3a5928b0b7872e2fa3ae64aa",
+    "familiarity-ladder-single/fl-ml-train-t4-all.report.json": "f66559dcc527b36a4fcd010651e2204c0e9a2fdf8053a0ea223c5f34c03bf16d",
+    "familiarity-ladder-single/fl-ml-train-t4-focus.report.json": "b0f9a7ee28c2dd9e1c214bd42525796d392ff03ffc0e95531ad7ddeb77cd637f",
+    "familiarity-ladder-single/fl-ml-train-t4-others.report.json": "30d2d32d6ee30e00ebd39134fcf5baa36f2db4fd3b45fcc64ea475e445afcd08",
+    "familiarity-ladder-single/fl-ml-train-t5-all.report.json": "26f91bc23055405839c4f0d6f95c9d046a5602d7847a06680a5906e35dadf878",
+    "familiarity-ladder-single/fl-ml-train-t5-focus.report.json": "4348bf99065d608eaf8a2d1edaf98f66ca74f6c235f418466313a27ab2fc9a42",
+    "familiarity-ladder-single/fl-ml-train-t5-others.report.json": "e458ddebedcd6907dea168d3ff25208fc78163e04eb27837cfcb1015c4cc8b90",
+    "familiarity-ladder-single/fl-office-t4-all.report.json": "1ada2659be2a03a9450ff5ad1abcf5d56fa86ff6656fbd8b7262fad7b25e67e9",
+    "familiarity-ladder-single/fl-office-t4-focus.report.json": "ea308414c3487aa2303b090433ee4ff727e722132e0919990cb46833bfec991e",
+    "familiarity-ladder-single/fl-office-t4-others.report.json": "7fb259aa08805824f313fe446be0cb51396740231f1fcd42950865ada1b8634b",
+    "familiarity-ladder-single/fl-office-t5-all.report.json": "1b8a514728570750d0bf50edc6669eb963135cd1bbdaa7b298721f330cf6a5b2",
+    "familiarity-ladder-single/fl-office-t5-focus.report.json": "50f36646922edaa3f5efd3730a0999450dd4393800446a9fad9919f4a0a09efc",
+    "familiarity-ladder-single/fl-office-t5-others.report.json": "7690600470369ecd8df41f7ce7306278bb1b75bd043077b3771eedfb0c6fe7fb",
+    "familiarity-ladder-single/fl-photo-t4-all.report.json": "fa12677722acd8a7aff6c018804300d962e771d741b68b158172f812b2365d5a",
+    "familiarity-ladder-single/fl-photo-t5-all.report.json": "bb90ecc894abe6f242b335545a74009a86472bb6d0b19200ca57bf737230be7c",
+    "familiarity-ladder-single/fl-render-t3.report.json": "e40b51ac536286c2c4903744329acf65d8af4d90774c6e2ff6512f5b71f8f005",
+    "familiarity-ladder-single/fl-render-t4-all.report.json": "d19c95ecdafeacf247564c6921487e9cb569d67b0edbbe76d19d527a5bf4560a",
+    "familiarity-ladder-single/fl-render-t4-focus.report.json": "d678206fc6ac23b3b65206d00afd93f7afeead2afab62e82dae78dc2d43a5e4b",
+    "familiarity-ladder-single/fl-render-t4-others.report.json": "fab3d2b733186c460ad842536b2836b6a31e409599ee32bbbc19dd3d6bc0fa46",
+    "familiarity-ladder-single/fl-render-t5-all.report.json": "d3a9f87cb6dd2e3e696178b1b4708d0fa52acbbd901d79c7938fb93ea99157f5",
+    "familiarity-ladder-single/fl-render-t5-focus.report.json": "96e3cdd72cc1338ac49e977b544c12cf99e7a8fa01c517f5a0fe14d795bf7044",
+    "familiarity-ladder-single/fl-render-t5-others.report.json": "6de45d7198e6e35a22832e30e0ae05e8e4425538ffb7f7d4c754761d9b6cbbbe",
+    "familiarity-ladder-single/fl-transcode-t4-all.report.json": "fda14a69aeca3348ae69a1616d271c1856e70ec523be74d0bdda67791de38d2f",
+    "familiarity-ladder-single/fl-transcode-t4-focus.report.json": "65ed6070c955c03eb684b05e718533acb755f1ce9a778318bcd320f35ce943e5",
+    "familiarity-ladder-single/fl-transcode-t4-others.report.json": "0cb191aeef667c1c82c53b18076230e3e1f7033b9acf77c4f002967a3d836a28",
+    "familiarity-ladder-single/fl-transcode-t5-all.report.json": "693688da6107cdafbd8902c5d659420602ff21f75840b2690f4d2e17cb8ffb74",
+    "familiarity-ladder-single/fl-transcode-t5-focus.report.json": "6858c711c374b641c40e603fe059af2b65576cac54a3144e2fb3f462d0065445",
+    "familiarity-ladder-single/fl-transcode-t5-others.report.json": "20be69f670c9943697d76805c015c5999681face9a184a944a6baf7abcff6533",
+    "familiarity-ladder-single/fl-video-edit-t4-all.report.json": "acf172d8ed55285547d2ca0459d00566a37d56080ec1261fccc40b63325cafbd",
+    "familiarity-ladder-single/fl-video-edit-t5-all.report.json": "45a63c82200b2c8e90fba3fb4160ed656f2a9894a4e9ca931dd488db4f97e851"
+  }
+}

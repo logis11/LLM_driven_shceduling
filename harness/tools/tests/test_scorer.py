@@ -96,7 +96,7 @@ def test_seam_records_writer_to_scorer(fixture_dir):
     hand-written fixed and oracle records for the same reduced workload."""
     d = fixture_dir("mock-p1a")
     llm_rows, _ = records.build(d / "run.json", d / "trace.jsonl", table="prior",
-                                schedule_path=d / "config-schedule.json")
+                                schedule_path=d / "config-schedule.json", telemetry="names")
     spec = _spec()
     win = _windows(spec, "mock-p1a")
     rows = agg.compute_aggregates(llm_rows, win)
@@ -136,16 +136,117 @@ def test_percentile_is_numpy_linear_and_exact():
 
 def test_excess_aggregates_on_mock_switch(fixture_dir):
     """Metrics doc §8 on mock-switch's worked values: the switch window [40600, 53100] holds the
-    46000 wake (100), the boost windows [60600, 69600] and [80600, 86600] hold the 62000 wake (600),
-    the rest of the MLFQ interval holds the 90000 wake (0): excess 100 (switch), 600 (boost)."""
+    50100 wake (0: keystroke 2 reached the editor at 46000 while it was ready in Q1 mid-burst,
+    preempted behind the hog, so it was queued and its next WAIT completed at 50100 with zero wait),
+    the boost windows [60600, 80600] and [80600, 86600] hold the 62000 wake (600), the rest of the
+    MLFQ interval holds the 90000 wake (0): excess 0 (switch), 600 (boost)."""
     d = fixture_dir("mock-switch")
     rows, _ = records.build(d / "run.json", d / "trace.jsonl", table="calibrated",
                             schedule_path=d / "config-schedule.json")
     out = {(r["aggregate"], r["index"]): r["value"]
            for r in agg.compute_aggregates(rows, interactive=("editor",)) if r["metric"] == "switch_window"}
-    assert out[("excess_switch", "3")] == "100.000000000000"
+    assert out[("excess_switch", "3")] == "0.000000000000"
     assert out[("excess_boost", "3")] == "600.000000000000"
     assert out[("share_inside_switch_windows", "")] == "0.125000000000"
+
+
+def _wake_records(condition, wakes, t_end=100000, extra=()):
+    """Typed records rows of one run of workload `w`: the lane's busy row and one
+    editor ready_wait wake row per (t, value, channel)."""
+    ident = {"workload_id": "w", "condition": condition, "source_sha256": "0" * 64, "sim": "mock@0"}
+    rows = [dict(ident, entity="lane", metric="busy", t=t_end, value=0)]
+    rows += [dict(ident, entity="editor", metric="ready_wait", t=t, value=v, cause="wake", channel=ch)
+             for (t, v, ch) in wakes]
+    rows += [dict(ident, **r) for r in extra]
+    return rows
+
+
+def test_censored_turnaround_reads_the_arrival_row():
+    """Metrics doc §9: an unfinished task's turnaround is scored on T_end − arrival, the
+    arrival its task_arrive line's time, which its `arrival` row carries (§6.6). A task
+    whose first instruction is a WAIT has no ready(cause = arrive) line (§11 item 5) and
+    keeps its bound: `waiter` arrives at 300 blocked, first runs on a wake at 500, never
+    ends — 1000 − 300 = 700. `runner`, ready at its arrival (200), gets 800 as before."""
+    from harness.primitives import compute
+    from harness.reader import RunFile, TaskInfo
+    tasks = {tid: TaskInfo(id=tid, name=tid, arrive=t, depart=None, demand=None, period_us=None,
+                           wake_targets=[], waits=w)
+             for tid, t, w in (("runner", 200, ["timer"]), ("waiter", 300, ["timer"]))}
+    run = RunFile(workload_id="w", t_end=1000, tasks=tasks, chains=[], input_wakes={})
+    events = [{"event": "task_arrive", "t": 200, "task": "runner", "source": "file"},
+              {"event": "ready", "t": 200, "task": "runner", "cause": "arrive"},
+              {"event": "run_start", "t": 200, "task": "runner"},
+              {"event": "run_end", "t": 300, "task": "runner", "reason": "block", "blocked_on": "wait"},
+              {"event": "task_arrive", "t": 300, "task": "waiter", "source": "file"},
+              {"event": "ready", "t": 500, "task": "waiter", "cause": "wake"},
+              {"event": "run_start", "t": 500, "task": "waiter"},
+              {"event": "run_end", "t": 600, "task": "waiter", "reason": "block", "blocked_on": "wait"}]
+    ident = {"workload_id": "w", "condition": "fixed", "source_sha256": "0" * 64, "sim": "mock@0"}
+    rows = [dict(ident, **r) for r in compute(run, events).rows]
+    assert {(r["entity"], r["t"], r["value"]) for r in rows if r["metric"] == "arrival"} == {
+        ("runner", 1000, 200), ("waiter", 1000, 300)}
+    assert not any(r["entity"] == "waiter" and r.get("cause") == "arrive" for r in rows)
+    out = {(r["entity"], r["aggregate"]): r["value"]
+           for r in agg.compute_aggregates(rows) if r["metric"] == "turnaround"}
+    assert out == {("runner", "turnaround_censored"): "800.000000000000",
+                   ("waiter", "turnaround_censored"): "700.000000000000"}
+
+
+def test_wake_aggregates_split_by_channel():
+    """Metrics doc §8: the ready_wait aggregates over cause wake come once over
+    every channel and once per channel kind, so interaction latency can read the
+    input channel alone (9.5 D74)."""
+    rows = _wake_records("fixed", [(10, 100, "input"), (20, 5000, "timer"), (30, 300, "input"),
+                                   (40, 7000, "timer"), (50, 9000, "timer")])
+    out = {(r["cause"], r["channel"], r["aggregate"]): r["value"]
+           for r in agg.compute_aggregates(rows) if r["entity"] == "editor"}
+    assert out[("wake", "input", "count")] == "2.000000000000"
+    assert out[("wake", "input", "max")] == "300.000000000000"
+    assert out[("wake", "input", "p99")] == "298.000000000000"         # 100 + 0.99 · 200
+    assert out[("wake", "timer", "count")] == "3.000000000000"
+    assert out[("wake", "timer", "mean")] == "7000.000000000000"
+    assert out[("wake", "", "count")] == "5.000000000000"
+    assert out[("", "", "count")] == "5.000000000000"
+    assert not any(k[1] and k[0] != "wake" for k in out)                  # the split is on wake only
+
+
+def test_excess_reads_the_input_channel_only():
+    """Metrics doc §8's per-switch excess is interaction latency: with the switch
+    window [10000, 15000] holding a keystroke (400) and a timer wake (9000), and the
+    rest of the interval a keystroke (100) and a timer wake (7000), the excess is
+    400 − 100 = 300; over every wake it would be 4700 − 3550 = 1150."""
+    extra = [dict(entity="schedule", metric="config_interval", t=0, value=10000,
+                  provenance="unmodified", algorithm="FIFO", index=0),
+             dict(entity="schedule", metric="config_interval", t=10000, value=90000,
+                  provenance="unmodified", algorithm="MLFQ", index=1),
+             dict(entity="schedule", metric="switch_window", t=10000, value=5000,
+                  algorithm="MLFQ", index=1, hogs=1)]
+    rows = _wake_records("llm_full", [(12000, 400, "input"), (13000, 9000, "timer"),
+                                      (50000, 100, "input"), (60000, 7000, "timer")], extra=extra)
+    out = {(r["aggregate"], r["index"]): r["value"]
+           for r in agg.compute_aggregates(rows, interactive=("editor",)) if r["metric"] == "switch_window"}
+    assert out[("excess_switch", "1")] == "300.000000000000"
+
+
+def test_a_channel_term_scores_the_channel_aggregate():
+    """A term naming `channel: input` scores the input channel's P99: fixed [1000, 3000]
+    → 2980, oracle [100, 100] → 100, llm_full [500, 1500] → 1490; share 1490/2880.
+    The timer wakes beside them would dominate a P99 over every wake."""
+    spec = {"files": {"w": {"terms": [
+        {"entity": "editor", "metric": "ready_wait", "cause": "wake", "channel": "input",
+         "aggregate": "p99", "direction": "lower", "weight": 1.0}]}}}
+    runs = {"fixed": [(10, 1000, "input"), (20, 3000, "input"), (30, 50000, "timer")],
+            "oracle": [(10, 100, "input"), (20, 100, "input"), (30, 50000, "timer")],
+            "llm_full": [(10, 500, "input"), (20, 1500, "input"), (30, 90000, "timer")]}
+    rows = []
+    for condition, wakes in runs.items():
+        rows.extend(agg.compute_aggregates(_wake_records(condition, wakes)))
+    term_rows, _ = scorer.score(rows, spec)
+    llm = next(r for r in term_rows if r["condition"] == "llm_full")
+    assert llm["channel"] == "input"
+    assert (llm["value_fixed"], llm["value_oracle"], llm["value_condition"]) == (
+        "2980.000000", "100.000000", "1490.000000")
+    assert llm["share"] == "0.517361"
 
 
 def test_scorer_floors_are_overridable_with_the_same_default():
@@ -164,3 +265,53 @@ def test_scorer_floors_are_overridable_with_the_same_default():
     assert editor and all(t["no_headroom"] == 1 for t in editor)
     s1 = next(f for f in files_r if f["condition"] == "random" and f["seed"] == "s1" and f["boot_default"] == "")
     assert s1["score"] == "2.250000" and s1["n_no_headroom"] == 3
+
+
+def test_flip_aggregates_on_mock_switch(fixture_dir, tmp_path):
+    """9.21 decision 7 on mock-switch's schedule (boot MLFQ; entry 1 MLFQ with a shorter slice; entry 2 FIFO; entry
+    3 MLFQ): three configuration changes; with a log of three queries graded correct, wrong, wrong, two of them
+    wrong, and the wrong switch into MLFQ (entry 3) contributing its excess; the wrong FIFO entry contributes nothing
+    (no window into FIFO). The fixture's own switch excess for entry 3 is 0 µs (worked.md, "The aggregates, by hand"), so the entry-3
+    `excess_switch` row's value is replaced by a 250 µs stand-in: the stand-in is what makes the contribution
+    visible — 250 µs when entry 3 is wrong, 0 when every query is correct."""
+    import json
+    from harness.reader import read_config_schedule, read_recognition_log
+    d = fixture_dir("mock-switch")
+    rows, _ = records.build(d / "run.json", d / "trace.jsonl", table="calibrated",
+                            schedule_path=d / "config-schedule.json")
+    aggregates = agg.compute_aggregates(rows, interactive=("editor",))
+    stand_in = "250.000000000000"
+    entry3 = [i for i, r in enumerate(aggregates) if r["metric"] == "switch_window"
+              and r["aggregate"] == "excess_switch" and r["index"] == "3"]
+    assert len(entry3) == 1 and aggregates[entry3[0]]["value"] == "0.000000000000"
+    aggregates[entry3[0]] = dict(aggregates[entry3[0]], value=stand_in)
+    schedule = read_config_schedule(d / "config-schedule.json")
+    queries = [{"t_set_change": t, "telemetry": {"t_us": t, "processes": []}, "validation": "unmodified",
+                "latency_us": 100, "proposal": {"system": {"mode": "dev", "background_wanted": True}}}
+               for t in (500, 10500, 40500)]
+    (tmp_path / "log.json").write_text(json.dumps({"workload_id": "mock-switch", "condition": "llm_algo",
+                                                   "seed": None, "telemetry": "names", "queries": queries}))
+    log = read_recognition_log(tmp_path / "log.json")
+    grades = [{"metric": "config_correct", "t": 500, "value": 1}, {"metric": "config_correct", "t": 10500, "value": 0},
+              {"metric": "config_correct", "t": 40500, "value": 0}, {"metric": "mode_correct", "t": 40500, "value": 1}]
+    out = {r["aggregate"]: r["value"] for r in agg.flip_aggregates(aggregates, schedule, log, grades)}
+    assert out == {"change_count": "3.000000000000", "wrong_change_count": "2.000000000000",
+                   "wrong_switch_excess_sum": stand_in}
+    flip_rows = agg.flip_aggregates(aggregates, schedule, log, grades)
+    assert all(r["entity"] == "schedule" and r["metric"] == "config_interval" and r["index"] == "" for r in flip_rows)
+    assert {r["workload_id"] for r in flip_rows} == {"mock-switch"} and all(r["condition"] == "llm_algo" for r in flip_rows)
+    validate_rows(flip_rows, AGGREGATES_SCHEMA)
+    # every query correct: changes stay, nothing is wrong, no excess
+    out = {r["aggregate"]: r["value"] for r in agg.flip_aggregates(
+        aggregates, schedule, log, [dict(g, value=1) for g in grades])}
+    assert out["change_count"] == "3.000000000000" and out["wrong_change_count"] == "0.000000000000"
+    assert out["wrong_switch_excess_sum"] == "0.000000000000"
+    # an ungraded query (no config_correct row) is a change and never a wrong one
+    out = {r["aggregate"]: r["value"] for r in agg.flip_aggregates(aggregates, schedule, log, grades[:1])}
+    assert out["wrong_change_count"] == "0.000000000000"
+    # a one-entry schedule (the fixed condition's) has no change
+    (tmp_path / "one.json").write_text(json.dumps({"workload_id": "mock-switch", "condition": "fixed",
+                                                   "schedule": [json.loads((d / "config-schedule.json").read_text())["schedule"][0]]}))
+    out = {r["aggregate"]: r["value"] for r in agg.flip_aggregates(aggregates, read_config_schedule(tmp_path / "one.json"), log, grades)}
+    assert out["change_count"] == "0.000000000000"
+    assert agg.flip_aggregates([], schedule, log, grades) == []

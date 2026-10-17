@@ -1,6 +1,7 @@
 # C1 — single-situation calibration: pure media (building-plan §3 C1).
 # Also the C5 familiarity-ladder base: tiers rebind these archetypes under
 # other name tiers (c5.variant.yaml).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-media
   seed: 104
@@ -11,9 +12,12 @@ segments:
      scenario: [S13]}
 
 tasks:
-  - {id: video, name: mpv, archetype: video-playback,
+  - {id: video, name: mpv, archetype: video-player,
      arrive: 0s, depart: 60s}
-  - {id: music, name: spotify, archetype: audio-playback,
+  - {id: music, name: mpv, archetype: audio-player,
      arrive: 0s, depart: 60s}
 
-focus: []
+input: []
+
+focus:
+  - {from: 0s, to: 60s, task: video}

@@ -7,15 +7,22 @@ carries. It knows nothing about which file, task role, or condition it is
 looking at. The config schedule is the third input (§3): `switch_window` and `boost_window` read
 the incoming entry's params from it by `index`.
 
-Alongside the rows it returns the guard messages the metrics doc names: tail
-iterations versus head ticks per chain, the `deadline` cross-check on
-single-stage chains, stimulus counts against the run file's wake events, and
-the schedule cross-check (an applied entry the schedule does not carry, or
-carries with another algorithm; a switch into MLFQ with no schedule given).
+A `ready(cause = wake)` line completes the task's next WAIT in program order,
+so its row carries that WAIT's channel kind from the run file (`input`, `timer`,
+`chain`, …; metrics doc §6.1).
+
+Alongside the rows it returns the guard messages the metrics doc names: more
+tail iterations than consumed head ticks per chain, the `deadline` cross-check on
+single-stage chains, stimulus counts — `input`-channel wake lines against the
+run file's input wake events — a wake line past the last WAIT of its task's
+program, and the schedule cross-check (an applied entry the schedule does not
+carry, or carries with another algorithm; a switch into MLFQ with no schedule
+given).
 """
 
+import bisect
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, Iterator, List, Optional
 
 _BLOCKING_END = {"block", "exit", "depart"}
 
@@ -35,7 +42,7 @@ def w_single(params) -> int:
 class _TaskState:
     arrive_t: Optional[int] = None
     running_since: Optional[int] = None
-    pending_ready: List[tuple] = field(default_factory=list)   # (t, cause)
+    pending_ready: List[tuple] = field(default_factory=list)   # (t, cause, channel)
     cpu: int = 0
     preempts: int = 0
     end: Optional[tuple] = None                                 # (t, reason)
@@ -43,7 +50,9 @@ class _TaskState:
     occupancy: List[tuple] = field(default_factory=list)        # (start, end) clipped at T_end
     # chain bookkeeping
     ticks: List[int] = field(default_factory=list)              # ready(timer_tick) times
-    wake_ready: int = 0                                         # ready(wake) lines seen
+    waits: Optional[Iterator[str]] = None                       # channel kinds of the WAITs still to complete
+    input_ready: int = 0                                        # ready(wake) lines on an input channel
+    unmatched: List[int] = field(default_factory=list)         # ready(wake) times past the program's last WAIT
     iter_open: Optional[int] = None                             # start t of the open iteration
     iter_ends: List[int] = field(default_factory=list)          # completion t per iteration
     deadlines: List[dict] = field(default_factory=list)
@@ -82,7 +91,8 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
 
     def state(tid):
         if tid not in tasks:
-            tasks[tid] = _TaskState()
+            info = run.tasks.get(tid)
+            tasks[tid] = _TaskState(waits=info.wait_channels() if info is not None else iter(()))
             order.append(tid)
         return tasks[tid]
 
@@ -109,22 +119,27 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
         if kind == "task_arrive":
             st.arrive_t = t
         elif kind == "ready":
+            channel = None
+            if ev["cause"] == "wake":
+                channel = next(st.waits, None)
+                if channel is None:
+                    st.unmatched.append(t)
+                elif channel == "input":
+                    st.input_ready += 1
             if st.running_since is not None:              # inside own occupancy
                 if t <= t_end:
-                    rows.append(_row(ev["task"], "ready_wait", t, 0, cause=ev["cause"]))
+                    rows.append(_ready_row(ev["task"], t, 0, ev["cause"], channel))
             else:
-                st.pending_ready.append((t, ev["cause"]))
+                st.pending_ready.append((t, ev["cause"], channel))
             if ev["cause"] == "timer_tick":
                 st.ticks.append(t)
-            if ev["cause"] == "wake":
-                st.wake_ready += 1
             if iteration_start(ev["task"], ev):
                 close_iteration(st, t)                    # zero-wait boundary
                 st.iter_open = t
         elif kind == "run_start":
             if t <= t_end:
-                for (rt, cause) in st.pending_ready:
-                    rows.append(_row(ev["task"], "ready_wait", rt, t - rt, cause=cause))
+                for (rt, cause, channel) in st.pending_ready:
+                    rows.append(_ready_row(ev["task"], rt, t - rt, cause, channel))
             st.pending_ready = []
             st.running_since = t
         elif kind == "run_end":
@@ -158,6 +173,9 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
         if st.arrive_t is None or st.arrive_t > t_end:
             continue
         info = run.tasks.get(tid)
+        # the task_arrive line's time, the arrival §9's censored turnaround reads: a task
+        # whose first instruction is a WAIT has no ready(cause = arrive) line (§11 item 5)
+        rows.append(_row(tid, "arrival", t_end, st.arrive_t))
         rows.append(_row(tid, "cpu_delivered", t_end, st.cpu))
         busy += st.cpu
         if info is not None and info.demand is not None:
@@ -220,22 +238,33 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                     reached = limit
                 end = max(end, reached)
             value = end - t_apply
-            # ---- boost windows (§6.10): one per boost instant t_apply + k·boost_interval_us
-            # inside this MLFQ interval, sized by the same rule from that instant with the
-            # params in force there, clipped at the next boost (or the interval's end)
-            boost = int(entry.params["boost_interval_us"])
-            k = 1
-            while t_apply + k * boost < limit:
-                t_b = t_apply + k * boost
-                t_next = min(t_apply + (k + 1) * boost, limit)
-                in_force = ev
-                for later in configs[i + 1:]:
-                    if later["t"] > t_b:
-                        break
-                    if later["algorithm"] == "MLFQ" and later["t"] <= t_b:
-                        in_force = later
-                force_entry = schedule.entry(in_force["index"])
-                need_b = w_single(force_entry.params) if force_entry is not None else need
+            # ---- boost windows (§6.10): the boost timer restarts at every applied MLFQ
+            # entry of this interval, a same-algorithm one included, as in the reference
+            # simulator (`apply_config` voids the policy timers, `Mlfq::start` arms the
+            # boost at the applied time + boost_interval_us). So the instants are
+            # t_e + k·boost_interval_us (k ≥ 1) of the latest applied entry e, before the
+            # next entry applies and before the interval's end; each window is sized by the
+            # same rule from its instant with e's params, clipped at the next boost instant
+            # (or the interval's end). An entry the schedule does not carry as MLFQ (a guard
+            # above) keeps the params before it.
+            segments = [(ev, entry.params)]
+            for later in configs[i + 1:]:
+                if later["algorithm"] != ev["algorithm"]:
+                    break
+                later_entry = schedule.entry(later["index"])
+                ok = later_entry is not None and later_entry.algorithm == "MLFQ"
+                segments.append((later, later_entry.params if ok else segments[-1][1]))
+            instants = []                               # (t_b, entry in force, its params)
+            for j, (e, params) in enumerate(segments):
+                stop = segments[j + 1][0]["t"] if j + 1 < len(segments) else limit
+                boost = int(params["boost_interval_us"])
+                t_b = e["t"] + boost
+                while t_b < stop:
+                    instants.append((t_b, e, params))
+                    t_b += boost
+            for n, (t_b, in_force, params) in enumerate(instants):
+                t_next = instants[n + 1][0] if n + 1 < len(instants) else limit
+                need_b = w_single(params)
                 hogs_b = [tid for tid in order if _is_hog(tasks[tid], t_b)]
                 end_b = t_b
                 for tid in hogs_b:
@@ -245,7 +274,6 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                     end_b = max(end_b, reached)
                 rows.append(_row("schedule", "boost_window", t_b, end_b - t_b,
                                  algorithm="MLFQ", index=in_force["index"], hogs=len(hogs_b)))
-                k += 1
         else:
             value = 0
         switches.append(Switch(t=t_apply, index=ev["index"], algorithm=ev["algorithm"],
@@ -253,43 +281,85 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
         rows.append(_row("schedule", "switch_window", t_apply, value,
                          algorithm=ev["algorithm"], index=ev["index"], hogs=len(hogs)))
 
-    # ---- job rows and chain guards
+    # ---- job rows and chain guards (§6.2 under the TIMER skip rule; 9.11 D3, D17; 9.14 decision 1)
     for chain in run.chains:
         head, tail = chain[0], chain[-1]
         if head not in tasks:
             continue
         hs, ts = tasks[head], tasks[tail]
         period = run.tasks[head].period_us
-        # The k-th ready(timer_tick) line marks the consumption of tick k; the
-        # tick itself sits on the TIMER grid, t0 + k*period, with t0 the task's
-        # arrival (metrics doc §11, assumption 4). A tick is consumed late when
-        # the lane was busy or the task was in backlog, so the line's time is
-        # never the tick's.
+        # Each ready(timer_tick) line marks the consumption of one tick: the latest
+        # grid tick at or before the line's time, the grid being t0 + k*period with
+        # t0 the task's first TIMER execution — its first ready(timer_tick) line,
+        # at its arrival: the TIMER-first invariant makes the TIMER the task's first
+        # instruction and the executor executes it in the arrival step, on a free
+        # lane or a busy one (metrics doc §11, assumption 4). A tick consumed late sits
+        # before its line, never at it. Every unconsumed tick between two
+        # consumptions was skipped: a job with no work and no completion, missed.
+        # The j-th consumption is the tail's j-th iteration, since a skipped tick
+        # sends no wake down the chain and wakes queue with depth.
+        # The tail can fall short at T_end and that is no error: an iteration still
+        # running there is not completed within the window (metrics doc §4), and a
+        # tick consumed shortly before T_end has no time to finish its frame (9.16
+        # D3). So only a tail with more completions than consumed ticks fails; a
+        # wake lost mid-run, which also leaves the tail short, is not caught here.
         consumed = [tk for tk in hs.ticks if tk <= t_end]
-        t0 = hs.arrive_t
-        ticks = [t0 + k * period for k in range(len(consumed))]
+        if not consumed:
+            continue
+        t0 = consumed[0]
+        indices = [(tk - t0) // period for tk in consumed]
         ends = [e for e in ts.iter_ends if e <= t_end]
-        if len(ends) != len(ticks):
+        if len(ends) > len(consumed):
             guards.append(f"chain {head}: tail {tail} completed {len(ends)} iteration(s) "
-                          f"for {len(ticks)} head tick(s) inside the window")
-        for k, tick in enumerate(ticks):
-            if k < len(ends):
-                rows.append(_row(head, "job", tick, ends[k] - tick, period_us=period))
+                          f"for {len(consumed)} consumed head tick(s) inside the window")
+        jobs = []                                   # (tick index, completion or None, skipped)
+        prev = -1
+        for j, k in enumerate(indices):
+            if k <= prev:
+                guards.append(f"chain {head}: ready(timer_tick) at t={consumed[j]} consumes tick {k}, "
+                              f"not after tick {prev}")
+                continue
+            for s in range(prev + 1, k):
+                jobs.append((s, None, True))
+            jobs.append((k, ends[j] if j < len(ends) else None, False))
+            prev = k
+        for k, completion, skipped in jobs:
+            tick = t0 + k * period
+            if skipped:
+                rows.append(_row(head, "job", tick, None, period_us=period, skipped=1))
+            elif completion is not None:
+                rows.append(_row(head, "job", tick, completion - tick, period_us=period, skipped=0))
         if len(chain) == 1:
-            for k, dl in enumerate(hs.deadlines):
-                if k >= len(ends) or dl["t"] > t_end:
+            # one deadline line per tick, consumed or skipped, in tick order; a skipped
+            # tick's line is read by `met` alone (9.11 D17), a consumed tick's by its
+            # completion and slack
+            lines = [dl for dl in hs.deadlines if dl["t"] <= t_end]
+            for n, (k, completion, skipped) in enumerate(jobs):
+                if n >= len(lines):
                     break
-                if dl["t"] != ends[k] or dl["slack_us"] != period - (ends[k] - ticks[k]):
-                    guards.append(f"deadline line for {head} job {k} (t={dl['t']}, "
-                                  f"slack={dl['slack_us']}) disagrees with the job row "
-                                  f"(completion {ends[k]}, value {ends[k] - ticks[k]})")
+                dl = lines[n]
+                tick = t0 + k * period
+                if skipped:
+                    if dl["met"]:
+                        guards.append(f"deadline line {n} for {head} (t={dl['t']}) says met where "
+                                      f"tick {k} was skipped")
+                elif completion is not None:
+                    if dl["t"] != completion or dl["slack_us"] != period - (completion - tick):
+                        guards.append(f"deadline line for {head} job {k} (t={dl['t']}, "
+                                      f"slack={dl['slack_us']}) disagrees with the job row "
+                                      f"(completion {completion}, value {completion - tick})")
 
-    # ---- stimulus guard
-    for tid, n in run.wakes.items():
-        seen = tasks[tid].wake_ready if tid in tasks else 0
+    # ---- stimulus guard, and wake lines the run file has no WAIT for
+    for tid, n in run.input_wakes.items():
+        seen = tasks[tid].input_ready if tid in tasks else 0
         if seen != n:
-            guards.append(f"task {tid}: {seen} ready(wake) line(s) for {n} wake event(s) "
-                          "in the run file")
+            guards.append(f"task {tid}: {seen} input ready(wake) line(s) for {n} input wake "
+                          "event(s) in the run file")
+    for tid in order:
+        extra = tasks[tid].unmatched
+        if extra:
+            guards.append(f"task {tid}: {len(extra)} ready(wake) line(s) past the last WAIT "
+                          f"of its program, the first at t={extra[0]}")
 
     return Result(rows=rows, guards=guards, switches=switches)
 
@@ -301,22 +371,31 @@ def _is_hog(st, t_apply) -> bool:
         return False
     if st.end is not None and st.end[0] <= t_apply:
         return False
-    first = next(((t, reason) for (t, reason) in st.run_ends if t > t_apply), None)
-    return first is not None and first[1] == "preempt"
+    # run_ends is in trace order, so the first run end past t_apply is found by bisection — the boost-window loop
+    # asks this per hog per boost instant, and a long file's task holds millions of run ends (9.14 D14)
+    i = bisect.bisect_right(st.run_ends, t_apply, key=lambda e: e[0])
+    return i < len(st.run_ends) and st.run_ends[i][1] == "preempt"
 
 
 def _time_of_cpu_since(occupancy, t0, need) -> Optional[int]:
     """The instant a task's CPU received since t0 reaches `need`, from its
-    occupancy intervals; None if it never does inside the window."""
+    occupancy intervals; None if it never does inside the window. The intervals
+    are in trace order and disjoint, so those ending at or before t0 are a prefix
+    skipped by bisection (9.14 D14)."""
     got = 0
-    for (start, end) in occupancy:
-        if end <= t0:
-            continue
+    for j in range(bisect.bisect_right(occupancy, t0, key=lambda iv: iv[1]), len(occupancy)):
+        start, end = occupancy[j]
         start = max(start, t0)
         if got + (end - start) >= need:
             return start + (need - got)
         got += end - start
     return None
+
+
+def _ready_row(entity, t, value, cause, channel):
+    if channel is None:
+        return _row(entity, "ready_wait", t, value, cause=cause)
+    return _row(entity, "ready_wait", t, value, cause=cause, channel=channel)
 
 
 def _row(entity, metric, t, value, **attrs):

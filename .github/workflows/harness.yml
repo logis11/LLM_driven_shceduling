@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:    # one run on a branch proves the harness lint and suite on Linux against the blessed build (9.21)
 
 jobs:
   harness:
@@ -14,6 +15,9 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r harness/tools/requirements.txt -r dataset/tools/requirements.txt
-      - run: make -C dataset dataset        # the scoring lint reads the compiled coreset
+      - run: make -C dataset dataset
+      - run: make -C dataset variants    # the RQ0 gate spec lists the variant files (9.14); the scoring lint reads the compiled coreset
+      - run: make -C dataset generated   # the generated layer's sets; `check` reads every manifest (9.19)
+      - run: make -C dataset check       # the build the harness reads is the blessed one (9.18)
       - run: make -C harness lint
-      - run: make -C harness test
+      - run: make -C harness test    # without the two coreset-wide mock tests, which exceed the runner's 16 GB; `make -C harness test-full` at home (9.21)

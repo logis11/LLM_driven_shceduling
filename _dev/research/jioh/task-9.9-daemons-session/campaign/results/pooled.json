@@ -1,0 +1,9797 @@
+{
+ "tag": "meas-ci:session:2026-09-24",
+ "machine": "EPYC 7763",
+ "gated_out": [
+  {
+   "app": "session",
+   "repeat": 50,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35934388525/meas-session-session-r50-full"
+  },
+  {
+   "app": "session",
+   "repeat": 52,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35938521032/meas-session-session-r52-full"
+  },
+  {
+   "app": "session",
+   "repeat": 53,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35939493589/meas-session-session-r53-full"
+  },
+  {
+   "app": "session",
+   "repeat": 54,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35940495385/meas-session-session-r54-full"
+  },
+  {
+   "app": "session",
+   "repeat": 55,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35940495385/meas-session-session-r55-full"
+  },
+  {
+   "app": "session",
+   "repeat": 56,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35940495385/meas-session-session-r56-full"
+  },
+  {
+   "app": "session",
+   "repeat": 57,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35941513123/meas-session-session-r57-full"
+  },
+  {
+   "app": "session",
+   "repeat": 59,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35941513123/meas-session-session-r59-full"
+  },
+  {
+   "app": "session",
+   "repeat": 64,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35945605366/meas-session-session-r64-full"
+  },
+  {
+   "app": "session",
+   "repeat": 65,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35948704522/meas-session-session-r65-full"
+  },
+  {
+   "app": "session",
+   "repeat": 66,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35948704522/meas-session-session-r66-full"
+  },
+  {
+   "app": "session",
+   "repeat": 67,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35948704522/meas-session-session-r67-full"
+  },
+  {
+   "app": "session",
+   "repeat": 70,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35948704522/meas-session-session-r70-full"
+  },
+  {
+   "app": "session",
+   "repeat": 78,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35948704522/meas-session-session-r78-full"
+  },
+  {
+   "app": "session",
+   "repeat": 80,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+   "path": "35948704522/meas-session-session-r80-full"
+  },
+  {
+   "app": "session",
+   "repeat": 81,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35948704522/meas-session-session-r81-full"
+  },
+  {
+   "app": "session",
+   "repeat": 82,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35948704522/meas-session-session-r82-full"
+  },
+  {
+   "app": "session",
+   "repeat": 84,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35948704522/meas-session-session-r84-full"
+  }
+ ],
+ "other_machine": [],
+ "not_repeats": [],
+ "runs": {
+  "session": {
+   "family": "session",
+   "repeats": [
+    47,
+    48,
+    49,
+    51,
+    58,
+    60,
+    61,
+    62,
+    63,
+    68,
+    69,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    79,
+    83,
+    85,
+    86,
+    87,
+    88
+   ],
+   "mode": "full",
+   "cpu_model": {
+    "47": "AMD EPYC 7763 64-Core Processor",
+    "48": "AMD EPYC 7763 64-Core Processor",
+    "49": "AMD EPYC 7763 64-Core Processor",
+    "51": "AMD EPYC 7763 64-Core Processor",
+    "58": "AMD EPYC 7763 64-Core Processor",
+    "60": "AMD EPYC 7763 64-Core Processor",
+    "61": "AMD EPYC 7763 64-Core Processor",
+    "62": "AMD EPYC 7763 64-Core Processor",
+    "63": "AMD EPYC 7763 64-Core Processor",
+    "68": "AMD EPYC 7763 64-Core Processor",
+    "69": "AMD EPYC 7763 64-Core Processor",
+    "71": "AMD EPYC 7763 64-Core Processor",
+    "72": "AMD EPYC 7763 64-Core Processor",
+    "73": "AMD EPYC 7763 64-Core Processor",
+    "74": "AMD EPYC 7763 64-Core Processor",
+    "75": "AMD EPYC 7763 64-Core Processor",
+    "76": "AMD EPYC 7763 64-Core Processor",
+    "77": "AMD EPYC 7763 64-Core Processor",
+    "79": "AMD EPYC 7763 64-Core Processor",
+    "83": "AMD EPYC 7763 64-Core Processor",
+    "85": "AMD EPYC 7763 64-Core Processor",
+    "86": "AMD EPYC 7763 64-Core Processor",
+    "87": "AMD EPYC 7763 64-Core Processor",
+    "88": "AMD EPYC 7763 64-Core Processor"
+   },
+   "kernel": {
+    "47": "6.17.0-1022-azure",
+    "48": "6.17.0-1022-azure",
+    "49": "6.17.0-1022-azure",
+    "51": "6.17.0-1022-azure",
+    "58": "6.17.0-1022-azure",
+    "60": "6.17.0-1022-azure",
+    "61": "6.17.0-1022-azure",
+    "62": "6.17.0-1022-azure",
+    "63": "6.17.0-1022-azure",
+    "68": "6.17.0-1022-azure",
+    "69": "6.17.0-1022-azure",
+    "71": "6.17.0-1022-azure",
+    "72": "6.17.0-1022-azure",
+    "73": "6.17.0-1022-azure",
+    "74": "6.17.0-1022-azure",
+    "75": "6.17.0-1022-azure",
+    "76": "6.17.0-1022-azure",
+    "77": "6.17.0-1022-azure",
+    "79": "6.17.0-1022-azure",
+    "83": "6.17.0-1022-azure",
+    "85": "6.17.0-1022-azure",
+    "86": "6.17.0-1022-azure",
+    "87": "6.17.0-1022-azure",
+    "88": "6.17.0-1022-azure"
+   },
+   "run_id": {
+    "47": "35934388525",
+    "48": "35934388525",
+    "49": "35934388525",
+    "51": "35934388525",
+    "58": "35941513123",
+    "60": "35941513123",
+    "61": "35945605366",
+    "62": "35945605366",
+    "63": "35945605366",
+    "68": "35948704522",
+    "69": "35948704522",
+    "71": "35948704522",
+    "72": "35948704522",
+    "73": "35948704522",
+    "74": "35948704522",
+    "75": "35948704522",
+    "76": "35948704522",
+    "77": "35948704522",
+    "79": "35948704522",
+    "83": "35948704522",
+    "85": "35948704522",
+    "86": "35948704522",
+    "87": "35948704522",
+    "88": "35948704522"
+   },
+   "versions": {
+    "47": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "48": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "49": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "51": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "58": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "60": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "61": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "62": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "63": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "68": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "69": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "71": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "72": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "73": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "74": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "75": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "76": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "77": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "79": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "83": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "85": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "86": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "87": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    },
+    "88": {
+     "dbus": "1.14.10-4ubuntu4.1",
+     "dbus-broker": "",
+     "dbus-daemon": "1.14.10-4ubuntu4.1",
+     "gdm3": "46.2-1ubuntu1~24.04.9",
+     "gnome-initial-setup": "46.3-1ubuntu3~24.04.2",
+     "gnome-session": "46.0-1ubuntu4",
+     "gnome-shell": "46.0-0ubuntu6~24.04.14",
+     "mutter": "46.2-1ubuntu0.24.04.16",
+     "pipewire": "1.0.5-1ubuntu3.3",
+     "pipewire-pulse": "1.0.5-1ubuntu3.3",
+     "systemd": "255.4-1ubuntu8.17",
+     "ubuntu-desktop-minimal": "1.539.2",
+     "ubuntu-settings": "24.04.6",
+     "wireplumber": "0.4.17-1ubuntu4.1"
+    }
+   },
+   "foreign_user": [],
+   "foreign": {
+    "47": {
+     "user": {
+      "schedule_ins": 36,
+      "cpu_ms": 33.878
+     },
+     "kernel": {
+      "schedule_ins": 15087,
+      "cpu_ms": 222.512
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.8821090198788666e-05
+    },
+    "48": {
+     "user": {
+      "schedule_ins": 38,
+      "cpu_ms": 33.611
+     },
+     "kernel": {
+      "schedule_ins": 14091,
+      "cpu_ms": 237.312
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.8672757030269963e-05
+    },
+    "49": {
+     "user": {
+      "schedule_ins": 36,
+      "cpu_ms": 32.582
+     },
+     "kernel": {
+      "schedule_ins": 14623,
+      "cpu_ms": 238.405
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.8101090998787778e-05
+    },
+    "51": {
+     "user": {
+      "schedule_ins": 43,
+      "cpu_ms": 39.375
+     },
+     "kernel": {
+      "schedule_ins": 13546,
+      "cpu_ms": 224.138
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 2.1874975694471453e-05
+    },
+    "58": {
+     "user": {
+      "schedule_ins": 19,
+      "cpu_ms": 18.197
+     },
+     "kernel": {
+      "schedule_ins": 14136,
+      "cpu_ms": 227.332
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.0109433211740875e-05
+    },
+    "60": {
+     "user": {
+      "schedule_ins": 23,
+      "cpu_ms": 22.533
+     },
+     "kernel": {
+      "schedule_ins": 14520,
+      "cpu_ms": 235.675
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.2518319424089529e-05
+    },
+    "61": {
+     "user": {
+      "schedule_ins": 27,
+      "cpu_ms": 26.626
+     },
+     "kernel": {
+      "schedule_ins": 15115,
+      "cpu_ms": 225.363
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.4792189350690333e-05
+    },
+    "62": {
+     "user": {
+      "schedule_ins": 19,
+      "cpu_ms": 18.932
+     },
+     "kernel": {
+      "schedule_ins": 12005,
+      "cpu_ms": 182.079
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.051775440499021e-05
+    },
+    "63": {
+     "user": {
+      "schedule_ins": 19,
+      "cpu_ms": 18.775
+     },
+     "kernel": {
+      "schedule_ins": 13553,
+      "cpu_ms": 210.761
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.043054396606226e-05
+    },
+    "68": {
+     "user": {
+      "schedule_ins": 24,
+      "cpu_ms": 22.788
+     },
+     "kernel": {
+      "schedule_ins": 15472,
+      "cpu_ms": 253.135
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.2659985933348964e-05
+    },
+    "69": {
+     "user": {
+      "schedule_ins": 19,
+      "cpu_ms": 18.464
+     },
+     "kernel": {
+      "schedule_ins": 12645,
+      "cpu_ms": 222.389
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.0257760681509974e-05
+    },
+    "71": {
+     "user": {
+      "schedule_ins": 19,
+      "cpu_ms": 18.303
+     },
+     "kernel": {
+      "schedule_ins": 13416,
+      "cpu_ms": 205.987
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.0168322035197738e-05
+    },
+    "72": {
+     "user": {
+      "schedule_ins": 19,
+      "cpu_ms": 18.623
+     },
+     "kernel": {
+      "schedule_ins": 12197,
+      "cpu_ms": 193.948
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.0346088119804179e-05
+    },
+    "73": {
+     "user": {
+      "schedule_ins": 20,
+      "cpu_ms": 18.71
+     },
+     "kernel": {
+      "schedule_ins": 13040,
+      "cpu_ms": 241.753
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.0394432895074561e-05
+    },
+    "74": {
+     "user": {
+      "schedule_ins": 19,
+      "cpu_ms": 18.858
+     },
+     "kernel": {
+      "schedule_ins": 13207,
+      "cpu_ms": 248.881
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.0476649205584657e-05
+    },
+    "75": {
+     "user": {
+      "schedule_ins": 19,
+      "cpu_ms": 18.357
+     },
+     "kernel": {
+      "schedule_ins": 14602,
+      "cpu_ms": 225.483
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.0198322001864442e-05
+    },
+    "76": {
+     "user": {
+      "schedule_ins": 20,
+      "cpu_ms": 19.73
+     },
+     "kernel": {
+      "schedule_ins": 13090,
+      "cpu_ms": 216.33
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.0961098932112298e-05
+    },
+    "77": {
+     "user": {
+      "schedule_ins": 18,
+      "cpu_ms": 18.312
+     },
+     "kernel": {
+      "schedule_ins": 11608,
+      "cpu_ms": 235.533
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.017332202964219e-05
+    },
+    "79": {
+     "user": {
+      "schedule_ins": 19,
+      "cpu_ms": 18.241
+     },
+     "kernel": {
+      "schedule_ins": 13244,
+      "cpu_ms": 190.318
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.0133877629024858e-05
+    },
+    "83": {
+     "user": {
+      "schedule_ins": 19,
+      "cpu_ms": 18.349
+     },
+     "kernel": {
+      "schedule_ins": 13927,
+      "cpu_ms": 225.633
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.0193877562358265e-05
+    },
+    "85": {
+     "user": {
+      "schedule_ins": 19,
+      "cpu_ms": 18.551
+     },
+     "kernel": {
+      "schedule_ins": 11644,
+      "cpu_ms": 204.754
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.0306099659889266e-05
+    },
+    "86": {
+     "user": {
+      "schedule_ins": 18,
+      "cpu_ms": 17.447
+     },
+     "kernel": {
+      "schedule_ins": 14226,
+      "cpu_ms": 211.566
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 9.692761623175073e-06
+    },
+    "87": {
+     "user": {
+      "schedule_ins": 20,
+      "cpu_ms": 22.304
+     },
+     "kernel": {
+      "schedule_ins": 11982,
+      "cpu_ms": 202.163
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.2391097343225173e-05
+    },
+    "88": {
+     "user": {
+      "schedule_ins": 19,
+      "cpu_ms": 18.565
+     },
+     "kernel": {
+      "schedule_ins": 12104,
+      "cpu_ms": 216.79
+     },
+     "in_unit_other": {
+      "schedule_ins": 0,
+      "cpu_ms": 0.0
+     },
+     "share_of_phase": 1.0313865969186737e-05
+    }
+   },
+   "display_servers": {
+    "47": [],
+    "48": [],
+    "49": [],
+    "51": [],
+    "58": [],
+    "60": [],
+    "61": [],
+    "62": [],
+    "63": [],
+    "68": [],
+    "69": [],
+    "71": [],
+    "72": [],
+    "73": [],
+    "74": [],
+    "75": [],
+    "76": [],
+    "77": [],
+    "79": [],
+    "83": [],
+    "85": [],
+    "86": [],
+    "87": [],
+    "88": []
+   },
+   "in_unit_other": {
+    "47": [],
+    "48": [],
+    "49": [],
+    "51": [],
+    "58": [],
+    "60": [],
+    "61": [],
+    "62": [],
+    "63": [],
+    "68": [],
+    "69": [],
+    "71": [],
+    "72": [],
+    "73": [],
+    "74": [],
+    "75": [],
+    "76": [],
+    "77": [],
+    "79": [],
+    "83": [],
+    "85": [],
+    "86": [],
+    "87": [],
+    "88": []
+   },
+   "phases": {
+    "steady": {
+     "entries": {
+      "gnome-shell": {
+       "repeats": [
+        47,
+        48,
+        49,
+        51,
+        58,
+        60,
+        61,
+        62,
+        63,
+        68,
+        69,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        79,
+        83,
+        85,
+        86,
+        87,
+        88
+       ],
+       "span_s": [
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.004,
+        1800.004,
+        1800.002,
+        1800.002,
+        1800.003,
+        1800.002,
+        1800.004,
+        1800.002,
+        1800.003,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.003,
+        1800.002,
+        1800.004
+       ],
+       "wakes_per_s": [
+        0.595,
+        0.587,
+        0.587,
+        0.591,
+        0.582,
+        0.589,
+        0.588,
+        0.594,
+        0.592,
+        0.584,
+        0.584,
+        0.588,
+        0.581,
+        0.593,
+        0.593,
+        0.593,
+        0.593,
+        0.577,
+        0.582,
+        0.591,
+        0.583,
+        0.579,
+        0.579,
+        0.589
+       ],
+       "cpu_share": [
+        0.000237,
+        0.000225,
+        0.000249,
+        0.000237,
+        0.000199,
+        0.000204,
+        0.000209,
+        0.000218,
+        0.000218,
+        0.000217,
+        0.000226,
+        0.0002,
+        0.000208,
+        0.000211,
+        0.000211,
+        0.000203,
+        0.000221,
+        0.000196,
+        0.000216,
+        0.000201,
+        0.000215,
+        0.000203,
+        0.000218,
+        0.000209
+       ],
+       "instances": {
+        "47": {
+         "gnome-shell": [
+          26196
+         ]
+        },
+        "48": {
+         "gnome-shell": [
+          25112
+         ]
+        },
+        "49": {
+         "gnome-shell": [
+          26134
+         ]
+        },
+        "51": {
+         "gnome-shell": [
+          25049
+         ]
+        },
+        "58": {
+         "gnome-shell": [
+          25764
+         ]
+        },
+        "60": {
+         "gnome-shell": [
+          25716
+         ]
+        },
+        "61": {
+         "gnome-shell": [
+          25168
+         ]
+        },
+        "62": {
+         "gnome-shell": [
+          25190
+         ]
+        },
+        "63": {
+         "gnome-shell": [
+          25128
+         ]
+        },
+        "68": {
+         "gnome-shell": [
+          25102
+         ]
+        },
+        "69": {
+         "gnome-shell": [
+          26827
+         ]
+        },
+        "71": {
+         "gnome-shell": [
+          26056
+         ]
+        },
+        "72": {
+         "gnome-shell": [
+          26853
+         ]
+        },
+        "73": {
+         "gnome-shell": [
+          26168
+         ]
+        },
+        "74": {
+         "gnome-shell": [
+          25101
+         ]
+        },
+        "75": {
+         "gnome-shell": [
+          25038
+         ]
+        },
+        "76": {
+         "gnome-shell": [
+          25806
+         ]
+        },
+        "77": {
+         "gnome-shell": [
+          25106
+         ]
+        },
+        "79": {
+         "gnome-shell": [
+          26834
+         ]
+        },
+        "83": {
+         "gnome-shell": [
+          25827
+         ]
+        },
+        "85": {
+         "gnome-shell": [
+          26861
+         ]
+        },
+        "86": {
+         "gnome-shell": [
+          26794
+         ]
+        },
+        "87": {
+         "gnome-shell": [
+          26674
+         ]
+        },
+        "88": {
+         "gnome-shell": [
+          26751
+         ]
+        }
+       },
+       "threads": {
+        "gnome-shell/JS Helper": {
+         "threads": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+         ],
+         "wakes_per_s": [
+          0.306666,
+          0.303333,
+          0.3,
+          0.306111,
+          0.296666,
+          0.305,
+          0.304444,
+          0.308888,
+          0.307777,
+          0.298889,
+          0.299444,
+          0.301666,
+          0.296666,
+          0.308889,
+          0.308333,
+          0.307222,
+          0.309444,
+          0.292777,
+          0.295555,
+          0.306111,
+          0.299444,
+          0.295,
+          0.296111,
+          0.305555
+         ],
+         "gap_ms": [
+          {
+           "n": 552,
+           "p50": 0.016,
+           "p90": 7.869,
+           "p99": 59991.491,
+           "mean": 3260.874,
+           "sum": 1800002.437
+          },
+          {
+           "n": 546,
+           "p50": 0.016,
+           "p90": 7.433,
+           "p99": 59991.947,
+           "mean": 3296.708,
+           "sum": 1800002.403
+          },
+          {
+           "n": 540,
+           "p50": 0.016,
+           "p90": 7.694,
+           "p99": 59992.204,
+           "mean": 3333.338,
+           "sum": 1800002.418
+          },
+          {
+           "n": 551,
+           "p50": 0.016,
+           "p90": 7.872,
+           "p99": 59991.455,
+           "mean": 3266.792,
+           "sum": 1800002.463
+          },
+          {
+           "n": 534,
+           "p50": 0.016,
+           "p90": 7.331,
+           "p99": 59992.012,
+           "mean": 3370.791,
+           "sum": 1800002.357
+          },
+          {
+           "n": 549,
+           "p50": 0.016,
+           "p90": 7.491,
+           "p99": 59991.887,
+           "mean": 3278.693,
+           "sum": 1800002.476
+          },
+          {
+           "n": 548,
+           "p50": 0.016,
+           "p90": 7.602,
+           "p99": 59991.728,
+           "mean": 3284.678,
+           "sum": 1800003.617
+          },
+          {
+           "n": 556,
+           "p50": 0.015,
+           "p90": 7.63,
+           "p99": 59991.925,
+           "mean": 3237.417,
+           "sum": 1800003.698
+          },
+          {
+           "n": 554,
+           "p50": 0.016,
+           "p90": 7.881,
+           "p99": 59991.47,
+           "mean": 3249.102,
+           "sum": 1800002.488
+          },
+          {
+           "n": 538,
+           "p50": 0.016,
+           "p90": 7.33,
+           "p99": 60001.304,
+           "mean": 3345.729,
+           "sum": 1800002.448
+          },
+          {
+           "n": 539,
+           "p50": 0.016,
+           "p90": 7.798,
+           "p99": 59991.675,
+           "mean": 3339.522,
+           "sum": 1800002.601
+          },
+          {
+           "n": 543,
+           "p50": 0.016,
+           "p90": 7.411,
+           "p99": 59992.399,
+           "mean": 3314.921,
+           "sum": 1800002.339
+          },
+          {
+           "n": 534,
+           "p50": 0.016,
+           "p90": 7.822,
+           "p99": 59991.601,
+           "mean": 3370.794,
+           "sum": 1800003.807
+          },
+          {
+           "n": 556,
+           "p50": 0.016,
+           "p90": 7.861,
+           "p99": 59992.112,
+           "mean": 3237.414,
+           "sum": 1800002.411
+          },
+          {
+           "n": 555,
+           "p50": 0.017,
+           "p90": 7.651,
+           "p99": 59991.677,
+           "mean": 3243.249,
+           "sum": 1800003.334
+          },
+          {
+           "n": 553,
+           "p50": 0.016,
+           "p90": 7.447,
+           "p99": 59992.264,
+           "mean": 3254.977,
+           "sum": 1800002.289
+          },
+          {
+           "n": 557,
+           "p50": 0.017,
+           "p90": 7.843,
+           "p99": 59991.555,
+           "mean": 3231.602,
+           "sum": 1800002.418
+          },
+          {
+           "n": 527,
+           "p50": 0.016,
+           "p90": 7.46,
+           "p99": 59992.471,
+           "mean": 3415.564,
+           "sum": 1800002.242
+          },
+          {
+           "n": 532,
+           "p50": 0.016,
+           "p90": 7.505,
+           "p99": 59992.072,
+           "mean": 3383.463,
+           "sum": 1800002.357
+          },
+          {
+           "n": 551,
+           "p50": 0.016,
+           "p90": 7.494,
+           "p99": 59992.29,
+           "mean": 3266.792,
+           "sum": 1800002.484
+          },
+          {
+           "n": 539,
+           "p50": 0.016,
+           "p90": 7.423,
+           "p99": 59991.922,
+           "mean": 3339.522,
+           "sum": 1800002.274
+          },
+          {
+           "n": 531,
+           "p50": 0.016,
+           "p90": 7.639,
+           "p99": 59991.798,
+           "mean": 3389.835,
+           "sum": 1800002.534
+          },
+          {
+           "n": 533,
+           "p50": 0.017,
+           "p90": 8.156,
+           "p99": 59991.164,
+           "mean": 3377.115,
+           "sum": 1800002.496
+          },
+          {
+           "n": 550,
+           "p50": 0.016,
+           "p90": 7.625,
+           "p99": 59992.091,
+           "mean": 3272.734,
+           "sum": 1800003.89
+          }
+         ],
+         "run_ms": [
+          {
+           "n": 552,
+           "p50": 0.007,
+           "p90": 0.032,
+           "p99": 0.092,
+           "mean": 0.014,
+           "sum": 7.51
+          },
+          {
+           "n": 546,
+           "p50": 0.007,
+           "p90": 0.031,
+           "p99": 0.093,
+           "mean": 0.013,
+           "sum": 7.325
+          },
+          {
+           "n": 540,
+           "p50": 0.007,
+           "p90": 0.032,
+           "p99": 0.092,
+           "mean": 0.014,
+           "sum": 7.482
+          },
+          {
+           "n": 551,
+           "p50": 0.008,
+           "p90": 0.032,
+           "p99": 0.095,
+           "mean": 0.014,
+           "sum": 7.5
+          },
+          {
+           "n": 534,
+           "p50": 0.007,
+           "p90": 0.031,
+           "p99": 0.091,
+           "mean": 0.013,
+           "sum": 7.125
+          },
+          {
+           "n": 549,
+           "p50": 0.007,
+           "p90": 0.031,
+           "p99": 0.093,
+           "mean": 0.013,
+           "sum": 7.405
+          },
+          {
+           "n": 548,
+           "p50": 0.008,
+           "p90": 0.032,
+           "p99": 0.094,
+           "mean": 0.014,
+           "sum": 7.66
+          },
+          {
+           "n": 556,
+           "p50": 0.007,
+           "p90": 0.034,
+           "p99": 0.103,
+           "mean": 0.014,
+           "sum": 7.999
+          },
+          {
+           "n": 554,
+           "p50": 0.008,
+           "p90": 0.032,
+           "p99": 0.102,
+           "mean": 0.014,
+           "sum": 7.865
+          },
+          {
+           "n": 538,
+           "p50": 0.007,
+           "p90": 0.031,
+           "p99": 0.094,
+           "mean": 0.014,
+           "sum": 7.307
+          },
+          {
+           "n": 539,
+           "p50": 0.007,
+           "p90": 0.033,
+           "p99": 0.096,
+           "mean": 0.014,
+           "sum": 7.526
+          },
+          {
+           "n": 543,
+           "p50": 0.007,
+           "p90": 0.031,
+           "p99": 0.091,
+           "mean": 0.013,
+           "sum": 7.328
+          },
+          {
+           "n": 534,
+           "p50": 0.007,
+           "p90": 0.031,
+           "p99": 0.095,
+           "mean": 0.013,
+           "sum": 7.126
+          },
+          {
+           "n": 556,
+           "p50": 0.007,
+           "p90": 0.032,
+           "p99": 0.091,
+           "mean": 0.014,
+           "sum": 7.563
+          },
+          {
+           "n": 555,
+           "p50": 0.007,
+           "p90": 0.032,
+           "p99": 0.094,
+           "mean": 0.014,
+           "sum": 7.693
+          },
+          {
+           "n": 553,
+           "p50": 0.007,
+           "p90": 0.031,
+           "p99": 0.092,
+           "mean": 0.014,
+           "sum": 7.511
+          },
+          {
+           "n": 557,
+           "p50": 0.008,
+           "p90": 0.033,
+           "p99": 0.099,
+           "mean": 0.014,
+           "sum": 8.037
+          },
+          {
+           "n": 527,
+           "p50": 0.007,
+           "p90": 0.031,
+           "p99": 0.091,
+           "mean": 0.013,
+           "sum": 6.986
+          },
+          {
+           "n": 532,
+           "p50": 0.007,
+           "p90": 0.032,
+           "p99": 0.091,
+           "mean": 0.013,
+           "sum": 7.114
+          },
+          {
+           "n": 551,
+           "p50": 0.007,
+           "p90": 0.031,
+           "p99": 0.091,
+           "mean": 0.013,
+           "sum": 7.372
+          },
+          {
+           "n": 539,
+           "p50": 0.007,
+           "p90": 0.032,
+           "p99": 0.092,
+           "mean": 0.014,
+           "sum": 7.338
+          },
+          {
+           "n": 531,
+           "p50": 0.007,
+           "p90": 0.032,
+           "p99": 0.092,
+           "mean": 0.014,
+           "sum": 7.231
+          },
+          {
+           "n": 533,
+           "p50": 0.008,
+           "p90": 0.032,
+           "p99": 0.097,
+           "mean": 0.014,
+           "sum": 7.249
+          },
+          {
+           "n": 550,
+           "p50": 0.007,
+           "p90": 0.031,
+           "p99": 0.092,
+           "mean": 0.014,
+           "sum": 7.432
+          }
+         ]
+        },
+        "gnome-shell/gmain": {
+         "threads": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+         ],
+         "wakes_per_s": [
+          0.248889,
+          0.249444,
+          0.249444,
+          0.249444,
+          0.25,
+          0.25,
+          0.249999,
+          0.249999,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.249999,
+          0.25,
+          0.25,
+          0.249444,
+          0.25,
+          0.25,
+          0.249444,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.249999
+         ],
+         "gap_ms": [
+          {
+           "n": 448,
+           "p50": 4000.118,
+           "p90": 4000.164,
+           "p99": 4003.131,
+           "mean": 4017.863,
+           "sum": 1800002.437
+          },
+          {
+           "n": 449,
+           "p50": 4000.108,
+           "p90": 4000.136,
+           "p99": 4002.133,
+           "mean": 4008.914,
+           "sum": 1800002.403
+          },
+          {
+           "n": 449,
+           "p50": 4000.11,
+           "p90": 4000.139,
+           "p99": 4000.422,
+           "mean": 4008.914,
+           "sum": 1800002.418
+          },
+          {
+           "n": 449,
+           "p50": 4000.119,
+           "p90": 4000.156,
+           "p99": 4000.685,
+           "mean": 4008.914,
+           "sum": 1800002.463
+          },
+          {
+           "n": 450,
+           "p50": 4000.102,
+           "p90": 4000.122,
+           "p99": 4000.151,
+           "mean": 4000.005,
+           "sum": 1800002.357
+          },
+          {
+           "n": 450,
+           "p50": 4000.103,
+           "p90": 4000.135,
+           "p99": 4000.178,
+           "mean": 4000.006,
+           "sum": 1800002.476
+          },
+          {
+           "n": 450,
+           "p50": 4000.107,
+           "p90": 4000.134,
+           "p99": 4000.152,
+           "mean": 4000.008,
+           "sum": 1800003.617
+          },
+          {
+           "n": 450,
+           "p50": 4000.109,
+           "p90": 4000.148,
+           "p99": 4002.88,
+           "mean": 4000.008,
+           "sum": 1800003.698
+          },
+          {
+           "n": 450,
+           "p50": 4000.117,
+           "p90": 4002.093,
+           "p99": 4002.159,
+           "mean": 4000.006,
+           "sum": 1800002.488
+          },
+          {
+           "n": 450,
+           "p50": 4000.103,
+           "p90": 4000.139,
+           "p99": 4001.313,
+           "mean": 4000.005,
+           "sum": 1800002.448
+          },
+          {
+           "n": 450,
+           "p50": 4000.103,
+           "p90": 4000.122,
+           "p99": 4000.182,
+           "mean": 4000.006,
+           "sum": 1800002.601
+          },
+          {
+           "n": 450,
+           "p50": 4000.101,
+           "p90": 4000.123,
+           "p99": 4000.647,
+           "mean": 4000.005,
+           "sum": 1800002.339
+          },
+          {
+           "n": 450,
+           "p50": 4000.105,
+           "p90": 4000.129,
+           "p99": 4003.876,
+           "mean": 4000.008,
+           "sum": 1800003.807
+          },
+          {
+           "n": 450,
+           "p50": 4000.107,
+           "p90": 4000.133,
+           "p99": 4003.106,
+           "mean": 4000.005,
+           "sum": 1800002.411
+          },
+          {
+           "n": 450,
+           "p50": 4000.118,
+           "p90": 4000.147,
+           "p99": 4000.172,
+           "mean": 4000.007,
+           "sum": 1800003.334
+          },
+          {
+           "n": 449,
+           "p50": 4000.104,
+           "p90": 4000.12,
+           "p99": 4000.137,
+           "mean": 4008.914,
+           "sum": 1800002.289
+          },
+          {
+           "n": 450,
+           "p50": 4000.098,
+           "p90": 4000.13,
+           "p99": 4000.17,
+           "mean": 4000.005,
+           "sum": 1800002.418
+          },
+          {
+           "n": 450,
+           "p50": 4000.1,
+           "p90": 4000.112,
+           "p99": 4000.126,
+           "mean": 4000.005,
+           "sum": 1800002.242
+          },
+          {
+           "n": 449,
+           "p50": 4000.11,
+           "p90": 4000.134,
+           "p99": 4003.303,
+           "mean": 4008.914,
+           "sum": 1800002.357
+          },
+          {
+           "n": 450,
+           "p50": 4000.103,
+           "p90": 4000.121,
+           "p99": 4000.151,
+           "mean": 4000.006,
+           "sum": 1800002.484
+          },
+          {
+           "n": 450,
+           "p50": 4000.1,
+           "p90": 4000.12,
+           "p99": 4000.141,
+           "mean": 4000.005,
+           "sum": 1800002.274
+          },
+          {
+           "n": 450,
+           "p50": 4000.107,
+           "p90": 4000.147,
+           "p99": 4002.132,
+           "mean": 4000.006,
+           "sum": 1800002.534
+          },
+          {
+           "n": 450,
+           "p50": 4000.113,
+           "p90": 4002.086,
+           "p99": 4002.157,
+           "mean": 4000.006,
+           "sum": 1800002.496
+          },
+          {
+           "n": 450,
+           "p50": 4000.106,
+           "p90": 4000.128,
+           "p99": 4000.16,
+           "mean": 4000.009,
+           "sum": 1800003.89
+          }
+         ],
+         "run_ms": [
+          {
+           "n": 448,
+           "p50": 0.052,
+           "p90": 0.065,
+           "p99": 0.072,
+           "mean": 0.053,
+           "sum": 23.672
+          },
+          {
+           "n": 449,
+           "p50": 0.046,
+           "p90": 0.057,
+           "p99": 0.066,
+           "mean": 0.048,
+           "sum": 21.396
+          },
+          {
+           "n": 449,
+           "p50": 0.048,
+           "p90": 0.058,
+           "p99": 0.068,
+           "mean": 0.049,
+           "sum": 21.917
+          },
+          {
+           "n": 449,
+           "p50": 0.053,
+           "p90": 0.062,
+           "p99": 0.07,
+           "mean": 0.052,
+           "sum": 23.563
+          },
+          {
+           "n": 450,
+           "p50": 0.045,
+           "p90": 0.056,
+           "p99": 0.062,
+           "mean": 0.047,
+           "sum": 21.051
+          },
+          {
+           "n": 450,
+           "p50": 0.045,
+           "p90": 0.055,
+           "p99": 0.063,
+           "mean": 0.047,
+           "sum": 21.19
+          },
+          {
+           "n": 450,
+           "p50": 0.052,
+           "p90": 0.062,
+           "p99": 0.07,
+           "mean": 0.052,
+           "sum": 23.535
+          },
+          {
+           "n": 450,
+           "p50": 0.054,
+           "p90": 0.063,
+           "p99": 0.071,
+           "mean": 0.052,
+           "sum": 23.506
+          },
+          {
+           "n": 450,
+           "p50": 0.056,
+           "p90": 0.066,
+           "p99": 0.072,
+           "mean": 0.055,
+           "sum": 24.579
+          },
+          {
+           "n": 450,
+           "p50": 0.045,
+           "p90": 0.061,
+           "p99": 0.068,
+           "mean": 0.048,
+           "sum": 21.656
+          },
+          {
+           "n": 450,
+           "p50": 0.048,
+           "p90": 0.058,
+           "p99": 0.066,
+           "mean": 0.049,
+           "sum": 22.182
+          },
+          {
+           "n": 450,
+           "p50": 0.046,
+           "p90": 0.053,
+           "p99": 0.061,
+           "mean": 0.046,
+           "sum": 20.815
+          },
+          {
+           "n": 450,
+           "p50": 0.048,
+           "p90": 0.059,
+           "p99": 0.068,
+           "mean": 0.05,
+           "sum": 22.423
+          },
+          {
+           "n": 450,
+           "p50": 0.048,
+           "p90": 0.059,
+           "p99": 0.067,
+           "mean": 0.05,
+           "sum": 22.425
+          },
+          {
+           "n": 450,
+           "p50": 0.053,
+           "p90": 0.064,
+           "p99": 0.071,
+           "mean": 0.053,
+           "sum": 23.897
+          },
+          {
+           "n": 449,
+           "p50": 0.049,
+           "p90": 0.056,
+           "p99": 0.062,
+           "mean": 0.049,
+           "sum": 21.81
+          },
+          {
+           "n": 450,
+           "p50": 0.05,
+           "p90": 0.063,
+           "p99": 0.074,
+           "mean": 0.051,
+           "sum": 22.999
+          },
+          {
+           "n": 450,
+           "p50": 0.045,
+           "p90": 0.053,
+           "p99": 0.064,
+           "mean": 0.046,
+           "sum": 20.893
+          },
+          {
+           "n": 449,
+           "p50": 0.049,
+           "p90": 0.056,
+           "p99": 0.063,
+           "mean": 0.049,
+           "sum": 22.062
+          },
+          {
+           "n": 450,
+           "p50": 0.045,
+           "p90": 0.055,
+           "p99": 0.062,
+           "mean": 0.047,
+           "sum": 21.233
+          },
+          {
+           "n": 450,
+           "p50": 0.045,
+           "p90": 0.055,
+           "p99": 0.063,
+           "mean": 0.047,
+           "sum": 21.082
+          },
+          {
+           "n": 450,
+           "p50": 0.05,
+           "p90": 0.059,
+           "p99": 0.067,
+           "mean": 0.049,
+           "sum": 22.229
+          },
+          {
+           "n": 450,
+           "p50": 0.056,
+           "p90": 0.066,
+           "p99": 0.074,
+           "mean": 0.054,
+           "sum": 24.316
+          },
+          {
+           "n": 450,
+           "p50": 0.051,
+           "p90": 0.058,
+           "p99": 0.066,
+           "mean": 0.05,
+           "sum": 22.489
+          }
+         ]
+        },
+        "gnome-shell/gnome-s:disk$0": {
+         "threads": [
+          1,
+          1,
+          1,
+          1
+         ],
+         "wakes_per_s": [
+          0.001111,
+          0.001111,
+          0.001111,
+          0.001111
+         ],
+         "gap_ms": [
+          {
+           "n": 2,
+           "p50": 900001.219,
+           "p90": 1619983.797,
+           "p99": 1781979.877,
+           "mean": 900001.218,
+           "sum": 1800002.437
+          },
+          {
+           "n": 2,
+           "p50": 900001.201,
+           "p90": 1619985.364,
+           "p99": 1781981.8,
+           "mean": 900001.201,
+           "sum": 1800002.403
+          },
+          {
+           "n": 2,
+           "p50": 900001.209,
+           "p90": 1619984.579,
+           "p99": 1781980.837,
+           "mean": 900001.209,
+           "sum": 1800002.418
+          },
+          {
+           "n": 2,
+           "p50": 900001.231,
+           "p90": 1619983.818,
+           "p99": 1781979.9,
+           "mean": 900001.231,
+           "sum": 1800002.463
+          }
+         ],
+         "run_ms": [
+          {
+           "n": 2,
+           "p50": 0.221,
+           "p90": 0.24,
+           "p99": 0.245,
+           "mean": 0.221,
+           "sum": 0.441
+          },
+          {
+           "n": 2,
+           "p50": 0.191,
+           "p90": 0.231,
+           "p99": 0.24,
+           "mean": 0.191,
+           "sum": 0.381
+          },
+          {
+           "n": 2,
+           "p50": 0.231,
+           "p90": 0.25,
+           "p99": 0.255,
+           "mean": 0.231,
+           "sum": 0.463
+          },
+          {
+           "n": 2,
+           "p50": 0.264,
+           "p90": 0.305,
+           "p99": 0.314,
+           "mean": 0.264,
+           "sum": 0.528
+          }
+         ]
+        },
+        "gnome-shell/gnome-shell": {
+         "threads": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+         ],
+         "wakes_per_s": [
+          0.038333,
+          0.033333,
+          0.036111,
+          0.034444,
+          0.035556,
+          0.033889,
+          0.033889,
+          0.035,
+          0.034444,
+          0.035,
+          0.034444,
+          0.036111,
+          0.033889,
+          0.033889,
+          0.035,
+          0.036111,
+          0.033889,
+          0.033889,
+          0.036667,
+          0.035,
+          0.033333,
+          0.034444,
+          0.033333,
+          0.033889
+         ],
+         "gap_ms": [
+          {
+           "n": 69,
+           "p50": 10417.716,
+           "p90": 49582.654,
+           "p99": 52916.279,
+           "mean": 26086.992,
+           "sum": 1800002.437
+          },
+          {
+           "n": 60,
+           "p50": 25120.858,
+           "p90": 50239.33,
+           "p99": 54245.527,
+           "mean": 30000.04,
+           "sum": 1800002.403
+          },
+          {
+           "n": 65,
+           "p50": 9930.316,
+           "p90": 50070.491,
+           "p99": 56204.826,
+           "mean": 27692.345,
+           "sum": 1800002.418
+          },
+          {
+           "n": 62,
+           "p50": 13003.227,
+           "p90": 49341.367,
+           "p99": 53498.142,
+           "mean": 29032.298,
+           "sum": 1800002.463
+          },
+          {
+           "n": 64,
+           "p50": 10165.091,
+           "p90": 49835.838,
+           "p99": 49835.926,
+           "mean": 28125.037,
+           "sum": 1800002.357
+          },
+          {
+           "n": 61,
+           "p50": 18433.633,
+           "p90": 49427.496,
+           "p99": 49431.606,
+           "mean": 29508.237,
+           "sum": 1800002.476
+          },
+          {
+           "n": 61,
+           "p50": 15003.27,
+           "p90": 49979.019,
+           "p99": 49979.527,
+           "mean": 29508.256,
+           "sum": 1800003.617
+          },
+          {
+           "n": 63,
+           "p50": 10456.504,
+           "p90": 49544.436,
+           "p99": 49547.446,
+           "mean": 28571.487,
+           "sum": 1800003.698
+          },
+          {
+           "n": 62,
+           "p50": 14502.984,
+           "p90": 50011.69,
+           "p99": 50018.091,
+           "mean": 29032.298,
+           "sum": 1800002.488
+          },
+          {
+           "n": 63,
+           "p50": 9928.278,
+           "p90": 50081.77,
+           "p99": 53121.805,
+           "mean": 28571.467,
+           "sum": 1800002.448
+          },
+          {
+           "n": 62,
+           "p50": 10406.495,
+           "p90": 49594.396,
+           "p99": 51940.304,
+           "mean": 29032.3,
+           "sum": 1800002.601
+          },
+          {
+           "n": 65,
+           "p50": 9800.602,
+           "p90": 50200.085,
+           "p99": 50200.27,
+           "mean": 27692.344,
+           "sum": 1800002.339
+          },
+          {
+           "n": 61,
+           "p50": 16003.264,
+           "p90": 49701.767,
+           "p99": 49702.089,
+           "mean": 29508.259,
+           "sum": 1800003.807
+          },
+          {
+           "n": 61,
+           "p50": 10433.54,
+           "p90": 49567.442,
+           "p99": 49576.225,
+           "mean": 29508.236,
+           "sum": 1800002.411
+          },
+          {
+           "n": 63,
+           "p50": 9863.074,
+           "p90": 50137.132,
+           "p99": 50142.139,
+           "mean": 28571.481,
+           "sum": 1800003.334
+          },
+          {
+           "n": 65,
+           "p50": 10389.784,
+           "p90": 49610.763,
+           "p99": 49611.147,
+           "mean": 27692.343,
+           "sum": 1800002.289
+          },
+          {
+           "n": 61,
+           "p50": 11281.62,
+           "p90": 49281.32,
+           "p99": 49291.779,
+           "mean": 29508.236,
+           "sum": 1800002.418
+          },
+          {
+           "n": 61,
+           "p50": 10375.375,
+           "p90": 49625.602,
+           "p99": 49631.467,
+           "mean": 29508.233,
+           "sum": 1800002.242
+          },
+          {
+           "n": 66,
+           "p50": 10223.407,
+           "p90": 49780.006,
+           "p99": 51532.872,
+           "mean": 27272.763,
+           "sum": 1800002.357
+          },
+          {
+           "n": 63,
+           "p50": 10118.309,
+           "p90": 49882.324,
+           "p99": 49882.581,
+           "mean": 28571.468,
+           "sum": 1800002.484
+          },
+          {
+           "n": 60,
+           "p50": 29999.981,
+           "p90": 49778.887,
+           "p99": 50602.991,
+           "mean": 30000.038,
+           "sum": 1800002.274
+          },
+          {
+           "n": 62,
+           "p50": 10227.295,
+           "p90": 49773.575,
+           "p99": 49779.129,
+           "mean": 29032.299,
+           "sum": 1800002.534
+          },
+          {
+           "n": 60,
+           "p50": 25025.707,
+           "p90": 50049.098,
+           "p99": 54129.209,
+           "mean": 30000.042,
+           "sum": 1800002.496
+          },
+          {
+           "n": 61,
+           "p50": 11009.164,
+           "p90": 49976.187,
+           "p99": 49976.39,
+           "mean": 29508.26,
+           "sum": 1800003.89
+          }
+         ],
+         "run_ms": [
+          {
+           "n": 69,
+           "p50": 2.189,
+           "p90": 9.524,
+           "p99": 22.478,
+           "mean": 5.723,
+           "sum": 394.864
+          },
+          {
+           "n": 60,
+           "p50": 8.517,
+           "p90": 9.085,
+           "p99": 24.727,
+           "mean": 6.279,
+           "sum": 376.769
+          },
+          {
+           "n": 65,
+           "p50": 2.22,
+           "p90": 9.35,
+           "p99": 42.906,
+           "mean": 6.445,
+           "sum": 418.911
+          },
+          {
+           "n": 62,
+           "p50": 8.734,
+           "p90": 9.512,
+           "p99": 25.308,
+           "mean": 6.385,
+           "sum": 395.862
+          },
+          {
+           "n": 64,
+           "p50": 2.206,
+           "p90": 8.848,
+           "p99": 9.385,
+           "mean": 5.158,
+           "sum": 330.103
+          },
+          {
+           "n": 61,
+           "p50": 8.63,
+           "p90": 9.207,
+           "p99": 9.308,
+           "mean": 5.543,
+           "sum": 338.144
+          },
+          {
+           "n": 61,
+           "p50": 8.776,
+           "p90": 9.342,
+           "p99": 10.142,
+           "mean": 5.649,
+           "sum": 344.586
+          },
+          {
+           "n": 63,
+           "p50": 2.244,
+           "p90": 9.574,
+           "p99": 13.25,
+           "mean": 5.729,
+           "sum": 360.896
+          },
+          {
+           "n": 62,
+           "p50": 5.582,
+           "p90": 9.923,
+           "p99": 10.456,
+           "mean": 5.807,
+           "sum": 360.061
+          },
+          {
+           "n": 63,
+           "p50": 2.311,
+           "p90": 9.321,
+           "p99": 19.608,
+           "mean": 5.736,
+           "sum": 361.353
+          },
+          {
+           "n": 62,
+           "p50": 5.566,
+           "p90": 9.744,
+           "p99": 20.748,
+           "mean": 6.085,
+           "sum": 377.264
+          },
+          {
+           "n": 65,
+           "p50": 2.187,
+           "p90": 8.778,
+           "p99": 9.19,
+           "mean": 5.094,
+           "sum": 331.122
+          },
+          {
+           "n": 61,
+           "p50": 8.82,
+           "p90": 9.362,
+           "p99": 9.876,
+           "mean": 5.667,
+           "sum": 345.672
+          },
+          {
+           "n": 61,
+           "p50": 8.998,
+           "p90": 9.435,
+           "p99": 9.644,
+           "mean": 5.737,
+           "sum": 349.96
+          },
+          {
+           "n": 63,
+           "p50": 2.34,
+           "p90": 9.558,
+           "p99": 9.812,
+           "mean": 5.533,
+           "sum": 348.585
+          },
+          {
+           "n": 65,
+           "p50": 2.299,
+           "p90": 8.89,
+           "p99": 9.309,
+           "mean": 5.161,
+           "sum": 335.448
+          },
+          {
+           "n": 61,
+           "p50": 8.995,
+           "p90": 10.24,
+           "p99": 12.277,
+           "mean": 6.011,
+           "sum": 366.651
+          },
+          {
+           "n": 61,
+           "p50": 2.281,
+           "p90": 9.04,
+           "p99": 9.275,
+           "mean": 5.324,
+           "sum": 324.79
+          },
+          {
+           "n": 66,
+           "p50": 2.152,
+           "p90": 8.901,
+           "p99": 18.398,
+           "mean": 5.444,
+           "sum": 359.284
+          },
+          {
+           "n": 63,
+           "p50": 2.22,
+           "p90": 8.95,
+           "p99": 9.083,
+           "mean": 5.289,
+           "sum": 333.2
+          },
+          {
+           "n": 60,
+           "p50": 8.58,
+           "p90": 9.12,
+           "p99": 20.602,
+           "mean": 5.985,
+           "sum": 359.107
+          },
+          {
+           "n": 62,
+           "p50": 2.224,
+           "p90": 9.354,
+           "p99": 10.066,
+           "mean": 5.41,
+           "sum": 335.389
+          },
+          {
+           "n": 60,
+           "p50": 9.144,
+           "p90": 10.034,
+           "p99": 10.705,
+           "mean": 6.018,
+           "sum": 361.101
+          },
+          {
+           "n": 61,
+           "p50": 8.757,
+           "p90": 9.22,
+           "p99": 11.167,
+           "mean": 5.671,
+           "sum": 345.937
+          }
+         ]
+        }
+       },
+       "components": {
+        "selected": [
+         "gnome-shell/JS Helper",
+         "gnome-shell/gmain",
+         "gnome-shell/gnome-shell"
+        ],
+        "residual": null,
+        "coverage": 0.95,
+        "covered_share": 0.9997,
+        "total_wakes_per_s": 0.587,
+        "sporadic": [
+         {
+          "comm": "residual",
+          "comms": [
+           "gnome-shell/gnome-s:disk$0"
+          ],
+          "repeats": [
+           47,
+           48,
+           49,
+           51
+          ],
+          "wakes_per_s": 0.0002
+         }
+        ],
+        "sparse": []
+       },
+       "cron_event": {
+        "waker": "cron",
+        "count": [
+         3,
+         3,
+         3,
+         3,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0
+        ],
+        "runs_ms": [
+         17.405,
+         0.245,
+         0.053,
+         17.146,
+         0.25,
+         0.037,
+         18.346,
+         0.268,
+         0.044,
+         17.814,
+         0.263,
+         0.039
+        ],
+        "at_s": [
+         [
+          317.6,
+          317.7,
+          320.1
+         ],
+         [
+          340.3,
+          340.3,
+          341.1
+         ],
+         [
+          363.2,
+          363.2,
+          365.1
+         ],
+         [
+          323.7,
+          323.7,
+          324.3
+         ],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         []
+        ],
+        "rate_per_s": 0.000278,
+        "span_s_total": 43200.1
+       },
+       "causes": {
+        "outside": {
+         "php8.3-fpm.service (php8.3-fpm)": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0
+         ]
+        },
+        "own": {
+         "idle CPU (timer or interrupt)": [
+          508,
+          509,
+          508,
+          509,
+          511,
+          511,
+          511,
+          511,
+          511,
+          510,
+          510,
+          511,
+          511,
+          511,
+          511,
+          510,
+          511,
+          510,
+          509,
+          511,
+          510,
+          510,
+          510,
+          511
+         ],
+         "own thread gnome-shell/gnome-shell": [
+          424,
+          426,
+          416,
+          427,
+          412,
+          426,
+          425,
+          429,
+          430,
+          416,
+          418,
+          417,
+          414,
+          432,
+          430,
+          425,
+          432,
+          408,
+          409,
+          426,
+          419,
+          411,
+          414,
+          426
+         ],
+         "own thread gnome-shell/JS Helper": [
+          139,
+          122,
+          132,
+          128,
+          125,
+          123,
+          123,
+          129,
+          125,
+          125,
+          123,
+          130,
+          120,
+          124,
+          127,
+          132,
+          125,
+          120,
+          129,
+          127,
+          120,
+          122,
+          119,
+          124
+         ]
+        }
+       },
+       "instance_wakes_all": {
+        "gnome-shell": [
+         1075,
+         1060,
+         1059,
+         1067,
+         1048,
+         1060,
+         1059,
+         1069,
+         1066,
+         1051,
+         1051,
+         1058,
+         1045,
+         1067,
+         1068,
+         1068,
+         1068,
+         1038,
+         1048,
+         1064,
+         1049,
+         1043,
+         1044,
+         1061
+        ]
+       },
+       "tables": {
+        "gnome-shell/JS Helper": {
+         "gap_ms": {
+          "n": 13068,
+          "p50": 0.016,
+          "p90": 7.525,
+          "p99": 59991.985,
+          "q": [
+           0.006,
+           0.007,
+           0.008,
+           0.012,
+           0.016,
+           0.091,
+           7.525,
+           59989.678,
+           59991.985,
+           60001.065
+          ],
+          "table": {
+           "p": [
+            0.005999999757477781,
+            0.007000000096013537,
+            0.007999999979801942,
+            0.011999999969702912,
+            0.015999999959603883,
+            0.0910000001113076,
+            7.524900000134952,
+            59989.678200000024,
+            59991.98532999977,
+            60001.06486300008
+           ],
+           "min": 0.003999999989900971,
+           "max": 68001.36599999997,
+           "means": [
+            0.005089378599051495,
+            0.006538337929673247,
+            0.007339455229513245,
+            0.010839506191058473,
+            0.013985307644962497,
+            0.037924089356241045,
+            0.8056674828624321,
+            6082.960565044295,
+            59991.2739820937,
+            59993.576532224724,
+            61912.733805628195
+           ]
+          },
+          "repeat_p50": [
+           0.016,
+           0.016,
+           0.016,
+           0.016,
+           0.016,
+           0.016,
+           0.016,
+           0.015,
+           0.016,
+           0.016,
+           0.016,
+           0.016,
+           0.016,
+           0.016,
+           0.017,
+           0.016,
+           0.017,
+           0.016,
+           0.016,
+           0.016,
+           0.016,
+           0.016,
+           0.017,
+           0.016
+          ],
+          "repeat_n": [
+           552,
+           546,
+           540,
+           551,
+           534,
+           549,
+           548,
+           556,
+           554,
+           538,
+           539,
+           543,
+           534,
+           556,
+           555,
+           553,
+           557,
+           527,
+           532,
+           551,
+           539,
+           531,
+           533,
+           550
+          ],
+          "repeat_mean": [
+           3260.874,
+           3296.7077,
+           3333.3378,
+           3266.7921,
+           3370.7909,
+           3278.693,
+           3284.6781,
+           3237.4167,
+           3249.102,
+           3345.7295,
+           3339.5225,
+           3314.9214,
+           3370.7936,
+           3237.4144,
+           3243.2493,
+           3254.977,
+           3231.6022,
+           3415.564,
+           3383.4631,
+           3266.7922,
+           3339.5218,
+           3389.8353,
+           3377.1154,
+           3272.7343
+          ]
+         },
+         "run_ms": {
+          "n": 13068,
+          "p50": 0.007,
+          "p90": 0.032,
+          "p99": 0.093,
+          "q": [
+           0.004,
+           0.004,
+           0.005,
+           0.006,
+           0.007,
+           0.01,
+           0.032,
+           0.077,
+           0.093,
+           0.112
+          ],
+          "table": {
+           "p": [
+            0.004,
+            0.004,
+            0.005,
+            0.006,
+            0.007,
+            0.01,
+            0.032,
+            0.077,
+            0.093,
+            0.112
+           ],
+           "min": 0.004,
+           "max": 0.174,
+           "means": [
+            0.004,
+            0.004,
+            0.004021120293847369,
+            0.005692276298337051,
+            0.006756351392715176,
+            0.008535353535354926,
+            0.014345168860321845,
+            0.038455463728190135,
+            0.08716437098255735,
+            0.10114294459749221,
+            0.12416712580348699
+           ]
+          },
+          "repeat_p50": [
+           0.007,
+           0.007,
+           0.007,
+           0.008,
+           0.007,
+           0.007,
+           0.008,
+           0.007,
+           0.008,
+           0.007,
+           0.007,
+           0.007,
+           0.007,
+           0.007,
+           0.007,
+           0.007,
+           0.008,
+           0.007,
+           0.007,
+           0.007,
+           0.007,
+           0.007,
+           0.008,
+           0.007
+          ],
+          "repeat_n": [
+           552,
+           546,
+           540,
+           551,
+           534,
+           549,
+           548,
+           556,
+           554,
+           538,
+           539,
+           543,
+           534,
+           556,
+           555,
+           553,
+           557,
+           527,
+           532,
+           551,
+           539,
+           531,
+           533,
+           550
+          ],
+          "repeat_mean": [
+           0.0136,
+           0.0134,
+           0.0139,
+           0.0136,
+           0.0133,
+           0.0135,
+           0.014,
+           0.0144,
+           0.0142,
+           0.0136,
+           0.014,
+           0.0135,
+           0.0133,
+           0.0136,
+           0.0139,
+           0.0136,
+           0.0144,
+           0.0133,
+           0.0134,
+           0.0134,
+           0.0136,
+           0.0136,
+           0.0136,
+           0.0135
+          ]
+         }
+        },
+        "gnome-shell/gmain": {
+         "gap_ms": {
+          "n": 10793,
+          "p50": 4000.106,
+          "p90": 4000.139,
+          "p99": 4002.13,
+          "q": [
+           3998.079,
+           3999.098,
+           3999.122,
+           4000.092,
+           4000.106,
+           4000.12,
+           4000.139,
+           4000.154,
+           4002.13,
+           4004.125
+          ],
+          "table": {
+           "p": [
+            3998.0787600001804,
+            3999.098000000231,
+            3999.1219999999885,
+            4000.0920000002225,
+            4000.1059999999597,
+            4000.1199999999244,
+            4000.13899999999,
+            4000.1539999999295,
+            4002.130000000343,
+            4004.124536000136
+           ],
+           "min": 3995.6590000001597,
+           "max": 8000.712999999905,
+           "means": [
+            3997.4005992772986,
+            3998.9624687760283,
+            3999.108996386507,
+            3999.880805089653,
+            4000.0997294542262,
+            4000.112396553338,
+            4000.127680472008,
+            4000.1455676826445,
+            4000.725398869641,
+            4002.874347220815,
+            6595.8075080138715
+           ]
+          },
+          "repeat_p50": [
+           4000.118,
+           4000.108,
+           4000.11,
+           4000.119,
+           4000.102,
+           4000.103,
+           4000.107,
+           4000.109,
+           4000.117,
+           4000.103,
+           4000.103,
+           4000.101,
+           4000.105,
+           4000.107,
+           4000.118,
+           4000.104,
+           4000.098,
+           4000.1,
+           4000.11,
+           4000.103,
+           4000.1,
+           4000.107,
+           4000.113,
+           4000.106
+          ],
+          "repeat_n": [
+           448,
+           449,
+           449,
+           449,
+           450,
+           450,
+           450,
+           450,
+           450,
+           450,
+           450,
+           450,
+           450,
+           450,
+           450,
+           449,
+           450,
+           450,
+           449,
+           450,
+           450,
+           450,
+           450,
+           450
+          ],
+          "repeat_mean": [
+           4017.8626,
+           4008.914,
+           4008.9141,
+           4008.9142,
+           4000.0052,
+           4000.0055,
+           4000.008,
+           4000.0082,
+           4000.0055,
+           4000.0054,
+           4000.0058,
+           4000.0052,
+           4000.0085,
+           4000.0054,
+           4000.0074,
+           4008.9138,
+           4000.0054,
+           4000.005,
+           4008.9139,
+           4000.0055,
+           4000.0051,
+           4000.0056,
+           4000.0055,
+           4000.0086
+          ]
+         },
+         "run_ms": {
+          "n": 10793,
+          "p50": 0.048,
+          "p90": 0.06,
+          "p99": 0.069,
+          "q": [
+           0.036,
+           0.039,
+           0.041,
+           0.044,
+           0.048,
+           0.055,
+           0.06,
+           0.064,
+           0.069,
+           0.076
+          ],
+          "table": {
+           "p": [
+            0.036,
+            0.039,
+            0.041,
+            0.044,
+            0.048,
+            0.055,
+            0.06,
+            0.064,
+            0.069,
+            0.076
+           ],
+           "min": 0.024,
+           "max": 0.136,
+           "means": [
+            0.0341006207727231,
+            0.03801507921801206,
+            0.04042981562123431,
+            0.042676240773343935,
+            0.045664041508380215,
+            0.05184628926155872,
+            0.057567404799410686,
+            0.06179634948577062,
+            0.06572878254425552,
+            0.07170184378765275,
+            0.08554322245898215
+           ]
+          },
+          "repeat_p50": [
+           0.052,
+           0.046,
+           0.048,
+           0.053,
+           0.045,
+           0.045,
+           0.052,
+           0.054,
+           0.056,
+           0.045,
+           0.048,
+           0.046,
+           0.048,
+           0.048,
+           0.053,
+           0.049,
+           0.05,
+           0.045,
+           0.049,
+           0.045,
+           0.045,
+           0.05,
+           0.056,
+           0.051
+          ],
+          "repeat_n": [
+           448,
+           449,
+           449,
+           449,
+           450,
+           450,
+           450,
+           450,
+           450,
+           450,
+           450,
+           450,
+           450,
+           450,
+           450,
+           449,
+           450,
+           450,
+           449,
+           450,
+           450,
+           450,
+           450,
+           450
+          ],
+          "repeat_mean": [
+           0.0528,
+           0.0477,
+           0.0488,
+           0.0525,
+           0.0468,
+           0.0471,
+           0.0523,
+           0.0522,
+           0.0546,
+           0.0481,
+           0.0493,
+           0.0463,
+           0.0498,
+           0.0498,
+           0.0531,
+           0.0486,
+           0.0511,
+           0.0464,
+           0.0491,
+           0.0472,
+           0.0468,
+           0.0494,
+           0.054,
+           0.05
+          ]
+         }
+        },
+        "gnome-shell/gnome-shell": {
+         "gap_ms": {
+          "n": 1501,
+          "p50": 10718.743,
+          "p90": 50069.247,
+          "p99": 50239.329,
+          "q": [
+           0.44,
+           9760.774,
+           9918.222,
+           10164.315,
+           10718.743,
+           49778.709,
+           50069.247,
+           50137.112,
+           50239.329,
+           60000.242
+          ],
+          "table": {
+           "p": [
+            0.4399999997986015,
+            9760.773999999856,
+            9918.222000000014,
+            10164.31499999976,
+            10718.742999999904,
+            49778.70899999994,
+            50069.2469999999,
+            50137.11200000012,
+            50239.329,
+            60000.241500000135
+           ],
+           "min": 0.011999999969702912,
+           "max": 60000.614000000045,
+           "means": [
+            0.34419720179986635,
+            3659.740428047913,
+            9823.699753497645,
+            10012.919944703524,
+            10395.75336375748,
+            45966.34648167887,
+            49918.03854119478,
+            50090.337216522086,
+            50206.69106112568,
+            54480.426755644,
+            60000.49183744699
+           ]
+          },
+          "repeat_p50": [
+           10417.716,
+           25120.858,
+           9930.316,
+           13003.227,
+           10165.091,
+           18433.633,
+           15003.27,
+           10456.504,
+           14502.984,
+           9928.278,
+           10406.495,
+           9800.602,
+           16003.264,
+           10433.54,
+           9863.074,
+           10389.784,
+           11281.62,
+           10375.375,
+           10223.407,
+           10118.309,
+           29999.981,
+           10227.295,
+           25025.707,
+           11009.164
+          ],
+          "repeat_n": [
+           69,
+           60,
+           65,
+           62,
+           64,
+           61,
+           61,
+           63,
+           62,
+           63,
+           62,
+           65,
+           61,
+           61,
+           63,
+           65,
+           61,
+           61,
+           66,
+           63,
+           60,
+           62,
+           60,
+           61
+          ],
+          "repeat_mean": [
+           26086.9918,
+           30000.04,
+           27692.3449,
+           29032.2978,
+           28125.0368,
+           29508.2373,
+           29508.256,
+           28571.4873,
+           29032.2982,
+           28571.4674,
+           29032.3,
+           27692.3437,
+           29508.2591,
+           29508.2362,
+           28571.4815,
+           27692.3429,
+           29508.2364,
+           29508.2335,
+           27272.763,
+           28571.468,
+           30000.0379,
+           29032.2989,
+           30000.0416,
+           29508.2605
+          ]
+         },
+         "run_ms": {
+          "n": 1501,
+          "p50": 2.38,
+          "p90": 9.424,
+          "p99": 10.918,
+          "q": [
+           0.423,
+           1.86,
+           1.902,
+           1.977,
+           2.38,
+           9.052,
+           9.424,
+           9.733,
+           10.918,
+           48.028
+          ],
+          "table": {
+           "p": [
+            0.423,
+            1.86,
+            1.902,
+            1.977,
+            2.38,
+            9.052000000000005,
+            9.424000000000003,
+            9.733000000000002,
+            10.918000000000005,
+            48.028
+           ],
+           "min": 0.006,
+           "max": 49.47,
+           "means": [
+            0.33072818121252495,
+            1.0880874417055295,
+            1.8821479013990663,
+            1.9417279591383545,
+            2.0833331112591607,
+            8.706459693537653,
+            9.239638463246727,
+            9.575293137908124,
+            10.075957195203168,
+            28.130402176326772,
+            49.00504796801992
+           ]
+          },
+          "repeat_p50": [
+           2.189,
+           8.517,
+           2.22,
+           8.734,
+           2.206,
+           8.63,
+           8.776,
+           2.244,
+           5.582,
+           2.311,
+           5.566,
+           2.187,
+           8.82,
+           8.998,
+           2.34,
+           2.299,
+           8.995,
+           2.281,
+           2.152,
+           2.22,
+           8.58,
+           2.224,
+           9.144,
+           8.757
+          ],
+          "repeat_n": [
+           69,
+           60,
+           65,
+           62,
+           64,
+           61,
+           61,
+           63,
+           62,
+           63,
+           62,
+           65,
+           61,
+           61,
+           63,
+           65,
+           61,
+           61,
+           66,
+           63,
+           60,
+           62,
+           60,
+           61
+          ],
+          "repeat_mean": [
+           5.7227,
+           6.2795,
+           6.4448,
+           6.3849,
+           5.1579,
+           5.5433,
+           5.649,
+           5.7285,
+           5.8074,
+           5.7358,
+           6.0849,
+           5.0942,
+           5.6668,
+           5.737,
+           5.5331,
+           5.1607,
+           6.0107,
+           5.3244,
+           5.4437,
+           5.2889,
+           5.9851,
+           5.4095,
+           6.0184,
+           5.6711
+          ]
+         }
+        }
+       }
+      },
+      "pipewire": {
+       "repeats": [
+        47,
+        48,
+        49,
+        51,
+        58,
+        60,
+        61,
+        62,
+        63,
+        68,
+        69,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        79,
+        83,
+        85,
+        86,
+        87,
+        88
+       ],
+       "span_s": [
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.004,
+        1800.004,
+        1800.002,
+        1800.002,
+        1800.003,
+        1800.002,
+        1800.004,
+        1800.002,
+        1800.003,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.003,
+        1800.002,
+        1800.004
+       ],
+       "wakes_per_s": [
+        0.011,
+        0.011,
+        0.012,
+        0.011,
+        0.01,
+        0.009,
+        0.009,
+        0.009,
+        0.009,
+        0.009,
+        0.009,
+        0.008,
+        0.008,
+        0.01,
+        0.009,
+        0.009,
+        0.009,
+        0.009,
+        0.008,
+        0.009,
+        0.009,
+        0.008,
+        0.008,
+        0.008
+       ],
+       "cpu_share": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "instances": {
+        "47": {
+         "pipewire": [
+          26049
+         ],
+         "wireplumber": [
+          26051
+         ],
+         "pipewire-pulse": [
+          26053
+         ]
+        },
+        "48": {
+         "pipewire": [
+          24978
+         ],
+         "wireplumber": [
+          24980
+         ],
+         "pipewire-pulse": [
+          24981
+         ]
+        },
+        "49": {
+         "pipewire": [
+          25995
+         ],
+         "wireplumber": [
+          25997
+         ],
+         "pipewire-pulse": [
+          25998
+         ]
+        },
+        "51": {
+         "pipewire": [
+          24915
+         ],
+         "wireplumber": [
+          24917
+         ],
+         "pipewire-pulse": [
+          24918
+         ]
+        },
+        "58": {
+         "pipewire": [
+          25628
+         ],
+         "wireplumber": [
+          25630
+         ],
+         "pipewire-pulse": [
+          25631
+         ]
+        },
+        "60": {
+         "pipewire": [
+          25577
+         ],
+         "wireplumber": [
+          25580
+         ],
+         "pipewire-pulse": [
+          25581
+         ]
+        },
+        "61": {
+         "pipewire": [
+          25033
+         ],
+         "wireplumber": [
+          25035
+         ],
+         "pipewire-pulse": [
+          25036
+         ]
+        },
+        "62": {
+         "pipewire": [
+          25056
+         ],
+         "wireplumber": [
+          25058
+         ],
+         "pipewire-pulse": [
+          25059
+         ]
+        },
+        "63": {
+         "pipewire": [
+          24994
+         ],
+         "wireplumber": [
+          24996
+         ],
+         "pipewire-pulse": [
+          24997
+         ]
+        },
+        "68": {
+         "pipewire": [
+          24966
+         ],
+         "wireplumber": [
+          24968
+         ],
+         "pipewire-pulse": [
+          24969
+         ]
+        },
+        "69": {
+         "pipewire": [
+          26689
+         ],
+         "wireplumber": [
+          26691
+         ],
+         "pipewire-pulse": [
+          26692
+         ]
+        },
+        "71": {
+         "pipewire": [
+          25922
+         ],
+         "wireplumber": [
+          25924
+         ],
+         "pipewire-pulse": [
+          25926
+         ]
+        },
+        "72": {
+         "pipewire": [
+          26716
+         ],
+         "wireplumber": [
+          26718
+         ],
+         "pipewire-pulse": [
+          26719
+         ]
+        },
+        "73": {
+         "pipewire": [
+          26034
+         ],
+         "wireplumber": [
+          26036
+         ],
+         "pipewire-pulse": [
+          26038
+         ]
+        },
+        "74": {
+         "pipewire": [
+          24968
+         ],
+         "wireplumber": [
+          24970
+         ],
+         "pipewire-pulse": [
+          24971
+         ]
+        },
+        "75": {
+         "pipewire": [
+          24904
+         ],
+         "wireplumber": [
+          24906
+         ],
+         "pipewire-pulse": [
+          24907
+         ]
+        },
+        "76": {
+         "pipewire": [
+          25673
+         ],
+         "wireplumber": [
+          25675
+         ],
+         "pipewire-pulse": [
+          25676
+         ]
+        },
+        "77": {
+         "pipewire": [
+          24967
+         ],
+         "wireplumber": [
+          24969
+         ],
+         "pipewire-pulse": [
+          24971
+         ]
+        },
+        "79": {
+         "pipewire": [
+          26697
+         ],
+         "wireplumber": [
+          26699
+         ],
+         "pipewire-pulse": [
+          26700
+         ]
+        },
+        "83": {
+         "pipewire": [
+          25690
+         ],
+         "wireplumber": [
+          25692
+         ],
+         "pipewire-pulse": [
+          25693
+         ]
+        },
+        "85": {
+         "pipewire": [
+          26712
+         ],
+         "wireplumber": [
+          26714
+         ],
+         "pipewire-pulse": [
+          26715
+         ]
+        },
+        "86": {
+         "pipewire": [
+          26657
+         ],
+         "wireplumber": [
+          26659
+         ],
+         "pipewire-pulse": [
+          26660
+         ]
+        },
+        "87": {
+         "pipewire": [
+          26536
+         ],
+         "wireplumber": [
+          26538
+         ],
+         "pipewire-pulse": [
+          26539
+         ]
+        },
+        "88": {
+         "pipewire": [
+          26606
+         ],
+         "wireplumber": [
+          26608
+         ],
+         "pipewire-pulse": [
+          26609
+         ]
+        }
+       },
+       "threads": {
+        "wireplumber/gmain": {
+         "threads": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+         ],
+         "wakes_per_s": [
+          0.010556,
+          0.010556,
+          0.011667,
+          0.011111,
+          0.01,
+          0.009444,
+          0.009444,
+          0.008889,
+          0.009444,
+          0.008889,
+          0.009444,
+          0.008333,
+          0.008333,
+          0.01,
+          0.008889,
+          0.008889,
+          0.009444,
+          0.009444,
+          0.008333,
+          0.008889,
+          0.009444,
+          0.007778,
+          0.007778,
+          0.008333
+         ],
+         "gap_ms": [
+          {
+           "n": 19,
+           "p50": 918.551,
+           "p90": 299201.251,
+           "p99": 445207.273,
+           "mean": 94736.97,
+           "sum": 1800002.437
+          },
+          {
+           "n": 19,
+           "p50": 17076.565,
+           "p90": 299185.932,
+           "p99": 546151.538,
+           "mean": 94736.969,
+           "sum": 1800002.403
+          },
+          {
+           "n": 21,
+           "p50": 100.208,
+           "p90": 238821.593,
+           "p99": 539842.882,
+           "mean": 85714.401,
+           "sum": 1800002.418
+          },
+          {
+           "n": 20,
+           "p50": 10144.135,
+           "p90": 281892.772,
+           "p99": 542853.689,
+           "mean": 90000.123,
+           "sum": 1800002.463
+          },
+          {
+           "n": 18,
+           "p50": 8837.945,
+           "p90": 296557.544,
+           "p99": 306567.255,
+           "mean": 100000.131,
+           "sum": 1800002.357
+          },
+          {
+           "n": 17,
+           "p50": 15665.756,
+           "p90": 298770.06,
+           "p99": 300053.722,
+           "mean": 105882.499,
+           "sum": 1800002.476
+          },
+          {
+           "n": 17,
+           "p50": 41870.585,
+           "p90": 299720.483,
+           "p99": 304031.263,
+           "mean": 105882.566,
+           "sum": 1800003.617
+          },
+          {
+           "n": 16,
+           "p50": 27682.589,
+           "p90": 300325.172,
+           "p99": 305163.38,
+           "mean": 112500.231,
+           "sum": 1800003.698
+          },
+          {
+           "n": 17,
+           "p50": 16378.9,
+           "p90": 296809.32,
+           "p99": 303707.164,
+           "mean": 105882.499,
+           "sum": 1800002.488
+          },
+          {
+           "n": 16,
+           "p50": 29858.783,
+           "p90": 299903.967,
+           "p99": 302806.251,
+           "mean": 112500.153,
+           "sum": 1800002.448
+          },
+          {
+           "n": 17,
+           "p50": 18291.731,
+           "p90": 300160.805,
+           "p99": 300235.401,
+           "mean": 105882.506,
+           "sum": 1800002.601
+          },
+          {
+           "n": 15,
+           "p50": 54513.458,
+           "p90": 299135.097,
+           "p99": 300540.335,
+           "mean": 120000.156,
+           "sum": 1800002.339
+          },
+          {
+           "n": 15,
+           "p50": 59627.522,
+           "p90": 301023.177,
+           "p99": 301091.709,
+           "mean": 120000.254,
+           "sum": 1800003.807
+          },
+          {
+           "n": 18,
+           "p50": 7525.456,
+           "p90": 293256.819,
+           "p99": 304361.909,
+           "mean": 100000.134,
+           "sum": 1800002.411
+          },
+          {
+           "n": 16,
+           "p50": 23455.868,
+           "p90": 299932.635,
+           "p99": 300154.071,
+           "mean": 112500.208,
+           "sum": 1800003.334
+          },
+          {
+           "n": 16,
+           "p50": 16828.456,
+           "p90": 300804.52,
+           "p99": 300869.796,
+           "mean": 112500.143,
+           "sum": 1800002.289
+          },
+          {
+           "n": 17,
+           "p50": 240.644,
+           "p90": 298745.789,
+           "p99": 301506.691,
+           "mean": 105882.495,
+           "sum": 1800002.418
+          },
+          {
+           "n": 17,
+           "p50": 8522.248,
+           "p90": 299830.537,
+           "p99": 303448.805,
+           "mean": 105882.485,
+           "sum": 1800002.242
+          },
+          {
+           "n": 15,
+           "p50": 59638.37,
+           "p90": 300744.958,
+           "p99": 300804.284,
+           "mean": 120000.157,
+           "sum": 1800002.357
+          },
+          {
+           "n": 16,
+           "p50": 8282.631,
+           "p90": 299932.52,
+           "p99": 300985.703,
+           "mean": 112500.155,
+           "sum": 1800002.484
+          },
+          {
+           "n": 17,
+           "p50": 17564.852,
+           "p90": 299748.881,
+           "p99": 300634.119,
+           "mean": 105882.487,
+           "sum": 1800002.274
+          },
+          {
+           "n": 14,
+           "p50": 31730.05,
+           "p90": 301441.798,
+           "p99": 303741.588,
+           "mean": 128571.61,
+           "sum": 1800002.534
+          },
+          {
+           "n": 14,
+           "p50": 29855.06,
+           "p90": 300480.609,
+           "p99": 300907.979,
+           "mean": 128571.607,
+           "sum": 1800002.496
+          },
+          {
+           "n": 15,
+           "p50": 29951.142,
+           "p90": 299431.126,
+           "p99": 300361.364,
+           "mean": 120000.259,
+           "sum": 1800003.89
+          }
+         ],
+         "run_ms": [
+          {
+           "n": 19,
+           "p50": 0.036,
+           "p90": 0.052,
+           "p99": 0.056,
+           "mean": 0.037,
+           "sum": 0.703
+          },
+          {
+           "n": 19,
+           "p50": 0.034,
+           "p90": 0.039,
+           "p99": 0.049,
+           "mean": 0.034,
+           "sum": 0.643
+          },
+          {
+           "n": 21,
+           "p50": 0.037,
+           "p90": 0.041,
+           "p99": 0.041,
+           "mean": 0.035,
+           "sum": 0.732
+          },
+          {
+           "n": 20,
+           "p50": 0.036,
+           "p90": 0.042,
+           "p99": 0.048,
+           "mean": 0.036,
+           "sum": 0.715
+          },
+          {
+           "n": 18,
+           "p50": 0.033,
+           "p90": 0.045,
+           "p99": 0.059,
+           "mean": 0.034,
+           "sum": 0.605
+          },
+          {
+           "n": 17,
+           "p50": 0.035,
+           "p90": 0.042,
+           "p99": 0.055,
+           "mean": 0.034,
+           "sum": 0.586
+          },
+          {
+           "n": 17,
+           "p50": 0.034,
+           "p90": 0.044,
+           "p99": 0.049,
+           "mean": 0.036,
+           "sum": 0.605
+          },
+          {
+           "n": 16,
+           "p50": 0.036,
+           "p90": 0.046,
+           "p99": 0.05,
+           "mean": 0.036,
+           "sum": 0.581
+          },
+          {
+           "n": 17,
+           "p50": 0.036,
+           "p90": 0.048,
+           "p99": 0.06,
+           "mean": 0.039,
+           "sum": 0.656
+          },
+          {
+           "n": 16,
+           "p50": 0.035,
+           "p90": 0.041,
+           "p99": 0.048,
+           "mean": 0.035,
+           "sum": 0.554
+          },
+          {
+           "n": 17,
+           "p50": 0.035,
+           "p90": 0.04,
+           "p99": 0.046,
+           "mean": 0.033,
+           "sum": 0.557
+          },
+          {
+           "n": 15,
+           "p50": 0.03,
+           "p90": 0.039,
+           "p99": 0.05,
+           "mean": 0.032,
+           "sum": 0.473
+          },
+          {
+           "n": 15,
+           "p50": 0.035,
+           "p90": 0.04,
+           "p99": 0.042,
+           "mean": 0.033,
+           "sum": 0.502
+          },
+          {
+           "n": 18,
+           "p50": 0.034,
+           "p90": 0.041,
+           "p99": 0.046,
+           "mean": 0.033,
+           "sum": 0.597
+          },
+          {
+           "n": 16,
+           "p50": 0.038,
+           "p90": 0.048,
+           "p99": 0.049,
+           "mean": 0.039,
+           "sum": 0.617
+          },
+          {
+           "n": 16,
+           "p50": 0.035,
+           "p90": 0.036,
+           "p99": 0.037,
+           "mean": 0.034,
+           "sum": 0.536
+          },
+          {
+           "n": 17,
+           "p50": 0.038,
+           "p90": 0.051,
+           "p99": 0.057,
+           "mean": 0.038,
+           "sum": 0.647
+          },
+          {
+           "n": 17,
+           "p50": 0.035,
+           "p90": 0.039,
+           "p99": 0.041,
+           "mean": 0.034,
+           "sum": 0.583
+          },
+          {
+           "n": 15,
+           "p50": 0.034,
+           "p90": 0.036,
+           "p99": 0.039,
+           "mean": 0.032,
+           "sum": 0.485
+          },
+          {
+           "n": 16,
+           "p50": 0.034,
+           "p90": 0.038,
+           "p99": 0.057,
+           "mean": 0.033,
+           "sum": 0.527
+          },
+          {
+           "n": 17,
+           "p50": 0.033,
+           "p90": 0.036,
+           "p99": 0.046,
+           "mean": 0.033,
+           "sum": 0.554
+          },
+          {
+           "n": 14,
+           "p50": 0.036,
+           "p90": 0.046,
+           "p99": 0.05,
+           "mean": 0.035,
+           "sum": 0.489
+          },
+          {
+           "n": 14,
+           "p50": 0.039,
+           "p90": 0.057,
+           "p99": 0.075,
+           "mean": 0.042,
+           "sum": 0.593
+          },
+          {
+           "n": 15,
+           "p50": 0.037,
+           "p90": 0.045,
+           "p99": 0.048,
+           "mean": 0.036,
+           "sum": 0.546
+          }
+         ]
+        }
+       },
+       "components": {
+        "selected": [
+         "wireplumber/gmain"
+        ],
+        "residual": null,
+        "coverage": 0.95,
+        "covered_share": 1.0,
+        "total_wakes_per_s": 0.009,
+        "sporadic": [],
+        "sparse": []
+       },
+       "cron_event": {
+        "waker": "cron",
+        "count": [
+         8,
+         10,
+         9,
+         10,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0
+        ],
+        "runs_ms": [
+         0.036,
+         0.01,
+         0.009,
+         0.009,
+         0.052,
+         0.008,
+         0.043,
+         0.027,
+         0.035,
+         0.009,
+         0.009,
+         0.008,
+         0.049,
+         0.009,
+         0.047,
+         0.027,
+         0.036,
+         0.039,
+         0.046,
+         0.009,
+         0.011,
+         0.014,
+         0.012,
+         0.048,
+         0.009,
+         0.037,
+         0.026,
+         0.039,
+         0.011,
+         0.009,
+         0.008,
+         0.03,
+         0.008,
+         0.033,
+         0.006,
+         0.033,
+         0.028
+        ],
+        "at_s": [
+         [
+          317.9,
+          317.9,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.1,
+          318.2
+         ],
+         [
+          340.7,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.9,
+          340.9,
+          341.0,
+          341.1,
+          341.2
+         ],
+         [
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.3,
+          364.3,
+          364.3,
+          364.4,
+          364.5
+         ],
+         [
+          324.7,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.9,
+          324.9,
+          325.0,
+          325.1
+         ],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         []
+        ],
+        "rate_per_s": 0.000856,
+        "span_s_total": 43200.1
+       },
+       "causes": {
+        "desktop": {
+         "job sysstat-collect (sysstat)": [
+          10,
+          10,
+          9,
+          9,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          11,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12
+         ]
+        },
+        "event": {
+         "job anacron (anacron)": [
+          1,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          2,
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          2,
+          2,
+          1
+         ],
+         "job sysstat-daily-sample (sysstat)": [
+          2,
+          2,
+          2,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "job sysstat-summary (sysstat)": [
+          2,
+          2,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "job motd-news (base-files)": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "job fstrim (util-linux)": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ]
+        },
+        "outside": {
+         "hosted-compute-agent.service (the harness)": [
+          362,
+          360,
+          356,
+          355,
+          361,
+          362,
+          360,
+          362,
+          362,
+          362,
+          362,
+          360,
+          360,
+          361,
+          362,
+          362,
+          362,
+          362,
+          360,
+          362,
+          362,
+          360,
+          360,
+          360
+         ],
+         "job phpsessionclean (php-common)": [
+          4,
+          4,
+          2,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+         ],
+         "job podman (podman)": [
+          2,
+          2,
+          2,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ]
+        },
+        "own": {
+         "idle CPU (timer or interrupt)": [
+          9,
+          9,
+          12,
+          11,
+          6,
+          5,
+          3,
+          4,
+          5,
+          4,
+          5,
+          3,
+          3,
+          7,
+          4,
+          4,
+          5,
+          5,
+          3,
+          4,
+          5,
+          2,
+          2,
+          3
+         ]
+        },
+        "unknown": {
+         "job launched by pid 1: (install) 9 install systemd": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ]
+        }
+       },
+       "instance_wakes_all": {
+        "pipewire": [
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0
+        ],
+        "pipewire-pulse": [
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0
+        ],
+        "wireplumber": [
+         400,
+         400,
+         394,
+         397,
+         384,
+         386,
+         382,
+         384,
+         384,
+         386,
+         384,
+         380,
+         380,
+         384,
+         384,
+         384,
+         384,
+         384,
+         380,
+         384,
+         384,
+         380,
+         380,
+         380
+        ]
+       },
+       "tables": {
+        "wireplumber/gmain": {
+         "gap_ms": {
+          "n": 402,
+          "p50": 16283.219,
+          "p90": 300132.601,
+          "p99": 307885.851,
+          "q": [
+           100.149,
+           100.159,
+           100.168,
+           100.187,
+           16283.219,
+           269212.011,
+           300132.601,
+           301003.122,
+           307885.851,
+           599925.861
+          ],
+          "table": {
+           "p": [
+            100.14899999987392,
+            100.15900000007605,
+            100.16799999993964,
+            100.18699999983482,
+            16283.21850000009,
+            269212.01050000003,
+            300132.6011,
+            301003.12159999984,
+            307885.85080000025,
+            599925.8609280002
+           ],
+           "min": 32.37300000000687,
+           "max": 599926.3710000003,
+           "means": [
+            83.28307960194104,
+            100.15391293534188,
+            100.16306965174937,
+            100.17999834159396,
+            656.2609203979863,
+            119918.61583084577,
+            296299.037618574,
+            300682.5729601983,
+            303418.9126542294,
+            564287.3304250966,
+            599926.3709999935
+           ]
+          },
+          "repeat_p50": [
+           918.551,
+           17076.565,
+           100.208,
+           10144.135,
+           8837.945,
+           15665.756,
+           41870.585,
+           27682.589,
+           16378.9,
+           29858.783,
+           18291.731,
+           54513.458,
+           59627.522,
+           7525.456,
+           23455.868,
+           16828.456,
+           240.644,
+           8522.248,
+           59638.37,
+           8282.631,
+           17564.852,
+           31730.05,
+           29855.06,
+           29951.142
+          ],
+          "repeat_n": [
+           19,
+           19,
+           21,
+           20,
+           18,
+           17,
+           17,
+           16,
+           17,
+           16,
+           17,
+           15,
+           15,
+           18,
+           16,
+           16,
+           17,
+           17,
+           15,
+           16,
+           17,
+           14,
+           14,
+           15
+          ],
+          "repeat_mean": [
+           94736.9704,
+           94736.9686,
+           85714.4009,
+           90000.1231,
+           100000.1309,
+           105882.4986,
+           105882.5657,
+           112500.2311,
+           105882.4993,
+           112500.153,
+           105882.5059,
+           120000.1559,
+           120000.2538,
+           100000.1339,
+           112500.2084,
+           112500.1431,
+           105882.4952,
+           105882.4848,
+           120000.1571,
+           112500.1552,
+           105882.4867,
+           128571.6096,
+           128571.6069,
+           120000.2593
+          ]
+         },
+         "run_ms": {
+          "n": 402,
+          "p50": 0.035,
+          "p90": 0.044,
+          "p99": 0.059,
+          "q": [
+           0.018,
+           0.024,
+           0.026,
+           0.03,
+           0.035,
+           0.039,
+           0.044,
+           0.049,
+           0.059,
+           0.071
+          ],
+          "table": {
+           "p": [
+            0.018009999999999998,
+            0.024,
+            0.026,
+            0.03,
+            0.035,
+            0.03875,
+            0.044,
+            0.049,
+            0.05898000000000002,
+            0.07098499999999984
+           ],
+           "min": 0.011,
+           "max": 0.077,
+           "means": [
+            0.01576119402985075,
+            0.021457711442786076,
+            0.025114427860696537,
+            0.028255389718076195,
+            0.0328656716417911,
+            0.03638308457711457,
+            0.04084079601990019,
+            0.04651243781094528,
+            0.05290547263681606,
+            0.06363349917081232,
+            0.077
+           ]
+          },
+          "repeat_p50": [
+           0.036,
+           0.034,
+           0.037,
+           0.036,
+           0.033,
+           0.035,
+           0.034,
+           0.036,
+           0.036,
+           0.035,
+           0.035,
+           0.03,
+           0.035,
+           0.034,
+           0.038,
+           0.035,
+           0.038,
+           0.035,
+           0.034,
+           0.034,
+           0.033,
+           0.036,
+           0.039,
+           0.037
+          ],
+          "repeat_n": [
+           19,
+           19,
+           21,
+           20,
+           18,
+           17,
+           17,
+           16,
+           17,
+           16,
+           17,
+           15,
+           15,
+           18,
+           16,
+           16,
+           17,
+           17,
+           15,
+           16,
+           17,
+           14,
+           14,
+           15
+          ],
+          "repeat_mean": [
+           0.037,
+           0.0338,
+           0.0349,
+           0.0357,
+           0.0336,
+           0.0345,
+           0.0356,
+           0.0363,
+           0.0386,
+           0.0346,
+           0.0328,
+           0.0315,
+           0.0335,
+           0.0332,
+           0.0386,
+           0.0335,
+           0.0381,
+           0.0343,
+           0.0323,
+           0.0329,
+           0.0326,
+           0.0349,
+           0.0424,
+           0.0364
+          ]
+         }
+        }
+       }
+      },
+      "systemd": {
+       "repeats": [
+        47,
+        48,
+        49,
+        51,
+        58,
+        60,
+        61,
+        62,
+        63,
+        68,
+        69,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        79,
+        83,
+        85,
+        86,
+        87,
+        88
+       ],
+       "span_s": [
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.004,
+        1800.004,
+        1800.002,
+        1800.002,
+        1800.003,
+        1800.002,
+        1800.004,
+        1800.002,
+        1800.003,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.003,
+        1800.002,
+        1800.004
+       ],
+       "wakes_per_s": [
+        0.068,
+        0.068,
+        0.068,
+        0.068,
+        0.074,
+        0.073,
+        0.077,
+        0.069,
+        0.071,
+        0.074,
+        0.069,
+        0.07,
+        0.068,
+        0.07,
+        0.063,
+        0.068,
+        0.07,
+        0.075,
+        0.067,
+        0.07,
+        0.069,
+        0.069,
+        0.073,
+        0.073
+       ],
+       "cpu_share": [
+        1.1e-05,
+        9e-06,
+        9e-06,
+        1e-05,
+        1.5e-05,
+        1.5e-05,
+        1.3e-05,
+        1.3e-05,
+        1.3e-05,
+        1.7e-05,
+        1e-05,
+        1.1e-05,
+        1e-05,
+        1.2e-05,
+        1e-05,
+        1e-05,
+        1.1e-05,
+        1.8e-05,
+        9e-06,
+        1e-05,
+        1.1e-05,
+        1.2e-05,
+        1.4e-05,
+        1.6e-05
+       ],
+       "instances": {
+        "47": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          26029
+         ]
+        },
+        "48": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          24958
+         ]
+        },
+        "49": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          25977
+         ]
+        },
+        "51": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          24895
+         ]
+        },
+        "58": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          25610
+         ]
+        },
+        "60": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          25559
+         ]
+        },
+        "61": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          25015
+         ]
+        },
+        "62": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          25037
+         ]
+        },
+        "63": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          24975
+         ]
+        },
+        "68": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          24948
+         ]
+        },
+        "69": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          26671
+         ]
+        },
+        "71": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          25902
+         ]
+        },
+        "72": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          26698
+         ]
+        },
+        "73": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          26016
+         ]
+        },
+        "74": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          24950
+         ]
+        },
+        "75": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          24886
+         ]
+        },
+        "76": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          25655
+         ]
+        },
+        "77": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          24949
+         ]
+        },
+        "79": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          26679
+         ]
+        },
+        "83": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          25672
+         ]
+        },
+        "85": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          26694
+         ]
+        },
+        "86": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          26639
+         ]
+        },
+        "87": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          26518
+         ]
+        },
+        "88": {
+         "pid1": [
+          1
+         ],
+         "user-manager": [
+          26586
+         ]
+        }
+       },
+       "threads": {
+        "pid1/systemd": {
+         "threads": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+         ],
+         "wakes_per_s": [
+          0.067778,
+          0.068333,
+          0.067778,
+          0.067778,
+          0.074444,
+          0.073333,
+          0.077222,
+          0.069444,
+          0.071111,
+          0.073889,
+          0.068889,
+          0.07,
+          0.067778,
+          0.07,
+          0.063333,
+          0.068333,
+          0.07,
+          0.075,
+          0.067222,
+          0.07,
+          0.068889,
+          0.068889,
+          0.073333,
+          0.072778
+         ],
+         "gap_ms": [
+          {
+           "n": 122,
+           "p50": 11983.657,
+           "p90": 31754.329,
+           "p99": 41544.519,
+           "mean": 14754.118,
+           "sum": 1800002.437
+          },
+          {
+           "n": 123,
+           "p50": 13344.044,
+           "p90": 30285.46,
+           "p99": 46124.708,
+           "mean": 14634.166,
+           "sum": 1800002.403
+          },
+          {
+           "n": 122,
+           "p50": 12207.98,
+           "p90": 34151.133,
+           "p99": 44123.076,
+           "mean": 14754.118,
+           "sum": 1800002.418
+          },
+          {
+           "n": 122,
+           "p50": 12478.623,
+           "p90": 31962.598,
+           "p99": 41907.938,
+           "mean": 14754.119,
+           "sum": 1800002.463
+          },
+          {
+           "n": 134,
+           "p50": 11049.432,
+           "p90": 30284.006,
+           "p99": 41479.521,
+           "mean": 13432.853,
+           "sum": 1800002.357
+          },
+          {
+           "n": 132,
+           "p50": 13393.7,
+           "p90": 28916.943,
+           "p99": 43059.945,
+           "mean": 13636.382,
+           "sum": 1800002.476
+          },
+          {
+           "n": 139,
+           "p50": 11690.005,
+           "p90": 29057.36,
+           "p99": 43364.85,
+           "mean": 12949.666,
+           "sum": 1800003.617
+          },
+          {
+           "n": 125,
+           "p50": 11907.166,
+           "p90": 30455.602,
+           "p99": 44861.739,
+           "mean": 14400.03,
+           "sum": 1800003.698
+          },
+          {
+           "n": 128,
+           "p50": 11411.748,
+           "p90": 31810.255,
+           "p99": 43143.516,
+           "mean": 14062.519,
+           "sum": 1800002.488
+          },
+          {
+           "n": 133,
+           "p50": 10376.231,
+           "p90": 30918.298,
+           "p99": 45645.179,
+           "mean": 13533.853,
+           "sum": 1800002.448
+          },
+          {
+           "n": 124,
+           "p50": 12126.411,
+           "p90": 31537.923,
+           "p99": 43934.774,
+           "mean": 14516.15,
+           "sum": 1800002.601
+          },
+          {
+           "n": 126,
+           "p50": 10874.829,
+           "p90": 31852.088,
+           "p99": 44151.205,
+           "mean": 14285.733,
+           "sum": 1800002.339
+          },
+          {
+           "n": 122,
+           "p50": 11521.041,
+           "p90": 32742.954,
+           "p99": 44010.099,
+           "mean": 14754.13,
+           "sum": 1800003.807
+          },
+          {
+           "n": 126,
+           "p50": 11592.377,
+           "p90": 33745.891,
+           "p99": 40973.834,
+           "mean": 14285.733,
+           "sum": 1800002.411
+          },
+          {
+           "n": 114,
+           "p50": 11195.826,
+           "p90": 34637.377,
+           "p99": 43562.028,
+           "mean": 15789.503,
+           "sum": 1800003.334
+          },
+          {
+           "n": 123,
+           "p50": 11562.491,
+           "p90": 30298.842,
+           "p99": 39897.691,
+           "mean": 14634.165,
+           "sum": 1800002.289
+          },
+          {
+           "n": 126,
+           "p50": 12012.213,
+           "p90": 30526.948,
+           "p99": 44389.713,
+           "mean": 14285.733,
+           "sum": 1800002.418
+          },
+          {
+           "n": 135,
+           "p50": 9923.491,
+           "p90": 28923.243,
+           "p99": 41247.659,
+           "mean": 13333.35,
+           "sum": 1800002.242
+          },
+          {
+           "n": 121,
+           "p50": 13535.191,
+           "p90": 30449.818,
+           "p99": 40083.595,
+           "mean": 14876.053,
+           "sum": 1800002.357
+          },
+          {
+           "n": 126,
+           "p50": 10854.163,
+           "p90": 32677.419,
+           "p99": 44636.721,
+           "mean": 14285.734,
+           "sum": 1800002.484
+          },
+          {
+           "n": 124,
+           "p50": 13795.303,
+           "p90": 28735.505,
+           "p99": 41306.675,
+           "mean": 14516.147,
+           "sum": 1800002.274
+          },
+          {
+           "n": 124,
+           "p50": 11875.026,
+           "p90": 32525.085,
+           "p99": 40833.033,
+           "mean": 14516.149,
+           "sum": 1800002.534
+          },
+          {
+           "n": 132,
+           "p50": 10825.919,
+           "p90": 31048.623,
+           "p99": 44595.247,
+           "mean": 13636.383,
+           "sum": 1800002.496
+          },
+          {
+           "n": 131,
+           "p50": 11154.138,
+           "p90": 29545.602,
+           "p99": 44742.249,
+           "mean": 13740.488,
+           "sum": 1800003.89
+          }
+         ],
+         "run_ms": [
+          {
+           "n": 122,
+           "p50": 0.111,
+           "p90": 0.153,
+           "p99": 2.142,
+           "mean": 0.158,
+           "sum": 19.316
+          },
+          {
+           "n": 123,
+           "p50": 0.106,
+           "p90": 0.14,
+           "p99": 1.674,
+           "mean": 0.132,
+           "sum": 16.233
+          },
+          {
+           "n": 122,
+           "p50": 0.108,
+           "p90": 0.148,
+           "p99": 1.657,
+           "mean": 0.134,
+           "sum": 16.335
+          },
+          {
+           "n": 122,
+           "p50": 0.118,
+           "p90": 0.153,
+           "p99": 1.631,
+           "mean": 0.141,
+           "sum": 17.166
+          },
+          {
+           "n": 134,
+           "p50": 0.1,
+           "p90": 0.141,
+           "p99": 2.277,
+           "mean": 0.199,
+           "sum": 26.715
+          },
+          {
+           "n": 132,
+           "p50": 0.108,
+           "p90": 0.144,
+           "p99": 2.117,
+           "mean": 0.204,
+           "sum": 26.99
+          },
+          {
+           "n": 139,
+           "p50": 0.102,
+           "p90": 0.146,
+           "p99": 2.259,
+           "mean": 0.169,
+           "sum": 23.552
+          },
+          {
+           "n": 125,
+           "p50": 0.106,
+           "p90": 0.146,
+           "p99": 2.404,
+           "mean": 0.193,
+           "sum": 24.118
+          },
+          {
+           "n": 128,
+           "p50": 0.105,
+           "p90": 0.145,
+           "p99": 2.168,
+           "mean": 0.186,
+           "sum": 23.773
+          },
+          {
+           "n": 133,
+           "p50": 0.109,
+           "p90": 0.164,
+           "p99": 2.264,
+           "mean": 0.228,
+           "sum": 30.344
+          },
+          {
+           "n": 124,
+           "p50": 0.103,
+           "p90": 0.135,
+           "p99": 1.987,
+           "mean": 0.142,
+           "sum": 17.596
+          },
+          {
+           "n": 126,
+           "p50": 0.099,
+           "p90": 0.14,
+           "p99": 2.062,
+           "mean": 0.158,
+           "sum": 19.912
+          },
+          {
+           "n": 122,
+           "p50": 0.101,
+           "p90": 0.134,
+           "p99": 2.09,
+           "mean": 0.142,
+           "sum": 17.364
+          },
+          {
+           "n": 126,
+           "p50": 0.11,
+           "p90": 0.151,
+           "p99": 2.14,
+           "mean": 0.176,
+           "sum": 22.22
+          },
+          {
+           "n": 114,
+           "p50": 0.106,
+           "p90": 0.135,
+           "p99": 2.192,
+           "mean": 0.151,
+           "sum": 17.219
+          },
+          {
+           "n": 123,
+           "p50": 0.105,
+           "p90": 0.141,
+           "p99": 2.072,
+           "mean": 0.146,
+           "sum": 18.006
+          },
+          {
+           "n": 126,
+           "p50": 0.109,
+           "p90": 0.142,
+           "p99": 2.099,
+           "mean": 0.162,
+           "sum": 20.355
+          },
+          {
+           "n": 135,
+           "p50": 0.125,
+           "p90": 0.187,
+           "p99": 2.195,
+           "mean": 0.234,
+           "sum": 31.656
+          },
+          {
+           "n": 121,
+           "p50": 0.105,
+           "p90": 0.144,
+           "p99": 1.735,
+           "mean": 0.14,
+           "sum": 16.914
+          },
+          {
+           "n": 126,
+           "p50": 0.104,
+           "p90": 0.146,
+           "p99": 1.74,
+           "mean": 0.138,
+           "sum": 17.375
+          },
+          {
+           "n": 124,
+           "p50": 0.103,
+           "p90": 0.136,
+           "p99": 2.068,
+           "mean": 0.164,
+           "sum": 20.373
+          },
+          {
+           "n": 124,
+           "p50": 0.107,
+           "p90": 0.142,
+           "p99": 2.124,
+           "mean": 0.171,
+           "sum": 21.241
+          },
+          {
+           "n": 132,
+           "p50": 0.111,
+           "p90": 0.154,
+           "p99": 2.204,
+           "mean": 0.189,
+           "sum": 25.003
+          },
+          {
+           "n": 131,
+           "p50": 0.105,
+           "p90": 0.164,
+           "p99": 2.205,
+           "mean": 0.222,
+           "sum": 29.137
+          }
+         ]
+        }
+       },
+       "components": {
+        "selected": [
+         "pid1/systemd"
+        ],
+        "residual": null,
+        "coverage": 0.95,
+        "covered_share": 1.0,
+        "total_wakes_per_s": 0.07,
+        "sporadic": [],
+        "sparse": []
+       },
+       "cron_event": {
+        "waker": "cron",
+        "count": [
+         50,
+         50,
+         49,
+         52,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0
+        ],
+        "runs_ms": [
+         3.276,
+         0.04,
+         1.286,
+         2.514,
+         0.883,
+         0.229,
+         0.114,
+         2.169,
+         2.205,
+         0.098,
+         3.018,
+         5.026,
+         2.133,
+         0.103,
+         0.085,
+         0.035,
+         0.099,
+         0.029,
+         0.038,
+         0.074,
+         0.03,
+         0.035,
+         0.063,
+         0.03,
+         0.034,
+         0.06,
+         0.034,
+         0.036,
+         0.062,
+         0.028,
+         0.082,
+         0.028,
+         0.031,
+         0.058,
+         0.054,
+         0.034,
+         0.058,
+         0.029,
+         0.032,
+         0.054,
+         0.028,
+         0.032,
+         0.053,
+         0.049,
+         0.027,
+         0.054,
+         0.022,
+         0.024,
+         0.044,
+         0.019,
+         3.21,
+         0.035,
+         1.298,
+         2.239,
+         1.006,
+         0.234,
+         0.142,
+         2.2,
+         2.296,
+         0.108,
+         3.228,
+         5.322,
+         2.265,
+         0.099,
+         0.08,
+         0.034,
+         0.094,
+         0.029,
+         0.034,
+         0.065,
+         0.029,
+         0.035,
+         0.059,
+         0.029,
+         0.033,
+         0.06,
+         0.028,
+         0.033,
+         0.058,
+         0.051,
+         0.085,
+         0.028,
+         0.031,
+         0.057,
+         0.028,
+         0.032,
+         0.056,
+         0.049,
+         0.033,
+         0.057,
+         0.027,
+         0.031,
+         0.057,
+         0.027,
+         0.036,
+         0.059,
+         0.022,
+         0.023,
+         0.048,
+         0.02,
+         3.561,
+         0.04,
+         1.439,
+         2.755,
+         0.879,
+         0.244,
+         0.115,
+         2.823,
+         1.739,
+         0.097,
+         2.779,
+         4.749,
+         2.317,
+         0.106,
+         0.173,
+         0.106,
+         0.031,
+         0.04,
+         0.072,
+         0.032,
+         0.035,
+         0.064,
+         0.03,
+         0.035,
+         0.06,
+         0.03,
+         0.034,
+         0.059,
+         0.028,
+         0.088,
+         0.03,
+         0.033,
+         0.056,
+         0.055,
+         0.035,
+         0.06,
+         0.029,
+         0.034,
+         0.062,
+         0.029,
+         0.036,
+         0.083,
+         0.029,
+         0.036,
+         0.07,
+         0.033,
+         0.038,
+         0.069,
+         0.031,
+         3.413,
+         0.037,
+         1.288,
+         2.226,
+         0.954,
+         0.124,
+         0.116,
+         0.115,
+         1.924,
+         1.799,
+         0.094,
+         2.814,
+         4.514,
+         2.319,
+         0.1,
+         0.084,
+         0.031,
+         0.086,
+         0.031,
+         0.034,
+         0.057,
+         0.022,
+         0.022,
+         0.048,
+         0.02,
+         0.019,
+         0.041,
+         0.019,
+         0.019,
+         0.043,
+         0.025,
+         0.02,
+         0.042,
+         0.019,
+         0.019,
+         0.042,
+         0.018,
+         0.019,
+         0.045,
+         0.018,
+         0.019,
+         0.045,
+         0.019,
+         0.02,
+         0.042,
+         0.019,
+         0.06,
+         0.068,
+         0.031,
+         0.036,
+         0.062,
+         0.03
+        ],
+        "at_s": [
+         [
+          317.9,
+          317.9,
+          317.9,
+          317.9,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.1,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2,
+          319.2
+         ],
+         [
+          340.7,
+          340.7,
+          340.7,
+          340.7,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.9,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1,
+          342.1
+         ],
+         [
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.3,
+          364.3,
+          364.3,
+          364.3,
+          364.3,
+          364.3,
+          364.4,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7,
+          364.7
+         ],
+         [
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          325.2,
+          325.2,
+          325.2,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3,
+          325.3
+         ],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         []
+        ],
+        "rate_per_s": 0.004653,
+        "span_s_total": 43200.1
+       },
+       "causes": {
+        "desktop": {
+         "systemd-oomd.service (systemd-oomd)": [
+          40,
+          39,
+          39,
+          37,
+          39,
+          40,
+          40,
+          40,
+          39,
+          39,
+          39,
+          40,
+          38,
+          39,
+          38,
+          39,
+          39,
+          39,
+          39,
+          39,
+          38,
+          39,
+          39,
+          36
+         ],
+         "systemd-logind.service (systemd)": [
+          33,
+          34,
+          34,
+          33,
+          34,
+          35,
+          35,
+          36,
+          34,
+          34,
+          33,
+          35,
+          36,
+          32,
+          35,
+          33,
+          35,
+          36,
+          34,
+          36,
+          35,
+          35,
+          33,
+          36
+         ],
+         "systemd-resolved.service (systemd-resolved)": [
+          20,
+          20,
+          18,
+          20,
+          20,
+          21,
+          18,
+          20,
+          22,
+          20,
+          18,
+          19,
+          19,
+          20,
+          19,
+          21,
+          20,
+          26,
+          22,
+          20,
+          19,
+          18,
+          20,
+          20
+         ],
+         "systemd-journald.service (systemd)": [
+          20,
+          20,
+          17,
+          19,
+          26,
+          22,
+          19,
+          17,
+          18,
+          19,
+          20,
+          17,
+          17,
+          22,
+          15,
+          16,
+          21,
+          21,
+          18,
+          18,
+          21,
+          20,
+          20,
+          16
+         ],
+         "systemd-udevd.service (udev)": [
+          3,
+          5,
+          7,
+          7,
+          12,
+          10,
+          6,
+          9,
+          11,
+          14,
+          10,
+          11,
+          8,
+          8,
+          3,
+          11,
+          5,
+          6,
+          4,
+          9,
+          7,
+          8,
+          9,
+          12
+         ],
+         "job sysstat-collect (sysstat)": [
+          2,
+          2,
+          2,
+          2,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+         ],
+         "job systemd helper (systemd)": [
+          3,
+          2,
+          4,
+          4,
+          0,
+          1,
+          2,
+          0,
+          1,
+          4,
+          1,
+          1,
+          1,
+          2,
+          1,
+          0,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          2,
+          0
+         ]
+        },
+        "event": {
+         "anacron.service (anacron)": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          1,
+          2,
+          0,
+          1
+         ],
+         "job anacron (anacron)": [
+          0,
+          1,
+          1,
+          1,
+          0,
+          1,
+          0,
+          2,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0
+         ],
+         "job sysstat-summary (sysstat)": [
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "job man-db (man-db)": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "job motd-news (base-files)": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "job fstrim (util-linux)": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ]
+        },
+        "kernel": {
+         "kernel thread kworker/3:1-mm_": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "kernel thread kworker/3:1-eve": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "kernel thread kthreadd": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "kernel thread kworker/0:3-eve": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "kernel thread kworker/3:0-mm_": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ]
+        },
+        "outside": {
+         "php8.3-fpm.service (php8.3-fpm)": [
+          186,
+          185,
+          185,
+          188,
+          182,
+          183,
+          185,
+          183,
+          183,
+          180,
+          187,
+          185,
+          184,
+          184,
+          186,
+          186,
+          186,
+          180,
+          188,
+          185,
+          187,
+          183,
+          184,
+          180
+         ],
+         "systemd-networkd.service (systemd)": [
+          5,
+          6,
+          9,
+          5,
+          7,
+          11,
+          8,
+          8,
+          12,
+          15,
+          10,
+          6,
+          10,
+          7,
+          12,
+          8,
+          11,
+          7,
+          7,
+          10,
+          5,
+          11,
+          8,
+          6
+         ],
+         "job podman (podman)": [
+          7,
+          7,
+          6,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "job phpsessionclean (php-common)": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+         ]
+        },
+        "own": {
+         "idle CPU (timer or interrupt)": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          6,
+          8
+         ]
+        },
+        "unknown": {
+         "job launched by pid 1: (install) 9 install systemd": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          9,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ]
+        }
+       },
+       "instance_wakes_all": {
+        "pid1": [
+         371,
+         372,
+         372,
+         375,
+         325,
+         329,
+         338,
+         319,
+         325,
+         331,
+         323,
+         319,
+         318,
+         319,
+         314,
+         319,
+         325,
+         324,
+         318,
+         323,
+         318,
+         321,
+         326,
+         319
+        ],
+        "user-manager": [
+         2,
+         2,
+         2,
+         2,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0
+        ]
+       },
+       "tables": {
+        "pid1/systemd": {
+         "gap_ms": {
+          "n": 3034,
+          "p50": 11583.948,
+          "p90": 31618.993,
+          "p99": 44474.874,
+          "q": [
+           2.893,
+           499.959,
+           1669.368,
+           4996.431,
+           11583.948,
+           21523.26,
+           31618.993,
+           36749.971,
+           44474.874,
+           46250.002
+          ],
+          "table": {
+           "p": [
+            2.8926600000477265,
+            499.9592500000972,
+            1669.3676999999072,
+            4996.430999999916,
+            11583.947500000022,
+            21523.26049999988,
+            31618.992800000044,
+            36749.97144999977,
+            44474.874159999774,
+            46250.00190099978
+           ],
+           "min": 0.008999999863590347,
+           "max": 46250.03000000015,
+           "means": [
+            1.5368912327044177,
+            132.69359525377902,
+            1095.6594568227056,
+            3376.541875192277,
+            8010.805969676974,
+            16001.766804218836,
+            25942.952475060443,
+            34178.527489782435,
+            40325.69400906396,
+            45474.71905046461,
+            46250.02177587335
+           ]
+          },
+          "repeat_p50": [
+           11983.657,
+           13344.044,
+           12207.98,
+           12478.623,
+           11049.432,
+           13393.7,
+           11690.005,
+           11907.166,
+           11411.748,
+           10376.231,
+           12126.411,
+           10874.829,
+           11521.041,
+           11592.377,
+           11195.826,
+           11562.491,
+           12012.213,
+           9923.491,
+           13535.191,
+           10854.163,
+           13795.303,
+           11875.026,
+           10825.919,
+           11154.138
+          ],
+          "repeat_n": [
+           122,
+           123,
+           122,
+           122,
+           134,
+           132,
+           139,
+           125,
+           128,
+           133,
+           124,
+           126,
+           122,
+           126,
+           114,
+           123,
+           126,
+           135,
+           121,
+           126,
+           124,
+           124,
+           132,
+           131
+          ],
+          "repeat_mean": [
+           14754.1183,
+           14634.1659,
+           14754.1182,
+           14754.1185,
+           13432.8534,
+           13636.3824,
+           12949.6663,
+           14400.0296,
+           14062.5194,
+           13533.853,
+           14516.15,
+           14285.7328,
+           14754.1296,
+           14285.7334,
+           15789.5029,
+           14634.165,
+           14285.7335,
+           13333.3499,
+           14876.0525,
+           14285.734,
+           14516.1474,
+           14516.1495,
+           13636.3825,
+           13740.4877
+          ]
+         },
+         "run_ms": {
+          "n": 3034,
+          "p50": 0.106,
+          "p90": 0.149,
+          "p99": 2.166,
+          "q": [
+           0.04,
+           0.044,
+           0.048,
+           0.062,
+           0.106,
+           0.125,
+           0.149,
+           0.18,
+           2.166,
+           2.417
+          ],
+          "table": {
+           "p": [
+            0.04,
+            0.044,
+            0.048,
+            0.06225,
+            0.106,
+            0.12475,
+            0.149,
+            0.1803499999999999,
+            2.16568,
+            2.4166040000000013
+           ],
+           "min": 0.003,
+           "max": 2.7150000000000003,
+           "means": [
+            0.0334739617666447,
+            0.04173698088332229,
+            0.047042847725774675,
+            0.054367831245879704,
+            0.09593803559657207,
+            0.11363546473302744,
+            0.13475258185014224,
+            0.15945220830586382,
+            1.3718434410019753,
+            2.2789717278253843,
+            2.5577382992749675
+           ]
+          },
+          "repeat_p50": [
+           0.111,
+           0.106,
+           0.108,
+           0.118,
+           0.1,
+           0.108,
+           0.102,
+           0.106,
+           0.105,
+           0.109,
+           0.103,
+           0.099,
+           0.101,
+           0.11,
+           0.106,
+           0.105,
+           0.109,
+           0.125,
+           0.105,
+           0.104,
+           0.103,
+           0.107,
+           0.111,
+           0.105
+          ],
+          "repeat_n": [
+           122,
+           123,
+           122,
+           122,
+           134,
+           132,
+           139,
+           125,
+           128,
+           133,
+           124,
+           126,
+           122,
+           126,
+           114,
+           123,
+           126,
+           135,
+           121,
+           126,
+           124,
+           124,
+           132,
+           131
+          ],
+          "repeat_mean": [
+           0.1583,
+           0.132,
+           0.1339,
+           0.1407,
+           0.1994,
+           0.2045,
+           0.1694,
+           0.1929,
+           0.1857,
+           0.2282,
+           0.1419,
+           0.158,
+           0.1423,
+           0.1763,
+           0.151,
+           0.1464,
+           0.1615,
+           0.2345,
+           0.1398,
+           0.1379,
+           0.1643,
+           0.1713,
+           0.1894,
+           0.2224
+          ]
+         }
+        }
+       }
+      },
+      "dbus-daemon": {
+       "repeats": [
+        47,
+        48,
+        49,
+        51,
+        58,
+        60,
+        61,
+        62,
+        63,
+        68,
+        69,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        79,
+        83,
+        85,
+        86,
+        87,
+        88
+       ],
+       "span_s": [
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.004,
+        1800.004,
+        1800.002,
+        1800.002,
+        1800.003,
+        1800.002,
+        1800.004,
+        1800.002,
+        1800.003,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.002,
+        1800.003,
+        1800.002,
+        1800.004
+       ],
+       "wakes_per_s": [
+        0.013,
+        0.009,
+        0.009,
+        0.01,
+        0.019,
+        0.018,
+        0.014,
+        0.016,
+        0.017,
+        0.02,
+        0.012,
+        0.013,
+        0.009,
+        0.015,
+        0.012,
+        0.012,
+        0.009,
+        0.021,
+        0.012,
+        0.012,
+        0.013,
+        0.015,
+        0.016,
+        0.019
+       ],
+       "cpu_share": [
+        2e-06,
+        1e-06,
+        1e-06,
+        1e-06,
+        2e-06,
+        3e-06,
+        2e-06,
+        2e-06,
+        2e-06,
+        3e-06,
+        1e-06,
+        1e-06,
+        1e-06,
+        1e-06,
+        1e-06,
+        1e-06,
+        2e-06,
+        3e-06,
+        1e-06,
+        1e-06,
+        2e-06,
+        1e-06,
+        2e-06,
+        3e-06
+       ],
+       "instances": {
+        "47": {
+         "system-bus": [
+          2997
+         ],
+         "session-bus": [
+          26058
+         ]
+        },
+        "48": {
+         "system-bus": [
+          2917
+         ],
+         "session-bus": [
+          24984
+         ]
+        },
+        "49": {
+         "system-bus": [
+          2930
+         ],
+         "session-bus": [
+          26005
+         ]
+        },
+        "51": {
+         "system-bus": [
+          2794
+         ],
+         "session-bus": [
+          24925
+         ]
+        },
+        "58": {
+         "system-bus": [
+          2909
+         ],
+         "session-bus": [
+          25634
+         ]
+        },
+        "60": {
+         "system-bus": [
+          2836
+         ],
+         "session-bus": [
+          25589
+         ]
+        },
+        "61": {
+         "system-bus": [
+          2905
+         ],
+         "session-bus": [
+          25041
+         ]
+        },
+        "62": {
+         "system-bus": [
+          2941
+         ],
+         "session-bus": [
+          25066
+         ]
+        },
+        "63": {
+         "system-bus": [
+          2914
+         ],
+         "session-bus": [
+          25004
+         ]
+        },
+        "68": {
+         "system-bus": [
+          2905
+         ],
+         "session-bus": [
+          24974
+         ]
+        },
+        "69": {
+         "system-bus": [
+          3014
+         ],
+         "session-bus": [
+          26699
+         ]
+        },
+        "71": {
+         "system-bus": [
+          2940
+         ],
+         "session-bus": [
+          25932
+         ]
+        },
+        "72": {
+         "system-bus": [
+          2940
+         ],
+         "session-bus": [
+          26724
+         ]
+        },
+        "73": {
+         "system-bus": [
+          2951
+         ],
+         "session-bus": [
+          26044
+         ]
+        },
+        "74": {
+         "system-bus": [
+          2899
+         ],
+         "session-bus": [
+          24978
+         ]
+        },
+        "75": {
+         "system-bus": [
+          2899
+         ],
+         "session-bus": [
+          24910
+         ]
+        },
+        "76": {
+         "system-bus": [
+          3032
+         ],
+         "session-bus": [
+          25683
+         ]
+        },
+        "77": {
+         "system-bus": [
+          2907
+         ],
+         "session-bus": [
+          24974
+         ]
+        },
+        "79": {
+         "system-bus": [
+          2957
+         ],
+         "session-bus": [
+          26706
+         ]
+        },
+        "83": {
+         "system-bus": [
+          2897
+         ],
+         "session-bus": [
+          25699
+         ]
+        },
+        "85": {
+         "system-bus": [
+          2977
+         ],
+         "session-bus": [
+          26721
+         ]
+        },
+        "86": {
+         "system-bus": [
+          2978
+         ],
+         "session-bus": [
+          26663
+         ]
+        },
+        "87": {
+         "system-bus": [
+          2879
+         ],
+         "session-bus": [
+          26546
+         ]
+        },
+        "88": {
+         "system-bus": [
+          2939
+         ],
+         "session-bus": [
+          26612
+         ]
+        }
+       },
+       "threads": {
+        "system-bus/dbus-daemon": {
+         "threads": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+         ],
+         "wakes_per_s": [
+          0.012778,
+          0.009444,
+          0.008889,
+          0.01,
+          0.018889,
+          0.018333,
+          0.014444,
+          0.015556,
+          0.016667,
+          0.02,
+          0.011667,
+          0.013333,
+          0.009444,
+          0.015,
+          0.011667,
+          0.011667,
+          0.009444,
+          0.021111,
+          0.011667,
+          0.011667,
+          0.013333,
+          0.015,
+          0.015556,
+          0.019444
+         ],
+         "gap_ms": [
+          {
+           "n": 23,
+           "p50": 0.276,
+           "p90": 337533.698,
+           "p99": 738823.004,
+           "mean": 78260.976,
+           "sum": 1800002.437
+          },
+          {
+           "n": 17,
+           "p50": 0.313,
+           "p90": 300011.987,
+           "p99": 1019952.023,
+           "mean": 105882.494,
+           "sum": 1800002.403
+          },
+          {
+           "n": 16,
+           "p50": 0.203,
+           "p90": 300013.479,
+           "p99": 1078446.619,
+           "mean": 112500.151,
+           "sum": 1800002.418
+          },
+          {
+           "n": 18,
+           "p50": 0.296,
+           "p90": 284991.396,
+           "p99": 973454.922,
+           "mean": 100000.137,
+           "sum": 1800002.463
+          },
+          {
+           "n": 34,
+           "p50": 0.174,
+           "p90": 41883.601,
+           "p99": 604417.276,
+           "mean": 52941.246,
+           "sum": 1800002.357
+          },
+          {
+           "n": 33,
+           "p50": 0.183,
+           "p90": 51901.949,
+           "p99": 599516.8,
+           "mean": 54545.53,
+           "sum": 1800002.476
+          },
+          {
+           "n": 26,
+           "p50": 0.246,
+           "p90": 302846.962,
+           "p99": 598599.5,
+           "mean": 69230.908,
+           "sum": 1800003.617
+          },
+          {
+           "n": 28,
+           "p50": 0.183,
+           "p90": 178715.443,
+           "p99": 602745.307,
+           "mean": 64285.846,
+           "sum": 1800003.698
+          },
+          {
+           "n": 30,
+           "p50": 0.2,
+           "p90": 112373.123,
+           "p99": 602234.658,
+           "mean": 60000.083,
+           "sum": 1800002.488
+          },
+          {
+           "n": 36,
+           "p50": 0.191,
+           "p90": 114997.238,
+           "p99": 599979.92,
+           "mean": 50000.068,
+           "sum": 1800002.448
+          },
+          {
+           "n": 21,
+           "p50": 0.152,
+           "p90": 599869.642,
+           "p99": 600070.802,
+           "mean": 85714.41,
+           "sum": 1800002.601
+          },
+          {
+           "n": 24,
+           "p50": 0.164,
+           "p90": 418884.125,
+           "p99": 601288.192,
+           "mean": 75000.097,
+           "sum": 1800002.339
+          },
+          {
+           "n": 17,
+           "p50": 0.296,
+           "p90": 599942.478,
+           "p99": 600074.137,
+           "mean": 105882.577,
+           "sum": 1800003.807
+          },
+          {
+           "n": 27,
+           "p50": 0.15,
+           "p90": 253343.637,
+           "p99": 600027.059,
+           "mean": 66666.756,
+           "sum": 1800002.411
+          },
+          {
+           "n": 21,
+           "p50": 0.137,
+           "p90": 599875.149,
+           "p99": 600064.207,
+           "mean": 85714.444,
+           "sum": 1800003.334
+          },
+          {
+           "n": 21,
+           "p50": 0.13,
+           "p90": 599863.44,
+           "p99": 600074.417,
+           "mean": 85714.395,
+           "sum": 1800002.289
+          },
+          {
+           "n": 17,
+           "p50": 0.182,
+           "p90": 598809.21,
+           "p99": 601642.299,
+           "mean": 105882.495,
+           "sum": 1800002.418
+          },
+          {
+           "n": 38,
+           "p50": 0.193,
+           "p90": 19114.566,
+           "p99": 601142.963,
+           "mean": 47368.48,
+           "sum": 1800002.242
+          },
+          {
+           "n": 21,
+           "p50": 0.147,
+           "p90": 599876.914,
+           "p99": 600061.842,
+           "mean": 85714.398,
+           "sum": 1800002.357
+          },
+          {
+           "n": 21,
+           "p50": 0.106,
+           "p90": 599862.111,
+           "p99": 600071.108,
+           "mean": 85714.404,
+           "sum": 1800002.484
+          },
+          {
+           "n": 24,
+           "p50": 0.19,
+           "p90": 419124.788,
+           "p99": 601018.956,
+           "mean": 75000.095,
+           "sum": 1800002.274
+          },
+          {
+           "n": 27,
+           "p50": 0.187,
+           "p90": 252699.947,
+           "p99": 600063.592,
+           "mean": 66666.761,
+           "sum": 1800002.534
+          },
+          {
+           "n": 28,
+           "p50": 0.253,
+           "p90": 204356.788,
+           "p99": 599697.025,
+           "mean": 64285.803,
+           "sum": 1800002.496
+          },
+          {
+           "n": 35,
+           "p50": 0.206,
+           "p90": 35996.54,
+           "p99": 599980.085,
+           "mean": 51428.683,
+           "sum": 1800003.89
+          }
+         ],
+         "run_ms": [
+          {
+           "n": 23,
+           "p50": 0.095,
+           "p90": 0.342,
+           "p99": 0.493,
+           "mean": 0.147,
+           "sum": 3.381
+          },
+          {
+           "n": 17,
+           "p50": 0.077,
+           "p90": 0.257,
+           "p99": 0.467,
+           "mean": 0.123,
+           "sum": 2.098
+          },
+          {
+           "n": 16,
+           "p50": 0.07,
+           "p90": 0.247,
+           "p99": 0.513,
+           "mean": 0.118,
+           "sum": 1.889
+          },
+          {
+           "n": 18,
+           "p50": 0.072,
+           "p90": 0.28,
+           "p99": 0.402,
+           "mean": 0.126,
+           "sum": 2.269
+          },
+          {
+           "n": 34,
+           "p50": 0.085,
+           "p90": 0.313,
+           "p99": 0.46,
+           "mean": 0.129,
+           "sum": 4.374
+          },
+          {
+           "n": 33,
+           "p50": 0.085,
+           "p90": 0.358,
+           "p99": 0.522,
+           "mean": 0.137,
+           "sum": 4.515
+          },
+          {
+           "n": 26,
+           "p50": 0.081,
+           "p90": 0.227,
+           "p99": 0.609,
+           "mean": 0.134,
+           "sum": 3.476
+          },
+          {
+           "n": 28,
+           "p50": 0.083,
+           "p90": 0.373,
+           "p99": 0.489,
+           "mean": 0.137,
+           "sum": 3.83
+          },
+          {
+           "n": 30,
+           "p50": 0.078,
+           "p90": 0.188,
+           "p99": 0.468,
+           "mean": 0.12,
+           "sum": 3.597
+          },
+          {
+           "n": 36,
+           "p50": 0.099,
+           "p90": 0.394,
+           "p99": 0.474,
+           "mean": 0.162,
+           "sum": 5.832
+          },
+          {
+           "n": 21,
+           "p50": 0.066,
+           "p90": 0.081,
+           "p99": 0.14,
+           "mean": 0.073,
+           "sum": 1.53
+          },
+          {
+           "n": 24,
+           "p50": 0.079,
+           "p90": 0.109,
+           "p99": 0.445,
+           "mean": 0.107,
+           "sum": 2.565
+          },
+          {
+           "n": 17,
+           "p50": 0.076,
+           "p90": 0.102,
+           "p99": 0.311,
+           "mean": 0.097,
+           "sum": 1.644
+          },
+          {
+           "n": 27,
+           "p50": 0.076,
+           "p90": 0.097,
+           "p99": 0.374,
+           "mean": 0.092,
+           "sum": 2.49
+          },
+          {
+           "n": 21,
+           "p50": 0.075,
+           "p90": 0.09,
+           "p99": 0.141,
+           "mean": 0.079,
+           "sum": 1.666
+          },
+          {
+           "n": 21,
+           "p50": 0.07,
+           "p90": 0.084,
+           "p99": 0.099,
+           "mean": 0.071,
+           "sum": 1.498
+          },
+          {
+           "n": 17,
+           "p50": 0.081,
+           "p90": 0.477,
+           "p99": 0.644,
+           "mean": 0.163,
+           "sum": 2.776
+          },
+          {
+           "n": 38,
+           "p50": 0.097,
+           "p90": 0.357,
+           "p99": 0.49,
+           "mean": 0.146,
+           "sum": 5.541
+          },
+          {
+           "n": 21,
+           "p50": 0.074,
+           "p90": 0.09,
+           "p99": 0.115,
+           "mean": 0.077,
+           "sum": 1.621
+          },
+          {
+           "n": 21,
+           "p50": 0.064,
+           "p90": 0.079,
+           "p99": 0.097,
+           "mean": 0.067,
+           "sum": 1.401
+          },
+          {
+           "n": 24,
+           "p50": 0.077,
+           "p90": 0.168,
+           "p99": 0.451,
+           "mean": 0.115,
+           "sum": 2.754
+          },
+          {
+           "n": 27,
+           "p50": 0.078,
+           "p90": 0.107,
+           "p99": 0.305,
+           "mean": 0.094,
+           "sum": 2.526
+          },
+          {
+           "n": 28,
+           "p50": 0.099,
+           "p90": 0.27,
+           "p99": 0.399,
+           "mean": 0.14,
+           "sum": 3.921
+          },
+          {
+           "n": 35,
+           "p50": 0.092,
+           "p90": 0.416,
+           "p99": 0.498,
+           "mean": 0.165,
+           "sum": 5.785
+          }
+         ]
+        }
+       },
+       "components": {
+        "selected": [
+         "system-bus/dbus-daemon"
+        ],
+        "residual": null,
+        "coverage": 0.95,
+        "covered_share": 1.0,
+        "total_wakes_per_s": 0.014,
+        "sporadic": [],
+        "sparse": []
+       },
+       "cron_event": {
+        "waker": "cron",
+        "count": [
+         56,
+         65,
+         55,
+         69,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0
+        ],
+        "runs_ms": [
+         1.221,
+         0.162,
+         0.083,
+         0.107,
+         0.08,
+         0.137,
+         0.135,
+         0.1,
+         0.102,
+         0.099,
+         0.099,
+         0.4,
+         0.098,
+         0.099,
+         0.135,
+         0.074,
+         0.223,
+         0.083,
+         0.132,
+         0.066,
+         1.779,
+         0.112,
+         0.099,
+         0.072,
+         0.101,
+         0.11,
+         0.086,
+         0.123,
+         0.2,
+         0.357,
+         0.106,
+         0.048,
+         0.19,
+         0.042,
+         0.159,
+         0.166,
+         0.163,
+         0.039,
+         0.035,
+         0.058,
+         0.04,
+         0.074,
+         0.083,
+         0.039,
+         0.032,
+         0.033,
+         0.06,
+         0.049,
+         0.024,
+         0.047,
+         0.11,
+         0.044,
+         0.037,
+         0.035,
+         0.038,
+         0.059,
+         0.835,
+         0.116,
+         0.086,
+         0.089,
+         0.106,
+         0.112,
+         0.099,
+         0.098,
+         0.102,
+         0.101,
+         0.095,
+         0.088,
+         0.091,
+         0.079,
+         0.096,
+         0.101,
+         0.096,
+         0.09,
+         0.2,
+         0.096,
+         0.082,
+         0.074,
+         0.074,
+         0.069,
+         0.103,
+         0.076,
+         1.819,
+         0.122,
+         0.098,
+         0.07,
+         0.104,
+         0.097,
+         0.089,
+         0.1,
+         0.237,
+         0.517,
+         0.096,
+         0.047,
+         0.202,
+         0.037,
+         0.051,
+         0.177,
+         0.111,
+         0.036,
+         0.06,
+         0.123,
+         0.035,
+         0.061,
+         0.05,
+         0.074,
+         0.125,
+         0.049,
+         0.039,
+         0.034,
+         0.05,
+         0.052,
+         0.026,
+         0.05,
+         0.048,
+         0.065,
+         0.044,
+         0.037,
+         0.033,
+         0.038,
+         0.059,
+         0.094,
+         0.043,
+         0.215,
+         0.039,
+         0.05,
+         0.08,
+         0.231,
+         0.066,
+         0.059,
+         0.116,
+         0.064,
+         0.056,
+         0.043,
+         0.07,
+         0.035,
+         0.038,
+         0.032,
+         0.037,
+         0.05,
+         0.049,
+         0.036,
+         0.082,
+         0.037,
+         0.029,
+         0.039,
+         0.039,
+         0.051,
+         0.939,
+         0.077,
+         0.075,
+         0.076,
+         0.073,
+         0.026,
+         0.218,
+         0.082,
+         0.135,
+         0.108,
+         0.117,
+         0.094,
+         0.099,
+         0.581,
+         0.106,
+         0.132,
+         0.188,
+         0.506,
+         1.738,
+         0.115,
+         0.072,
+         0.059,
+         0.078,
+         0.082,
+         0.068,
+         0.082,
+         0.229,
+         0.365,
+         0.105,
+         0.064,
+         0.175,
+         0.049,
+         0.045,
+         0.039,
+         0.108,
+         0.055,
+         0.065,
+         0.062,
+         0.108,
+         0.035,
+         0.052,
+         0.053,
+         0.027,
+         0.05,
+         0.101,
+         0.045,
+         0.038,
+         0.034,
+         0.048,
+         0.048,
+         0.065,
+         0.09,
+         0.047,
+         0.044,
+         0.038,
+         0.043,
+         0.051,
+         0.809,
+         0.134,
+         0.075,
+         0.091,
+         0.107,
+         0.119,
+         0.097,
+         0.094,
+         0.101,
+         0.093,
+         0.093,
+         0.089,
+         0.091,
+         0.081,
+         0.08,
+         0.082,
+         0.097,
+         0.093,
+         0.154,
+         0.083,
+         0.065,
+         0.094,
+         0.121,
+         0.133,
+         0.098,
+         0.07,
+         1.805,
+         0.096,
+         0.069,
+         0.053,
+         0.077,
+         0.111,
+         0.067,
+         0.064,
+         0.2,
+         0.174,
+         0.077,
+         0.068,
+         0.066,
+         0.063
+        ],
+        "at_s": [
+         [
+          317.9,
+          317.9,
+          317.9,
+          317.9,
+          317.9,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.0,
+          318.1,
+          318.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1,
+          319.1
+         ],
+         [
+          340.7,
+          340.7,
+          340.7,
+          340.7,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.8,
+          340.9,
+          340.9,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1,
+          341.1
+         ],
+         [
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.1,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.2,
+          364.3,
+          364.3,
+          364.3,
+          364.3,
+          364.3,
+          364.3,
+          364.3,
+          364.3,
+          364.3,
+          364.3,
+          364.4,
+          364.4
+         ],
+         [
+          324.3,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.4,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.8,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          324.9,
+          324.9
+         ],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         [],
+         []
+        ],
+        "rate_per_s": 0.005671,
+        "span_s_total": 43200.1
+       },
+       "causes": {
+        "desktop": {
+         "job sysstat-collect (sysstat)": [
+          14,
+          14,
+          14,
+          14,
+          12,
+          11,
+          15,
+          12,
+          16,
+          6,
+          21,
+          16,
+          17,
+          21,
+          21,
+          21,
+          9,
+          8,
+          21,
+          21,
+          16,
+          21,
+          14,
+          6
+         ],
+         "systemd-journald.service (systemd)": [
+          0,
+          0,
+          0,
+          0,
+          22,
+          14,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          8,
+          6,
+          0,
+          0,
+          8,
+          6,
+          0,
+          0
+         ],
+         "entry systemd (pid1/systemd) on its own": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0,
+          14,
+          29
+         ],
+         "systemd-resolved.service (systemd-resolved)": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          8,
+          14,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          16,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "systemd-oomd.service (systemd-oomd)": [
+          6,
+          0,
+          0,
+          0,
+          0,
+          8,
+          7,
+          8,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "systemd-udevd.service (udev)": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          24,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "udisks2.service (udisks2)": [
+          3,
+          3,
+          2,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ]
+        },
+        "event": {
+         "job sysstat-summary (sysstat)": [
+          7,
+          7,
+          1,
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "anacron.service (anacron)": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          1,
+          1,
+          0,
+          1
+         ],
+         "job anacron (anacron)": [
+          0,
+          1,
+          1,
+          1,
+          0,
+          1,
+          0,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0
+         ],
+         "job motd-news (base-files)": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "job fstrim (util-linux)": [
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "job man-db (man-db)": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ]
+        },
+        "outside": {
+         "php8.3-fpm.service (php8.3-fpm)": [
+          225,
+          221,
+          221,
+          225,
+          193,
+          198,
+          211,
+          199,
+          200,
+          191,
+          217,
+          205,
+          214,
+          209,
+          212,
+          219,
+          209,
+          186,
+          217,
+          215,
+          208,
+          207,
+          202,
+          185
+         ],
+         "job phpsessionclean (php-common)": [
+          7,
+          7,
+          7,
+          7,
+          4,
+          7,
+          7,
+          7,
+          4,
+          6,
+          5,
+          7,
+          7,
+          7,
+          7,
+          5,
+          6,
+          7,
+          6,
+          7,
+          3,
+          5,
+          7,
+          7
+         ],
+         "job podman (podman)": [
+          32,
+          4,
+          30,
+          26,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ],
+         "systemd-networkd.service (systemd)": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ]
+        },
+        "unknown": {
+         "job launched by pid 1: (install) 9 install systemd": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+         ]
+        }
+       },
+       "instance_wakes_all": {
+        "session-bus": [
+         26,
+         29,
+         27,
+         29,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0,
+         0
+        ],
+        "system-bus": [
+         325,
+         293,
+         304,
+         331,
+         232,
+         246,
+         252,
+         235,
+         235,
+         243,
+         244,
+         237,
+         239,
+         244,
+         241,
+         246,
+         233,
+         232,
+         245,
+         244,
+         236,
+         240,
+         238,
+         228
+        ]
+       },
+       "tables": {
+        "system-bus/dbus-daemon": {
+         "gap_ms": {
+          "n": 603,
+          "p50": 0.183,
+          "p90": 536054.933,
+          "p99": 603749.952,
+          "q": [
+           0.092,
+           0.099,
+           0.103,
+           0.126,
+           0.183,
+           0.686,
+           536054.933,
+           600056.816,
+           603749.952,
+           1139733.26
+          ],
+          "table": {
+           "p": [
+            0.0920199999882243,
+            0.09899999986373587,
+            0.10299999985363684,
+            0.12550000019473373,
+            0.1830000001064036,
+            0.6860000002006927,
+            536054.9332000006,
+            600056.8155999999,
+            603749.95162,
+            1139733.2596800022
+           ],
+           "min": 0.08299999990413198,
+           "max": 1199939.075,
+           "means": [
+            0.08884908787806176,
+            0.09623092870658453,
+            0.10089718075754382,
+            0.11387341073322044,
+            0.15091044777026147,
+            0.3211276948559542,
+            60769.488614704525,
+            592250.7778524051,
+            600647.2158971808,
+            854218.0975465348,
+            1199939.0749998991
+           ]
+          },
+          "repeat_p50": [
+           0.276,
+           0.313,
+           0.203,
+           0.296,
+           0.174,
+           0.183,
+           0.246,
+           0.183,
+           0.2,
+           0.191,
+           0.152,
+           0.164,
+           0.296,
+           0.15,
+           0.137,
+           0.13,
+           0.182,
+           0.193,
+           0.147,
+           0.106,
+           0.19,
+           0.187,
+           0.253,
+           0.206
+          ],
+          "repeat_n": [
+           23,
+           17,
+           16,
+           18,
+           34,
+           33,
+           26,
+           28,
+           30,
+           36,
+           21,
+           24,
+           17,
+           27,
+           21,
+           21,
+           17,
+           38,
+           21,
+           21,
+           24,
+           27,
+           28,
+           35
+          ],
+          "repeat_mean": [
+           78260.9755,
+           105882.4943,
+           112500.1511,
+           100000.1368,
+           52941.2458,
+           54545.5296,
+           69230.9083,
+           64285.8464,
+           60000.0829,
+           50000.068,
+           85714.4096,
+           75000.0975,
+           105882.5769,
+           66666.756,
+           85714.4445,
+           85714.3947,
+           105882.4952,
+           47368.4801,
+           85714.398,
+           85714.404,
+           75000.0948,
+           66666.7605,
+           64285.8034,
+           51428.6826
+          ]
+         },
+         "run_ms": {
+          "n": 603,
+          "p50": 0.079,
+          "p90": 0.267,
+          "p99": 0.516,
+          "q": [
+           0.053,
+           0.06,
+           0.064,
+           0.071,
+           0.079,
+           0.102,
+           0.267,
+           0.411,
+           0.516,
+           0.648
+          ],
+          "table": {
+           "p": [
+            0.05302,
+            0.06,
+            0.064,
+            0.071,
+            0.079,
+            0.102,
+            0.2666000000000015,
+            0.411,
+            0.51592,
+            0.6475620000000005
+           ],
+           "min": 0.052,
+           "max": 0.659,
+           "means": [
+            0.05250248756218907,
+            0.056609038142620235,
+            0.062162520729684895,
+            0.0675516860143726,
+            0.07503980099502497,
+            0.08893532338308416,
+            0.1423018242122716,
+            0.36413432835820986,
+            0.46787603648424514,
+            0.5640506725631154,
+            0.6589999999999646
+           ]
+          },
+          "repeat_p50": [
+           0.095,
+           0.077,
+           0.07,
+           0.072,
+           0.085,
+           0.085,
+           0.081,
+           0.083,
+           0.078,
+           0.099,
+           0.066,
+           0.079,
+           0.076,
+           0.076,
+           0.075,
+           0.07,
+           0.081,
+           0.097,
+           0.074,
+           0.064,
+           0.077,
+           0.078,
+           0.099,
+           0.092
+          ],
+          "repeat_n": [
+           23,
+           17,
+           16,
+           18,
+           34,
+           33,
+           26,
+           28,
+           30,
+           36,
+           21,
+           24,
+           17,
+           27,
+           21,
+           21,
+           17,
+           38,
+           21,
+           21,
+           24,
+           27,
+           28,
+           35
+          ],
+          "repeat_mean": [
+           0.147,
+           0.1234,
+           0.1181,
+           0.1261,
+           0.1286,
+           0.1368,
+           0.1337,
+           0.1368,
+           0.1199,
+           0.162,
+           0.0729,
+           0.1069,
+           0.0967,
+           0.0922,
+           0.0793,
+           0.0713,
+           0.1633,
+           0.1458,
+           0.0772,
+           0.0667,
+           0.1148,
+           0.0936,
+           0.14,
+           0.1653
+          ]
+         }
+        }
+       }
+      }
+     }
+    }
+   },
+   "stability": {
+    "tolerance": 0.05,
+    "abs_floor_ms": 0.001,
+    "min_repeats": 5,
+    "quantities": {
+     "gnome-shell gnome-shell/JS Helper wakes/s": {
+      "k": 24,
+      "mean": 0.3025,
+      "cv": 0.0172,
+      "half_width": 0.0073,
+      "half_width_abs": 0.0022,
+      "leave_one_out": 0.0014,
+      "passes": true,
+      "needed": 5,
+      "session_spread": false,
+      "sparse": false,
+      "carried": true
+     },
+     "gnome-shell gnome-shell/JS Helper gap mean (ms)": {
+      "k": 24,
+      "mean": 3305.79,
+      "cv": 0.0172,
+      "half_width": 0.0073,
+      "half_width_abs": 24.0413,
+      "leave_one_out": 0.0014,
+      "passes": true,
+      "needed": 5,
+      "session_spread": false,
+      "sparse": false,
+      "carried": true
+     },
+     "gnome-shell gnome-shell/JS Helper run mean (ms)": {
+      "k": 24,
+      "mean": 0.0137,
+      "cv": 0.0239,
+      "half_width": 0.0101,
+      "half_width_abs": 0.0001,
+      "leave_one_out": 0.0024,
+      "passes": true,
+      "needed": 5,
+      "session_spread": false,
+      "sparse": false,
+      "carried": true
+     },
+     "gnome-shell gnome-shell/gmain wakes/s": {
+      "k": 24,
+      "mean": 0.2498,
+      "cv": 0.0012,
+      "half_width": 0.0005,
+      "half_width_abs": 0.0001,
+      "leave_one_out": 0.0002,
+      "passes": true,
+      "needed": 5,
+      "session_spread": false,
+      "sparse": false,
+      "carried": true
+     },
+     "gnome-shell gnome-shell/gmain gap mean (ms)": {
+      "k": 24,
+      "mean": 4002.6002,
+      "cv": 0.0012,
+      "half_width": 0.0005,
+      "half_width_abs": 2.0674,
+      "leave_one_out": 0.0002,
+      "passes": true,
+      "needed": 5,
+      "session_spread": false,
+      "sparse": false,
+      "carried": true
+     },
+     "gnome-shell gnome-shell/gmain run mean (ms)": {
+      "k": 24,
+      "mean": 0.0497,
+      "cv": 0.051,
+      "half_width": 0.0215,
+      "half_width_abs": 0.0011,
+      "leave_one_out": 0.0042,
+      "passes": true,
+      "needed": 7,
+      "session_spread": false,
+      "sparse": false,
+      "carried": true
+     },
+     "gnome-shell gnome-shell/gnome-shell wakes/s": {
+      "k": 24,
+      "mean": 0.0347,
+      "cv": 0.0353,
+      "half_width": 0.0149,
+      "half_width_abs": 0.0005,
+      "leave_one_out": 0.0045,
+      "passes": true,
+      "needed": 5,
+      "session_spread": false,
+      "sparse": false,
+      "carried": true
+     },
+     "gnome-shell gnome-shell/gnome-shell gap mean (ms)": {
+      "k": 24,
+      "mean": 28780.8556,
+      "cv": 0.0353,
+      "half_width": 0.0149,
+      "half_width_abs": 428.7994,
+      "leave_one_out": 0.0045,
+      "passes": true,
+      "needed": 5,
+      "session_spread": false,
+      "sparse": false,
+      "carried": true
+     },
+     "gnome-shell gnome-shell/gnome-shell run mean (ms)": {
+      "k": 24,
+      "mean": 5.6996,
+      "cv": 0.0667,
+      "half_width": 0.0282,
+      "half_width_abs": 0.1606,
+      "leave_one_out": 0.0059,
+      "passes": true,
+      "needed": 10,
+      "session_spread": false,
+      "sparse": false,
+      "carried": true
+     },
+     "pipewire wireplumber/gmain wakes/s": {
+      "k": 24,
+      "mean": 0.0093,
+      "cv": 0.106,
+      "half_width": 0.0448,
+      "half_width_abs": 0.0004,
+      "leave_one_out": 0.011,
+      "passes": true,
+      "needed": 20,
+      "session_spread": false,
+      "sparse": false,
+      "carried": true
+     },
+     "pipewire wireplumber/gmain gap mean (ms)": {
+      "k": 24,
+      "mean": 107462.8465,
+      "cv": 0.106,
+      "half_width": 0.0448,
+      "half_width_abs": 4810.651,
+      "leave_one_out": 0.0112,
+      "passes": true,
+      "needed": 20,
+      "session_spread": false,
+      "sparse": false,
+      "carried": true
+     },
+     "pipewire wireplumber/gmain run mean (ms)": {
+      "k": 24,
+      "mean": 0.035,
+      "cv": 0.0668,
+      "half_width": 0.0282,
+      "half_width_abs": 0.001,
+      "leave_one_out": 0.0076,
+      "passes": true,
+      "needed": 10,
+      "session_spread": false,
+      "sparse": false,
+      "carried": true
+     },
+     "systemd pid1/systemd wakes/s": {
+      "k": 24,
+      "mean": 0.0702,
+      "cv": 0.0444,
+      "half_width": 0.0187,
+      "half_width_abs": 0.0013,
+      "leave_one_out": 0.0043,
+      "passes": true,
+      "needed": 6,
+      "session_spread": true,
+      "sparse": false,
+      "carried": true
+     },
+     "systemd pid1/systemd gap mean (ms)": {
+      "k": 24,
+      "mean": 14238.6501,
+      "cv": 0.0444,
+      "half_width": 0.0187,
+      "half_width_abs": 266.8546,
+      "leave_one_out": 0.0043,
+      "passes": true,
+      "needed": 6,
+      "session_spread": true,
+      "sparse": false,
+      "carried": true
+     },
+     "systemd pid1/systemd run mean (ms)": {
+      "k": 24,
+      "mean": 0.171,
+      "cv": 0.184,
+      "half_width": 0.0777,
+      "half_width_abs": 0.0133,
+      "leave_one_out": 0.0173,
+      "passes": false,
+      "needed": 55,
+      "session_spread": true,
+      "sparse": false,
+      "carried": true
+     },
+     "dbus-daemon system-bus/dbus-daemon wakes/s": {
+      "k": 24,
+      "mean": 0.014,
+      "cv": 0.2617,
+      "half_width": 0.1105,
+      "half_width_abs": 0.0015,
+      "leave_one_out": 0.0223,
+      "passes": false,
+      "needed": 108,
+      "session_spread": true,
+      "sparse": false,
+      "carried": true
+     },
+     "dbus-daemon system-bus/dbus-daemon gap mean (ms)": {
+      "k": 24,
+      "mean": 71641.8977,
+      "cv": 0.2617,
+      "half_width": 0.1105,
+      "half_width_abs": 7919.2058,
+      "leave_one_out": 0.0228,
+      "passes": false,
+      "needed": 108,
+      "session_spread": true,
+      "sparse": false,
+      "carried": true
+     },
+     "dbus-daemon system-bus/dbus-daemon run mean (ms)": {
+      "k": 24,
+      "mean": 0.121,
+      "cv": 0.2544,
+      "half_width": 0.1074,
+      "half_width_abs": 0.013,
+      "leave_one_out": 0.0225,
+      "passes": false,
+      "needed": 102,
+      "session_spread": true,
+      "sparse": false,
+      "carried": true
+     }
+    },
+    "passes": true
+   }
+  }
+ }
+}

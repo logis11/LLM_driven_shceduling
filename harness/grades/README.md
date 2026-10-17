@@ -1,6 +1,6 @@
 # grades
 
-The grades file is Layer 1: how well a recognizer read the situation, measured against the ground truth written in the workload file, with no simulator in the loop. Its rows are pooled across workloads, so a row is identified by condition, table, and seed, never by a single file.
+The grades file is Layer 1: how well a recognizer read the situation, measured against the ground truth written in the workload file, with no simulator in the loop. Its rows are pooled across workloads, so a row is identified by condition, table, seed and the telemetry shape shown (`telemetry`, 9.17), never by a single file; a `paired` row names its partner's condition and shape, so one condition under its two shapes is a pair like two conditions.
 
 ## What a row is
 

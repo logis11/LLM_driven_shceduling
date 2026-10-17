@@ -1,0 +1,136 @@
+# Work-list rows — `docs/guidebook/dataset/05-the-generated-layer.md`
+
+Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 10 open rows. The file has 2136 lines at `d5cc7711`.
+
+### W-0551 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §3.5 tier 4 이름표, open note line 426; §16.1 table item 5, line 1997
+- Change: Restate the §3.5 note and §16.1 item 5 to 인지오's answer on the six tier-4 names that equal archetype ids (`web-browser`, `video-editor`, `image-editor`, `audio-server`, `message-bus`, `file-indexer`): intended — the note closes, saying so; or renamed in `dataset/grids.yaml`'s `tier4_names` — the note and the §3.5 table give the new names. With no answer the note stays.
+- Final word: No decision record mentions the coincidence: the tier-4 name table is design (9.20 D7; `dataset/grids.yaml` `tier4_names`, from line 111), and six of its names equal archetype ids in `dataset/archetypes.yaml`; archetype ids are not in the recognizer's visible projection (`docs/data-contracts.md` §4), so nothing leaks; whether the coincidence is intended is unconfirmed.
+- Sources: SX-1018 (guidebook dataset vol-05 open note (§3.5), `dataset/05-the-generated-layer.md:426`)
+- Cross-ref: W-0552; W-0553; W-0556; W-0558
+- Waits on: W-0748 (인지오's answer; the row applies once it is given, or is logged as waiting)
+- Notes: Waits on the for-인지오 row from W-0748. Checked at HEAD: `tier4_names` maps chrome → web-browser, kdenlive → video-editor, gimp → image-editor, pipewire → audio-server, dbus-daemon → message-bus, tracker-miner-f → file-indexer. A rename edits `grids.yaml` (outside the sweep): an input of the five generated manifests only, so their re-bless and no RQ0 gate spec re-pin.
+
+### W-0552 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §5.3 batch 작업을 왜 비례로 줄이나, open note line 647; §8.7 두 번째 예, line 1072 (the pointer to 5.3 and ch.13); §13.12 비례로 줄인 batch 작업과 turnaround, open note line 1811; §16.1 table item 2, line 1994
+- Change: Close the notes on whether the scaled batch jobs finish inside their file with 9.23 D3: the batch term stays the C1 entry's turnaround; a row under which the job does not finish scores the censored bound (the file's end less the arrival, `docs/harness/metrics.md` §9), worse than every finishing value, two such rows tying; the idle-class placements (indexing, backup; 437 terms) are expected to show no headroom. Quote the scoring spec header's generated-layer paragraph (`harness/scoring/scoring-spec.yaml:90–98`) beside the core-set sentence (`:30–32`), give D3's counts, restate line 1072's pointer, and mark §16.1 item 2 resolved by 9.23 D3.
+- Final word: 9.23 D3 (2026-10-14, by 인지오's decision): the generated layer's batch term stays the C1 entry's turnaround; a row under which the job does not finish scores the censored bound, the file's end less the arrival (metrics §9), worse than every finishing value; two such rows tie; the idle-class placements (indexing, backup; 437 terms) end at the same time under every row and are expected to show no headroom; whether RQ4 needs the size of the lag on unfinished jobs is the RQ4 experiment spec's question. Checked 2026-10-14 with the reference simulator (a scratch build) under the boot default with no schedule: the rule derives 1,350 `turnaround` terms in 898 of the 1,562 files; of the 1,062 jobs the simulator could run, 191 end after their file — 114 normal-class (ml-train 92, transcode 21, render 1) and 77 idle-class (indexing 56, backup 21); the 212 jobs in files holding a compile were not run (the simulator refuses their spawned children's wakes, 9.6 D19); for all 1,350, arrival + own CPU + own blocked time fits inside the file, so no job is sure to outlive its file under every row. The scoring spec header states the middle case (re-frozen at `2ad757b6…`, 9.23 D10). Finding corrected: 9.14 decision 6 moved `c2-p3a`'s render term from progress to turnaround; the core-set rule meant is the header sentence citing it.
+- Sources: SX-0649 (9.23 D3, `task-9.23-guidebook-findings/changelog.md:31`); SX-1020 (guidebook dataset vol-05 open note (§5.3), `dataset/05-the-generated-layer.md:647`); SX-1028 (guidebook dataset vol-05 open note (§13.12), `dataset/05-the-generated-layer.md:1811`)
+- Cross-ref: W-0551; W-0553; W-0556; W-0558
+- Notes: The §13.12 note and §16.1 item 2 say the core set scores `cpu_delivered` under 9.14 decision 6; restate per D3's correction — the header sentence (`scoring-spec.yaml:30–32`): 'a job that finishes under every row scores its turnaround, one that cannot finish inside its file scores its delivered CPU (9.14 decision 6)'. The volume's three `end_bound.py` reads (134.9 s, 140.2 s, 122.3 s against a 120 s end) may stay as its own reads; D3 found 191 of 1,062 run jobs past the end. Not named by 9.23's hand-offs (they name the harness guide's rule).
+
+### W-0553 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §5.8 heading line 704 ('기록이 다루지 않은 한 가지: B의 도착은 launch입니다') and its open note lines 706–710; §16.1 table item 1, line 1993
+- Change: Close the note and §16.1 item 1 with 9.23 D4 and D5, and retitle §5.8 (the record now covers it): an arrival in the generated layer is a program start replaying its measured launch (9.10 D136); the segments where tasks arrive depict applications launching, the C1 files the steady state; recognition (RQ1, Layer 1) is untouched and the replay reaches Layer 2 only — the terms of B and the returning A, the per-switch excess and the `flip_cost` line; the return and flap-stress sets keep their form, each boundary closing one mode's programs and launching the other's.
+- Final word: 9.23 D4 (2026-10-14, by 인지오's decision: the generated layer exists to answer the research questions, not to make a claim): 9.10 D136 stands as the layer's behaviour — a task arriving mid-file replays one measured launch repeat from its arrival, its steady stream beginning when the phase ends; mid-file arrivals are in 300 of the transition grid's 480 files (630 task instances), 630 of the return grid's 720 (1,890), all 24 flap-stress files (160), 166 of the distractor grid's 272 (331), none of the familiarity ladder's; most launch phases outlast a 60 s segment (mail 409 s, browser 421 s, video editor 241 s, call 210 s, game client 906 s, hidden renderer 1,051 s; office writer, chat client and the two players 31–54 s), so those segments depict applications launching and the C1 files stay the steady-state material; recognition (RQ1) is untouched — telemetry is a pure function of the pinned events and Layer 1 runs no simulator — and the replay reaches Layer 2: the terms of B and of the returning A, the per-switch excess and the `flip_cost` line. 9.23 D5: the return grid and the flap-stress set keep their form; each boundary closes one mode's programs and launches the other's, a set change under both telemetry shapes; the launch load is the same under every condition (it sets the size of a stale configuration's cost, not its direction); a window-switch regime is a question for the RQ4 experiment spec.
+- Sources: SX-0650 (9.23 D4, `task-9.23-guidebook-findings/changelog.md:41`); SX-1021 (guidebook dataset vol-05 open note (§5.8), `dataset/05-the-generated-layer.md:706`)
+- Cross-ref: W-0551; W-0552; W-0556; W-0558
+- Notes: The note's own reads (launch phases 30.6–1,051.2 s; `mail-s1` 2.97 s CPU against `c1-office`'s 80 ms) agree with D4's figures (CPU in the first 60 s of launch against steady C1 use per 60 s: mail 2.8–3.0 s against 0.08 s, browser 1.6–1.95 s against 0.18 s, the call 47.8–48.2 s against 14.3 s). Not named by 9.23's hand-offs (they name `dataset/README.md` and the building plan).
+
+### W-0554 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §8.1 RQ4와 phase-shift 계열, open note line 977
+- Change: Once `docs/research-proposal.md`'s Family 4 is restated to the return grid A → B → A over the 240 ordered mode pairs (middle segment 60 s, 10 s, 2 s), close the note: the proposal now carries the definition.
+- Final word: From 9.19 (the TODO 9.15 line; 9.19 spec decision 8, 9.19 D6): the proposal's Family 4 ('the same scenario sequence repeated with transitions every 60 s / 10 s / 2 s') restated to the return grid A → B → A over the 240 pairs.
+- Sources: SX-1022 (guidebook dataset vol-05 open note (§8.1), `dataset/05-the-generated-layer.md:977`)
+- Cross-ref: the research proposal's Family 4 row (G02)
+- Notes: Waits on the proposal's Family 4 rows (another row: W-0360, W-0354); apply after that chunk commits. If the proposal is not restated, the note stays.
+
+### W-0555 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §9.1 hold-time 계획, open note line 1102; §16.2 table row 2, line 2004
+- Change: Restate the note and §16.2 row 2 to 인지오's answer on the number of the no-rule flap measurement (step 0 or step 1); with no answer they stay as written.
+- Final word: Unresolved in the records: the hold-time plan (`_dev/docs/plan/jioh/hold-time-and-hysteresis.md`) calls the no-rule measurement step 0 in its 'When' table (later steps '1, 2, 4, 5, 6') and step 1 in its 'Steps' list; the `_dev/TODO.md` backlog (line 197) says step 0; 9.21 spec decision 7, `harness/experiments/README.md:36` and the TODO 9.15 line's 9.21 item ('the `flip_cost` line as the hold-time plan's step-1 measurement') say step 1; no record aligns them; the plan is under `_dev/` and not edited in 9.15 (spec decision 11).
+- Sources: SX-1023 (guidebook dataset vol-05 open note (§9.1), `dataset/05-the-generated-layer.md:1102`)
+- Cross-ref: W-0558; W-0561; W-0559
+- Waits on: W-0481 (인지오's answer; the row applies once it is given, or is logged as waiting)
+- Notes: Waits on the for-인지오 row from W-0481. The answer also fixes the wording of the docs 9.21's hand-off restates ('the `flip_cost` line as the hold-time plan's step-1 measurement': the harness guide, the daemon guide).
+
+### W-0556 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §10.6 쌍둥이, line 1302 ('그 점에서 "focus만 다르다"는 기록의 말은 정확합니다') and open note line 1304; §16.1 table item 3, line 1995
+- Change: Close the note and §16.1 item 3 with 9.23 D6: the twins are a recognition pair; their seeds stay (a shared seed would not align them); no experiment spec or scoring rule pairs them for Layer 2; the focus field's Layer-2 worth is measured by running both telemetry shapes on the same files (9.17 spec decision 5). Restate line 1302's 'focus만 다르다' as D6 does: the twins share the task set and the name sequence and differ in the focus, the input, the labels and the random draws.
+- Final word: 9.23 D6 (2026-10-14, by 인지오's decision): the 240 pairs `dx-<A>-with-<B>` and `tr-<A>-to-<B>-focus` have identical task lists and different seeds (`dataset/tools/gen/cells.py`, SHA-256 over `seed|<set>|<cell id>`); names-only telemetry is identical in all 240, focus telemetry in the 26 whose focus holders share a name; the workloads differ (per-task programs in 1,528 of 1,590 tasks, file demand by a median of 17 %); a shared seed would not align them — the keystroke offset is drawn over windows of different length — and their scoring terms differ by design (9.21 spec decision 2); no experiment spec or scoring rule pairs the twins; the focus field's Layer-2 worth is measured by running both telemetry shapes on the same files (9.17 spec decision 5). D6's hand-off restates 'differ in the focus alone': the twins share the task set and the name sequence and differ in the focus, the input, the labels and the random draws — a recognition pair.
+- Sources: SX-0651 (9.23 D6, `task-9.23-guidebook-findings/changelog.md:57`); SX-1025 (guidebook dataset vol-05 open note (§10.6), `dataset/05-the-generated-layer.md:1304`)
+- Cross-ref: W-0551; W-0552; W-0553; W-0558
+- Notes: Not named by 9.23's hand-offs (they name `dataset/README.md:114`, `:117` and the building plan); line 1302 carries the same 'focus alone' reading D6 restates.
+
+### W-0557 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §11.1 친숙도 tier 다섯 단계, line 1367 (the quotation of `docs/workload/building-plan.md:113`, 'The whitelist scores structurally zero on tiers 4–5; that contrast is a headline result', and its Korean paraphrase)
+- Change: Follow the building plan's restated §3 C5 sentence in the quotation and the paraphrase: the two name-table conditions (`shipped_catalogue`, `strongest_name_table`) carry no rule for the invented names of tiers 4–5 and so score structurally zero there, in place of 'the whitelist'.
+- Final word: 9.12 D6, amended by D91, D105, D109 and D115: the `whitelist` condition becomes two. The shipped-catalogue condition (`shipped_catalogue`) reproduces the CachyOS catalogue (`ananicy-rules` at `03ef03fb`) as CachyOS installs and enables it with ananicy-cpp, matched by the basename of each process's `argv[0]`, untruncated (D105); on ananicy-cpp's key it keys 19 of the 35 bound names and every name in only 7 of 50 files (D109); it answers RQ2 (research question 2, value: 'does that reading beat what shipping systems do?', D115). The strongest-name-table condition (`strongest_name_table`) is a rule list in the catalogue's design covering the software the dataset presents as known, with no rule for Family 3's unregistered software or the invented names of familiarity tiers 4–5; it carries the paper's claim (D115), is the condition expected to score perfectly on the C1 (the single-situation calibration group) files, and fails structurally on world knowledge. 'A faithful reproduction of what shipping systems do today' and 'the whitelist approach real operating systems currently use' are restated to the two conditions (D91).
+- Sources: S12-050 (9.12 D6, `task-9.12-related-work-prose/changelog.md:114`); SX-0152 (TODO 9.15 line (from 9.12 D6), `_dev/TODO.md:179`)
+- Cross-ref: the building plan's §3 C1/C5 whitelist row (G03)
+- Notes: Apply after the building plan chunk restates `:113` (another row: W-0102) and quote its new wording; `building-plan.md:113` is unchanged at HEAD. Condition identifiers in code: `harness/tools/harness/evaluator.py:47`, `harness/guards/guard-spec.yaml:126` (S12-050's ':116' is `:126`).
+
+### W-0558 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §12.2 다섯 section, the table's `inputs` row line 1535 and the manifest sizes line 1541; §12.3 `inputs`: 45개 파일 — heading line 1543, count line 1545, table lines 1547–1550, paragraph line 1552, open note line 1556; §16.1 table item 4, line 1996; §16.2 table row 4, line 2006
+- Change: Restate the generated manifests' inputs to 55 = 33 compile inputs (the library, the schema, `compile.py`, eleven `wlc/*.py`, three stimulus, six replay and ten launch streams) + 22 generator inputs: the §12.2 row, the heading (55개), the table (23 → 33), line 1552's history and §16.2 row 4 (9.19 D3's 44, 45 after 9.21 D2's `gen/coverage.py`, 55 after 9.23 D11). Close the §12.3 note and mark §16.1 item 4 resolved: 9.23 D11 added `launch/*.json.gz` to `compile.py`'s `input_files`. Re-read the five manifest sizes at line 1541.
+- Final word: 9.23 D11 (2026-10-15, by 인지오's decision): the compiler reads the ten launch streams `dataset/launch/launch-<entry>.json.gz` for every task the file starts after 0 s; `compile.py`'s `input_files` now adds `launch/*.json.gz`, so the core manifest's inputs are 33 (23 before) and each generated manifest's 55 (45 before); the variants manifest pins the core manifest's bytes; `test_manifest.py` checks the pinned set holds a launch stream and `test_every_stream_directory_the_tools_open_is_pinned` requires every stream file the compiler and the linter open to be pinned. Re-blessed in 9.23 D17.
+- Sources: SX-0632 (9.23 D11, `task-9.23-guidebook-findings/changelog.md:108`); SX-0762 (record-gaps §1 item 5, `jioh/2026-10-14-record-gaps-and-doc-staleness-for-9.15.md:15`); SX-1026 (guidebook dataset vol-05 open note (§12.3), `dataset/05-the-generated-layer.md:1556`)
+- Cross-ref: W-0551; W-0552; W-0553; W-0555; W-0556; W-0561; W-0559
+- Notes: Checked at HEAD: `dataset/build.manifest.json` 33 inputs (10 under `dataset/launch/`); each `dataset/build.<set>.manifest.json` 55 — the 33 at the core manifest's values plus 22 generator inputs (`grids.yaml`, `generate.py`, four `gen/*.py`, the sixteen C1 timelines); `dataset/tools/compile.py:64` globs `launch/*.json.gz`. Manifest sizes after 9.23 D17 (`ls -l`): transition-grid 734,691 B, return-grid 1,409,515 B, flap-stress 117,369 B, distractor-grid 419,142 B, familiarity-ladder 85,400 B. 9.23 D11's hand-off names vol-07's counts only.
+
+### W-0559 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §14.1 core set의 coverage 표, line 1824 (`segments_total`(66)); §16.2 table row 6, line 2008 ('core set은 66 segment')
+- Change: Restate the core set's segment count 66 → 67 in both places.
+- Final word: The core set has 67 segments since 9.23 D2 split `c6-spoof` at the spoof's arrival (20 s), re-derived in 9.23 D10: `dataset/coverage-grid.json` `segments_total` 67 — 66 on the 32 driver-table cells and `c6-dual`'s one `ambiguous` segment outside.
+- Sources: SX-1029 (guidebook dataset vol-05 ch.16 mismatch table (§16.2) row 6; found stale at HEAD, `dataset/05-the-generated-layer.md:2008`)
+- Cross-ref: W-0555; W-0558; W-0561
+- Notes: Checked at HEAD: `dataset/coverage-grid.json` `segments_total` 67, `outside` one (`c6-dual`).
+
+### W-0560 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §16.4 아직 돌지 않은 일, the 9.15 row, line 2028
+- Change: Once the docs the row lists are restated in 9.15 (the proposal's Family 4, the coreset guide's C3–C6 narrative and its `c5-t3` tables, the research-claims chain's C3 line, the daemon guide §9.3, the harness guide), mark the row done in 9.15 or remove it; §16.3's undecided items (lines 2010–2020) stay — they close in the RQ1 and RQ4 experiment spec sessions.
+- Final word: The 9.19, 9.20 and 9.21 hand-offs on the TODO 9.15 line: the proposal's Family 4, the coreset guide's C3–C6 narrative and its `c5-t3` tables, the research-claims chain's C3 line, the daemon guide §9.3 (the precedent range 5–30 s), the harness guide.
+- Sources: SX-1030 (guidebook dataset vol-05 ch.16 not-yet-run table (§16.4), the 9.15 row, `dataset/05-the-generated-layer.md:2028`)
+- Notes: Apply after the chunks owning those docs commit (other groups' rows).
+
+### W-0866 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §1.3, line 80 ("building plan(`docs/workload/building-plan.md` §4)이 Layer 3b로 계획한"); §17.1 저장소 용어, line 2047 ("Layer 3b")
+- Change: Drop the layer number and name the set as the building plan now does (its §4, "The timelines: the naturalistic set (backlog)").
+- Final word: 인지오's answer to W-0742 (2026-10-16, (a)): the dataset's layers are named, not numbered; K02 renamed the building plan's headings.
+- Sources: `logs/K02.md` ## Rows for other chunks (X6); its last review, finding 8 (line 80)
+- Cross-ref: W-0742; W-0865
+- Notes: found in K02 (line 80 by K02's last review).
+
+### W-0929 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §2.5's table (`scenario` among what carries over unchanged), §3.3 ("generator는 그것을 그대로 복사합니다"), §5.2 step (6); the worked-example figures the regenerated transition-grid files move (§6.3, §7.6, §7.7 sizes and hashes; §12.8)
+- Change: Once W-0890 lands: state 9.10 D168's one rule — a `focus`-form transition file's second segment carries B's C1 tags and those of A's programs that stay — and re-read the worked-example figures, with a bless row in §12.8.
+- Final word: 인지오's answer to K02's M8 (2026-10-16, (b)): one rule, 9.10 D168, in both layers (W-0890, in the batch after wave 4). Until then the volume describes the generator at HEAD, which copies B's C1 tags alone (`dataset/tools/gen/compose.py`, 214 files; K13's M1).
+- Sources: `logs/K13.md` ## Rows for other chunks (X1), ## Code-versus-decision mismatches (M1)
+- Cross-ref: W-0890; W-0930
+- Notes: found in K13. K13's file: a follow-up chunk after the batch after wave 4.
+
+### W-0930 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §12.8 (the bless rows and "the current pins") and its worked-example artifact sizes; `docs/guidebook/dataset/06-grounding-measurement-verification.md` §14.2 (the pins rows)
+- Change: After the rebuild of the batch after wave 4 (its data rows W-0851–W-0853, W-0855, W-0856, W-0875–W-0883, W-0889, W-0890, W-0898–W-0901): add its re-bless as a row in both tables, restate "the current pins" to it, and re-read vol-05's worked-example artifact sizes.
+- Final word: K13's decision 1: both volumes name 9.15's 2026-10-16 re-bless as current (dataset `b6017a10…`, variants `087ef27c…`, generated `a8eebb33…` / `2e57a6c1…` / `dd6a7c24…` / `264d3333…` / `58a34d65…`), 9.23 D17's as the pins just before; the batch after wave 4 re-blesses again.
+- Sources: `logs/K13.md` ## Rows for other chunks (X2), ## Decisions 1
+- Cross-ref: W-0581; W-0929
+- Notes: found in K13. K13's files: a follow-up chunk after the batch after wave 4.
+
+### W-0962 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §2.1, line 192 ("`archetype` — process 한 종류의 행동 모형"); §17.1's glossary `archetype` row, line 2090 ("process 한 종류의 행동 모형")
+- Change: Restate "한 종류의 process" / "process 한 종류" to "프로그램 한 종류" in each definition, nothing else. In the volume's Korean.
+- Final word: `docs/workload/archetype-plan.md` §1 (`:8`) reads "a **generative model of one kind of program as the scheduler sees it**" since `18127cc9` (2026-10-16, K04): most entries merge a measured application's whole process tree into one task (`dataset/archetypes.yaml`'s measured entries: "one task carries the whole process tree merged (D14)"); `compiler-child` is six tasks. H2 restated vol-02's title (W-0957) and its two definitions (its N1: `:9` and the glossary's `archetype` row `:1543`) to "프로그램 한 종류"; K18 restated `docs/README.md`'s archetype-plan line and its Full-index row to "one kind of program" (its N6).
+- Sources: `logs/H2.md` ## Rows for other chunks (X2); W-0957; `logs/H2.md` ## New rows found and applied (N1); `logs/K18.md` ## Fix round 1 (N6); `docs/workload/archetype-plan.md` §1
+- Cross-ref: W-0957; W-0959; W-0960; W-0961; W-0963
+- Notes: found in H2. K13's file: a follow-up chunk.
+
+## Also on this file, not for editing from this list
+
+- W-0561 · closed, already-applied — vol-05:1731 and :2003 already state the code's rule and that 9.21 D1's list differs; that list describes the recorded shape ('`input` is whether the generator…
+- W-0481 · waits on 인지오 — Which number does the hold-time plan's no-rule measurement carry — the need for a hold time measured with hold time 0 and no hysteresis on the flap-stress set and the C4 files, under `oracle` and `random`, right after P… Blocks: The step label at `docs/harness/metrics.md:251` (§8, the flip-count row; the §13 entry at :328 is a dated record). Rows W-0454 and W-0456 (the daemon guide §9.…
+
+### W-0831 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md`, the `flip_cost` paragraph, line 1807 ("3 changes, 2 wrong, excess 100 µs")
+- Change: Restate on the re-derived `mock-switch` fixture: its switch excess is 0 µs, so the flip test substitutes a non-zero stand-in for the entry-3 switch's `excess_switch` and checks that the wrong switch into MLFQ adds it and the wrong FIFO change adds nothing ("3 changes, 2 wrong", the wrong-switch excess sum equal to the stand-in).
+- Final word: 인지오's answer to W-0804 (2026-10-16), applied by stage A (`logs/A4-fixture.md`, `logs/A5-fixups.md`).
+- Sources: `harness/tools/tests/test_scorer.py` (`test_flip_aggregates_on_mock_switch`, `test_excess_aggregates_on_mock_switch`, as committed after stage A); `harness/tools/tests/fixtures/mock-switch/worked.md`.
+- Notes: found in stage A (A4). Read the stand-in's value from the committed test.
+
+
+### W-0888 · applied
+- At: `docs/guidebook/dataset/05-the-generated-layer.md`, wherever it states which files carry idle's set (the session processes `gnome-shell`, `pipewire`, `systemd`, `dbus-daemon`)
+- Change: State as `docs/workload/building-plan.md` §3a now does: 182 generated files carry the four (transition grid 60, return grid 90, distractor grid 32; the familiarity ladder's idle cells rename them); in 62 — the transition grid's 30 `focus`-form files with idle on either side and the distractor grid's 32 with idle — they run beside another mode's programs, a design composition: the names beside the applications as on a real desktop, the demand the idle state's (understating an active session), no scored term on an idle placement; in the other 120 the session runs only in idle segments.
+- Final word: 인지오's answer to K02's M7 (2026-10-16, work list "Questions from the waves").
+- Sources: `docs/workload/building-plan.md` §3a; 9.10 D28, D172; 9.19 spec decision 2; 9.20 spec decisions 1–2.
+- Notes: found in K02.

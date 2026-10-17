@@ -1,5 +1,6 @@
 # C1 — single-situation calibration: pure dev (building-plan §3 C1; Phase 7
 # spec decision 8). Task set lifted from c2-p1a segment 0 (the editor alone).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-dev
   seed: 107
@@ -10,8 +11,11 @@ segments:
      scenario: [S11]}
 
 tasks:
-  - {id: editor, name: code, archetype: desktop-interactive,
+  - {id: editor, name: code, archetype: code-editor,
      arrive: 0s, depart: 60s}
 
-focus:
+input:
   - {from: 2s, to: 58s, task: editor}
+
+focus:
+  - {from: 0s, to: 60s, task: editor}

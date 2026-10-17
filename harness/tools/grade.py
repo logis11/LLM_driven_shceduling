@@ -7,7 +7,7 @@ records CSVs and one grades CSV (sub-task 8.4).
 
 The manifest is JSON: {"driver_table": "<path>", "bootstrap": {"seed": N,
 "repetitions": N}, "runs": [{"workload_id", "condition", "table", "seed",
-"boot_default", "log", "workload", "driver_table"?}, …]}. Each run is one
+"boot_default", "telemetry", "log", "workload", "driver_table"?}, …]}. Each run is one
 recognition log; a run may name its own `driver_table`, otherwise the top-level
 one is used. The runner (8.6) writes it.
 
@@ -36,7 +36,7 @@ def runs_from_manifest(doc):
             own = r.get("driver_table", table)
             out.append(Run(workload_id=r["workload_id"], condition=r["condition"],
                            table=str(r.get("table", "")), seed=str(r.get("seed", "")),
-                           boot_default=str(r.get("boot_default", "")),
+                           boot_default=str(r.get("boot_default", "")), telemetry=str(r.get("telemetry", "")),
                            log=pathlib.Path(r["log"]), workload=pathlib.Path(r["workload"]),
                            table_path=pathlib.Path(own) if own else None))
         except KeyError as exc:

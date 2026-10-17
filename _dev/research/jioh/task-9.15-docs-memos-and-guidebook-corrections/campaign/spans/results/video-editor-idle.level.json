@@ -1,0 +1,26 @@
+{
+ "slices_in_phase": 310,
+ "skipped_slices": 21,
+ "held_past_settle_s": 2890.0,
+ "slice_s": 10.0,
+ "phase_s": 180.0,
+ "span_s": 2860.0,
+ "cpu_ms_per_s": {
+  "level": 0.071,
+  "placement": -0.0029,
+  "worst": 0.0448,
+  "worst_at_s": 920.0,
+  "holds": true,
+  "worst_within_tolerance": true
+ },
+ "wakes_per_s": {
+  "level": 1.2199,
+  "placement": 0.0292,
+  "worst": 0.0383,
+  "worst_at_s": 370.0,
+  "holds": true,
+  "worst_within_tolerance": true
+ },
+ "holds": true,
+ "holds_at_worst_too": true
+}

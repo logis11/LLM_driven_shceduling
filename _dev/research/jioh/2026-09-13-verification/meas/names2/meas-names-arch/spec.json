@@ -1,0 +1,19 @@
+{
+  "recorded_utc": "2026-09-10T10:28:08Z",
+  "uname": "Linux c9f426e1afa1 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64 ",
+  "nproc": 4,
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "mem_total": "16373444 kB",
+  "os_release": {
+    "ID": "arch",
+    "VERSION_ID": "20260906.0.587075",
+    "PRETTY_NAME": "Arch Linux"
+  },
+  "github_run": {
+    "GITHUB_WORKFLOW": "meas-names",
+    "GITHUB_RUN_ID": "34466009254",
+    "GITHUB_RUN_NUMBER": "2",
+    "GITHUB_SHA": "2273feb4fa2f92092fdc1d53e04f9347b5b2ad27",
+    "GITHUB_JOB": "verify"
+  }
+}

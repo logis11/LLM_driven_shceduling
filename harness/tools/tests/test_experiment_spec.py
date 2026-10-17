@@ -125,3 +125,57 @@ def test_schema_refuses_a_g_band_value_outside_the_unit_interval_and_a_bad_state
     bad = copy.deepcopy(spec)
     bad["statements"] = [{"id": "x"}]
     assert next(v.iter_errors(bad), None) is not None
+
+
+# ---- 9.21 decision 6: selections from a generated set's manifest ----------------------------------------------------
+
+TOY = FX / "build.toy-grid.manifest.json"
+
+
+def _with_selection(tmp_path, where, mutate=None):
+    import hashlib
+
+    def add(spec):
+        spec["files"]["select"] = [{"manifest": "toy-grid", "where": where}]
+        spec["pins"]["generated"] = {"toy-grid": {"path": TOY.relative_to(REPO).as_posix(),
+                                                  "sha256": hashlib.sha256(TOY.read_bytes()).hexdigest()}}
+        spec["layer1_exclusions"] = sorted(set(spec["layer1_exclusions"]) | {"tg-a", "tg-b"} - {"tg-b" if where.get("split") == "measurement" else ""})
+        if mutate:
+            mutate(spec)
+    return _broken(tmp_path, add)
+
+
+def test_a_selection_lints_clean_with_the_selected_files_in_the_derived_exclusions(tmp_path):
+    """The selected copy of mock-score carries `pre_committed_miss`, so the Layer-1 exclusion lint runs over the
+    expanded list (the spec's invariant) and the selected file is listed there."""
+    assert _errors(_with_selection(tmp_path, {"split": "measurement"})) == []
+    errs = _errors(_with_selection(tmp_path, {"split": "measurement"},
+                                   lambda s: s.__setitem__("layer1_exclusions", ["mock-score"])))
+    assert any("layer1_exclusions" in e and "tg-a" in e for e in errs)
+
+
+def test_a_selection_is_refused_when_unpinned_mis_pinned_unknown_keyed_or_empty(tmp_path):
+    errs = _errors(_with_selection(tmp_path, {"split": "measurement"},
+                                   lambda s: s["pins"].pop("generated")))
+    assert any("not pinned" in e for e in errs)
+    errs = _errors(_with_selection(tmp_path, {"split": "measurement"},
+                                   lambda s: s["pins"]["generated"]["toy-grid"].__setitem__("sha256", "0" * 64)))
+    assert any("pins/generated/toy-grid" in e and "sha256" in e for e in errs)
+    errs = _errors(_with_selection(tmp_path, {"tier": 5}))
+    assert any("no key" in e and "tier" in e for e in errs)
+    errs = _errors(_with_selection(tmp_path, {"split": "neither"}))
+    assert any("no file of" in e for e in errs)
+    v = jsonschema.Draft202012Validator(_schema())
+    spec = load_spec(_with_selection(tmp_path, {"split": "measurement"}))
+    spec["files"]["select"][0]["where"] = {}
+    assert next(v.iter_errors(spec), None) is not None          # a condition names at least one key
+    spec["files"]["select"][0] = {"manifest": "toy-grid", "where": {"split": "measurement"}, "as": "judging"}
+    assert next(v.iter_errors(spec), None) is not None          # a selection is reporting material, never judging
+
+
+def test_the_flip_cost_line_is_registered_and_takes_no_parameters(tmp_path):
+    assert _errors(_broken(tmp_path, lambda s: s["reporting_lines"].append({"type": "flip_cost"}))) == []
+    v = jsonschema.Draft202012Validator(_schema())
+    spec = load_spec(FX / "experiment.yaml")
+    spec["reporting_lines"].append({"type": "flip_cost", "threshold": 1})
+    assert next(v.iter_errors(spec), None) is not None

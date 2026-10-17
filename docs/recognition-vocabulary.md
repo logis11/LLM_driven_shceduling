@@ -1,5 +1,5 @@
 # Recognition Vocabulary
-> Status: normative · Created 2026-08-28 · Updated 2026-09-12
+> Status: normative · Created 2026-08-28 · Updated 2026-10-17
 
 The shared vocabulary of the recognition signal — the one contract that the recognizer's output schema, the validator's menu, the driver table, and the Layer-1 grader all agree on. Ratified 2026-08-28 (인지오 · 인경민 · 박이안 — pending team review of this doc).
 
@@ -8,7 +8,7 @@ A recognizer's answer has two blocks, and this doc is organized around that divi
 - **`system`** — the claim about the world: what the machine is being used for. Subsystem-neutral; every consumer reads it. Its vocabulary (modes + attributes) is identical to the dataset's ground-truth labels, so recognizer answers and ground truth are compared directly, with no mapping layer.
 - **`subsystems`** — per-consumer configuration suggestions, one key per consumer. This project fills exactly one key, `cpu_scheduler`; its schema is the configuration language of the CPU driver.
 
-These labels were not invented for this doc — they come out of the dataset itself. Every mode below appears as a segment label in the released coreset, and each labeled segment carries `scenario` tags keying it to the scenario catalog (`workload/scenario-catalog.md`), whose co-occurrence patterns are grounded in cited sources — desktop-usage taxonomies, workload-benchmark suites, and our own CI measurements — resolvable through `references.md`. The same holds for `background_wanted`: it is the intent axis the C2 pair files were authored around. Adopting the dataset's labels as the vocabulary therefore means every term the recognizer can answer is backed by the citations that justified authoring a workload for it.
+These labels were not invented for this doc — they come out of the dataset itself. Every mode below appears as a segment label in the core set, and there a labeled segment's `scenario` tags name every scenario of the scenario catalog (`workload/scenario-catalog.md`) whose program is alive in the segment — descriptive keys that no scoring term reads. The catalog grounds each scenario's and each bound process name's existence, cited per row and resolvable through `references.md` (the program's package on Ubuntu 24.04 and the observation that showed its name; a benchmark definition only where one defines the scenario); it does not ground which programs run together — the core set's task sets, which programs share a segment, are design. The same holds for `background_wanted`: it is the intent axis the C2 pair files were authored around. Adopting the dataset's labels as the vocabulary therefore means every term the recognizer can answer names a situation the dataset instances, each program in it grounded in its catalog row.
 
 ---
 
@@ -31,7 +31,7 @@ A **mode** is the label for what the machine is primarily being used for during 
 | `video-edit` | interactive video editing |
 | `compile` | building software |
 | `ml-train` | a machine-learning training run |
-| `render` | an offline 3D/graphics render |
+| `render` | an offline render — a 3D scene or a video project rendered to a file |
 | `transcode` | batch media conversion |
 | `indexing` | file indexing / crawling |
 | `backup` | a backup job |
@@ -43,17 +43,17 @@ A **mode** is the label for what the machine is primarily being used for during 
 
 One graded attribute:
 
-- **`background_wanted`** (boolean) — *is the sustained background work something the user asked for?* `true` for work the user deliberately initiated or is waiting on (a download, a kicked-off training run, a render); `false` for work nobody asked for right now (a scheduled scan, an indexer's rescan). **Convention: when a segment has no sustained background work at all, `background_wanted` is `true`** — nothing unwanted is running — keeping the attribute a plain boolean. In the batch modes (`compile`, `ml-train`, `render`, `transcode`, `indexing`, `backup`) the batch job is itself the sustained background work the attribute judges: `false` means that job is one nobody asked for (a module rebuild after a kernel update in place of the user's build, an indexer's scheduled rescan), not that a second job runs beside it.
+- **`background_wanted`** (boolean) — *is the sustained background work something the user asked for?* `true` for work the user deliberately initiated or is waiting on (a download, a kicked-off training run, a render); `false` for work nobody asked for right now (the stock unattended upgrade, an update install nobody started now; an indexer's first index of a home at login, work the session starts unasked). **Convention: when a segment has no sustained background work at all, `background_wanted` is `true`** — nothing unwanted is running — keeping the attribute a plain boolean. In the batch modes (`compile`, `ml-train`, `render`, `transcode`, `indexing`, `backup`) the batch job is itself the sustained background work the attribute judges: `false` means that job is one nobody asked for (a module rebuild after a kernel update in place of the user's build, an indexer's first index of a home at login), not that a second job runs beside it.
 
 ### Ground-truth annotations (never recognizer-facing)
 
-Ground-truth segments may carry additional descriptive keys used for grading splits and failure analysis only: `background` (what the background work is, e.g. `download`, `av-scan`), `initiated` (`user` | `scheduled`), `dual_active`, `spoof`, `pre_committed_miss` (`true` on a segment whose label no recognizer can reach from names and behaviour — the C6 resolution-limit case and the Phase 7 same-name intent flips; the segment is excluded from accuracy and reported separately, and the coverage grid marks its cell as instanced but recognition-limited). They are not part of the recognizer's output schema, not on the validator's menu, and not graded.
+Ground-truth segments may carry additional descriptive keys used for grading splits and failure analysis only: `background` (what the background work is, e.g. `download`, `package-upgrade`), `initiated` (`user` | `scheduled` | `session` — `session` for work the desktop session itself starts, unasked, at login, as Tracker's first index in `c2-p1b` and `c7-indexing`; `scheduled` for a timer's job), `dual_active`, `spoof`, `pre_committed_miss` (`true` on a segment whose label no recognizer can reach from names and behaviour — the C6 resolution-limit case and the Phase 7 same-name intent flips; the segment is excluded from accuracy and reported separately, and the coverage grid marks its cell as instanced but recognition-limited). They are not part of the recognizer's output schema, not on the validator's menu, and not graded.
 
 ---
 
 ## 2. The `subsystems` block — `cpu_scheduler` config schema (frozen 2026-08-28)
 
-The configuration language of the CPU driver: what a scheduler configuration may say. This is the value space of the driver table, the field list the validator enforces, and the exact surface the simulator implements. (`cpu_scheduler` is the only subsystem key this project defines; a future consumer would add its own key with its own schema, without touching this one.)
+The configuration language of the CPU driver: what a scheduler configuration may say. This is the value space of the driver table, the field list the validator enforces, and the exact surface the simulator implements. (`cpu_scheduler` is the only subsystem key this project defines; a future consumer would add its own key with its own schema, without touching this one.) Every range below is design, frozen with the schema on 2026-08-28; no source states them.
 
 ### Envelope
 
@@ -67,7 +67,7 @@ Every configuration, regardless of algorithm:
 }
 ```
 
-`batch_bandwidth_cap` is the ceiling on the fraction of the lane the **batch class** may consume while non-batch work is runnable; `null` means no ceiling. The idea has a shipped counterpart, a per-class CPU bandwidth ceiling (`linux-sched-bwc`, existence only); the range, the floor, and the class rule below are ours. The batch class is determined behaviorally by the executor (observed CPU-bound behavior — the same evidence MLFQ demotion uses); the classification rule is identical across algorithms, frozen in the simulator's docs, and not configurable. Starvation protection is executor-owned and has no config field: every runnable task makes progress within a bounded window regardless of what any configuration says.
+`batch_bandwidth_cap` is the ceiling on the fraction of the lane the **batch class** may consume while non-batch work is runnable; `null` means no ceiling. The idea has a shipped counterpart, a per-group CPU bandwidth ceiling, a quota per period on a cgroup (`linux-sched-bwc`, existence only); the range, the floor, and the class rule below are ours. The batch class is determined behaviorally by the executor (observed CPU-bound behavior — the same evidence MLFQ demotion uses); the classification rule is identical across algorithms, frozen in the simulator's docs, and not configurable. The executor has no starvation window and no config field for one; the harness's `starvation_floor` guard bounds every task's wait at 30 s, the bound sched_ext's watchdog enforces (`harness/guards/guard-spec.yaml`).
 
 ### MLFQ
 
@@ -86,7 +86,7 @@ Demotion on a fully consumed slice and stay-on-block are fixed MLFQ rules, not c
 |---|---|---|---|
 | `residual_timeslice_us` | int, 500–100000 | 10000 | round-robin slice for the residual (non-deadline) class |
 
-The deadline class is the TIMER-driven tasks, behaviorally observed; each job's deadline is its next period boundary (period-implicit). Deadline tasks run earliest-deadline-first (ties broken by a fixed executor rule); the residual class round-robins in the remaining lane time. No admission control in v1.
+The deadline class is the TIMER-driven tasks and every task reachable from one by following `WAKE` targets (the frame chain), behaviorally observed; each job's deadline is its next period boundary (period-implicit), and a woken task's job carries the deadline of the job that woke it. Deadline tasks run earliest-deadline-first (ties broken by a fixed executor rule); the residual class round-robins in the remaining lane time. No admission control in v1.
 
 ### LOTTERY
 
@@ -99,27 +99,27 @@ Two classes, tickets split `batch_share : (1 − batch_share)`, equal tickets pe
 
 ### FIFO
 
-No fields: `"params": {}`. Run in arrival order until each task blocks or exits. The cap and the executor safety net still apply.
+No fields: `"params": {}`. Run in arrival order until each task blocks or exits. The cap still applies.
 
 ### Provenance of the boot default
 
-The seven default values above are the **boot default configuration** and the `fixed` condition, so they are the floor every normalised score is measured against. None was measured. Since 2026-09-11 the four MLFQ values are OSTEP §8's worked example, whole (`ostep`, read in Version 1.10); the two other slices equal the MLFQ slice by the same-granularity rule below; LOTTERY `batch_share` has no source. A configuration whose numbers come from one text is one claim; a value assembled from several sources is not used.
+The seven default values above are the **boot default configuration** and the `fixed` condition, so they are the floor every normalised score is measured against. None was measured. Since 2026-09-11 the four MLFQ values are the ones OSTEP chapter 8's worked examples use (`ostep`, read in Version 1.10) — three queues and a 10 ms top slice (Example 1), doubling per level (Figure 8.6), a 100 ms boost (Figure 8.4); the two other slices equal the MLFQ slice by the same-granularity rule below; LOTTERY `batch_share` has no source. A configuration whose numbers come from one text is one claim; a value assembled from several sources is not used.
 
 | field | default | grounding | status |
 |---|---|---|---|
-| MLFQ `num_queues` | 3 | `ostep` §8.2: the worked examples run in "a three-queue scheduler"; every figure has Q2, Q1, Q0. | OSTEP's example |
+| MLFQ `num_queues` | 3 | `ostep` §8.2, Example 1: "a three-queue scheduler"; Figures 8.2–8.6 have Q2, Q1, Q0 (Figure 8.1 draws eight queues). | OSTEP's example |
 | MLFQ `timeslice_us` | 10000 | `ostep` §8.2, Example 1: "with a time slice of 10 ms (and with the allotment set equal to the time slice)". | OSTEP's example |
 | MLFQ `timeslice_growth` | 2 | `ostep` §8.5, Fig. 8.6 ("Lower Priority, Longer Quanta"): 10 ms, 20 ms, 40 ms per level. | OSTEP's example |
 | MLFQ `boost_interval_us` | 100000 | `ostep` §8.3, Fig. 8.4: "a priority boost every 100 ms (which is likely too small of a value, but used here for the example)"; OSTEP names S a voo-doo constant after Ousterhout. | OSTEP's example; the caveat is OSTEP's own |
-| EDF `residual_timeslice_us` | 10000 | Equal to MLFQ `timeslice_us` by the same-granularity rule. | stated rule, no source |
-| LOTTERY `batch_share` | 0.15 | No source names a batch-class share. `waldspurger-osdi94` defines shares as proportional to tickets and gives no ratio between classes. | assumption, unbounded |
-| LOTTERY `timeslice_us` | 10000 | Equal to MLFQ `timeslice_us` by the same-granularity rule. | stated rule, no source |
+| EDF `residual_timeslice_us` | 10000 | Equal to MLFQ `timeslice_us` by the same-granularity rule. | design (the same-granularity rule) |
+| LOTTERY `batch_share` | 0.15 | No source names a batch-class share. `waldspurger-osdi94` gives shares proportional to tickets in expectation and states no ratio between classes. | design, unbounded by any source |
+| LOTTERY `timeslice_us` | 10000 | Equal to MLFQ `timeslice_us` by the same-granularity rule. | design (the same-granularity rule) |
 
-**Allotment.** OSTEP's Rule 4 demotes a job once it "uses up its time allotment at a given level". Example 1 sets the allotment equal to the slice; Figure 8.6 gives the top two levels two slices each. This schema has no allotment field and demotes on one fully consumed slice, so the boot default is OSTEP's slice ladder and boost with the allotment equal to the slice, as in Example 1. That is the one point where this model and the example differ.
+**Allotment.** OSTEP's Rule 4 demotes a job once it "uses up its time allotment at a given level". Example 1 sets the allotment equal to the slice; Figure 8.6 gives the top two levels two slices each. This schema has no allotment field and demotes on one fully consumed slice, so the boot default is OSTEP's slice ladder and boost with the allotment equal to the slice, as in Example 1. That matches Example 1 and departs from Figure 8.6.
 
-**Same-granularity rule.** EDF's residual slice and LOTTERY's slice equal the MLFQ slice. The rule is this project's, not a source's: dispatch tenure is held equal across the four algorithms so that a difference between two driver-table rows is the policy and the cap, never the quantum one algorithm was handed. No shipped EDF has a residual round-robin slice to cite (Liu and Layland's EDF is preemptive without a quantum), and no second source is introduced for LOTTERY. Per-algorithm tenure is the calibrated table's to tune.
+**Same-granularity rule.** EDF's residual slice and LOTTERY's slice equal the MLFQ slice. The rule is this project's, not a source's: dispatch tenure is held equal across the four algorithms so that a difference between two driver-table rows is the policy and the cap, never the quantum one algorithm was handed. Neither slice takes a value from a source: Liu and Layland's EDF is preemptive and priority-driven with no quantum (`liu-jacm73`), and no second source is introduced for LOTTERY. Per-algorithm tenure is the calibrated table's to tune.
 
-**Sensitivity check (pre-registered in the RQ0 gate spec, `harness/experiments/rq0-gate.yaml`, 2026-09-12).** Because the floor is one example's values, the `fixed` condition is re-run under a sweep of nine alternative boot defaults — this configuration with only the top slice changed, at 0.5, 0.75, 0.9, 1.2, 2, 3, 5, 20, and 100 ms, each point with its reason in the spec — and every judging file's gaps are recomputed against each. If the verdict count changes across the sweep, the verdict is reported as a range over the boot default rather than a point. Only the `fixed` run's slice varies: the `oracle` and `random` runs stay on the primary and the pinned driver table, whose EDF and LOTTERY slices keep the boot value by the same-granularity rule.
+**Sensitivity check (pre-registered in the RQ0 gate spec, `harness/experiments/rq0-gate.yaml`, 2026-09-12; reworked on the rebuilt dataset 2026-10-09).** Because the floor is the values of one chapter's worked examples, the `fixed` condition is re-run under a sweep of ten alternative boot defaults — this configuration with only the top slice changed, at 0.5, 0.7, 0.9, 1.2, 2, 3, 5, 14, 20 and 100 ms, each point with its reason in the spec — and every judging file's gaps are recomputed against each. If the verdict count changes across the sweep, the verdict is reported as a range over the boot default rather than a point. Only the `fixed` run's slice varies: the `oracle` and `random` runs stay on the primary and the pinned driver table, whose EDF and LOTTERY slices keep the boot value by the same-granularity rule.
 
 ### Validation rules
 
@@ -169,6 +169,11 @@ Adding or removing a mode, promoting an annotation to a graded attribute, changi
 
 ## 5. Changelog
 
+- **2026-10-17 — two groundings restated to their passages (jioh 9.16).** No value changed. §2's `batch_bandwidth_cap` paragraph: the shipped counterpart is a per-group CPU bandwidth ceiling, a quota per period on a cgroup, in place of a per-class one — `linux-sched-bwc` allocates a task group up to its quota of microseconds per period. §2's provenance table, LOTTERY `batch_share`: `waldspurger-osdi94` gives shares proportional to tickets in expectation, in place of "proportional to tickets". Found by the 9.16 claim audit (`_dev/research/jioh/task-9.16-exit-audits/claims/outside-findings.md`).
+- **2026-10-17 — the `render` gloss (jioh 9.15).** No graded value, label or file changed. §1's `render` row: 'an offline 3D/graphics render' → 'an offline render — a 3D scene or a video project rendered to a file', still distinct from `transcode`'s conversion of existing media. Every render segment binds Kdenlive's export of a video project (`kdenlive_render`, the `melt-7` it runs doing the work; 9.10 D10, D105), no 3D scene. §4's extension rule lists no gloss change among the three-owner decisions; the Phase 9 final memo (`docs/memos/2026-10-17-workload-dataset-rebuild.md`) tells 인경민 and 박이안. The prompt 9.12's latency measurement ran with (`dataset/tools/meas/llm/prompt.json`) keeps the former gloss, as measured.
+- **2026-10-16 — the dataset's examples and the sweep (jioh 9.15).** No graded value changed. §1: the descriptive key `initiated` gains its third value, `session` — work the desktop session itself starts, unasked, at login (`c2-p1b`, `c7-indexing`; 9.10 D79) — and stays ungraded; the examples name what the files carry, the stock unattended upgrade and an indexer's first index at login for `false`, `package-upgrade` for `background` (9.10 D3, D5); the preamble's scenario tags are restated to the catalog's existence claims, the task sets design (9.10 D33, D168). §2: the sensitivity sweep is ten alternative boot defaults, the 14 ms point added, as the RQ0 gate spec reworked on the rebuilt dataset states it (2026-10-09, 9.14).
+- **2026-10-08 — scheduler-side groundings (jioh 9.11).** No value changed. §2: the boot default's provenance — the values of three worked examples of OSTEP chapter 8 (Example 1, Figures 8.4 and 8.6), not one example whole, Figure 8.1 drawing eight queues; the allotment matching Example 1 and departing from Figure 8.6; the sweep's 0.7 ms point, Linux's base slice at one CPU since v6.15. The same-granularity rule's note without the claim that no shipped EDF has a residual slice. The executor has no starvation window, and FIFO's paragraph no safety net. EDF's and LOTTERY's slices, `batch_share` and the schema's ranges labelled design.
+- **2026-10-06 — EDF's deadline class holds the frame chain (jioh).** No value changed. §2's EDF paragraph now states the class as `docs/memos/2026-09-09-batch-class-rule-for-the-simulator.md` rule B2 defines the periodic class — the TIMER tasks and every task reachable from one through `WAKE` targets — and that a woken task's job carries the deadline of the job that woke it, so a frame's stages are ordered by the frame's own deadline, the one the harness's `job` primitive scores (`docs/harness/metrics.md` §6.2). The former wording, read literally, left a chain's woken stages in the residual class.
 - **2026-09-12 — the sensitivity check is a sweep (jioh 8.8).** No value changed. §2's sensitivity paragraph now states the pre-registered form: nine alternative boot defaults varying the top slice only, the reasons per point in the RQ0 gate spec, and the correction that only the `fixed` run varies — the earlier sentence that the pair varies all three slices together described a design the runner never had. Reference added: `linux-sched-ext` (the 20 ms point).
 - **2026-09-11 — boot default from OSTEP (jioh 8.1).** Three values changed: MLFQ `timeslice_us` 2000 → 10000, EDF `residual_timeslice_us` 2000 → 10000, LOTTERY `timeslice_us` 2000 → 10000. The MLFQ boot default is now OSTEP §8's worked example whole (3 queues, 10 ms, doubling, 100 ms boost, allotment equal to slice), one source for all four values; the other two slices follow by the same-granularity rule, now stated in §2 as the project's own; the alternative pair of the sensitivity check is the team's to fix before execution. The former 2 ms slice named no source (it lay inside the range `linux-sched-fair`, `illumos-ts`, and `ostep` bound). The prior table's rows follow by their header rule; the metrics doc's latency floor is untied from the slice (its changelog). Research behind the change: no source read claims a standard MLFQ configuration; memo `docs/memos/2026-09-11-boot-default-from-ostep.md`.
 - **2026-09-11 — the cap's shipped counterpart (jioh).** No value changed. §2's `batch_bandwidth_cap` paragraph now points to `linux-sched-bwc` (Linux CFS bandwidth control) as the existence reference for a per-class CPU bandwidth ceiling; what the class is, the range, and the floor remain this project's.

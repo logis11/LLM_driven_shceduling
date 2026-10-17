@@ -1,11 +1,11 @@
 """Linter behavior: repo lints on the real repo, the freeze gate, the
-registry subset rule, timeline structural rules, and the demand window."""
+registry subset rule, and timeline structural rules."""
 
 import pytest
 import yaml
 
 from wlc import Timeline, TimelineError, compile_timeline
-from wlc.linter import lint_canonical, lint_repo
+from wlc.linter import lint_bound_sources, lint_canonical, lint_repo
 
 
 def test_real_repo_lint_clean(repo_root):
@@ -23,26 +23,96 @@ def test_repo_is_freeze_clean(repo_root):
     assert errors == []
 
 
+PROBE_ENTRY = (
+    "archetypes:\n"
+    "  probe:\n"
+    "    category_source: meas\n"
+    "    declared_class: {declared_class}\n"
+    "    pattern: {{program: []}}\n"
+    "    params:\n"
+    "      x: {{dist: constant, value_us: 1, sampling: per-task,\n"
+    "          source: {source}}}\n"
+    "    lifetime: finite\n"
+    "    binding_params: []\n"
+    "    scalable: []\n"
+    "    validation_stats: {{}}\n"
+    "    modeling_notes: probe\n")
+
+
 def test_freeze_rejects_meas_pending(repo_root, tmp_path):
     archetypes = tmp_path / "archetypes.yaml"
-    archetypes.write_text(
-        "archetypes:\n"
-        "  probe:\n"
-        "    category_source: meas\n"
-        "    pattern: {program: []}\n"
-        "    params:\n"
-        "      x: {dist: constant, value_us: 1, sampling: per-task,\n"
-        "          source: meas-pending}\n"
-        "    lifetime: finite\n"
-        "    binding_params: []\n"
-        "    scalable: []\n"
-        "    validation_stats: {}\n"
-        "    modeling_notes: probe\n")
+    archetypes.write_text(PROBE_ENTRY.format(declared_class="normal", source="meas-pending"))
     sources = repo_root / "dataset" / "sources.yaml"
     references = repo_root / "docs" / "references.md"
     assert lint_repo(archetypes, sources, references, freeze=False) == []
     errors = lint_repo(archetypes, sources, references, freeze=True)
     assert errors == ["probe.x: meas-pending after freeze"]
+
+
+def test_repo_lint_requires_declared_class(repo_root, tmp_path):
+    """9.13 spec decisions 2 and 8: every entry carries `declared_class` from the closed set; no default."""
+    sources = repo_root / "dataset" / "sources.yaml"
+    references = repo_root / "docs" / "references.md"
+    archetypes = tmp_path / "archetypes.yaml"
+    text = PROBE_ENTRY.format(declared_class="normal", source="meas-ci:background:2026-09-19")
+    archetypes.write_text(text.replace("    declared_class: normal\n", ""))
+    assert lint_repo(archetypes, sources, references) == ["probe: missing field 'declared_class'"]
+    archetypes.write_text(PROBE_ENTRY.format(declared_class="nice", source="meas-ci:background:2026-09-19"))
+    assert lint_repo(archetypes, sources, references) == ["probe: bad declared_class 'nice'"]
+    archetypes.write_text(PROBE_ENTRY.format(declared_class="idle", source="meas-ci:background:2026-09-19"))
+    assert lint_repo(archetypes, sources, references) == []
+
+
+def canonical_of(program, spawned=None):
+    """A minimal schema-valid file around one task's program — with `spawned`, the task forks one child carrying it."""
+    task = {"t": 0, "op": "arrive", "id": "a", "name": "x", "declared_class": "normal", "program": program}
+    if spawned is not None:
+        task["program"] = [{"op": "FORK"}, {"op": "WAIT", "channel": "children:a"}, {"op": "EXIT"}]
+        task["spawn_table"] = [{"id": "a.c", "name": "y", "declared_class": "normal", "program": spawned}]
+        task["fork_cap"] = 1
+    else:
+        task["depart"] = 1_000_000
+    return {"meta": {"id": "t", "derived_from": "t.timeline.yaml@abcdef1",
+                     "sampled": {"seed": 1, "archetypes": "archetypes.yaml@abcdef1"}},
+            "ground_truth": [], "focus": [], "events": [task]}
+
+
+TIMER, RUN = {"op": "TIMER", "period_us": 10}, {"op": "RUN", "us": 5}
+
+
+@pytest.mark.parametrize("program,ok", [
+    ([TIMER, RUN, TIMER], True),                                            # TIMER literally first (the last, 9.23 N1)
+    ([{"op": "LOOP", "count": "unbounded", "body": [TIMER, RUN]}], True),   # a LOOP head whose body begins with TIMER
+    ([RUN, TIMER], False),                                                  # a run before the first tick
+    ([{"op": "LOOP", "count": "unbounded", "body": [RUN, TIMER]}], False),
+    ([{"op": "WAIT", "channel": "timer:a"}, RUN, TIMER], False),            # a wait before the first tick
+    ([{"op": "WAIT", "channel": "timer:a"}, RUN, {"op": "WAIT", "channel": "timer:a"}], True),   # no TIMER: no rule
+])
+def test_timer_first_invariant(schema, program, ok):
+    """9.11 D11, D33 (9.13 spec decision 8): a program that contains a TIMER anywhere has a TIMER as its first
+    executed instruction, descending LOOP heads, so TIMER's t₀ — its first execution — is the task's arrival."""
+    errors = lint_canonical(canonical_of(program), schema)
+    assert (errors == []) == ok, errors
+    if not ok:
+        assert len(errors) == 1 and errors[0].startswith("a: TIMER") and "first executed" in errors[0]
+
+
+def test_timer_first_invariant_covers_spawned_tasks(schema):
+    errors = lint_canonical(canonical_of(None, spawned=[RUN, TIMER, {"op": "EXIT"}]), schema)
+    assert len(errors) == 1 and errors[0].startswith("a.c: TIMER")
+    assert lint_canonical(canonical_of(None, spawned=[TIMER, RUN, {"op": "EXIT"}]), schema) == []
+
+
+def test_library_declared_classes(library):
+    """9.13 spec decisions 2 and 4: `idle` on `file-indexer` and `incremental-backup` and on the bounding check's
+    `game-download-idle`, `normal` on every other entry; the variant shares its base's tables by reference."""
+    classes = {aid: library.entry(aid)["declared_class"] for aid in library.entries}
+    assert {aid for aid, c in classes.items() if c == "idle"} == {"file-indexer", "incremental-backup",
+                                                                   "game-download-idle"}
+    assert set(classes.values()) <= {"normal", "idle"}
+    base, idle = library.entry("game-download"), library.entry("game-download-idle")
+    for field in ("params", "pattern", "lifetime", "binding_params", "scalable", "validation_stats"):
+        assert idle[field] == base[field]
 
 
 def test_registry_subset_rule(repo_root, tmp_path):
@@ -60,7 +130,7 @@ BASE = {
     "meta": {"id": "bad", "seed": 1, "demand": "calibration"},
     "segments": [{"from": "0s", "to": "10s", "mode": "office",
                   "attributes": {"background_wanted": True}}],
-    "tasks": [{"id": "player", "name": "mpv", "archetype": "audio-playback",
+    "tasks": [{"id": "player", "name": "mpv", "archetype": "audio-player",
                "arrive": "0s", "depart": "10s"}],
 }
 
@@ -68,7 +138,7 @@ BASE = {
 def load_bad(tmp_path, mutate):
     data = {"meta": dict(BASE["meta"]),
             "segments": [dict(s) for s in BASE["segments"]],
-            "tasks": [dict(t) for t in BASE["tasks"]], "focus": []}
+            "tasks": [dict(t) for t in BASE["tasks"]], "input": [], "focus": []}
     mutate(data)
     path = tmp_path / "bad.timeline.yaml"
     path.write_text(yaml.safe_dump(data))
@@ -78,17 +148,18 @@ def load_bad(tmp_path, mutate):
 @pytest.mark.parametrize("expect,mutate", [
     ("unknown archetype",
      lambda d: d["tasks"][0].update(archetype="nonesuch")),
-    ("not in 'audio-playback' binding_params",
+    ("not in 'audio-player' binding_params",
      lambda d: d["tasks"][0].update(bind={"burst_len": 5})),
     ("missing bind keys",
-     lambda d: d["tasks"].append({"id": "job", "name": "ffmpeg",
-                                  "archetype": "io-stream", "arrive": "0s"})),
+     lambda d: d["tasks"].append({"id": "job", "name": "7z",
+                                  "archetype": "file-archiver", "arrive": "0s"})),
     ("depart missing but archetype lifetime is 'segment-bound'",
      lambda d: d["tasks"][0].pop("depart")),
     ("depart present but archetype lifetime is 'finite'",
      lambda d: d["tasks"].append({"id": "job", "name": "python3",
                                   "archetype": "cpu-batch", "arrive": "0s",
-                                  "depart": "5s", "bind": {"total_work": "1s"}})),
+                                  "depart": "5s",
+                                  "bind": {"total_work": "1s", "program": "python3"}})),
     ("spawned-only",
      lambda d: d["tasks"].append({"id": "kid", "name": "cc1",
                                   "archetype": "compiler-child", "arrive": "0s"})),
@@ -98,18 +169,59 @@ def load_bad(tmp_path, mutate):
      lambda d: d["segments"].append({"from": "5s", "to": "15s", "mode": "x",
                                      "attributes": {"background_wanted": True}})),
     ("no input channel",
-     lambda d: d["focus"].append({"from": "1s", "to": "2s", "task": "player"})),
-    ("focus windows overlap",
+     lambda d: d["input"].append({"from": "1s", "to": "2s", "task": "player"})),
+    ("input windows overlap",
      lambda d: (d["tasks"].append({"id": "ed", "name": "code",
-                                   "archetype": "desktop-interactive",
+                                   "archetype": "code-editor",
                                    "arrive": "0s", "depart": "10s"}),
-                d["focus"].extend([{"from": "1s", "to": "5s", "task": "ed"},
+                d["focus"].append({"from": "0s", "to": "10s", "task": "ed"}),
+                d["input"].extend([{"from": "1s", "to": "5s", "task": "ed"},
                                    {"from": "4s", "to": "6s", "task": "ed"}]))),
-    ("outside task",
+    ("input window outside task",
      lambda d: (d["tasks"].append({"id": "ed", "name": "code",
-                                   "archetype": "desktop-interactive",
+                                   "archetype": "code-editor",
                                    "arrive": "2s", "depart": "10s"}),
-                d["focus"].append({"from": "1s", "to": "5s", "task": "ed"}))),
+                d["focus"].append({"from": "2s", "to": "10s", "task": "ed"}),
+                d["input"].append({"from": "1s", "to": "5s", "task": "ed"}))),
+    # 9.17: the window-focus track
+    ("missing focus track",
+     lambda d: d.pop("focus")),
+    ("focus targets unknown task",
+     lambda d: d["focus"].append({"from": "1s", "to": "2s", "task": "nobody"})),
+    ("a counted task",
+     lambda d: (d["tasks"].append({"id": "tabs", "name": "chrome", "archetype": "renderer-hidden",
+                                   "arrive": "0s", "depart": "10s", "count": 3}),
+                d["focus"].append({"from": "0s", "to": "10s", "task": "tabs"}))),
+    ("focus interval outside task",
+     lambda d: d["focus"].append({"from": "0s", "to": "11s", "task": "player"})),
+    ("focus intervals overlap",
+     lambda d: (d["tasks"].append({"id": "ed", "name": "code", "archetype": "code-editor",
+                                   "arrive": "0s", "depart": "10s"}),
+                d["focus"].extend([{"from": "0s", "to": "6s", "task": "player"},
+                                   {"from": "5s", "to": "10s", "task": "ed"}]))),
+    ("lies outside its focus intervals",
+     lambda d: (d["tasks"].append({"id": "ed", "name": "code", "archetype": "code-editor",
+                                   "arrive": "0s", "depart": "10s"}),
+                d["focus"].append({"from": "0s", "to": "4s", "task": "ed"}),
+                d["input"].append({"from": "1s", "to": "5s", "task": "ed"}))),
+    # 9.18: a window that is a slice of a stream window
+    ("slice_of missing 'index'",
+     lambda d: (d["tasks"].append({"id": "ed", "name": "code", "archetype": "code-editor",
+                                   "arrive": "0s", "depart": "10s"}),
+                d["focus"].append({"from": "0s", "to": "10s", "task": "ed"}),
+                d["input"].append({"from": "1s", "to": "5s", "task": "ed", "slice_of": {"from": "1s", "to": "9s"}}))),
+    ("slice_of.index must be a non-negative integer",
+     lambda d: (d["tasks"].append({"id": "ed", "name": "code", "archetype": "code-editor",
+                                   "arrive": "0s", "depart": "10s"}),
+                d["focus"].append({"from": "0s", "to": "10s", "task": "ed"}),
+                d["input"].append({"from": "1s", "to": "5s", "task": "ed",
+                                   "slice_of": {"from": "1s", "to": "9s", "index": -1}}))),
+    ("lies outside the stream window it names as slice_of",
+     lambda d: (d["tasks"].append({"id": "ed", "name": "code", "archetype": "code-editor",
+                                   "arrive": "0s", "depart": "10s"}),
+                d["focus"].append({"from": "0s", "to": "10s", "task": "ed"}),
+                d["input"].append({"from": "1s", "to": "5s", "task": "ed",
+                                   "slice_of": {"from": "2s", "to": "9s", "index": 0}}))),
     ("meta.demand",
      lambda d: d["meta"].update(demand="whatever")),
     ("segment 'office': background_wanted missing",
@@ -125,27 +237,185 @@ def test_timeline_rules(tmp_path, library, expect, mutate):
         Timeline(load_bad(tmp_path, mutate), library)
 
 
-def test_demand_window_enforced(tmp_path, library, schema):
-    """An underloaded default-class file fails -single lint; the calibration
-    class and -native mode are exempt."""
+def test_real_timelines_bound_values_are_sourced(repo_root):
+    """9.18 spec, decision 4 (9.10 D32): every value a core-set timeline binds carries a source tag or a label."""
+    registry = yaml.safe_load((repo_root / "dataset" / "sources.yaml").read_text())["sources"]
+    errors = []
+    for path in sorted((repo_root / "dataset" / "timelines").glob("**/*.timeline.yaml")):
+        errors.extend(lint_bound_sources(path, registry))
+    assert errors == []
+
+
+REGISTRY = {"meas-ci": {"type": "measurement", "locator_pattern": r"^[a-z0-9_-]+:\d{4}-\d{2}-\d{2}[a-z]?$"},
+            "glam": {"type": "deployed-system"}}
+
+
+def bound_task(bind=None, count=None, source=None):
+    task = {"id": "job", "name": "x", "archetype": "cpu-batch", "arrive": "0s"}
+    if bind is not None:
+        task["bind"] = bind
+    if count is not None:
+        task["count"] = count
+    if source is not None:
+        task["source"] = source
+    return task
+
+
+@pytest.mark.parametrize("task,expect", [
+    (bound_task({"total_work": "1s"}, source={"total_work": "meas-ci:background:2026-10-01"}), []),
+    (bound_task({"total_work": "1s"}, source={"total_work": "design"}), []),
+    (bound_task({"total_work": "1s", "program": "p"},
+                source={"total_work": "meas-ci:background:2026-10-01", "program": ["glam", "meas-ci:desktop:2026-10-04"]}), []),
+    (bound_task(count=4, source={"count": ["glam", "meas-ci:desktop:2026-10-04"]}), []),
+    (bound_task(), []),                                              # nothing bound, nothing to source
+    (bound_task({"total_work": "1s"}), ["bound values ['total_work'] carry no source map"]),
+    (bound_task(count=4), ["bound values ['count'] carry no source map"]),
+    (bound_task({"total_work": "1s", "program": "p"}, source={"total_work": "design"}),
+     ["bound values ['program'] have no source entry"]),
+    (bound_task({"total_work": "1s"}, source={"total_work": "design", "lane_share": "design"}),
+     ["source entries ['lane_share'] name no bound value"]),
+    (bound_task({"total_work": "1s"}, source={"total_work": "guess"}), ["source id 'guess' not in registry"]),
+    (bound_task({"total_work": "1s"}, source={"total_work": "meas-ci:background:yesterday"}),
+     ["locator 'background:yesterday' violates meas-ci pattern"]),
+    (bound_task({"total_work": "1s"}, source={"total_work": ["design", "glam"]}), ["a label stands alone"]),
+    (bound_task({"total_work": "1s"}, source={"total_work": []}), ["source of 'total_work' is empty"]),
+])
+def test_bound_values_carry_a_source_tag_or_a_label(tmp_path, task, expect):
+    """9.18 spec, decision 4: `source` mirrors the bound values — the `bind` keys and `count` when stated — each a
+    registry tag, a list of tags, or one of the labels design / convention / arithmetic."""
+    path = tmp_path / "probe.timeline.yaml"
+    path.write_text(yaml.safe_dump({"meta": {"id": "probe", "seed": 1}, "segments": [], "tasks": [task],
+                                    "input": [], "focus": []}))
+    errors = lint_bound_sources(path, REGISTRY)
+    assert len(errors) == len(expect)
+    for error, fragment in zip(errors, expect):
+        assert fragment in error, error
+
+
+def test_no_demand_window_gates_a_file(tmp_path, library, schema):
+    """9.14 decision 4: the demand window is retired as a gate — an underloaded default-class file lints clean, its
+    demand a measured fact the compile report states per segment."""
     data = {"meta": {"id": "under", "seed": 1},
             "segments": [{"from": "0s", "to": "60s", "mode": "office",
                           "attributes": {"background_wanted": True}}],
             "tasks": [{"id": "job", "name": "python3", "archetype": "cpu-batch",
-                       "arrive": "0s", "bind": {"total_work": "20s"}}]}
+                       "arrive": "0s",
+                       "bind": {"total_work": "20s", "program": "python3"}}],
+            "focus": []}
     path = tmp_path / "under.timeline.yaml"
     path.write_text(yaml.safe_dump(data))
     timeline = Timeline(path, library)
 
     canonical, report = compile_timeline(timeline, library, "single")
-    errors = lint_canonical(canonical, schema, report=report, mode="single")
-    assert len(errors) == 1 and "outside" in errors[0]
-
-    canonical, report = compile_timeline(timeline, library, "native")
-    assert lint_canonical(canonical, schema, report=report, mode="native") == []
-
-    data["meta"]["demand"] = "calibration"
-    path.write_text(yaml.safe_dump(data))
-    timeline = Timeline(path, library)
-    canonical, report = compile_timeline(timeline, library, "single")
     assert lint_canonical(canonical, schema, report=report, mode="single") == []
+    assert report["demand_class"] == "oversubscribed" and report["utilization"] == 20 / 60
+    assert [s["utilization"] for s in report["per_segment"]] == [20 / 60]
+
+
+def test_a_heavy_event_states_its_runs_and_no_gap(tmp_path):
+    # 9.5 D64: chrome's MemoryInfra pass is carried as its own stated event — its runs, their count and the span they
+    # were counted over. It states no interval, because no repeat held two of them to measure one.
+    import yaml
+    from wlc import linter
+    ev = {"comm": "MemoryInfra", "run_floor_ms": 30, "count": 8, "span_s": 22800.1, "rate_per_s": 0.000351,
+          "run": {"dist": "quantiles", "p": [50939, 50939, 52001, 53255, 54695, 55068, 59377, 59997, 59997, 59997],
+                  "sampling": "per-iteration", "source": "meas-ci"}}
+    lib = {"archetypes": {"web-browser": {"category_source": "meas", "lifetime": "segment-bound",
+                                          "pattern": {"program": []}, "params": {"heavy_events": [ev]}}}}
+    a = tmp_path / "archetypes.yaml"; a.write_text(yaml.safe_dump(lib))
+    src = tmp_path / "sources.yaml"; src.write_text(yaml.safe_dump({"sources": {"meas-ci": {"type": "measurement"}}}))
+    refs = tmp_path / "references.md"; refs.write_text("- `meas-ci` — the campaign's own runs\n")
+    errs = linter.lint_repo(str(a), str(src), str(refs))
+    assert not [e for e in errs if "heavy_events" in e], errs
+
+    ev_gap = dict(ev, gap=ev["run"])
+    lib["archetypes"]["web-browser"]["params"]["heavy_events"] = [ev_gap]
+    a.write_text(yaml.safe_dump(lib))
+    errs = linter.lint_repo(str(a), str(src), str(refs))
+    assert any("states no gap" in e for e in errs), errs
+
+
+@pytest.mark.parametrize("focus,expect", [
+    ([{"t_start": 0, "t_end": 1_000_000, "task": "a"}], None),
+    ([{"t_start": 0, "t_end": 1_000_000, "task": "nobody"}], "not a top-level task"),
+    ([{"t_start": 0, "t_end": 2_000_000, "task": "a"}], "outside its pinned lifetime"),
+    ([{"t_start": 500_000, "t_end": 1_000_000, "task": "a"}, {"t_start": 0, "t_end": 400_000, "task": "a"}],
+     "not sorted"),
+    ([{"t_start": 0, "t_end": 600_000, "task": "a"}, {"t_start": 500_000, "t_end": 1_000_000, "task": "a"}],
+     "overlap"),
+])
+def test_canonical_focus_track_names_live_top_level_tasks_in_order(schema, focus, expect):
+    """9.17 spec decisions 2 and 3: the canonical focus list names top-level tasks within their pinned lifetimes, in
+    time order, never overlapping."""
+    doc = canonical_of([{"op": "WAIT", "channel": "input:a"}, {"op": "RUN", "us": 5}, {"op": "WAIT", "channel": "input:a"}])
+    doc["focus"] = focus
+    errors = lint_canonical(doc, schema)
+    if expect is None:
+        assert errors == []
+    else:
+        assert len(errors) == 1 and expect in errors[0], errors
+
+
+def test_freeze_rejects_a_bound_value_tagged_meas_pending(tmp_path):
+    """9.15 (W-0750): a value awaiting measurement carries meas-pending, which the freeze rejects in a timeline's bound
+    values as in the library's params."""
+    registry = dict(REGISTRY, **{"meas-pending": {"type": "measurement"}})
+    path = tmp_path / "probe.timeline.yaml"
+    path.write_text(yaml.safe_dump({"meta": {"id": "probe", "seed": 1}, "segments": [], "input": [], "focus": [],
+                                    "tasks": [bound_task({"total_work": "1s", "program": "p"},
+                                                         source={"total_work": "meas-pending",
+                                                                 "program": ["glam", "meas-pending"]})]}))
+    assert lint_bound_sources(path, registry) == []
+    assert lint_bound_sources(path, registry, freeze=True) == [
+        "probe.timeline.yaml: task 'job'.program: meas-pending after freeze",
+        "probe.timeline.yaml: task 'job'.total_work: meas-pending after freeze"]
+
+
+def test_real_timelines_are_freeze_clean(repo_root):
+    registry = yaml.safe_load((repo_root / "dataset" / "sources.yaml").read_text())["sources"]
+    errors = []
+    for path in sorted((repo_root / "dataset" / "timelines").glob("**/*.timeline.yaml")):
+        errors.extend(lint_bound_sources(path, registry, freeze=True))
+    assert errors == []
+
+
+def _cited(dataset):
+    return [dataset / "archetypes.yaml", dataset / "grids.yaml",
+            *sorted((dataset / "timelines").glob("**/*.timeline.yaml")),
+            *sorted((dataset / "timelines").glob("**/*.variant.yaml"))]
+
+
+def test_every_cited_campaign_has_its_release(repo_root):
+    """9.15 (W-0732): every meas-ci campaign the data cites resolves to a release in dataset/meas-releases.yaml, each
+    release with its page and each asset's sha256."""
+    from wlc.linter import lint_releases, meas_ci_tags
+    dataset = repo_root / "dataset"
+    assert lint_releases(dataset / "meas-releases.yaml", _cited(dataset)) == []
+    mapped = yaml.safe_load((dataset / "meas-releases.yaml").read_text())["campaigns"]
+    assert set(meas_ci_tags(_cited(dataset))) <= set(mapped)
+
+
+def test_release_lint_reports_an_unmapped_campaign_and_a_malformed_entry(tmp_path):
+    from wlc.linter import lint_releases
+    data = tmp_path / "probe.timeline.yaml"
+    data.write_text(yaml.safe_dump({"tasks": [{"source": {"total_work": "meas-ci:background:2099-01-01",
+                                                          "count": ["glam", "meas-ci:desktop:2099-01-02"]}}],
+                                    "validation": {"referee": "meas-ci"}}))
+    url = "https://github.com/o/r/releases/tag/{}"
+    releases = tmp_path / "meas-releases.yaml"
+    releases.write_text(yaml.safe_dump({"campaigns": {
+        "meas-ci:desktop:2099-01-02": [{"release": "meas-ci-desktop-2099-01-02", "url": url.format("other"),
+                                        "assets": [{"name": "a.zip", "sha256": "abc"}]}]}}))
+    errors = lint_releases(releases, [data])
+    assert len(errors) == 3, errors
+    assert "meas-ci-desktop-2099-01-02's url" in errors[0]
+    assert "asset 'a.zip' needs a name and a 64-hex sha256" in errors[1]
+    assert errors[2].startswith("meas-ci:background:2099-01-01 (in probe.timeline.yaml) resolves to no release")
+    releases.write_text(yaml.safe_dump({"campaigns": {
+        "meas-ci:desktop:2099-01-02": [{"release": "meas-ci-desktop-2099-01-02",
+                                        "url": url.format("meas-ci-desktop-2099-01-02"),
+                                        "assets": [{"name": "a.zip", "sha256": "0" * 64}]}],
+        "meas-ci:background:2099-01-01": [{"release": "meas-ci-background-2099-01-01",
+                                           "url": url.format("meas-ci-background-2099-01-01"),
+                                           "assets": [{"name": "b.zip", "sha256": "f" * 64}]}]}}))
+    assert lint_releases(releases, [data]) == []

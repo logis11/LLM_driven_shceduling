@@ -1,24 +1,74 @@
 # C7 — attribute counterparts (building-plan §3 C7; Phase 7 spec decisions 4–7,
-# 10). One counterpart per mode, derived from its C1 base, so every driver-table
-# cell has a one-diff pair: the base is the `true` cell, the counterpart the
-# `false` cell of the same mode (indexing the other way round — c1-indexing is
-# the user-initiated `true` cell).
+# 10). One counterpart per mode, derived from its C1 base: the base is the `true`
+# cell, the counterpart the `false` cell of the same mode. A pair differs in more
+# than the unwanted job (the interactive modes), the module build (compile) or
+# the label alone (indexing and the batch modes): the counterpart is its base's
+# first C seconds, so it differs also in length, input window and operation
+# times, and its keystrokes are its base's over the slice, less those inside its
+# own operations (9.18 D1).
 #
-# Interactive modes: one injected unwanted job — clamscan bound cpu-batch (full-
-# scan state is CPU-saturating, meas-ci:cli:3), the same name in every file so
-# the ten `false` cells differ only in mode; tier 1, so no pair changes
-# familiarity tier. Arrives at 0 s with total_work equal to the segment, so the
-# label holds at every instant under every policy.
+# Interactive modes (9.10 D3, D36–D44): one injected unwanted job — the stock
+# Ubuntu 24.04 unattended upgrade's install stage, `package-upgrade`
+# (meas-ci:background:2026-10-01), shown as `unattended-upgr` — the same name in
+# every file so the ten `false` cells differ only in mode; tier 1, so no pair
+# changes familiarity tier (D43). It arrives at 0 s bound whole, total_work its
+# measured CPU total C = 26.385 s (D17), and each counterpart is its base's
+# first C seconds (D41): one segment, every base task departing at C, so on one
+# lane the job is alive at every instant of the segment under every policy.
+# Focus windows keep the base's 2 s margins, 2 s to C − 2 s, and an operation
+# sits at its fraction of the window as in the base (D44): page load, unsharp
+# mask and preview render at the middle (the base's 30 s in 2–58 s), the mail
+# send at 38/56 of it (the base's 40 s).
+#
+# Compile (9.10 D4, D46–D57): the user's build is replaced by an observed DKMS
+# autoinstall — NVIDIA's 595 open module rebuilt for 2026-09-23's security
+# kernel by the stock unattended upgrade (meas-ci:background:2026-10-02), task
+# `dkms` on module-build-orchestrator, the segment at tier 3 as its base's (D55).
+# Indexing (9.10 D5, D60–D79): the same job as the base, Tracker's first index of a
+# home from an empty database, `file-indexer` (meas-ci:background:2026-10-02b) shown
+# as `tracker-miner-f`, now at a first login (`initiated: session`, D79). As
+# c7-compile, c7-indexing is its base's first C seconds (D78): the index from 0 s
+# bound whole, the editor departing at C, input 2 s to C − 2 s; C = 39.435 s, the
+# index's CPU total, so it is alive at every instant of the segment.
+#
+# As the indexing counterpart, c7-ml-train is its base's first C seconds (D78's
+# form): the training run from 0 s bound whole, the editor departing at C, input
+# 2 s to C − 2 s; C = 1,389.885 s, the run's CPU total (meas-ci:background:2026-10-03),
+# so it is alive at every instant of the segment. The label still flips alone on the
+# same job and name, a pre-committed miss.
+#
+# c7-transcode likewise (D78's form): the encode, `video-transcoder` shown as
+# `HandBrakeCLI`, from 0 s bound whole, the editor departing at C, input 2 s to
+# C − 2 s, the preview render at the window's middle (D44, D96); C = 2,970.871 s,
+# the encode's CPU total (meas-ci:background:2026-10-03b). A pre-committed miss.
+#
+# c7-render likewise (D78's form): Kdenlive's export, `cpu-batch`'s
+# `kdenlive_render`, from 0 s bound whole, the editor departing at C, input 2 s
+# to C − 2 s, the preview render at the window's middle (D44, D96), cut at the
+# editor's departure; C = 16.545 s, the export's CPU total
+# (meas-ci:background:2026-10-03c). A pre-committed miss.
+#
+# c7-backup likewise (D78's form): Déjà Dup's scheduled weekly incremental,
+# `incremental-backup` shown as `deja-dup`, from 0 s bound whole, the editor
+# departing at C, input 2 s to C − 2 s, the preview render at the window's middle
+# (D44, D96); C = 165.668 s, the backup's CPU total
+# (meas-ci:background:2026-10-04), so it is alive at every instant of the segment.
+# A pre-committed miss, its premise D9's: the one unasked backup under its own
+# name, dpkg's daily `dpkg-db-backup`, finished in the second it started on the
+# one desktop observed and cannot hold a backup segment.
+#
+# As the interactive counterparts, c7-compile is its base's first C seconds (D56): the
+# build from 0 s bound whole, the editor departing at C, input 2 s to C − 2 s;
+# C = 225.458 s, the build's CPU as compiled under the file's seed, so it is alive
+# at every instant of the segment.
 #
 # Batch modes: the batch job is itself the background work the attribute judges
-# (recognition-vocabulary §1), so the counterpart is the same job unwanted — the
-# P1b move, rename and label flip, mode unchanged. compile: make -> dkms, the
-# kernel-module rebuild the distro runs on a kernel change (dkms-man,
-# dkms-debian; names workflow meas-ci:names:2 observed comm `dkms` at runtime
-# level on all three distros, Fedora shipping a kernel-install hook and a
-# dkms.service unit — dataset/meas/names/run-2/). ml-train, render, transcode, backup: no same-mode orchestrator a
-# distro or vendor runs unasked under a distinct name exists (transcode: Jellyfin
-# installs its transcoder as plain `ffmpeg`), so the label flips alone and the
+# (recognition-vocabulary §1), so the counterpart is the same job unwanted, the
+# label flipped on the same job and name, mode unchanged. No distro or vendor
+# was found starting an ml-train, render or transcode job unasked (the
+# 2026-09-13 verification: Jellyfin runs its transcoder as plain `ffmpeg` and
+# Plex as `Plex Transcoder`, neither found converting media on a schedule);
+# backup's one unasked job under its own name is sub-second (9.10 D9). Each
 # file ships as a pre-committed miss.
 #
 # Every counterpart declares demand: calibration in its own recipe (Phase 7 spec
@@ -26,147 +76,245 @@
 variants:
   - id: c7-browsing
     from: c1-browsing.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S2, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: browsing,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S2, S17]}]
+      - patch-task: {id: browser, depart: 26.385s}
+      - patch-task: {id: renderers, depart: 26.385s}
+      - set-input: [{from: 2s, to: 24.385s, task: browser}]
+      - set-operations: [{at: 13.1925s, task: browser, name: page-load}]
+      - set-focus: [{from: 0s, to: 26.385s, task: browser}]
       - patch-meta: {demand: calibration}
 
   - id: c7-office
     from: c1-office.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S1, S2, S4, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: office,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S1, S2, S4, S17]}]
+      - patch-task: {id: writer, depart: 26.385s}
+      - patch-task: {id: browser, depart: 26.385s}
+      - patch-task: {id: renderers, depart: 26.385s}
+      - patch-task: {id: mail, depart: 26.385s}
+      - set-input: [{from: 2s, to: 24.385s, task: writer}]
+      - set-focus: [{from: 0s, to: 26.385s, task: writer}]
       - patch-meta: {demand: calibration}
 
   - id: c7-mail
     from: c1-mail.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S4, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: mail,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S4, S17]}]
+      - patch-task: {id: mailer, depart: 26.385s}
+      - set-input: [{from: 2s, to: 24.385s, task: mailer}]
+      - set-operations: [{at: 17.189821s, task: mailer, name: send}]
+      - set-focus: [{from: 0s, to: 26.385s, task: mailer}]
       - patch-meta: {demand: calibration}
 
   - id: c7-dev
     from: c1-dev.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S11, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: dev,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S11, S17]}]
+      - patch-task: {id: editor, depart: 26.385s}
+      - set-input: [{from: 2s, to: 24.385s, task: editor}]
+      - set-focus: [{from: 0s, to: 26.385s, task: editor}]
       - patch-meta: {demand: calibration}
 
   - id: c7-photo
     from: c1-photo.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S6, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: photo,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S6, S17]}]
+      - patch-task: {id: photo-editor, depart: 26.385s}
+      - set-input: [{from: 2s, to: 24.385s, task: photo-editor}]
+      - set-operations: [{at: 13.1925s, task: photo-editor, name: unsharp-mask}]
+      - set-focus: [{from: 0s, to: 26.385s, task: photo-editor}]
       - patch-meta: {demand: calibration}
 
   - id: c7-meeting
     from: c1-meeting.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S3, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: meeting,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S3, S17]}]
+      - patch-task: {id: voice, depart: 26.385s}
+      - set-focus: [{from: 0s, to: 26.385s, task: voice}]
       - patch-meta: {demand: calibration}
 
   - id: c7-gaming
     from: c1-gaming.timeline.yaml
+    # the game's threads beyond the chain and `wineserver` are omitted: the source
+    # puts 95% of scheduling in its top 30-40 tasks and describes none outside
+    # them (lavd-ossna24 s12; 9.10 D19)
+    # the Steam client is in its measured state: logged out, no account, no
+    # library, no game behind it, no `gameoverlayui` (9.10 D22; 9.8 D6)
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S9, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: gaming,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S9, S17]}]
+      - patch-task: {id: game, depart: 26.385s}
+      - patch-task: {id: steam, depart: 26.385s}
+      - set-focus: [{from: 0s, to: 26.385s, task: game}]
       - patch-meta: {demand: calibration}
 
   - id: c7-media
     from: c1-media.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S13, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: media,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S13, S17]}]
+      - patch-task: {id: video, depart: 26.385s}
+      - patch-task: {id: music, depart: 26.385s}
+      - set-focus: [{from: 0s, to: 26.385s, task: video}]
       - patch-meta: {demand: calibration}
 
   - id: c7-video-edit
     from: c1-video-edit.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S7, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: video-edit,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S7, S17]}]
+      - patch-task: {id: editor, depart: 26.385s}
+      - set-input: [{from: 2s, to: 24.385s, task: editor}]
+      - set-operations: [{at: 13.1925s, task: editor, name: preview-render}]
+      - set-focus: [{from: 0s, to: 26.385s, task: editor}]
       - patch-meta: {demand: calibration}
 
   - id: c7-idle
     from: c1-idle.timeline.yaml
+    # the four session tasks carry the idle session's measured state (9.9 D9),
+    # not the work the upgrade causes in them. On a booted desktop (the probe,
+    # 9.10 D171) the session starts nothing; PID 1 does some 372 ms more work
+    # and the system bus some 99 ms over an 11.6 s job, PID 1's daemon-reexec
+    # running its generators (31 processes in 63 ms), and apt's PackageKit hook
+    # starts `packagekitd`. The file carries none of it (9.10 D165, D173)
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S18, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: idle,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S18, S17]}]
+      - patch-task: {id: shell, depart: 26.385s}
+      - patch-task: {id: audio-srv, depart: 26.385s}
+      - patch-task: {id: init, depart: 26.385s}
+      - patch-task: {id: bus, depart: 26.385s}
       - patch-meta: {demand: calibration}
 
   - id: c7-compile
     from: c1-compile.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - rename: {from: make, to: dkms}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, initiated: scheduled}}
+      - patch-task: {id: build, name: dkms, archetype: module-build-orchestrator, arrive: 0s,
+                     bind: {parallelism_cap: 8, child_name: cc1},
+                     source: {parallelism_cap: convention, child_name: "meas-ci:background:2026-10-02"}}
+      - set-segments: [{from: 0s, to: 225.458s, mode: compile,
+                         attributes: {background_wanted: false, initiated: scheduled},
+                         scenario: [S11]}]
+      - patch-task: {id: editor, depart: 225.458s}
+      - set-input: [{from: 2s, to: 223.458s, task: editor}]
+      - set-focus: [{from: 0s, to: 225.458s, task: editor}]
       - patch-meta: {demand: calibration}
 
   - id: c7-indexing
     from: c1-indexing.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, initiated: scheduled}}
+      - patch-task: {id: hog, arrive: 0s}
+      - set-segments: [{from: 0s, to: 39.435s, mode: indexing,
+                         attributes: {background_wanted: false, initiated: session},
+                         scenario: [S11, S14]}]
+      - patch-task: {id: editor, depart: 39.435s}
+      - set-input: [{from: 2s, to: 37.435s, task: editor}]
+      - set-focus: [{from: 0s, to: 39.435s, task: editor}]
       - patch-meta: {demand: calibration}
 
   - id: c7-ml-train
     from: c1-ml-train.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, initiated: scheduled,
-                                     pre_committed_miss: true}}
+      - patch-task: {id: hog, arrive: 0s}
+      - set-segments: [{from: 0s, to: 1389.885s, mode: ml-train,
+                         attributes: {background_wanted: false, initiated: scheduled,
+                                      pre_committed_miss: true},
+                         scenario: [S11, S12]}]
+      - patch-task: {id: editor, depart: 1389.885s}
+      - set-input: [{from: 2s, to: 1387.885s, task: editor}]
+      - set-focus: [{from: 0s, to: 1389.885s, task: editor}]
       - patch-meta: {demand: calibration}
 
   - id: c7-render
     from: c1-render.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, initiated: scheduled,
-                                     pre_committed_miss: true}}
+      - patch-task: {id: bulk, arrive: 0s}
+      - set-segments: [{from: 0s, to: 16.545s, mode: render,
+                         attributes: {background_wanted: false, initiated: scheduled,
+                                      pre_committed_miss: true},
+                         scenario: [S7]}]
+      - patch-task: {id: editor, depart: 16.545s}
+      - set-input: [{from: 2s, to: 14.545s, task: editor}]
+      - set-operations: [{at: 8.2725s, task: editor, name: preview-render}]
+      - set-focus: [{from: 0s, to: 16.545s, task: editor}]
       - patch-meta: {demand: calibration}
 
   - id: c7-transcode
     from: c1-transcode.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, initiated: scheduled,
-                                     pre_committed_miss: true}}
+      - patch-task: {id: batch, arrive: 0s}
+      - set-segments: [{from: 0s, to: 2970.871s, mode: transcode,
+                         attributes: {background_wanted: false, initiated: scheduled,
+                                      pre_committed_miss: true},
+                         scenario: [S8, S7]}]
+      - patch-task: {id: video-editor, depart: 2970.871s}
+      - set-input: [{from: 2s, to: 2968.871s, task: video-editor}]
+      - set-operations: [{at: 1485.4355s, task: video-editor, name: preview-render}]
+      - set-focus: [{from: 0s, to: 2970.871s, task: video-editor}]
       - patch-meta: {demand: calibration}
 
   - id: c7-backup
     from: c1-backup.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, initiated: scheduled,
-                                     pre_committed_miss: true}}
+      - patch-task: {id: bulk, arrive: 0s}
+      - set-segments: [{from: 0s, to: 165.668s, mode: backup,
+                         attributes: {background_wanted: false, initiated: scheduled,
+                                      pre_committed_miss: true},
+                         scenario: [S7, S15]}]
+      - patch-task: {id: editor, depart: 165.668s}
+      - set-input: [{from: 2s, to: 163.668s, task: editor}]
+      - set-operations: [{at: 82.834s, task: editor, name: preview-render}]
+      - set-focus: [{from: 0s, to: 165.668s, task: editor}]
       - patch-meta: {demand: calibration}

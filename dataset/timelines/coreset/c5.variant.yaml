@@ -1,28 +1,26 @@
 # C5 — familiarity ladder (building-plan §3 C5): same structure and
 # archetypes as c1-media; only the name tier changes, so any recognition
 # difference is attributable to the name alone. Tiers 1-2 already appear
-# across C1; these files cover tiers 3-5.
+# across C1; these two files are the authored cells of tiers 4 and 5 — the
+# generated ladder (dataset/grids.yaml, 9.20) covers tiers 3-5 over every mode.
+# The tier-3 file authored here until 2026-10-12 (indexers' names on the two
+# players) is C6's `c6-alias`: another program's real name is a name collision,
+# not the player's own opaque name (9.20 decision 8).
 variants:
-  - id: c5-t3   # opaque real names (corpus-recallable, not inferable)
-    from: c1-media.timeline.yaml
-    ops:
-      - rename: {from: mpv, to: baloo_file}
-      - rename: {from: spotify, to: tracker-miner-fs-3}
-      - patch-segment: {index: 0, familiarity: 3}
-      - patch-meta: {demand: calibration}
-
   - id: c5-t4   # nonexistent-compositional (inferable from word semantics)
     from: c1-media.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - rename: {from: mpv, to: video-playback-svc}
-      - rename: {from: spotify, to: audio-stream-helper}
+      - patch-task: {id: video, name: video-playback-}
+      - patch-task: {id: music, name: audio-stream-he}
       - patch-segment: {index: 0, familiarity: 4}
       - patch-meta: {demand: calibration}
 
   - id: c5-t5   # nonexistent-opaque (neither recall nor inference possible)
     from: c1-media.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - rename: {from: mpv, to: qzvd}
-      - rename: {from: spotify, to: xkrr}
+      - patch-task: {id: video, name: qzvd}
+      - patch-task: {id: music, name: xkrr}
       - patch-segment: {index: 0, familiarity: 5}
       - patch-meta: {demand: calibration}

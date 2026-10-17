@@ -1,0 +1,40 @@
+meas-cli-r1 kernel-build-j8 total compiler cpu s 1072.13 wall s 498.8 cpu/(4*wall) 0.537 peak cc1 live 8
+   share by comm: {('cc1', 106464): '0.000', ('modpost', 400): '0.000', ('objtool', 250): '0.000', ('ld', 99): '0.000', ('gcc', 0): '0.000', ('as', 0): '0.000', ('fixdep', 0): '0.000'}
+   cc1: cpu s 1064.64 exits 2973 mean cpu/cc1 exit us 358103 | per-TU (gcc exits) 2991 cpu/TU us 358452
+   states of compiler-family observations: {'S': 7172, 'R': 7093, 'D': 10, 'Z': 6} D frac 0.0007
+meas-cli-r1 kernel-build-cold total compiler cpu s 1085.05 wall s 504.1 cpu/(4*wall) 0.538 peak cc1 live 8
+   share by comm: {('cc1', 107754): '0.000', ('modpost', 400): '0.000', ('objtool', 251): '0.000', ('ld', 100): '0.000', ('gcc', 0): '0.000', ('as', 0): '0.000', ('objcopy', 0): '0.000'}
+   cc1: cpu s 1077.54 exits 2957 mean cpu/cc1 exit us 364403 | per-TU (gcc exits) 2970 cpu/TU us 365337
+   states of compiler-family observations: {'S': 7208, 'R': 7157, 'D': 9, 'Z': 7} D frac 0.0006
+meas-cli-r2 kernel-build-j8 total compiler cpu s 1026.4 wall s 486.2 cpu/(4*wall) 0.528 peak cc1 live 8
+   share by comm: {('cc1', 101890): '0.000', ('modpost', 399): '0.000', ('objtool', 200): '0.000', ('ld', 151): '0.000', ('gcc', 0): '0.000', ('as', 0): '0.000', ('objcopy', 0): '0.000'}
+   cc1: cpu s 1018.9 exits 2964 mean cpu/cc1 exit us 343758 | per-TU (gcc exits) 2981 cpu/TU us 344314
+   states of compiler-family observations: {'S': 6978, 'R': 6921, 'Z': 9, 'D': 5} D frac 0.0004
+meas-cli-r2 kernel-build-cold total compiler cpu s 1022.27 wall s 486.5 cpu/(4*wall) 0.525 peak cc1 live 8
+   share by comm: {('cc1', 101479): '0.000', ('modpost', 399): '0.000', ('objtool', 200): '0.000', ('ld', 149): '0.000', ('gcc', 0): '0.000', ('as', 0): '0.000', ('fixdep', 0): '0.000', ('objcopy', 0): '0.000'}
+   cc1: cpu s 1014.79 exits 2946 mean cpu/cc1 exit us 344464 | per-TU (gcc exits) 2957 cpu/TU us 345712
+   states of compiler-family observations: {'S': 6946, 'R': 6895, 'D': 4, 'Z': 6} D frac 0.0003
+meas-cli-r3 kernel-build-j8 total compiler cpu s 734.14 wall s 399.4 cpu/(4*wall) 0.46 peak cc1 live 8
+   share by comm: {('cc1', 72865): '0.000', ('modpost', 299): '0.000', ('objtool', 201): '0.000', ('ld', 49): '0.000', ('gcc', 0): '0.000', ('as', 0): '0.000', ('objcopy', 0): '0.000'}
+   cc1: cpu s 728.65 exits 2976 mean cpu/cc1 exit us 244842 | per-TU (gcc exits) 2996 cpu/TU us 245040
+   states of compiler-family observations: {'D': 11, 'S': 5731, 'R': 5680, 'Z': 12} D frac 0.001
+meas-cli-r3 kernel-build-cold total compiler cpu s 688.77 wall s 386.2 cpu/(4*wall) 0.446 peak cc1 live 8
+   share by comm: {('cc1', 68377): '0.000', ('modpost', 300): '0.000', ('objtool', 200): '0.000', ('gcc', 0): '0.000', ('as', 0): '0.000', ('ld', 0): '0.000', ('objcopy', 0): '0.000'}
+   cc1: cpu s 683.77 exits 2949 mean cpu/cc1 exit us 231865 | per-TU (gcc exits) 2966 cpu/TU us 232222
+   states of compiler-family observations: {'S': 5510, 'R': 5462, 'D': 12, 'Z': 9} D frac 0.0011
+meas-cli-r4 kernel-build-j8 total compiler cpu s 1152.11 wall s 523.7 cpu/(4*wall) 0.55 peak cc1 live 8
+   share by comm: {('cc1', 114661): '0.000', ('modpost', 350): '0.000', ('objtool', 200): '0.000', ('gcc', 0): '0.000', ('collect2', 0): '0.000', ('as', 0): '0.000', ('ld', 0): '0.000'}
+   cc1: cpu s 1146.61 exits 2948 mean cpu/cc1 exit us 388945 | per-TU (gcc exits) 2965 cpu/TU us 388570
+   states of compiler-family observations: {'S': 7533, 'R': 7450, 'Z': 13, 'D': 9} D frac 0.0006
+meas-cli-r4 kernel-build-cold total compiler cpu s 1154.14 wall s 525.2 cpu/(4*wall) 0.549 peak cc1 live 8
+   share by comm: {('cc1', 114815): '0.000', ('modpost', 349): '0.000', ('objtool', 250): '0.000', ('gcc', 0): '0.000', ('as', 0): '0.000', ('ld', 0): '0.000', ('objcopy', 0): '0.000'}
+   cc1: cpu s 1148.15 exits 2951 mean cpu/cc1 exit us 389072 | per-TU (gcc exits) 2965 cpu/TU us 389255
+   states of compiler-family observations: {'S': 7552, 'R': 7466, 'D': 7, 'Z': 13} D frac 0.0005
+meas-cli-r5 kernel-build-j8 total compiler cpu s 1171.78 wall s 527.6 cpu/(4*wall) 0.555 peak cc1 live 8
+   share by comm: {('cc1', 116578): '0.000', ('modpost', 350): '0.000', ('objtool', 200): '0.000', ('ld', 50): '0.000', ('gcc', 0): '0.000', ('as', 0): '0.000', ('objcopy', 0): '0.000'}
+   cc1: cpu s 1165.78 exits 2957 mean cpu/cc1 exit us 394244 | per-TU (gcc exits) 2971 cpu/TU us 394406
+   states of compiler-family observations: {'R': 7530, 'Z': 14, 'S': 7596, 'D': 7} D frac 0.0005
+meas-cli-r5 kernel-build-cold total compiler cpu s 1168.91 wall s 526.7 cpu/(4*wall) 0.555 peak cc1 live 8
+   share by comm: {('cc1', 116342): '0.000', ('modpost', 350): '0.000', ('objtool', 199): '0.000', ('gcc', 0): '0.000', ('as', 0): '0.000', ('ld', 0): '0.000'}
+   cc1: cpu s 1163.42 exits 2954 mean cpu/cc1 exit us 393846 | per-TU (gcc exits) 2968 cpu/TU us 393838
+   states of compiler-family observations: {'S': 7574, 'R': 7495, 'Z': 9, 'D': 9} D frac 0.0006

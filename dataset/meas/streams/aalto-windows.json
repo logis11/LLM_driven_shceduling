@@ -1,0 +1,1454 @@
+{
+ "rule": "spec decision 11: participants with KEYBOARD_TYPE full/laptop and LAYOUT qwerty, shuffled with seed 20260916, taken in order until 600 s per repeat; recorded gaps kept within a participant (sentence pauses included); 2000 ms per participant boundary; keys not exported (D4)",
+ "dataset": "136M Keystrokes (dhakal-chi18), https://userinterfaces.aalto.fi/136Mkeystrokes/data/Keystrokes.zip",
+ "zip_size": 1572785433,
+ "zip_etag": "\"5dbecd19-5688a4ae747c0\"",
+ "zip_last_modified": "Thu, 29 Mar 2018 10:07:35 GMT",
+ "pool": 162057,
+ "sha256": {
+  "Keystrokes/files/readme.txt": "c81fcbee7e98e53a5bc789074207ec338e66edd204bbf9a160c8edfaf098a08c",
+  "Keystrokes/files/metadata_participants.txt": "3ba22e2c23dbcbb5645197b9dd68c17e9ef68a1be7170e1bc1f0cd869a68ac6d",
+  "Keystrokes/files/464063_keystrokes.txt": "bf13fd4af1f424a08b75eecaaaa4c2bc23f3ce828ab2ee182e9f972235e39f4b",
+  "Keystrokes/files/213065_keystrokes.txt": "f2945f0cd189f36b9cbadd775d4d8b0a8f3f89c1a1f52f27b1c9161dcb7eab1f",
+  "Keystrokes/files/424772_keystrokes.txt": "d6b87f2d312487a5c01c0302bb8c35647915517fa58ccad58f4917679f9fba53",
+  "Keystrokes/files/453650_keystrokes.txt": "38d03da376257e62f33ee5affb3d26cf53ec4b9bf918d51575b13ce91abd5cdf",
+  "Keystrokes/files/69557_keystrokes.txt": "17cc284fc99e483817be5648d109992ce6f98cd5fb6916847fd8d989e6d4ea2b",
+  "Keystrokes/files/371833_keystrokes.txt": "e455b1f9d7e9028c477b3b7bd4a60e3c70ade439a4c85ab647eca96211701cac",
+  "Keystrokes/files/23867_keystrokes.txt": "ac74f86aca14b23ec18b6bd3ec7eeea1cf5631423b4fd4f0717dbe7f19fe3a7b",
+  "Keystrokes/files/300397_keystrokes.txt": "e1b4f289a20f080b79ecb32dc55a6dcd31265b0bffcfa20769b5ccc867420786",
+  "Keystrokes/files/58159_keystrokes.txt": "4028c63d0422fc6577c85541dd37bb70958f4c0266f2a0b2801ec30419f61b4e",
+  "Keystrokes/files/253255_keystrokes.txt": "f64c79607e06d002b702c5450b2f1b479eeebbc0f52efffa2ba5c498327070a6",
+  "Keystrokes/files/414907_keystrokes.txt": "86368f9e869b6fffab714daa8959229b73a2c5df8fc6286b8495c16454595dc1",
+  "Keystrokes/files/6533_keystrokes.txt": "e2d1fa586605f5e1dd373c728acd5852910f2ae9e1cc87ea2e2a33ee3e5b6961",
+  "Keystrokes/files/125993_keystrokes.txt": "39739b561e7d4331f8c9912696dd47575a8ec9419e05f99b5e33a847b1652bb7",
+  "Keystrokes/files/102616_keystrokes.txt": "c1533626965c4ced739e57d5ce346765fb60701d9839ecb7f5c3da5ae373ad8a",
+  "Keystrokes/files/66814_keystrokes.txt": "55c1d636d5def1b9837b4094178812bfb172907a69352ca085724a0bbc345263",
+  "Keystrokes/files/15814_keystrokes.txt": "7df83136526f173184c5254474a2b2ef4f3ac53f72e33b422f1e1377ebf86283",
+  "Keystrokes/files/46251_keystrokes.txt": "2afcbb25d2fe0df31ca62997e2973eb635a26d250d276dccd03a9e32ca5dcdd7",
+  "Keystrokes/files/61076_keystrokes.txt": "c8a903492303c483c9cbde68923f21242286b02c797a9fd493eab71d3cdbba1a",
+  "Keystrokes/files/36904_keystrokes.txt": "0e9b8e1627dba98559dd04e84a1caa329dbaf1d9d47382904586a5189a888f21",
+  "Keystrokes/files/193883_keystrokes.txt": "4c88d1fee87705d8552fa7b388c5581ef34e9256c1aa00e1d5e8b4c4f2f8244b",
+  "Keystrokes/files/279711_keystrokes.txt": "6d7b0072540ba07763d2253ee6b3ff3e337c7cfc3a14227fd5b6104c675057b6",
+  "Keystrokes/files/512488_keystrokes.txt": "bdd7581e318e9ee3e653985be0b21351cfb5644e3966edd35fdbb2df60566ffb",
+  "Keystrokes/files/329899_keystrokes.txt": "c10d5c6061f75159256e57af26eab18fd84137be0eb7c9b0ab8edf1404e93374",
+  "Keystrokes/files/301536_keystrokes.txt": "fb17b3a1160c51b1fdabc6bcbd0509d35f4402a9c0f2b4ebe3b755c7dc4e9bf9",
+  "Keystrokes/files/290328_keystrokes.txt": "88f33be81d64c3214b0f350bf04f2676b231928c7c06d075d4fab7d5fa87f7e3",
+  "Keystrokes/files/209447_keystrokes.txt": "e3bc4fec9ecf5021dfc1efa170ab689c5dde3945d25c9a610a32f865a6a49a33",
+  "Keystrokes/files/3264_keystrokes.txt": "198c83373c188e449fd1fd7d4179ac4dcbe746034dc342ba35a2e238ee11b46f",
+  "Keystrokes/files/450459_keystrokes.txt": "0b6bf1b34dd40b3887997b146f1847a0e1bc84f4ec71f3666704ad30823e2cdc",
+  "Keystrokes/files/189613_keystrokes.txt": "1274ee0f145024e9def275b9c2376f4e7056d5b2a389410ff0d7e39a97a6545f",
+  "Keystrokes/files/1580_keystrokes.txt": "7474cdf84e253d81a188088f08176d8bcdb3bc27ec533c3adde0ee3b5f90f882",
+  "Keystrokes/files/440272_keystrokes.txt": "fb0c81d1da5e7cc2d8cc144d7b277418e109656493bcbd3c28a671b9a42985a4",
+  "Keystrokes/files/189732_keystrokes.txt": "89e99fb7ba03565839c5329d115b02e0508a0c12e689f7d0c87520151be10a39",
+  "Keystrokes/files/130750_keystrokes.txt": "349cec9bb5d3fa2143448e6bc10f30c5ff122ecb5d941e71d601231bedf6666e",
+  "Keystrokes/files/145016_keystrokes.txt": "3a1a47a721770605c9b7dc7ab1822ea7bf383d6e209f713fc0fc4412d5905b9b",
+  "Keystrokes/files/144374_keystrokes.txt": "2fffdcd6082b66cd7cac8cbc56876937a448b799f66a01d5eee309cfde250046",
+  "Keystrokes/files/433840_keystrokes.txt": "f5872514d787197ef546172878322becad24fde3029115e897ebe860ee4bb07e",
+  "Keystrokes/files/77784_keystrokes.txt": "09ed206d2eaa3a8121cf444f2ad42b785dc24fbebba4690dc8cc98bc01252d6f",
+  "Keystrokes/files/40065_keystrokes.txt": "338001b134d234711984452188600f29fefc95874fc775d39e6bb22821bfd8b4",
+  "Keystrokes/files/375290_keystrokes.txt": "ff2f88e0e36491959835fe86082d100a0023bce6cdac7e5cf07c6f25014825b1",
+  "Keystrokes/files/353095_keystrokes.txt": "0f671fd9e1c8192a22353bbcb2b476e5bf2b4f448e8780e8c8456b51a9551180",
+  "Keystrokes/files/407909_keystrokes.txt": "0b16c4eccb04af29dd2814fd9292ab115273b59861aedbb5e8781e95bee5b55f",
+  "Keystrokes/files/170319_keystrokes.txt": "598b6046330c2d69f148061c401a12787403bb9f5a03b6330aaa131b355d7fea",
+  "Keystrokes/files/411183_keystrokes.txt": "e62ecbbe956b11fa97605d64704aa0ae12a758f14d0aa7d439847a3158391b73",
+  "Keystrokes/files/192640_keystrokes.txt": "1fa6f18e6b33aef81325cffbddcdcf522e354497d228a66896a1880a5a2a8600",
+  "Keystrokes/files/77699_keystrokes.txt": "58279b058afadc73e4610ff32791d6f76a54de75a90d3e74fd985aa884489f97",
+  "Keystrokes/files/188582_keystrokes.txt": "2150d1f742a2f146de27ae0866d42f395d76b23b6f4dc8aefd2f12e1d57c265a",
+  "Keystrokes/files/247749_keystrokes.txt": "c460fa0131162a804dae4b020e1226202be7cbca0f39eccc849c7d8bb5bfda82",
+  "Keystrokes/files/266996_keystrokes.txt": "9a229369bbc3baaec5e0937fd32bd3612f4c0a026309b4d69adaddc349ec4e76",
+  "Keystrokes/files/344836_keystrokes.txt": "1713a522ba3816c6bc64c3c3401b26f39c44d872cc427a3e4fd1aec27b4e5ebb",
+  "Keystrokes/files/273218_keystrokes.txt": "e4e750ffdaa6e08295f43a84e1b3730f6065d2101783896422d8a5adf9e3e2f9",
+  "Keystrokes/files/10974_keystrokes.txt": "09796d7bf8c989352cdf9202c9a08d1e049ff2aa0e80446576e7209d6f433f91",
+  "Keystrokes/files/317363_keystrokes.txt": "523d3b6c0c7e61975f47ce7f51332b196559a8a6c4beb57e28aec8586e942708",
+  "Keystrokes/files/7181_keystrokes.txt": "b5fc3d232d675ef11de6420bd19821fa283051e9a6cfed8c20b504caf2c8dbe0",
+  "Keystrokes/files/482757_keystrokes.txt": "8d398fc6d6f8cc944a3e971f82ef048bdfdce3f7442fe8bf4210a9c5d3a8c3e7",
+  "Keystrokes/files/372767_keystrokes.txt": "5a2735290ea8d87f48607e83b85e0bb6fa69b312b043ef670acf2e026737849b",
+  "Keystrokes/files/21681_keystrokes.txt": "81b26b756150161b5008722301920a020b9c73e908384e2dd999414558629334",
+  "Keystrokes/files/48503_keystrokes.txt": "ccaf4cc790ba15fa9117cc4a1abb23c3450ba30a8db5a21c6e382d919a7c0b6f",
+  "Keystrokes/files/395026_keystrokes.txt": "bebd941d493b34a6b556c93b5d8cee17ea98243c9f77d3d090927b67e4ef2e65",
+  "Keystrokes/files/482128_keystrokes.txt": "35e10d723652ad5208ab0cb048d8c2c8e20ee24c51d81f2248ec22c0431e3582",
+  "Keystrokes/files/240404_keystrokes.txt": "6f4b8c3561b8c52284518c14125f49df943c6345cc236f368d7f897ec4aacbfe",
+  "Keystrokes/files/483103_keystrokes.txt": "02dea8b3c06f09724039e9b33cca9827ecad33f708c8d88f30504be5ce558618",
+  "Keystrokes/files/200383_keystrokes.txt": "3b0115f57d6063bee31ab8d9adcc0305f84efcbd1ac41c30b315388b2f2a28e1",
+  "Keystrokes/files/407173_keystrokes.txt": "3f68abddd9e82cc83076fe22f678ab3b7cb2daa502add68dc7c69d6d0d34fd5f",
+  "Keystrokes/files/326064_keystrokes.txt": "e04d0b26aa0310079121501299c8a7c46214e991ce7b03c8e6c07b785495ed00",
+  "Keystrokes/files/61129_keystrokes.txt": "e9087293e104954b63eafaca7b8128cc2bca7b0c0fdbb994f180e2970d4dd376",
+  "Keystrokes/files/164501_keystrokes.txt": "6e486173677899667f9909ac1fae6b5668326d1e69319cb44496795e87bf3830",
+  "Keystrokes/files/259599_keystrokes.txt": "07ffd9a9b5c1627a7ae74a5cebbb19765293dcd017f18b0a9219295bfb559965",
+  "Keystrokes/files/171170_keystrokes.txt": "d4e4aa27b35c34113138ac898779d03f7113a64937bd70618b67de9ff2c6e27f",
+  "Keystrokes/files/500640_keystrokes.txt": "c0e95f733d27e0e8d71f0f899b4d6172e944a076fe7f804fc452687ab9e2ef07",
+  "Keystrokes/files/458560_keystrokes.txt": "6dddb723c05107c4d0d913f8ae2d759d233cf33e7fb3c8ffe4d9f8d81a241c06",
+  "Keystrokes/files/319016_keystrokes.txt": "d8b1602094198a0525b840dcb38e412a2258435408f116f46b825b38f75a4b35",
+  "Keystrokes/files/122669_keystrokes.txt": "12bb791ada01fffbf7c96015d1c3f9eb89488e025e58a840bcd9cf674d71b6d6",
+  "Keystrokes/files/504312_keystrokes.txt": "2ff728b6abdb8bc626abbbe6df09ce686af3037b052baed46af104ed798a3fb2",
+  "Keystrokes/files/375925_keystrokes.txt": "c2225bde4d4e253d8e86aa18d7a31ddb2036561882625f931d8bf3584646304e",
+  "Keystrokes/files/12559_keystrokes.txt": "1044e7e9e0dd54d1a4780533c25bde4cdb2783215d2f708b0bcc9df2de2ed258",
+  "Keystrokes/files/517926_keystrokes.txt": "ca20521097947a8f5f7c13b76012b637f44cc6b82cb5b02d6e393def4e1cc51d",
+  "Keystrokes/files/151324_keystrokes.txt": "28acce86e3bf11c5afd8f53b5266e7709ec14197a6e085db9588ca04ea005ac5",
+  "Keystrokes/files/460555_keystrokes.txt": "59234350e02c4048ede5d2ad8f26b479c856daa121cbc35a6ba2ae1424f13453",
+  "Keystrokes/files/4283_keystrokes.txt": "b35ade355f37d2ab954cb7a33b1bf3aa3904be756e1209d258280808ab3ffd8a",
+  "Keystrokes/files/59744_keystrokes.txt": "ee37b2a3921082bf1d2b41923bc5e928afe968528bcbd7ee77b2dc6fda1a57bc",
+  "Keystrokes/files/274832_keystrokes.txt": "d056db8ee7d03f089db2c48ef3645bf590a41496e405dc70aefd99a0659a9cea",
+  "Keystrokes/files/438831_keystrokes.txt": "4460255dd68d3a63920e7bef4b94e248e57ec995ac5350aa4d011c0986ae83fd",
+  "Keystrokes/files/393223_keystrokes.txt": "41f611f8656d41f1fc016829230323a2537f712eb24007f3f7022162701ce83b",
+  "Keystrokes/files/85075_keystrokes.txt": "f590c53674a8b506a258f4daaaf65967640c2905b3e2b7134c291ad5c0166738",
+  "Keystrokes/files/276497_keystrokes.txt": "757508bffa0c55360f30b6083d84ff86c8f574f831a303bf275df5b054f5b2b1",
+  "Keystrokes/files/282936_keystrokes.txt": "3af69913040536e2fb4fc1aa7559ab3d9afc68ced555e50708d3889a1a5f2561",
+  "Keystrokes/files/34139_keystrokes.txt": "313b1ea9cd2db14ccd712a8df9fe005624d931b5c16abc88c98807ed609b1402",
+  "Keystrokes/files/110993_keystrokes.txt": "9c9ee9c46d359db714091031f33baa6f213461f73c949d9bc8aaaf53b981c5a4",
+  "Keystrokes/files/466836_keystrokes.txt": "7b39126f4d21687566491a8f430eb0b3b91542cf6aaa92f5b05641f097f80aa4",
+  "Keystrokes/files/411219_keystrokes.txt": "3ee8379ece8bfdb79d09b58eb840e46f98776f00e1947649f3f34c11c22c7b0d",
+  "Keystrokes/files/516939_keystrokes.txt": "672ed155481b5da1cd1d580890367cadb6b8ceca368cb0dcac8c4be6867cdd74",
+  "Keystrokes/files/163235_keystrokes.txt": "98d2ae94526bab31d0809a8464f630db075175b1809e36fae23d9b010f6a10f6",
+  "Keystrokes/files/5334_keystrokes.txt": "0d940c11fbc95beed04e93d4747723dfed90e7e177e680d939035747313c50ab",
+  "Keystrokes/files/468215_keystrokes.txt": "81e61865e6d8aeeba889979b088ef0b318ea315cfe9342f1068188767bd0af8d",
+  "Keystrokes/files/281553_keystrokes.txt": "ebd5fd99e41cf3f63a07c4d01e5d4f0cc2f2bfaad8d279da59ccc104e154421d",
+  "Keystrokes/files/25146_keystrokes.txt": "528682929623ca944edf82735884f6db9907c55851ebddb130f9cd073bcc24c7",
+  "Keystrokes/files/306250_keystrokes.txt": "5671c7d2380fba7bd314c70b8aaa3639302d6d6f678e2cf9b257e86493907ed2",
+  "Keystrokes/files/33707_keystrokes.txt": "9f66753e6196422399f3a16081abbf91fbd29d30544ca74dcb9b4abc135e448f",
+  "Keystrokes/files/496373_keystrokes.txt": "dd09ca7ab0b753051c8cbb26aade48206179cecd43fcacc4eba1f1a98731112b",
+  "Keystrokes/files/360274_keystrokes.txt": "ed9ff0d477f9067795122c3e21d9b428ba019a6b0a7f726418d0f191b18efd57",
+  "Keystrokes/files/68738_keystrokes.txt": "8da55617b73c21606d2ba6a975a064e55efa50926a0993860001ff42aad660ed",
+  "Keystrokes/files/172603_keystrokes.txt": "5b257ff81c397bea0f34ac8be9b23b8b13da00e6ca4aff386d780d6bab34a230",
+  "Keystrokes/files/14417_keystrokes.txt": "84ee7db04b9132b2e5c700d87307a5e3bf31a4cb725f34358de1cd3aeecf83a4",
+  "Keystrokes/files/150681_keystrokes.txt": "60f0c56e8f28c46eec7e5a81570ed08183acdd78aed78e25615565c89cfd6879",
+  "Keystrokes/files/138362_keystrokes.txt": "e7546b7387dd38f2167dcb340d4f844f0e0111f14fb7b70856d712b0469ed583",
+  "Keystrokes/files/236702_keystrokes.txt": "eace6bcc2dc1dd5ac22a58a38632db84a9c8527ef20812ef6c74a4d8a6a17b09",
+  "Keystrokes/files/75131_keystrokes.txt": "c0d30bb0839c1e382af22b16d2d20856f64ff18d8ccc71de83454464d1089fd5",
+  "Keystrokes/files/184817_keystrokes.txt": "c93077558dc4f389b99565456c9ae7debae7a0189c2d795e1de5fa2b26ca1386",
+  "Keystrokes/files/225849_keystrokes.txt": "1f2cc32e35430c94974894314c2f6df5db0a1a923ea8a40b9ecf6d6895b4edc1",
+  "Keystrokes/files/444952_keystrokes.txt": "f0bafb338b84b87f65c11d7b6fdedcfdff85af492eee551e8d4d05dcf412cc59",
+  "Keystrokes/files/355173_keystrokes.txt": "0e5b416a94984b768c320d0efb912bc5b9d2e191562983c15c2a0df877b434ac",
+  "Keystrokes/files/264758_keystrokes.txt": "4e8987e1facc86c108e3e97d3668dea94dfa22912d00a504132dc172d109298a",
+  "Keystrokes/files/115354_keystrokes.txt": "6e8b6b493152dbc453acdbf8210d27ca780ba608711f8a56fbb6294d4ddb5e52",
+  "Keystrokes/files/322476_keystrokes.txt": "02f73942e87dd57bb75cf3cc14af32715ed32b5ee074a78963a7e433b1062726",
+  "Keystrokes/files/137864_keystrokes.txt": "27bd8062290a27bc3a5402a069f19a13c57e4e4a0865c67f05c940deb3f69429",
+  "Keystrokes/files/285069_keystrokes.txt": "406fcc23dcfbd80fb3fe19a9f07351f897c9ee532e59cb6bd1bbacef23e619fd",
+  "Keystrokes/files/7516_keystrokes.txt": "643b03a32a85759921372e992bf62668e0ab1fec12b0e7f243d2095cc4b87e9f",
+  "Keystrokes/files/315999_keystrokes.txt": "8f9853c66b64e1892a03cdf05d2566f2da2c6b910f805bf2d73ac7ff041cd810",
+  "Keystrokes/files/427582_keystrokes.txt": "dd98c73f7d584f9d3957c9b4d4f94df4ed19ac9eb927cc6a2ad38518f3978813",
+  "Keystrokes/files/133927_keystrokes.txt": "d739db6fce48cc1614bf513a61b4b6afc9cd54317832043a681d160067862743",
+  "Keystrokes/files/343021_keystrokes.txt": "0fc1eaa68c98a61c3c2767deda978c23dd73a7dd2fb4694d1d8b9d9771196178",
+  "Keystrokes/files/97178_keystrokes.txt": "6b6c67d5bdbfad2b6206309be10a1eb501c9be4cb43fcb20c14cd53d43516420",
+  "Keystrokes/files/450643_keystrokes.txt": "3596d4110953faf7a188215a4d5c7a482b828cb975167f46387d6559ef297d95",
+  "Keystrokes/files/274451_keystrokes.txt": "7a5a2638d1ddf841ea4a7d3e206d78c51f7c187b0e50072b670172ce74af941c",
+  "Keystrokes/files/189660_keystrokes.txt": "b00e6e52f4494cf2e1f4d8651692e0bf9f7f8290f4fe5eaf3a4c611155ac4470",
+  "Keystrokes/files/248369_keystrokes.txt": "5da668ab09e6c913d6d08ce4358fa26b479a29638bfa2963db4db304caa77199",
+  "Keystrokes/files/72055_keystrokes.txt": "066bec24ab1a945defa80b7e91d5b891b3b182611eefa14430d134072f3803db",
+  "Keystrokes/files/139649_keystrokes.txt": "cca95c131b514e0c9ec88f204c255c0d1bb2e7aa33d844e3ec33bd3642d05d0a",
+  "Keystrokes/files/261870_keystrokes.txt": "ae40d232aa47d47a8320c3b2668c414cb3a54b6532a0bbad2cac5319226396ae",
+  "Keystrokes/files/508402_keystrokes.txt": "846b08526c73485f9e643b50d02d8baf3189f5941627fe0b31d444e2e490f8a6",
+  "Keystrokes/files/284072_keystrokes.txt": "c1c0dcba873968ac33df69c0197feb442ed08711b1dbda17037aeb6ba5bceef7",
+  "Keystrokes/files/356658_keystrokes.txt": "5e12993f8bec4c89dab72581efceb6a4d00bea7d4c367b267263afa0214d478d",
+  "Keystrokes/files/7943_keystrokes.txt": "6f683ce6e8241f6445a77d4f8de5cb1da0912e2ed6640018513275f5ec38761c",
+  "Keystrokes/files/116767_keystrokes.txt": "e73fcf6d36988107aa306977c3098a3c2bfa42c09760335356c00f4ebbf4d6f0",
+  "Keystrokes/files/371085_keystrokes.txt": "cc214a517c9e3e8555b36f5c7f28e3486dbf327dc785bc0196d6d1ee3c56795a",
+  "Keystrokes/files/182451_keystrokes.txt": "f1b2458dcdfe2927e82f327bcc88fa229e39a96d11bf89718e1148fe06168bdf",
+  "Keystrokes/files/67729_keystrokes.txt": "c050042b69b68d971b045e520b722e3e22b59e672dc3e02968e4e4937592e283",
+  "Keystrokes/files/210182_keystrokes.txt": "4ab942e9ecdacf6028f99ffd87965b87cc0becc46e276cd6ca5b95313c598d0d",
+  "Keystrokes/files/457168_keystrokes.txt": "e191be5d383397dee355afa7b6c2989d9682412614b8f059c36dea6e4ed9ab1f",
+  "Keystrokes/files/189707_keystrokes.txt": "d30413cb47041314cedfd9d4f1a3382630be42c603554c3b295a48c7392b0a4f",
+  "Keystrokes/files/368827_keystrokes.txt": "c9ddac55d8b3a88a4882879cfe82b8ce6ff7fa772c48c89a943df981a5b892fa",
+  "Keystrokes/files/191188_keystrokes.txt": "a6e93d3ba3cccf260429572152196a8428b58064f9a9d91e6968bbb5b388a818",
+  "Keystrokes/files/358615_keystrokes.txt": "3cf6118b9f647df555dfac15384706381cdaac72327bc9d0367d272c79adb28c",
+  "Keystrokes/files/194324_keystrokes.txt": "c1e2f03fb563a8b8ff0fe419e419d492b5c57c3c2d63538080ee3422377fc107",
+  "Keystrokes/files/128689_keystrokes.txt": "a16cc6a928c5c4dd07dcfa1bb79ece0d110e2f4eb433d7b0e011965679552169",
+  "Keystrokes/files/288250_keystrokes.txt": "5a6785120820469e2d732ed2697303dad33498ff78e47450aebfd25f1b4bc267",
+  "Keystrokes/files/84833_keystrokes.txt": "2f6732bcf91d0720edf9c4289181e1eda00f30779aa9ddbda351cba2d4dffa1c",
+  "Keystrokes/files/110695_keystrokes.txt": "021fd8e92b273571375539c0024a0752f1cf01f54301ae92c21c455f0ba03776",
+  "Keystrokes/files/257538_keystrokes.txt": "dedf53f16f371fee51e4dc052013bed6240490d899f2b5ea33ec5757b18b0fd0",
+  "Keystrokes/files/239022_keystrokes.txt": "af755c3247325baa6c12c330a573a0b22852c58892c0cd1386b8f25234e4a5f7",
+  "Keystrokes/files/93816_keystrokes.txt": "7140b26e28fece9cc5dd07df38de0f10422786f795efd4f8627385161a7d2455",
+  "Keystrokes/files/351385_keystrokes.txt": "e64c45a5380454b1da2230a44b61b321b81c89dcdbf6d8214054b46f7bef0752",
+  "Keystrokes/files/208214_keystrokes.txt": "a9a4eb428f40d0bb594e6e19e8a094ab0dd3b345a22f9fef76c35a43ecd5474e",
+  "Keystrokes/files/475687_keystrokes.txt": "0ec1a531556502e340eabb0f38b36c9c4ec494bd148a15d7300a61b6ed6d96ad",
+  "Keystrokes/files/206803_keystrokes.txt": "329612c3f00502de9808b3bdfa9458f4ff4eb4b1414b363c1686e1ba3b000e1e",
+  "Keystrokes/files/336040_keystrokes.txt": "de6a940a21d563feba1931d4b8ab7e7693fc70ea0a7325ceb2e438027b787986",
+  "Keystrokes/files/288098_keystrokes.txt": "f512b83ccb106815d7dc6f06767d965a53946ef82ee1128f4c21b2b12a63036f",
+  "Keystrokes/files/132104_keystrokes.txt": "2132e492a09ea89eaf25bf68782d70e76487252702bac2b783824b3dc10bfd8a",
+  "Keystrokes/files/180455_keystrokes.txt": "cc546d65395ecd7033627b2ba9b5ea2db13d32886abc6ebcb74d9cd72c7168c1",
+  "Keystrokes/files/284710_keystrokes.txt": "52594ee8e3e73bf805ef6ff9d055b9610ff363dd5bd0671fde973694fef3fb9b",
+  "Keystrokes/files/76234_keystrokes.txt": "1b4c6f1bf5ec7dd27f79c656e781d750e2d83d343655507edc46c95e840d49ff",
+  "Keystrokes/files/312628_keystrokes.txt": "169086eb7272d1a5e3d6e1cfa60b487c0cc0f81b500f3f74dbec6a1651a3a90e",
+  "Keystrokes/files/413480_keystrokes.txt": "d2ec07317e8f8cb0c421fad547783d6c28d8eed84d9a0951ff851475c4533cfa",
+  "Keystrokes/files/143674_keystrokes.txt": "327fe410dea3e7e958fe053249db2937f22321cc0b392560cc0b93eddb42a26b",
+  "Keystrokes/files/406696_keystrokes.txt": "aee1202710395f5412d551cbd15ce1aacbeb2008142974ecf3f08b7250f1b204",
+  "Keystrokes/files/499835_keystrokes.txt": "da624ac0f5b777921ee1905323d687cf527193cbb3778d4dc4aed67e5dadeb2f",
+  "Keystrokes/files/478505_keystrokes.txt": "12907cb98ce5369e922ff0acd1d47cc2000bd0eb08a3d66550ad85a820c30a35",
+  "Keystrokes/files/135808_keystrokes.txt": "4ef33bc8931191d31e274b65bcaa2efd2776e3c4b60e207b84681e86f4f93434",
+  "Keystrokes/files/395427_keystrokes.txt": "5a6a92a34c70adc32c639a2f6937d37a4875e9f212a8e0aae5c6bc2822ea0904",
+  "Keystrokes/files/394698_keystrokes.txt": "e1085d620c9b751cdd22a537e5a5504e809a1ae5b1c892146c3c91ed1b2db23f",
+  "Keystrokes/files/426613_keystrokes.txt": "7e237fa7703ba1931c5f8d5d80c74332ce3096ff39c6ce3e990937c845391f0d",
+  "Keystrokes/files/453848_keystrokes.txt": "d0d787116dd1a11c561aace11f2d40f1c2673b7cc8ff649f3b435c43bace3c82",
+  "Keystrokes/files/514720_keystrokes.txt": "faff9cf9569e7981364f39410037498936f1f95808428d9e6b65e31a370de3c0",
+  "Keystrokes/files/444456_keystrokes.txt": "8c803bc4982180e45d7d5617e2107c660daadab99735a115690fb039b11215bc",
+  "Keystrokes/files/278006_keystrokes.txt": "0e5854f33f0e773527a4d3e027eb220c790d08b5cc62f744a0205f0d47a87631",
+  "Keystrokes/files/457634_keystrokes.txt": "4a72c9c83969227d423cbda81da9d8c5dd554aa6a4c92f7ad037f73d88ad114a",
+  "Keystrokes/files/418150_keystrokes.txt": "989ab0ed8456ecbdbba6e70d585c1819c003f23c5e7c3956d1015a6e94d07b1a",
+  "Keystrokes/files/510038_keystrokes.txt": "2beb67477a905bac7567e476f0e2ef5965324ec50495698ce9615a1b8c4ade81",
+  "Keystrokes/files/452446_keystrokes.txt": "faa4ae601623827298a6bee1693f29931e16033ab79edd596f8871ab2a82c1b5",
+  "Keystrokes/files/204164_keystrokes.txt": "2d5f3cc81749bd1cbae26d2062aa35717483d7b83530c1f3b234da41dfd59fc8",
+  "Keystrokes/files/158308_keystrokes.txt": "082fd49ef67e7c6f16280bfb49b958c3ae6662154aab5ed4a9eb87916d88774a",
+  "Keystrokes/files/315770_keystrokes.txt": "66d8a4596d35cc3d9f50d41fb6875ff83e3ed6db70ea4adfc76ceac9e029a3e5",
+  "Keystrokes/files/132426_keystrokes.txt": "373eec6e49c64c5db6b258061c3e727ae4bc492223054ec4cdd30ad016a97207",
+  "Keystrokes/files/386946_keystrokes.txt": "c1ce31b2305ca0b143f41efcf76ba7e8b1bbcefb0b85abdd07b8c236df47325f",
+  "Keystrokes/files/500843_keystrokes.txt": "31aefe61a101d834c63e7be32f39947e85a50a904977a8fea6bd43ace4fc4e78",
+  "Keystrokes/files/446341_keystrokes.txt": "938be07a4fee13599bb0d0f8f1a9ef6ba70d68e77bcb335cbb308591c2a658a3",
+  "Keystrokes/files/510701_keystrokes.txt": "ad0fa42ae25476f8edb1f42b8080b24adfa696eb77b842ef89fcd776bb3a4c7a",
+  "Keystrokes/files/387189_keystrokes.txt": "8a3088f27bfa5ea5e6a6fa4bdd9cefe0ae8703ce1a906aaf4f0b40839262128f",
+  "Keystrokes/files/245069_keystrokes.txt": "0f47df69b8753abde4966214228ce1ae008950fe95264bb5377a2a41089d4de0",
+  "Keystrokes/files/234444_keystrokes.txt": "950a7f3d6bd5ec1d3e1a22c7fe9dd91b04f8b0f7b1edd2b1274bf2937a6825a8",
+  "Keystrokes/files/52634_keystrokes.txt": "9fb9b915013019ecd31f3c5e0bbd2c104e1b1692e82cfc95a01c26cfab4f1f74",
+  "Keystrokes/files/156482_keystrokes.txt": "9cc6a9163bd088f26f00d6aa2c0de343db7e709c1d6e2b4501b758084fb0d456",
+  "Keystrokes/files/206353_keystrokes.txt": "a6e96e7c40d0b8ef7e669f50fe7c1d8808bd6d8d0759032805a18b3f79e00197",
+  "Keystrokes/files/312616_keystrokes.txt": "2675a6ca17c99f3be40e90ebba94628478dc0377e1e65445a387d1897011fc33",
+  "Keystrokes/files/483416_keystrokes.txt": "91765fe81ad801a326693d0b1d57f17d00c43948364288bf1b63b130a10fc8d4",
+  "Keystrokes/files/222680_keystrokes.txt": "34f1e353e6221166447fe3797f6ae98577a91a3001c07686e1a77401d737a150",
+  "Keystrokes/files/296021_keystrokes.txt": "292630314df38e224b96d03cc3c264bbe85e0580d61dffea6bba0d481d48794b",
+  "Keystrokes/files/402249_keystrokes.txt": "7d07bfcdceabaa1dcf5286ead75cc0fa89f52c53d0801a887bf0b11d6b95214e",
+  "Keystrokes/files/516760_keystrokes.txt": "f65b846e50b3cfb27eea16bb10d8e68bfba500b13ad94ea0ac101c30a287d330",
+  "Keystrokes/files/229735_keystrokes.txt": "7c7f335d8e3632b98114d05a79a987d1b3295de00eb067588d5e7c9589675d23",
+  "Keystrokes/files/137704_keystrokes.txt": "ef7a662744f7c7ac70769ac6b479d017a7341b1b8b4f58aec3d2b48f5c44ce16",
+  "Keystrokes/files/263133_keystrokes.txt": "58a704ff0afc6b0cffc16852fc313ec6dc1893e90b43c7a73b34757299cf092d",
+  "Keystrokes/files/100889_keystrokes.txt": "6f698bd7f9a088e91358280e94c6daf37f0b636a3f8eea01fc3bc9143588fe2d",
+  "Keystrokes/files/455866_keystrokes.txt": "4a610ba0c7706eb56012a04b363547299aea6347cc0493a88635501106a8f478",
+  "Keystrokes/files/480178_keystrokes.txt": "ffec729a1cda427b2e54c080fd4deb60ecca495b6648e965a9d79cb1a69b6de6",
+  "Keystrokes/files/260601_keystrokes.txt": "bc09245ddc343aaa07907a0472b4f3784c1c48757dea22dc95fe4931cb552048",
+  "Keystrokes/files/255026_keystrokes.txt": "d97de8347677ce996fa569daed3f1d241b187d86d1f40acd86eedfaef61c22ea",
+  "Keystrokes/files/448824_keystrokes.txt": "2b2ab836b175d993049789f41adf501cc1fd3a8fef761d8053609e5118442a6d",
+  "Keystrokes/files/287029_keystrokes.txt": "715d04db11f9c770de24f83de0262e329d24b30bab75e913bcd267a0e504771b",
+  "Keystrokes/files/469932_keystrokes.txt": "53d6b0f00c09310d55a4552e908097d5e1ce7b43c06dba64434ec42f4f5c631e",
+  "Keystrokes/files/272576_keystrokes.txt": "bc65fe587b63edb0e9b30eecd54398da4ac326dbdfea79e7cc4c82898445a308",
+  "Keystrokes/files/203123_keystrokes.txt": "e4475a271564233af570bb6d663fc461f381a4ee20910dd6e7f3c9cd47b31677",
+  "Keystrokes/files/397034_keystrokes.txt": "50b57a512c906bbdb05a4653f5a7d5bc9761d28dc61babd760afa25d77fc36aa",
+  "Keystrokes/files/425061_keystrokes.txt": "7df7889e53a9dc1ccb8bfc1fd3dcf5a9bb7b8052af3d24a461295afd954a3cb3",
+  "Keystrokes/files/315581_keystrokes.txt": "513c754db868fc7cbe7e4c2048b78799fc1af40a63a782c2d046c58c48d076d6",
+  "Keystrokes/files/325249_keystrokes.txt": "8788d699e914426dea063a0ca19021793ec9ce8d4ef9ce18f77e5fc5f12e6d4e",
+  "Keystrokes/files/314110_keystrokes.txt": "6e413e6626492316e1f9bd68f127e1f28df232ef9599d03ba3cf72566041f7bd",
+  "Keystrokes/files/441790_keystrokes.txt": "fe25c77ceb71dd256e823ef3710b335cf78ea065a9cdaf3fd8340ce6e81d9896",
+  "Keystrokes/files/316088_keystrokes.txt": "4b039459141baff2019d8aff4b4ee85fa80cdce7b69e5375efcbd425656cf4ca",
+  "Keystrokes/files/216859_keystrokes.txt": "571e21fa85000bd48958c30f95c37ec21fed389eaf398e77a7ca0e3e817f404e",
+  "Keystrokes/files/476782_keystrokes.txt": "fd210b4ac1d809b32bd3b07a23bb6a731ab25da0b67c0197af43fc4f830313d7",
+  "Keystrokes/files/21934_keystrokes.txt": "fd7faba9802991e6dbd63800ab51131b7c0f915a3d66d7e489878393e70d6eb6",
+  "Keystrokes/files/13106_keystrokes.txt": "e65447870fb9423adf9a5cd80a8d57f7ad610be2636ddabf7d5ae82f8e2cfa1d",
+  "Keystrokes/files/508222_keystrokes.txt": "afa038ef142cadad0d4d5826e650c3ec75b128b12fc3c87a1512bd5941e3c8c5",
+  "Keystrokes/files/183057_keystrokes.txt": "0a0570995fa326bb2192a6c3e2bd875795c9fbcfddbaef112073ef84223eef8c",
+  "Keystrokes/files/315990_keystrokes.txt": "fcf7c9c8efc9af8e503f47be68ae75965f5640504ed661bd5c8528518784bc04",
+  "Keystrokes/files/176736_keystrokes.txt": "3d15bbdb0e083a0dd3dec2cce0e953751a30694c7a5f590342f552f9f254e4ee",
+  "Keystrokes/files/145902_keystrokes.txt": "b6e1a9864f4cbd001b39f65a2a39ae7bd95c52d5fe52fafd8fa1bdee64b8d35e",
+  "Keystrokes/files/483755_keystrokes.txt": "00241a9efcffe00e5c49d6c8cc35762c03376916179e9b5c90d9d529876d7df2",
+  "Keystrokes/files/357898_keystrokes.txt": "3d686f40d7ba9db39c4253833a39b3d0b533ca9cf06ac49591d25e4ee2f33253",
+  "Keystrokes/files/157299_keystrokes.txt": "79ff22d89f760e27dd9c90fe67cb23f2c56f67c8ce4e6ddca438405b2ec442ff",
+  "Keystrokes/files/68711_keystrokes.txt": "ad8025f590c57ad603110170499b14c8d198fa4c69905ba78e7c96887af0f57b",
+  "Keystrokes/files/187854_keystrokes.txt": "2fe64a2c8422bb7ec2b29efaeafb5444855f4c69f09e0e09b676bddf6af0df8f",
+  "Keystrokes/files/179639_keystrokes.txt": "8caaa710e4badc307847bfff3c1ef9c91eb76175906cbb173d02e21be943185f",
+  "Keystrokes/files/352079_keystrokes.txt": "d5bf727dd7e8febc3d6e3a558316fedb50ef39184ce44a06f72c7f73916f567d",
+  "Keystrokes/files/266839_keystrokes.txt": "0f4959f3900667981b33aa0ef5ba6024eeec77c12a3af4949a61c54dd426e780",
+  "Keystrokes/files/52615_keystrokes.txt": "c8c07439348cd744017ded0d5300aa02c780dc7a5102f575c5dfb4ef0f693fcf",
+  "Keystrokes/files/156020_keystrokes.txt": "83d92a7462a6d0b61763279677f05c9d0d6d23b205746c4a0ca7969e40b8f266",
+  "Keystrokes/files/506006_keystrokes.txt": "ba3a148c10d1e30d61c50ff9d06a0802b5b13158607fc61003fb258ee138bfe6",
+  "Keystrokes/files/49060_keystrokes.txt": "b6535f25a120b9a1043b2b53ecddc2acd8bba8d188da5b6f3d787080e9b6c920",
+  "Keystrokes/files/410569_keystrokes.txt": "d53be0730784eea235d10d1419e873b323da611f2d09f01529519a0f95633cd7",
+  "Keystrokes/files/70790_keystrokes.txt": "bd3ddc5edfed87f92d0e83b13c91e733534748250dd88fd4411b9274d6c0b681",
+  "Keystrokes/files/472202_keystrokes.txt": "62af93a6ac7fe769f82210b09b207c593d935fc2c36413c2872caa1ffce987a7",
+  "Keystrokes/files/238636_keystrokes.txt": "5943f210f06ed7e36a4f7fea8d77be210145c4bae773e0cb8e2825c2ee507065",
+  "Keystrokes/files/514867_keystrokes.txt": "44bba1cd538fb130dad8f3af53d4a5e30d5da461fe390f15b91bdf3179d2d95a",
+  "Keystrokes/files/86472_keystrokes.txt": "f408a4687b65061571c792a7143d623ef61d255bb6e98f32efa85c2b80a777b1",
+  "Keystrokes/files/161842_keystrokes.txt": "d7f53efdbacd1b8dca33afed1e2f5e41a771b5b98244a4bee23d68ddbf308486",
+  "Keystrokes/files/158153_keystrokes.txt": "3f3f81503e9dc7d0e01df862f6f6f1325cab32183111ff15893d5d521300b797",
+  "Keystrokes/files/90730_keystrokes.txt": "7f0e07131d4ab1f99be6d4f6e5c3124259efd6c15a9a999432fc057cd90d49bd",
+  "Keystrokes/files/485184_keystrokes.txt": "43951022d260fc50baebfe55afd14085453e899cd06283828bbef23f75e6ca63",
+  "Keystrokes/files/205351_keystrokes.txt": "f129f4d5a36e294c1fc620240191c8523afb0f8cbc753ebfacb979c65f525b41",
+  "Keystrokes/files/61819_keystrokes.txt": "6e69b6c442a94996e53aae07dbecba471a80fd7f44759464555420b53b166ee2"
+ },
+ "windows": {
+  "aalto-r1": {
+   "participants": [
+    "464063",
+    "213065",
+    "424772"
+   ],
+   "events": 2055,
+   "keys": 2055,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 167.0,
+   "gap_ms_p90": 593.0,
+   "gap_ms_p99": 2609.0,
+   "share_gt_1s": 0.037
+  },
+  "aalto-r2": {
+   "participants": [
+    "453650",
+    "69557",
+    "371833"
+   ],
+   "events": 1897,
+   "keys": 1897,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 160.0,
+   "gap_ms_p90": 595.0,
+   "gap_ms_p99": 2584.0,
+   "share_gt_1s": 0.0564
+  },
+  "aalto-r3": {
+   "participants": [
+    "23867",
+    "300397",
+    "58159"
+   ],
+   "events": 1977,
+   "keys": 1977,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 157.0,
+   "gap_ms_p90": 550.0,
+   "gap_ms_p99": 2937.0,
+   "share_gt_1s": 0.0344
+  },
+  "aalto-r4": {
+   "participants": [
+    "253255",
+    "414907",
+    "6533",
+    "125993"
+   ],
+   "events": 2375,
+   "keys": 2375,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 168.0,
+   "gap_ms_p90": 376.0,
+   "gap_ms_p99": 2240.0,
+   "share_gt_1s": 0.024
+  },
+  "aalto-r5": {
+   "participants": [
+    "102616",
+    "66814",
+    "15814"
+   ],
+   "events": 1892,
+   "keys": 1892,
+   "pointer": 0,
+   "span_s": 603.9,
+   "gap_ms_p50": 183.0,
+   "gap_ms_p90": 488.0,
+   "gap_ms_p99": 2320.0,
+   "share_gt_1s": 0.0301
+  },
+  "aalto-r6": {
+   "participants": [
+    "46251",
+    "61076",
+    "36904",
+    "193883"
+   ],
+   "events": 2276,
+   "keys": 2276,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 160.0,
+   "gap_ms_p90": 449.0,
+   "gap_ms_p99": 2611.0,
+   "share_gt_1s": 0.029
+  },
+  "aalto-r7": {
+   "participants": [
+    "279711",
+    "512488",
+    "329899"
+   ],
+   "events": 1678,
+   "keys": 1678,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 184.0,
+   "gap_ms_p90": 464.0,
+   "gap_ms_p99": 4821.0,
+   "share_gt_1s": 0.0304
+  },
+  "aalto-r8": {
+   "participants": [
+    "301536",
+    "290328",
+    "209447",
+    "3264"
+   ],
+   "events": 2367,
+   "keys": 2367,
+   "pointer": 0,
+   "span_s": 600.7,
+   "gap_ms_p50": 144.0,
+   "gap_ms_p90": 362.0,
+   "gap_ms_p99": 3031.0,
+   "share_gt_1s": 0.0287
+  },
+  "aalto-r9": {
+   "participants": [
+    "450459",
+    "189613",
+    "1580",
+    "440272"
+   ],
+   "events": 2516,
+   "keys": 2516,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 134.0,
+   "gap_ms_p90": 448.0,
+   "gap_ms_p99": 2256.0,
+   "share_gt_1s": 0.0247
+  },
+  "aalto-r10": {
+   "participants": [
+    "189732",
+    "130750",
+    "145016"
+   ],
+   "events": 1962,
+   "keys": 1962,
+   "pointer": 0,
+   "span_s": 600.6,
+   "gap_ms_p50": 160.0,
+   "gap_ms_p90": 543.0,
+   "gap_ms_p99": 2071.0,
+   "share_gt_1s": 0.0342
+  },
+  "aalto-r11": {
+   "participants": [
+    "144374",
+    "433840",
+    "77784"
+   ],
+   "events": 1693,
+   "keys": 1693,
+   "pointer": 0,
+   "span_s": 600.6,
+   "gap_ms_p50": 209.0,
+   "gap_ms_p90": 634.0,
+   "gap_ms_p99": 2950.0,
+   "share_gt_1s": 0.052
+  },
+  "aalto-r12": {
+   "participants": [
+    "40065",
+    "375290"
+   ],
+   "events": 1261,
+   "keys": 1261,
+   "pointer": 0,
+   "span_s": 600.6,
+   "gap_ms_p50": 281.0,
+   "gap_ms_p90": 948.0,
+   "gap_ms_p99": 2988.0,
+   "share_gt_1s": 0.0802
+  },
+  "aalto-r13": {
+   "participants": [
+    "353095",
+    "407909",
+    "170319"
+   ],
+   "events": 1998,
+   "keys": 1998,
+   "pointer": 0,
+   "span_s": 600.5,
+   "gap_ms_p50": 149.0,
+   "gap_ms_p90": 584.0,
+   "gap_ms_p99": 2910.0,
+   "share_gt_1s": 0.0376
+  },
+  "aalto-r14": {
+   "participants": [
+    "411183",
+    "192640",
+    "77699"
+   ],
+   "events": 1704,
+   "keys": 1704,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 176.0,
+   "gap_ms_p90": 779.0,
+   "gap_ms_p99": 2412.0,
+   "share_gt_1s": 0.054
+  },
+  "aalto-r15": {
+   "participants": [
+    "188582",
+    "247749",
+    "266996",
+    "344836"
+   ],
+   "events": 2230,
+   "keys": 2230,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 137.0,
+   "gap_ms_p90": 512.0,
+   "gap_ms_p99": 3096.0,
+   "share_gt_1s": 0.0328
+  },
+  "aalto-r16": {
+   "participants": [
+    "273218",
+    "10974",
+    "317363"
+   ],
+   "events": 1698,
+   "keys": 1698,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 181.0,
+   "gap_ms_p90": 636.0,
+   "gap_ms_p99": 3064.0,
+   "share_gt_1s": 0.0524
+  },
+  "aalto-r17": {
+   "participants": [
+    "7181",
+    "482757",
+    "372767"
+   ],
+   "events": 2132,
+   "keys": 2132,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 144.0,
+   "gap_ms_p90": 349.0,
+   "gap_ms_p99": 5049.0,
+   "share_gt_1s": 0.0221
+  },
+  "aalto-r18": {
+   "participants": [
+    "21681",
+    "48503",
+    "395026",
+    "482128"
+   ],
+   "events": 2315,
+   "keys": 2315,
+   "pointer": 0,
+   "span_s": 600.5,
+   "gap_ms_p50": 163.0,
+   "gap_ms_p90": 417.0,
+   "gap_ms_p99": 2174.0,
+   "share_gt_1s": 0.0303
+  },
+  "aalto-r19": {
+   "participants": [
+    "240404",
+    "483103",
+    "200383",
+    "407173"
+   ],
+   "events": 2183,
+   "keys": 2183,
+   "pointer": 0,
+   "span_s": 600.2,
+   "gap_ms_p50": 144.0,
+   "gap_ms_p90": 395.0,
+   "gap_ms_p99": 3765.0,
+   "share_gt_1s": 0.028
+  },
+  "aalto-r20": {
+   "participants": [
+    "326064",
+    "61129",
+    "164501",
+    "259599",
+    "171170"
+   ],
+   "events": 3054,
+   "keys": 3054,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 123.0,
+   "gap_ms_p90": 319.0,
+   "gap_ms_p99": 2056.0,
+   "share_gt_1s": 0.0242
+  },
+  "aalto-r21": {
+   "participants": [
+    "500640",
+    "458560",
+    "319016"
+   ],
+   "events": 2038,
+   "keys": 2038,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 172.0,
+   "gap_ms_p90": 513.0,
+   "gap_ms_p99": 2897.0,
+   "share_gt_1s": 0.0285
+  },
+  "aalto-r22": {
+   "participants": [
+    "122669",
+    "504312",
+    "375925",
+    "12559"
+   ],
+   "events": 2250,
+   "keys": 2250,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 136.0,
+   "gap_ms_p90": 386.0,
+   "gap_ms_p99": 2648.0,
+   "share_gt_1s": 0.0293
+  },
+  "aalto-r23": {
+   "participants": [
+    "517926",
+    "151324"
+   ],
+   "events": 1321,
+   "keys": 1321,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 211.0,
+   "gap_ms_p90": 547.0,
+   "gap_ms_p99": 8216.0,
+   "share_gt_1s": 0.0424
+  },
+  "aalto-r24": {
+   "participants": [
+    "460555",
+    "4283",
+    "59744"
+   ],
+   "events": 2355,
+   "keys": 2355,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 150.0,
+   "gap_ms_p90": 435.0,
+   "gap_ms_p99": 2224.0,
+   "share_gt_1s": 0.0246
+  },
+  "aalto-r25": {
+   "participants": [
+    "274832",
+    "438831",
+    "393223"
+   ],
+   "events": 1665,
+   "keys": 1665,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 167.0,
+   "gap_ms_p90": 474.0,
+   "gap_ms_p99": 5975.0,
+   "share_gt_1s": 0.0373
+  },
+  "aalto-r26": {
+   "participants": [
+    "85075",
+    "276497",
+    "282936",
+    "34139"
+   ],
+   "events": 2278,
+   "keys": 2278,
+   "pointer": 0,
+   "span_s": 600.5,
+   "gap_ms_p50": 159.0,
+   "gap_ms_p90": 381.0,
+   "gap_ms_p99": 3210.0,
+   "share_gt_1s": 0.029
+  },
+  "aalto-r27": {
+   "participants": [
+    "110993",
+    "466836",
+    "411219",
+    "516939"
+   ],
+   "events": 2302,
+   "keys": 2302,
+   "pointer": 0,
+   "span_s": 600.7,
+   "gap_ms_p50": 143.0,
+   "gap_ms_p90": 384.0,
+   "gap_ms_p99": 2935.0,
+   "share_gt_1s": 0.0274
+  },
+  "aalto-r28": {
+   "participants": [
+    "163235",
+    "5334",
+    "468215",
+    "281553"
+   ],
+   "events": 2661,
+   "keys": 2661,
+   "pointer": 0,
+   "span_s": 605.3,
+   "gap_ms_p50": 144.0,
+   "gap_ms_p90": 329.0,
+   "gap_ms_p99": 2464.0,
+   "share_gt_1s": 0.0207
+  },
+  "aalto-r29": {
+   "participants": [
+    "25146",
+    "306250",
+    "33707"
+   ],
+   "events": 2135,
+   "keys": 2135,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 172.0,
+   "gap_ms_p90": 432.0,
+   "gap_ms_p99": 2377.0,
+   "share_gt_1s": 0.0272
+  },
+  "aalto-r30": {
+   "participants": [
+    "496373",
+    "360274"
+   ],
+   "events": 885,
+   "keys": 885,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 218.0,
+   "gap_ms_p90": 1115.0,
+   "gap_ms_p99": 3303.0,
+   "share_gt_1s": 0.138
+  },
+  "aalto-r31": {
+   "participants": [
+    "68738",
+    "172603",
+    "14417",
+    "150681"
+   ],
+   "events": 2179,
+   "keys": 2179,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 168.0,
+   "gap_ms_p90": 448.0,
+   "gap_ms_p99": 2500.0,
+   "share_gt_1s": 0.0271
+  },
+  "aalto-r32": {
+   "participants": [
+    "138362",
+    "236702",
+    "75131",
+    "184817"
+   ],
+   "events": 2313,
+   "keys": 2313,
+   "pointer": 0,
+   "span_s": 600.2,
+   "gap_ms_p50": 156.0,
+   "gap_ms_p90": 423.0,
+   "gap_ms_p99": 2425.0,
+   "share_gt_1s": 0.0281
+  },
+  "aalto-r33": {
+   "participants": [
+    "225849",
+    "444952",
+    "355173"
+   ],
+   "events": 2090,
+   "keys": 2090,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 160.0,
+   "gap_ms_p90": 464.0,
+   "gap_ms_p99": 3601.0,
+   "share_gt_1s": 0.0263
+  },
+  "aalto-r34": {
+   "participants": [
+    "264758",
+    "115354",
+    "322476"
+   ],
+   "events": 1959,
+   "keys": 1959,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 158.0,
+   "gap_ms_p90": 612.0,
+   "gap_ms_p99": 3074.0,
+   "share_gt_1s": 0.0506
+  },
+  "aalto-r35": {
+   "participants": [
+    "137864",
+    "285069",
+    "7516",
+    "315999"
+   ],
+   "events": 2598,
+   "keys": 2598,
+   "pointer": 0,
+   "span_s": 600.3,
+   "gap_ms_p50": 147.0,
+   "gap_ms_p90": 320.0,
+   "gap_ms_p99": 2235.0,
+   "share_gt_1s": 0.0219
+  },
+  "aalto-r36": {
+   "participants": [
+    "427582",
+    "133927",
+    "343021",
+    "97178"
+   ],
+   "events": 2289,
+   "keys": 2289,
+   "pointer": 0,
+   "span_s": 602.1,
+   "gap_ms_p50": 164.0,
+   "gap_ms_p90": 414.0,
+   "gap_ms_p99": 2219.0,
+   "share_gt_1s": 0.0288
+  },
+  "aalto-r37": {
+   "participants": [
+    "450643",
+    "274451"
+   ],
+   "events": 1177,
+   "keys": 1177,
+   "pointer": 0,
+   "span_s": 601.1,
+   "gap_ms_p50": 260.0,
+   "gap_ms_p90": 1016.0,
+   "gap_ms_p99": 4476.0,
+   "share_gt_1s": 0.1071
+  },
+  "aalto-r38": {
+   "participants": [
+    "189660",
+    "248369",
+    "72055"
+   ],
+   "events": 1481,
+   "keys": 1481,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 238.0,
+   "gap_ms_p90": 705.0,
+   "gap_ms_p99": 3907.0,
+   "share_gt_1s": 0.0507
+  },
+  "aalto-r39": {
+   "participants": [
+    "139649",
+    "261870",
+    "508402"
+   ],
+   "events": 2149,
+   "keys": 2149,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 140.0,
+   "gap_ms_p90": 504.0,
+   "gap_ms_p99": 2817.0,
+   "share_gt_1s": 0.0326
+  },
+  "aalto-r40": {
+   "participants": [
+    "284072",
+    "356658",
+    "7943"
+   ],
+   "events": 2424,
+   "keys": 2424,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 160.0,
+   "gap_ms_p90": 343.0,
+   "gap_ms_p99": 2514.0,
+   "share_gt_1s": 0.0215
+  },
+  "aalto-r41": {
+   "participants": [
+    "116767",
+    "371085"
+   ],
+   "events": 1613,
+   "keys": 1613,
+   "pointer": 0,
+   "span_s": 600.3,
+   "gap_ms_p50": 179.0,
+   "gap_ms_p90": 618.0,
+   "gap_ms_p99": 3448.0,
+   "share_gt_1s": 0.0347
+  },
+  "aalto-r42": {
+   "participants": [
+    "182451",
+    "67729",
+    "210182",
+    "457168"
+   ],
+   "events": 2357,
+   "keys": 2357,
+   "pointer": 0,
+   "span_s": 600.3,
+   "gap_ms_p50": 144.0,
+   "gap_ms_p90": 439.0,
+   "gap_ms_p99": 2291.0,
+   "share_gt_1s": 0.0293
+  },
+  "aalto-r43": {
+   "participants": [
+    "189707",
+    "368827",
+    "191188"
+   ],
+   "events": 1880,
+   "keys": 1880,
+   "pointer": 0,
+   "span_s": 600.3,
+   "gap_ms_p50": 192.0,
+   "gap_ms_p90": 608.0,
+   "gap_ms_p99": 2471.0,
+   "share_gt_1s": 0.0426
+  },
+  "aalto-r44": {
+   "participants": [
+    "358615",
+    "194324",
+    "128689"
+   ],
+   "events": 2178,
+   "keys": 2178,
+   "pointer": 0,
+   "span_s": 601.5,
+   "gap_ms_p50": 152.0,
+   "gap_ms_p90": 400.0,
+   "gap_ms_p99": 3152.0,
+   "share_gt_1s": 0.0248
+  },
+  "aalto-r45": {
+   "participants": [
+    "288250",
+    "84833",
+    "110695",
+    "257538"
+   ],
+   "events": 2533,
+   "keys": 2533,
+   "pointer": 0,
+   "span_s": 604.3,
+   "gap_ms_p50": 138.0,
+   "gap_ms_p90": 368.0,
+   "gap_ms_p99": 2678.0,
+   "share_gt_1s": 0.0257
+  },
+  "aalto-r46": {
+   "participants": [
+    "239022",
+    "93816",
+    "351385",
+    "208214"
+   ],
+   "events": 2300,
+   "keys": 2300,
+   "pointer": 0,
+   "span_s": 602.7,
+   "gap_ms_p50": 144.0,
+   "gap_ms_p90": 285.0,
+   "gap_ms_p99": 4255.0,
+   "share_gt_1s": 0.0252
+  },
+  "aalto-r47": {
+   "participants": [
+    "475687",
+    "206803"
+   ],
+   "events": 1202,
+   "keys": 1202,
+   "pointer": 0,
+   "span_s": 603.3,
+   "gap_ms_p50": 152.0,
+   "gap_ms_p90": 1056.0,
+   "gap_ms_p99": 3968.0,
+   "share_gt_1s": 0.1074
+  },
+  "aalto-r48": {
+   "participants": [
+    "336040",
+    "288098",
+    "132104",
+    "180455"
+   ],
+   "events": 2094,
+   "keys": 2094,
+   "pointer": 0,
+   "span_s": 601.9,
+   "gap_ms_p50": 159.0,
+   "gap_ms_p90": 416.0,
+   "gap_ms_p99": 3728.0,
+   "share_gt_1s": 0.0296
+  },
+  "aalto-r49": {
+   "participants": [
+    "284710",
+    "76234",
+    "312628",
+    "413480"
+   ],
+   "events": 2494,
+   "keys": 2494,
+   "pointer": 0,
+   "span_s": 600.5,
+   "gap_ms_p50": 128.0,
+   "gap_ms_p90": 296.0,
+   "gap_ms_p99": 3105.0,
+   "share_gt_1s": 0.0233
+  },
+  "aalto-r50": {
+   "participants": [
+    "143674"
+   ],
+   "events": 902,
+   "keys": 902,
+   "pointer": 0,
+   "span_s": 9350.3,
+   "gap_ms_p50": 168.0,
+   "gap_ms_p90": 352.0,
+   "gap_ms_p99": 1952.0,
+   "share_gt_1s": 0.02
+  },
+  "aalto-r51": {
+   "participants": [
+    "406696",
+    "499835"
+   ],
+   "events": 1279,
+   "keys": 1279,
+   "pointer": 0,
+   "span_s": 600.8,
+   "gap_ms_p50": 247.0,
+   "gap_ms_p90": 783.0,
+   "gap_ms_p99": 4837.0,
+   "share_gt_1s": 0.0696
+  },
+  "aalto-r52": {
+   "participants": [
+    "478505",
+    "135808",
+    "395427"
+   ],
+   "events": 2147,
+   "keys": 2147,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 158.0,
+   "gap_ms_p90": 436.0,
+   "gap_ms_p99": 2485.0,
+   "share_gt_1s": 0.0354
+  },
+  "aalto-r53": {
+   "participants": [
+    "394698",
+    "426613",
+    "453848"
+   ],
+   "events": 2324,
+   "keys": 2324,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 156.0,
+   "gap_ms_p90": 490.0,
+   "gap_ms_p99": 2264.0,
+   "share_gt_1s": 0.0306
+  },
+  "aalto-r54": {
+   "participants": [
+    "514720",
+    "444456",
+    "278006"
+   ],
+   "events": 2108,
+   "keys": 2108,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 176.0,
+   "gap_ms_p90": 472.0,
+   "gap_ms_p99": 2349.0,
+   "share_gt_1s": 0.0252
+  },
+  "aalto-r55": {
+   "participants": [
+    "457634",
+    "418150",
+    "510038"
+   ],
+   "events": 1307,
+   "keys": 1307,
+   "pointer": 0,
+   "span_s": 600.5,
+   "gap_ms_p50": 193.0,
+   "gap_ms_p90": 908.0,
+   "gap_ms_p99": 2859.0,
+   "share_gt_1s": 0.0873
+  },
+  "aalto-r56": {
+   "participants": [
+    "452446",
+    "204164",
+    "158308",
+    "315770"
+   ],
+   "events": 2234,
+   "keys": 2234,
+   "pointer": 0,
+   "span_s": 600.2,
+   "gap_ms_p50": 149.0,
+   "gap_ms_p90": 414.0,
+   "gap_ms_p99": 3024.0,
+   "share_gt_1s": 0.0296
+  },
+  "aalto-r57": {
+   "participants": [
+    "132426",
+    "386946",
+    "500843"
+   ],
+   "events": 2009,
+   "keys": 2009,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 165.0,
+   "gap_ms_p90": 588.0,
+   "gap_ms_p99": 2423.0,
+   "share_gt_1s": 0.0518
+  },
+  "aalto-r58": {
+   "participants": [
+    "446341",
+    "510701"
+   ],
+   "events": 933,
+   "keys": 933,
+   "pointer": 0,
+   "span_s": 608.5,
+   "gap_ms_p50": 334.0,
+   "gap_ms_p90": 934.0,
+   "gap_ms_p99": 8058.0,
+   "share_gt_1s": 0.0869
+  },
+  "aalto-r59": {
+   "participants": [
+    "387189",
+    "245069",
+    "234444"
+   ],
+   "events": 2052,
+   "keys": 2052,
+   "pointer": 0,
+   "span_s": 600.4,
+   "gap_ms_p50": 153.0,
+   "gap_ms_p90": 453.0,
+   "gap_ms_p99": 4043.0,
+   "share_gt_1s": 0.0307
+  },
+  "aalto-r60": {
+   "participants": [
+    "52634",
+    "156482",
+    "206353"
+   ],
+   "events": 1855,
+   "keys": 1855,
+   "pointer": 0,
+   "span_s": 600.2,
+   "gap_ms_p50": 158.0,
+   "gap_ms_p90": 417.0,
+   "gap_ms_p99": 4050.0,
+   "share_gt_1s": 0.0291
+  },
+  "aalto-r61": {
+   "participants": [
+    "312616",
+    "483416",
+    "222680"
+   ],
+   "events": 1865,
+   "keys": 1865,
+   "pointer": 0,
+   "span_s": 600.4,
+   "gap_ms_p50": 173.0,
+   "gap_ms_p90": 424.0,
+   "gap_ms_p99": 2423.0,
+   "share_gt_1s": 0.0274
+  },
+  "aalto-r62": {
+   "participants": [
+    "296021",
+    "402249",
+    "516760"
+   ],
+   "events": 1863,
+   "keys": 1863,
+   "pointer": 0,
+   "span_s": 600.3,
+   "gap_ms_p50": 143.0,
+   "gap_ms_p90": 375.0,
+   "gap_ms_p99": 4656.0,
+   "share_gt_1s": 0.0258
+  },
+  "aalto-r63": {
+   "participants": [
+    "229735",
+    "137704",
+    "263133"
+   ],
+   "events": 1774,
+   "keys": 1774,
+   "pointer": 0,
+   "span_s": 600.9,
+   "gap_ms_p50": 168.0,
+   "gap_ms_p90": 645.0,
+   "gap_ms_p99": 2865.0,
+   "share_gt_1s": 0.0688
+  },
+  "aalto-r64": {
+   "participants": [
+    "100889",
+    "455866",
+    "480178",
+    "260601"
+   ],
+   "events": 2319,
+   "keys": 2319,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 144.0,
+   "gap_ms_p90": 304.0,
+   "gap_ms_p99": 4421.0,
+   "share_gt_1s": 0.025
+  },
+  "aalto-r65": {
+   "participants": [
+    "255026",
+    "448824",
+    "287029",
+    "469932"
+   ],
+   "events": 2126,
+   "keys": 2126,
+   "pointer": 0,
+   "span_s": 600.2,
+   "gap_ms_p50": 162.0,
+   "gap_ms_p90": 544.0,
+   "gap_ms_p99": 2416.0,
+   "share_gt_1s": 0.0367
+  },
+  "aalto-r66": {
+   "participants": [
+    "272576",
+    "203123",
+    "397034"
+   ],
+   "events": 2043,
+   "keys": 2043,
+   "pointer": 0,
+   "span_s": 601.1,
+   "gap_ms_p50": 152.0,
+   "gap_ms_p90": 406.0,
+   "gap_ms_p99": 3583.0,
+   "share_gt_1s": 0.0382
+  },
+  "aalto-r67": {
+   "participants": [
+    "425061",
+    "315581",
+    "325249",
+    "314110"
+   ],
+   "events": 2217,
+   "keys": 2217,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 137.0,
+   "gap_ms_p90": 464.0,
+   "gap_ms_p99": 2542.0,
+   "share_gt_1s": 0.0325
+  },
+  "aalto-r68": {
+   "participants": [
+    "441790",
+    "316088"
+   ],
+   "events": 1330,
+   "keys": 1330,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 128.0,
+   "gap_ms_p90": 230.0,
+   "gap_ms_p99": 3414.0,
+   "share_gt_1s": 0.0218
+  },
+  "aalto-r69": {
+   "participants": [
+    "216859",
+    "476782",
+    "21934"
+   ],
+   "events": 1650,
+   "keys": 1650,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 219.0,
+   "gap_ms_p90": 661.0,
+   "gap_ms_p99": 3206.0,
+   "share_gt_1s": 0.0443
+  },
+  "aalto-r70": {
+   "participants": [
+    "13106",
+    "508222",
+    "183057",
+    "315990",
+    "176736"
+   ],
+   "events": 2664,
+   "keys": 2664,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 144.0,
+   "gap_ms_p90": 345.0,
+   "gap_ms_p99": 2353.0,
+   "share_gt_1s": 0.0244
+  },
+  "aalto-r71": {
+   "participants": [
+    "145902",
+    "483755",
+    "357898"
+   ],
+   "events": 2177,
+   "keys": 2177,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 168.0,
+   "gap_ms_p90": 444.0,
+   "gap_ms_p99": 2799.0,
+   "share_gt_1s": 0.0271
+  },
+  "aalto-r72": {
+   "participants": [
+    "157299",
+    "68711",
+    "187854"
+   ],
+   "events": 1575,
+   "keys": 1575,
+   "pointer": 0,
+   "span_s": 600.0,
+   "gap_ms_p50": 168.0,
+   "gap_ms_p90": 748.0,
+   "gap_ms_p99": 4174.0,
+   "share_gt_1s": 0.0565
+  },
+  "aalto-r73": {
+   "participants": [
+    "179639",
+    "352079"
+   ],
+   "events": 1454,
+   "keys": 1454,
+   "pointer": 0,
+   "span_s": 600.2,
+   "gap_ms_p50": 189.0,
+   "gap_ms_p90": 610.0,
+   "gap_ms_p99": 7457.0,
+   "share_gt_1s": 0.044
+  },
+  "aalto-r74": {
+   "participants": [
+    "266839",
+    "52615",
+    "156020",
+    "506006",
+    "49060"
+   ],
+   "events": 2853,
+   "keys": 2853,
+   "pointer": 0,
+   "span_s": 600.6,
+   "gap_ms_p50": 127.0,
+   "gap_ms_p90": 298.0,
+   "gap_ms_p99": 2174.0,
+   "share_gt_1s": 0.0235
+  },
+  "aalto-r75": {
+   "participants": [
+    "410569",
+    "70790"
+   ],
+   "events": 1574,
+   "keys": 1574,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 210.0,
+   "gap_ms_p90": 768.0,
+   "gap_ms_p99": 2496.0,
+   "share_gt_1s": 0.054
+  },
+  "aalto-r76": {
+   "participants": [
+    "472202",
+    "238636",
+    "514867"
+   ],
+   "events": 2117,
+   "keys": 2117,
+   "pointer": 0,
+   "span_s": 603.0,
+   "gap_ms_p50": 155.0,
+   "gap_ms_p90": 447.0,
+   "gap_ms_p99": 3283.0,
+   "share_gt_1s": 0.0274
+  },
+  "aalto-r77": {
+   "participants": [
+    "86472",
+    "161842",
+    "158153"
+   ],
+   "events": 1897,
+   "keys": 1897,
+   "pointer": 0,
+   "span_s": 601.3,
+   "gap_ms_p50": 160.0,
+   "gap_ms_p90": 638.0,
+   "gap_ms_p99": 3083.0,
+   "share_gt_1s": 0.0459
+  },
+  "aalto-r78": {
+   "participants": [
+    "90730",
+    "485184",
+    "205351",
+    "61819"
+   ],
+   "events": 2503,
+   "keys": 2503,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 136.0,
+   "gap_ms_p90": 376.0,
+   "gap_ms_p99": 2679.0,
+   "share_gt_1s": 0.0288
+  }
+ }
+}

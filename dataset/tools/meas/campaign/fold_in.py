@@ -1,0 +1,603 @@
+#!/usr/bin/env python3
+"""Generate the measured archetype entries (9.5 fold-in) from pool.py output.
+
+fold_in.py <results-dir> <out.yaml> [--tag interactive=meas-ci:interactive:<campaign> --tag playback=meas-ci:playback:<campaign> --tag <app>=meas-ci:interactive:<campaign>]
+    [--idle-from <app>=<pool.json> --idle-tag <app>=meas-ci:interactive:<campaign>] [--control <record>]
+    [--only <archetype>[,<archetype>...]]
+(<campaign>: the launch date, D27; a run number for a one-run campaign from before it. --idle-from: the app's idle
+phase from another campaign's pool, D79. --control: the untraced control's record, each archetype's reading appended
+to its notes. --only: those entries alone, so <results-dir> need hold only their pools — 9.10 D146 regenerates
+`video-editor` with its idle phase from a campaign of its own)
+
+One entry per campaign run, per the 9.5 changelog: D2/D11 ids, D9 shape,
+D13 per-input run (window rule), D16 timer components with a pooled
+residual, D17 quantile tables in µs, D18 replayed stimulus, D14 tree scope,
+D15 rasteriser exclusion (applied upstream in analyze.py). The output is a
+YAML fragment to splice into dataset/archetypes.yaml under `archetypes:`.
+"""
+
+import json
+import os
+import statistics
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from pool import build_census, stimulus_check  # noqa: E402  — D69: one definition of the build census; D81 the check
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from distribution import quantile_table, yaml_table  # noqa: E402
+from control_report import fold_reading  # noqa: E402  — the reading scoped to the phases the control ran
+
+RUN_TAG = {"interactive": "meas-ci:interactive:3", "playback": "meas-ci:playback:3"}  # the D3 campaign; --tag overrides
+# D79: a run whose idle phase comes from another campaign — the pool it is read from and that campaign's tag
+IDLE_FROM, IDLE_TAG = {}, {}
+CONTROL = {}   # archetype id -> the untraced control's reading for its notes (control_report.py's `notes`)
+
+# the observed setup per run — `{version}` is filled from the run's recorded application version (report.json)
+
+ARCHETYPES = {
+    # id: (run, program observed, kind, stimulus stream, stimulus tag, bound names by approximation — none since
+    # 9.10 D24: every file shows the observed program's name, so zoom, gamescope and spotify left the notes)
+    "office-writer": ("soffice", "{version} (Ubuntu 24.04 apt), a generated document of about 76 pages (100 sections of five 100-word paragraphs, ten 1024×768 pictures; design — no source states a length, S7) with the stream typing at its end", "input",
+                      "swell-word-c1", "swell-icmi14:word-c1", []),
+    "code-editor": ("code", "Visual Studio Code {version} (vendor .deb), the TypeScript project sindresorhus/got at commit 64f21e2a (tag v16.0.0, dependencies installed; design) open on source/index.ts with the built-in TypeScript language server running", "input",
+                    "swell-word-c1", "swell-icmi14:word-c1", []),
+    # 9.7 D3 and D31, D36: mail-client is re-observed whole as thunderbird-send — the same application with a send
+    # operation, its values replacing the compose-only entry's
+    "mail-client": ("thunderbird-send", "{version} (Ubuntu 24.04 snap), a compose window over a local account whose SMTP server is a loopback peer (aiosmtpd, no authentication or TLS, on the harness CPUs); operation send: a reply with a short body and one Word document attached — the Writer setup state's document (100 sections of five 100-word paragraphs, ten 1024×768 pictures; design after CpsMark+ §CA's attachment kinds, no source stating a size) saved as .docx, 41,555,063 B on the runner and 56,946,735 B as the peer receives it, the same size in every repeat and not the same bytes (D49); completion when the copy into the Sent folder lands, the peer's own stamp recorded beside it", "input",
+                    "swell-outlook-c23", "swell-icmi14:outlook-c23", []),
+    "web-browser": ("chrome", "{version} (preinstalled), a local page with a text area and 400 paragraphs; the whole process tree, its renderers included — the typed-into page's, the spare renderer the page load takes over and Chrome's own WebUI renderer (D84); other tabs' renderers are renderer-hidden's; operation page-load: the scripted feed page feed.html (300 posts, thirty 1600×1200 pictures, a 200 000-record sort; design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3) from a local server, completion by the page's title after first paint", "input",
+                    "swell-ie-c1", "swell-icmi14:ie-c1", []),
+    "image-editor": ("gimp", "{version} (apt), a 4952×3288 image open (PCMark 10 Photo Editing's interactive image size, Technical Guide p. 71; synthetic content, imported as 16-bit; design); driven by a scripted pointer loop (drag, click, wheel; design); operation unsharp-mask: plug-in-unsharp-mask std-dev 4.0, amount 0.32, threshold 8 (PCMark 10's batch unsharp parameters mapped onto GIMP's PDB, p. 74; design) through the Script-Fu server, completion by its reply", "cadence", None, None, []),
+    "video-editor": ("kdenlive", "Kdenlive 23.08.5 (Ubuntu 24.04 apt; 4:23.08.5-0ubuntu4 in every repeat's install log, `kdenlive --version` printing none), a project with one 20 s 1920×1080 30 fps H.264 clip (PCMark 10 Video Editing's 1080p H.264, p. 76; synthetic content, design) on V1 with an avfilter.unsharp effect at PCMark 10's sharpening parameters (p. 76); driven by a scripted pointer loop that scrubs the clip monitor (design); llvmpipe software-rasteriser threads excluded (D15); operation preview-render: the whole-clip timeline preview rendered by Kdenlive's external kdenlive_render process (part of the tree), completion when it exits", "cadence", None, None, []),
+    "video-player": ("mpv-video", "{version}, --vo=x11 --ao=null, a 1280×720 30 fps H.264 file with AAC audio, looped", "play", None, None, []),
+    "audio-player": ("mpv-audio", "{version}, --no-video --ao=null, the same file's AAC audio, looped", "play", None, None, []),
+    "video-call": ("webrtc", "{version}, a loopback WebRTC call in one page with a synthetic 1280×720 30 fps camera and microphone (--use-fake-device-for-media-stream); encode and decode at ~20 fps", "play", None, None, []),
+}
+
+VENUE_BOUND = {
+    'web-browser': "Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.",
+    'video-call': "Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.",
+    'code-editor': "Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.",
+    'video-editor': "Venue bound (D24, S8): Qt Quick's render loop paces on a blocking buffer swap; the runner's software rasteriser does not block, so the rendering path's wake rate overcounts a vsync-throttled display (Qt 5.15 qsgthreadedrenderloop.cpp); the excluded llvmpipe threads carried 93 % of the driven phase's CPU (D15).",
+    'video-player': "Venue bound (D24, S8): mpv's default --video-sync=audio paces frames on the audio clock, not the display (mpv 0.37 manual), so the missing refresh does not change its cadence; the x11 output copies frames on the CPU, work a GPU output would move.",
+}
+
+# D69: the build is pinned where the vendor serves a version of its own, so an archetype describes that build and not
+# whatever the repository serves later; where the build moved under the campaign, what it leaves out is stated.
+BUILD_BOUND = {
+    'code-editor': "Build bound (D69): the campaign is pinned to the build named above, which ships no assistant runtime. "
+                   "VS Code 1.139.0, released during the campaign, runs a copilot-runtime process that woke 49.7 times a "
+                   "second in the idle phase against the 115 a second of this build's whole tree — a different workload, "
+                   "and whether a code editor should describe an assistant-bearing one is the archetype's own question, "
+                   "not this campaign's.",
+    'mail-client': "Build bound (D69): the idle phase pools two builds, Thunderbird 156.0 in 43 repeats and 156.0.1 in the 34 "
+                   "added under D94. Against the 156.0 repeats' own spread, 43 of the 45 idle values agree between them "
+                   "within 0.78 standard deviations; `WebExtensions/IPC I/O Child`'s wake rate and gap mean, 22 wakes a "
+                   "phase in every 156.0 repeat and in 33 of the 34 156.0.1 repeats, differ by 0.1 % (D94).",
+    'web-browser': "Build bound (D69): the 38 repeats pool two builds, Google's repository serving only its current version. "
+                   "Against the 152 repeats' own spread, 59 of the 60 carried values agree between the builds within 1.80 "
+                   "standard deviations; the page load's `gpu/VizCompositorTh` run mean does not: 0.382 ms under 153 "
+                   "against 0.455 ms under 152 (−16.0 %, −2.31 standard deviations, 8 of the 9 repeats below every 152 "
+                   "repeat). The carried 0.438 ms pools both, the 152 repeats' mean 4.0 % above it (D93).",
+}
+
+
+# D75: where each playback archetype's medium cycle starts, as the scope states it (the rule itself: pool.py CYCLES)
+CYCLE_START = {
+    "video-player": ("frame", "each frame copy — a run of 1 ms or more by the video output thread `vo`, 30.0 a second"),
+    "audio-player": ("audio", "the first wake of the audio output thread `ao` after 5 ms of silence"),
+    "video-call": ("audio-frame", "each wake of the audio worker thread `utility/AudioWorkerThre`, once per 10 ms audio frame"),
+}
+MASSES = (0.01, 0.04, 0.05, 0.15, 0.25, 0.25, 0.15, 0.05, 0.04, 0.009, 0.001)   # the eleven intervals of a D17 table
+
+
+def table_mean(table):
+    """A pooled table's mean: the interval means weighted by their masses (9.5 D71), the sample's own mean."""
+    return sum(m * x for m, x in zip(MASSES, table["means"]))
+
+
+def share_above(table, x):
+    """The share of a pooled table's samples above x, read off its knots (minimum, ten quantiles, maximum) with straight
+    lines between them — how many of a periodic job's cycles carry more work than the period itself (D75)."""
+    knots = [table["min"], *table["p"], table["max"]]
+    probs = [0.0, 0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999, 1.0]
+    if x >= knots[-1]:
+        return 0.0
+    for (a, pa), (b, pb) in zip(zip(knots, probs), zip(knots[1:], probs[1:])):
+        if a <= x < b:
+            return 1.0 - (pa + (pb - pa) * (x - a) / (b - a))
+    return 1.0
+
+
+# The stability rule as the scope states it (the campaign workflow; D26, D30, D78): the rule over the repeats obtained, and
+# each value it was not held to — at the recording's window limit (D32) or carried under D57 — with its half-width.
+LABEL = {"wakes/s": "wake rate", "gap mean (ms)": "gap mean", "run mean (ms)": "run mean"}
+# where each entry's window limit is decided: D32 the rule, D46 the send's operation phase, D68 chrome's and code's limits
+# D85: where a carried phase does part of its work only in part of it, read in time windows over the carried repeats
+# (meas/windows.py, `campaign/results-windows.md`) — stated beside the values, which stay the phase's means
+# D88: the repeat count is the rule's first pass, chosen by the estimate it produces; where an entry's widest value the
+# rule is read on sits within half a point of the tolerance, its stated interval is read against the rule's stopping
+# simulated at that value's spread (meas/stopping.py, campaign/results-stopping.md)
+STOPPING_STATED = {
+    "office-writer": ("The repeat count is the rule's first pass (D88): simulated at the spread of the widest value, the "
+                      "per-input run mean under 136M at ±4.96 % over 14 repeats, the rule's stated 95 % interval covers "
+                      "the true mean in about 91–93 % of campaigns and the stopped mean leans by at most 0.2 %."),
+    "video-editor": ("The repeat count is the rule's first pass (D88): simulated at the spread of the widest value, the "
+                     "driven phase's `kdenlive` run mean at ±5.00 % over 20 repeats, the rule's stated 95 % interval covers "
+                     "the true mean in about 91 % of campaigns and the stopped mean leans by at most 0.2 %."),
+    "audio-player": ("The repeat count is the rule's first pass (D88): simulated at the spread of the widest value, the "
+                     "play phase's CPU share at ±4.68 % over 31 repeats, the rule's stated 95 % interval covers the true "
+                     "mean in about 92 % of campaigns and the stopped mean leans by at most 0.2 %."),
+    "mail-client": ("The idle phase's repeat count is the rule's first pass (D88, D94): simulated at the spread of the "
+                    "widest value, `WebExtensions/StreamTrans`' run mean at ±4.75 % over 77 repeats, the rule's stated "
+                    "95 % interval covers the true mean in about 93–94 % of campaigns and the stopped mean leans by at "
+                    "most 0.2 %."),
+}
+
+# D91: an event on the clock, by its thread — what it is, from its source, and which repeats caught it, from the phases'
+# start times (phases.jsonl), which the pooled record does not keep
+CLOCK_STATED = {
+    "glean.mps": ("Glean's metrics-ping scheduler, wakes once a day at 04:00 local time (glean)",
+                  "the only one of the {k} whose phase held 04:00 on the runner's clock (UTC)"),
+}
+
+WINDOWS_STATED = {
+    "mail-client": ("Read in 100 s windows over the 77 repeats (D85, D90, D94): `WebExtensions/WebExtensions`' run "
+                    "mean is 0.252 ms in the idle phase's first 100 s against 0.080–0.111 ms after, 0.2 % of the entry's "
+                    "CPU above its median window; `WebExtensions/StreamTrans` wakes at 0.56–0.58 of its mean rate in the "
+                    "first 200 s, its run mean 0.094 ms in the first 100 s against 1.86–3.91 ms after, 3.1 % of the "
+                    "entry's CPU above its median window; `StreamTrans`'s episodes recur through the phase. The carried "
+                    "values are the phase's means. The send read in 100 s windows over the 8 repeats (D87): from the first window to the last "
+                    "the main thread wakes 17 % less often with runs 27 % longer (1.29 against 1.63 ms), `Socket "
+                    "Thread` wakes 21 % more, `TaskCon~ller` 27 % less with runs 36 % longer and `StreamTrans` 30 % more, "
+                    "while each send's mean duration stays within 2.88–3.19 s and its CPU within 2.19–2.44 s across the "
+                    "25. The carried values are the means over the 25."),
+    "web-browser": ("The page load read one by one over the 38 repeats (D87): the first page load of each repeat takes "
+                    "739 ms and 545 ms of CPU against a mean of 485 ms and 341 ms over the other 55 (446–570 ms and 292–413 ms "
+                    "by position in the pass), the network service's "
+                    "foreground pool (`utility/ThreadPoolForeg`, in the residual) waking 606 times in it against 41 and "
+                    "the renderer's main thread 101 times, its runs 2.45 ms, against 38 times at 5.03 ms — one page "
+                    "load in 56, 2.8 % of the operation's CPU and 4.3 % of its wakes; past the first six, each block of "
+                    "six page loads holds the operation's wake rate within 2 % and its CPU at 334–356 ms a page load. "
+                    "The carried values are the means over the 56."),
+}
+
+WINDOW_LAW = {"web-browser": "D32, D68", "mail-client": "D32, D46"}
+# 9.10 D143–D150: an entry a core-set file holds past its observed phase, read in one long-phase probe at the file's
+# span (`task-9.10-scenarios-timelines/campaign/spans/results/results.md`) — stated beside the values
+SPAN_STATED = {
+    "office-writer": ("Read over 1,429 s, the span `c3-workday` holds it, in one long-phase probe (9.10 D145, D148, D149): "
+                      "the idle phase's wakes hold within 0.1 % of the probe's level; its CPU rises from 0.56–0.58 ms/s "
+                      "in the first two minutes to 0.64–0.66 by minutes 5–11 and holds 0.56–0.63 after, so a 120 s phase "
+                      "at the placement every repeat takes reads −7.5 % against the level, −8.8 % at the worst; the "
+                      "carried CPU share lies within 3.7 % of the level."),
+    "video-editor": ("The idle phase opens 240 s after the window, past the work Kdenlive does after launch, and runs "
+                     "180 s (9.10 D146). Read over 2,851 s, the span `c3-creation` holds it (2,860 s in whole 10 s "
+                     "slices), in one long-phase probe held 2,890 s past that settle (`kdenlive` 13 of the `long-probe` "
+                     "family, run 38976976741 of 2026-10-17, release `meas-ci-probes-2026-10-17`), on 9.10 D143's 5 % "
+                     "test: a 180 s phase at the placement every repeat takes reads CPU −0.3 % and wakes +2.9 % against "
+                     "the probe's level, +4.5 % and +3.8 % at the worst. Read over 4,758 s, the span `c1-transcode` "
+                     "holds it "
+                     "focused, in two long-phase probes of the pointer loop (9.10 D145, D150, D153): averaged, the 600 s "
+                     "driven phase at the placement every repeat takes reads CPU −2.8 % and wakes +4.8 % against their "
+                     "level; some 20 minutes into the input both probes enter a state of fewer, longer main-thread "
+                     "wakes, 126 a second at 3.06 ms against 135–153 at 2.3–2.8 ms, which one of them kept to its end, "
+                     "the CPU then 9 % above the carried phase and the wakes 14 % below."),
+    "code-editor": ("Read over 12,068 s, the span `c6-dual` held it focused before its focus alternated with the game "
+                    "every 688 s (9.17 D1), in two long-phase probes of the replayed typing (9.10 D144, D154, D158): with the committed file restored before each 600 s window, the "
+                    "per-input run mean against 9.5's repeat of the same window is 1.00 (95 % interval 0.97–1.03) over "
+                    "19 windows, with no trend; the rise of the probe that typed one growing line was the line's length. "
+                    "In each probed session VS Code's extension host, the process holding the TypeScript and JSON "
+                    "language servers, ran for 2–4 windows at up to 400 s of CPU a window, the per-input run mean up to "
+                    "3.9 times the carried, until VS Code replaced the host: 6,100–8,500 s into the input in one "
+                    "session, 10,700–12,050 s in the other. The episode is not carried."),
+}
+# D99: an entry whose repeat count neither the rule nor its recording's end chose states where it stopped
+STOP_STATED = {
+    "code-editor": ("The repeat count is not the rule's (D99): the campaign stopped at window 44, then read as the Word "
+                    "recording's last; the recording holds 57 windows, 56 with input. At 44 every value the rule is read "
+                    "on holds, the widest the per-input run mean under SWELL-KW at ±4.84 % (±5.17 % as the rule was read "
+                    "when the campaign stopped, D73)."),
+}
+# D57's second finding: a between-sessions component's spread within one run, read on the D52 probe
+# (_dev/research/jioh/task-9.5-interactive-typing/campaign/within_libuv.py, D83)
+WITHIN = {("code-editor", "utility/libuv-worker"): "its wake rate ±10.6 % (5.41–6.71 a second over 700 s windows slid "
+                                                   "along the D52 probe from 200 s)"}
+
+
+def value_name(key):
+    """(name, unit) of a stability-block value as the scope writes it."""
+    if key.startswith("input_run mean, "):
+        return f"the per-input run mean under {key[len('input_run mean, '):-len(' (ms)')]}", "ms"
+    if key == "operation duration mean (ms)":
+        return "the operation's duration mean", "ms"
+    phase, rest = key.split(" ", 1)
+    label = next(lb for lb in LABEL if rest.endswith(" " + lb))
+    whose = "the operation's " if phase == "op" else ""
+    return f"{whose}`{rest[:-len(label) - 1]}` {LABEL[label]}", ("wakes/s" if label == "wakes/s" else "ms")
+
+
+def held(c, unit):
+    return f"{c['mean']:.4g} {unit} ±{c['half_width'] * 100:.2f} %"
+
+
+def stability_scope(aid, d):
+    st = d["stability"]
+    q = st["quantities"]
+    text = (f"Stability rule (D26, D30, D78): every value on the list — a table read by the mean it carries, over "
+            f"every repeat's samples — holds within {st['tolerance'] * 100:g} % or "
+            f"{st['abs_floor_ms'] * 1000:g} µs over the {len(d['repeats'])} repeats obtained")
+    limited = {k: c for k, c in q.items() if c.get("limited")}
+    session = {k: c for k, c in q.items() if c.get("session_spread") and c.get("carried")}
+    if not limited and not session:
+        return text + ". "
+    text += ", except these, stated with their half-widths. "
+    if limited:
+        op = (d["phases"].get("op") or {}).get("operation")
+        what = "the per-input means" + (f" and the {op['name']} operation's values"
+                                        if op and any(k.startswith(("op ", "operation ")) for k in limited) else "")
+        out = sorted((kc for kc in limited.items() if not kc[1]["passes"]), key=lambda kc: -kc[1]["half_width"])
+        ins = [c for c in limited.values() if c["passes"]]
+        text += (f"Window limit ({WINDOW_LAW[aid]}): {what} come from the repeats that replay a window of the "
+                 f"recording, {max(c['k'] for c in limited.values())} repeats, every window of it that holds input")
+        if out:
+            text += "; outside the rule: " + "; ".join(
+                f"{value_name(k)[0]} {held(c, value_name(k)[1])} (the rule needs {c['needed']} repeats)" for k, c in out)
+        if 1 <= len(ins) <= 2:
+            text += "; " + " and ".join(f"{value_name(k)[0]} {held(c, value_name(k)[1])}"
+                                        for k, c in limited.items() if c["passes"])
+            text += f" hold{'s' if len(ins) == 1 else ''} within it"
+        elif ins:
+            text += (f"; {'the other' if out else 'all'} {len(ins)} hold within it, the widest "
+                     f"±{max(c['half_width'] for c in ins) * 100:.2f} %")
+        text += ". "
+    if session:
+        comps = {}
+        for k, c in session.items():
+            phase, rest = k.split(" ", 1)
+            label = next(lb for lb in LABEL if rest.endswith(" " + lb))
+            comps.setdefault((phase, rest[:-len(label) - 1]), {})[label] = c
+        parts = []
+        for (phase, comm), vals in comps.items():
+            t = d["phases"][phase]["threads"][comm]
+            per = {"wakes/s": t["wakes_per_s"], "gap mean (ms)": t["gap_ms"]["repeat_mean"],
+                   "run mean (ms)": t["run_ms"]["repeat_mean"]}
+            texts = []
+            for label in LABEL:
+                if label in vals:
+                    unit = "wakes/s" if label == "wakes/s" else "ms"
+                    texts.append(f"{LABEL[label]} {held(vals[label], unit)} "
+                                 f"({min(per[label]):.4g}–{max(per[label]):.4g} {unit})")
+            w = t["wakes_per_s"]
+            across = (max(w) - min(w)) / 2 / statistics.fmean(w) * 100
+            share = statistics.fmean(w) / statistics.fmean(d["phases"][phase]["wakes_per_s"]) * 100
+            parts.append(f"`{comm}` " + ", ".join(texts) + f"; within one run {WITHIN[(aid, comm)]}, across the "
+                         f"repeats its wake rate ±{across:.1f} %; it holds {share:.1f} % of the {phase} phase's wakes")
+        many = len(comps) > 1
+        text += (f"{'Components' if many else 'A component'} whose rate varies between sessions, "
+                 f"{'their' if many else 'its'} three values carried together (D57): " + "; ".join(parts) + ". ")
+    return text
+
+
+def rng(vals, nd=4):
+    return f"{min(vals):.{nd}f}–{max(vals):.{nd}f}"
+
+
+def dist(summary, tag, sampling="per-iteration"):
+    """A pooled summary's table (ms) as the library's `quantiles` param: ten quantiles, extremes, interval means."""
+    return yaml_table(summary["table"], tag, sampling=sampling)
+
+
+def component_lines(comp_name, comp, tag, indent, extra=None):
+    lines = [f"{indent}- comm: {json.dumps(comp_name)}"]
+    if extra:
+        lines += [f"{indent}  {k}: {v}" for k, v in extra]
+    lines.append(f"{indent}  threads: {min(comp['threads'])}" if min(comp["threads"]) == max(comp["threads"]) else f"{indent}  threads: [{min(comp['threads'])}, {max(comp['threads'])}]")
+    lines.append(f"{indent}  wakes_per_s: {sum(comp['wakes_per_s']) / len(comp['wakes_per_s']):.5g}")
+    lines.append(f"{indent}  gap: {dist(comp['gap_ms'], tag)}")
+    lines.append(f"{indent}  run: {dist(comp['run_ms'], tag)}")
+    return lines
+
+
+def components_block(ph, tag, key, indent="      "):
+    sel = ph["components"]
+    if not sel["selected"] and not sel["residual"]:
+        return [f"{indent}# {key}: none — no wake in the {'idle' if key == 'components' else 'driven'} phase (GIMP idles silently)"]
+    lines = [f"{indent}{key}:"]
+    for comm in sel["selected"]:
+        c = ph["threads"][comm]
+        if c["gap_ms"]["table"] is None:
+            continue
+        lines += component_lines(comm, c, tag, indent + "  ")
+    if sel["residual"] and sel["residual"]["gap_ms"]["table"]:
+        r = sel["residual"]
+        lines += component_lines("residual", r, tag, indent + "  ",
+                                 extra=[("comms", "[" + ", ".join(json.dumps(x) for x in r["comms"]) + "]")])
+    lines.append(f"{indent}  # {len(sel['selected'])} comms cover {(sel['covered_share'] or 0) * 100:.1f} % of {sel['total_wakes_per_s']:.1f} wakes/s (D16, target {sel['coverage'] * 100:.0f} %); the rest pooled as `residual`")
+    return lines
+
+
+def heavy_events_block(ph, tag, indent="      "):
+    """D64: a rare run the component's wakes leave out — chrome's MemoryInfra pass, 50.9–60.0 ms against its regular
+    runs of at most 11.5 ms — carried as its own stated event. Only what was measured: the run quantiles, the count and
+    the span they were counted over, and the rate that follows. No gap distribution, because none was measured — most
+    repeats saw the event once or not at all, so no repeat holds an interval between two of them. D91: an event on the
+    clock (`compiled` false) is stated in the scope, not written here."""
+    h = ph.get("heavy_event")
+    if not h or not h.get("runs_ms") or h.get("compiled") is False:
+        return []
+    runs = sorted(h["runs_ms"])
+    return [f"{indent}heavy_events:",
+            f"{indent}  - comm: {json.dumps(h['comm'])}",
+            f"{indent}    run_floor_ms: {h['run_floor_ms']:g}",
+            f"{indent}    count: {sum(h['count'])}",
+            f"{indent}    span_s: {h['span_s_total']:.1f}",
+            f"{indent}    rate_per_s: {h['rate_per_s']:g}",
+            f"{indent}    run: {yaml_table(quantile_table(runs), tag)}",
+            f"{indent}  # D64: {sum(h['count'])} runs of at least {h['run_floor_ms']:g} ms over {h['span_s_total']:.0f} s of idle phase, "
+            f"{min(runs):.1f}–{max(runs):.1f} ms; their runs leave the components' wakes, so the residual converges. "
+            f"No interval is stated: no repeat holds two of them."]
+
+
+# D28, D65, D72, D79: the stream's keys only (appdefs KINDS=key), and what each entry's scope says about it
+KEYS_ONLY = {
+    "office-writer": ("and its clicks, scrolls and drags left out, so the typing stays at the document's end (D28; the archetype "
+                      "carries typing, not document navigation); "),
+    "web-browser": ("and its clicks, scrolls and drags left out, so every key lands in the page's text box (D65; the archetype "
+                    "carries typing into a page field, not browsing's scrolling and clicking — the page-load operation carries "
+                    "browsing's heavy work); "),
+    "code-editor": ("and its clicks, scrolls and drags left out, so the typing stays at the file's end, the file otherwise as "
+                    "committed (D72; the archetype carries typing, not the editor's navigation); the keys are a fixed letter "
+                    "cycle (D4: timing only), so the per-key cost is the language server re-checking a file being filled with "
+                    "letter runs; "),
+    "mail-client": ("and its clicks, scrolls and drags left out, so every key lands in the message body (D79; the archetype "
+                    "carries typing a message, not moving between the compose window's fields); "),
+}
+
+
+def with_idle(later, idle):
+    """D79: one entry from two campaigns. The idle phase runs before any input: its values, its rows of the rule and the
+    repeats the rule is read over come from `idle`; every phase with or after the input, and its rows, from `later`,
+    which the record keeps as `later`."""
+    d = dict(idle)
+    d["phases"] = {"idle": idle["phases"]["idle"], **{k: v for k, v in later["phases"].items() if k != "idle"}}
+    q = {k: v for k, v in idle["stability"]["quantities"].items() if k.startswith("idle ")}
+    q.update({k: v for k, v in later["stability"]["quantities"].items() if not k.startswith("idle ")})
+    d["stability"] = dict(later["stability"], quantities=q)
+    d["later"] = later
+    return d
+
+
+def run_line(tag, d):
+    line = f"{tag.split(':', 1)[1]}, repeats {d['repeats']}"
+    runs = sorted(set(x for x in (d.get("run_id") or {}).values() if x))
+    if runs:  # D27: a campaign spans runs; each repeat's run is in the pooled record
+        line += f", runs {', '.join(runs)}"
+    return line
+
+
+def entry(aid, spec, d):
+    run, observed, kind, stream, stim_tag, approx = spec
+    tag = RUN_TAG.get(run) or RUN_TAG[d["family"]]  # --tag <app>=… overrides the family tag for one run (re-run batch)
+    idle_tag = IDLE_TAG.get(run, tag)
+    later = d.get("later")   # D79: the phases with or after the input from another campaign than the idle phase
+    census = build_census(d.get("version"))   # D69: the census, a mix stated
+    if later:
+        census = f"{build_census(later.get('version'))} in the phases with or after the input, {census} in the idle phase"
+    observed = observed.replace("{version}", census)
+    out = [f"  {aid}:", "    category_source: meas", "    declared_class: normal", "    pattern:", "      program:"]
+    if kind == "play":
+        out += ["        - loop:                    # one periodic job per medium cycle, its deadline the next cycle's start (D74, D75)",
+                "            - TIMER: period", "            - RUN: cycle_run"]
+    else:
+        out += ["        - loop:                    # merged event stream, explicit at compile time (D9): replayed stimulus in focus windows (D18) + timer components (D16)",
+                "            - WAIT: input", "            - RUN: event"]
+    out.append("    params:")
+    ph_idle = d["phases"].get("idle") or d["phases"].get("play")
+    if kind == "input":
+        pi = d["phases"]["driven"]["per_input"]
+        out.append("      input_run:")
+        out.append(f"        {dist(pi['window']['run_ms_minus_idle'], tag)}")
+        out.append("      stimulus:")
+        kinds = ", kinds: [key]" if aid in KEYS_ONLY else ""   # D28, D65, D72, D79: the events the measurement replayed
+        out.append(f"        {{stream: {stream}{kinds}, sampling: per-task, source: \"{stim_tag}\"}}")
+    if kind == "play":   # D75: the period is the cycles' mean length, the run each cycle's whole-tree CPU
+        cyc = ph_idle["cycle"]
+        out.append(f"      period: {{dist: constant, value_us: {round(table_mean(cyc['length_ms']['table']) * 1000)}, "
+                   f"sampling: per-task, source: \"{idle_tag}\"}}")
+        out.append(f"      cycle_run: {dist(cyc['work_ms'], idle_tag)}")
+    else:
+        out += components_block(ph_idle, idle_tag, "components")
+    out += heavy_events_block(ph_idle, idle_tag)
+    if kind == "cadence":
+        out += components_block(d["phases"]["driven"], tag, "focus_components")
+    if "op" in d["phases"] and d["phases"]["op"].get("operation"):
+        # spec decision 8: a named operation with its own components and a measured duration (trigger to completion)
+        o = d["phases"]["op"]["operation"]
+        out.append("      operations:")
+        out.append(f"        {o['name']}:")
+        out.append(f"          duration: {dist(o['duration_ms'], tag)}")
+        out += components_block(d["phases"]["op"], tag, "components", indent="          ")
+    out += ["    lifetime: segment-bound", "    binding_params: []", "    scalable: []", "    validation_stats:",
+            "      referee: meas-ci"]
+    phase_names = list(d["phases"])
+    line = f"{run_line(tag, later)}; the idle phase {run_line(idle_tag, d)}" if later else run_line(tag, d)
+    if run == "thunderbird" and tag == "meas-ci:interactive:3":
+        line += " (repeats 2 and 3 from interactive:4 after a replay-driver fix)"
+    out.append(f"      run: \"{line}\"")
+    stats = []
+    for pn in phase_names:
+        ph = d["phases"][pn]
+        stats.append(f"{pn} wakes/s {rng(ph['wakes_per_s'], 1)}")
+        stats.append(f"{pn} cpu-share {rng(ph['cpu_share'])}")
+    if kind == "input":
+        pi = d["phases"]["driven"]["per_input"]
+        stats.append(f"input_run p50 ms per repeat {pi['window']['run_ms_minus_idle']['repeat_p50']}")
+    if kind == "play":   # D75: the cycle's length and work, each repeat's mean
+        cyc = ph_idle["cycle"]
+        stats.append(f"cycle length ms per repeat {rng(cyc['length_ms']['repeat_mean'], 3)}")
+        stats.append(f"cycle run ms per repeat {rng(cyc['work_ms']['repeat_mean'], 4)}")
+    out.append("      stats: [" + ", ".join(json.dumps(x) for x in stats) + "]")
+    out.append("      scope: >-")
+    # D26: the machine and kernel are the pooled repeats' own records (spec.json), one CPU model per observation
+    recs = [d] + ([later] if later else [])
+    models = sorted({m for r in recs for m in (r.get("cpu_model") or {}).values()}) or ["CPU model not recorded"]
+    kernels = sorted({k for r in recs for k in (r.get("kernel") or {}).values() if k}) or ["kernel not recorded"]
+    scope = (f"One observation (phase decision 2; D3, D10, D26): {observed}, on a GitHub-hosted ubuntu-24.04 runner "
+             f"(4 vCPU {' / '.join(models)}, kernel {' / '.join(kernels)}), the application's process tree pinned to one of its "
+             f"CPUs, which the runner's own agent processes share (D21; method §4), under Xvfb 1280×800 — no display refresh, no GPU, "
+             f"no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. ")
+    if kind == "input":
+        if aid in KEYS_ONLY:
+            scope += (f"Stimulus: SWELL-KW stream {stream}, its keystrokes replayed by xdotool at their recorded times (error p99 1.24 ms) "
+                      + KEYS_ONLY[aid])
+        else:
+            scope += (f"Stimulus: SWELL-KW stream {stream} replayed per event by xdotool at recorded gaps (error p99 1.24 ms), "
+                      f"keys and pointer events together, pointer positions scaled into the content area (D5, D12); ")
+        scope += (f"the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the "
+                  f"process tree until the next input minus the idle rate, bounded below by zero (a window quieter than the "
+                  f"idle rate carries no input work), so work that is not the idle rate inside a long gap "
+                  f"(an autosave after typing) is charged to the input before it. ")
+        if d.get("idle_from_s"):   # D83
+            scope += (f"The idle phase is read from {d['idle_from_s']:g} s past its start, past the launch work in it (D83); "
+                      f"the idle rate is read over the same span. ")
+        alt = d["phases"].get("driven-alt", {}).get("per_input")
+        if alt:  # spec decision 11: the pre-registered sensitivity result, one sentence, no value changed
+            a = pi["window"]["run_ms_minus_idle"]["p50"]; b = alt["window"]["run_ms_minus_idle"]["p50"]
+            change = f" ({(b - a) / a * 100:+.0f} %)" if a else " (the SWELL-KW median is at the zero bound, D13)"
+            c = stimulus_check(pi["window"]["run_ms_minus_idle"], alt["window"]["run_ms_minus_idle"])
+            lo, hi = c["interval"]
+            scope += (f"Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) "
+                      f"the per-input run p50 is {b:.2f} ms against {a:.2f} ms under SWELL-KW{change}; read per repeat (D81), "
+                      f"the per-input run mean under 136M is {c['per_repeat_mean']:.3f} of SWELL-KW's (95 % interval "
+                      f"{lo:.3f}–{hi:.3f} over {len(c['per_repeat'])} repeats), "
+                      f"{'a difference' if c['reading'] == 'difference' else 'not resolved'}; the archetype carries SWELL-KW. ")
+    elif kind == "cadence":
+        scope += "Stimulus: a scripted pointer loop (design); no per-input run exists, the driven cadence is carried as focus_components. "
+    else:   # D74, D75: one periodic job per medium cycle, read off the trace
+        cyc = ph_idle["cycle"]
+        what, start = CYCLE_START[aid]
+        period_ms = table_mean(cyc['length_ms']['table'])
+        scope += (f"No stimulus. One periodic job per {what} cycle (D74, D75): a cycle starts at {start}; the period is the "
+                  f"mean interval between starts, {period_ms:.3f} ms over {sum(cyc['cycles']):,} cycles; "
+                  f"each job's run is the process tree's whole CPU from one start to the next, drawn per cycle from its "
+                  f"measured table, and its deadline is the next cycle's start (period-implicit, liu-jacm73 (A2)). The "
+                  f"deadline is the cycle's, not the output device's: an audio server buffers ahead of the device (PulseAudio "
+                  f"up to 2 s by default, 9.5 search record S2), so a late cycle is not by itself an audible gap or a dropped frame. ")
+        over = share_above(cyc["work_ms"]["table"], period_ms)
+        if over >= 0.001:   # measured load, not a compile effect: these jobs miss with the task alone on the CPU
+            scope += (f"In about {over * 100:.1f} % of cycles the tree's own work exceeds the period"
+                      + (" — the call's saturation episodes, one CPU busy for about 30 s every 240 s (D54) —" if aid == "video-call" else "")
+                      + " so those jobs miss even with the task alone on the CPU. ")
+        if aid == "video-call":
+            scope += ("The call's video path — compositing at about 16.7 ms and the 30 fps frames — has no job of its own; its "
+                      "CPU runs inside the audio frames' cycles. ")
+    if later:
+        scope += (f"Two campaigns (D79): the idle phase's values from {idle_tag}, {len(d['repeats'])} repeats; the phases "
+                  f"with or after the input from {tag}, {len(later['repeats'])} repeats; the idle phase runs before any input. ")
+    scope += stability_scope(aid, d)
+    heavy = (ph_idle or {}).get("heavy_event") if kind == "input" else None
+    if heavy and heavy.get("runs_ms") and heavy.get("compiled") is False:   # D91: an event on the clock, stated, not carried
+        what, caught = CLOCK_STATED[heavy["comm"]]
+        n = sum(heavy["count"])
+        at = "; ".join(f"{t:.1f} s into repeat {r}'s idle phase" for r, ts in zip(d["repeats"], heavy["at_s"]) for t in ts)
+        scope += (f"`{heavy['comm']}`, {what}; it is stated, not carried (D91): {n} run{'s' if n != 1 else ''} of "
+                  f"{', '.join(f'{x:g}' for x in heavy['runs_ms'])} ms, {at}, {caught.format(k=len(d['repeats']))}; "
+                  f"its run is out of the residual. ")
+    elif heavy and heavy.get("runs_ms"):   # D64: carried as its own event, beside the rule's list
+        scope += (f"The `{heavy['comm']}` heavy event (D64) is carried beside the rule, not on it: "
+                  f"{sum(heavy['count'])} runs over {heavy['span_s_total']:.0f} s of idle phase, "
+                  f"{sum(1 for c in heavy['count'] if not c)} of the {len(heavy['count'])} repeats holding none, so no "
+                  f"half-width is read for its rate. ")
+    if aid in STOPPING_STATED:
+        scope += STOPPING_STATED[aid] + " "
+    if aid in STOP_STATED:
+        scope += STOP_STATED[aid] + " "
+    if aid in WINDOWS_STATED:
+        scope += WINDOWS_STATED[aid] + " "
+    if aid in SPAN_STATED:
+        scope += SPAN_STATED[aid] + " "
+    scope += "Values are this software on this machine, not desktop truth (D10)."
+    if aid in BUILD_BOUND:   # D69: what the pinned or recorded build leaves out of the archetype
+        scope += " " + BUILD_BOUND[aid]
+    if aid in VENUE_BOUND:  # D24: the direction of the venue's error, from the toolkits' own sources (search log S8)
+        scope += " " + VENUE_BOUND[aid]
+    out += ["        " + scope]
+    out.append("    modeling_notes: >-")
+    notes = (f"Per-application archetype (D2): one task carries the whole process tree merged (D14)")
+    if run == "chrome":
+        notes += ", its renderers included — other tabs' renderers are renderer-hidden's, bound separately (D84)"
+    notes += (". A component is its process's role and the thread comm together (D67), so one comm naming a thread of "
+              "several processes — chrome's Chrome_ChildIOT runs in the GPU process and in each utility process — is "
+              "several components; a single-process tree's components carry the comm alone")
+    if kind == "play":
+        notes += (". The threads' own wakes are not carried one by one: the tree's CPU is summed per medium cycle into one run "
+                  "per job (D75), so the compiled task wakes once per cycle; the per-thread tables stay in the pooled record.")
+    else:
+        notes += (". Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the "
+                  "task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled "
+                  "residual stands for the comms below the coverage cut. Each timer wake is a WAIT on the task's timer channel, "
+                  "woken at its sampled absolute time, with no deadline (D74).")
+    if kind == "input":
+        notes += (f" Input wakes: a contiguous slice of {stream} equal to each focus window, at a seed-drawn offset (D18); "
+                  "the slice preserves the recording's burst-and-pause structure.")
+    if kind == "cadence":
+        notes += " Inside focus windows the driven-phase components replace the idle ones; no input wake is emitted (the stimulus was scripted)."
+    if "op" in d["phases"] and d["phases"]["op"].get("operation"):
+        o = d["phases"]["op"]["operation"]
+        notes += (f" Operation `{o['name']}` (spec decisions 8–10): the timeline names it and a start time; the compiler draws its length "
+                  f"from the measured duration table (trigger to completion) and swaps in the operation's components for that span, "
+                  f"emitting no input wake; it runs to completion past the focus window.")
+    if run == "code":
+        notes += " Word streams drive this editor as the nearest recording: no code-editing keystroke dataset with timestamps exists (D4)."
+    if run in ("thunderbird", "thunderbird-send"):
+        notes += " Outlook streams exist only in SWELL-KW's interruption conditions c2 and c3 (D12)."
+    if approx:
+        notes += (" Bound by stated approximation, carrying these numbers unchanged (D11, D12): " + "; ".join(approx)
+                  + ". No run observes these programs, so the direction of each binding's error is not measured; each "
+                  "binding is design.")
+    sporadic = [(pn, ph.get("repeats", d["repeats"]), sp) for pn, ph in d["phases"].items()
+                for sp in (ph.get("components") or {}).get("sporadic", [])]
+    if sporadic:  # D43: a thread whose gap and run means do not exist in every repeat is reported, not carried
+        notes += " Sporadic wakes, not carried as components (D43): " + "; ".join(
+            f"`{sp['comm']}`" + (f" ({', '.join(sp['comms'])})" if "comms" in sp else "")
+            + f" in the {pn} phase, repeats {sp['repeats']} of {reps}, {sp['wakes_per_s']} wakes/s" for pn, reps, sp in sporadic) + "."
+    if aid in CONTROL:
+        notes += " " + CONTROL[aid]
+    out += ["      " + notes]
+    return "\n".join(out)
+
+
+def main():
+    R, out = sys.argv[1], sys.argv[2]
+    rest = sys.argv[3:]
+    flags = {"--tag": RUN_TAG, "--idle-from": IDLE_FROM, "--idle-tag": IDLE_TAG}
+    only = None
+    while rest:  # --tag interactive=meas-ci:interactive:N, --idle-from <app>=<pool.json>, --idle-tag <app>=<tag> (repeatable)
+        if rest[0] == "--only" and len(rest) > 1:
+            only = set(rest[1].split(",")); rest = rest[2:]
+            if only - set(ARCHETYPES):
+                raise SystemExit(f"--only names no 9.5 archetype: {', '.join(sorted(only - set(ARCHETYPES)))}")
+        elif rest[0] == "--control" and len(rest) > 1:
+            CONTROL.update({a: fold_reading(a, r["notes"]) for a, r in json.load(open(rest[1]))["archetypes"].items()}); rest = rest[2:]
+        elif rest[0] in flags and len(rest) > 1 and "=" in rest[1]:
+            key, val = rest[1].split("=", 1); flags[rest[0]][key] = val; rest = rest[2:]
+        else:
+            raise SystemExit(f"unknown argument {rest[0]!r}")
+    if set(IDLE_FROM) != set(IDLE_TAG):
+        raise SystemExit("--idle-from and --idle-tag name the same applications")
+    tags = ", ".join(sorted(set(RUN_TAG.values()) | set(IDLE_TAG.values())))
+    blocks = [f"  # ---- measured per-application archetypes — 9.5 same-machine campaigns ({tags}) ----", ""]
+    ids = [a for a in ARCHETYPES if only is None or a in only]
+    for aid, spec in ((a, ARCHETYPES[a]) for a in ids):
+        d = json.load(open(os.path.join(R, f"pool-{spec[0]}.json")))["runs"][spec[0]]
+        if spec[0] in IDLE_FROM:
+            d = with_idle(d, json.load(open(IDLE_FROM[spec[0]]))["runs"][spec[0]])
+        blocks.append(entry(aid, spec, d))
+        blocks.append("")
+    open(out, "w").write("\n".join(blocks))
+    print(f"wrote {out}: {len(ids)} entries")
+
+
+if __name__ == "__main__":
+    main()

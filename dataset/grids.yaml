@@ -1,0 +1,139 @@
+# dataset/grids.yaml — the generated layer's grid definition (9.19 spec).
+#
+# `tools/generate.py` reads this file and the sixteen C1 timelines
+# (`timelines/coreset/c1-<mode>.timeline.yaml`) and writes one timeline per cell
+# under `generated/<set>/` (not committed), compiles them with the workload
+# compiler and writes one manifest per set, `build.<set>.manifest.json`, that
+# pins this file, the generator, the C1 timelines and the compile's inputs by
+# content. Every generated file is design: it composes the C1 task sets and
+# claims nothing about how often or in what order desktops see the modes.
+#
+# A segment is `segment_length` long (9.19 decision 1). A task set lands in a
+# segment by 9.10 D44 — its C1 arrive offsets kept, the input window with the
+# C1's 2 s margins, each operation at its fraction of the window (decision 3);
+# a segment of `no_input_below` or less has no input window and its batch job
+# arrives at the segment's start. A batch job's `total_work` or `spawn_count` is
+# the C1 value scaled to the span the job must be alive in, labelled `design`
+# (decision 1). Every seed and every split is a keyed SHA-256 draw from the
+# cell's id; nothing here is chosen by hand except the tier-4 name table below.
+#
+# 9.20 adds the C4 distractor grid and the C5 familiarity ladder (9.20 spec). A
+# distractor cell keeps the user in mode A — A's focus and input run to the file's
+# end — while another process set arrives at the boundary; both segments are
+# labelled A. A ladder cell is a C1 file with its process names substituted at a
+# familiarity tier; every substituted name fits the kernel's `comm` field
+# (`comm_limit`).
+
+segment_length: 60s
+no_input_below: 4s
+
+# The longest process name a file may carry: TASK_COMM_LEN is 16 bytes including the
+# terminating NUL (`include/linux/sched.h`), so 15 characters.
+comm_limit: {chars: 15, source: linux-sched-h}
+
+sets:
+
+  # The 2-segment transition grid over the 240 ordered mode pairs (A, B), two forms
+  # (decision 2): `departs` — at the boundary A's tasks depart, B's arrive, the
+  # focus moves to B; `focus` — B's tasks arrive and the focus moves to B, A's
+  # tasks stay to the end of the file. No split: RQ1 tunes nothing on it.
+  transition-grid:
+    forms: [departs, focus]
+
+  # The 3-segment return grid A -> B -> A over the same pairs, form `departs`
+  # throughout (decision 10), the middle segment's length a variant (RQ4's
+  # phase-shift family at 60 s / 10 s / 2 s). Split by pair: the 240 pairs
+  # ranked by keyed hash, the first half tuning, a pair's three variants on the
+  # same side (decision 6).
+  return-grid:
+    middle_lengths: [60s, 10s, 2s]
+    split: {by: pair, tuning: 120}
+
+  # The flap-stress set, the hold-time and hysteresis tuning material (the
+  # hold-time plan, `_dev/docs/plan/jioh/hold-time-and-hysteresis.md`): a 60 s
+  # lead-in on A, then `alternations` segments of one interval each, B and A in
+  # turn, form `departs`. Three ordered pairs drawn from the 240 by keyed hash;
+  # each file built under two seeds, one tuning and one measurement (decision 6).
+  # The intervals are the hold-time plan's step 3 (decision 7): 5 s, 10 s and
+  # 30 s are intervals of the daemon-level switches comparable to ours —
+  # GameMode's reaper check interval, tuned's dynamic-tuning update interval
+  # (dynamic tuning off by default), systemd-oomd's pressure sustain duration
+  # — each tagged with its source; 2 s is a point below that range, design.
+  flap-stress:
+    lead_in: 60s
+    alternations: 8
+    pairs: 3
+    intervals:
+      - {length: 2s, source: design}
+      - {length: 5s, source: feral-gamemode}
+      - {length: 10s, source: tuned}
+      - {length: 30s, source: systemd-oomd}
+    split: {by: seed, names: [tuning, measurement]}
+
+  # The C4 distractor grid (9.20 decisions 1–4): the user keeps working in A, the
+  # focus on A's holder and A's input to the file's end; at 60 s another process
+  # set arrives and stays; both segments are labelled A, the second one's scenario
+  # list naming the programs alive in it by 9.10 D168's rule — A's staying ones
+  # and the arrival's, A's batch job (no `depart`) counting in the first segment
+  # only. Two relations of the arriving names to the
+  # vocabulary: `cross-mode` — B's whole C1 task set, over the 240 ordered pairs
+  # (the transition grid's `focus` form with the focus kept on A: the same open
+  # programs, the focus alone differs); `out-of-vocabulary` — one measured program
+  # of the library that belongs to no mode's task set and leaves the label
+  # unchanged, over the sixteen modes. A finite program's `total_work` is bound to
+  # the 60 s span (`span`), design. Where A's and B's focus holders share a name
+  # the two files' telemetry is the same (the focus is carried by name), so the
+  # second segment is a pre-committed miss (decision 3). No split: RQ1 tunes
+  # nothing on it.
+  distractor-grid:
+    relations: [cross-mode, out-of-vocabulary]
+    programs:
+      - {name: element-desktop, archetype: chat-client, scenario: S5}
+      - {name: 7z, archetype: file-archiver, scenario: S16, total_work: span}
+
+  # The C5 familiarity ladder (9.20 decisions 5–7): each C1 file with its names
+  # substituted at tier 4 (a nonexistent name whose words say what the program
+  # does) and tier 5 (a nonexistent name saying nothing), in three carrier forms —
+  # the focus holder's name alone, the other names alone, every name — cells whose
+  # substituted name set coincides collapsed to one. One real name maps to one
+  # substitute within a file, so name counts are preserved. Tier 3 — the program's
+  # own real name that carries no meaning — exists where the campaign record shows
+  # the mode's job running under such a name in its own tree: the two cells below,
+  # each name with its source. The chain's `wineserver` member is named by the
+  # compiler and keeps its real name (stated limit). The tier-4 table is design;
+  # tier-5 names are keyed draws (`tier5_letters` lowercase letters) redrawn when
+  # they equal a real process name the dataset knows. No split.
+  familiarity-ladder:
+    tiers: [4, 5]
+    carriers: [focus, others, all]
+    tier5_letters: 4
+    tier3:
+      render: {kdenlive_render: {name: melt-7, source: "meas-ci:background:2026-10-03c"}}
+      backup: {deja-dup: {name: duplicity, source: "meas-ci:background:2026-10-04"}}
+    tier4_names:
+      code: text-editor
+      soffice.bin: doc-writer
+      thunderbird-bin: mail-reader
+      chrome: web-browser
+      gimp: image-editor
+      kdenlive: video-editor
+      mpv: media-player
+      Troy.exe: game-engine
+      steam: game-launcher
+      make: build-runner
+      cc1: c-compiler
+      python: model-trainer
+      kdenlive_render: clip-exporter
+      HandBrakeCLI: video-encoder
+      deja-dup: backup-tool
+      tracker-miner-f: file-indexer
+      gnome-shell: desktop-shell
+      pipewire: audio-server
+      systemd: service-mgr
+      dbus-daemon: message-bus
+      Task worker thr: game-worker
+      dxvk-cs: gpu-cmd-stream
+      dxvk-submit: gpu-submitter
+      winepulse_mainl: audio-mainloop
+      winepulse_timer: audio-timer
+      FAudio_AudioCli: audio-client

@@ -2,6 +2,7 @@
 invariants, focus-driven wake generation, and the demand estimate."""
 
 from wlc import Timeline, compile_timeline
+from wlc.compiler import MODES
 from wlc.linter import lint_canonical
 
 
@@ -14,10 +15,59 @@ def compiled(fixture_path, library, name, mode="single"):
 def test_fixtures_lint_clean(fixture_path, library, schema):
     for name in ("fx-mixed.timeline.yaml", "fx-game.timeline.yaml",
                  "fx-oversub.timeline.yaml"):
-        for mode in ("native", "single"):
+        for mode in MODES:
             _, canonical, report = compiled(fixture_path, library, name, mode)
             assert lint_canonical(canonical, schema, report=report,
                                   mode=mode) == []
+
+
+def instance_archetypes(timeline):
+    """instance id -> archetype id, as the compiler names instances (`id` or `id.n` for a task group)."""
+    out = {}
+    for task in timeline.tasks:
+        ids = [task["id"]] if task["count"] == 1 else [f"{task['id']}.{n}" for n in range(1, task["count"] + 1)]
+        for iid in ids:
+            out[iid] = task["archetype"]
+    return out
+
+
+def test_tasks_carry_their_entrys_declared_class(fixture_path, library):
+    """9.13 spec decision 2: every task record carries the class of the entry it binds — a spawn-table entry its
+    child entry's, a chain member its chain entry's."""
+    timeline, canonical, _ = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
+    archetypes = instance_archetypes(timeline)
+    arrivals = [e for e in canonical["events"] if e["op"] == "arrive"]
+    assert arrivals
+    for event in arrivals:
+        assert event["declared_class"] == library.entry(archetypes[event["id"]])["declared_class"]
+        if event.get("spawn_table"):
+            child = library.entry(library.entry(archetypes[event["id"]])["spawns"])
+            assert {s["declared_class"] for s in event["spawn_table"]} == {child["declared_class"]}
+    assert any(e.get("spawn_table") for e in arrivals)   # the fixture exercises the spawn path
+
+    timeline, canonical, _ = compiled(fixture_path, library, "fx-game.timeline.yaml")
+    chain_class = library.entry("game-task-chain")["declared_class"]
+    members = [e for e in canonical["events"] if e["op"] == "arrive"]
+    assert len(members) > 1 and {e["declared_class"] for e in members} == {chain_class}
+
+
+def test_schema_requires_declared_class_on_every_task_record(fixture_path, library, schema):
+    """9.13 spec decision 8: the schema requires `declared_class` on arrive events and spawn entries."""
+    _, canonical, report = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
+    assert lint_canonical(canonical, schema, report=report, mode="single") == []
+    build = next(e for e in canonical["events"] if e["op"] == "arrive" and e.get("spawn_table"))
+    del build["spawn_table"][0]["declared_class"]
+    errors = lint_canonical(canonical, schema, report=report, mode="single")
+    assert errors and all("declared_class" in e for e in errors)
+    # an arrive event sits under the events' oneOf, so the schema reports the event, not the field
+    _, canonical, report = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
+    index, arrive = next((i, e) for i, e in enumerate(canonical["events"]) if e["op"] == "arrive")
+    del arrive["declared_class"]
+    errors = lint_canonical(canonical, schema, report=report, mode="single")
+    assert errors and all(e.endswith(f"at events/{index}") for e in errors)
+    arrive["declared_class"] = "nice"
+    errors = lint_canonical(canonical, schema, report=report, mode="single")
+    assert errors and all(e.endswith(f"at events/{index}") for e in errors)
 
 
 def test_events_sorted_and_ids_unique(fixture_path, library):
@@ -28,15 +78,33 @@ def test_events_sorted_and_ids_unique(fixture_path, library):
     assert len(ids) == len(set(ids))
 
 
-def test_orchestrator_spawn_table(fixture_path, library):
+def test_orchestrator_spawn_table_is_six_member_object_jobs(fixture_path, library):
+    # D19: one object job = six spawn-table entries, forked together, woken in D2's parent-child order
     _, canonical, _ = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
     build = next(e for e in canonical["events"]
                  if e["op"] == "arrive" and e["id"] == "build")
-    assert build["fork_cap"] == 2
-    assert len(build["spawn_table"]) == 6
-    assert sum(1 for i in build["program"] if i["op"] == "FORK") == 6
-    assert all(s["name"] == "cc1" for s in build["spawn_table"])
-    assert all(s["program"][-1] == {"op": "EXIT"} for s in build["spawn_table"])
+    assert build["fork_cap"] == 12                 # parallelism_cap 2 x the job's six members
+    table = build["spawn_table"]
+    assert len(table) == 36                        # 6 object jobs x 6 members
+    assert len({s["id"] for s in table}) == 36
+    assert sum(1 for i in build["program"] if i["op"] == "FORK") == 36
+    assert [s["name"] for s in table[:6]] == ["sh", "gcc", "cc1", "as", "fixdep", "rm"]
+    job = {s["name"]: s for s in table[:6]}
+    assert [op["op"] for op in job["sh"]["program"]] == [
+        "RUN", "WAKE", "WAIT", "RUN", "WAKE", "WAIT", "RUN", "WAKE", "WAIT", "RUN",
+        "WAKE", "WAKE", "WAKE", "WAKE", "WAKE", "EXIT"]      # four steps, then it releases the five it held
+    assert [op["op"] for op in job["gcc"]["program"]] == [
+        "WAIT", "RUN", "WAKE", "WAIT", "RUN", "WAKE", "WAIT", "RUN", "WAKE", "WAIT", "EXIT"]
+    assert [op["op"] for op in job["cc1"]["program"]] == ["WAIT", "RUN", "WAKE", "WAIT", "EXIT"]
+    assert job["sh"]["program"][1]["target"] == job["gcc"]["id"]    # sh wakes gcc first (D2's order)
+    assert job["gcc"]["program"][2]["target"] == job["cc1"]["id"]   # gcc wakes cc1, then as, then sh
+    assert job["cc1"]["program"][0]["channel"] == f"job:{job['cc1']['id']}"
+    cc1_us = job["cc1"]["program"][1]["us"]
+    assert 6_414 <= cc1_us <= 4_005_164                            # inside its table's support, p1 to p99.9
+    others = sum(op["us"] for name, s in job.items() if name != "cc1"
+                 for op in s["program"] if op["op"] == "RUN")
+    assert cc1_us > 10 * others                                    # cc1 carries the job's CPU (D2, D20)
+    assert all(s["program"][-1] == {"op": "EXIT"} for s in table)
     assert "depart" not in build  # finite: ends via EXIT at an emergent time
 
 
@@ -46,33 +114,92 @@ def test_count_expansion(fixture_path, library):
                  and e["id"].startswith("renderers.")]
     assert len(renderers) == 3
     assert all(e["name"] == "chrome" for e in renderers)
-    periods = set()
-    for event in renderers:
-        body = event["program"][0]["body"]
-        periods.add(next(i["period_us"] for i in body if i["op"] == "TIMER"))
-    assert len(periods) == 3  # per-instance draws differ across the expansion
+    # a measured archetype compiles to an explicit event stream per instance (9.5 D9): each instance draws its own —
+    # its timer wakes are wake events on its own timer channel (D74), its runs in its program
+    streams = {(tuple(i.get("us") for i in event["program"]),
+                tuple(w["t"] for w in canonical["events"] if w["op"] == "wake" and w["target"] == event["id"]))
+               for event in renderers}
+    assert len(streams) == 3  # per-instance draws differ across the expansion
 
 
-def test_focus_wakes_inside_windows(fixture_path, library):
+def test_input_wakes_inside_windows(fixture_path, library):
     timeline, canonical, _ = compiled(fixture_path, library,
                                       "fx-mixed.timeline.yaml")
-    wake_events = [e for e in canonical["events"] if e["op"] == "wake"]
-    assert wake_events, "focused interactive task must receive input wakes"
-    windows = [(w["from"], w["to"]) for w in timeline.focus]
-    for event in wake_events:
-        assert event["target"] == "editor"
-        assert event["channel"] == "input:editor"
+    wake_events = [e for e in canonical["events"] if e["op"] == "wake" and e["target"] == "editor"]
+    inputs = [e for e in wake_events if e["channel"] == "input:editor"]
+    assert inputs, "a typed-into interactive task must receive input wakes"
+    windows = [(w["from"], w["to"]) for w in timeline.input]
+    for event in inputs:
         assert any(lo <= event["t"] < hi for lo, hi in windows)
+    # every other wake is a timer wake on the task's own timer channel (9.5 D74)
+    assert {e["channel"] for e in wake_events} <= {"input:editor", "timer:editor"}
     editor = next(e for e in canonical["events"]
                   if e["op"] == "arrive" and e["id"] == "editor")
-    bursts = [i for i in editor["program"] if i["op"] == "RUN"]
-    assert len(bursts) == len(wake_events)  # one unrolled burst per wake
+    waits = [i for i in editor["program"] if i["op"] == "WAIT"]
+    # one WAIT per wake, input or timer, and the one it waits on past its last wake until it departs (9.23 N1)
+    assert len(waits) == len(wake_events) + 1
+    assert editor["program"][-1] == {"op": "WAIT", "channel": wake_events[-1]["channel"]}
+
+
+def test_no_program_runs_out(fixture_path, library):
+    """9.23 N1: a segment-bound task's program ends with the blocking step its loop takes next — a WAIT, a TIMER — or
+    an unbounded LOOP; a task without a pinned depart, top-level or spawned, ends with EXIT."""
+    ends = set()
+    for name in ("fx-mixed.timeline.yaml", "fx-game.timeline.yaml", "fx-oversub.timeline.yaml"):
+        _, canonical, _ = compiled(fixture_path, library, name)
+        for event in (e for e in canonical["events"] if e["op"] == "arrive"):
+            last = event["program"][-1]
+            if event.get("depart") is not None:
+                assert last["op"] in ("WAIT", "TIMER") or (last["op"] == "LOOP" and last["count"] == "unbounded"), event["id"]
+                ends.add(last["op"])
+            else:
+                assert last["op"] == "EXIT", event["id"]
+            assert all(s["program"][-1]["op"] == "EXIT" for s in event.get("spawn_table") or [])
+    assert {"WAIT", "LOOP"} <= ends
+
+
+def _with_spawn(canonical):
+    return next(e for e in canonical["events"] if e["op"] == "arrive" and e.get("spawn_table"))
+
+
+def test_lint_catches_a_spawned_childs_wake_to_an_unknown_task(fixture_path, library, schema):
+    """9.23 B4: a WAKE in a spawn-table entry's program resolves as a top-level program's does."""
+    _, canonical, report = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
+    child = _with_spawn(canonical)["spawn_table"][0]
+    child["program"].insert(0, {"op": "WAKE", "target": "nobody"})
+    errors = lint_canonical(canonical, schema, report=report, mode="single")
+    assert errors == [f"{child['id']}: WAKE targets unknown task 'nobody'"]
+
+
+def test_lint_catches_a_name_past_the_comm_limit(fixture_path, library, schema):
+    """9.23 B4: 15 characters and the terminator (linux-sched-h), on a top-level task and a spawned child alike."""
+    _, canonical, report = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
+    build = _with_spawn(canonical)
+    build["name"] = "a" * 15
+    assert lint_canonical(canonical, schema, report=report, mode="single") == []
+    build["name"] = build["spawn_table"][0]["name"] = "a" * 16
+    errors = lint_canonical(canonical, schema, report=report, mode="single")
+    assert len(errors) == 2 and all("longer than 15 characters" in e for e in errors)
+
+
+def test_lint_catches_a_program_that_runs_out(fixture_path, library, schema):
+    """9.23 B4, N1: a segment-bound program without its trailing blocking step runs out before its depart; a finite
+    or spawned program without EXIT runs out without one."""
+    _, canonical, report = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
+    editor = next(e for e in canonical["events"] if e["op"] == "arrive" and e["id"] == "editor")
+    editor["program"].pop()
+    child = _with_spawn(canonical)["spawn_table"][0]
+    child["program"].pop()
+    errors = lint_canonical(canonical, schema, report=report, mode="single")
+    assert "editor: the program ends with RUN, so it runs out before its depart" in errors
+    assert any(e.startswith(f"{child['id']}: the program ends with ") and e.endswith("without EXIT") for e in errors)
+    assert len(errors) == 2
 
 
 def test_demand_estimate(fixture_path, library):
     _, _, report = compiled(fixture_path, library, "fx-oversub.timeline.yaml")
-    # cpu-batch 66s/60s + audio duty 2500/50000 = 1.10 + 0.05
-    assert abs(report["utilization"] - 1.15) < 0.005
+    # cpu-batch 66s/60s = 1.10 + the measured audio-player's mean duty (9.5 D19: mpv audio ≈ 0.0076)
+    assert abs(report["utilization"] - 1.1076) < 0.005
 
 
 def test_familiarity_annotation_carried_into_ground_truth(fixture_path, library,
@@ -85,3 +212,76 @@ def test_familiarity_annotation_carried_into_ground_truth(fixture_path, library,
     # not authored -> the key is absent, never null or derived
     _, canonical, _ = compiled(fixture_path, library, "fx-game.timeline.yaml")
     assert all("familiarity" not in s for s in canonical["ground_truth"])
+
+
+def test_cpu_batch_runs_and_blocks_until_total_work(fixture_path, library):
+    # D21, D22, D25: RUN from the bound program's runs between voluntary blocks, then the block that followed it
+    _, canonical, _ = compiled(fixture_path, library, "fx-oversub.timeline.yaml")
+    task = next(e for e in canonical["events"]
+                if e["op"] == "arrive" and e["id"] == "train")
+    ops = [op["op"] for op in task["program"]]
+    assert ops[-1] == "EXIT" and ops.count("RUN") > 1      # a loop, not one uninterrupted RUN
+    assert set(ops) == {"RUN", "SLEEP", "EXIT"}
+    assert sum(op["us"] for op in task["program"] if op["op"] == "RUN") == 66_000_000
+    assert all(op["us"] >= 1 for op in task["program"] if op["op"] in ("RUN", "SLEEP"))
+
+
+def test_zero_inclusive_block_table_leaves_the_program_running(library):
+    # D25: a block table zero up to p99.9 leaves the task running on through almost every run, those runs joining
+    # one RUN; the table's top interval carries the rare blocks measured, and the CPU still sums to total_work.
+    # HandBrakeCLI's, re-measured as `video-transcoder` (9.10 D97): about 2 in 100,000 of its runs end in a block
+    from wlc import compiler
+    build = compiler._TaskBuild("batch", "HandBrakeCLI", "normal")
+    compiler._batch_loop(build, library.entry("video-transcoder")["params"], {"bind": {"total_work": "2s"}}, "seed", "batch")
+    ops = [op["op"] for op in build.program]
+    assert ops[-1] == "EXIT" and ops.count("RUN") == ops.count("SLEEP") + 1 and ops.count("SLEEP") <= 10
+    assert sum(op["us"] for op in build.program if op["op"] == "RUN") == 2_000_000 == build.demand_us
+    params = library.entry("cpu-batch")["params"]
+    build = compiler._TaskBuild("hog", "python3", "normal")
+    compiler._batch_loop(build, params, {"bind": {"program": "python3", "total_work": "2s"}}, "seed", "hog")
+    assert "SLEEP" in {op["op"] for op in build.program}          # python3 blocks after every run
+    assert sum(op["us"] for op in build.program if op["op"] == "RUN") == 2_000_000
+
+
+def test_a_single_table_set_batch_loop_needs_no_program_binding(library):
+    # 9.7 D29: file-archiver and game-download each carry one table set, taken without a `program` binding;
+    # cpu-batch, with three, still needs one
+    import pytest
+    from wlc import compiler
+    build = compiler._TaskBuild("download", "steam", "normal")
+    compiler._batch_loop(build, library.entry("game-download")["params"], {"bind": {"total_work": "2s"}}, "seed", "download")
+    assert "SLEEP" in {op["op"] for op in build.program}          # SteamCMD blocks after about 5 % of its runs
+    assert sum(op["us"] for op in build.program if op["op"] == "RUN") == 2_000_000 == build.demand_us
+    build = compiler._TaskBuild("archive", "7z", "normal")
+    compiler._batch_loop(build, library.entry("file-archiver")["params"], {"bind": {"total_work": "2s"}}, "seed", "archive")
+    assert [op["op"] for op in build.program] == ["RUN", "EXIT"]  # 7-Zip's block is zero at every quantile
+    with pytest.raises(ValueError):
+        compiler._batch_loop(compiler._TaskBuild("x", "x", "normal"), library.entry("cpu-batch")["params"],
+                             {"bind": {"total_work": "2s"}}, "seed", "x")
+
+
+def test_an_entry_matching_no_compile_path_is_refused(tmp_path):
+    # 9.15 (W-0746): the compiler has five paths — the chain and module-build constructors, a measured entry, a fork
+    # loop, a batch loop. An entry that is none of them, here a plain loop of a sampled run and a sleep (the shape
+    # the deleted unbounded-loop path compiled), is refused at compile time rather than compiled some other way.
+    import pytest
+    import yaml
+    from wlc import Library
+    library_path = tmp_path / "archetypes.yaml"
+    library_path.write_text(yaml.safe_dump({"archetypes": {"plain-loop": {
+        "category_source": "meas", "declared_class": "normal",
+        "pattern": {"program": [{"loop": [{"RUN": "x"}, {"SLEEP": "y"}]}]},
+        "params": {"x": {"dist": "constant", "value_us": 5, "sampling": "per-task", "source": "design"},
+                   "y": {"dist": "constant", "value_us": 10, "sampling": "per-task", "source": "design"}},
+        "lifetime": "segment-bound", "binding_params": [], "scalable": [], "validation_stats": {},
+        "modeling_notes": "probe"}}}))
+    library = Library(library_path)
+    timeline_path = tmp_path / "probe.timeline.yaml"
+    timeline_path.write_text(yaml.safe_dump({
+        "meta": {"id": "probe", "seed": 1},
+        "segments": [{"from": "0s", "to": "10s", "mode": "office", "attributes": {"background_wanted": True}}],
+        "tasks": [{"id": "loop", "name": "x", "archetype": "plain-loop", "arrive": "0s", "depart": "10s"}],
+        "focus": []}))
+    timeline = Timeline(timeline_path, library)
+    with pytest.raises(ValueError, match="'plain-loop' matches no compile path"):
+        compile_timeline(timeline, library, "single")

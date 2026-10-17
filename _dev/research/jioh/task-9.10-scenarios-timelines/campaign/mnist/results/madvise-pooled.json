@@ -1,0 +1,1552 @@
+{
+ "tag": null,
+ "machine": "EPYC 7763",
+ "gated_out": [],
+ "other_machine": [],
+ "runs": {
+  "mnist-madvise": {
+   "repeats": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "mode": {
+    "1": "full",
+    "2": "full",
+    "3": "full",
+    "4": "full",
+    "5": "full"
+   },
+   "cpu_model": {
+    "1": "AMD EPYC 7763 64-Core Processor",
+    "2": "AMD EPYC 7763 64-Core Processor",
+    "3": "AMD EPYC 7763 64-Core Processor",
+    "4": "AMD EPYC 7763 64-Core Processor",
+    "5": "AMD EPYC 7763 64-Core Processor"
+   },
+   "kernel": {
+    "1": "6.17.0-1022-azure",
+    "2": "6.17.0-1022-azure",
+    "3": "6.17.0-1022-azure",
+    "4": "6.17.0-1022-azure",
+    "5": "6.17.0-1022-azure"
+   },
+   "run_id": {
+    "1": "37093570964",
+    "2": "37093570964",
+    "3": "37093781292",
+    "4": "37093612595",
+    "5": "37093612595"
+   },
+   "versions": {
+    "1": {
+     "zpaq.version": "dataset/tools/meas/background/run.sh: line 154: zpaq: command not found",
+     "perf.version": "perf version 6.17.13",
+     "kernel": "6.17.0-1022-azure",
+     "mmdebstrap.version": "mmdebstrap 1.4.3",
+     "upgrade.layer.sha256": "b137960b535edc27c16e04454779edc65d0fdc2b32f9a55a6335f22031df87d9",
+     "upgrade.t0": "20260922T170000Z",
+     "upgrade.t1": "20260728T000000Z"
+    },
+    "2": {
+     "zpaq.version": "dataset/tools/meas/background/run.sh: line 154: zpaq: command not found",
+     "perf.version": "perf version 6.17.13",
+     "kernel": "6.17.0-1022-azure",
+     "mmdebstrap.version": "mmdebstrap 1.4.3",
+     "upgrade.layer.sha256": "b137960b535edc27c16e04454779edc65d0fdc2b32f9a55a6335f22031df87d9",
+     "upgrade.t0": "20260922T170000Z",
+     "upgrade.t1": "20260728T000000Z"
+    },
+    "3": {
+     "zpaq.version": "dataset/tools/meas/background/run.sh: line 154: zpaq: command not found",
+     "perf.version": "perf version 6.17.13",
+     "kernel": "6.17.0-1022-azure",
+     "mmdebstrap.version": "mmdebstrap 1.4.3",
+     "upgrade.layer.sha256": "b137960b535edc27c16e04454779edc65d0fdc2b32f9a55a6335f22031df87d9",
+     "upgrade.t0": "20260922T170000Z",
+     "upgrade.t1": "20260728T000000Z"
+    },
+    "4": {
+     "zpaq.version": "dataset/tools/meas/background/run.sh: line 154: zpaq: command not found",
+     "perf.version": "perf version 6.17.13",
+     "kernel": "6.17.0-1022-azure",
+     "mmdebstrap.version": "mmdebstrap 1.4.3",
+     "upgrade.layer.sha256": "b137960b535edc27c16e04454779edc65d0fdc2b32f9a55a6335f22031df87d9",
+     "upgrade.t0": "20260922T170000Z",
+     "upgrade.t1": "20260728T000000Z"
+    },
+    "5": {
+     "zpaq.version": "dataset/tools/meas/background/run.sh: line 154: zpaq: command not found",
+     "perf.version": "perf version 6.17.13",
+     "kernel": "6.17.0-1022-azure",
+     "mmdebstrap.version": "mmdebstrap 1.4.3",
+     "upgrade.layer.sha256": "b137960b535edc27c16e04454779edc65d0fdc2b32f9a55a6335f22031df87d9",
+     "upgrade.t0": "20260922T170000Z",
+     "upgrade.t1": "20260728T000000Z"
+    }
+   },
+   "phases": {
+    "mnist-train": {
+     "repeats": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "cmd_wall_s": {
+      "1": 1598.053,
+      "2": 1626.704,
+      "3": 1555.977,
+      "4": 1583.228,
+      "5": 1585.081
+     },
+     "rc": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0
+     },
+     "program_cpu_us": {
+      "1": 1597888184.0,
+      "2": 1626543954.0,
+      "3": 1555835996.0,
+      "4": 1583078658.0,
+      "5": 1584925650.0
+     },
+     "program_taskstats_cpu_us": {
+      "1": 1597784814.7,
+      "2": 1626433269.8,
+      "3": 1555730723.9,
+      "4": 1582987076.0,
+      "5": 1584839572.7
+     },
+     "resumes_merged": {
+      "1": 10834,
+      "2": 8983,
+      "3": 9240,
+      "4": 9758,
+      "5": 9147
+     },
+     "taskstats_enobufs": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0
+     },
+     "all": {
+      "run_us": {
+       "n": 15,
+       "q": [
+        13.1,
+        13.7,
+        14.4,
+        15.0,
+        221399.0,
+        1569238931.5,
+        1592480930.0,
+        1606261499.7,
+        1622304995.1,
+        1625914781.6
+       ],
+       "p50": 221399.0,
+       "table": {
+        "p": [
+         13.14,
+         13.7,
+         14.4,
+         15.0,
+         221399.0,
+         1569238931.4999986,
+         1592480929.9999936,
+         1606261499.6999938,
+         1622304995.13999,
+         1625914781.613989
+        ],
+        "min": 13.0,
+        "max": 1626315868.999989,
+        "means": [
+         13.00011272920849,
+         13.14045091683396,
+         13.700563646042449,
+         14.777956713029349,
+         146055.18304780382,
+         521349451.945842,
+         1586974169.553175,
+         1606261499.6999938,
+         1622304995.13999,
+         1625914781.613989,
+         1626315868.9999566
+        ]
+       },
+       "repeat_p50": {
+        "1": 221399.0,
+        "2": 228071.0,
+        "3": 219907.0,
+        "4": 216854.0,
+        "5": 223467.0
+       },
+       "repeat_mean": {
+        "1": 532629394.6667,
+        "2": 542181318.0,
+        "3": 518611998.6667,
+        "4": 527692886.0,
+        "5": 528308550.0
+       },
+       "repeat_n": {
+        "1": 3,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 3
+       }
+      },
+      "wait_us": {
+       "n": 10,
+       "q": [
+        99.1,
+        99.5,
+        99.9,
+        101.0,
+        101.5,
+        102.0,
+        103.8,
+        107.4,
+        110.3,
+        110.9
+       ],
+       "p50": 101.5,
+       "table": {
+        "p": [
+         99.09000009088231,
+         99.4500000899734,
+         99.90000008883726,
+         101.0000000007949,
+         101.50000002795423,
+         102.00000008353527,
+         103.8000000789907,
+         107.40000006990157,
+         110.28000006263028,
+         110.92800006099424
+        ],
+        "min": 99.00000009110954,
+        "max": 111.00000006081245,
+        "means": [
+         99.0381269860284,
+         99.24250767055776,
+         99.6406345645677,
+         100.61575480695709,
+         101.21181613175679,
+         102.0000000573251,
+         103.14678320305255,
+         107.40000006990157,
+         110.28000006263028,
+         110.92800006099424,
+         111.0000000608124
+        ]
+       },
+       "repeat_p50": {
+        "1": 101.5,
+        "2": 102.5,
+        "3": 100.5,
+        "4": 100.5,
+        "5": 106.0
+       },
+       "repeat_mean": {
+        "1": 101.5,
+        "2": 102.5,
+        "3": 100.5,
+        "4": 100.5,
+        "5": 106.0
+       },
+       "repeat_n": {
+        "1": 2,
+        "2": 2,
+        "3": 2,
+        "4": 2,
+        "5": 2
+       }
+      },
+      "disk_us": {
+       "n": 0,
+       "q": null,
+       "p50": null,
+       "table": null,
+       "repeat_p50": {
+        "1": null,
+        "2": null,
+        "3": null,
+        "4": null,
+        "5": null
+       },
+       "repeat_mean": {
+        "1": null,
+        "2": null,
+        "3": null,
+        "4": null,
+        "5": null
+       },
+       "repeat_n": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+       }
+      },
+      "uninterruptible_us": {
+       "n": 0,
+       "q": null,
+       "p50": null,
+       "table": null,
+       "repeat_p50": {
+        "1": null,
+        "2": null,
+        "3": null,
+        "4": null,
+        "5": null
+       },
+       "repeat_mean": {
+        "1": null,
+        "2": null,
+        "3": null,
+        "4": null,
+        "5": null
+       },
+       "repeat_n": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+       }
+      },
+      "network_us": {
+       "n": 0,
+       "q": null,
+       "p50": null,
+       "table": null,
+       "repeat_p50": {
+        "1": null,
+        "2": null,
+        "3": null,
+        "4": null,
+        "5": null
+       },
+       "repeat_mean": {
+        "1": null,
+        "2": null,
+        "3": null,
+        "4": null,
+        "5": null
+       },
+       "repeat_n": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+       }
+      },
+      "sleep_us": {
+       "n": 10,
+       "q": [
+        99.1,
+        99.5,
+        99.9,
+        101.0,
+        101.5,
+        102.0,
+        103.8,
+        107.4,
+        110.3,
+        110.9
+       ],
+       "p50": 101.5,
+       "table": {
+        "p": [
+         99.09000009088231,
+         99.4500000899734,
+         99.90000008883726,
+         101.0000000007949,
+         101.50000002795423,
+         102.00000008353527,
+         103.8000000789907,
+         107.40000006990157,
+         110.28000006263028,
+         110.92800006099424
+        ],
+        "min": 99.00000009110954,
+        "max": 111.00000006081245,
+        "means": [
+         99.0381269860284,
+         99.24250767055776,
+         99.6406345645677,
+         100.61575480695709,
+         101.21181613175679,
+         102.0000000573251,
+         103.14678320305255,
+         107.40000006990157,
+         110.28000006263028,
+         110.92800006099424,
+         111.0000000608124
+        ]
+       },
+       "repeat_p50": {
+        "1": 101.5,
+        "2": 102.5,
+        "3": 100.5,
+        "4": 100.5,
+        "5": 106.0
+       },
+       "repeat_mean": {
+        "1": 101.5,
+        "2": 102.5,
+        "3": 100.5,
+        "4": 100.5,
+        "5": 106.0
+       },
+       "repeat_n": {
+        "1": 2,
+        "2": 2,
+        "3": 2,
+        "4": 2,
+        "5": 2
+       }
+      },
+      "runnable_us": {
+       "n": 0,
+       "q": null,
+       "p50": null,
+       "table": null,
+       "repeat_p50": {
+        "1": null,
+        "2": null,
+        "3": null,
+        "4": null,
+        "5": null
+       },
+       "repeat_mean": {
+        "1": null,
+        "2": null,
+        "3": null,
+        "4": null,
+        "5": null
+       },
+       "repeat_n": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+       }
+      },
+      "bytes_per_wake": {
+       "n": 0,
+       "q": null,
+       "p50": null,
+       "table": null,
+       "repeat_p50": {
+        "1": null,
+        "2": null,
+        "3": null,
+        "4": null,
+        "5": null
+       },
+       "repeat_mean": {
+        "1": null,
+        "2": null,
+        "3": null,
+        "4": null,
+        "5": null
+       },
+       "repeat_n": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+       }
+      },
+      "batch_run_us": {
+       "n": 15,
+       "q": [
+        13.1,
+        13.7,
+        14.4,
+        15.0,
+        221399.0,
+        1569238931.5,
+        1592480930.0,
+        1606261499.7,
+        1622304995.1,
+        1625914781.6
+       ],
+       "p50": 221399.0,
+       "table": {
+        "p": [
+         13.14,
+         13.7,
+         14.4,
+         15.0,
+         221399.0,
+         1569238931.4999986,
+         1592480929.9999936,
+         1606261499.6999938,
+         1622304995.13999,
+         1625914781.613989
+        ],
+        "min": 13.0,
+        "max": 1626315868.999989,
+        "means": [
+         13.00011272920849,
+         13.14045091683396,
+         13.700563646042449,
+         14.777956713029349,
+         146055.18304780382,
+         521349451.945842,
+         1586974169.553175,
+         1606261499.6999938,
+         1622304995.13999,
+         1625914781.613989,
+         1626315868.9999566
+        ]
+       },
+       "repeat_p50": {
+        "1": 221399.0,
+        "2": 228071.0,
+        "3": 219907.0,
+        "4": 216854.0,
+        "5": 223467.0
+       },
+       "repeat_mean": {
+        "1": 532629394.6667,
+        "2": 542181318.0,
+        "3": 518611998.6667,
+        "4": 527692886.0,
+        "5": 528308550.0
+       },
+       "repeat_n": {
+        "1": 3,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 3
+       }
+      },
+      "batch_block_us": {
+       "n": 10,
+       "q": [
+        99.1,
+        99.5,
+        99.9,
+        101.0,
+        101.5,
+        102.0,
+        103.8,
+        107.4,
+        110.3,
+        110.9
+       ],
+       "p50": 101.5,
+       "table": {
+        "p": [
+         99.09000009088231,
+         99.4500000899734,
+         99.90000008883726,
+         101.0000000007949,
+         101.50000002795423,
+         102.00000008353527,
+         103.8000000789907,
+         107.40000006990157,
+         110.28000006263028,
+         110.92800006099424
+        ],
+        "min": 99.00000009110954,
+        "max": 111.00000006081245,
+        "means": [
+         99.0381269860284,
+         99.24250767055776,
+         99.6406345645677,
+         100.61575480695709,
+         101.21181613175679,
+         102.0000000573251,
+         103.14678320305255,
+         107.40000006990157,
+         110.28000006263028,
+         110.92800006099424,
+         111.0000000608124
+        ]
+       },
+       "repeat_p50": {
+        "1": 101.5,
+        "2": 102.5,
+        "3": 100.5,
+        "4": 100.5,
+        "5": 106.0
+       },
+       "repeat_mean": {
+        "1": 101.5,
+        "2": 102.5,
+        "3": 100.5,
+        "4": 100.5,
+        "5": 106.0
+       },
+       "repeat_n": {
+        "1": 2,
+        "2": 2,
+        "3": 2,
+        "4": 2,
+        "5": 2
+       }
+      }
+     },
+     "threads": {
+      "python#1": {
+       "cpu_us": {
+        "1": 1597888184.0,
+        "2": 1626543954.0,
+        "3": 1555835996.0,
+        "4": 1583078658.0,
+        "5": 1584925650.0
+       },
+       "run_us": {
+        "n": 15,
+        "q": [
+         13.1,
+         13.7,
+         14.4,
+         15.0,
+         221399.0,
+         1569238931.5,
+         1592480930.0,
+         1606261499.7,
+         1622304995.1,
+         1625914781.6
+        ],
+        "p50": 221399.0,
+        "table": {
+         "p": [
+          13.14,
+          13.7,
+          14.4,
+          15.0,
+          221399.0,
+          1569238931.4999986,
+          1592480929.9999936,
+          1606261499.6999938,
+          1622304995.13999,
+          1625914781.613989
+         ],
+         "min": 13.0,
+         "max": 1626315868.999989,
+         "means": [
+          13.00011272920849,
+          13.14045091683396,
+          13.700563646042449,
+          14.777956713029349,
+          146055.18304780382,
+          521349451.945842,
+          1586974169.553175,
+          1606261499.6999938,
+          1622304995.13999,
+          1625914781.613989,
+          1626315868.9999566
+         ]
+        },
+        "repeat_p50": {
+         "1": 221399.0,
+         "2": 228071.0,
+         "3": 219907.0,
+         "4": 216854.0,
+         "5": 223467.0
+        },
+        "repeat_mean": {
+         "1": 532629394.6667,
+         "2": 542181318.0,
+         "3": 518611998.6667,
+         "4": 527692886.0,
+         "5": 528308550.0
+        },
+        "repeat_n": {
+         "1": 3,
+         "2": 3,
+         "3": 3,
+         "4": 3,
+         "5": 3
+        }
+       },
+       "wait_us": {
+        "n": 10,
+        "q": [
+         99.1,
+         99.5,
+         99.9,
+         101.0,
+         101.5,
+         102.0,
+         103.8,
+         107.4,
+         110.3,
+         110.9
+        ],
+        "p50": 101.5,
+        "table": {
+         "p": [
+          99.09000009088231,
+          99.4500000899734,
+          99.90000008883726,
+          101.0000000007949,
+          101.50000002795423,
+          102.00000008353527,
+          103.8000000789907,
+          107.40000006990157,
+          110.28000006263028,
+          110.92800006099424
+         ],
+         "min": 99.00000009110954,
+         "max": 111.00000006081245,
+         "means": [
+          99.0381269860284,
+          99.24250767055776,
+          99.6406345645677,
+          100.61575480695709,
+          101.21181613175679,
+          102.0000000573251,
+          103.14678320305255,
+          107.40000006990157,
+          110.28000006263028,
+          110.92800006099424,
+          111.0000000608124
+         ]
+        },
+        "repeat_p50": {
+         "1": 101.5,
+         "2": 102.5,
+         "3": 100.5,
+         "4": 100.5,
+         "5": 106.0
+        },
+        "repeat_mean": {
+         "1": 101.5,
+         "2": 102.5,
+         "3": 100.5,
+         "4": 100.5,
+         "5": 106.0
+        },
+        "repeat_n": {
+         "1": 2,
+         "2": 2,
+         "3": 2,
+         "4": 2,
+         "5": 2
+        }
+       },
+       "disk_us": {
+        "n": 0,
+        "q": null,
+        "p50": null,
+        "table": null,
+        "repeat_p50": {
+         "1": null,
+         "2": null,
+         "3": null,
+         "4": null,
+         "5": null
+        },
+        "repeat_mean": {
+         "1": null,
+         "2": null,
+         "3": null,
+         "4": null,
+         "5": null
+        },
+        "repeat_n": {
+         "1": 0,
+         "2": 0,
+         "3": 0,
+         "4": 0,
+         "5": 0
+        }
+       },
+       "uninterruptible_us": {
+        "n": 0,
+        "q": null,
+        "p50": null,
+        "table": null,
+        "repeat_p50": {
+         "1": null,
+         "2": null,
+         "3": null,
+         "4": null,
+         "5": null
+        },
+        "repeat_mean": {
+         "1": null,
+         "2": null,
+         "3": null,
+         "4": null,
+         "5": null
+        },
+        "repeat_n": {
+         "1": 0,
+         "2": 0,
+         "3": 0,
+         "4": 0,
+         "5": 0
+        }
+       },
+       "network_us": {
+        "n": 0,
+        "q": null,
+        "p50": null,
+        "table": null,
+        "repeat_p50": {
+         "1": null,
+         "2": null,
+         "3": null,
+         "4": null,
+         "5": null
+        },
+        "repeat_mean": {
+         "1": null,
+         "2": null,
+         "3": null,
+         "4": null,
+         "5": null
+        },
+        "repeat_n": {
+         "1": 0,
+         "2": 0,
+         "3": 0,
+         "4": 0,
+         "5": 0
+        }
+       },
+       "sleep_us": {
+        "n": 10,
+        "q": [
+         99.1,
+         99.5,
+         99.9,
+         101.0,
+         101.5,
+         102.0,
+         103.8,
+         107.4,
+         110.3,
+         110.9
+        ],
+        "p50": 101.5,
+        "table": {
+         "p": [
+          99.09000009088231,
+          99.4500000899734,
+          99.90000008883726,
+          101.0000000007949,
+          101.50000002795423,
+          102.00000008353527,
+          103.8000000789907,
+          107.40000006990157,
+          110.28000006263028,
+          110.92800006099424
+         ],
+         "min": 99.00000009110954,
+         "max": 111.00000006081245,
+         "means": [
+          99.0381269860284,
+          99.24250767055776,
+          99.6406345645677,
+          100.61575480695709,
+          101.21181613175679,
+          102.0000000573251,
+          103.14678320305255,
+          107.40000006990157,
+          110.28000006263028,
+          110.92800006099424,
+          111.0000000608124
+         ]
+        },
+        "repeat_p50": {
+         "1": 101.5,
+         "2": 102.5,
+         "3": 100.5,
+         "4": 100.5,
+         "5": 106.0
+        },
+        "repeat_mean": {
+         "1": 101.5,
+         "2": 102.5,
+         "3": 100.5,
+         "4": 100.5,
+         "5": 106.0
+        },
+        "repeat_n": {
+         "1": 2,
+         "2": 2,
+         "3": 2,
+         "4": 2,
+         "5": 2
+        }
+       },
+       "runnable_us": {
+        "n": 0,
+        "q": null,
+        "p50": null,
+        "table": null,
+        "repeat_p50": {
+         "1": null,
+         "2": null,
+         "3": null,
+         "4": null,
+         "5": null
+        },
+        "repeat_mean": {
+         "1": null,
+         "2": null,
+         "3": null,
+         "4": null,
+         "5": null
+        },
+        "repeat_n": {
+         "1": 0,
+         "2": 0,
+         "3": 0,
+         "4": 0,
+         "5": 0
+        }
+       },
+       "bytes_per_wake": {
+        "n": 0,
+        "q": null,
+        "p50": null,
+        "table": null,
+        "repeat_p50": {
+         "1": null,
+         "2": null,
+         "3": null,
+         "4": null,
+         "5": null
+        },
+        "repeat_mean": {
+         "1": null,
+         "2": null,
+         "3": null,
+         "4": null,
+         "5": null
+        },
+        "repeat_n": {
+         "1": 0,
+         "2": 0,
+         "3": 0,
+         "4": 0,
+         "5": 0
+        }
+       },
+       "batch_run_us": {
+        "n": 15,
+        "q": [
+         13.1,
+         13.7,
+         14.4,
+         15.0,
+         221399.0,
+         1569238931.5,
+         1592480930.0,
+         1606261499.7,
+         1622304995.1,
+         1625914781.6
+        ],
+        "p50": 221399.0,
+        "table": {
+         "p": [
+          13.14,
+          13.7,
+          14.4,
+          15.0,
+          221399.0,
+          1569238931.4999986,
+          1592480929.9999936,
+          1606261499.6999938,
+          1622304995.13999,
+          1625914781.613989
+         ],
+         "min": 13.0,
+         "max": 1626315868.999989,
+         "means": [
+          13.00011272920849,
+          13.14045091683396,
+          13.700563646042449,
+          14.777956713029349,
+          146055.18304780382,
+          521349451.945842,
+          1586974169.553175,
+          1606261499.6999938,
+          1622304995.13999,
+          1625914781.613989,
+          1626315868.9999566
+         ]
+        },
+        "repeat_p50": {
+         "1": 221399.0,
+         "2": 228071.0,
+         "3": 219907.0,
+         "4": 216854.0,
+         "5": 223467.0
+        },
+        "repeat_mean": {
+         "1": 532629394.6667,
+         "2": 542181318.0,
+         "3": 518611998.6667,
+         "4": 527692886.0,
+         "5": 528308550.0
+        },
+        "repeat_n": {
+         "1": 3,
+         "2": 3,
+         "3": 3,
+         "4": 3,
+         "5": 3
+        }
+       },
+       "batch_block_us": {
+        "n": 10,
+        "q": [
+         99.1,
+         99.5,
+         99.9,
+         101.0,
+         101.5,
+         102.0,
+         103.8,
+         107.4,
+         110.3,
+         110.9
+        ],
+        "p50": 101.5,
+        "table": {
+         "p": [
+          99.09000009088231,
+          99.4500000899734,
+          99.90000008883726,
+          101.0000000007949,
+          101.50000002795423,
+          102.00000008353527,
+          103.8000000789907,
+          107.40000006990157,
+          110.28000006263028,
+          110.92800006099424
+         ],
+         "min": 99.00000009110954,
+         "max": 111.00000006081245,
+         "means": [
+          99.0381269860284,
+          99.24250767055776,
+          99.6406345645677,
+          100.61575480695709,
+          101.21181613175679,
+          102.0000000573251,
+          103.14678320305255,
+          107.40000006990157,
+          110.28000006263028,
+          110.92800006099424,
+          111.0000000608124
+         ]
+        },
+        "repeat_p50": {
+         "1": 101.5,
+         "2": 102.5,
+         "3": 100.5,
+         "4": 100.5,
+         "5": 106.0
+        },
+        "repeat_mean": {
+         "1": 101.5,
+         "2": 102.5,
+         "3": 100.5,
+         "4": 100.5,
+         "5": 106.0
+        },
+        "repeat_n": {
+         "1": 2,
+         "2": 2,
+         "3": 2,
+         "4": 2,
+         "5": 2
+        }
+       }
+      }
+     },
+     "processes": {
+      "1": [
+       {
+        "pid": 27741,
+        "role": "python",
+        "exec": "/home/user/venv/bin/python",
+        "threads": 1,
+        "perf_cpu_us": 1597888184.0,
+        "taskstats_cpu_us": 1597784814.7,
+        "perf_over_taskstats": 1.0001,
+        "disk": null
+       }
+      ],
+      "2": [
+       {
+        "pid": 27721,
+        "role": "python",
+        "exec": "/home/user/venv/bin/python",
+        "threads": 1,
+        "perf_cpu_us": 1626543954.0,
+        "taskstats_cpu_us": 1626433269.8,
+        "perf_over_taskstats": 1.0001,
+        "disk": null
+       }
+      ],
+      "3": [
+       {
+        "pid": 27726,
+        "role": "python",
+        "exec": "/home/user/venv/bin/python",
+        "threads": 1,
+        "perf_cpu_us": 1555835996.0,
+        "taskstats_cpu_us": 1555730723.9,
+        "perf_over_taskstats": 1.0001,
+        "disk": null
+       }
+      ],
+      "4": [
+       {
+        "pid": 27721,
+        "role": "python",
+        "exec": "/home/user/venv/bin/python",
+        "threads": 1,
+        "perf_cpu_us": 1583078658.0,
+        "taskstats_cpu_us": 1582987076.0,
+        "perf_over_taskstats": 1.0001,
+        "disk": null
+       }
+      ],
+      "5": [
+       {
+        "pid": 27741,
+        "role": "python",
+        "exec": "/home/user/venv/bin/python",
+        "threads": 1,
+        "perf_cpu_us": 1584925650.0,
+        "taskstats_cpu_us": 1584839572.7,
+        "perf_over_taskstats": 1.0001,
+        "disk": null
+       }
+      ]
+     },
+     "outside_on_measured_cpu": {
+      "1": {
+       "kworker/3:0-eve": {
+        "rows": 8708,
+        "run_ms": 118.231
+       },
+       "multipathd": {
+        "rows": 1608,
+        "run_ms": 21.188
+       },
+       "provjobd7729520": {
+        "rows": 37,
+        "run_ms": 10.414
+       },
+       "migration/3": {
+        "rows": 402,
+        "run_ms": 2.893
+       },
+       ".NET TP Worker": {
+        "rows": 13,
+        "run_ms": 2.774
+       }
+      },
+      "2": {
+       "kworker/3:2-mm_": {
+        "rows": 8471,
+        "run_ms": 136.296
+       },
+       "migration/3": {
+        "rows": 409,
+        "run_ms": 3.251
+       },
+       "kworker/3:1H-kb": {
+        "rows": 158,
+        "run_ms": 2.2
+       },
+       "ksoftirqd/3": {
+        "rows": 33,
+        "run_ms": 0.771
+       },
+       "systemd-resolve": {
+        "rows": 1,
+        "run_ms": 0.564
+       }
+      },
+      "3": {
+       "kworker/3:2-eve": {
+        "rows": 8743,
+        "run_ms": 116.768
+       },
+       "sadc": {
+        "rows": 17,
+        "run_ms": 3.714
+       },
+       "migration/3": {
+        "rows": 391,
+        "run_ms": 2.788
+       },
+       "9": {
+        "rows": 1,
+        "run_ms": 2.499
+       },
+       "kworker/3:0H-kb": {
+        "rows": 152,
+        "run_ms": 1.957
+       }
+      },
+      "4": {
+       "kworker/3:0-mm_": {
+        "rows": 9262,
+        "run_ms": 124.884
+       },
+       "migration/3": {
+        "rows": 398,
+        "run_ms": 2.776
+       },
+       "provjobd1844639": {
+        "rows": 5,
+        "run_ms": 2.134
+       },
+       "kworker/3:1H-kb": {
+        "rows": 154,
+        "run_ms": 2.023
+       },
+       "systemd-journal": {
+        "rows": 8,
+        "run_ms": 1.534
+       }
+      },
+      "5": {
+       "kworker/3:1-mm_": {
+        "rows": 8641,
+        "run_ms": 131.487
+       },
+       "migration/3": {
+        "rows": 398,
+        "run_ms": 2.901
+       },
+       "provjobd3798144": {
+        "rows": 125,
+        "run_ms": 2.414
+       },
+       "kworker/3:1H-kb": {
+        "rows": 160,
+        "run_ms": 2.182
+       },
+       "systemd-journal": {
+        "rows": 5,
+        "run_ms": 1.085
+       }
+      }
+     },
+     "cached_fraction": {
+      "1": 1.0,
+      "2": 1.0,
+      "3": 1.0,
+      "4": 1.0,
+      "5": 1.0
+     }
+    }
+   },
+   "stability": {
+    "tolerance": 0.05,
+    "abs_floor_us": 1.0,
+    "min_repeats": 5,
+    "quantities": {
+     "mnist-train run between voluntary blocks (\u00b5s)": {
+      "k": 5,
+      "mean": 529884829.4667,
+      "cv": 0.0162,
+      "half_width": 0.0201,
+      "half_width_abs": 10627082.3108,
+      "leave_one_out": 0.0058,
+      "passes": true,
+      "needed": 5,
+      "excepted": false,
+      "carried": true
+     },
+     "mnist-train block per run (\u00b5s)": {
+      "k": 5,
+      "mean": 102.2,
+      "cv": 0.0223,
+      "half_width": 0.0277,
+      "half_width_abs": 2.831,
+      "leave_one_out": 0.0093,
+      "passes": true,
+      "needed": 5,
+      "excepted": false,
+      "carried": true
+     },
+     "mnist-train CPU total (\u00b5s)": {
+      "k": 5,
+      "mean": 1589654488.4,
+      "cv": 0.0162,
+      "half_width": 0.0201,
+      "half_width_abs": 31881246.9324,
+      "leave_one_out": 0.0058,
+      "passes": true,
+      "needed": 5,
+      "excepted": false,
+      "carried": true
+     }
+    },
+    "passes": true,
+    "excepted": []
+   },
+   "first_batch": {
+    "by_quantity": {
+     "mnist-train run between voluntary blocks (\u00b5s)": 5,
+     "mnist-train block per run (\u00b5s)": 5,
+     "mnist-train CPU total (\u00b5s)": 5
+    },
+    "count": 5
+   },
+   "checks": {},
+   "comparisons": {},
+   "also": {
+    "state": {
+     "1": {
+      "upgrade.layer.packages": "1445",
+      "upgrade.layer.added": "python3-venv",
+      "upgrade.layer.sha256": "b137960b535edc27c16e04454779edc65d0fdc2b32f9a55a6335f22031df87d9",
+      "upgrade.t0": "20260922T170000Z",
+      "upgrade.t1": "20260728T000000Z",
+      "upgrade.build.rc": "0",
+      "upgrade.build_s": "435",
+      "upgrade.t0.installed": "1449",
+      "upgrade.layer.missing": "0",
+      "upgrade.layer.extra": "4",
+      "upgrade.chroot_bytes": "2648678757",
+      "upgrade.run_systemd_system": "absent",
+      "mnist.useradd.rc": "0",
+      "mnist.python.version": "3.12.3-1ubuntu0.17",
+      "mnist.venv_pkg.version": "3.12.3-0ubuntu2.1",
+      "mnist.example.main.py.pin": "ok",
+      "mnist.example.README.md.pin": "ok",
+      "mnist.example.requirements.txt.pin": "ok",
+      "mnist.example.placed.rc": "0",
+      "mnist.venv.rc": "0",
+      "mnist.pip.rc": "0",
+      "mnist.pip_s": "28",
+      "mnist.torch.version": "2.14.0+cpu",
+      "mnist.torchvision.version": "0.29.0+cpu",
+      "mnist.pip-freeze.sha256": "9b1862cf91fbf40fb4418a3aa340e2f51d5411c66ec72431222227ba46c072b1",
+      "mnist.venv_bytes": "985279990",
+      "mnist.warm.rc": "0",
+      "mnist.warm_s": "11",
+      "mnist.data.files": "8",
+      "mnist.data.sha256": "a3e004ee720c641943c6fb17b1c30ca336461947512280ec620a9005918dfad8",
+      "mnist.probe.rc": "0",
+      "mnist.probe.threads": "1",
+      "mnist.probe.interop_threads": "1",
+      "cache.mnist-train.fraction": "1.0000",
+      "cache.mnist-train.torch_lib_fraction": "1.0000",
+      "mnist.thp_set.rc": "0",
+      "mnist.train.epochs": "14",
+      "mnist.train.log_lines": "1316",
+      "mnist.train.last_test": "Test set: Average loss: 0.0256, Accuracy: 9916/10000 (99%)",
+      "mnist.checkpoint.bytes": "4803113",
+      "mnist.checkpoint.sha256": "18f1b8f519e65fc9cc695c4d2d726f110756061d783c450a4856a07516152d9e"
+     },
+     "2": {
+      "upgrade.layer.packages": "1445",
+      "upgrade.layer.added": "python3-venv",
+      "upgrade.layer.sha256": "b137960b535edc27c16e04454779edc65d0fdc2b32f9a55a6335f22031df87d9",
+      "upgrade.t0": "20260922T170000Z",
+      "upgrade.t1": "20260728T000000Z",
+      "upgrade.build.rc": "0",
+      "upgrade.build_s": "433",
+      "upgrade.t0.installed": "1449",
+      "upgrade.layer.missing": "0",
+      "upgrade.layer.extra": "4",
+      "upgrade.chroot_bytes": "2648678757",
+      "upgrade.run_systemd_system": "absent",
+      "mnist.useradd.rc": "0",
+      "mnist.python.version": "3.12.3-1ubuntu0.17",
+      "mnist.venv_pkg.version": "3.12.3-0ubuntu2.1",
+      "mnist.example.main.py.pin": "ok",
+      "mnist.example.README.md.pin": "ok",
+      "mnist.example.requirements.txt.pin": "ok",
+      "mnist.example.placed.rc": "0",
+      "mnist.venv.rc": "0",
+      "mnist.pip.rc": "0",
+      "mnist.pip_s": "29",
+      "mnist.torch.version": "2.14.0+cpu",
+      "mnist.torchvision.version": "0.29.0+cpu",
+      "mnist.pip-freeze.sha256": "9b1862cf91fbf40fb4418a3aa340e2f51d5411c66ec72431222227ba46c072b1",
+      "mnist.venv_bytes": "985279990",
+      "mnist.warm.rc": "0",
+      "mnist.warm_s": "11",
+      "mnist.data.files": "8",
+      "mnist.data.sha256": "a3e004ee720c641943c6fb17b1c30ca336461947512280ec620a9005918dfad8",
+      "mnist.probe.rc": "0",
+      "mnist.probe.threads": "1",
+      "mnist.probe.interop_threads": "1",
+      "cache.mnist-train.fraction": "1.0000",
+      "cache.mnist-train.torch_lib_fraction": "1.0000",
+      "mnist.thp_set.rc": "0",
+      "mnist.train.epochs": "14",
+      "mnist.train.log_lines": "1316",
+      "mnist.train.last_test": "Test set: Average loss: 0.0256, Accuracy: 9916/10000 (99%)",
+      "mnist.checkpoint.bytes": "4803113",
+      "mnist.checkpoint.sha256": "18f1b8f519e65fc9cc695c4d2d726f110756061d783c450a4856a07516152d9e"
+     },
+     "3": {
+      "upgrade.layer.packages": "1445",
+      "upgrade.layer.added": "python3-venv",
+      "upgrade.layer.sha256": "b137960b535edc27c16e04454779edc65d0fdc2b32f9a55a6335f22031df87d9",
+      "upgrade.t0": "20260922T170000Z",
+      "upgrade.t1": "20260728T000000Z",
+      "upgrade.build.rc": "0",
+      "upgrade.build_s": "349",
+      "upgrade.t0.installed": "1449",
+      "upgrade.layer.missing": "0",
+      "upgrade.layer.extra": "4",
+      "upgrade.chroot_bytes": "2648678757",
+      "upgrade.run_systemd_system": "absent",
+      "mnist.useradd.rc": "0",
+      "mnist.python.version": "3.12.3-1ubuntu0.17",
+      "mnist.venv_pkg.version": "3.12.3-0ubuntu2.1",
+      "mnist.example.main.py.pin": "ok",
+      "mnist.example.README.md.pin": "ok",
+      "mnist.example.requirements.txt.pin": "ok",
+      "mnist.example.placed.rc": "0",
+      "mnist.venv.rc": "0",
+      "mnist.pip.rc": "0",
+      "mnist.pip_s": "27",
+      "mnist.torch.version": "2.14.0+cpu",
+      "mnist.torchvision.version": "0.29.0+cpu",
+      "mnist.pip-freeze.sha256": "9b1862cf91fbf40fb4418a3aa340e2f51d5411c66ec72431222227ba46c072b1",
+      "mnist.venv_bytes": "985279990",
+      "mnist.warm.rc": "0",
+      "mnist.warm_s": "10",
+      "mnist.data.files": "8",
+      "mnist.data.sha256": "a3e004ee720c641943c6fb17b1c30ca336461947512280ec620a9005918dfad8",
+      "mnist.probe.rc": "0",
+      "mnist.probe.threads": "1",
+      "mnist.probe.interop_threads": "1",
+      "cache.mnist-train.fraction": "1.0000",
+      "cache.mnist-train.torch_lib_fraction": "1.0000",
+      "mnist.thp_set.rc": "0",
+      "mnist.train.epochs": "14",
+      "mnist.train.log_lines": "1316",
+      "mnist.train.last_test": "Test set: Average loss: 0.0256, Accuracy: 9916/10000 (99%)",
+      "mnist.checkpoint.bytes": "4803113",
+      "mnist.checkpoint.sha256": "18f1b8f519e65fc9cc695c4d2d726f110756061d783c450a4856a07516152d9e"
+     },
+     "4": {
+      "upgrade.layer.packages": "1445",
+      "upgrade.layer.added": "python3-venv",
+      "upgrade.layer.sha256": "b137960b535edc27c16e04454779edc65d0fdc2b32f9a55a6335f22031df87d9",
+      "upgrade.t0": "20260922T170000Z",
+      "upgrade.t1": "20260728T000000Z",
+      "upgrade.build.rc": "0",
+      "upgrade.build_s": "391",
+      "upgrade.t0.installed": "1449",
+      "upgrade.layer.missing": "0",
+      "upgrade.layer.extra": "4",
+      "upgrade.chroot_bytes": "2648678757",
+      "upgrade.run_systemd_system": "absent",
+      "mnist.useradd.rc": "0",
+      "mnist.python.version": "3.12.3-1ubuntu0.17",
+      "mnist.venv_pkg.version": "3.12.3-0ubuntu2.1",
+      "mnist.example.main.py.pin": "ok",
+      "mnist.example.README.md.pin": "ok",
+      "mnist.example.requirements.txt.pin": "ok",
+      "mnist.example.placed.rc": "0",
+      "mnist.venv.rc": "0",
+      "mnist.pip.rc": "0",
+      "mnist.pip_s": "28",
+      "mnist.torch.version": "2.14.0+cpu",
+      "mnist.torchvision.version": "0.29.0+cpu",
+      "mnist.pip-freeze.sha256": "9b1862cf91fbf40fb4418a3aa340e2f51d5411c66ec72431222227ba46c072b1",
+      "mnist.venv_bytes": "985279990",
+      "mnist.warm.rc": "0",
+      "mnist.warm_s": "10",
+      "mnist.data.files": "8",
+      "mnist.data.sha256": "a3e004ee720c641943c6fb17b1c30ca336461947512280ec620a9005918dfad8",
+      "mnist.probe.rc": "0",
+      "mnist.probe.threads": "1",
+      "mnist.probe.interop_threads": "1",
+      "cache.mnist-train.fraction": "1.0000",
+      "cache.mnist-train.torch_lib_fraction": "1.0000",
+      "mnist.thp_set.rc": "0",
+      "mnist.train.epochs": "14",
+      "mnist.train.log_lines": "1316",
+      "mnist.train.last_test": "Test set: Average loss: 0.0256, Accuracy: 9916/10000 (99%)",
+      "mnist.checkpoint.bytes": "4803113",
+      "mnist.checkpoint.sha256": "18f1b8f519e65fc9cc695c4d2d726f110756061d783c450a4856a07516152d9e"
+     },
+     "5": {
+      "upgrade.layer.packages": "1445",
+      "upgrade.layer.added": "python3-venv",
+      "upgrade.layer.sha256": "b137960b535edc27c16e04454779edc65d0fdc2b32f9a55a6335f22031df87d9",
+      "upgrade.t0": "20260922T170000Z",
+      "upgrade.t1": "20260728T000000Z",
+      "upgrade.build.rc": "0",
+      "upgrade.build_s": "396",
+      "upgrade.t0.installed": "1449",
+      "upgrade.layer.missing": "0",
+      "upgrade.layer.extra": "4",
+      "upgrade.chroot_bytes": "2648678761",
+      "upgrade.run_systemd_system": "absent",
+      "mnist.useradd.rc": "0",
+      "mnist.python.version": "3.12.3-1ubuntu0.17",
+      "mnist.venv_pkg.version": "3.12.3-0ubuntu2.1",
+      "mnist.example.main.py.pin": "ok",
+      "mnist.example.README.md.pin": "ok",
+      "mnist.example.requirements.txt.pin": "ok",
+      "mnist.example.placed.rc": "0",
+      "mnist.venv.rc": "0",
+      "mnist.pip.rc": "0",
+      "mnist.pip_s": "27",
+      "mnist.torch.version": "2.14.0+cpu",
+      "mnist.torchvision.version": "0.29.0+cpu",
+      "mnist.pip-freeze.sha256": "9b1862cf91fbf40fb4418a3aa340e2f51d5411c66ec72431222227ba46c072b1",
+      "mnist.venv_bytes": "985279990",
+      "mnist.warm.rc": "0",
+      "mnist.warm_s": "7",
+      "mnist.data.files": "8",
+      "mnist.data.sha256": "a3e004ee720c641943c6fb17b1c30ca336461947512280ec620a9005918dfad8",
+      "mnist.probe.rc": "0",
+      "mnist.probe.threads": "1",
+      "mnist.probe.interop_threads": "1",
+      "cache.mnist-train.fraction": "1.0000",
+      "cache.mnist-train.torch_lib_fraction": "1.0000",
+      "mnist.thp_set.rc": "0",
+      "mnist.train.epochs": "14",
+      "mnist.train.log_lines": "1316",
+      "mnist.train.last_test": "Test set: Average loss: 0.0256, Accuracy: 9916/10000 (99%)",
+      "mnist.checkpoint.bytes": "4803113",
+      "mnist.checkpoint.sha256": "18f1b8f519e65fc9cc695c4d2d726f110756061d783c450a4856a07516152d9e"
+     }
+    },
+    "cached_fraction": {
+     "mnist-train": {
+      "1": 1.0,
+      "2": 1.0,
+      "3": 1.0,
+      "4": 1.0,
+      "5": 1.0
+     }
+    }
+   }
+  }
+ }
+}

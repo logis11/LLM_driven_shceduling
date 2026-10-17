@@ -2,7 +2,9 @@
 
 `compute_aggregates` takes the typed rows of one records file (what
 `records.read_csv` returns) and yields aggregate rows: one per
-(entity, metric, aggregate, cause, window, index) with a value. Every trace
+(entity, metric, aggregate, cause, channel, window, index) with a value. The
+`ready_wait` aggregates come per cause and, for cause `wake`, per channel kind
+as well (§8), so interaction latency can read the input channel alone. Every trace
 aggregate §8 lists is here whether a scoring term weights it or not, so the
 scorer, the guards, and the report read one file (`harness/aggregates/schema/`).
 The recognition aggregates are the grader's (sub-task 8.4), not this module's.
@@ -15,10 +17,22 @@ observations "at or before" `T_end`.
 The per-switch excess and its boost variant (§8) need the interactive task the
 scoring spec names for the file — the caller passes `interactive`, the entities
 of the file's `ready_wait` terms — and the `boost_window` rows the primitives
-emit (§6.10, sub-task 8.10). Inside a switch window (or the boost windows of that
-config interval) means the wake row's `t` lies in it; "the rest of that config
+emit (§6.10, sub-task 8.10). Its wake rows are the input channel's. Inside a
+switch window (or the boost windows of that config interval) means the wake
+row's `t` lies in it; "the rest of that config
 interval outside any window" is the interval's wake rows in neither. A variant
 is written only when both sides have rows.
+
+The flip aggregates (9.21 spec, decision 7; the hold-time plan's step 1) are
+three more rows over the config schedule, computed by `flip_aggregates` from
+what already exists — the schedule, the recognition log, the run's graded
+queries and the per-switch excess rows above: the number of configuration
+changes the daemon applied (an applied entry whose algorithm, params or cap
+differ from the entry before it), the number of those whose query the grader
+marked `config_correct` 0 (one query yields one schedule entry, data-contracts
+§7, so entry k is query k − 1's), and the sum of the per-switch excess over the
+wrong changes that were switches into MLFQ, where the excess is defined. They
+are emitted for a recognizing run only; `fixed` consults no recognizer.
 
 Values are written as decimal strings at a fixed precision (`fmt`) so identical
 records give identical files: twelve places here, because the scorer divides
@@ -29,6 +43,7 @@ computed exactly on the integer records with numpy's "linear" convention
 neighbours; R type 7), so no float noise reaches the file.
 """
 
+import json
 from decimal import ROUND_HALF_EVEN, Decimal
 from fractions import Fraction
 
@@ -39,10 +54,11 @@ T_INTERACTION_US = 100_000          # metrics doc §10
 PERCENTILE_METHOD = "linear"        # numpy's linear interpolation, R type 7 (metrics doc §8)
 PLACES = 12                         # decimal places in the aggregates file
 
-IDENTITY = ("workload_id", "condition", "table", "seed", "boot_default")
-COLUMNS = IDENTITY + ("entity", "metric", "aggregate", "cause",
+IDENTITY = ("workload_id", "condition", "table", "seed", "boot_default", "telemetry")
+COLUMNS = IDENTITY + ("entity", "metric", "aggregate", "cause", "channel",
                       "window_start_us", "window_end_us", "index", "value")
 PROVENANCES = ("unmodified", "clamped", "held", "fallback")
+FLIP_AGGREGATES = ("change_count", "wrong_change_count", "wrong_switch_excess_sum")   # 9.21 decision 7
 
 
 def fmt(x, places=PLACES) -> str:
@@ -86,15 +102,15 @@ def compute_aggregates(rows, windows=None, interactive=()):
     windows = windows or {}
     identity = run_identity(rows)
     df = pd.DataFrame(rows)
-    for col in ("cause", "provenance", "algorithm", "index", "period_us"):
+    for col in ("cause", "channel", "provenance", "algorithm", "index", "period_us", "skipped"):
         if col not in df.columns:
             df[col] = np.nan
     out = []
 
-    def emit(entity, metric, aggregate, value, cause="", window=(None, None), index=""):
+    def emit(entity, metric, aggregate, value, cause="", window=(None, None), index="", channel=""):
         start, end = window
         out.append({**identity, "entity": entity, "metric": metric, "aggregate": aggregate,
-                    "cause": cause,
+                    "cause": cause, "channel": channel,
                     "window_start_us": "" if start is None else str(start),
                     "window_end_us": "" if end is None else str(end),
                     "index": "" if index == "" else str(index),
@@ -106,46 +122,58 @@ def compute_aggregates(rows, windows=None, interactive=()):
     def windows_for(entity, metric):
         return [(None, None)] + list(windows.get((entity, metric), []))
 
-    # --- ready_wait: per entity, per cause (and any cause), per window
+    # --- ready_wait: per entity, per cause (and any cause), wake per channel too, per window
     rw = df[df["metric"] == "ready_wait"]
     for entity, g in rw.groupby("entity", sort=True):
-        causes = [""] + sorted(c for c in g["cause"].dropna().unique())
+        filters = [("", "")] + [(c, "") for c in sorted(g["cause"].dropna().unique())]
+        wake = g[g["cause"] == "wake"]
+        filters += [("wake", ch) for ch in sorted(wake["channel"].dropna().unique())]
         for window in windows_for(entity, "ready_wait"):
-            for cause in causes:
+            for cause, channel in filters:
                 sel = g if cause == "" else g[g["cause"] == cause]
+                if channel:
+                    sel = sel[sel["channel"] == channel]
                 sel = sel[[_in_window(int(t), window) for t in sel["t"]]]
                 if sel.empty:
                     continue
                 vals = sel["value"].astype(int).tolist()
-                emit(entity, "ready_wait", "count", len(vals), cause, window)
-                emit(entity, "ready_wait", "mean", Fraction(sum(vals), len(vals)), cause, window)
+                kw = dict(cause=cause, window=window, channel=channel)
+                emit(entity, "ready_wait", "count", len(vals), **kw)
+                emit(entity, "ready_wait", "mean", Fraction(sum(vals), len(vals)), **kw)
                 for p, name in ((50, "p50"), (95, "p95"), (99, "p99")):
-                    emit(entity, "ready_wait", name, percentile(vals, p), cause, window)
-                emit(entity, "ready_wait", "max", max(vals), cause, window)
+                    emit(entity, "ready_wait", name, percentile(vals, p), **kw)
+                emit(entity, "ready_wait", "max", max(vals), **kw)
                 over = sum(1 for v in vals if v > T_INTERACTION_US)
-                emit(entity, "ready_wait", "over_threshold", Fraction(over, len(vals)), cause, window)
+                emit(entity, "ready_wait", "over_threshold", Fraction(over, len(vals)), **kw)
 
-    # --- job: per entity, per window
+    # --- job: per entity, per window. A skipped tick (metrics doc §6.2, the TIMER skip
+    # rule) is a job row with no completion: it counts, it is missed, it has no latency.
     jobs = df[df["metric"] == "job"]
     for entity, g in jobs.groupby("entity", sort=True):
         for window in windows_for(entity, "job"):
             sel = g[[_in_window(int(t), window) for t in g["t"]]]
             if sel.empty:
                 continue
-            vals = sel["value"].astype(int).tolist()
-            periods = sel["period_us"].astype(int).tolist()
-            emit(entity, "job", "count", len(vals), "", window)
-            missed = sum(1 for v, per in zip(vals, periods) if v > per)
-            emit(entity, "job", "miss_rate", Fraction(missed, len(vals)), "", window)
-            emit(entity, "job", "latency_p50", percentile(vals, 50), "", window)
-            emit(entity, "job", "latency_p99", percentile(vals, 99), "", window)
+            is_skipped = sel["skipped"].fillna(0).astype(int) == 1
+            done = sel[~is_skipped]
+            vals = done["value"].astype(int).tolist()
+            periods = done["period_us"].astype(int).tolist()
+            n = len(sel)
+            emit(entity, "job", "count", n, "", window)
+            missed = sum(1 for v, per in zip(vals, periods) if v > per) + int(is_skipped.sum())
+            emit(entity, "job", "miss_rate", Fraction(missed, n), "", window)
+            if vals:
+                emit(entity, "job", "latency_p50", percentile(vals, 50), "", window)
+                emit(entity, "job", "latency_p99", percentile(vals, 99), "", window)
 
     # --- lifetime rows: progress, completion, turnaround (and the censored bound), preempts
     per_entity = {}
     for metric in ("cpu_delivered", "demand", "completed", "turnaround", "preempt_count"):
         for _, r in df[df["metric"] == metric].iterrows():
             per_entity.setdefault(r["entity"], {})[metric] = (int(r["t"]), int(r["value"]))
-    arrivals = {r["entity"]: int(r["t"]) for _, r in rw[rw["cause"] == "arrive"].iterrows()}
+    # the censored bound's arrival is the task's `arrival` row, its task_arrive line's time
+    # (metrics doc §6.6, §9) — a WAIT-first task has no ready(cause = arrive) row
+    arrivals = {r["entity"]: int(r["value"]) for _, r in df[df["metric"] == "arrival"].iterrows()}
     lane_preempts = 0
     for entity in sorted(per_entity):
         m = per_entity[entity]
@@ -190,7 +218,7 @@ def compute_aggregates(rows, windows=None, interactive=()):
         emit("schedule", "switch_window", "share_inside_switch_windows", Fraction(inside, t_end))
         bw = df[df["metric"] == "boost_window"]
         ci = df[df["metric"] == "config_interval"]
-        wakes = rw[rw["cause"] == "wake"]
+        wakes = rw[(rw["cause"] == "wake") & (rw["channel"] == "input")]
         for _, s_row in sw[sw["algorithm"] == "MLFQ"].iterrows():
             t_s, v_s, idx = int(s_row["t"]), int(s_row["value"]), int(s_row["index"])
             interval = ci[ci["index"].astype("Int64") == idx]
@@ -225,7 +253,50 @@ def compute_aggregates(rows, windows=None, interactive=()):
     return out
 
 
+def _config_of(entry):
+    return (entry.algorithm, json.dumps(entry.params, sort_keys=True), entry.batch_bandwidth_cap)
+
+
+def flip_aggregates(agg_rows, schedule, log, grade_rows):
+    """The three flip rows (9.21 decision 7) for one recognizing run, from the run's aggregate rows (its identity, its
+    `t_end`, its per-switch excess rows), its config schedule, its recognition log and its graded queries
+    (`grader.grade_log` rows). An entry applied at or after `T_end` is ignored (data-contracts §7); a query without a
+    `config_correct` row — ungraded, or no driver table — counts as a change but never as a wrong one."""
+    if not agg_rows:
+        return []
+    identity = {k: agg_rows[0][k] for k in IDENTITY}
+    t_end = next((int(Decimal(r["value"])) for r in agg_rows
+                  if r["entity"] == "lane" and r["metric"] == "busy" and r["aggregate"] == "t_end"), None)
+    wrong_at = {int(r["t"]) for r in grade_rows if r["metric"] == "config_correct" and int(r["value"]) == 0}
+    excess = {}
+    for r in agg_rows:
+        if r["metric"] == "switch_window" and r["aggregate"] == "excess_switch" and r["index"] != "":
+            excess[int(r["index"])] = excess.get(int(r["index"]), Fraction(0)) + Fraction(Decimal(r["value"]))
+    changes = wrong = 0
+    excess_sum = Fraction(0)
+    entries = schedule.entries
+    for k in range(1, len(entries)):
+        entry = entries[k]
+        if t_end is not None and entry.t_us >= t_end:
+            continue
+        if _config_of(entry) == _config_of(entries[k - 1]):
+            continue
+        changes += 1
+        query = log.queries[k - 1] if k - 1 < len(log.queries) else None
+        if query is None or query.t_set_change not in wrong_at:
+            continue
+        wrong += 1
+        if entry.algorithm == "MLFQ" and entries[k - 1].algorithm != "MLFQ":
+            excess_sum += excess.get(k, Fraction(0))
+    rows = []
+    for aggregate, value in zip(FLIP_AGGREGATES, (changes, wrong, excess_sum)):
+        rows.append({**identity, "entity": "schedule", "metric": "config_interval", "aggregate": aggregate,
+                     "cause": "", "channel": "", "window_start_us": "", "window_end_us": "", "index": "",
+                     "value": fmt(value)})
+    return rows
+
+
 def sort_key(row):
-    return (row["entity"], row["metric"], row["aggregate"], row["cause"],
+    return (row["entity"], row["metric"], row["aggregate"], row["cause"], row["channel"],
             int(row["window_start_us"] or -1), int(row["window_end_us"] or -1),
             int(row["index"] or -1))

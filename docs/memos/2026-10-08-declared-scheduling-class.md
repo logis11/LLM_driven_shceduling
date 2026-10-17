@@ -1,0 +1,39 @@
+# The declared scheduling class — a field in the workload, a rule in the executor
+
+> Status: memo · Created 2026-10-08 · Updated 2026-10-17
+> Open — §4's items 1 and 4: the idle rule of §2 in the executor, which the simulator does not implement yet (its loader reads no `declared_class`; the RQ0 gate spec's conformance item (e)), and the status memo's §6 answers 1 and 2 confirmed as the reply the RQ0 gate spec's statement `executor-assumptions` asks for; owner 인경민. Items 2 and 3 are answered (§1's 2026-10-09 line; `docs/data-contracts.md` §14, 2026-10-09).
+> From 인지오 to 인경민 and 박이안. Decisions D4–D6, D16, D18, D19, D26 and D34 of task 9.11 (`_dev/research/jioh/task-9.11-scheduler-constants/changelog.md`). Archetype entries gain a field that the workload and the run file carry, a change to three frozen contracts — the archetype, the workload and the run file, four if the visible projection shows it (§3) — that needs the three of us (`docs/data-contracts.md` §13). The heads-up memo of 2026-09-13 said your programs' input and output formats were outside the rebuild; this field is the exception.
+
+## 1. The field
+
+- **What it carries.** The scheduling policy a program sets for itself, read from its source and from the class census of the carried work (`_dev/research/jioh/task-9.11-scheduler-constants/classes/audit.md`). Values: `normal`, and `idle` on the two entries whose programs declare it — `file-indexer` (Tracker sets SCHED_IDLE on every thread) and `incremental-backup` (Déjà Dup starts the backup under `chrt --idle 0`). A batch or real-time value is added only when an entry carries work in that class.
+- **The class is the entry's.** A task carries the class of the entry it binds, never one inferred from its name: `c5-t3` shows two media players as `tracker-miner-f` and `baloo_file`, and they stay `normal`.
+- **Nice is not carried.** Nice is a weight within the normal class, not a class, and of the four algorithms only LOTTERY has a weight to carry it.
+- **Where it goes.** On each archetype entry, compiled into each task of the workload file and so into the run file the simulator reads. Its name and place in the schema are set by the dataset rebuild (task 9.13), after your agreement.
+- **2026-10-09.** Agreed and added by 9.13 as `declared_class`, required on every archetype entry and on every task record of the workload — each `arrive` event and each spawn-table entry — from the closed set `normal` and `idle`; the visible projection shows it per task. The contract entry: `docs/data-contracts.md` §14, 2026-10-09.
+
+## 2. The executor rule (인경민)
+
+A task whose class is `idle` runs only when no task of another class is runnable, and a task of another class that becomes runnable preempts it at once. The executor applies this below whatever the configured algorithm decides — the same under MLFQ, EDF, LOTTERY and FIFO; under FIFO too, a waking `normal` task preempts a running `idle` one. The algorithm orders the other tasks as before, and orders idle tasks among themselves when only they are runnable.
+
+The rule is our design for the scheduler under test, which through sched_ext schedules every task, idle-policy ones included, and decides what an idle task's weight means (`kernel/sched/ext.c` at v6.17, `:4663–4670`, `:5736`, `:3850–3860`). Against the stock desktop it depicts: the backup runs in the editor's CPU group and gets about 0.3 % of the CPU beside it there, as the rule nearly gives; Tracker runs in `background.slice`, whose group gets about 23 % against the editor's, so the simulated indexer interferes less than the real one.
+
+**No starvation safety net.** The executor builds none. The algorithm-switch memo (2026-09-08) and the batch-class memo (2026-09-09) said one exists, and your status memo lists it as owed (§5.5); instead the harness's `starvation_floor` guard bounds every task's wait at 30 s, the bound sched_ext's watchdog enforces, by design. If the consumer rework's dry runs (task 9.14) show waits near 30 s, the question comes back to you.
+
+## 3. The visible projection (박이안)
+
+The recognizer's view (`docs/data-contracts.md` §4, "The two derived views": names, counts and pinned lifetime times) does not say whether it shows a task's declared class. That is open.
+
+## 4. What I need from you
+
+1. 인경민: the rule of §2 in the executor, and anything in it that conflicts with the simulator's other invariants.
+2. 박이안: whether the visible projection shows the class.
+3. Both: the contract change agreed — the archetype, the workload and the run file carry the class of §1 — so that the rebuild can add the field with an entry in `docs/data-contracts.md` §14.
+4. 인경민: your status memo's §6 answers 1 and 2 (`simulator/memo/memo_261001.md`) confirmed as your reply to the boot-default memo's questions 1 and 2 (`docs/memos/2026-09-11-boot-default-from-ostep.md` §5) — a waking deadline task takes the lane from a residual slice at once; same-microsecond events follow your rule D1, config changes first, then insertion order. The RQ0 gate spec's executor assumptions, and whether `c7-meeting` and `c7-media` re-enter its judging set, are restated on them.
+
+## Correction (2026-10-17)
+
+Two statements above are corrected; the field and the rule are unchanged.
+
+- **§1, "`c5-t3` shows two media players as `tracker-miner-f` and `baloo_file`, and they stay `normal`."** The file is now `c6-alias` (9.20, 2026-10-12; `docs/data-contracts.md` §14): `c1-media`'s two players under the two indexers' real names — `video` as `baloo_file`, `music` as `tracker-miner-f` — its segment carrying `spoof: true` and `pre_committed_miss: true` and no familiarity tier (`dataset/timelines/coreset/c6.variant.yaml`). Both players still declare `normal`.
+- **§1, "`idle` on the two entries whose programs declare it".** Since the dataset rebuild (task 9.13) three entries carry `idle`: `file-indexer`, `incremental-backup`, and `game-download-idle`, compiled into `c2-p2a-idle` (the 9.16 compiled-number audit, `_dev/research/jioh/task-9.16-exit-audits/compiled/report.md` §2.6).

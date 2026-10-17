@@ -1,0 +1,20 @@
+c2-p2a chain-x1.2 chain 15833 -> 18999 1.1399 lanes ratio 1.2 | other cpu ratios {'steam': 1.0, 'download': 1.0}
+c2-p2a chain-x1.4 chain 15833 -> 22166 1.3299 lanes ratio 1.4 | other cpu ratios {'steam': 1.0, 'download': 1.0}
+c2-p2a venue-x0.8 chain 15833 -> 15833 0.9500 lanes ratio 1.0 | other cpu ratios {'steam': 0.7999, 'download': 0.8}
+c2-p2a venue-x1.25 chain 15833 -> 15833 0.9500 lanes ratio 1.0 | other cpu ratios {'steam': 1.2499, 'download': 1.25}
+c2-p2b chain-x1.2 chain 15833 -> 18999 1.1399 lanes ratio 1.2 | other cpu ratios {'steam': 1.0, 'download': 1.0}
+c2-p2b chain-x1.4 chain 15833 -> 22166 1.3299 lanes ratio 1.4 | other cpu ratios {'steam': 1.0, 'download': 1.0}
+c2-p2b venue-x0.8 chain 15833 -> 15833 0.9500 lanes ratio 1.0 | other cpu ratios {'steam': 0.7999, 'download': 0.8}
+c2-p2b venue-x1.25 chain 15833 -> 15833 0.9500 lanes ratio 1.0 | other cpu ratios {'steam': 1.2499, 'download': 1.25}
+c7-gaming chain-x1.2 chain 14999 -> 17998 1.0799 lanes ratio 1.1999 | other cpu ratios {'steam': 1.0, 'upgrade': 1.0}
+c7-gaming chain-x1.4 chain 14999 -> 20997 1.2598 lanes ratio 1.3999 | other cpu ratios {'steam': 1.0, 'upgrade': 1.0}
+c7-gaming venue-x0.8 chain 14999 -> 14999 0.8999 lanes ratio 1.0 | other cpu ratios {'steam': 0.7998, 'upgrade': 0.8}
+c7-gaming venue-x1.25 chain 14999 -> 14999 0.8999 lanes ratio 1.0 | other cpu ratios {'steam': 1.2498, 'upgrade': 1.25}
+c1-render venue-x0.8 {'editor': 0.8, 'bulk': 0.8} T_end 60000000 60000000
+c1-render venue-x1.25 {'editor': 1.25, 'bulk': 1.25} T_end 60000000 60000000
+c7-dev venue-x0.8 {'editor': 0.8, 'upgrade': 0.8} T_end 26385000 26385000
+c7-dev venue-x1.25 {'editor': 1.25, 'upgrade': 1.25} T_end 26385000 26385000
+c2-p1a seg1-30s [(0.0, 30.0, 'dev'), (30.0, 69.435, 'ml-train')]
+c2-p1a seg1-120s [(0.0, 120.0, 'dev'), (120.0, 159.435, 'ml-train')]
+c2-p2a seg1-30s [(0.0, 30.0, 'gaming'), (30.0, 56.385, 'gaming')]
+c2-p2a seg1-120s [(0.0, 120.0, 'gaming'), (120.0, 146.385, 'gaming')]

@@ -1,5 +1,19 @@
-# C3 — evening arc (building-plan §3 C3): browsing -> gaming (+discord
-# overlay) -> media playback.
+# C3 — evening arc (building-plan §3 C3): browsing -> gaming (+chat client)
+# -> media playback. The order is design; no source defines it.
+# The four renderer-hidden tasks are the other tabs' page renderers of one
+# five-tab window: five tabs from Firefox's Linux telemetry (glam; 9.10 D15,
+# D16), one renderer per tab observed in Chrome (meas-ci:desktop:2026-10-04;
+# 9.10 D126-D129, D131). The chat client, Element shown idle with no messages
+# arriving (D23), the Steam client and the two players, started mid-file, run
+# their observed launch phases first, replayed
+# (meas-ci:desktop:2026-10-04b; 9.10 D21, D132-D138); the game chain arrives
+# steady, its source holding no launch data (D19, D21).
+# The game's threads beyond the chain and `wineserver` are omitted: the source
+# puts 95% of scheduling in its top 30-40 tasks and describes none outside
+# them (lavd-ossna24 s12; 9.10 D19).
+# The Steam client is in its measured state: logged out, no account, no
+# library, no game behind it, no `gameoverlayui` (9.10 D22; 9.8 D6).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c3-evening
   seed: 302
@@ -13,22 +27,31 @@ segments:
      scenario: [S13]}
 
 tasks:
-  - {id: browser, name: chrome, archetype: desktop-interactive,
+  - {id: browser, name: chrome, archetype: web-browser,
      arrive: 0s, depart: 60s}
-  - {id: renderers, name: chrome, archetype: electron-comms,
-     arrive: 0s, depart: 60s, count: 10}
-  - {id: game, name: game.exe, archetype: game-task-chain,
-     arrive: 60s, depart: 300s, bind: {lane_share: 1.45}}
-  - {id: overlay, name: discord, archetype: electron-comms,
+  - {id: renderers, name: chrome, archetype: renderer-hidden,
+     arrive: 0s, depart: 60s, count: 4,
+     source: {count: [glam, "meas-ci:desktop:2026-10-04"]}}
+  - {id: game, name: Troy.exe, archetype: game-task-chain,
+     arrive: 60s, depart: 300s, bind: {lane_share: 1.45,
+           member_names: ["Task worker thr", "Task worker thr", "Task worker thr", "Task worker thr", dxvk-cs, dxvk-submit, winepulse_mainl, winepulse_timer, FAudio_AudioCli, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe]},
+     source: {lane_share: design, member_names: "lavd-ossna24:s16"}}
+  - {id: chat, name: element-desktop, archetype: chat-client,
      arrive: 60s, depart: 300s}
-  - {id: steam, name: steam, archetype: electron-comms,
+  - {id: steam, name: steam, archetype: game-client,
      arrive: 60s, depart: 300s}
-  - {id: wine, name: wineserver, archetype: system-daemon,
-     arrive: 60s, depart: 300s}
-  - {id: video, name: mpv, archetype: video-playback,
+  - {id: video, name: mpv, archetype: video-player,
      arrive: 300s, depart: 420s}
-  - {id: music, name: spotify, archetype: audio-playback,
+  - {id: music, name: mpv, archetype: audio-player,
      arrive: 300s, depart: 420s}
 
-focus:
+input:
   - {from: 2s, to: 58s, task: browser}
+
+focus:
+  - {from: 0s, to: 60s, task: browser}
+  - {from: 60s, to: 300s, task: game}
+  - {from: 300s, to: 420s, task: video}
+
+operations:
+  - {at: 30s, task: browser, name: page-load}

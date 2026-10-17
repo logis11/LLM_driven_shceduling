@@ -23,7 +23,7 @@
       "enum": [
         "fixed",
         "random",
-        "whitelist",
+        "shipped_catalogue", "strongest_name_table",
         "llm_vocab",
         "llm_algo",
         "llm_full",
@@ -44,6 +44,14 @@
     "boot_default": {
       "type": "string",
       "minLength": 1
+    },
+    "telemetry": {
+      "description": "The telemetry shape the run's daemon showed the recognizer (data-contracts \u00a75, rule 6; 9.17): `focus`, the name \u2192 count multiset with the focus holder, or `names`, the multiset alone.",
+      "type": "string",
+      "enum": [
+        "focus",
+        "names"
+      ]
     },
     "entity": {
       "type": "string",
@@ -76,6 +84,11 @@
         "timer_tick",
         "fork_slot"
       ]
+    },
+    "channel": {
+      "description": "The kind of the channel the wake rows were filtered to (docs/harness/metrics.md §8; added 2026-09-26, from 9.5 D74); empty for no channel filter.",
+      "type": "string",
+      "pattern": "^[^:]+$"
     },
     "window_start_us": {
       "type": "string",

@@ -1,0 +1,5 @@
+start 2026-10-17 21:50:14 KST commit a4b6a9da65edbf3d5d57f958d28b016f2caf195d
+end 2026-10-18 02:22:07 KST rc 0 total 16313 s
+/private/tmp/claude-501/-Users-jiohin-Desktop-future-of-sw-LLM-driven-shceduling/43e369a1-b5c7-40a2-b57d-cc4fcdb568dc/scratchpad/venv/bin/python tools/smoke.py --machine runner.example.yaml
+smoke spec: 102 lines, discarded after the run
+verdict: invalid — 0 of 49 judging files met the criterion (K = 1); 142 invocation(s) executed, 250 from the cache; report in /Users/jiohin/Desktop/future-of-sw/LLM_driven_shceduling/runs/smoke/report.json

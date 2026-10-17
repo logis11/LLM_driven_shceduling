@@ -1,6 +1,7 @@
 # Coreset 변경 안내 — 24개 파일에서 50개로, 무엇이 왜 바뀌었나
 
-> Status: memo · Created 2026-09-10 · Updated 2026-09-11
+> Status: memo · Created 2026-09-10 · Updated 2026-10-17
+> 닫힘 — 2026-09-10의 core set 변경(24 → 50개 파일)을 그날 그대로 적은 기록이에요. 지금의 core set(51개 파일, 67 segment; `dataset/build.manifest.json`, `dataset/coverage-grid.json`)은 `docs/workload/coreset-guide.md`와 `dataset/README.md`에, judging set은 RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)에 있어요. 두 분께 남은 부탁은 없어요.
 > From 인지오 to 인경민, 박이안. dataset 쪽에서 coreset을 24개 파일에서 50개로 바꿨어요. 이 memo는 두 분이 dataset 작업 내부를 모른다는 전제로 씁니다 — 왜 바꿨는지, 무엇이 추가됐는지, 그리고 simulator와 daemon 쪽에 무엇이 달라지고 무엇이 그대로인지. 규범 문서는 §9에 링크했고, 이 글은 그것들을 읽기 편하게 이어 붙인 거예요. 길어요. 급하면 §1과 §7만 읽어도 돼요.
 
 ## 1. 한 문단 요약

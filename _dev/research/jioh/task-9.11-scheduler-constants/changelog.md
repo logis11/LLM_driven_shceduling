@@ -1,0 +1,466 @@
+# Task 9.11 — changelog
+
+One entry per decision applied to the scheduler-side constants and their groundings (`docs/harness/metrics.md`, `docs/recognition-vocabulary.md`, `harness/guards/guard-spec.yaml`, `harness/experiments/rq0-gate.yaml`, and the registry lines they cite). Parameter, old value, new value, source id and locator or the label, commit. References are the search records' candidate ids (`search/candidates.md`).
+
+## D1 — `T_interaction` stays 100 000 µs, grounded as a guideline with a measured cross-check (2026-10-07)
+
+By 인지오's decision, scope-card item 1: the value is unchanged; its grounding is restated to what the sources are.
+
+- **The guideline.** `miller-fjcc68` (S1-01), p. 271, Topic 1: control-activation feedback "No more than 0.1 second"; key-to-visual echo "no more than 0.1 to 0.2 seconds", "far too slow for skilled keyboard users". Miller calls his delays "the best calculated guesses by the author" and asks that they be accepted "as indicative rather than conclusive"; no subjects, no source for 0.1 s. It is the only candidate that names keyboard input, the dataset's only input kind (every stimulus stream carries `kinds: [key]`).
+- **The restatement.** `nielsen-ue93` (S1-05) restates Miller 1968 and Card et al. 1991 (not read, HTTP 403) as "advice"; its role changes from "secondary grounding" to a restatement, not an independent grounding.
+- **The measured cross-check.** `deber-chi15` (S1-11), minted: latency just-noticeable differences against a 0.98 ms reference, 14 participants, p. 1831 — dragging 11 / 55 ms and tapping 69 / 96 ms, direct / indirect, the indirect form a touchpad and screen. The authors place key typing among the indirect tapping tasks behind "the textbook threshold of 100 ms", which falls within the 95 % confidence interval of their 96 ms. The other measured thresholds — Jota et al. CHI 2013 tap 64 ms (S1-10), Annett GI 2014 inking 53 ms (S1-12), Forch 2017 mouse ≈ 60 ms, abstract only (S1-13) — measure touch, stylus and mouse and are not taken. No keyboard-echo measurement and no released threshold dataset was found in the four classes (`search/candidates.md`, Not found, T1).
+- **Kept.** `shneiderman-csur84` (S1-07), p. 268: Long 1976's 0.1–0.5 s keystroke-to-print delays slowed typists, cited as Shneiderman's report.
+- **What the constant reads.** `ready_wait` rows with `cause = wake` and `channel = input`. A `ready_wait` is the scheduler's share of a keystroke's response only, so `over_threshold` is a lower bound on the share of keystrokes answered later than 0.1 s — now stated in §10.
+
+Applied: `docs/harness/metrics.md` §10 — the table row's status "grounded (`miller-fjcc68`, `nielsen-ue93`)" → "a guideline (`miller-fjcc68`), cross-checked against a measured detection threshold (`deber-chi15`)"; the paragraph restated; its sentence calling the constant "one input to the `c1-media` weighting question in the scoring spec" removed, since that weighting (audio 1.0 : video 0.5) is a stated assumption that does not read `T_interaction` (`harness/scoring/scoring-spec.yaml:32–33`). `docs/references.md` — `miller-fjcc68` and `nielsen-ue93` role and status lines; `shneiderman-csur84` status line; `deber-chi15` added (paper-only, no `dataset/sources.yaml` entry). Not added to `metrics.md` §13: no primitive, aggregate, constant or floor changed.
+
+Verification: the four copies re-downloaded on 2026-10-07 into `sources/S1-01`, `S1-05`, `S1-07`, `S1-11` (local, gitignored); Miller, Shneiderman and Deber byte-identical to the search record's SHA-256, Nielsen's HTML page changed in bytes (121 941 against 120 613) with every quoted passage present; each passage re-read in the copy.
+
+Compiled effect: none. No scored term reads `over_threshold` (the scoring spec's 78 terms: 39 `ready_wait` P99, 26 miss rates, 6 progress, 7 turnaround). `T_interaction` is also the comparison point in the `starvation_floor` grounding, scope-card item 28, decided there.
+
+Hands to: none.
+
+## D2 — the sweep's Linux point: 700 µs, the base slice at one CPU since v6.15 (2026-10-07)
+
+By 인지오's decision, scope-card item 26a: the RQ0 gate spec's boot-default sweep point for Linux moves from 750 µs to 700 µs. Its reason changes from "Linux's base slice (linux-sched-fair)" to "Linux's base slice at one CPU, 0.70 ms since v6.15 (linux-sched-fair), the kernels of the runner and of the depicted desktop"; the second reason, "also below the C2 gaming pair's 831 µs frame slack", is 9.14's and is kept as written (700 < 831).
+
+- **The value at a tag** (S2-01, re-read): `kernel/sched/fair.c`'s `sysctl_sched_base_slice` is `750000ULL` at v6.14 and `700000ULL` at v6.15, v6.17 and v7.0 (`fair.c:79` at each; SHA-256 v6.14 `77dfa23e…`, v6.15 `cd623f6e…`, v6.17 `e00d16ce…` — the search record's S4-05 copy — v7.0 `931c64fb…`). The commit between the two tags is not identified.
+- **The scaling** (v7.0): `update_sysctl()` sets it to the normalized value × `1 + ilog2(min(num_online_cpus(), 8))` under the default `SCHED_TUNABLESCALING_LOG` (`fair.c:192–221`), at boot (`sched_init_granularity`) and on every CPU online and offline (`rq_online_fair`, `rq_offline_fair`, `:13112–13121`).
+- **One CPU.** The simulator has exactly one lane (`docs/simulator/simulator-guide.md`, "One lane"), so the factor is 1 + ilog2(1) = 1 and the point is the normalized value.
+- **The kernels the project uses.** The runner's `6.17.0-1022-azure` (S4-03: its package diff touches no base-slice line) and the depicted desktop's Ubuntu HWE `7.0.0-34` (9.10 D48). `linux-hwe-7.0` 7.0.0-34.34~24.04.1, read on 2026-10-07 from archive.ubuntu.com: the `.dsc`'s SHA-256 of the orig tarball (`c6343795…`) and of the diff (`81b9d83f…`) match the files; the orig's `kernel/sched/fair.c` is byte-identical to v7.0's; the diff's `fair.c` hunks change the wake-up preemption pick (`pick_eevdf`, `pick_next_entity`), no line of the base slice or its scaling. 750 µs is the value of v6.6–v6.14 only, none of which the project uses.
+- **On the runner** (`meas-ci:sched:2026-10-07`; run 37601932147, three jobs, `.github/workflows/meas-sched.yml`, `dataset/tools/meas/sched/tunables.sh` at `b795d701`; an AMD EPYC 7763, an Intel Xeon Platinum 8370C and an AMD EPYC 9V45, each 4 vCPUs on `6.17.0-1022-azure`): `/sys/kernel/debug/sched/base_slice_ns` reads 2100000 at boot with 4 online CPUs and `tunable_scaling` 1 (log), in all three. Taking CPUs 3, 2, 1 offline and back reads 2100000, 1400000, 1400000 and 1400000, 1400000, 2100000 — identical in all three — each the normalized 700000 × (1 + ilog2(n)) with n the online count before the CPU left: the hotplug teardown runs `sched_cpu_deactivate` (`CPUHP_AP_ACTIVE`, `kernel/cpu.c:2245–2249` at v6.17), which calls `rq_offline_fair` while the leaving CPU is still online (`kernel/sched/core.c:8465–8520`); x86 clears the online bit later (`arch/x86/kernel/smpboot.c:1178`). So the one-CPU value is not reached by hotplug; 2100000 / 3 and 1400000 / 2 both give the normalized 700000 on the built kernel. A configuration read, not a workload measurement: no machine gate, the value identical on three CPU models.
+- **Not taken.** The multi-CPU effective value (2.1 ms at 4 CPUs, 2.8 ms at 8 or more) does not describe a one-lane machine, and 2 ms is the illumos point.
+
+Applied: `harness/boot-defaults/ostep-slice-750us.json` → `ostep-slice-700us.json` (`timeslice_us` 750 → 700); `harness/experiments/rq0-gate.yaml` — both lists and the reason; `harness/tools/tests/test_boot_defaults.py` `SWEEP_US`; `harness/boot-defaults/README.md`; `docs/references.md` `linux-sched-fair` — cite, role and status. Memos 2026-09-11 (boot default from OSTEP) and the 8.8 spec keep their 0.75 ms as point-in-time records.
+
+The same jobs read the runner kernel's other tunables, identical in all three, for the later items (`tunables.tsv`): fair server 50 000 000 / 1 000 000 000 ns per CPU; `sched_rt_period_us` 1 000 000, `sched_rt_runtime_us` 950 000; `sched_rr_timeslice_ms` 100; `sched_cfs_bandwidth_slice_us` 5 000; sched_ext `disabled`, `enable_seq` 0; no `preempt` file (no dynamic preemption).
+
+Verification: `harness/tools/tests/test_boot_defaults.py` passes; `experiment_lint.py` validates `rq0-gate.yaml` with the new file and reports only the dataset pin (`pins/dataset`), which predates this change and is 9.14's re-pin; `scoring_lint.py`'s nine errors are the same with this change stashed.
+
+Compiled effect: none on any compiled file. The sweep's `fixed` re-run under this point is 9.14's and the RQ0 run's.
+
+Raw records: by 인지오's decision, release `meas-ci-sched-2026-10-07` at `e82356d3`, run 37601932147's three artifacts as `meas-sched-<artifact>-37601932147.zip`; Actions artifacts expire after 90 days.
+
+Hands to: 9.14 — the RQ0 gate spec's re-pin carries the renamed file; the second reason on this point (the 831 µs frame slack) is read there against the rebuilt files.
+
+## D3 — TIMER skips missed ticks on its grid; a skipped tick is a missed job (2026-10-07)
+
+By 인지오's decision, scope-card items 11 and 39 (the 9.5 D11 hand-off; C-rt-app-2): a TIMER task that reaches its TIMER after one or more ticks of its grid have passed no longer runs every overdue tick back to back. It replaces the backlog rule of `docs/simulator/interpretation-contract.md:31`, which `simulator/simulator-guide.md` restated on 2026-10-06 (`5479dcab`) as a measurement choice that overstates a configuration's damage.
+
+**The rule.** A TIMER task with period P has its grid t₀ + k·P, as now. When it reaches a TIMER at time `now`:
+- if its next unconsumed tick is later than `now`, it blocks until that tick — unchanged;
+- otherwise, with m the last grid index whose tick is at or before `now`, it consumes tick m at once: job m is released at `now`, due at tick m + 1. Every unconsumed tick before m is skipped — no work runs for it, and it is a job that missed its deadline. Its next tick is m + 1.
+
+One overdue tick is consumed at once, as before; only ticks beyond it are skipped, and the job run late is the current tick's, not the oldest's. Skipping happens only at a TIMER, so work already started always finishes — a RUN's demand still survives preemption. A chain skips at its head only, so no frame is dropped mid-chain. A task's executed CPU now depends on the scheduler; its offered load does not.
+
+**Grounds** — every program and periodic framework found skips; only rt-app's non-default mode catches up (each re-read on 2026-10-07 in a copy byte-identical to the search record's):
+- interbench (S2-15, `interbench.c:398–436` at `e612a65`): a missed period is counted as missed deadlines and "deadline += intervals * interval_usecs" moves it past the current time; late before its burn, the burn is bypassed.
+- ROS 2's executor (S1-16, Teper et al., arXiv:2408.03696v1, §II): "the next activation time point is determined by increasing the current activation time by the minimal multiple of the timer period, such that it is greater than the current time. As a result, the executor may skip timer jobs".
+- Lipari & Palopoli's reference periodic thread for Linux (S1-15, arXiv:1512.01978v1, Listing 2): `while (timespec_cmp (&now, &next) > 0) { // Skip late instances`.
+- rt-app (S2-14, `tutorial.txt:507–509`, `rt-app.c:589–597` at `d6f8be4`): the default "relative" mode re-anchors the next activation to now on an overrun; only "absolute" mode keeps the grid and catches up.
+- The programs the TIMER tasks stand for (`docs/references.md`, verified 2026-10-06): mpv drops late video frames by default (`mpv`); Chromium's fake audio worker runs a late callback once and moves to "the next nearest ontime interval" (`chromium`); a FIFO-presented frame takes the next vertical blank (`vulkan`); GStreamer's video sinks drop frames more than 5 ms late (S2-17, `gstvideosink.c:177`). A fixed-timestep loop catches up its simulation steps, capped, and renders once per loop (`fiedler-gaffer04`).
+
+**The scored terms it moves.** `job` miss rate is 26 of the scoring spec's 78 terms. Under backlog a stall's overdue ticks run back to back after it, each late, the cascade longest for a task whose run fills most of its period; a chain needing more than the lane (`c3-evening`'s game segment at `lane_share` 1.45, 인경민's 2026-10-06 note) never drains, so nearly every frame misses under every condition. Under the rule above the miss rate is the share of ticks not served on time, bounded under overload and read by policy.
+
+Hands to:
+- **인경민** (the simulator's owner): `simulator/src/sim.cpp`'s TIMER (step K, "TIMER + backlog"), the `deadline` line per job including the skipped ones, and the contract's TIMER row (`interpretation-contract.md:31`, ratified) — his note `simulator/notes/note-for-jioh-timer-backlog-vs-drop.md` (2026-09-29) is answered by this entry. Sent by 인지오's decision as memo `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md` (the rule, a worked example, one `deadline` line per skipped tick with `met: false` and no new event type or field, the contract row to ratify); `teper-arxiv24` and `lipari-arxiv15` minted for it.
+- **9.14:** `docs/harness/metrics.md` §6.2 — the consumed tick's index from its `ready(cause = timer_tick)` line, the latest tick at or before it; the skipped ticks counted as missed jobs; the chain guard's count the consumed ticks — and `harness/tools/harness/primitives.py`'s `job`; the `mock-media` fixture, which pins backlog ("A simulator that skipped backlogged ticks would show four"); the scoring spec's no-headroom notes on the periodic files; whether `c3-evening`'s `job` term stays scored (from 인경민's 2026-10-06 note); the RQ0 gate spec's `c7-gaming` note ("frames miss under every row").
+- **9.15:** `docs/simulator/simulator-guide.md` (the TIMER section, its worked example, the glossary's "backlog (of a TIMER)"), `docs/workload/coreset-guide.md` (the TIMER row; `c1-media`, `c3-evening`), `docs/guidebook/vol-06-archetypes-and-grounding.md` (the TIMER passage), `docs/harness/harness-and-records-guide.md` ch. 11 (the backlog mock); `docs/references.md`'s `mpv` and `chromium` role lines ("for the TIMER backlog statement"), `rt-app`'s, and entries for Teper et al. and Lipari & Palopoli where that prose cites them. Each after the simulator implements the rule.
+
+Compiled effect: none on any compiled file — the TIMER op and its period are unchanged; the rule is the simulator's.
+
+## D4 — the simulated machine honours a task's declared scheduling class (2026-10-07)
+
+> Amended by D6 (the field carries the policy, not the nice value).
+
+By 인지오's decision, scope-card item 38 (the 9.6 D17 hand-off; with 9.10's on the backup's classes, D112 and D117, and on `c2-p1b`'s indexer): the task model gains a declared-class field carrying each task's observed scheduling policy and nice value, and the executor honours it by one rule per class, the same under every algorithm. The executor's behavioural batch class (memo 2026-09-09) is unchanged; the declared class is a second input beside it.
+
+- **Why.** Background programs declare their class themselves, and a stock Linux kernel acts on it. LocalSearch, the Tracker the dataset measures, sets `SCHED_IDLE`, nice 19 and the idle I/O class on itself at every start (S2-22, `tracker-main.c:82–109`); Baloo's extractor does the same and its daemon runs `SCHED_BATCH` at nice 19 (S2-24); plocate's unit is nice 19 with idle I/O (S2-23); Déjà Dup runs its backend under `chrt --idle 0` and `ionice -c3` (S2-27, `CommonUtils.vala:129–148`). ClamAV's units, borg and restic declare nothing (S2-25, S2-26); borgmatic's sample unit is `SCHED_BATCH` at nice 19. The kernel weighs nice 0 at 1024, nice 19 at 15 and `SCHED_IDLE` at 3 (S2-06, `core.c:10594–10615`, `sched.h:2511` at v7.2), and a waking normal task preempts a running idle one (S2-01, `fair.c:9820–9840` at v7.2). The project's own campaigns observed the declaration: Tracker's threads at `SCHED_IDLE`, nice 19 in every repeat (9.6 D17), Déjà Dup's backend in the idle CPU and I/O classes (9.10 D112). A machine that ignores it gives self-declared background work the standing of foreground work, and the recognizer's headroom on the files that hold it — the indexing files, the backup files, `c2-p1b` — is the excess.
+- **What follows, each brought as its own item:** (1) every measured entry's observed policy and priority read from its raw records — the real-time classes included (PipeWire's data threads and mutter's KMS thread run real-time on a stock GNOME session), since only Tracker's and Déjà Dup's are read so far; (2) the rule per class — idle, batch, nice, real-time — grounded on the kernel's semantics; (3) the field in the schema (9.13) and the rule in the simulator (인경민).
+
+Step (1) done: `classes/audit.md` — the build and background entries from their campaigns' taskstats, the rest by a class census of one dry job per subject, raw records released by 인지오's decision as `meas-ci-probes-2026-10-07b` at `07af2d92`.
+
+Hands to: 9.10 — `c2-p1b`'s indexer carries the declared class (9.10's decision on scope-card items 38 and 45 took it "if 9.11 adds the field"); 9.13 — the schema field; 인경민 — the executor's rule, once (2) is decided; 9.14 — the prior table and pair review read against a machine that honours the class (9.10: "a baseline may deprioritize the indexer without recognition; the RQ0 gate then measures that headroom as it is").
+
+## D5 — the idle class: a strict background class in the executor (2026-10-07)
+
+By 인지오's decision, D4's step (2) for the one class the dataset's carried work declares beyond the default (the audit, `classes/audit.md`: `SCHED_IDLE` for `file-indexer`, every Tracker thread, and `incremental-backup`, `deja-dup`, `duplicity` and `gpg`): a task whose declared class is idle runs only when no task of another class is runnable, and a task of another class that becomes runnable preempts it at once. The executor applies it below whatever the configured algorithm decides — the same under MLFQ, EDF and LOTTERY; the algorithm orders the other tasks as before, and orders idle tasks among themselves when only they are runnable.
+
+- **The kernel's semantics, read at v7.2 and v6.17** (S2-01, S2-06; `D-scx/ext.c@v6.17`, byte-identical to the S4-05 copy): in the fair class an idle task weighs 3 against 1 024 for nice 0 (`sched.h:2511`, `core.c:1529–1535` at v7.2), about 0.3 % of the CPU beside one busy nice-0 task; a waking non-idle task preempts a running idle one at once, without slice protection, and an idle task's wake preempts nothing (`fair.c:9820–9840` at v7.2). Under sched_ext without `SCX_OPS_SWITCH_PARTIAL` every task outside the deadline and real-time classes, idle ones included, moves to the BPF scheduler (`task_should_scx`, `ext.c:4663–4670`; `:5736`), which is handed the task's weight — `WEIGHT_IDLEPRIO` for an idle task (`ext.c:3850–3860`) — and decides what to do with it.
+- **The deviation, stated:** the rule gives an idle task no share while another class is runnable, where the fair class gives it about 0.3 %. In the files that hold idle work — `c1-indexing` (VS Code and the indexer), `c1-backup` (Kdenlive and Déjà Dup), `c7-indexing`, `c7-backup`, `c2-p1b` — the idle task's only competitor is the editor's bursts.
+- **Not taken:** the kernel's weights (B) — only LOTTERY has a weight to carry them, so no one rule holds under every algorithm; a strict class with a guaranteed minimum share (C) — its window and mechanism come from no source.
+
+Expected effect: under every condition the editor preempts the indexer or the backup at once, so the editor's P99 and the background task's turnaround in those five judging files likely read no headroom — what a real desktop gives these two self-declared programs, as 9.10 D6 stated it would be measured.
+
+Hands to: **인경민** — the executor rule (with D4's field); **9.13** — the field, its value `idle` on `file-indexer` and `incremental-backup`; **9.10** — the tasks binding them (`c1-indexing`, `c7-indexing`, `c2-p1b`, `c1-backup`, `c7-backup`, and any other file binding the two entries) carry the class through the entries; **9.14** — the scoring spec's no-headroom notes and the pair review for those five judging files, and the prior table's rows on indexing and backup read against it.
+
+## D6 — nice is not carried; the download's nice-10 work bounded by a check (2026-10-07)
+
+By 인지오's decision, D4's step (2) for the nice value: the declared-class field carries the scheduling policy — `normal` and `idle` now (D5), batch and real-time once an entry carries work in them — and not the nice value. Nice is a weight within the normal class, not a class (S2-06: `sched_prio_to_weight`, nice 10 = 110 against nice 0 = 1 024, `core.c:10594–10615` at v7.2); of the simulated algorithms only LOTTERY has a weight to carry it, so no one rule holds under every algorithm (D4).
+
+- **The one carried case** (`classes/audit.md`): `game-download`. In its carried phase (`meas-ci:background:2026-09-19`, repeat 32, `taskstats.steam-fresh-shaped.tsv`, `run_real_ns` summed by `ac_nice`) the threads at nice 10 did 530.7 s of the 696.8 s of SteamCMD's CPU, 76.2 % — nearly all of it `CContentUpdateC`, 525.6 s; the HTTP, IPC, IOCP and validation threads, 166.1 s, ran at nice 0. The entry pools all of them into one table (9.7 D28), bound only in `c2-p2a`, beside the game.
+- **The limitation, stated:** the simulated download competes at full standing. On a stock desktop EEVDF gives nice-10 work about a tenth of the CPU against a busy nice-0 thread, and a waking nice-0 frame's earlier virtual deadline preempts it; so the download's interference with the game in `c2-p2a` is overstated, and the headroom there inflated, in the hypothesis's favour.
+- **Not taken:** the whole download in the idle class (B) — its nice-0 network work, 24 % of its CPU, demoted with it, and nice 10's tenth made nothing; a split of `game-download` by thread group (C) — a re-fold of a closed slice's entry from a record that pools its threads (9.7 D28), the nice-10 part still made nothing.
+
+Hands to: **9.14** — a bounding check, pre-registered in the RQ0 gate spec: `c2-p2a` scored with the download as measured and with it in the idle class (D5's rule), the two bracketing a stock desktop; the verdict on `c2-p2a` under each reported, and a difference stated as this limitation's reach. **9.15** — the limitation in the dataset docs that describe `game-download`.
+
+## D7 — the starvation floor: 30 s, sched_ext's watchdog (2026-10-07)
+
+By 인지오's decision, scope-card item 28: `harness/guards/guard-spec.yaml`'s `starvation_floor` threshold 1 000 000 → 30 000 000 µs; its grounding "Stated assumption pending the executor's declared window: one second of virtual time, an order of magnitude above T_interaction" → sched_ext's watchdog. The reading is unchanged: per task, the largest `ready_wait` over any cause on the whole file, every task included.
+
+- **The executor declares no window.** 인경민, `simulator/memo/memo_261001.md` §6, question 3: "No safety net exists, so there is no number. The guard's 1,000,000 µs placeholder is not backed by the executor"; §5.5: EDF's deadline class and FIFO have no horizon. With D5 an idle task waits behind every run of its editor by design. A failing guard on any run the criterion reads makes the whole RQ0 verdict `invalid` (`harness/tools/harness/evaluator.py:317–335`), so an unbacked 1 s could void the verdict on runs a deployment produces.
+- **The bound a shipped kernel enforces on the scheduler under test** (`kernel/sched/ext.c` at v6.17, byte-identical to the S4-05 copy): `@timeout_ms`, "The maximum amount of time, in milliseconds, that a runnable task should be able to wait before being scheduled. The maximum timeout may not exceed the default timeout of 30 seconds. Defaults to the maximum allowed timeout value of 30 seconds." (`:749–757`; `SCX_WATCHDOG_MAX_TIMEOUT = 30 * HZ`, `:17`; `:5649–5654`); a task runnable past it ends the BPF scheduler with `SCX_EXIT_ERROR_STALL` (`:3645–3662`), every task returning to the fair class. The shipped scx schedulers set 30 s (lavd), 10 s (rusty), 5 s (bpfland) (S2-11 to S2-13, at scx `00fec1e`); the watchdog covers idle-policy tasks, which sched_ext schedules (D5). A run in which a task waits longer describes a configuration a real deployment could not keep running; a shorter wait is damage the scored terms read.
+- **Not taken:** 1 s kept as design with exemptions for idle tasks and EDF's residual class (B) — no source; an executor safety net mirroring the watchdog, reverting to the boot default after a 30 s stall (C) — a simulator change that adds behaviour to every condition, open if 9.14's dry runs show stalls near 30 s. The fair server (50 ms per 1 s) and RT throttling (950 ms per 1 s) bound fair tasks against real-time ones, not the scheduler under test.
+
+Applied: `harness/guards/guard-spec.yaml` — the threshold, its grounding and its header comment (which stated an executor net the simulator does not have); `docs/references.md` `linux-sched-ext` — cite (the watchdog passages at v6.17; `SCX_SLICE_DFL` read at v6.17 and v7.0, 20 ms, Ubuntu's 7.0.0-34 diff touching no line of `ext.h`), role (the guard's threshold) and status; the `mock-guards` fixture — its `batch` task's 1.95 s wait under FIFO now passes (`expected-guards.csv`, `worked.md`, `tools/tests/fixtures/README.md`), `test_guards.py` asserting the pass and the CLI's one fail, and a new test reading the same run against a 1 s threshold for the fail path. `guards_lint.py` clean; `test_guards.py` 26 passed. `experiment_lint.py` now reports the RQ0 gate spec's `pins/guard_spec` hash beside its `pins/dataset` one — both 9.14's one re-pin (phase spec decision 6).
+
+Hands to: **9.14** — the RQ0 gate spec's `executor-assumptions` (3) restated (answered: no executor window; the guard reads the watchdog's bound), the harness changelog entry and the re-pin for the guard spec's change; **9.15** — `docs/harness/harness-and-records-guide.md:1204` ("1 000 000 µs 이하 (stated assumption; 경민이 executor의 starvation window를 정하면 그 값으로 교체)") restated.
+
+## D8 — the boot default's OSTEP grounding: two wordings corrected (2026-10-07)
+
+By 인지오's decision, scope-card items 13–17 and 24: the four MLFQ values stand as cited — three queues, a 10 ms top slice, doubling per level, a 100 ms boost — each passage re-read in OSTEP chapter 8, Version 1.10 (S1-02; re-downloaded 2026-10-07, byte-identical to the search record's copy), and the allotment divergence stands as `docs/recognition-vocabulary.md` §2 states it (Example 1 sets the allotment to one slice; Figure 8.6 gives the top two levels two slices each). Two wordings were wrong:
+
+- "every figure has Q2, Q1, Q0" → Figures 8.2–8.6 have Q2, Q1, Q0; Figure 8.1 ("MLFQ Example", p. 3) draws eight queues, Q1–Q8.
+- "OSTEP §8's worked example, whole" → the values chapter 8's worked examples use: three queues and a 10 ms top slice from Example 1 (p. 4), doubling from Figure 8.6 (p. 9), the boost from Figure 8.4 (pp. 6–7) — three examples of one chapter, not one example.
+
+Applied: `docs/recognition-vocabulary.md` §2 (the lead sentence and the `num_queues` row); `harness/experiments/rq0-gate.yaml`, the primary point's reason; `docs/references.md` `ostep` role and status. Memo 2026-09-11 keeps its wording as a point-in-time record. Values changed: none.
+
+## D9 — the §8 statistics citations: two scope statements corrected (2026-10-07)
+
+By 인지오's decision, scope-card item 9: the four method citations of `docs/harness/metrics.md` §8 stand — balanced accuracy defined on a two-by-two matrix in a binary setting (`brodersen-icpr10`, S1-04, p. 3122); the coefficient's all-four-cells property (`chicco-bmcg20`, S1-08); the cluster bootstrap's consistency in the number of clusters (`field-jrssb07`, S1-09, Corollary 4); pairing, with the difference of two proportions and the resampled t test ruled out (`dietterich-neco98`, S1-06, §3.2 and abstract). Two scope statements change, wording only:
+
+- **The cluster bootstrap's small-sample behaviour.** "anti-conservative at very few" → the paper's own: its §4 simulations at g = 5 and g = 15 clusters of m = 4 (Table 2) find that "the cluster bootstrap consistently underestimates the bootstrap variance for all the statistics", and its consistency result is for a balanced one-way array, clusters of equal size (§2). The workload files hold unequal numbers of query points, so a Layer-1 interval may be narrower than its nominal level. The `field-jrssb07` role line's "Our Layer-1 set has roughly forty-nine files, well clear of that regime" is removed: the paper reports no simulation above 15 clusters, so no source places 49 clear of it.
+- **The coefficient's undefined case.** Chicco & Jurman: "undefined when a whole row or column of M is zero" (Methods); the grader already returns undefined then (`harness/tools/harness/grader.py:349–372`), now stated in §8 and in the role line.
+
+Applied: `docs/harness/metrics.md` §8 (two sentences); `docs/references.md` `field-jrssb07` (role, status — §4 and Table 2 re-read 2026-10-07 in a copy byte-identical to S1-09) and `chicco-bmcg20` (role). No method or value changed.
+
+Hands to: **9.14** — the stated caveat on the Layer-1 intervals (narrower than nominal possible at the coreset's file count and unequal file sizes) carried into the RQ0 gate spec's reporting, and whether a small-sample correction is pre-registered.
+
+## D10 — the provenance-share guard: its quotation corrected, its readings stated as design (2026-10-07)
+
+By 인지오's decision, scope-card item 27: `provenance_share` keeps its reading — the time-weighted share of `fallback` + `held` configuration intervals below 0.5, under every condition but `fixed`. Its grounding quoted "mostly running fallback" from the research proposal §6.3, a phrase the proposal does not contain; the proposal says "a condition that scores well while 70% of its configurations were fallbacks did not demonstrate anything about recognition" (`docs/research-proposal.md:718`) and, in appendix B.3, "a condition that scored well while most of its configurations were fallbacks demonstrated nothing about recognition" (`:916`).
+
+- **Two readings, the guard's own, now stated as design:** the proposal counts configurations — its provenance breakdown is the "fraction of applied configurations that were unmodified, clamped, held, or fallback" (`:714`) — and the guard weighs them by time, a run's score accruing over its time under each configuration; and the proposal names fallbacks, the guard counting `held` with them. The harness computes both the count-weighted and the time-weighted shares (`docs/harness/metrics.md` §8).
+- **Not taken:** the count-weighted `fallback` share alone (B), which passes a run that spent most of its time under a few long fallbacks; both readings at once (C), a second way to void the verdict for no further purpose.
+
+Applied: `harness/guards/guard-spec.yaml` — the `provenance_share` grounding and header comment. `guards_lint.py` clean; `test_guards.py` 26 passed. The guard spec's hash moves again under the RQ0 gate spec's pin (D7), 9.14's re-pin.
+
+## D11 — the simulator assumptions of metrics §11 restated to the simulator's state; TIMER's t₀ pinned (2026-10-07)
+
+By 인지오's decision, scope-card item 10: `docs/harness/metrics.md` §11 items 1–4 state what the simulator does, read from its owner's records (`simulator/src/notes.md` §4, `simulator/memo/memo_261001.md`, 2026-10-01):
+
+- **Item 1** (a `ready` line at every completion of a blocking primitive, zero wait included) stands as the contract's clarification; the simulator does not yet emit the zero-wait line — a primitive completing without blocking prints `ready cause=arrive` and gives up the lane without a `run_end` (notes §4, gaps 4 and 10, "owed implementation, and the top priority"). D3's skip rule reads the same `ready(cause = timer_tick)` lines.
+- **Item 2** (wakes queue with depth): implemented — a wake with no waiter goes to a mailbox, never lost (notes, step M; memo D2).
+- **Item 3** (the same-instant tie-break): the simulator applies config entries first, then events in insertion order (rule D1, memo §6 question 2), as the mocks do.
+- **Item 4** (TIMER's t₀): pinned to the simulator's reading — the task's first TIMER execution (its decision D4) — in place of the arrival time. Its notes call the pick "ours to pin, not a question" (gap 3); the two coincide for a task whose program begins with its TIMER, every compiled periodic task today (memo §5.4: 12 periodic tasks arrive mid-run, in `c3-evening` and `c4-compile`, all TIMER-first).
+
+Applied: `docs/harness/metrics.md` §11 — the lead paragraph and items 1–4.
+
+Hands to: **9.13** — a linter invariant that every task carrying a TIMER begins its program with it, so t₀ and the arrival cannot come apart silently; **인경민** — item 1's zero-wait line, already his first item; **9.14** — the harness reader's `t₀` (`harness/tools/harness/reader.py`, `_task_info`, the arrival) checked against the invariant.
+
+## D12 — the precedent registry entries corrected (2026-10-07)
+
+By 인지오's decision, scope-card items 12 and 35–37 (C-schbench-1, -2; C-hackbench-1, -2; C-stress-ng-1; C-corbet-1, -2; C-scx-1; C-interbench-11): the `docs/references.md` entries cited as precedents, none grounding a dataset value, brought to their sources.
+
+- **`schbench`** (S2-18, S2-19): cite → git.kernel.org `mason/schbench`, tag `v1.0` (commit `ab22f3f8`, 2023-04-17), its only tag, the GitHub repository continuing the history without tags; © 2016 Facebook, GPLv2. Role → what it prints: at v1.0 wakeup and request latency at p50/p90/p99/p99.9, p99 marked, and RPS at p20/p50/p90 (`schbench.c:101–104`, `:1275–1285`); the 2016 first version p50/75/90/95/99/99.5/99.9. SchedCP cites it at kernel.googlesource.com, not by the GitHub URL (2026-09-13 verification, `reads/R03-build-papers.md:218–219`).
+- **`hackbench`** (S2-20): GPL-2.0 → GPL-2.0-or-later (the source headers; 2026-09-13 verification, `compare/K1.md`); pinned at tag `v2.11` (commit `62da2bef`), the one read, in place of "latest v2.10"; role "many-task IPC burst model" → existence only, a scheduler benchmark and stress test cited for the contrast with `schbench`, grounding no archetype (memo 2026-09-13 B7: no IPC archetype exists).
+- **`stress-ng`** (S2-21): GPL-2.0 → GPL-2.0-or-later; pinned at commit `3ac9d7a8`; role "fallback archetypes only" → existence only: `--workload` "emulates bursty scheduled compute" (`stress-ng.1:11793–11809`), `--cyclic` reports wake-latency percentiles (`:2744–2752`), its README disclaims precise benchmarking (`README.md:32–35`); it grounds no archetype.
+- **`corbet-lwn24`**: the later article's byline "unverified" → Jake Edge, 2026-01-07 (2026-09-13 verification, `compare/K2.md:12, 49`).
+- **`scx`**: "(pin commit)" → release `v1.1.3` (2026-08-19; tag object `b2cd800e`, commit `c8728c6b`), each quotation located there and re-read on 2026-10-07 — the watchdog sentence `README.md:82–84`, "Meta is in the process of mass production deployment" `README.md:33–35`, "Distros are able to package and release these schedulers" `OVERVIEW.md:283`; licence GPLv2 (`LICENSE`).
+- **`interbench`** unchanged: its "~7 ms" jitter figure is stated without a source in its man page, readmes and code (S2-15), and no harness or metrics constant cites it.
+
+Applied: `docs/references.md`, the six entries. The repo lint is clean.
+
+Hands to **9.15**: the prose repeating the old wordings — `docs/workload/source-vetting.md:58` (schbench's GitHub URL "(mirror on kernel.googlesource.com)" and its percentile list 20/50/75/90/95/99/99.5/99.9, printed by no version), `:61` (hackbench's `github.com/jlelli/rt-tests`, unread, and its licence), `:64` ("LWN LPC 2025 coverage", which `corbet-lwn24` is not — LPC 2025 is the Jake Edge article), `:67` (stress-ng's "no behavioral timing" and licence); `docs/workload/grounding-sources.md:29` (hackbench as a "load-balancing stressor"; the man page says "benchmark and a stress test for the Linux kernel scheduler") and `:30` ("Meta adopted the scheduler server-side", MISATTRIBUTED, C-lavd-18b); interbench's 7 ms wherever prose states it as a perception fact.
+
+## D13 — the items that stand; the percentile method labelled (2026-10-07)
+
+By 인지오's decision, the scope-card items whose text holds against its sources or is labelled for what it is:
+
+- **2–5, 7, 8** (`docs/harness/metrics.md` §10, §6.9–§6.10): the latency floor, 1 000 µs, and the fraction floor, 0.01, stated assumptions; the bootstrap seed 20260911 and 10 000 repetitions, "pinned, not estimated"; the 95 % interval, convention; `W_single` at the boot default, 10 000 × (1 + 2) = 30 000 µs; the boost grid, confirmed with 인경민 (§11 item 7).
+- **18:** the same-granularity rule's premise that no shipped EDF has a residual round-robin slice — Linux's deadline class serves fair tasks through the fair-server reservation, 50 ms per 1 000 ms per CPU from v6.12, not a residual slice (S2-05); on the runner 50 000 000 / 1 000 000 000 ns per CPU (`meas-ci:sched:2026-10-07`).
+- **19, 20:** LOTTERY's `batch_share` 0.15, "assumption, unbounded" — a full-text search of Waldspurger & Weihl found ticket ratios only between peer clients (S1-03); the 10 ms quantum sentence quoted as the paper gives it and "not a grounding".
+- **21:** `linux-sched-bwc`, existence only — quota per period on a cgroup, default period 100 ms (S2-03).
+- **22, 25:** the config schema's ranges and the sweep's 500 µs and 100 000 µs points, design.
+- **26b:** illumos TS's top-level quantum, 2 ticks at level 59, 2 ms at the default hz of 1000 (S2-08, S2-09). **26c:** sched_ext's `SCX_SLICE_DFL`, 20 ms at v6.12, v6.17 and v7.0, unscaled (D7's entry update).
+- **29–34:** `utilisation_sanity`, arithmetic; `config_age`, `determinism`, `tick_count`, `validation_matches_provenance`, `c2_pair`, structural — `tick_count` as applied to the compiled gaming files is 9.14's (scope card, Boundary).
+
+One label added — **item 6**: §8's percentile rule, linear interpolation at position (n − 1)·p/100 (numpy `linear`, R type 7), is now called a convention where it is stated, as decision 1 asks of a value no source states. Applied: `docs/harness/metrics.md` §8, one word.
+
+## D14 — the boot-default memo's comparison points: a dated correction note (2026-10-07)
+
+By 인지오's decision, scope-card item 23: `docs/memos/2026-09-11-boot-default-from-ostep.md` §3 states that it records "only what was confirmed by reading the originals on 2026-09-11; no number from memory", and four of its statements were not read. The memo gets a dated correction note — its original text otherwise kept, as a point-in-time record — stating, claim by claim:
+
+- **Holds:** OSTEP's "no easy answers … only some experience with workloads and subsequent tuning" (S1-02, p. 8); Arpaci-Dusseau's lecture notes, the memo's Korean a translation of "no one really knows how to configure these tables well" (S1-19 = S2-28); illumos/Solaris TS — 60 levels, quanta 2 ticks at the top to 20 at the bottom, 2–20 ms at the default hz of 1000, `ts_update` once a second lifting starved threads into levels 50–59 (S2-08, S2-09); MINIX 3 — 16 queues, a 200 ms quantum, demoted processes raised a level every 5 s (S2-10); sched_ext's default slice, 20 ms (D7); the scx schedulers' slices — lavd 0.5–5 ms, bpfland 1 ms, rusty 1–20 ms (S2-11 to S2-13, read at the unpinned commit `00fec1e`, to be re-read at release `v1.1.3`).
+- **Wrong for today's kernels:** Linux CFS/EEVDF's default slice "0.75 ms" — 0.70 ms from v6.15, scaled by 1 + log2 of the online CPUs up to 8 (D2).
+- **Not found:** that Silberschatz and Stallings give only example numbers (no copy read); that papers call per-level doubling a convention (no such paper found).
+- **Unverifiable:** that only two table-based MLFQs ever shipped (a universal negative).
+- **Not searched:** that macOS, FreeBSD and Windows compute priority by decaying usage.
+
+None of these carries the boot default, which rests on OSTEP's chapter alone (D8).
+
+Hands to **9.15**: the correction note in the memo, with the memo's corrections; `docs/references.md` entries for the verified points the memo names without an id — MINIX 3's scheduler source, the CS 537 lecture notes on the Solaris TS scheduler, and the scx per-scheduler slices re-read at release `v1.1.3` — minted with the note that cites them.
+
+## D15 — the C2 pair guard: P1 no longer identical under `fixed` (2026-10-07)
+
+By 인지오's decision, scope-card item 34, `c2_pair`, which D13 listed among the items that stand on the compiled audit's HOLDS (`_dev/research/jioh/2026-09-13-verification/compiled-numbers-report.md` §3.3), read before 9.10 rebound P1's variant.
+
+- **P1's events differ beyond the label.** `dataset/timelines/coreset/c2-pairs.variant.yaml` patches `c2-p1b`'s `hog` to `tracker-miner-f`, archetype `file-indexer`, bound at 39.435 s — the measured indexer's own tables in place of `c2-p1a`'s `cpu-batch` training run (9.10 D6) — and D4–D5 put `file-indexer` in the idle class. The guard spec's `fixed_identical` states whether a pair's events are identical apart from the label (`harness/guards/guard-spec.yaml`, the pair list's comment); for P1 that is false, as for P2 and P3.
+- **What the flag did.** Under `fixed` with the flag true, `c2_pair` fails a pair whose trace bodies differ (`harness/tools/harness/guards.py:265–268`). Both P1 files are judging files (`harness/experiments/rq0-gate.yaml:37`), the `fixed` runs at the primary boot default feed the criterion (`harness/tools/harness/evaluator.py:229–241`), and a failed guard on such a run makes the verdict `invalid` (`evaluator.py:317–335`): every RQ0 run set would have come out invalid.
+- **What the guard keeps.** Under a recognition-driven condition it still fails identical trace bodies. With every pair's background task changed, a differing trace no longer shows that the configuration changed between wanted and unwanted — for P1 now, as for P2 and P3 since the guard was written.
+
+Applied: `harness/guards/guard-spec.yaml` — P1's `fixed_identical` true → false; the `c2_pair` header: a pair differs in one segment's label and the background task it holds, each pair's swap named, no identity expected under `fixed` on all three. `harness/tools/tests/test_guards.py` — the `fixed` test asserts P1 `not_applicable` under the committed spec and keeps the identity path's fail and pass on a copy flagging P1. `guards_lint.py` clean; `test_guards.py` 26 passed. The spec's version stays `1.0` until 9.14's re-pin, as for D7 and D10.
+
+Hands to: **9.14** — this change in the one re-pin, with the guard spec's version bump and the harness changelog entry (with D7 and D10); the pair review's p1 row (`docs/daemon/prior-table-pair-review.md:36`, "the hog is CPU-bound in both files, so both knobs act") and any prior-table row arguing from P1's identical behaviour — 9.10 D6's hand-off, not on the 9.14 line until now; whether `c2_pair` compares the two files' configuration sequences rather than their traces, since traces of differing events differ whatever the configuration; **9.15** — `docs/harness/harness-and-records-guide.md:1209`, the C2 pair row ("`fixed`에서는 두 파일의 event가 label 빼고 같은 pair(P1)만 **같아야** 함, P2·P3는 not_applicable"), restated.
+
+## D16 — the idle class against the depicted desktop: the per-task reading holds within a task group (2026-10-08)
+
+By 인지오's decision, scope-card item 38, correcting the comparison D5 and D6 state. The executor rule is unchanged: the idle class is strict background under every algorithm — design for the scheduler under test, which under sched_ext schedules every task, idle-policy ones included (D5).
+
+- **The per-task reading holds between siblings of one task group.** sched(7), "The nice value and group scheduling" (man-pages 6.19, the S4-06 copy, SHA-256 `3b52e015…`): "Under group scheduling, a thread's nice value has an effect for scheduling decisions only relative to other threads in the same task group"; "All of the threads in a CPU cgroup form a task group." `kernel/sched/fair.c` walks a waking task and the running one up to "sibling entities who are in the same cfs_rq" (`:429–460` at v7.0, `:431–460` at v7.2), and a group entity counts as idle only when its cgroup is marked idle (`:469` at v7.0, `:476` at v7.2) before the idle-preemption rule compares them (`:9820–9834` at v7.2).
+- **The depicted desktop's groups** (Ubuntu 24.04 source packages read 2026-10-08 from archive.ubuntu.com, each matching its `.dsc` SHA-256). systemd `255.4-1ubuntu8.17`: `user@.service` delegates `pids memory cpu`; `app.slice` sets `CPUWeight=100`, `background.slice` 30, `session.slice` 100 (`units/user/`; no Ubuntu patch touches them). systemd.resource-control(5), "Enabling and disabling controllers": the user manager "will repeat the same logic as the system instance and enable controllers for user units which have resource limits configured, and their siblings and parents and parents' siblings" — each slice is one CPU group, and a unit under a slice with no CPU setting shares the slice's group. systemd.special(7): `app.slice`, "By default, all user services and applications managed by systemd are found in this slice"; `background.slice`, "Examples include non-interactive tasks like file indexing or backup operations".
+- **The indexer runs in another group from the editor.** tracker-miners `3.7.1-1ubuntu0.1`: `src/miners/fs/tracker-miner-fs.service.in:14`, `Slice=background.slice` (no Ubuntu patch touches the unit); SCHED_IDLE (`tracker-sched.c:46`), nice 19 (`tracker-main.c:219`). The editor: gnome-shell `46.0-0ubuntu6~24.04.15` launches an application through `gnome_start_systemd_scope` (`src/shell-global.c:1431`), and gnome-desktop `44.0-5build2` creates `app-gnome-<id>-<pid>.scope` with no slice or CPU property (`libgnome-desktop/gnome-systemd.c:81–104`), so it runs under `app.slice`. The indexer's idle policy acts on nothing in the editor's group; between the two slices the weights give `background.slice` 30 / 130, about 23 % of the CPU, while both have runnable work, and a waking editor thread meets the indexer's slice as a non-idle sibling.
+- **The backup runs in the editor's group.** deja-dup `45.2-1build2`: the monitor is an XDG autostart entry (`data/monitor.desktop.in`), which gnome-session `46.0-1ubuntu4` starts and moves into an application scope (`gnome-session/gsm-autostart-app.c:953`; the scope drop-in `data/gnome-launched-override.scope.conf` sets no CPU property); the monitor spawns the scheduled backup as its child, `chrt --idle 0 ionice -c3 deja-dup --backup --auto` (`monitor/BackupInterface.vala:39`, `libdeja/CommonUtils.vala:107–148`). Backup and editor share `app.slice`'s group: weight 3 against 1 024, about 0.3 %, and the idle-preemption rule, as D5 states.
+- **Not read:** where a snap-packaged application's scope is placed (Ubuntu's gnome-shell patch `shell-global-util-Do-not-move-snap-apps-to-gnome-apps-sco.patch` leaves snap applications in their own scope); a backup run inside an already-running Déjà Dup instance; any other unit under `app.slice` carrying a CPU setting, which would split its group; where a game started by the Steam client runs.
+
+Restated: D4's "a stock Linux kernel acts on it" and D5's "the fair class gives it about 0.3 %", "what a real desktop gives these two self-declared programs", hold for the backup and not for the indexer. D6's nice-10 weight, "about a tenth" against a busy nice-0 thread, and its bounding check's "the two bracketing a stock desktop" hold where the download and the game share a group. The limitation, stated: the simulated indexer interferes with the editor less than on the depicted desktop, where its slice gets about 23 % against the editor's, so the headroom the indexer files can show is understated, against the hypothesis.
+
+Applied: this changelog (D5's rule is recorded here; the executor and the schema are 인경민's and 9.13's).
+
+Hands to: **9.14** — the six files that hold idle work, `c1-indexing`, `c7-indexing` and `c2-p1b` (the indexer) and `c1-backup`, `c7-backup` and `c2-p3b` (the backup; D5's list omitted `c2-p3b`, a judging file, `harness/experiments/rq0-gate.yaml:37`), read against the strict idle class; in the three indexer files "no headroom" follows from the rule, not from the depicted desktop; the prior table's indexing and backup rows; **9.13** — `file-indexer`'s and `incremental-backup`'s modelling notes (`dataset/archetypes.yaml:1542`, `:1651–1652`, "the task model carries no declared class (9.11's)") restated to the declared class `idle`, `file-indexer`'s with its placement in `background.slice` and the limitation above.
+
+## D17 — TIMER's late job: the latest passed tick, grounded for video playback, design elsewhere; the memo corrected (2026-10-08)
+
+By 인지오's decision, scope-card items 11 and 39, on D3's rule. The rule stands; its grounds are restated and three statements of the memo D3 sent are corrected.
+
+- **What the sources share:** skipping by default — interbench, ROS 2's executor, Lipari & Palopoli's thread, rt-app's "relative" mode. rt-app's "absolute" mode and a fixed-timestep loop's simulation steps catch up (`fiedler-gaffer04`, listed in D3's grounds beside "only rt-app's non-default mode catches up").
+- **Where they differ — which tick the late job is:**
+  - ROS 2's executor (S1-16, Teper et al., §II, p. 3): "a job of that timer is sampled, and the next activation time point is determined by increasing the current activation time by the minimal multiple of the timer period, such that it is greater than the current time. … For the rest of the paper, we refer to the activation time as the timestamp of the timer job." One job runs at once, stamped with the oldest pending activation; under a deadline one period after its tick it misses too.
+  - interbench (S2-15, `interbench.c:398–411`, `:441` at `e612a65`): more than a period late, the missed periods are counted (`tb->missed_deadlines += intervals`), the burn is bypassed, and the thread sleeps to the deadline past now. Lipari & Palopoli (S1-15, Listing 2, p. 10): the late instances skipped by advancing `next` past now (lines 16–18), then one more period before the absolute sleep (line 8) — nothing runs late in either.
+  - GStreamer's sink (S2-17, main `83e7df91`; `gstbasesink.c`, SHA-256 `43a7223c…`, byte-identical to the search record's copy): "A buffer arrives too late in the sink when the presentation time (as a combination of the last segment, buffer timestamp and element base_time) plus the duration is before the current time of the clock. If the frame is later than max-lateness, the sink will drop the buffer without calling the render method" (`:118–124`); the check adds the buffer's stop time to `max-lateness` (`:3199`) and drops past it (`:3208`); a video sink sets 5 ms (`gstvideosink.c:177`). The frame whose interval contains the current time renders at once, due at its stop time — the next tick — and the earlier frames are dropped: D3's rule.
+  - Audio and games: Chromium's fake audio worker runs one late callback and moves to "the next nearest ontime interval" (`chromium`); Vulkan's FIFO mode presents a late frame at the next vertical blank (`vulkan`). Neither says which tick the late work stands for.
+- **Kept:** the latest passed tick, run at once, due at the next tick — the GStreamer sink's for video playback; design for the audio and game TIMER tasks. **Not taken:** ROS 2's identity, the late job a miss too, one more miss per stall (B); interbench's, nothing run late and the task resumed at a later tick, executed work changed as well as counts (C).
+- **The memo's three statements, corrected by a dated note, its text otherwise kept:** §4's "none replays them"; §5's "as today" — a tick consumed at once emits no `ready(cause = timer_tick)` line today (`simulator/src/sim.cpp:635–637`; 인경민's `simulator/memo/memo_261001.md` §5.1: the next RUN prints `ready cause=arrive`), so the skip rule's reading needs his zero-wait line first; §5's skipped-tick `deadline` line — `slack_us` 0 with `met: false` when a TIMER lands exactly on a tick, against the simulator's met-when-not-later (`sim.cpp:631`) — `met` is read, not the slack's sign.
+
+Applied: `docs/references.md` — `gstreamer` minted (deployed-system, existence only: the sink's code at the commit); `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md` — the dated correction note, the header's Updated date.
+
+Hands to: **인경민** — the memo's correction note (§1 unchanged; §5.1's zero-wait line comes before the rule's reading); **9.14** — the `job` primitive and metrics §6.2's `deadline` cross-check read `met` for a skipped tick, not the slack's sign; **9.15** — where the docs D3 hands over restate TIMER's rule, its grounds as above: GStreamer's sink for video playback, design for audio and games.
+
+## D18 — the declared class to 인경민 and 박이안: a memo and the frozen-contract change (2026-10-08)
+
+By 인지오's decision, scope-card item 38: D4's field and D5's executor rule, handed to 인경민, had reached no one — no memo, nothing in 인경민's section of `_dev/TODO.md`, nothing on the 9.15 line.
+
+- **A change to frozen contracts.** The field enters the workload, a dataset contract frozen and enforced by schema, and the run file the simulator reads, a protocol contract frozen on 2026-09-06; `docs/data-contracts.md` §13 (`:525`): "any change to a frozen contract needs all three of us and a changelog entry". The heads-up memo of 2026-09-13 told both teammates "두 분 프로그램의 입출력 형식은 이번 작업 범위 밖이에요" (`:4`).
+- **The recognizer's side open.** The visible projection (`docs/data-contracts.md` §4, "The two derived views", `:256`: "names, counts, and *pinned* lifetime times only") does not say whether a task's class is shown — 박이안's question.
+- **D5's rule names FIFO.** D5 names MLFQ, EDF and LOTTERY; the config schema's fourth algorithm, FIFO, runs "in arrival order until each task blocks or exits" (`docs/recognition-vocabulary.md:64`, `:102`). D5 applies its rule "below whatever the configured algorithm decides", so under FIFO too a waking task of another class preempts a running idle one; the memo says so.
+- **Not taken:** folding it into 9.15's final memo (B) — 9.13 adds the field and 9.14 reads the rule before 9.15, and §13 asks for agreement before a frozen contract changes.
+
+Applied: `docs/memos/2026-10-08-declared-scheduling-class.md` (the field — policy, not nice; `normal` and `idle`; the entry's class, never the task name's; its name and place 9.13's — the executor rule under the four algorithms, D16's comparison with the depicted desktop, the visible-projection question, the change to agree); the heads-up memo's dated note in Korean; `docs/README.md`'s index.
+
+Hands to: **인경민** — the rule in the executor; **박이안** — whether the visible projection shows the class; **9.13** — the field added only after the three agree, with a `docs/data-contracts.md` §14 entry and §4's two views stated.
+
+## D19 — the starvation floor labelled design; the executor's safety net retired from the docs (2026-10-08)
+
+By 인지오's decision, scope-card item 28, on D7. The threshold stays 30 000 000 µs; its grounding stated it as sourced.
+
+- **The value is the kernel's; its use here is ours.** `kernel/sched/ext.c` at v6.17 bounds `timeout_ms` at 30 s and defaults to it (D7). Nothing the project runs has that watchdog: the executor has no net (`simulator/memo/memo_261001.md` §6, question 3), and sched_ext is disabled on the runner (`meas-ci:sched:2026-10-07`, D2). sched_ext is the deployment path (`docs/research-proposal.md:152`, §2.1: "the concrete deployment path for anything this project produces"), not the scheduler the daemon drives today, as the guard spec's header had it. 30 s is the kernel's maximum; the shipped scx schedulers set less or the same — scx_lavd `.timeout_ms = 30000U` (`scheds/rust/scx_lavd/src/bpf/main.bpf.c:2850`), scx_rusty `10000` (`scheds/rust/scx_rusty/src/bpf/main.bpf.c:2017`), scx_bpfland `STARVATION_MS`, `5000ULL` (`scheds/rust/scx_bpfland/src/bpf/main.bpf.c:13`, `:1478`), at release `v1.1.3` (tag object `b2cd800e`), read 2026-10-08. The threshold is design: the bound the kernel enforces at most and by default, borrowed as the deployment path's validity bound. The header's "a shorter wait is damage the scored terms read" had no ground — the guard reads every task, a scored term a named one — and is dropped.
+- **The safety net in the docs.** D7 took no executor net, and with D5 an idle task waits by design; normative text still promised one: `docs/recognition-vocabulary.md` ("every runnable task makes progress within a bounded window regardless of what any configuration says"; FIFO's "the executor safety net still apply"), `harness/guards/README.md` (three places), the grounding kinds in `harness/guards/guard-spec.yaml`'s header and `docs/harness/metrics.md`'s §10 table, which named no kind for a design value. 인경민 holds the net as owed (status memo §5.5), told it exists by the algorithm-switch memo (2026-09-08, `:16`) and the batch-class memo (2026-09-09, `:45`).
+- **Not taken:** the 30 s kept as a sourced value (B).
+
+Applied: `harness/guards/guard-spec.yaml` — `starvation_floor`'s header and grounding (design; the shipped 5–30 s), the grounding kinds (a design value added); `docs/references.md` — `linux-sched-ext`'s role (the bound borrowed by design; "Does not name the boot default's values"), `scx`'s cite, role and status (the three schedulers' timeouts at the release); `docs/recognition-vocabulary.md` — the executor has no starvation window, FIFO's line without the net; `harness/guards/README.md` — the three places; `docs/harness/metrics.md` — the grounding kinds; `docs/memos/2026-10-08-declared-scheduling-class.md` — no safety net to build. `guards_lint.py` clean; `test_guards.py` passed; the references lint 0 errors.
+
+Hands to: **9.12** — `docs/research-proposal.md:473` and `:756`; **9.14** — `daemon/driver-table/prior.yaml:22`; the dry runs' longest wait per run against 30 s, an executor net reconsidered with 인경민 if any run comes near it (D7's option C); **9.15** — `docs/terminology.md:122`; guidebook vol-03 `:1089–1091`, `:1327–1329` and vol-04 `:1196`, `:1227`, `:1251–1257`, `:1317`; **인경민** — the declared-class memo's paragraph.
+
+## D20 — nice's carried work restated: the entry's own repeats, the upgrade's nice 19, nice as recorded at exit (2026-10-08)
+
+By 인지오's decision, scope-card item 38, on D6. D6's rule — nice is not carried — stands; its numbers and its "one carried case" are restated. Recomputed 2026-10-08 from the releases (`run_real_ns` summed by `ac_nice`, `type = pid` rows; each member read by HTTP range request and checked against the zip's CRC-32).
+
+- **`game-download`, on its pool.** D6 read repeat 32 (`meas-background-steamcmd-r32-full.zip`), which the entry leaves out: "repeats [1-20, 22, 24-31, 34]" (`dataset/archetypes.yaml:1368`; 32's and 33's check phases failed). Over the 30 pooled repeats of `meas-ci:background:2026-09-19`, `taskstats.steam-fresh-shaped.tsv`, SteamCMD's thread group (84 threads in each): nice 10 does **75.33 %** of the group's CPU, 73.56–77.57 % per repeat, median 75.10 %; nice 0, **24.67 %**. Repeat 32 alone: 530.665 s of 696.704 s, 76.17 %; its nice-0 166.039 s is SteamCMD's group (the HTTP, IPC, IOCP and validation threads and the rest), D6's 166.1 s holding 0.026 s of 12 tasks outside it; the nice-10 CPU is the content-update threads' (`CContentUpdateC`, 525.612 s).
+- **Not the one carried case.** `package-upgrade` pools every process of the upgrade (`dataset/archetypes.yaml:1431`). Over its pool, repeats 1–9 of `meas-ci:background:2026-10-01` (`taskstats.upgrade-install.tsv`, every `pid` row): nice 19 does 6.292 s of 235.590 s, **2.67 %** (2.30–3.36 % per repeat), `apt-check` nearly all of it — carried at full standing, as the download's nice-10 work is. `module-build-orchestrator`: landing 10 (`meas-ci:background:2026-10-02`, `…-dkms-r10-full-36987468347.zip`, `taskstats.dkms-install.tsv`) has 2.024 s of 237.033 s at nice 19, 0.85 %, `apt-check` again; the entry's stated tail is strip, zstd and depmod (`dataset/archetypes.yaml:1118–1122`), and whether its tables hold `apt-check` is not settled.
+- **Nice as recorded at exit.** A taskstats record is filled when the task exits, `ac_nice = task_nice(tsk)` (`kernel/tsacct.c:56` at v6.17, called from `taskstats_exit` through `fill_stats`, `kernel/taskstats.c:598`, `:636`, `:192`): each thread's whole CPU is filed under the nice it had at exit.
+- **The preemption clause qualified.** D6's "a waking nice-0 frame's earlier virtual deadline preempts it": with run-to-parity, the running entity keeps the CPU through a protected slice, the shortest slice queued (`set_protect_slice`, `kernel/sched/fair.c:958–971`; `:1037`, at v7.0); the runner has `RUN_TO_PARITY` on (`meas-ci:sched:2026-10-07`, `sched/features`). The limitation's direction — the download's interference with the game overstated — rests on the weights, about a tenth for nice 10, within one task group (D16).
+- **Not taken:** settling `module-build-orchestrator` now (B) — it needs 9.10's split of the DKMS process tree (D52–D57), the entry 9.13 rebuilds, and at under 1 % of the landing read it does not turn the limitation.
+
+Restated: D6's limitation covers `game-download`'s nice-10 work, 75 % of SteamCMD's CPU on the entry's pool, and `package-upgrade`'s nice-19 work, 2.7 % of its CPU; both are carried at full standing, overstating their interference.
+
+Applied: `classes/audit.md` — the `game-download` row's nice-0 tasks (25 SteamCMD threads; 12 tasks outside the entry), the carried-class list (the content-update threads; `package-upgrade` and `module-build-orchestrator` at nice 19).
+
+Hands to: **9.13** — whether `module-build-orchestrator`'s tables hold the nice-19 `apt-check` and `dpkg` work, read on its landings with the DKMS tree's split; **9.15** — the dataset docs' `game-download` limitation with these numbers, and `package-upgrade`'s nice-19 share beside it.
+
+## D21 — the `c2-p2a` bounding check: a variant entry and file for its idle half (2026-10-08)
+
+By 인지오's decision, scope-card item 38, on D6's hand-off to 9.14: `c2-p2a` scored with the download as measured and with it in the idle class, each verdict reported and the difference stated as the limitation's reach. The class is the entry's, never the task's (D18), and `game-download` is `normal`, so no file can put that download in the idle class; the RQ0 gate spec pins one dataset manifest (`harness/experiments/rq0-gate.yaml:226`), and no hand-off asked 9.13 for the idle half. The 9.14 pointer had dropped the reporting.
+
+- **The idle half's inputs.** A variant of `game-download` — the same tables, the declared class `idle` — and a variant of `c2-p2a` binding it in the download's place, both built by the rebuild and in the manifest the RQ0 gate spec pins. The variant file is outside the judging set; the bounding check alone reads it.
+- **Not taken:** dropping the idle half, the download carried as measured with the limitation stated alone (B); a harness override setting a task's class for one run (C) — against the class being the entry's, and a knob at run time.
+
+Applied: this changelog.
+
+Hands to: **9.13** — the `game-download` variant (its tables, class `idle`) and the `c2-p2a` variant binding it, outside the judging set; **9.14** — the bounding check pre-registered in the RQ0 gate spec on `c2-p2a` and its variant, the verdict under each reported and the difference stated as the reach of D6's limitation (D20's numbers).
+
+## D22 — metrics §11 item 9 and §6.9 given the simulator's state (2026-10-08)
+
+By 인지오's decision, scope-card item 10, completing D11: §11's lead says "The simulator's state is its owner's record (`simulator/src/notes.md` §4, `simulator/memo/memo_261001.md`)", and D11 stated that state for items 1–4 only. 인경민's status memo files two deviations under "Open gaps the docs already answer — implementation owed by the simulator", both marked inferred from reading the code:
+
+- §5.3, against §11 item 9 ("the running task finishes the slice it was granted and the new params govern from its next dispatch"): "`on_config_apply` re-arms the holder with the incoming policy's horizon"; a smaller new MLFQ `timeslice_us` can schedule a lane event in the past and trip `assert(e.t >= now_)`.
+- §5.2, against §6.9's premise ("a cold start into MLFQ puts every task in the top queue", from the switch memo §4): "`Mlfq::start()` keeps the per-task levels (`st`), so MLFQ→FIFO→MLFQ resumes the old levels."
+
+Items 7 and 8 have no recorded deviation; item 7's boost restart matches `simulator/src/sim.cpp:194–197`.
+
+- **Not taken:** narrowing §11's lead to items 1–4 (B).
+
+Applied: `docs/harness/metrics.md` — §11 item 9 and §6.9, one sentence each: the simulator does not yet, owed, its owner's record.
+
+Hands to: **9.14** — the primitives reading §6.9's re-learning time and §11 item 9's same-algorithm entries run against a simulator with both fixed, or their readings stated as the current simulator's.
+
+## D23 — the same-granularity rule's note: the universal negative dropped (2026-10-08)
+
+By 인지오's decision, scope-card item 18, correcting D13's reading. `docs/recognition-vocabulary.md` §2 labels the rule this project's, then said "No shipped EDF has a residual round-robin slice to cite"; D13 let it stand because Linux's fair-server reservation is not a residual slice. The sentence is a universal negative (the kind D14 classes unverifiable), and the shipped EDF it would cover leaves other tasks to their own classes' slices: sched(7) (man-pages 6.19): SCHED_DEADLINE threads preempt "any thread scheduled under one of the other policies", whose slices remain — SCHED_RR's, 100 ms on the runner (`sched_rr_timeslice_ms`, `meas-ci:sched:2026-10-07`), and the fair class's base slice (D2). What a source does say: Liu and Layland's algorithms "are pre-emptive and priority driven ones. … Thus the specification of such algorithms amounts to the specification of the method of assigning priorities to tasks" (`liu-jacm73`, p. 48, the scan re-read 2026-10-08); the model has no quantum.
+
+- **Not taken:** a scoped Linux statement in its place, with a registry entry for `include/linux/sched/rt.h` (B) — a source for values the rule does not use.
+
+Applied: `docs/recognition-vocabulary.md` §2 — "Neither slice takes a value from a source: Liu and Layland's EDF is preemptive and priority-driven with no quantum (`liu-jacm73`), and no second source is introduced for LOTTERY."; `docs/references.md` `liu-jacm73` — the role covers the note, p. 48.
+
+Hands to: none.
+
+## D24 — `T_interaction`: 0.1 s labelled the strict end of Miller's echo range; Long and Deber restated (2026-10-08)
+
+By 인지오's decision, scope-card item 1, on D1. The value stays 100 000 µs. Re-read 2026-10-08 in the S1-01, S1-07 and S1-11 copies:
+
+- **Miller gives two delays.** Topic 1 (p. 271): the indication "by the movement of a key, switch or other control member that signals it has been physically activated. The click of the typewriter key … Time delay: No more than 0.1 second"; and for typed text, "the delay between depressing the key and the visual feedback should be no more than 0.1 to 0.2 seconds", with "this delay in feedback may be far too slow for skilled keyboard users". The constant reads a keystroke's response — the second statement's object — and D1's paraphrase had dropped "physically". 0.1 s is the strict end of the echo range, taken on Miller's caveat on skilled typists: design.
+- **Long, as Shneiderman reports him** (p. 268): "delays of approximately 0.1-0.5 second in the time for a keystroke to produce a character on an impact printer … worked more slowly and made more errors with longer response times. Even these brief delays were distracting" — a trend within the range, keystroke to print; §10's "already slowed … so 0.1 s is the loose end" went beyond it.
+- **Deber's population** (p. 1830): "A total of 24 sessions were run across both form-factors (12 drag and 12 tap). The sessions were performed by 14 right-handed participants"; the 69 ms and 96 ms tapping thresholds rest on the 12 tapping sessions.
+- **Not taken:** Long and Deber restated with the 0.1 s left a guideline's value (B).
+
+Applied: `docs/harness/metrics.md` §10 — the status cell (design: the strict end of a guideline's range) and the paragraph (Miller's two delays, the choice and its reason, Long's trend, Deber's 12 tapping sessions); `docs/references.md` — `miller-fjcc68`'s role (the strict end taken by design; "physically activated"; "sixteen other topics", Topic 1 one of the seventeen, p. 269), `deber-chi15`'s role (the tapping thresholds' 12 sessions).
+
+Hands to: **9.15** — the guidebook's `T_interaction` passages (vol-01 `:818`, `:820`; vol-02 `:720`, `:823`; vol-03 `:3127`), which call Nielsen a second grounding (D1) and state 0.1 s as Miller's value, restated to D1 and this entry.
+
+## D25 — the 700 µs point labelled a one-CPU design choice; the desktop's running kernel; every tag recorded (2026-10-08)
+
+By 인지오's decision, scope-card item 26a, on D2. The point stays 700 µs.
+
+- **The one-CPU value is a choice.** The kernel scales the base slice by 1 + log₂ of the online CPUs up to 8 (`fair.c:192–221` at v7.0); the runner reads 2.1 ms at its 4 CPUs (`meas-ci:sched:2026-10-07`). D2 took the unscaled value for the simulator's one lane and recorded the scaled one as not taken, but the RQ0 gate spec's reason ("the kernels of the runner and of the depicted desktop") read as if those kernels run 0.70 ms, and `linux-sched-fair`'s "sub-millisecond base slice" holds at one CPU only. Both now label the value design.
+- **The desktop's running kernel is 7.0.0-31.** 9.10 D48 (9.10 changelog `:928`): "the desktop on HWE kernel `7.0.0-31.31~24.04.1`"; the depicted upgrade installs 7.0.0-34. D2 read only -34. Read 2026-10-08 from launchpad.net: `linux-hwe-7.0_7.0.0-31.31~24.04.1.diff.gz`, matching its `.dsc` (same orig tarball, `c6343795…`); its `kernel/sched/fair.c` hunks change the wake-up pick (`pick_eevdf`, `pick_next_entity`, the wake-preemption pick at `:8809`, `:8920` of the orig) and no line of the base slice or its scaling; `features.h` changes only `RT_PUSH_IPI`'s default. 700 µs holds on the running kernel.
+- **Every tag read.** `kernel/sched/fair.c` at v6.6 through v7.2, from the torvalds/linux mirror on 2026-10-08: `750000ULL` at v6.6–v6.14, `700000ULL` at v6.15–v7.2 (`:78` at v6.6, `:76` at v6.7–v6.13, `:79` from v6.14); the SHA-256 of v6.14, v6.15, v6.17 and v7.0 match D2's (`77dfa23e…`, `cd623f6e…`, `e00d16ce…`, `931c64fb…`).
+- **Not taken:** the sweep point moved to the runner's scaled 2.1 ms (B).
+
+Applied: `harness/experiments/rq0-gate.yaml` — the 700 µs point's reason (design: the one-CPU value for the simulator's one lane; the runner's 2.1 ms at 4 CPUs); `docs/references.md` `linux-sched-fair` — the role (unscaled magnitudes; the value taken by design; the desktop on 7.0.0-31 before its upgrade), the cite's access dates and the status (every tag; the -31 diff).
+
+Hands to: **9.14** — the gate spec's reason with the re-pin, and its second half, the 831 µs frame slack, already judged wrong by the compiled audit (`_dev/research/jioh/2026-09-13-verification/compiled-numbers-report.md:69`, `:138`; scope card `:21`), read against the rebuilt files (D2).
+
+## D26 — the RQ0 gate spec's executor assumptions: the simulator's current answers, and 인경민's reply asked for (2026-10-08)
+
+By 인지오's decision, scope-card item 10, extending D7 and D11 to the gate spec. `harness/experiments/rq0-gate.yaml` statement `executor-assumptions` (`:133–143`) commits three assumptions "pending 인경민's confirmation" and calls confirmation "a Phase 9 prerequisite"; statement `judging-set` (`:123–129`) lets `c7-meeting` and `c7-media` re-enter the judging set if the answers are that "a residual task keeps its slice when a deadline task wakes and that a slice boundary is dispatched before a same-microsecond wake". 인경민's status memo §6 (`simulator/memo/memo_261001.md:96–102`, "current behaviour; the reply is kyungmin's to send"):
+
+1. "Does a waking deadline task take the lane from a residual slice at once? Yes (option A). [confirmed]" — `video` waits 0 µs on all 3 600 ticks of the memo's scenario. Assumption (1) holds as the simulator behaves today.
+2. "Rule D1: config applies first, then insertion order. It is **not** 'wake first' by rule. [inferred …]"; "Under option A the wait is 0 either way." Assumption (2) — the wake processed first — is not the simulator's rule; metrics §11 item 3 states D1 (D11).
+3. Answered by D7 and D19: no executor window; the guard's 30 s, by design.
+
+On answer 1, the re-entry condition's first half fails, so `c7-meeting` and `c7-media` stay reporting-only.
+
+- **Not taken:** the hand-off alone, with 인경민's formal reply left outstanding (A).
+
+Applied: `docs/memos/2026-10-08-declared-scheduling-class.md` — a fourth request: 인경민 confirms §6's answers 1 and 2 as his reply.
+
+Hands to: **9.14** — the gate spec's `executor-assumptions` restated on 인경민's reply — (1) as today, (2) replaced by rule D1, (3) per D7 and D19 — with the `judging-set` statement's re-entry condition read against them (on today's answers, `c7-meeting` and `c7-media` stay reporting-only), as the harness changelog entry the statement requires; **인경민** — the memo's fourth request.
+
+## D27 — batch: metrics and citation wording (2026-10-08)
+
+By 인지오's decision, the audit's routine corrections to wording 9.11 wrote or kept, each checked against its source on 2026-10-08:
+
+- **The coefficient's undefined case** (D9). Chicco & Jurman (Europe PMC full text, PMC6941312, SHA-256 `8c497f0d…`), Methods: "MCC is undefined when a whole row or column of M is zero … However, some mathematical considerations can help meaningfully fill in the gaps for these cases. If M has only one non-zero entry … MCC=1 for the former case and MCC=−1 for the latter case", the four remaining cases taken as a limit "→ 0", "With these positions MCC is now defined for all confusion matrices M". Reporting it undefined (`harness/tools/harness/grader.py:349–372`) is the project's choice: design. The role line's quotation restored to "We cannot consider such measures fully informative …".
+- **The Layer-1 interval caveat** (D9). Field & Welsh (S1-09): §2, p. 371, "a balanced single classification with g clusters … of m observations each"; §4, p. 387, "The cluster bootstrap consistently underestimates the bootstrap variance for all the statistics. However, we should note that for the cluster bootstrap we are essentially working with five and 15 observations respectively." The underestimate is found with few clusters of equal size; unequal sizes are outside the paper, not the cause D9's "so … unequal size" gave. Stated now: the coreset's files are more than 15 and of unequal size, outside both, so the interval's coverage is untested. Changelog D9 (`:132`, `:137`) reads with this.
+- **The bootstrap seed and repetitions are pinned in the grader** (`grader.py:69–70`), not by the RQ0 gate spec, whose pins (`harness/experiments/rq0-gate.yaml:222–226`) are the scoring spec, guard spec, driver table and dataset manifest (D13, item 4).
+- **TIMER's `t₀`** (D11): metrics §6.2's cross-reference now reads "the task's first TIMER execution (§11, assumption 4)"; §11 item 4's "every periodic task's program begins with its TIMER" scoped to the 24 files of the current coreset and to the first executed instruction — `memo_261001` §5.4 states it of those files, and a loop's head is its TIMER, not the loop marker (the `mock-chain` and `mock-media` tasks; the gaming chain heads). The fixtures README's t₀ line likewise.
+- **The `mock-guards` derivation** (D7): one run-level guard fails by design, config age; the starvation floor passes, `batch`'s 1.95 s inside 30 s.
+- **D1's "It is the only candidate that names keyboard input"** (`:9`) reads "the only candidate threshold": Shneiderman's report of Long (S1-07, p. 268) and Deber's "key typing" (S1-11, p. 1831) name it too.
+
+Applied: `docs/harness/metrics.md` §6.2, §8, §10, §11; `docs/references.md` `chicco-bmcg20`; `harness/tools/tests/fixtures/README.md`; `harness/tools/tests/fixtures/mock-guards/worked.md`.
+
+Hands to: none.
+
+## D28 — batch: the stale OSTEP and 0.75 ms wording in 9.11's own files (2026-10-08)
+
+By 인지오's decision: D8's correction — the boot default is the values of three worked examples of OSTEP's chapter 8 (Example 1, p. 4; Figure 8.6, p. 9; Figure 8.4, pp. 6–7), not one example whole — and D2's 700 µs point reached the lead sentence, the `num_queues` row, the RQ0 gate spec's primary reason and the `ostep` entry, but not these:
+
+- `docs/recognition-vocabulary.md` §2, the sensitivity paragraph: "the floor is one example's values" and the sweep's "0.75" ms — now the values of one chapter's worked examples, and 0.7 ms (`harness/boot-defaults/ostep-slice-700us.json`).
+- §2, the allotment paragraph: "That is the one point where this model and the example differ" — the boot default's allotment equals the slice as in Example 1 and departs from Figure 8.6, which gives the top two levels two slices each.
+- `harness/experiments/rq0-gate.yaml`'s comment on the primary; `harness/boot-defaults/README.md`'s `ostep.json` line ("OSTEP §8's worked MLFQ example whole"); `docs/references.md` `illumos-ts`'s role ("OSTEP's example whole").
+
+Applied: the five places above.
+
+Hands to: **9.14** — the gate spec's comment with the re-pin.
+
+## D29 — batch: labels in decision 1's words (2026-10-08)
+
+By 인지오's decision. Phase spec decision 1: "A value no source states carries no source tag and is labelled for what it is: convention, arithmetic, placeholder, or design." D13 left labels outside those four standing ("stated assumption", "stated rule, no source", "assumption, unbounded") and the config schema's ranges unlabelled where stated; each value so labelled is one the project chose, so each is design, its qualifier kept:
+
+- `docs/harness/metrics.md` §10: the latency floor (1 000 µs) and the fraction floor (0.01), "stated assumption" → design; the bootstrap seed and repetitions, "pinned, not estimated" → "design, pinned, not estimated"; "Floors are stated assumptions" → design values; the guard-threshold row's kinds — an identity, a structural rule, or a design value. §9's sensitivity sentence: the boot default's values are OSTEP's worked examples' for MLFQ and design for EDF and LOTTERY (they had been called stated assumptions), and the RQ0 gate spec's sweep is nine alternative boot defaults (it said two).
+- `docs/recognition-vocabulary.md` §2: EDF's and LOTTERY's slices, "stated rule, no source" → "design (the same-granularity rule)"; LOTTERY's `batch_share`, "assumption, unbounded" → "design, unbounded by any source"; the schema's ranges, "design, frozen with the schema on 2026-08-28; no source states them".
+- `harness/guards/guard-spec.yaml`: the grounding kinds; `provenance_share` 0.5, design — its quotation located in appendix B.3, which restates §6.3 (`docs/research-proposal.md:916`; §6.3, `:718`, says "70% of its configurations were fallbacks"); `harness/guards/README.md`'s kinds.
+
+The RQ0 gate spec's `executor-assumptions` keep their word: they await 인경민's reply (D26).
+
+Applied: the files above. `guards_lint.py` clean; `test_guards.py` passed.
+
+Hands to: **9.14** — the guard spec's changes with the re-pin.
+
+## D30 — batch: the two docs' own changelogs (2026-10-08)
+
+By 인지오's decision. `docs/harness/metrics.md` §13 says "Every change to a primitive, an aggregate, a constant, or a floor lands here" and logged a grounding-only change before (8.1's latency floor); `docs/recognition-vocabulary.md` §5 logs §2's wording changes (2026-09-12, 2026-10-06). D1 recorded "Not added to §13", and D8, D9, D11, D13, D19, D22–D24 and D27–D29 changed the two docs without an entry.
+
+Applied: one dated entry in each — metrics §13, "scheduler-side constants and groundings (jioh 9.11)"; vocabulary §5, "scheduler-side groundings (jioh 9.11)".
+
+Hands to: none.
+
+## D31 — batch: registry details, and D14's note corrected (2026-10-08)
+
+By 인지오's decision, each checked on 2026-10-08:
+
+- **`scx`** (D12): the watchdog quotation spans `README.md:81–84`, the distros quotation `OVERVIEW.md:283–284` (the local v1.1.3 copies); of the release's fifteen Rust schedulers, ten READMEs carry a "Production Ready?" line and scx_cake, scx_chaos, scx_mitosis, scx_p2dq and scx_pandemonium none (the tree at `v1.1.3` listed through the GitHub API, each README read) — the role had "each". The cite's access dates added.
+- **Access dates on the deployed-system cites** `schbench`, `stress-ng` (2026-09-24, their status lines' reads) and `scx`, as the citation-tier rule asks (`docs/references.md`, "deployed-system → footnote with URL + accessed date + pinned version").
+- **`ostep`**: the cite gains the year, Version 1.10 and the chapter number, as the copy prints them ("[VERSION 1.10]", "© 2008–23").
+- **`rt-app`**: pinned at `d6f8be41…` (2026-06-10), the commit D3 read (search record S2-14); "pin commit" retired.
+- **`interbench`**: the role adds the TIMER memo's citation of its missed-period handling (`interbench.c:398–436`), beside "no longer cited by the dataset" for the emulations' parameters.
+- **`nielsen-ue93`**: the chapter's title, "Usability Heuristics", is not in the excerpt read ("Excerpt from Chapter 5 in my book Usability Engineering"); marked not verified. **`hackbench`**: the superseded GitHub mirror is not recorded; said so.
+- **D14's note, for 9.15** (D14's own lines read with these): scx_lavd's regular slice is 0.5–5 ms (`scheds/rust/scx_lavd/src/bpf/lavd.bpf.h:74–75` at v1.1.3), and its slice boost, on unless `--no-slice-boost` is passed (`src/main.rs:220–222`), lets a long-running task's slice reach `LAVD_SLICE_BOOST_MAX`, 500 ms (`lavd.bpf.h:77`; `src/bpf/main.bpf.c:348–351`); scx_rusty uses two values, 20 ms and 1 ms when the host is fully utilised (`src/main.rs:97–103`; `src/tuner.rs:139`, `:173–177`), not a range. D14's "Not searched: that macOS, FreeBSD and Windows compute priority by decaying usage" — for FreeBSD, OSTEP (S1-02, p. 9) states it: "the FreeBSD scheduler (version 4.3) uses a formula to calculate the current priority level of a job, basing it on how much CPU the process has used [LM+89]; in addition, usage is decayed over time"; macOS and Windows not searched.
+
+Applied: `docs/references.md` — `scx`, `schbench`, `stress-ng`, `ostep`, `rt-app`, `interbench`, `nielsen-ue93`, `hackbench`. The references lint 0 errors.
+
+Hands to: **9.15** — D14's correction note with these values: lavd's boost and rusty's two values, FreeBSD 4.3's decaying usage stated by OSTEP.
+
+## D32 — batch: records and tooling (2026-10-08)
+
+By 인지오's decision, each checked on 2026-10-08 against the local census copies (byte-identical to release `meas-ci-probes-2026-10-07b`) and the repository:
+
+- **`classes/audit.md`.** The perf-removal citation, `campaign/run.sh:156–162`, now `dataset/tools/meas/campaign/run.sh:156–163` at `5c08d1a7` (the `rm -f` on line 163; the block has since moved). `image-editor`'s `python3`: every `python3` in the `gimp` job is the harness's tools or the runner agent's `waagent` (its threads and children by `ppid`), none GIMP's. `audio-server`'s nice −11: the main threads of `pipewire`, `pipewire-pulse` and `wireplumber`, four sessions each; the filter-chain instance's, `pipewire -c filter-chain.conf`, at nice 0. "No thread … changed its policy, real-time priority or nice during its job": after its first sample — `classes.py` samples every 2 s (the hooks' interval argument), so a class set within 2 s of a thread's start is first seen already set. The census table's blank line, which split the session rows from their header, moved after the table.
+- **`dataset/tools/meas/sched/classes.py`.** `cmdline` turned a tab or newline inside an argument into a tab or newline in the TSV row: release `meas-ci-probes-2026-10-07b`'s `steam` job (`classes.tsv`, SHA-256 `e713389e…`) has two such rows, zenity's multi-line `--text`, their class fields intact. Tabs, carriage returns and newlines now become spaces. Records already released stand.
+- **Earlier lines of this changelog, read with these.** D2 (`:31`): n is the online count when the kernel recomputes the slice, which on the way down still counts the leaving CPU, as release `meas-ci-sched-2026-10-07`'s notes put it — "before the CPU left" holds on the way down only (on the way up, 1 → 2 gives 1 400 000, 3 → 4 2 100 000). D11 (`:155`): "12 periodic tasks arrive mid-run, in `c3-evening` and `c4-compile`" is `simulator/memo/memo_261001.md`'s count of 2026-10-01; at the committed build (`dataset/build.manifest.json`, the 50 local files matching it) 22 tasks carry a TIMER and 4 arrive mid-run, 3 in `c3-evening` and 1 in `c6-fold`, all TIMER-first. D3 (`:48`): the guide is `docs/simulator/simulator-guide.md`; (`:68`): `teper-arxiv24` and `lipari-arxiv15` were minted with D3 (`a9b3eab0`), so 9.15 cites them, not mints them.
+
+Applied: `classes/audit.md`; `dataset/tools/meas/sched/classes.py`.
+
+Hands to: none. Release `meas-ci-probes-2026-10-07b`'s notes say "Eleven jobs on the AMD EPYC 7763"; the jobs' `spec.json` give ten — an edit to the release, on 인지오's go-ahead.
+
+## D33 — batch: hand-off pointers (2026-10-08)
+
+By 인지오's decision, the hand-offs the audit found missing or short, each location read on 2026-10-08 at the current line:
+
+- **9.12** — 9.11 D4's survey of which programs declare a class, against the proposal's "Most applications never do" (`docs/research-proposal.md:158`). 9.12 runs as issue #18; the pointer reaches it by a comment there, on 인지오's go-ahead, with D19's two proposal lines.
+- **9.13** — the TIMER-first invariant on the first executed instruction: the gaming chain heads and the mocks are LOOPs whose body begins with TIMER, so "begins its program with it" read literally fails them (D11). No I/O class field: 9.10 D125 handed 9.11 the backup's "idle CPU and I/O classes"; D4–D5 carry the CPU class; the I/O class is not carried, the simulator scheduling one CPU lane and nothing else (`docs/simulator/simulator-guide.md:44`, "Exactly one simulated CPU").
+- **9.14** — D3's harness side beyond its pointer (the consumed tick's index; the chain guard's count; the length-one `deadline` cross-check, which pairs lines with job ends by index, `primitives.py:292–300`; the `tick_count` header and README; metrics `:317`'s `mock-media`; the `c7-gaming` note's place); the scope card's routings to 9.14 (`scope-card.md:21–23`), which no pointer carried; 인경민's EDF chain-stage note, with its measured consequences (the note's table, `:36–40`) for the pair review's gaming rows (`docs/daemon/prior-table-pair-review.md:37`, `:52`), and the reply it is owed.
+- **9.15** — the stale TIMER-backlog, t₀, OSTEP, 0.75 ms, `T_interaction` and precedent passages the D2, D3, D8, D11 and D12 pointers did not name (the 9.15 line lists each); the dataset docs D6 and D20 meant, named; 인경민's 2026-10-06 note, cited by D3 and the TIMER memo, absent from the repository, its content on the 9.14 line and in the coreset guide.
+
+Left as it is: `simulator/src/sim.cpp:940`'s comment "OSTEP §8 whole", 인경민's code.
+
+Applied: `_dev/TODO.md` — the 9.12, 9.13, 9.14 and 9.15 lines.
+
+Hands to: as listed.
+
+## D34 — the declared-class memo: three frozen contracts, not two (2026-10-08)
+
+By 인지오's decision, correcting D18. D18 and its memo named two frozen contracts, the workload and the run file. The class is the entry's, so the field sits on each archetype entry, and the archetype format is a frozen dataset contract too (`docs/data-contracts.md` §13: "The dataset contracts (archetype, timeline, workload) are frozen and enforced by schema and CI today"). The change touches three — the archetype, the workload and the run file — and a fourth, the visible projection, if 박이안 answers that it shows the class.
+
+Applied: `docs/memos/2026-10-08-declared-scheduling-class.md` — the header, §1's "Where it goes", §4's third request (the memo not yet sent); `_dev/TODO.md` — 9.13's line names §2's archetype beside §4's workload and its two views.
+
+Hands to: as D18.

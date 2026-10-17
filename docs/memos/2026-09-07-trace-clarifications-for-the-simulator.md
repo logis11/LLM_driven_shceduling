@@ -1,6 +1,7 @@
 # Trace clarifications for the simulator — what the harness needs from the trace, and why
 
-> Status: memo · Created 2026-09-07 · Updated 2026-09-07
+> Status: memo · Created 2026-09-07 · Updated 2026-10-17
+> Open — item 1 of §8, a `ready` line at every completion of a blocking primitive, at zero wait when it did not block: owed by the simulator, which passes a backlogged TIMER tick or a mailbox-satisfied WAIT without one (`simulator/src/sim.cpp`), the RQ0 gate spec's simulator-conformance item (a) (`harness/experiments/rq0-gate.yaml`); owner 인경민. Items 2–4 have their answers: wakes queue with depth in the simulator's mailbox, its same-instant rule D1 is written in `simulator/steps/README.md`, and it emits the `deadline` lines (`docs/harness/metrics.md` §11 items 2, 3 and 6).
 > From 인지오 to 인경민. Written at the end of the Phase 5 spec session, where the metric definitions were fixed by hand-writing mock traces. Nothing here changes the trace format: no new event type, no new field. Everything here is a clarification of what an existing line means, plus one piece of advice. Please read it before deciding the open questions in `simulator-guide.md` §9, because three of them decide whether the harness can compute the paper's numbers at all.
 
 ## 1. The one-paragraph version
@@ -87,3 +88,11 @@ The harness fixes its observation window as `[0, T_end]`, with `T_end` read from
 | 5 | Stop at the workload's end if you like (§7) | advice | nothing; the harness never reads past it |
 
 If any of 1–3 goes differently, tell 인지오 before the harness's mock traces are finalised, because they encode these assumptions and would be changed deliberately rather than discovered wrong later. The full reasoning behind each item is in `_dev/archive/2026-09-07-phase-5-primitive-metrics.md`.
+
+## Correction (2026-10-17)
+
+Three examples above read the 2026-09 core set. On the rebuilt files (the 9.16 compiled-number audit, `_dev/research/jioh/task-9.16-exit-audits/compiled/report.md` §2.6) they read as follows; the point each illustrates holds.
+
+- **§3c, "The game chain is sixteen tasks".** Every chain file's chain has 17 members: 16 stages and `wineserver`.
+- **§6, "did the input stage finish its 230 µs before the next tick".** The head runs 0.2–0.9 ms: 225 µs in the C2 gaming pair (`c2-p2a` and `c2-p2b`), 631 µs in `c1-gaming`, `c4-gaming` and `c7-gaming`, 746 µs in `c3-evening`, 911 µs in `c6-dual`. All are sub-millisecond, so the head's `deadline` line still answers almost always yes.
+- **§7, "`c2-p1a`'s training run has 130 s of work from t = 60 s in a file whose labels end at 180 s".** It has 1,389.885 s of work from t = 60 s in a file whose labels end at 99.435 s; the advice holds.

@@ -1,0 +1,13 @@
+{
+ "apt.rc": "0",
+ "finished_utc": "2026-09-14T11:13:36Z",
+ "replay.rc": "0",
+ "timing.rc": "0",
+ "type_delay.delivered": "60",
+ "type_delay.rc": "0",
+ "window.found": "1",
+ "window.id": "2097152",
+ "window.name": "xkeylog",
+ "window.wait_ms": "88",
+ "xvfb.alive": "1"
+}

@@ -1,0 +1,123 @@
+/private/tmp/claude-501/-Users-jiohin-Desktop-future-of-sw-LLM-driven-shceduling/43e369a1-b5c7-40a2-b57d-cc4fcdb568dc/scratchpad/venv/bin/python tools/derive.py --check --require-coverage
+verified — 67 segments on the grid
+cell                t1  t2  t3  t4  t5  segs  miss
+browsing/true        5   0   0   0   0     5     0
+browsing/false       2   0   0   0   0     2     1
+office/true          0   3   0   0   0     3     0
+office/false         0   1   0   0   0     1     0
+mail/true            1   0   1   0   0     2     0
+mail/false           1   0   0   0   0     1     0
+dev/true             3   0   0   0   0     3     0
+dev/false            1   0   0   0   0     1     0
+photo/true           2   0   0   0   0     2     0
+photo/false          1   0   0   0   0     1     0
+meeting/true         2   0   0   0   0     2     1
+meeting/false        1   0   0   0   0     1     0
+gaming/true          0   0   8   0   0     8     0
+gaming/false         0   0   2   0   0     2     0
+media/true           2   0   1   1   1     5     1
+media/false          1   0   0   0   0     1     0
+video-edit/true      4   0   0   0   0     4     0
+video-edit/false     1   0   0   0   0     1     0
+compile/true         0   0   3   0   0     3     0
+compile/false        0   0   1   0   0     1     0
+ml-train/true        2   0   0   0   0     2     0
+ml-train/false       1   0   0   0   0     1     1
+render/true          2   0   0   0   0     2     0
+render/false         1   0   0   0   0     1     1
+transcode/true       0   2   0   0   0     2     0
+transcode/false      0   1   0   0   0     1     1
+indexing/true        0   0   1   0   0     1     1
+indexing/false       0   0   2   0   0     2     0
+backup/true          2   0   0   0   0     2     0
+backup/false         1   0   0   0   0     1     1
+idle/true            0   1   0   0   0     1     0
+idle/false           0   1   0   0   0     1     0
+outside the grid: ambiguous ×1 (c6-dual, tier 3)
+total segments: 67 (66 on the grid, 1 outside)
+empty cells: 0
+generated distractor-grid: 272 files, 544 segments
+cell                t1  t2  t3  t4  t5  segs  miss
+browsing/true       27   4   3   0   0    34     1
+office/true          0  31   3   0   0    34     0
+mail/true           27   4   3   0   0    34     0
+dev/true            27   4   3   0   0    34     3
+photo/true          27   4   3   0   0    34     0
+meeting/true        27   4   3   0   0    34     1
+gaming/true          0   0  34   0   0    34     0
+media/true          27   4   3   0   0    34     0
+video-edit/true     27   4   3   0   0    34     3
+compile/true         0   0  34   0   0    34     3
+ml-train/true       27   4   3   0   0    34     3
+render/true         27   4   3   0   0    34     3
+transcode/true       0  31   3   0   0    34     3
+indexing/true        0   0  34   0   0    34    34
+backup/true         27   4   3   0   0    34     3
+idle/true            0  31   3   0   0    34     0
+
+generated familiarity-ladder: 66 files, 66 segments
+cell                t1  t2  t3  t4  t5  segs  miss
+browsing/true        0   0   0   1   1     2     0
+office/true          0   0   0   3   3     6     0
+mail/true            0   0   0   1   1     2     0
+dev/true             0   0   0   1   1     2     0
+photo/true           0   0   0   1   1     2     0
+meeting/true         0   0   0   1   1     2     0
+gaming/true          0   0   0   3   3     6     0
+media/true           0   0   0   1   1     2     0
+video-edit/true      0   0   0   1   1     2     0
+compile/true         0   0   0   3   3     6     0
+ml-train/true        0   0   0   3   3     6     0
+render/true          0   0   1   3   3     7     0
+transcode/true       0   0   0   3   3     6     0
+indexing/true        0   0   0   3   3     6     6
+backup/true          0   0   1   3   3     7     0
+idle/true            0   0   0   1   1     2     0
+
+generated flap-stress: 24 files, 216 segments
+cell                t1  t2  t3  t4  t5  segs  miss
+mail/true           40   0   0   0   0    40     0
+photo/true          32   0   0   0   0    32     0
+meeting/true        40   0   0   0   0    40     0
+gaming/true          0   0  64   0   0    64     0
+render/true         40   0   0   0   0    40     0
+
+generated return-grid: 720 files, 2160 segments
+cell                t1  t2  t3  t4  t5  segs  miss
+browsing/true      117   6  12   0   0   135     0
+office/true          0 123  12   0   0   135     0
+mail/true          117   6  12   0   0   135     0
+dev/true           117   6  12   0   0   135     0
+photo/true         117   6  12   0   0   135     0
+meeting/true       117   6  12   0   0   135     0
+gaming/true          0   0 135   0   0   135     0
+media/true         117   6  12   0   0   135     0
+video-edit/true    117   6  12   0   0   135     0
+compile/true         0   0 135   0   0   135     0
+ml-train/true      117   6  12   0   0   135     0
+render/true        117   6  12   0   0   135     0
+transcode/true       0 123  12   0   0   135     0
+indexing/true        0   0 135   0   0   135   135
+backup/true        117   6  12   0   0   135     0
+idle/true            0 123  12   0   0   135     0
+
+generated transition-grid: 480 files, 960 segments
+cell                t1  t2  t3  t4  t5  segs  miss
+browsing/true       51   4   5   0   0    60     0
+office/true          0  55   5   0   0    60     0
+mail/true           51   4   5   0   0    60     0
+dev/true            51   4   5   0   0    60     0
+photo/true          51   4   5   0   0    60     0
+meeting/true        51   4   5   0   0    60     0
+gaming/true          0   0  60   0   0    60     0
+media/true          51   4   5   0   0    60     0
+video-edit/true     51   4   5   0   0    60     0
+compile/true         0   0  60   0   0    60     0
+ml-train/true       51   4   5   0   0    60     0
+render/true         51   4   5   0   0    60     0
+transcode/true       0  55   5   0   0    60     0
+indexing/true        0   0  60   0   0    60    60
+backup/true         51   4   5   0   0    60     0
+idle/true            0  55   5   0   0    60     0
+/private/tmp/claude-501/-Users-jiohin-Desktop-future-of-sw-LLM-driven-shceduling/43e369a1-b5c7-40a2-b57d-cc4fcdb568dc/scratchpad/venv/bin/python tools/check_build.py
+build verified (3304 files, 7 manifests)

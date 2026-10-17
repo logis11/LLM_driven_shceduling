@@ -1,4 +1,9 @@
 # C1 — single-situation calibration: pure office (building-plan §3 C1).
+# The four renderer-hidden tasks are the other tabs' page renderers of one
+# five-tab window: five tabs from Firefox's Linux telemetry (glam; 9.10 D15,
+# D16), one renderer per tab observed in Chrome (meas-ci:desktop:2026-10-04;
+# 9.10 D126-D129, D131).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-office
   seed: 101
@@ -9,14 +14,18 @@ segments:
      scenario: [S1, S2, S4]}
 
 tasks:
-  - {id: writer, name: soffice.bin, archetype: desktop-interactive,
+  - {id: writer, name: soffice.bin, archetype: office-writer,
      arrive: 0s, depart: 60s}
-  - {id: browser, name: chrome, archetype: desktop-interactive,
+  - {id: browser, name: chrome, archetype: web-browser,
      arrive: 0s, depart: 60s}
-  - {id: renderers, name: chrome, archetype: electron-comms,
-     arrive: 0s, depart: 60s, count: 8}
-  - {id: mail, name: thunderbird, archetype: electron-comms,
+  - {id: renderers, name: chrome, archetype: renderer-hidden,
+     arrive: 0s, depart: 60s, count: 4,
+     source: {count: [glam, "meas-ci:desktop:2026-10-04"]}}
+  - {id: mail, name: thunderbird-bin, archetype: mail-client,
      arrive: 0s, depart: 60s}
 
-focus:
+input:
   - {from: 2s, to: 58s, task: writer}
+
+focus:
+  - {from: 0s, to: 60s, task: writer}

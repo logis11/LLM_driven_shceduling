@@ -31,7 +31,7 @@ def test_expected_csv_byte_for_byte(fixture_dir, mock, tmp_path):
     d = fixture_dir(mock)
     table, seed = IDENTITY[mock]
     rows, guards = build(d / "run.json", d / "trace.jsonl", table=table, seed=seed,
-                         schedule_path=schedule_of(d))
+                         schedule_path=schedule_of(d), telemetry="names")   # the fixtures predate the focus (9.17)
     assert guards == []
     out = tmp_path / "records.csv"
     write_csv(rows, out)
@@ -45,12 +45,31 @@ def test_fixture_csv_validates_against_schema(fixture_dir, mock):
     validate_rows(rows)            # raises on the first invalid row
 
 
-def test_columns_are_the_twenty_two_in_order(fixture_dir):
+def test_columns_are_the_twenty_five_in_order(fixture_dir):
     with open(fixture_dir("mock-office") / "expected.csv", newline="") as f:
         header = next(csv.reader(f))
     assert header == list(COLUMNS)
-    assert len(COLUMNS) == 22
-    assert COLUMNS[-2:] == ("hogs", "pre_committed_miss")
+    assert len(COLUMNS) == 25
+    assert COLUMNS[COLUMNS.index("cause") + 1] == "channel"
+    assert COLUMNS[COLUMNS.index("boot_default") + 1] == "telemetry"          # 9.17: the sixth identity column
+    assert COLUMNS[-3:] == ("hogs", "pre_committed_miss", "skipped")
+
+
+def test_channel_rides_on_wake_rows_only(fixture_dir):
+    """metrics doc §5: `channel` is filled on `ready_wait` rows with cause `wake`
+    and on no other row."""
+    rows = read_csv(fixture_dir("mock-chain") / "expected.csv")
+    wake = next(r for r in rows if r["metric"] == "ready_wait" and r["cause"] == "wake")
+    assert wake["channel"] == "chain"
+    validate_rows([dict(wake, channel="timer")])
+    arrive = next(r for r in rows if r["metric"] == "ready_wait" and r["cause"] == "arrive")
+    with pytest.raises(ValueError):
+        validate_rows([dict(arrive, channel="input")])
+    busy = next(r for r in rows if r["metric"] == "busy")
+    with pytest.raises(ValueError):
+        validate_rows([dict(busy, channel="input")])
+    with pytest.raises(ValueError, match="channel"):
+        validate_rows([dict(wake, channel="input:editor")])     # the kind, never the full name
 
 
 def test_pre_committed_miss_is_zero_or_one():
@@ -94,7 +113,7 @@ def test_cli_writes_the_same_file(fixture_dir, tmp_path):
     out = tmp_path / "records.csv"
     subprocess.run([sys.executable, str(TOOLS / "records.py"),
                     "--run", str(d / "run.json"), "--trace", str(d / "trace.jsonl"),
-                    "--table", "prior", "--out", str(out)], check=True)
+                    "--table", "prior", "--telemetry", "names", "--out", str(out)], check=True)
     assert out.read_bytes() == (d / "expected.csv").read_bytes()
 
 
@@ -104,5 +123,5 @@ def test_cli_takes_the_config_schedule(fixture_dir, tmp_path):
     subprocess.run([sys.executable, str(TOOLS / "records.py"),
                     "--run", str(d / "run.json"), "--trace", str(d / "trace.jsonl"),
                     "--schedule", str(d / "config-schedule.json"),
-                    "--table", "calibrated", "--out", str(out)], check=True)
+                    "--table", "calibrated", "--telemetry", "names", "--out", str(out)], check=True)
     assert out.read_bytes() == (d / "expected.csv").read_bytes()

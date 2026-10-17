@@ -5,9 +5,21 @@ The generator emits a contract-valid trace (data-contracts §9) for any
 workload and config schedule from one rule that models no scheduling: at every
 stimulus instant — a pinned arrival, a pinned wake, a periodic task's tick, and
 each chain stage's wake in turn — the stimulated task is `ready`, runs for
-exactly 1 µs, and ends its run. A finite task exits after its last stimulus
-run, a segment-bound task departs at its pinned depart, spawn children arrive
-with their parent, every periodic job gets a met `deadline` line, and each
+exactly 1 µs, and ends its run. A wake sent to a task before its arrival is no
+stimulus at its own instant: it is stored for the task, as the reference
+simulator stores one on its channel or in the task's mailbox
+(`simulator/src/sim.cpp` `on_ext_wake`, `deliver`), and taken in the arrival
+step, its `ready(wake)` line written at the arrival beside `ready(arrive)` —
+the zero-wait line of the WAIT it completes (metrics doc §11, item 1); the
+generator pairs a wake with its target, whatever its channel. A task whose
+first instruction is a WAIT (a LOOP's body counting), a spawn child included,
+completes that WAIT in its arrival step on a stored wake, its arrival then a
+stimulus like any other's; with none stored it blocks there, as the reference
+simulator's does (`step`'s WAIT, `on_arrive`, `spawn`): its arrival is no
+stimulus, with no `ready` line and no run, and its first run is the wake that
+completes that WAIT. A finite task exits after its last
+stimulus run, a segment-bound task departs at its pinned depart, spawn children
+arrive with their parent, every periodic job gets a met `deadline` line, and each
 schedule entry before the workload's end gets its `config_applied` line at its
 stamped time. Same-instant lines: config entries in list order, then arrivals
 in file order, then the rest, a run closing before a run opening.
@@ -23,7 +35,7 @@ from collections import defaultdict
 
 from harness.reader import RunFileError, read_run_file
 
-SIM = "mock-simulator@0"
+SIM = "mock-simulator@2"
 _RANK = {"config_applied": 0, "task_arrive": 1, "run_end": 2, "deadline": 3,
          "ready": 4, "run_start": 5, "task_end": 6}
 
@@ -73,6 +85,18 @@ def _write_text(text, out):
         out.write_text(text, encoding="utf-8")
 
 
+def _write_lines(lines, out):
+    """One JSON line per trace line, streamed to the file: a large workload's trace (c6-dual's millions of lines) is
+    never held as one string beside its line objects (9.21 D12)."""
+    out = pathlib.Path(out)
+    opener = (lambda: gzip.open(out, "wt", encoding="utf-8")) if out.suffix == ".gz" else \
+        (lambda: open(out, "w", encoding="utf-8"))
+    with opener() as f:
+        for line in lines:
+            f.write(json.dumps(line, separators=(",", ":")))
+            f.write("\n")
+
+
 def generate(workload_path, schedule_path, out_path, replay=None):
     """Write the trace for (workload, schedule) to `out_path`; with `replay`,
     copy that trace instead. Nothing is written until every input passed."""
@@ -97,7 +121,20 @@ def generate(workload_path, schedule_path, out_path, replay=None):
     except RunFileError as exc:
         raise MockSimulatorError(f"{workload_path}: {exc}") from None
     lines = _lines(doc, run, sched)
-    _write_text("".join(json.dumps(l, separators=(",", ":")) + "\n" for l in lines), out_path)
+    del doc, run                       # the trace alone is written; a large workload's objects go first (9.21 D12)
+    _write_lines(lines, out_path)
+
+
+def _first_op(program):
+    """The op a program executes first, a LOOP's body counting."""
+    for op in program:
+        if op.get("op") != "LOOP":
+            return op.get("op")
+        if op.get("count") != 0:
+            inner = _first_op(op.get("body", []))
+            if inner is not None:
+                return inner
+    return None
 
 
 def _lines(doc, run, sched):
@@ -116,15 +153,19 @@ def _lines(doc, run, sched):
 
     # stimuli per task, in file order of first appearance
     stimuli = defaultdict(list)
-    order, parent_of = [], {}
+    order, parent_of, wait_first = [], {}, set()
     for ev in doc["events"]:
         if ev.get("op") == "arrive":
             order.append(ev["id"])
             stimuli[ev["id"]].append((int(ev["t"]), "arrive"))
+            if _first_op(ev["program"]) == "WAIT":
+                wait_first.add(ev["id"])
             for child in ev.get("spawn_table", []):
                 order.append(child["id"])
                 parent_of[child["id"]] = ev["id"]
                 stimuli[child["id"]].append((int(ev["t"]), "arrive"))
+                if _first_op(child["program"]) == "WAIT":
+                    wait_first.add(child["id"])
         elif ev.get("op") == "wake":
             stimuli[ev["target"]].append((int(ev["t"]), "wake"))
     ticks = {}
@@ -142,14 +183,23 @@ def _lines(doc, run, sched):
 
     for tid in order:
         info = run.tasks[tid]
-        arrive_t = stimuli[tid][0][0]
+        arrive_t = next(t for t, cause in stimuli[tid] if cause == "arrive")
         arrival = {"event": "task_arrive", "t": arrive_t, "task": tid, "source": "file"}
         if tid in parent_of:
             arrival["source"] = "spawn"
             arrival["parent"] = parent_of[tid]
         emit(arrive_t, arrival)
+        # a wake sent before the arrival is stored for the task and taken in its arrival step
+        stored = sum(1 for t, cause in stimuli[tid] if cause == "wake" and t < arrive_t)
         groups = defaultdict(list)
         for t, cause in sorted(stimuli[tid], key=lambda s: s[0]):
+            if t < arrive_t:
+                continue                   # a stored wake: no line before the task exists
+            if cause == "arrive":
+                if tid in wait_first and not stored:
+                    continue               # blocked in its arrival step: no ready line, no run
+                groups[t] += [cause] + ["wake"] * stored   # each stored wake's zero-wait line
+                continue
             groups[t].append(cause)
         finite = info.depart is None and info.period_us is None
         instants = sorted(groups)

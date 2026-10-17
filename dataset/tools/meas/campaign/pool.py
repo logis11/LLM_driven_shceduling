@@ -1,0 +1,576 @@
+#!/usr/bin/env python3
+"""Pool a campaign's downloaded artifacts into per-run distributions with
+across-repeat spread (9.5 method §6–§7).
+
+pool.py <artifacts-dir> <out.json> [--w-ms 5] [--cap-ms 0] [--cpu-model TEXT]
+
+<artifacts-dir> holds one folder per (app, repeat) named
+meas-<family>-<app>-r<k>-<mode> (as uploaded), at any depth, so the runs of one
+campaign can be downloaded side by side into one folder each. A job the machine
+gate stopped (report.json gate=wrong-machine) and, with --cpu-model, a repeat
+measured on another CPU model are listed, not pooled (changelog D26). For each
+app: every repeat is analysed (analyze.analyze_run); per phase and per thread
+comm the gap and run samples of all repeats are pooled (p50, p90, p99, n) and
+the per-repeat p50 is listed as the spread; per-input samples likewise for the
+three rules; every value the fold-in carries, each table by its mean as the
+table carries it (count-weighted over the repeats), is checked against the
+shared stability criterion (dataset/tools/meas/stability.py; changelog D29,
+D30).
+"""
+
+import argparse
+import glob
+import json
+import os
+import re
+import statistics
+import sys
+from array import array
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from analyze import analyze_run, component_name, pct  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from stability import stability, ratio_stability, ratio_repeats_needed, TOLERANCE, t975  # noqa: E402
+from distribution import circular_gaps, quantile_table  # noqa: E402
+
+# `idle`: a repeat of the settle and the idle phase alone (9.10 D146), pooled into an idle-only record
+NAME = re.compile(r"^meas-(interactive|playback)-(.+)-r(\d+)-(dry|full|control|idle)$")
+
+
+def pooled_mode(mode, control):
+    """A control job (task-9.5-untraced-control spec) is pooled only under --control, and then alone (decision 15)."""
+    return (mode == "control") == bool(control)
+
+
+QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
+COVERAGE = 0.95  # D16: components in descending wake rate until this share of idle wakes; the rest pooled as one residual
+# D26: the headline per application; under D30 the playback CPU share stays on the list beside every carried table
+HEADLINE = {"soffice": "input_run", "code": "input_run", "thunderbird": "input_run", "thunderbird-send": "input_run",
+            "chrome": "op_duration", "gimp": "op_duration", "kdenlive": "op_duration",
+            "mpv-video": "play_cpu_share", "mpv-audio": "play_cpu_share", "webrtc": "play_cpu_share"}
+# D26: SWELL-KW's Outlook conditions (c2, c3) hold 4 761 s of recorded time — eight windows, the eighth 561 s
+WINDOW_LIMIT = {"thunderbird": 8, "thunderbird-send": 8,   # D31: the re-observation reads the same Outlook windows
+                # D32 names chrome too: SWELL-KW's Internet Explorer condition (c1) holds 38 windows, the 38th 338.6 s,
+                # and windows.json records every later one empty. Past it run.sh replays neither driven phase (the
+                # window's index decides both), so the 136M check stops with SWELL-KW at the same repeat.
+                "chrome": 38,
+                # code replays SWELL-KW's Word condition (c1): 57 windows, the 57th 262.8 s, word-r43 recording no event
+                # (that repeat runs the idle phase alone, D32) and windows.json recording every later one empty. D99:
+                # entered at 44, the last window then cut; code's campaign stopped there, short of the recording's end
+                "code": 57}
+ABS_FLOOR_MS = 0.001  # the trace's resolution: perf sched timehist times in whole microseconds (D30; 9.6 D23)
+MIN_REPEATS = 5       # kalibera-ismm13 §11 (D29; 9.6 D24)
+# D57: the rule's exception — a component whose rate varies between sessions rather than within a run, so repeats
+# tighten the estimate without narrowing the spread; carried with its half-widths over at least MIN_REPEATS repeats,
+# the tolerance not applied. (app, the value name's prefix). D59: webrtc's audio path — AudioProcessing whole, the
+# others' run means only, their wake rates being fixed or passing.
+# D67 renamed the components these name, so the keys carry the role: the exception follows its component's identity.
+# D78: code's utility/libuv-worker, carried here from D57, holds the rule once its values are read as carried; D83: read
+# from 200 s into the idle phase it does not (±5.6 % over its 44 repeats), and D57 carries it again; D99: it stands
+# on its spread within one run, not on the recording's end.
+SESSION_SPREAD = {("code", "idle utility/libuv-worker"),
+                  ("webrtc", "play utility/AudioProcessing "), ("webrtc", "play renderer/AudioOutputDevi run mean"),
+                  ("webrtc", "play renderer/AudioInputDevic run mean"), ("webrtc", "play utility/FakeAudioInput run mean"),
+                  ("webrtc", "play residual run mean")}
+# D64: a rare heavy run carried as its own stated event, not as a component's wake — chrome's MemoryInfra pass of 54–61 ms
+# at no fixed time (9 in 20 sessions × 600 s) against its regular runs of at most 11.5 ms; (app, phase) -> (comm, run floor
+# in ms, the floor being design between the two). The event's runs leave the component rows, so the residual converges.
+HEAVY_EVENTS = {("chrome", "idle"): ("MemoryInfra", 30.0), ("thunderbird-send", "idle"): ("glean.mps", 0.0)}
+# D91: an event on the clock — thunderbird-send's `glean.mps`, Glean's metrics-ping scheduler, wakes once a day at 04:00
+# local time (glean-core/src/scheduler.rs, SCHEDULED_HOUR) — leaves the component rows at any run, as D64's event does,
+# and is stated, not compiled: its pooled record says so
+CLOCK_EVENTS = {("thunderbird-send", "idle")}
+# D83: the idle phase read from this many seconds past its start — code's launch work, two episodes 50–75 s and
+# 150–175 s into the phase that never recur (the D52 probe's 1,400 s), left out; the start past the last is design.
+IDLE_FROM_S = {"code": 200.0}
+# D75: a periodic job per medium cycle — each cycle's start read off a reference thread of the trace, its work the process
+# tree's whole CPU from one start to the next (W2), its period the mean interval (P1); (app, phase) -> (component, rule,
+# value, spacing): `silence_ms` starts a cycle at the reference's first wake after that silence, `min_run_ms` at each of
+# its wakes with a run of at least that length; a start closer than `spacing` ms to the one before it is not a new cycle
+CYCLES = {("mpv-audio", "play"): ("ao", "silence_ms", 5.0, 0.0),                   # one ao cluster per ~49.6 ms audio cycle
+          # the frame copy: one run of 1 ms or more per frame, a second one inside half a frame (16.7 ms) the same frame's
+          ("mpv-video", "play"): ("vo", "min_run_ms", 1.0, 16.7),
+          ("webrtc", "play"): ("utility/AudioWorkerThre", "silence_ms", 5.0, 0.0)}  # one wake per 10 ms audio frame
+FOCUS_COMPONENTS = {"gimp", "kdenlive"}  # fold_in.py's pointer-loop archetypes carry the driven phase as focus_components
+# D38: a component keyed by the thread's name with a trailing " #<n>" removed — Gecko names a pool's threads
+# "<pool> #<n>", n counting up per spawn (nsThreadPoolNaming::GetNextThreadName), so each pool is one component
+POOL_SUFFIX_APPS = {"thunderbird-send"}
+POOL_SUFFIX = re.compile(r" #\d+$")
+# D90: Gecko shortens a thread name past 15 characters to its first 7, "~" and its last 7 (NSPR's
+# PR_SetCurrentThreadName, nsprpub/pr/src/pthreads/ptthread.c, on Linux), so a pool whose name runs
+# long takes another spelling once its thread numbers grow (the traces: `StreamTrans #99`, `StreamT~ns #114`;
+# `IndexedDB IO #9`, `Indexed~ IO #10`); these pools' later spellings fold back into the pool
+GECKO_POOLS = ("StreamTrans", "IndexedDB IO")
+
+
+def gecko_short(name):
+    return name if len(name) <= 15 else name[:7] + "~" + name[-7:]
+
+
+def split_events(app, phase, rows):
+    """D64: (rows without the phase's heavy-event runs, [(t_in, run_ms)] of those runs, or None where none is declared)."""
+    spec = HEAVY_EVENTS.get((app, phase))
+    if not spec:
+        return rows, None
+    comm, floor = spec
+    heavy = lambda r: r.comm == comm and r.run >= floor
+    return [r for r in rows if not heavy(r)], [(r.t_in, r.run) for r in rows if heavy(r)]
+
+
+def cycle_windows(app, phase, rows, segments, roles):
+    """D75: the phase's medium cycles — their starts from the reference component's wakes (`CYCLES`), each cycle's work
+    the sum of the tree's segment runs (ms) that start inside it, and its length (ms); None where no cycle is declared."""
+    import bisect
+    spec = CYCLES.get((app, phase))
+    if not spec:
+        return None
+    comm, rule, value, spacing = spec
+    ref = sorted((r.t_in, r.run) for r in rows
+                 if component_name(roles.get(r.pid, "main"), component_key(app, r.comm)) == comm)
+    if rule == "silence_ms":
+        found = [t for i, (t, _) in enumerate(ref) if i == 0 or t - ref[i - 1][0] > value / 1000]
+    else:
+        found = [t for t, run in ref if run >= value]
+    starts = []
+    for t in found:
+        if not starts or t - starts[-1] >= spacing / 1000:
+            starts.append(t)
+    seg = sorted((s.t_in, s.run) for s in segments)
+    times = [t for t, _ in seg]
+    work, length = [], []
+    for a, b in zip(starts, starts[1:]):
+        i, j = bisect.bisect_left(times, a), bisect.bisect_left(times, b)
+        work.append(sum(run for _, run in seg[i:j]))
+        length.append((b - a) * 1000)
+    return {"comm": comm, "rule": rule, "value": value, "spacing_ms": spacing, "work_ms": work, "length_ms": length}
+
+
+def stimulus_check(a, b):
+    """D81: the stimulus-sensitivity check read as 9.7 D36 reads a check — each repeat's per-input run mean under 136M
+    (`b`) against its mean under SWELL-KW (`a`), both a pooled record's `run_ms_minus_idle`; a difference when the 95 % t
+    interval of the per-repeat ratios excludes 1, not resolved otherwise; the pooled medians' ratio kept beside it."""
+    r = [y / x for x, y in zip(a["repeat_mean"], b["repeat_mean"]) if x]
+    m, hw = statistics.fmean(r), t975(len(r)) * statistics.stdev(r) / len(r) ** 0.5
+    return {"per_repeat": r, "per_repeat_mean": m, "interval": [m - hw, m + hw],
+            "reading": "difference" if not m - hw <= 1 <= m + hw else "not resolved",
+            "p50_ratio": b["p50"] / a["p50"] if a.get("p50") else None}
+
+
+def build_census(version):
+    """D69: the builds a pool holds, most repeats first — "1.138.0 (28 repeats)", or with a mix
+    "152.0.7977.82 (26 repeats), 153.0.8010.52 (4: 18, 20, 22, 27)". `version` is {repeat: the build it measured}; a
+    repeat keyed "<index>@<run id>" (9.8 D24, an index that landed more than once) counts once per landing, listed by
+    its index."""
+    if not isinstance(version, dict):
+        return (version or "?").strip()[:60]
+    index = lambda r: int(str(r).split("@")[0])
+    by = {}
+    for r, v in sorted(version.items(), key=lambda kv: index(kv[0])):
+        by.setdefault((v or "?").strip()[:60], []).append(index(r))
+    if len(by) == 1:
+        v, reps = next(iter(by.items()))
+        return f"{v} ({len(reps)} repeats)"
+    parts = [f"{v} ({len(reps)} repeats)" if i == 0 else f"{v} ({len(reps)}: {', '.join(str(x) for x in reps)})"
+             for i, (v, reps) in enumerate(sorted(by.items(), key=lambda kv: -len(kv[1])))]
+    return ", ".join(parts)
+
+
+def component_key(app, comm):
+    if app not in POOL_SUFFIX_APPS:
+        return comm
+    m = POOL_SUFFIX.search(comm)
+    if m:
+        n = m.group(0)[2:]
+        for pool_name in GECKO_POOLS:   # D90
+            if gecko_short(f"{pool_name} #{n}") == comm:
+                return pool_name
+    return POOL_SUFFIX.sub("", comm)
+
+
+def repeats_needed(values, abs_floor=None):
+    """The smallest repeat count, at least MIN_REPEATS, at which the 95 % half-width at the spread of the given
+    repeats is within the tolerance (stability()'s t multipliers); None past 200."""
+    v = [x for x in values if x is not None]
+    if len(v) < 2:
+        return None
+    m, sd = statistics.fmean(v), statistics.stdev(v)
+    bound = max(TOLERANCE * m, abs_floor or 0.0)
+    for k in range(MIN_REPEATS, 201):
+        if t975(k) * sd / k ** 0.5 <= bound:
+            return k
+    return None
+
+
+def table_pairs(table):
+    """A pooled table's per-repeat sums and counts, read from its per-repeat means and counts (`summary`): the pairs
+    whose ratio is the table's own mean. A repeat with no samples is a pair of zeros."""
+    return ([m * n if m is not None else 0.0 for m, n in zip(table["repeat_mean"], table["repeat_n"])],
+            list(table["repeat_n"]))
+
+
+def criterion(app, entry):
+    """D30: every value the fold-in carries against the shared rule (georges-oopsla07 §4.2, kalibera-ismm13 §9.3) —
+    tolerance the larger of 5 % of the mean and 1 µs for times, 5 % for rates and shares, at least five repeats (D29).
+    A rate or share by its per-repeat values; a carried table by its mean as the table carries it, every repeat's
+    samples together — count-weighted, its half-width the ratio estimator's over the repeats (cochran-st77), a gap
+    mean the span over the wakes. Per carried component (the idle or play phase; the driven phase of the pointer-loop
+    runs; the operation's), its wake rate, gap mean and run mean; the input-run mean under SWELL-KW and under the 136M
+    check; the operation duration mean; the play-phase CPU share (D26's headline for playback)."""
+    ph, crit = entry["phases"], {}
+
+    def add(name, values, floor):
+        crit[name] = {**stability(values, floor, MIN_REPEATS, keep_zero=True), "needed": repeats_needed(values, floor)}
+
+    def add_table(name, table, floor):
+        sums, counts = table_pairs(table)
+        crit[name] = {**ratio_stability(sums, counts, floor, MIN_REPEATS),
+                      "needed": ratio_repeats_needed(sums, counts, floor, MIN_REPEATS)}
+
+    name, values = headline(app, entry)
+    if name == "play CPU share":
+        add("play CPU share", values, None)
+    carried = ["idle" if "idle" in ph else "play"] + (["driven"] if app in FOCUS_COMPONENTS else []) \
+        + (["op"] if ph.get("op", {}).get("operation") else [])
+    for p in carried:
+        if p not in ph:
+            continue
+        if ph[p].get("cycle"):   # D75: a periodic job carries its cycle's length and work, not the phase's components
+            add_table(f"{p} cycle length mean (ms)", ph[p]["cycle"]["length_ms"], ABS_FLOOR_MS)
+            add_table(f"{p} cycle work mean (ms)", ph[p]["cycle"]["work_ms"], ABS_FLOOR_MS)
+            continue
+        sel = ph[p]["components"]
+        comps = [(c, ph[p]["threads"][c]) for c in sel["selected"] if ph[p]["threads"][c]["gap_ms"]["q"] is not None]
+        if sel["residual"] and sel["residual"]["gap_ms"]["q"]:
+            comps.append(("residual", sel["residual"]))
+        for comm, c in comps:
+            add(f"{p} {comm} wakes/s", c["wakes_per_s"], None)
+            add_table(f"{p} {comm} gap mean (ms)", c["gap_ms"], ABS_FLOOR_MS)
+            add_table(f"{p} {comm} run mean (ms)", c["run_ms"], ABS_FLOOR_MS)
+    for p, label in (("driven", "SWELL-KW"), ("driven-alt", "136M")):
+        if "per_input" in ph.get(p, {}):
+            add_table(f"input_run mean, {label} (ms)", ph[p]["per_input"]["window"]["run_ms_minus_idle"], ABS_FLOOR_MS)
+    if ph.get("op", {}).get("operation"):
+        add_table("operation duration mean (ms)", ph["op"]["operation"]["duration_ms"], ABS_FLOOR_MS)
+    return crit
+
+
+def mark_limited(app, entry, crit):
+    """D32, D46: a value of a phase only full repeats run — the replayed input's (driven, driven-alt) and the operation's
+    (op) — stops at the recording's window limit: once that phase holds the limit's repeats, the value is reported with
+    its half-width (`limited`) and no longer holds the rule open; the idle values keep adding repeats."""
+    limit = WINDOW_LIMIT.get(app)
+    if not limit:
+        return
+    def phase_of(name):
+        if name.startswith("op ") or name.startswith("operation"):
+            return "op"
+        if "SWELL-KW" in name or name.startswith("driven "):
+            return "driven"
+        if "136M" in name:
+            return "driven-alt"
+        return None
+    for name, c in crit.items():
+        p = phase_of(name)
+        # the highest window the phase reached, not how many repeats it holds: a window left out by the validity step
+        # (D47) or replayed by none (code's word-r43 records no event, so that repeat runs the idle phase alone) leaves
+        # the count short of the limit while the recording is just as exhausted — there is no further window to add
+        reps = entry["phases"][p].get("repeats", entry["repeats"]) if p in entry["phases"] else None
+        if reps and max(reps) >= limit:
+            c["limited"] = True
+
+
+def headline(app, entry):
+    kind = HEADLINE.get(app)
+    ph = entry["phases"]
+    if kind == "input_run" and "per_input" in ph.get("driven", {}):
+        return "input_run p50 (ms)", ph["driven"]["per_input"]["window"]["run_ms_minus_idle"]["repeat_p50"]
+    if kind == "op_duration" and "operation" in ph.get("op", {}):
+        return "operation duration p50 (ms)", ph["op"]["operation"]["duration_ms"]["repeat_p50"]
+    if kind == "play_cpu_share" and "play" in ph:
+        return "play CPU share", ph["play"]["cpu_share"]
+    return None, None
+
+
+def qtable(values):
+    """The D17 quantile table (ms, 3 decimals) of a pooled sample."""
+    if not values:
+        return None
+    v = sorted(values)
+    return [pct(v, q) for q in QUANTILE_PROBS]
+
+
+def summary(samples_by_repeat):
+    pooled = [v for vs in samples_by_repeat for v in vs]
+    return {"n": len(pooled), "p50": pct(pooled, .5), "p90": pct(pooled, .9), "p99": pct(pooled, .99),
+            "q": qtable(pooled), "table": quantile_table(pooled),
+            "repeat_p50": [pct(vs, .5) for vs in samples_by_repeat], "repeat_n": [len(vs) for vs in samples_by_repeat],
+            "repeat_mean": [round(statistics.fmean(vs), 4) if vs else None for vs in samples_by_repeat]}
+
+
+def segment_gaps(times, segments):
+    """A component's gaps in ms over its merged wake times (seconds), laid out on its segments [(start, end)] and
+    wrapped round (distribution.circular_gaps): each time belongs to the segment whose start it follows."""
+    import bisect
+    starts = [a for a, _ in segments]
+    split = [[] for _ in segments]
+    for t in times:
+        split[max(bisect.bisect_right(starts, t) - 1, 0)].append(t)
+    return [g * 1000 for g in circular_gaps([(ts, a, b) for ts, (a, b) in zip(split, segments)])]
+
+
+def phase_comms(app, rows, roles, segments):
+    """The phase's components (D16, D38, D67) with the samples the pool keeps: per component its merged wake times,
+    its gaps over them (`segment_gaps`), its runs, wakes and threads."""
+    by_comm = {}
+    for row in rows:
+        key = component_name(roles.get(row.pid, "main"), component_key(app, row.comm))   # D67
+        by_comm.setdefault(key, []).append(row)
+    comms = {}
+    for comm, rs in by_comm.items():
+        times = [r.t_in for r in rs]
+        comms[comm] = {"gaps": array("d", segment_gaps(times, segments)), "runs": array("d", [r.run for r in rs]),
+                       "t_in": array("d", times), "wakes": len(rs), "threads": len({r.tid for r in rs})}
+    return comms
+
+
+def per_repeat_rates(c, reps, spans):
+    """A component's wake rate per repeat from its exact wake count — never rounded to a resolution the rule can
+    read as spread (a component waking 0.04 times a second rounded to two places moves in 25 % steps)."""
+    return [c["wakes"].get(r, 0) / spans[r] for r in reps]
+
+
+def select_components(comms, spans, reps, segments=None):
+    """D16: comms in descending mean wake rate until COVERAGE of the wakes; the remaining comms merged
+    into one residual component whose gaps are those of their merged wake times, wrapped round each repeat's
+    segments (`segments`: {repeat: [(start, end)]}, the phase or the operation's windows; default the span from 0).
+    D43: a component, the residual included, that does not wake at least twice in every repeat is listed under
+    `sporadic`, not carried."""
+    segments = segments or {r: [(0.0, spans[r])] for r in reps}
+    rate = {c: sum(cc["wakes"].get(r, 0) / spans[r] for r in reps) / len(reps) for c, cc in comms.items()}
+    total = sum(rate.values())
+    order = sorted(comms, key=lambda c: -rate[c])
+    chosen, cum = [], 0.0
+    for c in order:
+        if total and cum / total >= COVERAGE:
+            break
+        chosen.append(c); cum += rate[c]
+    rest = [c for c in order if c not in chosen]
+    residual = None
+    if rest:
+        gaps_by_rep, runs_by_rep, wakes_by_rep, threads_by_rep = [], [], [], []
+        for r in reps:
+            times = [t for c in rest for t in comms[c]["t_in"].get(r, [])]
+            gaps_by_rep.append(segment_gaps(times, segments[r]))
+            runs_by_rep.append([x for c in rest for x in comms[c]["runs"].get(r, [])])
+            wakes_by_rep.append(len(times)); threads_by_rep.append(sum(comms[c]["threads"].get(r, 0) for c in rest))
+        residual = {"comms": rest, "threads": threads_by_rep, "wakes": wakes_by_rep,
+                    "wakes_per_s": [wakes_by_rep[i] / spans[r] for i, r in enumerate(reps)],
+                    "cpu_share": [round(sum(runs_by_rep[i]) / 1000 / spans[r], 5) for i, r in enumerate(reps)],
+                    "gap_ms": summary(gaps_by_rep), "run_ms": summary(runs_by_rep)}
+    # D43: a component — the residual as a whole included — is carried only if it wakes at least twice in each
+    # repeat's phase: the rule then tested each value by its per-repeat mean (kalibera-ismm13 §9.3; since D78 a table by
+    # its mean as carried), and D16's components are periodic; the rest is reported as sporadic, not carried
+    sporadic = []
+    # (`count`, where a slot carries one, is the wake count the rule reads when `wakes` is one renderer's mean: a
+    # renderer entry carries a thread that wakes at least twice across the renderers measured in every repeat)
+    for c in [c for c in chosen if not all(comms[c].get("count", comms[c]["wakes"]).get(r, 0) >= 2 for r in reps)]:
+        chosen.remove(c)
+        sporadic.append({"comm": c, "repeats": [r for r in reps if comms[c]["wakes"].get(r, 0)], "wakes_per_s": round(rate[c], 4)})
+    if residual and not all(w >= 2 for w in residual["wakes"]):
+        sporadic.append({"comm": "residual", "comms": rest, "repeats": [r for r, w in zip(reps, residual["wakes_per_s"]) if w],
+                         "wakes_per_s": round(sum(rate[c] for c in rest), 4)})
+        residual = None
+    cum = sum(rate[c] for c in chosen)
+    return chosen, residual, {"coverage": COVERAGE, "covered_share": round(cum / total, 4) if total else None,
+                              "total_wakes_per_s": round(total, 3), "sporadic": sporadic}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("artifacts"); ap.add_argument("out")
+    ap.add_argument("--w-ms", type=float, default=5.0); ap.add_argument("--cap-ms", type=float, default=0.0)
+    ap.add_argument("--exclude-roles", default="", help="comma-separated process roles left out of the tree (D14; none since D84)")
+    ap.add_argument("--cpu-model", default="", help="pool only repeats whose CPU model contains this text (D26)")
+    ap.add_argument("--control", action="store_true", help="pool the untraced control's traced runs, and only them")
+    args = ap.parse_args()
+    exclude_roles = tuple(x for x in args.exclude_roles.split(",") if x)
+    runs, gated, other = {}, [], []
+    for d in sorted(glob.glob(os.path.join(args.artifacts, "**", "meas-*"), recursive=True)):
+        m = NAME.match(os.path.basename(d))
+        if not m or not os.path.exists(os.path.join(d, "report.json")):
+            continue
+        fam, app, rep, mode = m.group(1), m.group(2), int(m.group(3)), m.group(4)
+        if not pooled_mode(mode, args.control):
+            continue
+        spec = json.load(open(os.path.join(d, "spec.json"))) if os.path.exists(os.path.join(d, "spec.json")) else {}
+        model = spec.get("cpu_model") or ""
+        if json.load(open(os.path.join(d, "report.json"))).get("gate") == "wrong-machine":
+            gated.append({"app": app, "repeat": rep, "cpu_model": model, "path": os.path.relpath(d, args.artifacts)})
+            continue
+        if args.cpu_model and args.cpu_model not in model:
+            other.append({"app": app, "repeat": rep, "cpu_model": model, "path": os.path.relpath(d, args.artifacts)})
+            continue
+        info = runs.setdefault(app, {"family": fam, "mode": mode, "repeats": {}, "cpu_model": {}, "kernel": {}, "run_id": {}})
+        if rep in info["repeats"]:
+            raise SystemExit(f"{app} repeat {rep}: two measured artifacts ({info['repeats'][rep]}, {d})")
+        info["repeats"][rep] = d
+        info["cpu_model"][rep] = model
+        info["run_id"][rep] = (spec.get("github_run") or {}).get("GITHUB_RUN_ID")  # D27: a campaign spans runs
+        info["kernel"][rep] = (spec.get("uname") or "").split()[2] if len((spec.get("uname") or "").split()) > 2 else None
+    out = {"w_ms": args.w_ms, "cap_ms": args.cap_ms, "exclude_roles": list(exclude_roles), "machine": args.cpu_model or None,
+           "gated_out": gated, "other_machine": other, "runs": {}}
+    for app, info in runs.items():
+        reps = sorted(info["repeats"])
+        results, raws = {}, {}
+        for r in reps:
+            results[r], raw = analyze_run(info["repeats"][r], args.w_ms, args.cap_ms, exclude_roles=exclude_roles,
+                                          idle_from_s=IDLE_FROM_S.get(app, 0.0))
+            # keep only compact samples per phase: per-comm gaps/runs/wakes/threads, span, per-input lists
+            slim = {"phases": {}}
+            for phase, pd in raw["phases"].items():
+                # the op phase pools the operation's components, i.e. the rows inside the [trigger, done) windows,
+                # over the summed window span; its duration samples travel beside them (spec decisions 8–9)
+                op = pd.get("operation")
+                phase_rows = op["inside"] if op else pd["rows"]
+                phase_rows, events = split_events(app, phase, phase_rows)
+                phase_span = (sum(op["durations_ms"]) / 1000 or 1e-6) if op else pd["span"]
+                # the gaps' segments: the phase, or the operation's windows joined end to end (the pause between
+                # two operations is no gap of the operation's)
+                segments = [tuple(w) for w in op["windows"]] if op else [(pd["t0"], pd["t0"] + pd["span"])]
+                comms = phase_comms(app, phase_rows, pd.get("roles") or {}, segments)
+                slim["phases"][phase] = {"span": phase_span, "segments": segments, "comms": comms, "per_input": pd.get("per_input"),
+                                         "cycle": None if op else cycle_windows(app, phase, pd["rows"], pd["segments"], pd.get("roles") or {}),
+                                         "events": None if events is None else [(t - pd["t0"], x) for t, x in events],
+                                         "operation": {"name": op["name"], "durations_ms": op["durations_ms"],
+                                                       "n_ok": op["n_ok"], "n_failed": op["n_failed"]} if op else None}
+            raws[r] = slim
+            del raw
+        entry = {"family": info["family"], "mode": info["mode"], "repeats": reps,
+                 "cpu_model": {r: info["cpu_model"][r] for r in reps}, "kernel": {r: info["kernel"][r] for r in reps},
+                 "run_id": {r: info["run_id"][r] for r in reps},
+                 # D69: every repeat's build, as the CPU model is kept per repeat — a pool that carried only the first
+                 # repeat's could not show a build change (code's 1.139.0 in repeat 29, chrome's 153 in four of thirty)
+                 "version": {r: results[r].get("version") for r in reps}, "phases": {}}
+        if app in IDLE_FROM_S:
+            entry["idle_from_s"] = IDLE_FROM_S[app]
+        for phase in ("idle", "driven", "driven-alt", "play", "op"):
+            # D32: each phase over the repeats that have it — a repeat past the recording's end runs the idle phase alone
+            preps = [r for r in reps if phase in raws[r]["phases"]]
+            if not preps:
+                continue
+            ph = {"roles": {r: results[r]["phases"][phase]["roles"] for r in preps},
+                  "span_s": [round(raws[r]["phases"][phase]["span"], 1) for r in preps],
+                  "cpu_share": [results[r]["phases"][phase]["cpu_share"] for r in preps],
+                  "wakes_per_s": [results[r]["phases"][phase]["wakes_per_s"] for r in preps],
+                  "threads": {}}
+            comms = {}
+            for r in preps:
+                for comm, cc in raws[r]["phases"][phase]["comms"].items():
+                    c = comms.setdefault(comm, {"gaps": {}, "runs": {}, "t_in": {}, "wakes": {}, "threads": {}})
+                    c["gaps"][r] = cc["gaps"]; c["runs"][r] = cc["runs"]; c["t_in"][r] = cc["t_in"]
+                    c["wakes"][r] = cc["wakes"]; c["threads"][r] = cc["threads"]
+            spans = {r: raws[r]["phases"][phase]["span"] for r in preps}
+            chosen, residual, cov = select_components(comms, spans, preps,
+                                                      {r: raws[r]["phases"][phase]["segments"] for r in preps})
+            ph["components"] = {"selected": chosen, "residual": residual, **cov}
+            for comm, c in sorted(comms.items(), key=lambda kv: -sum(sum(v) for v in kv[1]["runs"].values())):
+                ph["threads"][comm] = {
+                    "threads": [c["threads"].get(r, 0) for r in preps],
+                    "wakes_per_s": per_repeat_rates(c, preps, spans),
+                    "cpu_share": [round(sum(c["runs"].get(r, [])) / 1000 / spans[r], 4) for r in preps],
+                    "gap_ms": summary([c["gaps"].get(r, []) for r in preps]),
+                    "run_ms": summary([c["runs"].get(r, []) for r in preps])}
+            cyc = {r: raws[r]["phases"][phase]["cycle"] for r in preps}
+            if all(cyc.values()):   # D75: the medium's cycles, their length and work pooled as tables
+                c0 = cyc[preps[0]]
+                ph["cycle"] = {"reference": {"comm": c0["comm"], c0["rule"]: c0["value"], "spacing_ms": c0["spacing_ms"]},
+                               "cycles": [len(cyc[r]["work_ms"]) for r in preps],
+                               "length_ms": summary([cyc[r]["length_ms"] for r in preps]),
+                               "work_ms": summary([cyc[r]["work_ms"] for r in preps])}
+            if HEAVY_EVENTS.get((app, phase)):   # D64: the heavy event, stated with its counts
+                comm, floor = HEAVY_EVENTS[(app, phase)]
+                ev = {r: raws[r]["phases"][phase]["events"] or [] for r in preps}
+                total_s = sum(raws[r]["phases"][phase]["span"] for r in preps)
+                ph["heavy_event"] = {"comm": comm, "run_floor_ms": floor,
+                                     "count": [len(ev[r]) for r in preps],
+                                     "runs_ms": [round(x, 3) for r in preps for _, x in ev[r]],
+                                     "at_s": [[round(t, 1) for t, _ in ev[r]] for r in preps],   # seconds into the phase
+                                     "rate_per_s": round(sum(len(ev[r]) for r in preps) / total_s, 6) if total_s else None,
+                                     "span_s_total": round(total_s, 1)}
+                if (app, phase) in CLOCK_EVENTS:   # D91
+                    ph["heavy_event"]["compiled"] = False
+            if phase == "op" and all(raws[r]["phases"][phase].get("operation") for r in preps):
+                ops = {r: raws[r]["phases"][phase]["operation"] for r in preps}
+                ph["operation"] = {"name": ops[preps[0]]["name"],
+                                   "n_ok": [ops[r]["n_ok"] for r in preps], "n_failed": [ops[r]["n_failed"] for r in preps],
+                                   "duration_ms": summary([ops[r]["durations_ms"] for r in preps])}
+            if phase in ("driven", "driven-alt") and all(raws[r]["phases"][phase].get("per_input") for r in preps):
+                pi = {r: raws[r]["phases"][phase]["per_input"] for r in preps}
+                ph["per_input"] = {
+                    "events": [len(pi[r]["win_run"]) for r in preps],
+                    "first_wake": {"attributed_share": [round(len(pi[r]["first_lat"]) / max(len(pi[r]["win_run"]), 1), 3) for r in preps],
+                                   "latency_ms": summary([pi[r]["first_lat"] for r in preps]),
+                                   "run_ms": summary([pi[r]["first_run"] for r in preps])},
+                    "window": {"len_ms": summary([pi[r]["win_len"] for r in preps]),
+                               "run_ms": summary([pi[r]["win_run"] for r in preps]),
+                               "run_ms_minus_idle": summary([pi[r]["win_run_corr"] for r in preps])},
+                    "waker": {"x_wakes_per_input": summary([pi[r]["xw_count"] for r in preps]),
+                              "first_x_wake_latency_ms": summary([pi[r]["xw_lat"] for r in preps]),
+                              "run_ms": summary([pi[r]["xw_run"] for r in preps])}}
+            checks = {r: results[r]["phases"][phase].get("wake_check") for r in preps}
+            if any(checks.values()):   # D39: the wakeup row against the switch-out state, repeats that record it
+                ph["wake_check"] = {r: v for r, v in checks.items() if v}
+            if preps != reps:
+                ph["repeats"] = preps   # the phase's lists run over these repeats, not the entry's
+            entry["phases"][phase] = ph
+        crit = criterion(app, entry)
+        mark_limited(app, entry, crit)
+        for q, c in crit.items():   # D57: carried with its half-width once it has the minimum repeats
+            if any(a == app and q.startswith(pre) for a, pre in SESSION_SPREAD):
+                c["session_spread"] = True
+                c["carried"] = c["k"] >= MIN_REPEATS
+        live = [c for c in crit.values() if not c.get("limited") and not c.get("session_spread")]
+        needed = [c["needed"] for c in live]
+        entry["stability"] = {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS,
+                              "window_limit": WINDOW_LIMIT.get(app), "quantities": crit,
+                              "passes": bool(crit) and all(c["passes"] for c in live),
+                              "needed": None if not needed or None in needed else max(needed)}
+        out["runs"][app] = entry
+        print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {build_census(entry['version'])}; CPU {sorted(set(entry['cpu_model'].values()))})")
+        st = entry["stability"]
+        fails = [q for q, c in crit.items() if not c["passes"] and not c.get("limited") and not c.get("session_spread")]
+        print(f"   stability: {len(crit)} quantities over {len(reps)} repeats, {len(fails)} out of tolerance; repeats needed at "
+              f"this spread {st['needed'] or 'over 200'} — {'holds' if st['passes'] else 'does not hold yet'}")
+        for q in fails:
+            c = crit[q]
+            hw = "—" if c["half_width"] is None else f"±{c['half_width']:.1%}"
+            print(f"     {q}: mean {c['mean']}, half-width {hw}, needed {c['needed']}")
+        for phase, ph in entry["phases"].items():
+            preps = ph.get("repeats", reps)
+            print(f"   {phase}{f' (repeats {preps})' if preps != reps else ''}: span {ph['span_s']} cpu {ph['cpu_share']} wakes/s {ph['wakes_per_s']}")
+            if "wake_check" in ph:
+                tot = {k: sum(c[k] for v in ph["wake_check"].values() for c in v.values())
+                       for k in ("gaps", "slept_without_row", "preempted_with_row")}
+                print(f"     wake check (repeats {sorted(ph['wake_check'])}): {tot['gaps']} gaps with a state; row disagrees: "
+                      f"{tot['slept_without_row']} slept without a row, {tot['preempted_with_row']} preempted with a row")
+            if "operation" in ph:
+                o = ph["operation"]
+                print(f"     operation {o['name']}: ok {o['n_ok']} failed {o['n_failed']}; duration p50/p90/p99 {o['duration_ms']['p50']}/{o['duration_ms']['p90']}/{o['duration_ms']['p99']} ms ({o['duration_ms']['repeat_p50']})")
+            print(f"     roles r{preps[0]}: {ph['roles'][preps[0]]}")
+            for sp in ph["components"].get("sporadic", []):
+                print(f"     sporadic, not carried (D43): {sp['comm']}{' ' + str(sp['comms']) if 'comms' in sp else ''}, "
+                      f"wakes in repeats {sp['repeats']}, {sp['wakes_per_s']} wakes/s")
+            for comm, c in list(ph["threads"].items())[:5]:
+                print(f"     {comm:16s} thr {c['threads']} wakes/s {c['wakes_per_s']} gap p50 {c['gap_ms']['p50']} ({c['gap_ms']['repeat_p50']}) run p50/p90/p99 {c['run_ms']['p50']}/{c['run_ms']['p90']}/{c['run_ms']['p99']}")
+            if "per_input" in ph:
+                p = ph["per_input"]
+                print(f"     per input: events {p['events']}; first-wake share {p['first_wake']['attributed_share']} run p50 {p['first_wake']['run_ms']['p50']}; window run p50/p90 {p['window']['run_ms']['p50']}/{p['window']['run_ms']['p90']} net {p['window']['run_ms_minus_idle']['p50']}; waker run p50/p90/p99 {p['waker']['run_ms']['p50']}/{p['waker']['run_ms']['p90']}/{p['waker']['run_ms']['p99']} ({p['waker']['run_ms']['repeat_p50']})")
+    for g in gated:
+        print(f"   gated out: {g['app']} r{g['repeat']} ({g['cpu_model']}) {g['path']}")
+    for o in other:
+        print(f"   other machine, not pooled: {o['app']} r{o['repeat']} ({o['cpu_model']}) {o['path']}")
+    json.dump(out, open(args.out, "w"), indent=1)
+
+
+if __name__ == "__main__":
+    main()

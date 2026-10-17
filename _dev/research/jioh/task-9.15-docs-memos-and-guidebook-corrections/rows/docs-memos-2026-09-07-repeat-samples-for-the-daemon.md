@@ -1,0 +1,18 @@
+# Work-list rows — `docs/memos/2026-09-07-repeat-samples-for-the-daemon.md`
+
+Chunk K17, Memos (wave 4). 2 open rows. The file has 40 lines at `d5cc7711`.
+
+### W-0684 · applied
+- At: `docs/memos/2026-09-07-repeat-samples-for-the-daemon.md` the header block after the H1 (the `> Status:` line and the `> From …` line)
+- Change: Add one header line after the Status line: either closed, naming where the memo's content now lives, or open, naming the ask still outstanding and its owner. Bump the header's `Updated`.
+- Final word: 9.15 spec decision 10: each memo carries one header line — closed, with where its content now lives, or open, with the ask and its owner; a memo's original text is never edited; a correction is an appended `## Correction (<date>)` section in the memo's own language, the header's `Updated` bumped; no memo is moved or deleted.
+- Sources: 9.15 spec decision 10 (`jioh/task-9.15-docs-memos-and-guidebook-corrections.md:54`)
+- Notes: The memo: to 박이안: the repeat index run-to-run consistency needs from the recognition log. Written in English; the header line in the memo's own language. Whether it is open or closed is decided against the code and the records, and logged.
+
+### W-0685 · applied
+- At: `docs/memos/2026-09-07-repeat-samples-for-the-daemon.md` new — an appended `## Correction (<date>)` section after §5; the corrected statement is in §3 'What the harness will accept', line 29 ('… because `fixed`, `oracle`, and `whitelist` are deterministic …')
+- Change: Append a dated `## Correction (<date>)` section in English naming the statement and stating that the `whitelist` condition is now two conditions, `shipped_catalogue` and `strongest_name_table`, both name-keyed tables and so deterministic like `fixed` and `oracle`; bump the header's `Updated`; the memo's text stays.
+- Final word: 9.12 D6 (the `whitelist` condition split), amended by D91, D105, D109 and D115: the `whitelist` condition becomes two. The shipped-catalogue condition (`shipped_catalogue`) reproduces the CachyOS catalogue (`ananicy-rules` at `03ef03fb`) as CachyOS installs and enables it with ananicy-cpp, matched by the basename of each process's `argv[0]`, untruncated (D105); on that key the catalogue keys 19 of the 35 bound names and every name in only 7 of 50 files (D109); it answers RQ2 (research question 2, 'does that reading beat what shipping systems do?'). The strongest-name-table condition (`strongest_name_table`) is a rule list in the catalogue's design covering the software the dataset presents as known, with no rule for Family 3's unregistered software or the invented names of familiarity tiers 4–5; it carries the paper's claim (D115), is expected to score perfectly on the C1 (single-situation calibration) files, and fails structurally on world knowledge. 'A faithful reproduction of what shipping systems do today' and 'the whitelist approach real operating systems currently use' are restated to the two conditions (D91).
+- Sources: S12-053 (9.12 D6, `task-9.12-related-work-prose/changelog.md:114`); SX-0147 (TODO 9.15 line (from 9.12 D6), `_dev/TODO.md:179`)
+- Resolved at merge: S12-053 offered 'append a correction, or leave if the sweep judges the memo's word historical'; SX-0147 asks for the correction. 9.15 spec decision 10 (memos: corrections appended) decides: append.
+- Notes: Condition identifiers in code: `harness/tools/harness/evaluator.py:47` (CONDITIONS = fixed, random, shipped_catalogue, strongest_name_table, llm_vocab, llm_algo, llm_full, oracle); `harness/guards/guard-spec.yaml:126`. The statement's substance (the non-LLM conditions are deterministic) still holds. The memo also gets its one open/closed header line at assembly (spec decision 10).

@@ -1,0 +1,36 @@
+c7-meeting fixed {'voice': '837/2639 missed (31.717%)'}
+c7-meeting edf {'voice': '151/2639 missed (5.722%)'}
+c1-meeting fixed {'voice': '340/6000 missed (5.667%)'}
+c1-meeting edf {'voice': '340/6000 missed (5.667%)'}
+c7-media fixed {'music': '0/532 missed (0.000%)', 'video': '0/792 missed (0.000%)'}
+c7-media edf {'video': '0/792 missed (0.000%)', 'music': '0/532 missed (0.000%)'}
+c1-media fixed {'music': '0/1209 missed (0.000%)', 'video': '0/1800 missed (0.000%)'}
+c1-media edf {'video': '0/1800 missed (0.000%)', 'music': '0/1209 missed (0.000%)'}
+c2-p2a fixed {'game.chain.1': '10/5183 missed (0.193%)'}
+c2-p2a edf {'game.chain.1': '0/5183 missed (0.000%)'}
+c2-p2b fixed {'game.chain.1': '18/5183 missed (0.347%)'}
+c2-p2b edf {'game.chain.1': '0/5183 missed (0.000%)'}
+c7-gaming fixed {'game.chain.1': '337/1583 missed (21.289%)'}
+c7-gaming edf {'game.chain.1': '0/1584 missed (0.000%)'}
+c3-evening fixed {'game.chain.1': '11697/11723 missed (99.778%)', 'music': '8/2418 missed (0.331%)', 'video': '10/3599 missed (0.278%)'}
+c3-evening edf {'game.chain.1': '9929/9932 missed (99.970%)', 'video': '12/3599 missed (0.333%)', 'music': '8/2418 missed (0.331%)'}
+c2-p2a fixed lines 1352917 {'game.wineserver': 1.684, 'steam': 0.58, 'download': 3.04} chain 72.793
+ head deadline lines 5183 missed 10
+c2-p2a fixed head timer_tick ready lines <= T_end 5172 last 86368394 | tail run_end <= T_end 4914 last (86376032, 'block')
+c2-p2a edf lines 1368719 {'game.wineserver': 1.684, 'steam': 0.233, 'download': 1.062} chain 80.378
+ head deadline lines 5183 missed 0
+c2-p2a edf head timer_tick ready lines <= T_end 5182 last 86368394 | tail run_end <= T_end 5183 last (86384227, 'block')
+c2-p2b fixed lines 439724 {'game.wineserver': 1.684, 'steam': 0.575, 'download': 3.445} chain 70.988
+ head deadline lines 5183 missed 18
+c2-p2b fixed head timer_tick ready lines <= T_end 5164 last 86368394 | tail run_end <= T_end 4882 last (86376032, 'block')
+c2-p2b edf lines 421847 {'game.wineserver': 1.684, 'steam': 0.222, 'download': 1.233} chain 80.378
+ head deadline lines 5183 missed 0
+c2-p2b edf head timer_tick ready lines <= T_end 5182 last 86368394 | tail run_end <= T_end 5183 last (86384227, 'block')
+c7-gaming fixed lines 122299 {'upgrade': 2.623, 'game.wineserver': 0.537, 'steam': 0.004} chain 20.859
+ head deadline lines 1583 missed 337
+c7-gaming fixed head timer_tick ready lines <= T_end 1246 last 26300526 | tail run_end <= T_end 1348 last (26385000, 'depart')
+c3-evening fixed longest ready wait (s): {'chat': 120.021, 'game.chain.1': 120.021, 'game.chain.14': 120.018, 'game.chain.15': 120.016, 'game.chain.16': 120.015}
+c7-gaming edf lines 131238 {'game.wineserver': 0.54, 'upgrade': 2.537, 'steam': 0.001} chain 23.204
+ head deadline lines 1584 missed 0
+c7-gaming edf head timer_tick ready lines <= T_end 1583 last 26383861 | tail run_end <= T_end 1583 last (26382193, 'block')
+c3-evening edf longest ready wait (s): {'chat': 359.99, 'steam': 240.0, 'game.chain.1': 120.007, 'video': 0.066, 'music': 0.065}

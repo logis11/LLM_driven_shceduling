@@ -95,7 +95,7 @@ def test_the_invalid_variant_names_the_guard_and_the_run():
     assert report["verdict"] == "invalid"
     assert report["verdict_detail"]["invalid_runs"] == [
         {"workload_id": "mock-score", "condition": "random", "table": "prior", "seed": "s2",
-         "boot_default": "", "guard": "starvation_floor"}]
+         "boot_default": "", "telemetry": "names", "guard": "starvation_floor"}]
     assert _gap(report)["gap"] == "0.585462"                       # still computed and reported
     fails = [r for r in report["guards"] if r["result"] == "fail"]
     assert len(fails) == 1 and fails[0]["exempt"] is False and fails[0]["invalidating"] is True
@@ -277,3 +277,128 @@ def test_statements_are_echoed_into_the_report_in_order():
     report = _evaluate()
     assert report["statements"] == [{"id": "fixture", "text": "A pre-registered statement, echoed verbatim."}]
     assert "## Statements" in render(report) and "A pre-registered statement" in render(report)
+
+
+# ---------------------------------------------- the 9.14 lines (decisions 10, 12)
+
+VARIANT = "mock-score@v"
+
+
+def _with_variant(tmp_path, lines, variants=(VARIANT,)):
+    """The mock inputs with every `mock-score` row under the primary boot default copied
+    to a variant workload, and a spec listing it under `files.variants` with `lines`."""
+    from harness import aggregates as agg_mod
+    columns = {"aggregates": agg_mod.COLUMNS, "scores": scorer.COLUMNS, "guards": guards_mod.COLUMNS}
+    paths = {}
+    for name in ("aggregates", "scores", "guards"):
+        rows = read_csv(INPUTS[name], columns[name])
+        extra = [{**r, "workload_id": VARIANT} for r in rows
+                 if r["workload_id"] == "mock-score" and r["boot_default"] == ""]
+        out = tmp_path / f"{name}.csv"
+        write_csv(rows + extra, columns[name], out)
+        paths[name] = out
+    spec = yaml.safe_load((FX / "experiment.yaml").read_text())
+    spec["files"]["variants"] = list(variants)
+    spec["reporting_lines"] = lines
+    sp = tmp_path / "experiment.yaml"
+    sp.write_text(yaml.safe_dump(spec, sort_keys=False))
+    return sp, paths
+
+
+def test_variant_set_line_substitutes_the_variants_gap(tmp_path):
+    sp, paths = _with_variant(tmp_path, [
+        {"type": "variant_set", "name": "venue-x1.25", "axis": "venue_factor", "value": 1.25,
+         "files": {"mock-score": VARIANT}, "reason": "a stated reason"}])
+    report = evaluate(sp, paths["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+    line = _line(report, "variant_set")
+    assert line["name"] == "venue-x1.25" and line["axis"] == "venue_factor" and line["value"] == "1.25"
+    assert line["judging"] == 1 and line["met"] == line["primary_met"] and line["verdict"] == report["verdict"]
+    (row,) = line["rows"]
+    assert row["workload_id"] == "mock-score" and row["variant"] == VARIANT
+    assert row["primary"]["gap"] == row["variant_result"]["gap"] == _gap(report)["gap"]
+    assert any(r["workload_id"] == VARIANT and not r["judging"] for r in report["gaps"])   # reported, never judged
+
+
+def test_trace_replay_line_agrees_on_identical_gaps(tmp_path):
+    sp, paths = _with_variant(tmp_path, [
+        {"type": "trace_replay", "files": {"mock-score": VARIANT}, "tolerance": 0.17}])
+    report = evaluate(sp, paths["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+    line = _line(report, "trace_replay")
+    (row,) = line["rows"]
+    assert row["difference"] == "0.000000" and row["same_side_of_g"] and row["within_tolerance"] and row["agrees"]
+    assert line["agreement"] is True and line["tolerance"] == "0.17"
+
+
+def test_bounding_pair_line_reports_both_files_and_the_difference(tmp_path):
+    sp, paths = _with_variant(tmp_path, [
+        {"type": "bounding_pair", "a": "mock-score", "b": VARIANT, "reason": "the reach of a limitation"}])
+    report = evaluate(sp, paths["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+    line = _line(report, "bounding_pair")
+    assert line["a"]["workload_id"] == "mock-score" and line["b"]["workload_id"] == VARIANT
+    assert line["a"]["gap"] == line["b"]["gap"] and line["difference"] == "0.000000"
+
+
+def test_input_wake_count_and_longest_wait_lines_read_the_aggregates(tmp_path):
+    sp, paths = _with_variant(tmp_path, [
+        {"type": "input_wake_count"},
+        {"type": "longest_wait", "threshold_us": 30000000, "reopen_us": 15000000}])
+    report = evaluate(sp, paths["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+    counts = _line(report, "input_wake_count")
+    assert counts["rows"] and all(r["workload_id"] == "mock-score" for r in counts["rows"])
+    assert all(isinstance(r["count"], int) for r in counts["rows"])          # every term's wakes are counted
+    waits = _line(report, "longest_wait")
+    assert waits["threshold_us"] == 30000000 and waits["rows"]
+    assert all(r["margin_us"] == 30000000 - r["longest_wait_us"] for r in waits["rows"])
+    assert waits["any_past_reopen"] == any(r["past_reopen"] for r in waits["rows"])
+    assert "## Line: longest_wait" in render(report) and "## Line: input_wake_count" in render(report)
+
+
+def test_variant_lines_are_linted_against_the_lists(tmp_path):
+    from harness.evaluator import SPEC_SCHEMA, lint_spec
+    build = tmp_path / "build"
+    build.mkdir()
+    src = (FX / "workloads" / "mock-score.workload.json").read_bytes()
+    (build / "mock-score.workload.json").write_bytes(src)
+    (build / f"{VARIANT}.workload.json").write_bytes(src)
+    spec = yaml.safe_load((FX / "experiment.yaml").read_text())
+    spec["files"]["variants"] = [VARIANT]
+    spec["reporting_lines"] = [
+        {"type": "variant_set", "name": "x", "axis": "venue_factor", "value": 1.25, "files": {"nobody": VARIANT}},
+        {"type": "trace_replay", "files": {"mock-score": "unlisted"}, "tolerance": 0.17},
+        {"type": "longest_wait", "threshold_us": 30, "reopen_us": 60}]
+    sp = tmp_path / "experiment.yaml"
+    sp.write_text(yaml.safe_dump(spec, sort_keys=False))
+    errors = lint_spec(sp, SPEC_SCHEMA, build, REPO)
+    assert any("'nobody' is not a judging file" in e for e in errors)
+    assert any("'unlisted' is not a listed variant file" in e for e in errors)
+    assert any("reopen_us lies past threshold_us" in e for e in errors)
+    spec["files"]["variants"] = ["mock-score"]                                   # listed twice
+    sp.write_text(yaml.safe_dump(spec, sort_keys=False))
+    assert any("variants and as judging" in e for e in lint_spec(sp, SPEC_SCHEMA, build, REPO))
+
+
+def test_the_flip_cost_line_reads_the_flip_aggregates_and_the_runs_score(tmp_path):
+    """9.21 decision 7: the three flip aggregates of a recognizing run become one row with the run's file score
+    beside them; a run without the three rows has no row; the totals sum the rows."""
+    from harness import aggregates as agg
+    rows = read_csv(INPUTS["aggregates"], agg.COLUMNS)
+    seed_one = next(r for r in rows if r["condition"] == "random" and r["seed"] == "s1")
+    for aggregate, value in (("change_count", "4.000000000000"), ("wrong_change_count", "1.000000000000"),
+                             ("wrong_switch_excess_sum", "250.000000000000")):
+        rows.append({**{k: seed_one[k] for k in agg.IDENTITY}, "entity": "schedule", "metric": "config_interval",
+                     "aggregate": aggregate, "cause": "", "channel": "", "window_start_us": "", "window_end_us": "",
+                     "index": "", "value": value})
+    rows.sort(key=agg.sort_key)
+    write_csv(rows, agg.COLUMNS, tmp_path / "aggregates.csv")
+    spec = yaml.safe_load((FX / "experiment.yaml").read_text())
+    spec["reporting_lines"].append({"type": "flip_cost"})
+    (tmp_path / "spec.yaml").write_text(yaml.safe_dump(spec, sort_keys=False))
+    report = _evaluate(tmp_path / "spec.yaml", aggregates=tmp_path / "aggregates.csv")
+    line = _line(report, "flip_cost")
+    assert line["rows"] == [{"workload_id": "mock-score", "condition": "random", "table": "prior", "seed": "s1",
+                             "boot_default": "", "telemetry": "names", "changes": 4, "wrong_changes": 1,
+                             "wrong_switch_excess_us": "250.000000000000", "score": "1.639359"}]
+    assert line["changes_total"] == 4 and line["wrong_total"] == 1
+    assert "wrong-switch excess into MLFQ" in render(report)
+    import jsonschema
+    jsonschema.Draft202012Validator(json.loads(REPORT_SCHEMA.read_text())).validate(report)

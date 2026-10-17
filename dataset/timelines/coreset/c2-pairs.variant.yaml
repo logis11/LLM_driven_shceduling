@@ -2,34 +2,73 @@
 # its base by exactly the ops below — the one-segment-diff discipline is
 # structural. Seeds inherit from the bases (byte-discipline).
 variants:
-  # P1b — the load-bearing flip: rename ONLY (plus the segment label).
-  # tracker-miner-fs-3 stays bound to cpu-batch deliberately (full-rescan
-  # state; archetypes.yaml binding note).
+  # P1b — the load-bearing flip: the training run's place taken by Tracker's
+  # first index of a home, `file-indexer` (meas-ci:background:2026-10-02b)
+  # shown as `tracker-miner-f`, bound whole at its measured CPU total — the
+  # measured indexer's own tables, not python3's under a rename (9.10 D6, D17,
+  # D70, D74); segment 1 is that long in both files, so the job is alive at
+  # every instant of it under every policy (D80). The index is a first login's,
+  # as c7-indexing's: `initiated: session`, scenario S14 (D5, D79, D164).
+  # The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
   - id: c2-p1b
     from: c2-p1a.timeline.yaml
     ops:
-      - rename: {from: python3, to: tracker-miner-fs-3}
+      - patch-task: {id: hog, name: tracker-miner-f, archetype: file-indexer,
+                     arrive: 60s, bind: {total_work: 39.435s}, source: {total_work: "meas-ci:background:2026-10-02b"}}
       - patch-segment: {index: 1, mode: indexing,
-                        attributes: {background_wanted: false}}
+                        attributes: {background_wanted: false, initiated: session},
+                        scenario: [S11, S14]}
 
-  # P2b — same game-plus-background shape; wanted flips (S17 vs S10).
-  # clamscan binds cpu-batch: full-scan state is CPU-saturating
-  # (meas-ci:cli:3 finding: foreground clamscan per-proc duty ~1.0).
+  # P2b — same game-plus-background shape; wanted flips (S17 vs S10). The
+  # unwanted job is the stock unattended upgrade's install stage,
+  # `package-upgrade` shown as `unattended-upgr`, bound whole at its measured CPU
+  # total (9.10 D3, D17, D40); segment 1 is that long in both files, so the job
+  # is alive at every instant of it under every policy (D42).
+  # The game's threads beyond the chain and `wineserver` are omitted: the source
+  # puts 95% of scheduling in its top 30-40 tasks and describes none outside
+  # them (lavd-ossna24 s12; 9.10 D19).
+  # The Steam client is in its measured state: logged out, no account, no
+  # library, no game behind it, no `gameoverlayui` (9.10 D22; 9.8 D6).
+  # The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
   - id: c2-p2b
     from: c2-p2a.timeline.yaml
     ops:
-      - patch-task: {id: download, name: clamscan, archetype: cpu-batch,
-                     arrive: 60s, bind: {total_work: 25s}}
+      - patch-task: {id: download, name: unattended-upgr, archetype: package-upgrade,
+                     arrive: 60s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
       - patch-segment: {index: 1,
-                        attributes: {background_wanted: false, background: av-scan},
+                        attributes: {background_wanted: false, background: package-upgrade},
                         scenario: [S9, S17]}
 
-  # P3b — user-initiated bulk -> scheduled bulk (S15).
+  # P2a-idle — the idle half of the c2-p2a bounding check (9.11 D21; 9.13): c2-p2a with
+  # the download bound to `game-download-idle`, the entry that shares `game-download`'s
+  # tables and declares `idle`; nothing else changes, the seed inherited, so the two
+  # compiled files differ in that task's class alone. Outside the judging set; read by
+  # 9.14's bounding check alone.
+  # The game's threads beyond the chain and `wineserver` are omitted: the source
+  # puts 95% of scheduling in its top 30-40 tasks and describes none outside
+  # them (lavd-ossna24 s12; 9.10 D19).
+  # The Steam client is in its measured state: logged out, no account, no
+  # library, no game behind it, no `gameoverlayui` (9.10 D22; 9.8 D6).
+  # The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
+  - id: c2-p2a-idle
+    from: c2-p2a.timeline.yaml
+    ops:
+      - patch-task: {id: download, archetype: game-download-idle}
+
+  # P3b — user-initiated bulk -> scheduled bulk (S15): Déjà Dup's scheduled
+  # weekly incremental, `incremental-backup` shown as `deja-dup`, bound whole at
+  # its measured CPU total (meas-ci:background:2026-10-04; 9.10 D17, D119, D120).
+  # Segment 1 runs 60–326 s in both files; the length is 9.10 D123's, set on a
+  # shared lane; under the idle class (9.13) the backup, 165.7 s of CPU in the
+  # about 166 s of lane the editor leaves, finishes about 0.3 s before the
+  # segment's end and is scored by its turnaround (9.14 decision 6's header rule;
+  # 9.16 decision D4); the base's export ends by about 99.5 s.
+  # The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
   - id: c2-p3b
     from: c2-p3a.timeline.yaml
     ops:
-      - patch-task: {id: bulk, name: borg, archetype: io-stream,
-                     arrive: 60s, bind: {total_work: 75s}}
+      - patch-task: {id: bulk, name: deja-dup, archetype: incremental-backup,
+                     arrive: 60s, bind: {total_work: 165.668s}, source: {total_work: "meas-ci:background:2026-10-04"}}
       - patch-segment: {index: 1, mode: backup,
                         attributes: {background_wanted: true, initiated: scheduled},
                         scenario: [S7, S15]}

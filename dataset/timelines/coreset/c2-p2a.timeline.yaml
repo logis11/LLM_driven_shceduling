@@ -1,5 +1,18 @@
-# C2 P2 (base) — {game + steam download workers}: same game-plus-background
-# shape as the clamscan variant; wanted flips (S10 vs S17).
+# C2 P2 (base) — gaming with a download the user started: an install of
+# another game begun during play, which Steam starts at once although it
+# pauses queued downloads when a game launches (steam-downloads; Valve's
+# steam-for-linux #8821). The variant swaps in an unwanted job and flips
+# the label (c2-pairs.variant.yaml). Segment 1 is as long as the variant's
+# unwanted job's measured CPU total, 26.385 s (9.10 D42). The download is the
+# measured fresh install bound whole at its CPU total, 727.170 s
+# (meas-ci:background:2026-09-19; 9.10 D17, D142); the file ends while it runs
+# (D86's form).
+# The game's threads beyond the chain and `wineserver` are omitted: the source
+# puts 95% of scheduling in its top 30-40 tasks and describes none outside
+# them (lavd-ossna24 s12; 9.10 D19).
+# The Steam client is in its measured state: logged out, no account, no
+# library, no game behind it, no `gameoverlayui` (9.10 D22; 9.8 D6).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c2-p2a
   seed: 202
@@ -7,17 +20,22 @@ meta:
 segments:
   - {from: 0s, to: 60s, mode: gaming, attributes: {background_wanted: true},
      scenario: [S9]}
-  - {from: 60s, to: 120s, mode: gaming,
-     attributes: {background_wanted: true, background: download}, scenario: [S9, S10]}
+  - {from: 60s, to: 86.385s, mode: gaming,
+     attributes: {background_wanted: true, background: download, initiated: user},
+     scenario: [S9, S10]}
 
 tasks:
-  - {id: game, name: game.exe, archetype: game-task-chain,
-     arrive: 0s, depart: 120s, bind: {lane_share: 0.95}}
-  - {id: steam, name: steam, archetype: electron-comms,
-     arrive: 0s, depart: 120s}
-  - {id: wine, name: wineserver, archetype: system-daemon,
-     arrive: 0s, depart: 120s}
-  - {id: download, name: steam, archetype: network-bulk, arrive: 60s,
-     bind: {total_work: 25s}}
+  - {id: game, name: Troy.exe, archetype: game-task-chain,
+     arrive: 0s, depart: 86.385s, bind: {lane_share: 0.95,
+           member_names: ["Task worker thr", "Task worker thr", "Task worker thr", "Task worker thr", dxvk-cs, dxvk-submit, winepulse_mainl, winepulse_timer, FAudio_AudioCli, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe]},
+     source: {lane_share: design, member_names: "lavd-ossna24:s16"}}
+  - {id: steam, name: steam, archetype: game-client,
+     arrive: 0s, depart: 86.385s}
+  - {id: download, name: steam, archetype: game-download, arrive: 60s,
+     bind: {total_work: 727.170s},
+     source: {total_work: "meas-ci:background:2026-09-19"}}
 
-focus: []
+input: []
+
+focus:
+  - {from: 0s, to: 86.385s, task: game}

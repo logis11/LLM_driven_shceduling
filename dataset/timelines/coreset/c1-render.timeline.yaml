@@ -1,7 +1,14 @@
 # C1 — single-situation calibration: pure render (building-plan §3 C1; Phase 7
-# spec decision 8). Task set lifted from c2-p3a segment 1 (kdenlive + ffmpeg
-# render); total_work resized from 75 s to 30 s so the job finishes inside the
-# 60 s segment (turnaround term).
+# spec decision 8). Task set lifted from c2-p3a segment 1 (kdenlive + its
+# export). The render is Kdenlive's own export of the video-editor project as
+# `cpu-batch`'s `kdenlive_render` program measured it
+# (meas-ci:background:2026-10-03c): Kdenlive 23.08.5's shipped default profile,
+# the task shown as `kdenlive_render`, bound whole at its measured CPU total
+# (9.10 D10, D17, D101–D107). The job ends inside the 60 s segment under every
+# policy — 2 s + its CPU and blocks + the editor's CPU as compiled under the
+# file's seed — so the turnaround term reads a finished job and the segment
+# keeps its length (D78's form).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-render
   seed: 113
@@ -9,13 +16,20 @@ meta:
 
 segments:
   - {from: 0s, to: 60s, mode: render,
-     attributes: {background_wanted: true, initiated: user}, scenario: [S7, S8]}
+     attributes: {background_wanted: true, initiated: user}, scenario: [S7]}
 
 tasks:
-  - {id: editor, name: kdenlive, archetype: desktop-interactive,
+  - {id: editor, name: kdenlive, archetype: video-editor,
      arrive: 0s, depart: 60s}
-  - {id: bulk, name: ffmpeg, archetype: cpu-batch, arrive: 2s,
-     bind: {total_work: 30s}}
+  - {id: bulk, name: kdenlive_render, archetype: cpu-batch, arrive: 2s,
+     bind: {total_work: 16.545s, program: kdenlive_render},
+     source: {total_work: "meas-ci:background:2026-10-03c", program: [kdenlive, "meas-ci:background:2026-10-03c"]}}
+
+input:
+  - {from: 2s, to: 58s, task: editor}
 
 focus:
-  - {from: 2s, to: 58s, task: editor}
+  - {from: 0s, to: 60s, task: editor}
+
+operations:
+  - {at: 30s, task: editor, name: preview-render}

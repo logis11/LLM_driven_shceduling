@@ -34,20 +34,32 @@ MISS_KEY = "pre_committed_miss"
 
 # Default name→tier lookup (C5 ladder, building-plan §3). Tiers 4–5 exist
 # only via explicit annotation or invented names listed here by authoring.
+# A name no timeline binds tags no segment; such names stay so that a tier-5
+# draw avoids a real program's name (9.20 decision 7: a draw equal to a known
+# name is redrawn, gen/cells.py `known_names`).
 NAME_TIERS = {
     1: {"firefox", "blender", "chrome", "code", "make", "steam", "discord",
-        "thunderbird", "spotify", "gimp", "kdenlive", "ffmpeg", "mpv",
+        "thunderbird", "thunderbird-bin", "spotify", "gimp", "kdenlive", "ffmpeg", "mpv",
         "python3", "rsync", "tar", "xz", "7z", "borg", "rclone", "zoom",
         "slack", "vlc", "game.exe", "transmission-daemon", "clamscan",
-        "evince", "darktable", "ollama"},
+        "evince", "darktable", "ollama", "unattended-upgr",   # unattended-upgr: 9.10 D43
+        "python",   # python: the training run's comm, python3's program and tier (9.10 D27, D84)
+        "kdenlive_render",   # kdenlive_render: the export's comm, a new program at tier 1 (9.10 D106, D107)
+        "deja-dup"},   # deja-dup: the scheduled backup's comm, a new program at tier 1 (9.10 D120, D121)
     2: {"soffice.bin", "gamescope", "wineserver", "steamwebhelper",
         "HandBrakeCLI", "freshclam", "gnome-shell", "Xorg", "pipewire",
-        "systemd", "dbus-daemon"},
-    3: {"tracker-miner-fs-3", "cc1", "baloo_file", "updatedb", "ld", "cc1plus",
-        "dkms"},
+        "systemd", "dbus-daemon", "element-desktop", "Troy.exe"},
+    3: {"tracker-miner-f", "cc1", "baloo_file", "updatedb", "ld", "cc1plus",
+        "dkms", "Task worker thr", "dxvk-cs", "dxvk-submit", "winepulse_mainl",
+        "winepulse_timer", "FAudio_AudioCli"},
 }
 _TIER_BY_NAME = {name: tier for tier, names in NAME_TIERS.items()
                  for name in names}
+
+# Names a compile-time constructor emits beside the bound task's own name
+# (recognizer-visible like a spawned child): the chain constructor adds a
+# `wineserver` member to every game-task-chain (archetypes.yaml).
+CONSTRUCTOR_NAMES = {"game-task-chain": ("wineserver",)}
 
 
 class GridError(Exception):
@@ -74,6 +86,10 @@ def segment_tier(segment, tasks):
             child = (task.get("bind") or {}).get("child_name")
             if child:
                 tiers.append(_TIER_BY_NAME.get(child, 5))
+            for name in CONSTRUCTOR_NAMES.get(task.get("archetype"), ()):
+                tiers.append(_TIER_BY_NAME.get(name, 5))
+            for name in (task.get("bind") or {}).get("member_names", ()):   # 9.10 D26: bound member names
+                tiers.append(_TIER_BY_NAME.get(name, 5))
     return max(tiers, default=1)
 
 

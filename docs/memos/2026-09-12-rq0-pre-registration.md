@@ -1,6 +1,7 @@
 # RQ0 gate spec 확정 안내 — 판정 기준을 실행 전에 파일로 못 박았어요
 
-> Status: memo · Created 2026-09-12 · Updated 2026-09-12
+> Status: memo · Created 2026-09-12 · Updated 2026-10-17
+> 열림 — §5의 부탁: `random`의 읽기와 N = 100을 daemon 쪽에서 확인해 주시는 것, 담당 박이안(RQ0 gate spec의 statement `random-reading`이 아직 확인을 기다려요). §4의 세 가정은 지금 spec의 statement `executor-assumptions`로 다시 적혔고(아래 정정), 그중 1·2에 대한 인경민의 정식 답은 2026-10-08 declared-class memo §4의 4번이 받아요.
 > From 인지오 to 인경민, 박이안. RQ0(random vs oracle의 gap이 잴 만큼 큰가)의 판정 기준을 **실행 전에** 하나의 파일로 확정했어요: `harness/experiments/rq0-gate.yaml`. 이 memo는 거기에 무엇이 어떤 근거로 들어갔는지, 그리고 두 분께 확인을 부탁드릴 것이 무엇인지 적어요. 두 분 프로그램의 입출력 형식은 하나도 안 바뀌었어요. 급하면 §1과 §4·§5만 읽어도 돼요.
 
 ## 1. 한 문단 요약
@@ -45,3 +46,13 @@ spec에 적힌 `random`의 정의(`statements: random-reading`)는 daemon guide�
 - `harness/boot-defaults/` — primary `ostep.json`과 sweep 9개.
 - `docs/recognition-vocabulary.md` §2 sensitivity 문단과 changelog 2026-09-12.
 - `docs/memos/2026-09-11-boot-default-from-ostep.md` §5 — 세 질문의 원문.
+
+## 정정 (2026-10-17)
+
+RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)은 rebuild된 dataset 위에서 2026-10-09에 다시 쓰였어요(9.14 D7). 아래 문장들은 지금 spec과 달라요.
+
+- **판정 set과 K — §1의 "판정에 쓰는지(25개)", "K = 13, 과반"; §2 1번의 "판정 set 25개. C2 pair 여섯, batch C1 base 여섯, term이 있는 C7 counterpart 열셋"과 `c7-meeting`·`c7-media`를 보고 전용으로 뺀 것; §2 3번의 "K = 13. 25개 중 과반"; §2 7번의 "판정 파일 25개 중 13개".** 판정 set은 19개예요: C2 pair의 절반 넷(`c2-p1a`, `c2-p2a`, `c2-p2b`, `c2-p3a`), batch C1 base 넷(`c1-compile`, `c1-ml-train`, `c1-render`, `c1-transcode`), C7 counterpart 열하나(`c7-meeting` 포함). `c7-media`(측정된 table 위에서 headroom이 없음)와 `c7-mail`(잘린 구간에 keystroke가 없음, 9.14 D6)은 보고 전용이고, 보고 목록은 32개예요. K = 10, 19개 중 과반이에요. prior table의 구조(32 row에 config 8종류, 13 row가 MLFQ·cap 0.05)는 그대로이고, 그 13 row에 대응하는 판정 파일은 19개 중 아홉 개예요 — 거기서 random이 oracle과 같은 config를 뽑을 확률이 41%예요(statement `prior-table-structure`).
+- **boot default sweep — §1의 "sweep(9개 지점)", §2 5번의 "0.5 / 0.75 / 0.9 / 1.2 / 2 / 3 / 5 / 20 / 100 ms"와 "출하된 기본값 셋(Linux 0.75, …)", §3의 "sweep의 9개 파일", §6의 "sweep 9개".** sweep은 열 지점, 파일 열 개예요: 0.5, 0.7, 0.9, 1.2, 2, 3, 5, 14, 20, 100 ms(`harness/boot-defaults/`). Linux 지점은 0.75 ms가 아니라 0.7 ms예요(`ostep-slice-700us.json`): v6.15부터의 Linux base slice를 CPU 하나에서 읽은 값으로, simulator의 lane 하나에 맞춰 곱하지 않은 값을 설계로 골랐어요(runner의 CPU 4개에서는 2.1 ms; 9.11 D2, D25). 750 µs는 v6.6–v6.14의 값이고, 이 프로젝트는 그 커널을 쓰지 않아요. 14 ms가 새로 들어왔어요: 측정된 call의 cycle 9분위(12.2 ms)보다 위, call과 video player의 최대(18.9 ms, 16.0 ms)보다 아래라, call이 cycle의 10분의 1이 안 되게만 강등돼요. 지점마다의 이유는 rebuild된 파일 기준으로 spec의 statement `boot-default-sweep`와 sensitivity line에 다시 적혔고, compositor burst 6 667 µs라는 이유는 compositor task와 함께 빠졌어요.
+- **executor 가정 — §4의 1·2·3번, §3의 "`starvation_floor`만 §4의 세 번째 답을 기다려요".** 지금 spec의 statement `executor-assumptions`는 인경민의 status memo §6(`simulator/memo/memo_261001.md`)과 9.11의 결정 위에 서요. (1) EDF에서 깨어난 deadline task는 residual slice를 바로 뺏어요 — 제안 그대로이고, simulator가 지금 그렇게 해요. (2) 같은 µs의 event는 config entry 먼저, 그다음 들어온 순서예요 — simulator의 규칙 D1이고, 깨어남을 먼저 하자는 제안과 달라요. (3) executor에는 starvation window가 없어요. `starvation_floor` guard의 threshold는 30 000 000 µs(30 s)로, sched_ext watchdog의 상한을 설계로 빌린 값이에요(9.11 D7, D19; `harness/guards/guard-spec.yaml`). 1·2에 대한 인경민의 정식 답은 2026-10-08 declared-class memo §4의 4번이 받아요.
+- **§5의 "전체 5 000 run".** 지금 spec에서 random run은 파일마다 seed 100개, core 파일 51개(판정 19, 보고 32)와 sensitivity line의 variant 파일 78개를 합쳐 12 900번이에요(spec의 `files`와 `seed_count`; run matrix는 `harness/tools/harness/runner.py`).
+- **위 boot default sweep 줄의 "cycle 9분위(12.2 ms)", "최대(18.9 ms, 16.0 ms)", "10분의 1이 안 되게".** 측정된 `cycle_run` table은 십분위가 아니라 백분위 열 개(p1, p5, p10, p25, p50, p75, p90, p95, p99, p99.9)를 가져요(`dataset/tools/wlc/sampling.py`). 12.2 ms는 call의 99백분위이고, 9분위는 7.4 ms예요. 18.9 ms와 16.0 ms는 측정된 두 table의 최대예요. 14 ms에서 call은 cycle의 약 0.04 %만 강등돼요. 14 ms 지점은 그대로이고, 다른 지점도 이유가 말하는 쪽에 그대로 있어요(RQ0 gate spec의 statement `boot-default-sweep`; 9.16의 넘겨받은 점검, `_dev/research/jioh/task-9.16-exit-audits/handed/findings.md`).

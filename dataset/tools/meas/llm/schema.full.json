@@ -1,0 +1,51 @@
+{
+ "type": "object",
+ "properties": {
+  "reasoning": {
+   "type": "string"
+  },
+  "situation": {
+   "type": "string"
+  },
+  "system": {
+   "type": "object",
+   "properties": {
+    "mode": {
+     "type": "string",
+     "enum": [
+      "browsing",
+      "office",
+      "mail",
+      "dev",
+      "photo",
+      "meeting",
+      "gaming",
+      "media",
+      "video-edit",
+      "compile",
+      "ml-train",
+      "render",
+      "transcode",
+      "indexing",
+      "backup",
+      "idle"
+     ]
+    },
+    "background_wanted": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "mode",
+    "background_wanted"
+   ],
+   "additionalProperties": false
+  }
+ },
+ "required": [
+  "reasoning",
+  "situation",
+  "system"
+ ],
+ "additionalProperties": false
+}

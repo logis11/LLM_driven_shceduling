@@ -11,6 +11,14 @@ FIXTURES = pathlib.Path(__file__).parent / "fixtures"
 MOCKS = ("mock-office", "mock-media", "mock-p1a", "mock-chain", "mock-switch")
 
 
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        "coreset_wide: reads all 51 compiled coreset files and builds every record row of each; "
+        "needs more memory than a 16 GB runner holds (c6-dual), so `make test` leaves these out and "
+        "`make test-full` runs them (9.21 D13)")
+
+
 @pytest.fixture(scope="session")
 def repo_root():
     return REPO

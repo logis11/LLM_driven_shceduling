@@ -25,7 +25,7 @@ needs_build = pytest.mark.skipif(not BUILD.exists(), reason="compiled coreset ab
 
 
 def _arrive(tid, name, t, depart=None, spawn=None):
-    ev = {"op": "arrive", "t": t, "id": tid, "name": name,
+    ev = {"op": "arrive", "t": t, "id": tid, "name": name, "declared_class": "normal",
           "program": [{"op": "RUN", "us": 10}, {"op": "EXIT"}]}
     if depart is not None:
         ev["depart"] = depart
@@ -52,7 +52,7 @@ HAND = {
         _arrive("chrome3", "chrome", 300, depart=1000),
         _arrive("chrome4", "chrome", 600, depart=1000),           # replaces chrome1: no set change
         _arrive("build", "make", 800, spawn=[
-            {"id": f"build.c{i}", "name": "cc1",
+            {"id": f"build.c{i}", "name": "cc1", "declared_class": "normal",
              "program": [{"op": "RUN", "us": 3}, {"op": "EXIT"}]} for i in range(3)]),
         {"op": "wake", "t": 50, "channel": "input:editor", "target": "editor"},
     ],
@@ -77,14 +77,46 @@ def test_projection_is_one_entry_per_task_with_children_folded_by_name():
     by_id = {(t["name"], t["t_arrive"], t.get("t_depart")) for t in proj["tasks"]}
     assert ("chrome", 0, 600) in by_id and ("chrome", 0, 1000) in by_id      # never folded
     make = next(t for t in proj["tasks"] if t["name"] == "make")
-    assert make == {"name": "make", "t_arrive": 800, "children": [{"name": "cc1", "count": 3}]}
-    assert all(set(t) <= {"name", "t_arrive", "t_depart", "children"} for t in proj["tasks"])
+    assert make == {"name": "make", "declared_class": "normal", "t_arrive": 800,
+                    "children": [{"name": "cc1", "declared_class": "normal", "count": 3}]}
+    assert all(set(t) <= {"name", "declared_class", "t_arrive", "t_depart", "children", "focus"} for t in proj["tasks"])
+    assert all(t["declared_class"] == "normal" for t in proj["tasks"])          # contract 3b: shown per task
+
+
+def test_projection_folds_children_by_name_and_class():
+    """data-contracts §4 (2026-10-09): the class rides on every task and on each folded child group."""
+    doc = {"meta": {"id": "x"}, "ground_truth": [], "events": [
+        {"op": "arrive", "t": 0, "id": "idx", "name": "tracker-miner-f", "declared_class": "idle",
+         "program": [{"op": "RUN", "us": 1}, {"op": "EXIT"}]},
+        {"op": "arrive", "t": 0, "id": "b", "name": "make", "declared_class": "normal", "fork_cap": 2,
+         "program": [{"op": "RUN", "us": 1}, {"op": "FORK"}, {"op": "FORK"}, {"op": "EXIT"}],
+         "spawn_table": [
+             {"id": "b.1", "name": "cc1", "declared_class": "normal", "program": [{"op": "RUN", "us": 1}, {"op": "EXIT"}]},
+             {"id": "b.2", "name": "cc1", "declared_class": "idle", "program": [{"op": "RUN", "us": 1}, {"op": "EXIT"}]}]}]}
+    proj = daemon.projection(doc)
+    assert proj["tasks"][0] == {"name": "tracker-miner-f", "declared_class": "idle", "t_arrive": 0}
+    assert proj["tasks"][1]["children"] == [{"name": "cc1", "declared_class": "idle", "count": 1},
+                                            {"name": "cc1", "declared_class": "normal", "count": 1}]
+
+
+def test_projection_carries_each_tasks_focus_intervals():
+    """data-contracts §4 (2026-10-11, 9.17): a task the focus track names shows its pinned intervals."""
+    doc = copy.deepcopy(HAND)
+    doc["focus"] = [{"t_start": 0, "t_end": 300, "task": "editor"}, {"t_start": 300, "t_end": 600, "task": "chrome1"},
+                    {"t_start": 600, "t_end": 1000, "task": "editor"}]
+    proj = daemon.projection(doc)
+    editor = next(t for t in proj["tasks"] if t["name"] == "code")
+    assert editor["focus"] == [{"t_start": 0, "t_end": 300}, {"t_start": 600, "t_end": 1000}]
+    chrome1 = next(t for t in proj["tasks"] if t["name"] == "chrome" and t["t_depart"] == 600)
+    assert chrome1["focus"] == [{"t_start": 300, "t_end": 600}]
+    assert all("focus" not in t for t in proj["tasks"] if t["name"] not in ("code", "chrome"))
 
 
 # ---------------------------------------------------------- snapshots (§5)
 
 def test_snapshots_follow_the_five_telemetry_rules():
     snaps = daemon.snapshots(daemon.projection(HAND))
+    assert all(s["focus"] is None for s in snaps)                 # rule 6: no window holds the focus
     assert [s["t_us"] for s in snaps] == [0, 300, 800, 1000]      # 600: unchanged multiset; 50: a wake
     assert snaps[0]["processes"] == [{"name": "chrome", "count": 2}, {"name": "code", "count": 1}]
     assert snaps[1]["processes"] == [{"name": "chrome", "count": 3}, {"name": "code", "count": 1},
@@ -96,15 +128,58 @@ def test_snapshots_follow_the_five_telemetry_rules():
                                      {"name": "python3", "count": 1}]        # terminal: finite tasks stay
 
 
+FOCUSED = copy.deepcopy(HAND)
+FOCUSED["focus"] = [{"t_start": 0, "t_end": 100, "task": "editor"},        # the editor, then
+                    {"t_start": 100, "t_end": 300, "task": "chrome1"},     # a chrome window: a focus-only change
+                    {"t_start": 300, "t_end": 600, "task": "chrome2"},     # another chrome: the same name
+                    {"t_start": 600, "t_end": 1000, "task": "editor"}]     # back to the editor, with chrome1 gone
+
+
+def test_rule_six_a_focus_change_is_a_set_change_and_the_holder_is_a_name():
+    """9.17 spec, decisions 2 and 6: the set is the multiset with the holder's name. 100: a focus-only change
+    emits; 300: a move between two chromes changes nothing beyond the arrivals at that instant; 600: chrome1
+    departs and the editor takes the focus — one snapshot."""
+    snaps = daemon.snapshots(daemon.projection(FOCUSED))
+    assert [(s["t_us"], s["focus"]) for s in snaps] == [(0, "code"), (100, "chrome"), (300, "chrome"),
+                                                        (600, "code"), (800, "code"), (1000, None)]
+    assert snaps[1]["processes"] == snaps[0]["processes"]           # the multiset did not change at 100
+
+
+def test_the_names_shape_keeps_the_query_points_and_hides_the_holder():
+    """9.17 spec, decision 6: under `names` the same instants query, the snapshot without the field — at a
+    focus-only change byte-identical to the one before it."""
+    focus = daemon.snapshots(daemon.projection(FOCUSED), "focus")
+    names = daemon.snapshots(daemon.projection(FOCUSED), "names")
+    assert [s["t_us"] for s in names] == [s["t_us"] for s in focus]
+    assert all("focus" not in s for s in names)
+    assert names[1] == {**names[0], "t_us": 100}
+    assert [{k: v for k, v in s.items() if k != "focus"} for s in focus] == names
+    with pytest.raises(MockDaemonError):
+        daemon.snapshots(daemon.projection(FOCUSED), "everything")
+
+
+def test_the_log_names_the_shape_shown(table, boot):
+    for shape in ("focus", "names"):
+        _schedule, log = daemon.run(FOCUSED, "oracle", table, boot, telemetry=shape)
+        assert log["telemetry"] == shape
+        assert all(("focus" in q["telemetry"]) == (shape == "focus") for q in log["queries"])
+    with pytest.raises(MockDaemonError):
+        daemon.run(FOCUSED, "oracle", table, boot, telemetry="everything")
+
+
 @needs_build
-def test_c1_compile_opens_with_the_guides_two_snapshots():
+def test_c1_compile_opens_with_the_editor_then_the_whole_build():
+    """The rebuilt c1-compile (9.10 D141, 9.6 D19): the editor at 0, then at 2 s `make` with its
+    2,908 object jobs, six members each, folded by name; the terminal snapshot at the file's end
+    (rule 4) with the editor gone and the finite build still present."""
     doc = json.loads((BUILD / "c1-compile.workload.json").read_text())
     snaps = daemon.snapshots(daemon.projection(doc))
-    assert snaps[0] == {"t_us": 0, "processes": [{"name": "code", "count": 1}]}
-    assert snaps[1] == {"t_us": 2000000, "processes": [{"name": "cc1", "count": 100},
-                                                        {"name": "code", "count": 1},
-                                                        {"name": "make", "count": 1}]}
-    assert snaps[2]["t_us"] == 60000000 and len(snaps) == 3                  # rule 4
+    assert snaps[0] == {"t_us": 0, "processes": [{"name": "code", "count": 1}], "focus": "code"}
+    members = [{"name": n, "count": 2908} for n in ("as", "cc1")] + [{"name": "code", "count": 1}] + \
+              [{"name": n, "count": 2908} for n in ("fixdep", "gcc")] + [{"name": "make", "count": 1}] + \
+              [{"name": n, "count": 2908} for n in ("rm", "sh")]
+    assert snaps[1] == {"t_us": 2000000, "processes": members, "focus": "code"}  # the editor keeps the focus (9.17)
+    assert snaps[2]["t_us"] == 1594000000 and snaps[2]["focus"] is None and len(snaps) == 3   # rule 4
 
 
 # -------------------------------------------------------------- conditions
@@ -121,7 +196,7 @@ def test_fixed_is_the_boot_entry_alone_and_an_empty_log(table, boot, tmp_path):
     schedule, log = daemon.run(HAND, "fixed", table, boot)
     assert schedule == {"workload_id": "hand", "condition": "fixed",
                         "schedule": [{"t_us": 0, "config": boot, "provenance": "fallback"}]}
-    assert log == {"workload_id": "hand", "condition": "fixed", "seed": None, "queries": []}
+    assert log == {"workload_id": "hand", "condition": "fixed", "seed": None, "telemetry": "focus", "queries": []}
     s, l = _valid(schedule, log, tmp_path)
     assert len(s.entries) == 1 and l.queries == []
 
@@ -186,8 +261,8 @@ def test_random_draws_uniformly_over_the_sorted_rows_from_the_seed(table, boot, 
 
 
 def test_other_conditions_and_wrong_seed_pairings_are_refused(table, boot):
-    with pytest.raises(MockDaemonError, match="whitelist"):
-        daemon.run(HAND, "whitelist", table, boot)
+    with pytest.raises(MockDaemonError, match="shipped_catalogue"):
+        daemon.run(HAND, "shipped_catalogue", table, boot)
     with pytest.raises(MockDaemonError, match="seed"):
         daemon.run(HAND, "random", table, boot)
     with pytest.raises(MockDaemonError, match="seed"):
@@ -199,9 +274,10 @@ def test_other_conditions_and_wrong_seed_pairings_are_refused(table, boot):
 # --------------------------------------------- the 8.4 measured facts (dec. 19)
 
 @needs_build
+@pytest.mark.coreset_wide
 def test_oracle_over_the_coreset_reproduces_the_measured_graded_set(table, boot, tmp_path):
-    files = sorted(BUILD.glob("*.workload.json"))
-    assert len(files) == 50
+    files = sorted(p for p in BUILD.glob("*.workload.json") if "@" not in p.name)   # the variants (9.14 D8) aside
+    assert len(files) == 51                                     # the blessed set of 2026-10-09 (9.13 D7)
     points = terminal = ambiguous = 0
     graded, graded_files, miss, headline, headline_files = 0, set(), 0, 0, set()
     for path in files:
@@ -217,21 +293,31 @@ def test_oracle_over_the_coreset_reproduces_the_measured_graded_set(table, boot,
                 ambiguous += 1
         lp = tmp_path / f"{doc['meta']['id']}.json"
         lp.write_text(json.dumps(log))
-        rows, messages = grade_log(Run(doc["meta"]["id"], "oracle", "prior", "", "", lp, path, PRIOR))
+        wid = doc["meta"]["id"]
+        del doc, schedule                                         # 9.21 D12: one file's objects at a time
+        rows, messages = grade_log(Run(wid, "oracle", "prior", "", "", lp, path, PRIOR))
         assert messages == [], messages                              # the oracle is perfect where graded
         for r in rows:
             if r["metric"] != "mode_correct":
                 continue
             graded += 1
-            graded_files.add(doc["meta"]["id"])
+            graded_files.add(wid)
             if r["pre_committed_miss"]:
                 miss += 1
             else:
                 headline += 1
-                headline_files.add(doc["meta"]["id"])
-    assert (points, terminal, ambiguous) == (134, 50, 2)
-    assert (graded, len(graded_files), miss) == (82, 49, 10)
-    assert (headline, len(headline_files)) == (72, 44)
+                headline_files.add(wid)
+    # re-measured on the 2026-10-12 blessed set (9.20): 51 files, one terminal snapshot each; c6-dual's
+    # nineteen ambiguous query points — its two set changes and the seventeen focus moves of its alternation
+    # (rule 6), the only focus-only query points in the set, every other focus move coinciding with an arrival;
+    # 77 graded points over 50 files, nine in pre-committed-miss segments — c6-alias's one point joined them
+    # when c5-t3 became the name-collision alias (9.20 decision 8), c6-fold's 30 s point and c6-spoof's 20 s
+    # point when their limit segments were marked (9.23 D1, D2); 68 headline points over 44 files, both files
+    # keeping their 0 s point (the 2026-10-12 set: 77/50/7 and 70/44; the 2026-10-11 set: 77/50/6 and 71/45;
+    # the 2026-10-09 set 130/51/2; the 8.4 facts on the Phase 7 set 134/50/2, 82/49/10 and 72/44)
+    assert (points, terminal, ambiguous) == (147, 51, 19)
+    assert (graded, len(graded_files), miss) == (77, 50, 9)
+    assert (headline, len(headline_files)) == (68, 44)
 
 
 # --------------------------------------------------------------- the command
@@ -244,7 +330,7 @@ def test_cli_writes_both_outputs_deterministically_and_stays_silent(tmp_path):
         d = tmp_path / str(i)
         d.mkdir()
         proc = subprocess.run([sys.executable, str(SCRIPT),
-                               "--workload", str(wl), "--condition", "random", "--seed", "5",
+                               "--workload", str(wl), "--condition", "random", "--seed", "5", "--telemetry", "focus",
                                "--driver-table", str(PRIOR), "--boot-default", str(BOOT),
                                "--out-schedule", str(d / "schedule.json"),
                                "--out-log", str(d / "log.json")],
@@ -255,7 +341,7 @@ def test_cli_writes_both_outputs_deterministically_and_stays_silent(tmp_path):
         outs.append(((d / "schedule.json").read_bytes(), (d / "log.json").read_bytes()))
         s = read_config_schedule(d / "schedule.json")
         l = read_recognition_log(d / "log.json")
-        assert s.workload_id == l.workload_id == "c2-p1a" and l.seed == "5"
+        assert s.workload_id == l.workload_id == "c2-p1a" and l.seed == "5" and l.telemetry == "focus"
     assert outs[0] == outs[1]
 
 
@@ -265,9 +351,11 @@ def test_cli_refuses_a_missing_flag_a_bad_pairing_and_an_unknown_condition(tmp_p
     base = [sys.executable, str(SCRIPT), "--workload", str(wl),
             "--driver-table", str(PRIOR), "--boot-default", str(BOOT),
             "--out-schedule", str(tmp_path / "s.json"), "--out-log", str(tmp_path / "l.json")]
-    for extra in (["--condition", "oracle", "--seed", "1"],
-                  ["--condition", "random"],
-                  ["--condition", "llm_vocab"],
+    for extra in (["--condition", "oracle", "--seed", "1", "--telemetry", "focus"],
+                  ["--condition", "random", "--telemetry", "focus"],
+                  ["--condition", "llm_vocab", "--telemetry", "focus"],
+                  ["--condition", "oracle"],                                   # 9.17: the shape flag is required
+                  ["--condition", "oracle", "--telemetry", "everything"],
                   []):
         proc = subprocess.run(base + extra, capture_output=True, text=True)
         assert proc.returncode != 0, extra

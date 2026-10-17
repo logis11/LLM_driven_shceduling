@@ -1,0 +1,124 @@
+{
+  "artifacts": {
+    "toy-grid-single/tg-a.workload.json": "48ee2171b22b9676b213ebbb781f8632304f90b04ffa39328c7c0e6d7b7c2ff4",
+    "toy-grid-single/tg-b.workload.json": "6c91977950d132cff3f15213cf78291a2f815fdded6a129f1a77c9c4ec75d6cc"
+  },
+  "demand": {
+    "toy-grid-single/tg-a.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 50000,
+          "t_start_us": 0,
+          "utilization": 0.0
+        },
+        {
+          "index": 1,
+          "t_end_us": 100000,
+          "t_start_us": 50000,
+          "utilization": 0.0
+        }
+      ],
+      "utilization": 0.0
+    },
+    "toy-grid-single/tg-b.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 50000,
+          "t_start_us": 0,
+          "utilization": 0.0
+        },
+        {
+          "index": 1,
+          "t_end_us": 100000,
+          "t_start_us": 50000,
+          "utilization": 0.0
+        }
+      ],
+      "utilization": 0.0
+    }
+  },
+  "grid": {
+    "toy-grid-single/tg-a.workload.json": {
+      "a": "dev",
+      "b": "ml-train",
+      "form": "departs",
+      "placements": [
+        {
+          "input": true,
+          "mode": "dev",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "ml-train",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "dev",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": false,
+          "mode": "ml-train",
+          "pre_committed_miss": true,
+          "tier": 1
+        }
+      ],
+      "split": "measurement"
+    },
+    "toy-grid-single/tg-b.workload.json": {
+      "a": "dev",
+      "b": "ml-train",
+      "form": "departs",
+      "placements": [
+        {
+          "input": true,
+          "mode": "dev",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "ml-train",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "dev",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": false,
+          "mode": "ml-train",
+          "pre_committed_miss": true,
+          "tier": 1
+        }
+      ],
+      "split": "tuning"
+    }
+  },
+  "inputs": {},
+  "reports": {}
+}

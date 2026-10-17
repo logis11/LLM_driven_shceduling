@@ -5,24 +5,49 @@
 variants:
   - id: c4-gaming
     from: c1-gaming.timeline.yaml
+    # the injected chat client is Element shown idle, no messages arriving
+    # (9.10 D23); it runs its observed launch phase first, replayed
+    # (meas-ci:desktop:2026-10-04b; 9.10 D21, D132-D138)
+    # the game's threads beyond the chain and `wineserver` are omitted: the source
+    # puts 95% of scheduling in its top 30-40 tasks and describes none outside
+    # them (lavd-ossna24 s12; 9.10 D19)
+    # the Steam client is in its measured state: logged out, no account, no
+    # library, no game behind it, no `gameoverlayui` (9.10 D22; 9.8 D6)
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - add-task: {id: injected-overlay, name: discord,
-                   archetype: electron-comms, arrive: 30s, depart: 60s}
+      - add-task: {id: injected-chat, name: element-desktop,
+                   archetype: chat-client, arrive: 30s, depart: 60s}
+      - patch-segment: {index: 0, scenario: [S9, S5]}   # 9.10 D168: the chat client the segment shows
       - patch-meta: {demand: calibration}
 
   - id: c4-office
     from: c1-office.timeline.yaml
+    # the 7z burst's 6 s is design, the injection's size (phase decision 3):
+    # part of 9.7's measured archive of the Mahoney set, the set cached,
+    # 4,882-5,283 s of CPU
+    # (meas-ci:background:2026-09-19), an exception to 9.10 D17 (9.10 D161)
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
-      - add-task: {id: injected-burst, name: 7z, archetype: io-stream,
-                   arrive: 30s, bind: {total_work: 6s}}
+      - add-task: {id: injected-burst, name: 7z, archetype: file-archiver,
+                   arrive: 30s, bind: {total_work: 6s}, source: {total_work: design}}
+      - patch-segment: {index: 0, scenario: [S1, S2, S4, S16]}   # 9.10 D168: the archive the segment shows
       - patch-meta: {demand: calibration}
 
   - id: c4-compile
     from: c1-compile.timeline.yaml
+    # the injected browser and its four hidden tabs' renderers run their
+    # observed launch phases first, replayed — the browser's from
+    # meas-ci:desktop:2026-10-04b, the renderers' traced to their 1,030 s
+    # grace-settle from meas-ci:desktop:2026-10-05b (9.10 D21, D132-D138,
+    # D152, D155, D156)
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - add-task: {id: injected-browser, name: chrome,
-                   archetype: desktop-interactive, arrive: 30s, depart: 60s}
+                   archetype: web-browser, arrive: 30s, depart: 60s}
+      # the four other tabs' page renderers of one five-tab window (glam;
+      # meas-ci:desktop:2026-10-04; 9.10 D15, D126-D129, D131)
       - add-task: {id: injected-renderers, name: chrome,
-                   archetype: electron-comms, arrive: 30s, depart: 60s,
-                   count: 6}
+                   archetype: renderer-hidden, arrive: 30s, depart: 60s,
+                   count: 4, source: {count: [glam, "meas-ci:desktop:2026-10-04"]}}
+      - patch-segment: {index: 0, scenario: [S11, S2]}   # 9.10 D168: the browser the segment shows
       - patch-meta: {demand: calibration}
