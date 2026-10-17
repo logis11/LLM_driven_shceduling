@@ -1463,7 +1463,7 @@ def test_no_file_fails_on_its_demand(coreset, schema):
 
 ## 7.6 Harness 쪽에서 dataset을 읽는 test와 lint
 
-harness의 suite(`harness/tools/tests/`, 2026-10-14에 298개, 2026-10-17에 301개 collect)도 dataset을 읽습니다. 이 test들은 hash를 확인하지 않고 `dataset/build/coreset-single/`을 바로 읽으므로, 6.4에서 본 것처럼 workflow가 그 앞에서 `make -C dataset check`를 돌립니다. 또 많은 test가 `needs_build = pytest.mark.skipif(not BUILD.exists(), reason="compiled coreset absent")`를 달고 있어서, build가 없으면 skip됩니다. `harness/tools/tests/README.md`는 "A handful drive the runner end to end on the mocks over compiled coreset files and are skipped when `dataset/build/coreset-single` is absent"라고 적습니다.
+harness의 suite(`harness/tools/tests/`, 2026-10-14에 298개, 2026-10-17에 302개 collect)도 dataset을 읽습니다. 이 test들은 hash를 확인하지 않고 `dataset/build/coreset-single/`을 바로 읽으므로, 6.4에서 본 것처럼 workflow가 그 앞에서 `make -C dataset check`를 돌립니다. 또 많은 test가 `needs_build = pytest.mark.skipif(not BUILD.exists(), reason="compiled coreset absent")`를 달고 있어서, build가 없으면 skip됩니다. `harness/tools/tests/README.md`는 "A handful drive the runner end to end on the mocks over compiled coreset files and are skipped when `dataset/build/coreset-single` is absent"라고 적습니다.
 
 | 어디 | 무엇을 읽고 무엇을 확인하나 |
 |---|---|
@@ -1500,7 +1500,7 @@ dataset suite의 크기와 시간은 Phase 9 동안 이렇게 움직였습니다
 
 9.18의 세 실패는 9.17이 keystroke track의 이름을 `focus`에서 `input`으로 바꾼 뒤 `test_measured.py`의 helper가 옛 이름을 쓰고 있었던 것이었습니다(9.18 changelog D7). 9.13의 네 실패와 harness 쪽 실패들(9.13 reads R6: 264개 중 9개)도 rebuild로 바뀐 사실에 test의 기대값이 따라가지 못한 것이었습니다. 즉 이 suite는 rebuild 동안 "새 사실이 옛 문장과 어긋나는 곳"을 찾는 역할도 했습니다.
 
-harness suite는 9.18에서 284개 중 283개 통과(26분 44초), 9.19에서 284개(30분 19초), 9.20에서 284개(32분 11초), 9.21에서 298개(약 34분)였고, 9.21 D13 이후 CI가 돌리는 `make test`는 296개 17분 23초입니다. 그 뒤 집 기계의 기록은 9.23 D10의 `make test` 296 passed, 2 deselected(17분 03초), D17의 `make test-full` 298 passed(29분 00초), 9.15의 2026-10-16 rebuild 뒤 `make test` 296 passed, 2 deselected(17분 12초)입니다. 9.15의 2026-10-17 첫 rebuild는 harness의 test를 바꾸지 않았고, 그 뒤에는 `make -C harness lint`만 돌았습니다(9.15 기록 `logs/B1-data-rebuild.md`). 같은 날 9.15의 harness 작업 두 단계가 test를 더했습니다. 첫 단계(mock simulator가 WAIT로 시작하는 task를 도착 단계에서 막게 한 것)가 하나를 더해 `make test` 297 passed, 2 deselected(15분 41초), 둘째 단계가 둘(boost grid가 같은 algorithm의 entry에서 다시 시작함, censored turnaround가 `arrival` row를 읽음)을 더해 299 passed, 2 deselected(16분 05초)입니다(9.15 기록 `logs/B2-harness.md`, `logs/B3-harness.md`). 두 번째 data rebuild 뒤에는 다시 `make -C harness lint`만 돌았습니다(`logs/B4-data-rebuild.md`).
+harness suite는 9.18에서 284개 중 283개 통과(26분 44초), 9.19에서 284개(30분 19초), 9.20에서 284개(32분 11초), 9.21에서 298개(약 34분)였고, 9.21 D13 이후 CI가 돌리는 `make test`는 296개 17분 23초입니다. 그 뒤 집 기계의 기록은 9.23 D10의 `make test` 296 passed, 2 deselected(17분 03초), D17의 `make test-full` 298 passed(29분 00초), 9.15의 2026-10-16 rebuild 뒤 `make test` 296 passed, 2 deselected(17분 12초)입니다. 9.15의 2026-10-17 첫 rebuild는 harness의 test를 바꾸지 않았고, 그 뒤에는 `make -C harness lint`만 돌았습니다(9.15 기록 `logs/B1-data-rebuild.md`). 같은 날 9.15의 harness 작업 두 단계가 test를 더했습니다. 첫 단계(mock simulator가 WAIT로 시작하는 task를 도착 단계에서 막게 한 것)가 하나를 더해 `make test` 297 passed, 2 deselected(15분 41초), 둘째 단계가 둘(boost grid가 같은 algorithm의 entry에서 다시 시작함, censored turnaround가 `arrival` row를 읽음)을 더해 299 passed, 2 deselected(16분 05초)입니다(9.15 기록 `logs/B2-harness.md`, `logs/B3-harness.md`). 두 번째 data rebuild 뒤에는 다시 `make -C harness lint`만 돌았습니다(`logs/B4-data-rebuild.md`). 그 뒤 9.15의 harness 작업 셋째 단계(mock simulator가 도착 전에 온 wake를 저장해 두었다가 도착 단계에서 받게 한 것, WAIT로 시작하는 task는 그 wake로 첫 WAIT를 끝냄; `mock-simulator@2`)가 test 하나를 더해 `make test` 300 passed, 2 deselected(16분 34초)입니다(9.15 기록 `logs/P1.md`). 이로써 suite는 302개 collect, 그중 `make test`가 300개입니다.
 
 > **코드로.** 2026-10-14에 집 기계에서 확인하면 dataset suite의 skip 하나는 `test_meas_send.py`의 SMTP test입니다. `pytest.importorskip("aiosmtpd")`가 `aiosmtpd` package가 없어서 skip합니다(`SKIPPED [1] tools/tests/test_meas_send.py:48: could not import 'aiosmtpd'`). `requirements.txt`에 `aiosmtpd`가 없으므로 CI에서도 같은 test가 skip될 것입니다. 이 test는 측정 도구(Thunderbird의 `send` 측정에 쓰는 SMTP 상대)의 test이고 build와는 관계가 없습니다.
 
@@ -1714,7 +1714,7 @@ C7 그룹의 interactive counterpart는 C1 base의 처음 C초를 잘라 원하�
 - `coreset` fixture — dataset test가 51개 (artifact, report)를 얻는 장치. hash가 manifest와 맞으면 blessed build를 읽고, 아니면 compile합니다. (7.3)
 - `coreset_wide` — harness의 두 test에 붙은 pytest marker. CI의 `make -C harness test`는 이 둘을 빼고, 집에서 `make -C harness test-full`이 돌립니다. (6.10)
 - `smoke` — mock daemon과 mock simulator로 scored core 파일 전부에 pipeline 전체를 돌리는 `make -C harness smoke`. (5.11)
-- `mock daemon` / `mock simulator` — 진짜 daemon과 simulator가 나오기 전까지 같은 호출 계약으로 대신 도는 harness의 test용 program. (6.10)
+- `mock daemon` / `mock simulator` — 진짜 daemon과 simulator가 호출 계약(`docs/data-contracts.md` §11)으로 돌기 전까지 그 계약으로 대신 도는 harness의 test용 program. daemon program은 아직 저장소에 없고, reference simulator(`simulator/src/sim.cpp`)는 두 입력을 위치 인자로 받아 trace를 표준 출력에 씁니다. Phase 10(통합과 RQ0 run)이 진짜 program으로 바꿉니다. (6.10)
 
 **실험 쪽**
 
