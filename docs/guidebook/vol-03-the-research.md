@@ -717,14 +717,16 @@ policy daemon이 이 telemetry로 프롬프트를 만들고, 모델이 답합니
 ```text
   t_observe          t_return              t_apply
      |                  |                     |
-     |  모델이 생각 중   |   slice를 마저 씀    |
+     |  모델이 생각 중   |   CPU가 빌 때까지    |
      |----------------->|-------------------->|
-     |      ~600 ms     |      <= 10 ms        |
+     |      ~600 ms     |      ~10 ms          |
      |                                        |
      +--------- configuration age ------------+
 ```
 
-`t_observe`는 telemetry를 찍은 순간, `t_return`은 daemon의 답이 도착한 순간, `t_apply`는 실행 중이던 slice가 끝나고 새 알고리즘이 실제로 활성화된 순간입니다.
+`t_observe`는 telemetry를 찍은 순간, `t_return`은 daemon의 답이 도착한 순간, `t_apply`는 새 알고리즘이 실제로 활성화된 순간입니다.
+
+답이 도착해도 알고리즘을 바꾸는 설정은 곧바로 적용되지 않을 수 있습니다. MLFQ, EDF, LOTTERY에서 다른 알고리즘으로 넘어갈 때 실행 중인 task가 있으면, 그 task의 time slice나 지금의 실행이 끝나거나, 그 task가 preemption으로 밀려나거나 떠나서 CPU가 빌 때까지 기다립니다. 이 기다림을 **drain**이라고 부릅니다. 얼마나 기다리는지는 그 task가 언제 CPU를 내놓느냐에 달려 있고, 부팅 기본 설정의 MLFQ에서 time slice는 queue 단계에 따라 10, 20, 40밀리초입니다. 위 그림의 ~10 ms는 이 예의 값입니다. CPU가 비어 있으면 곧바로 적용되고, slice가 없는 FIFO에서 넘어갈 때도 곧바로 적용되어 실행 중인 task를 새 알고리즘이 막 고른 것처럼 다룹니다.
 
 **configuration age**는 그 설정이 근거로 삼은 관찰이 얼마나 오래된 것인지입니다. `t_observe`에서 `t_apply`까지를 잽니다. 이 숫자는 나중에 결과를 읽을 때 반드시 함께 봐야 하는 값입니다.
 
@@ -3788,7 +3790,7 @@ RQ4는 **지연**을 잽니다. 이유 토큰을 포함한 왕복 시간이고, 
 | **control plane** | 결정 경로 바깥에서 느리게 도는 층. 언어 모델이 놓이는 자리 |
 | **slow loop / fast loop** | 초 단위로 도는 인식 고리와 마이크로초 단위로 도는 scheduling 고리. 이 분리가 깨지면 연구가 성립하지 않는다 |
 | **t_observe / t_return / t_apply** | telemetry를 찍은 순간, 답이 도착한 순간, 새 설정이 실제로 활성화된 순간 |
-| **drain** | 새 설정을 적용하기 전에 실행 중인 slice를 마저 쓰게 하는 것 |
+| **drain** | 알고리즘을 바꾸는 설정이 lane이 빌 때까지 기다렸다가 적용되는 것. 실행 중인 task의 time slice나 지금의 실행(RUN)이 끝나거나, 그 task가 preemption으로 밀려나거나 떠나면 lane이 빈다. MLFQ, EDF, LOTTERY에서 다른 알고리즘으로 바꿀 때 생기고, 그동안 도착한 설정은 그 뒤에서 함께 기다린다. lane이 비어 있으면 곧바로 적용된다 |
 | **batch_bandwidth_cap** | batch class가 차지할 수 있는 CPU 비율의 상한. 설정에 있는 유일한 상한이고, driver table의 줄이 값을 정한다. 실행부가 집행해야 하지만 시뮬레이터는 아직 읽지 않는다 |
 
 ## 실험의 어휘

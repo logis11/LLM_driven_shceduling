@@ -1057,10 +1057,10 @@ build-orchestrator:
 
 등록부의 `notes`는 **출처가 무엇을 확립하는지**를 적고, `modeling_notes`는 **우리가 그 위에 무엇을 지었는지**를 적는다. 둘이 함께 논문을 쓸 때 과장을 막는 난간이 된다.
 
-같은 출처에 대한 두 메모를 나란히 보면 차이가 선명합니다. 게임 분석 발표에 대한 것입니다.
+같은 출처에 대한 두 메모를 나란히 보면 차이가 선명합니다. 게임 분석 발표에 대한 것이고, 둘 다 2026-09-13의 문장입니다.
 
 ```text
-   출처 등록부 notes (출처가 말하는 것)
+   출처 등록부 notes, 2026-09-13 (출처가 말하는 것)
    ─────────────────────────────────
    "~300 tasks per game, ~90% long-lived … per-schedule runtimes
     few-hundred-us average to few-ms max (wineserver ~260 us,
@@ -1068,7 +1068,7 @@ build-orchestrator:
     LAVD defines no spec format: any schema encoding of these
     observations … is our modeling"
 
-   archetype modeling_notes (우리가 지은 것)
+   archetype modeling_notes, 2026-09-13 (우리가 지은 것)
    ─────────────────────────────────
    "the linearization of the s16-s17 waker-waiter graph into a chain,
     and every field name, are ours … chain_length 16 sits in the
@@ -1077,6 +1077,8 @@ build-orchestrator:
 ```
 
 위는 발표가 말한 관찰이고, 아래는 그 관찰을 체인 모양으로 펴고, 길이를 16으로 고르고, 나머지 task의 값을 임시로 정한 우리 결정입니다.
+
+> **재구축 이후 (2026-10-17).** 위의 두 인용은 이 권을 쓴 2026-09-13의 문장이고, 같은 날 늦게 게임 항목을 발표 원문과 다시 대조하면서 둘 다 바뀌었습니다. 등록부 쪽의 "~300 tasks per game"은 게임 하나가 만드는 수가 아니라 게임을 하는 동안 시스템 전체에서 scheduling되는 task의 수(시스템 task 포함)로 고쳐졌습니다. 메모 쪽에서는 사슬 밖의 task들과 그 임시 값이 항목에서 빠졌고, 발표에 없는 말인 "frame-critical band"가 슬라이드의 말 "15-20 game-specific tasks"로 바뀌었습니다. 지금 등록부의 `notes`는 2026-10-17부터 "Min's reported figures of 2024-04-17"로 시작해 숫자를 모두 Min이 2024-04-17에 보고한 값으로 적고, 슬라이드에 frame 주기도 frame 예산도 없다고 밝히며, "LAVD defines no spec format: any schema encoding of these figures … is our modeling"이라는 선 긋기를 그대로 둡니다. 지금 `modeling_notes`는 "The linearization of the s16-s17 waker-waiter graph into one chain, and every field name, are ours"를 그대로 두고, `chain_length` 16을 "a point chosen inside the source's "15-20 game-specific tasks" (s12) — design within a source range"로 적으며, "The entry models the chain only"라고 사슬 밖의 task를 만들지 않는다고 적습니다. 그래서 바로 위 문단의 "나머지 task의 값을 임시로 정한" 결정은 지금 항목에 없습니다. 위는 발표가 보고한 것이고 아래는 우리가 지은 것이라는 두 메모의 구분은 그대로입니다.
 
 ### 필드 이름은 출처가 정당화하지 않습니다
 
@@ -1093,6 +1095,8 @@ archetype의 경계를 정한 규칙은 두 문장입니다. 첫 문장은 sched
 > **논문으로.** 이 두 메모의 구분이 논문 문장의 동사를 정합니다. 등록부 `notes`에 있는 내용은 "LAVD의 분석에 따르면 게임 하나가 약 300개의 task를 만든다"처럼 **출처를 주어로** 쓸 수 있습니다. `modeling_notes`에 있는 내용은 "우리는 이 관찰을 16단계의 사슬로 모형화했다"처럼 **우리를 주어로** 써야 합니다.
 >
 > 논문 초고를 쓸 때 문장 하나마다 "이 주어가 맞나"를 두 메모에 대보면 과장이 걸러집니다. 그게 계획 문서가 말한 "난간"입니다.
+
+> **재구축 이후 (2026-10-17).** 위 상자의 첫 예문은 그때의 등록부 문장("~300 tasks per game")을 따른 것입니다. 지금 인용 문서는 발표의 주장을 발표자의 것으로 적고 숫자는 날짜와 함께 그 보고로만 적으므로, 출처를 주어로 쓰는 문장은 "Min은 2024-04-17 발표에서 게임을 하는 동안 시스템 task를 포함해 약 300개의 task가 scheduling된다고 보고했다"처럼 됩니다. 앞의 예에서 `chain_length: 16`에 붙은 출처 표시는 지금 `lavd-ossna24:s12`이고, 메모는 그 값을 출처의 범위 안에서 고른 설계라고 적습니다.
 
 ## 4.8 무엇이 기계로 검사되나
 
