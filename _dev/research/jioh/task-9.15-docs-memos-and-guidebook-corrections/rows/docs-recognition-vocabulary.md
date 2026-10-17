@@ -32,13 +32,13 @@ Chunk K08, Related work, claims and vocabulary prose (wave 2). 4 open rows. The 
 - Sources: SX-0286 (TODO 9.15 line (from the 2026-10-11 audit), `_dev/TODO.md:179`); SX-0713 (audit 2026-10-10 docs-staleness additions (pre-registration numbers), `jioh/2026-10-10-dataset-audit-before-9.15.md:55`)
 - Notes: The 2026-10-10 dataset audit and the TODO line list this line among the stale pre-registration numbers beside `docs/terminology.md:229–230` (W-0424), `docs/research-proposal.md:548` and `docs/harness/metrics.md:279` (other groups). The raw rows' '9.14 D7' is 9.14's changelog entry; the gate spec's own comments cite 9.14 decision 9 for the sweep.
 
-### W-1009 · open
+### W-1009 · applied
 - At: `docs/recognition-vocabulary.md` §5, the 2026-10-17 `render` gloss entry, line 172 ("the Phase 9 final memo (`docs/memos/2026-10-17-dataset-rebuild-wrap-up.md`) tells 인경민 and 박이안")
 - Change: The final memo's path → `docs/memos/2026-10-17-workload-dataset-rebuild.md`; the draft path no longer exists.
 - Final word: The final memo's review (2026-10-17): the memo as one standalone document on Phase 9, applied in R1, which moved the draft `docs/memos/2026-10-17-dataset-rebuild-wrap-up.md` to `docs/memos/2026-10-17-workload-dataset-rebuild.md` (H1 "workload dataset rebuild — 바뀐 것, 부탁할 것, 같이 정할 것"); the only reference to the old path in `docs/`, `dataset/`, `harness/`, `simulator/` and `daemon/` (R1's grep, re-checked in its review round 2).
 - Sources: `logs/R1.md` ## Rows for other chunks (X1), ## Review round 2; `logs/R4.md` ## Review round 1, note 2
 - Cross-ref: W-0432; W-0827
-- Notes: found in R1 (R4's review found it too). R2 wrote the entry while the draft sat at its old path (R2's decision 4). K08's file, edited in R2: a follow-up chunk.
+- Notes: found in R1 (R4's review found it too). R2 wrote the entry while the draft sat at its old path (R2's decision 4). K08's file, edited in R2: a follow-up chunk. Applied 2026-10-17 in S1.
 
 ## Also on this file, not for editing from this list
 

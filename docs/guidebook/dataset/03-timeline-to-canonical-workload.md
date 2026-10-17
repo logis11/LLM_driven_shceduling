@@ -860,11 +860,11 @@ meta:
 "meta": {
   "derived_from": "dataset/timelines/coreset/c1-office.timeline.yaml@1b5295f96a851b62184a3a1dbe3f575f45bb3bbc",
   "id": "c1-office",
-  "sampled": {"archetypes": "archetypes.yaml@143e2f4b65bbbf280e8ccbd5a961a4491035fe81", "seed": 101}
+  "sampled": {"archetypes": "archetypes.yaml@803395dc5462940050ba09bfe25c69d269633d9f", "seed": 101}
 }
 ```
 
-`@` 뒤의 `1b5295f9…`는 이 timeline 파일의 git blob hash입니다. `git hash-object dataset/timelines/coreset/c1-office.timeline.yaml`로 확인하면 같은 값이 나옵니다. `143e2f4b…`은 `dataset/archetypes.yaml`의 blob hash입니다(2026-10-17 tree. timeline이나 library의 byte가 바뀔 때마다 두 hash도 바뀝니다). `demand: calibration`은 canonical `meta`에 없고 compile report의 `demand_class`로만 갑니다.
+`@` 뒤의 `1b5295f9…`는 이 timeline 파일의 git blob hash입니다. `git hash-object dataset/timelines/coreset/c1-office.timeline.yaml`로 확인하면 같은 값이 나옵니다. `803395dc…`은 `dataset/archetypes.yaml`의 blob hash입니다(2026-10-17 tree. timeline이나 library의 byte가 바뀔 때마다 두 hash도 바뀝니다). `demand: calibration`은 canonical `meta`에 없고 compile report의 `demand_class`로만 갑니다.
 
 ```yaml
 segments:
@@ -1090,7 +1090,7 @@ canonical 파일은 JSON object 하나이고, key가 정확히 네 개입니다.
 "meta": {
   "derived_from": "dataset/timelines/coreset/c2-p1a.timeline.yaml@a0effee93e945b3d39f8aa3501475f31896d58d8",
   "id": "c2-p1a",
-  "sampled": {"archetypes": "archetypes.yaml@143e2f4b65bbbf280e8ccbd5a961a4491035fe81", "seed": 201}
+  "sampled": {"archetypes": "archetypes.yaml@803395dc5462940050ba09bfe25c69d269633d9f", "seed": 201}
 }
 ```
 
@@ -1209,13 +1209,13 @@ contract는 primitive를 여섯 개라고 셉니다(`FORK`와 `EXIT`를 한 줄�
 | `input:<task id>` | 재생한 키 입력 | 외부 `wake` event(박힌 시각) | `input:writer` |
 | `chain:<member id>` | 게임 chain의 구성원 | 앞 구성원의 `WAKE` 명령어 | `chain:game.wineserver` |
 | `job:<job member id>` | 빌드 object job의 구성원 | 같은 job의 다른 구성원의 `WAKE` | `job:build.j1.gcc` |
-| `children:<task id>` | 빌드 orchestrator가 모든 자식을 낳은 뒤 | 파일 안에는 깨우는 것이 없음. 마지막 자식이 끝날 때 executor가 완료(제안된 규칙, 아래) | `children:build` |
+| `children:<task id>` | 빌드 orchestrator가 모든 자식을 낳은 뒤 | 파일 안에는 깨우는 것이 없음. 자식이 모두 끝났을 때 executor가 완료(제안된 규칙, 아래) | `children:build` |
 
 `timer:`와 `input:`을 나눈 것은 9.5 D74의 hand-off입니다. "the harness tells an input wake from a timer wake by channel". harness는 키 입력에 대한 반응 시간을 잴 때 `input:` channel의 깨어남만 셉니다. 사용자가 느끼는 지연은 키를 누른 뒤의 지연이기 때문입니다.
 
 tree에서 세면 core set 51개 파일의 wake event는 모두 4,502,685개입니다(이 권을 쓰며 `"op":"wake"`를 세었습니다). 키 입력 channel은 그중 작은 부분입니다. 편집기 하나만 보아도 `c1-dev`에서 timer wake가 6,456개, 키 입력이 186개입니다. "편집기 program = 키 입력 기다림과 CPU 사용의 반복"이라는 README와 data-contracts의 그림은 단순화이고, 실제 측정된 편집기는 사용자가 없어도 자기 thread들의 timer로 훨씬 자주 깨어납니다.
 
-> **열린 자리.** `children:<id>` channel을 깨우는 사건은 canonical 파일에 없습니다. 이 channel의 뜻은 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 그 orchestrator가 낳은 마지막 자식이 끝날 때 완료하고, WAIT에 닿았을 때 살아 있는 자식이 없으면 막지 않고 곧바로 완료합니다(대기 0의 `ready` 줄). 데이터는 바뀌지 않습니다. 이 규칙은 interpretation contract의 §3 `WAIT(channel)` 행과 §5 FORK 문단, `docs/data-contracts.md` §4 예제 B와 §14의 2026-10-16 기록에 "proposed"로 적혀 있습니다. 동결된 계약의 변경이라 simulator 담당 인경민이 Phase 9의 final memo에 답해 동의하면 효력을 가집니다(`docs/data-contracts.md` §13의 동결 규칙). 지금의 reference simulator는 이 channel을 보통 channel로 다루어(`simulator/src/sim.cpp`의 `on_task_end`는 fork 자리만 돌려줍니다), 자식이 다 끝나도 orchestrator가 막힌 채로 남습니다. 그래서 `c1-compile`의 build turnaround를 재려면 이 구현이 먼저 있어야 하고, RQ0 gate spec은 이것을 simulator 적합성 항목 (g)로 적습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
+> **열린 자리.** `children:<id>` channel을 깨우는 사건은 canonical 파일에 없습니다. 이 channel의 뜻은 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 그 orchestrator가 낳은 자식이 모두 끝났을 때 완료하고, WAIT에 닿았을 때 살아 있는 자식이 없으면 막지 않고 곧바로 완료합니다(대기 0의 `ready` 줄). 데이터는 바뀌지 않습니다. 이 규칙은 interpretation contract의 §3 `WAIT(channel)` 행과 §5 FORK 문단, `docs/data-contracts.md` §4 예제 B와 §14의 2026-10-16 기록에 "proposed"로 적혀 있습니다. 동결된 계약의 변경이라 simulator 담당 인경민이 Phase 9의 final memo에 답해 동의하면 효력을 가집니다(`docs/data-contracts.md` §13의 동결 규칙). 지금의 reference simulator는 이 channel을 보통 channel로 다루어(`simulator/src/sim.cpp`의 `on_task_end`는 fork 자리만 돌려줍니다), 자식이 다 끝나도 orchestrator가 막힌 채로 남습니다. 그래서 `c1-compile`의 build turnaround를 재려면 이 구현이 먼저 있어야 하고, RQ0 gate spec은 이것을 simulator 적합성 항목 (g)로 적습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
 
 ## 7.8 spawn table과 `fork_cap`
 
@@ -2244,7 +2244,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 
 **1. launch stream의 고정 — 닫힘.** 9.23 D11(2026-10-15)이 `dataset/launch/*.json.gz` 10개를 manifest의 `inputs`에 더했습니다(13.5절).
 
-**2. `children:<id>` channel을 누가 깨우나 — 규칙은 정해졌고 동의를 기다림.** 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 마지막 자식이 끝날 때 완료하고, 살아 있는 자식이 없으면 곧바로 완료합니다. 이 규칙은 interpretation contract와 `docs/data-contracts.md`에 "proposed"로 적혀 있고, 동결된 계약의 변경이라 인경민이 Phase 9의 final memo에 답해 동의하면 효력을 가집니다(`docs/data-contracts.md` §13의 동결 규칙). 그때까지 reference simulator에서는 `c1-compile`의 build turnaround를 잴 수 없고, RQ0 gate spec이 그 구현을 simulator 적합성 항목 (g)로 요구합니다(7.7절). 인경민의 답 대기.
+**2. `children:<id>` channel을 누가 깨우나 — 규칙은 정해졌고 동의를 기다림.** 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 자식이 모두 끝났을 때 완료하고, 살아 있는 자식이 없으면 곧바로 완료합니다. 이 규칙은 interpretation contract와 `docs/data-contracts.md`에 "proposed"로 적혀 있고, 동결된 계약의 변경이라 인경민이 Phase 9의 final memo에 답해 동의하면 효력을 가집니다(`docs/data-contracts.md` §13의 동결 규칙). 그때까지 reference simulator에서는 `c1-compile`의 build turnaround를 잴 수 없고, RQ0 gate spec이 그 구현을 simulator 적합성 항목 (g)로 요구합니다(7.7절). 인경민의 답 대기.
 
 **3. 파일보다 오래 사는 job의 demand — 닫힘.** 잘라 내지 않고, 문서들이 offered demand라고 문장으로 범위를 밝힙니다(12.4절).
 

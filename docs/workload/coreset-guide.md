@@ -139,7 +139,7 @@ TIMER — 주기와 deadline이 있는 periodic job — 를 쓰는 건 playback�
 - `timer:<task id>`: 역시 run file의 `wake` event가 깨워요. 측정된 앱의 thread가 스스로 깨던 것(timer component, 4.1절)을 compile 때 절대 시각의 wake로 펼친 것이고, deadline이 없어요. 주기적으로 보이지만 TIMER가 아니에요.
 - `chain:<task id>`: game chain의 앞 멤버가 `WAKE`로 깨워요.
 - `job:<task id>`: build의 job 하나 안에서 멤버들이 job의 부모-자식 순서대로 서로 `WAKE`해요(5.4절).
-- `children:<task id>`: orchestrator(`make`, `dkms`)가 마지막 `FORK` 뒤에 기다리는 channel. orchestrator가 spawn한 마지막 자식이 끝날 때 executor가 이 WAIT를 완료시킨다(그때 살아 있는 자식이 없으면 막지 않고 바로)는 규칙이 interpretation contract의 FORK·WAIT에 제안돼 있고, 인경민이 동의하면 효력이 생겨요(`docs/data-contracts.md` §14의 2026-10-16 항목). reference simulator(`simulator/src/sim.cpp`)는 아직 구현하지 않아서 그 simulator에서는 `make`가 run 끝까지 거기서 막혀 있어요(12장).
+- `children:<task id>`: orchestrator(`make`, `dkms`)가 마지막 `FORK` 뒤에 기다리는 channel. orchestrator가 spawn한 자식이 모두 끝났을 때 executor가 이 WAIT를 완료시킨다(그때 살아 있는 자식이 없으면 막지 않고 바로)는 규칙이 interpretation contract의 FORK·WAIT에 제안돼 있고, 인경민이 동의하면 효력이 생겨요(`docs/data-contracts.md` §14의 2026-10-16 항목). reference simulator(`simulator/src/sim.cpp`)는 아직 구현하지 않아서 그 simulator에서는 `make`가 run 끝까지 거기서 막혀 있어요(12장).
 
 **operation.** 측정된 앱 넷은 사용자가 시킨 일 하나를 측정해서 들고 있어요: `web-browser`의 page-load(측정 길이 중앙값 약 0.47 s), `image-editor`의 unsharp mask(약 2.36 s), `video-editor`의 preview-render(약 11.4 s), `mail-client`의 send(약 2.9 s). timeline의 `operations` track이 `{at, task, name}`으로 시작 시각만 정하고, compiler가 측정된 길이표에서 길이를 뽑아 그 구간 동안 operation의 component가 task의 다른 wake를 대신하게 해요(그 구간에는 keystroke도 안 생겨요). operation은 그 task의 input window 안에서만 시작하고 window 하나에 하나예요(design). 60 s C1 base에서는 2–58 s window의 30 s(mail의 send는 40 s), 길이를 바꾸거나 자른 파일에서는 window 안의 같은 비율 자리에 놓여요(예: `c7-browsing`의 2–24.385 s window에서 13.1925 s, `c1-transcode`의 2–4,760 s window에서 2,381 s). C2와 C3의 파일은 각자의 표에 적힌 시각에 놓여요. operation은 event op가 아니라 task의 WAIT/RUN stream 안으로 compile되고, compile report(`build/coreset-single/<id>.report.json`의 `operations`)가 시각과 길이를 적어요.
 
@@ -394,7 +394,7 @@ simulator와 harness가 읽는 유일한 형식. `dataset/build/coreset-single/<
 "meta": {
   "id": "c2-p1a",
   "derived_from": "dataset/timelines/coreset/c2-p1a.timeline.yaml@a0effee9…",
-  "sampled": { "archetypes": "archetypes.yaml@818b41b8…", "seed": 201 }
+  "sampled": { "archetypes": "archetypes.yaml@803395dc…", "seed": 201 }
 }
 ```
 
@@ -662,7 +662,7 @@ VS Code에 타이핑하면서 2초에 Linux kernel(defconfig)을 `make -j8`로 �
 
 recognizer: 0 s `code`. 2 s `as ×2908, cc1 ×2908, code, fixdep ×2908, gcc ×2908, make, rm ×2908, sh ×2908`(자식은 부모와 함께 보임). 1594 s `make`와 자식들(finite라 안 사라짐).
 
-harness: **양면** 파일. editor의 input P99(weight 1.0)와 `make`의 `turnaround`(= makespan, weight 1.0). editor latency와 makespan이 서로 당기는 trade-off가 scoring 판단 대상. utilization 0.9982. RQ0 판정 파일이에요. `make`의 turnaround는 `WAIT children:build`가 마지막 자식이 끝날 때 완료돼야 읽혀요(3장).
+harness: **양면** 파일. editor의 input P99(weight 1.0)와 `make`의 `turnaround`(= makespan, weight 1.0). editor latency와 makespan이 서로 당기는 trade-off가 scoring 판단 대상. utilization 0.9982. RQ0 판정 파일이에요. `make`의 turnaround는 `make`가 spawn한 자식이 모두 끝났을 때 `WAIT children:build`가 완료돼야 읽혀요(3장).
 
 #### `c1-gaming` — 게임
 
@@ -1198,7 +1198,7 @@ core set 밖의 파생도 있어요: `build/coreset-single/`의 sensitivity vari
 
 **reference simulator가 아직 못 하는 것**
 - loader가 spawn-table 자식을 target으로 하는 WAKE를 거부해요(`simulator/src/sim.cpp`: "WAKE target is not a top-level task"). object job의 멤버가 서로 깨우니, build가 있는 core 파일 다섯(`c1-compile`, `c7-compile`, `c3-workday`, `c4-compile`, `c6-dual`)을 아직 읽지 못해요. dataset은 이 쓰임을 지키고(canonical lint가 spawned WAKE target이 resolve되는지 검사), 고칠 곳은 simulator예요.
-- `WAIT children:<id>`를 마지막 자식이 끝날 때 완료하지 않아요(3장). `c1-compile`의 build turnaround term(판정, weight 1.0)이 읽히려면 필요해요.
+- orchestrator가 spawn한 자식이 모두 끝났을 때 `WAIT children:<id>`를 완료하지 않아요(3장). `c1-compile`의 build turnaround term(판정, weight 1.0)이 읽히려면 필요해요.
 - 막을 수 있는 명령(`TIMER`, `WAIT`, `FORK`)이 막히지 않고 끝나도 zero-wait `ready` line을 내지 않아요. 그 자리의 line은 `ready(cause = arrive)`예요(`docs/harness/metrics.md` §11 item 1이 simulator에 남은 일로 적어 둔 것). 도착할 때 소비되는 첫 TIMER도 그래서, harness가 첫 `ready(cause = timer_tick)` line으로 읽는 t₀가 도착보다 주기의 정수배만큼 늦어요(10장 `c3-evening`).
 
 **결정된 것과 남은 것**

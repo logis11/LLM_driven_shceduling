@@ -240,13 +240,21 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 24 open rows. The file has 1
 - Cross-ref: W-0971; W-0972
 - Notes: found in L1. K11's file: a follow-up chunk.
 
-### W-1013 · open
+### W-1013 · applied
 - At: `docs/guidebook/dataset/01-the-big-picture.md` §2.5, line 372 ("`make`의 마지막 자식이 끝날 때")
 - Change: → "`make`가 spawn한 자식이 모두 끝났을 때".
 - Final word: The final memo's review (2026-10-17): conformance item (g)'s wording, (a) — 'when every child it spawned has ended'; no rule moves. Applied in R3 to the six sources the decision names (the dataset guidebook vol-08 `:1817` in Korean: "spawn한 자식이 모두 끝났을 때").
 - Sources: `logs/R3.md` ## Rows for other chunks (X2)
 - Cross-ref: W-0743; W-0758; W-1012; W-1014; W-1015
-- Notes: found in R3. K11's file: a follow-up chunk.
+- Notes: found in R3. K11's file: a follow-up chunk. Applied 2026-10-17 in S1.
+
+### W-1018 · applied
+- At: `docs/guidebook/dataset/01-the-big-picture.md:144` (the pins), `:661` (`c1-dev`'s `meta`), `:675` (`c1-dev`'s artifact hash), `:713` (the open note on the runner), `:1340` (the pin chain)
+- Change: The pins `0f0af422…`/`cdc14319…`, the second 2026-10-17 re-pin; the library blob `@803395dc…`, changed twice on 2026-10-17; the artifact `f0f67836…`; three 9.15 rebuilds, none yet on the CI runner; the pin chain ending at `0f0af422…`. In the volume's Korean.
+- Final word: The second data rebuild (`57342aab`, 2026-10-17): `git hash-object dataset/archetypes.yaml` = `803395dc5462940050ba09bfe25c69d269633d9f`; `harness/experiments/rq0-gate.yaml` `pins.dataset` `0f0af422…`, `pins.variants.all` `cdc143191fcd…`; `dataset/build.manifest.json` `c1-dev.workload.json` `f0f67836…`.
+- Sources: `logs/S1.md` ## Found rows (W-1016–W-1020); `logs/R3.md` ## Review (the note on `818b41b…`); `logs/B4-data-rebuild.md` ## Review, finding 1
+- Cross-ref: W-1016–W-1020
+- Notes: found in S1. Applied 2026-10-17 in S1.
 
 ## Also on this file, not for editing from this list
 

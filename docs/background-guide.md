@@ -129,7 +129,7 @@ The whole experiment's raw material is a directory of **canonical workload files
     "id": "c2-p1a",
     // the hashes after @ are the source files' git blobs; they move with each file's bytes
     "derived_from": "dataset/timelines/coreset/c2-p1a.timeline.yaml@a0effee…",
-    "sampled": { "seed": 201, "archetypes": "archetypes.yaml@818b41b…" }
+    "sampled": { "seed": 201, "archetypes": "archetypes.yaml@803395d…" }
   },
 
   "ground_truth": [

@@ -178,6 +178,14 @@ Chunk K12, Dataset guidebook, volumes 3-4 (wave 3). 17 open rows. The file has 2
 - Cross-ref: W-0432; W-0827; W-1011
 - Notes: found in R2. Applied in R4 (its R4-1, found there too, the same wave): "offline render — 3D 장면이나 영상 project를 파일로 render하는 일".
 
+### W-1020 · applied
+- At: `docs/guidebook/dataset/04-the-coreset.md:1966` (§11.6, the variants pin)
+- Change: → `cdc143191fcd28aec80595e3060f4f391c91ba52c341e076043589124bb579f6`, the second 2026-10-17 re-pin; the re-pin list names that day's second data rebuild.
+- Final word: The second data rebuild (`57342aab`, 2026-10-17): `git hash-object dataset/archetypes.yaml` = `803395dc5462940050ba09bfe25c69d269633d9f`; `harness/experiments/rq0-gate.yaml` `pins.dataset` `0f0af422…`, `pins.variants.all` `cdc143191fcd…`; `dataset/build.manifest.json` `c1-dev.workload.json` `f0f67836…`.
+- Sources: `logs/S1.md` ## Found rows (W-1016–W-1020); `logs/R3.md` ## Review (the note on `818b41b…`); `logs/B4-data-rebuild.md` ## Review, finding 1
+- Cross-ref: W-1016–W-1020
+- Notes: found in S1. Applied 2026-10-17 in S1.
+
 ## Also on this file, not for editing from this list
 
 - W-0550 · closed, carried — `_dev/TODO.md:200` (Backlog: 'Unwanted jobs to measure — how many the attribute's `false` side needs is decided in the RQ1 experiment spec's session …') carrie…

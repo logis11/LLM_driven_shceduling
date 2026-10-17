@@ -584,7 +584,7 @@ entity=build.j1.as, metric=arrival, t=180000, value=2000
 
 window 안에 못 끝난 task에는 `turnaround` row가 없으니, 그 task의 turnaround term은 censored bound `T_end − 등장`으로 채점돼요(15.3, metrics doc의 normalisation 절). aggregate는 그 등장 시각을 이 row에서 읽어요. `ready(cause=arrive)` row가 없는 task — 첫 명령이 `WAIT`인 task(10.3) — 에도 이 row는 있어요.
 
-`c1-compile`의 makespan(빌드 전체 시간)은 `make`(task `build`)의 `turnaround`예요. `make`는 자식 17,448개를 만들어요 — object job 2,908개, job마다 `sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm` 여섯 — 동시에 살아 있는 자식은 많아야 48개(`fork_cap`, `-j8`의 8 × 6)이고, 마지막 `FORK` 뒤에 자기 `children:build` channel에서 `WAIT`했다가 `EXIT`해요. 그 `WAIT`은 마지막 자식이 끝날 때 완료돼요 — interpretation contract에 제안된 규칙이고 RQ0 gate spec의 simulator-conformance 항목 (g)예요. reference simulator는 아직 이 `WAIT`을 깨우지 않아서, 그 전까지는 `make`가 `EXIT`에 못 가고 이 row가 안 나와요. 각 자식도 자기 row를 갖는데, 자식의 등장 시각은 trace의 `task_arrive(source=spawn)`에서 와요.
+`c1-compile`의 makespan(빌드 전체 시간)은 `make`(task `build`)의 `turnaround`예요. `make`는 자식 17,448개를 만들어요 — object job 2,908개, job마다 `sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm` 여섯 — 동시에 살아 있는 자식은 많아야 48개(`fork_cap`, `-j8`의 8 × 6)이고, 마지막 `FORK` 뒤에 자기 `children:build` channel에서 `WAIT`했다가 `EXIT`해요. 그 `WAIT`은 자식이 모두 끝났을 때 완료돼요 — interpretation contract에 제안된 규칙이고 RQ0 gate spec의 simulator-conformance 항목 (g)예요. reference simulator는 아직 이 `WAIT`을 깨우지 않아서, 그 전까지는 `make`가 `EXIT`에 못 가고 이 row가 안 나와요. 각 자식도 자기 row를 갖는데, 자식의 등장 시각은 trace의 `task_arrive(source=spawn)`에서 와요.
 
 ### 7.7 `preempt_count` — 강제로 끌려 내려온 횟수
 

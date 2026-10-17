@@ -129,13 +129,21 @@ Chunk K12, Dataset guidebook, volumes 3-4 (wave 3). 14 open rows. The file has 2
 - Cross-ref: W-0957; W-0959; W-0961; W-0962; W-0963
 - Notes: found in H2. K12's file: a follow-up chunk.
 
-### W-1014 · open
+### W-1014 · applied
 - At: `docs/guidebook/dataset/03-timeline-to-canonical-workload.md` §7.7's channel table, line 1212 ("마지막 자식이 끝날 때"); §7.7's open note, line 1218 ("그 orchestrator가 낳은 마지막 자식이 끝날 때"); §16.2 item 2, line 2247 ("마지막 자식이 끝날 때")
 - Change: "(낳은) 마지막 자식이 끝날 때" → "자식이 모두 끝났을 때".
 - Final word: The final memo's review (2026-10-17): conformance item (g)'s wording, (a) — 'when every child it spawned has ended'; no rule moves. Applied in R3 to the six sources the decision names (the dataset guidebook vol-08 `:1817` in Korean: "spawn한 자식이 모두 끝났을 때").
 - Sources: `logs/R3.md` ## Rows for other chunks (X3)
 - Cross-ref: W-0743; W-0758; W-1012; W-1013; W-1015
-- Notes: found in R3. K12's file: a follow-up chunk.
+- Notes: found in R3. K12's file: a follow-up chunk. Applied 2026-10-17 in S1.
+
+### W-1019 · applied
+- At: `docs/guidebook/dataset/03-timeline-to-canonical-workload.md:863`, `:867`, `:1093` (the `c1-office` and `c2-p1a` `meta` examples)
+- Change: The library blob → `803395dc5462940050ba09bfe25c69d269633d9f`.
+- Final word: The second data rebuild (`57342aab`, 2026-10-17): `git hash-object dataset/archetypes.yaml` = `803395dc5462940050ba09bfe25c69d269633d9f`; `harness/experiments/rq0-gate.yaml` `pins.dataset` `0f0af422…`, `pins.variants.all` `cdc143191fcd…`; `dataset/build.manifest.json` `c1-dev.workload.json` `f0f67836…`.
+- Sources: `logs/S1.md` ## Found rows (W-1016–W-1020); `logs/R3.md` ## Review (the note on `818b41b…`); `logs/B4-data-rebuild.md` ## Review, finding 1
+- Cross-ref: W-1016–W-1020
+- Notes: found in S1. Applied 2026-10-17 in S1.
 
 ## Also on this file, not for editing from this list
 

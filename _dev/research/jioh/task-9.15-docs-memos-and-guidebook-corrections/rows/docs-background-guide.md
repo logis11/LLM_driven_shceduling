@@ -115,3 +115,11 @@ Chunk K08, Related work, claims and vocabulary prose (wave 2). 15 open rows. The
 - Final word: 9.12 D35 as amended by D66 and D90: `docs/background-guide.md:207` — each job must finish within its period, or the frame is shown late or dropped, or the audio clicks (D90); per kind, a late game frame is shown at the next vertical blank under FIFO presentation (Vulkan's `VK_PRESENT_MODE_FIFO_KHR`), a video sink drops a frame later than its max-lateness (GStreamer's `gstbasesink.c`), a late audio buffer is an xrun ('clicks, pops and crackles'); the deadline lengths are arithmetic on named rates — a frame every 16.7 ms at 60 Hz, a 128-frame audio buffer at 48 kHz every 2.67 ms (D35, D66).
 - Sources: S12-192 (9.12 D90, `task-9.12-related-work-prose/changelog.md:1396`)
 - Notes: Not a TIMER-rule row: it states what a missed deadline does on a real system, not the simulator's backlog or skip rule.
+
+### W-1016 · applied
+- At: `docs/background-guide.md:132` (§5's `c2-p1a` example, `meta.sampled.archetypes`)
+- Change: `archetypes.yaml@818b41b…` → `@803395d…`.
+- Final word: The second data rebuild (`57342aab`, 2026-10-17): `git hash-object dataset/archetypes.yaml` = `803395dc5462940050ba09bfe25c69d269633d9f`; `harness/experiments/rq0-gate.yaml` `pins.dataset` `0f0af422…`, `pins.variants.all` `cdc143191fcd…`; `dataset/build.manifest.json` `c1-dev.workload.json` `f0f67836…`.
+- Sources: `logs/S1.md` ## Found rows (W-1016–W-1020); `logs/R3.md` ## Review (the note on `818b41b…`); `logs/B4-data-rebuild.md` ## Review, finding 1
+- Cross-ref: W-1016–W-1020
+- Notes: found in S1. Applied 2026-10-17 in S1.

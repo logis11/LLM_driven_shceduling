@@ -1963,7 +1963,7 @@ RQ0 gate spec의 `files.variants`가 78개를 모두 이름으로 나열하고, 
 
 variant는 base의 term으로 채점됩니다. 9.14 D11(variant 파일은 base의 term으로, 자기 segment 위의 window로 채점된다는 결정, 2026-10-09)이 `scoring.with_variants`를 만들었습니다. 기록된 계기는 "a variant run … would have been aggregated without its windows and never scored — every sensitivity line reading an empty gap"입니다. 이것이 없었다면 variant run은 window 없이 합산되어 채점되지 않았고, 모든 민감도 line이 빈 gap을 읽었을 것이라는 뜻입니다. `segment-length` variant는 segment 경계가 옮겨지므로 window도 variant 자신의 segment를 따라갑니다.
 
-pin은 RQ0 gate spec의 `pins.variants.all`입니다. 2026-10-17의 값은 `6c1c3e09277f6368d84d88fa15adea27a9cea1d028859dc4f6f2e63568684f0a`이고(그날의 re-pin, `harness/CHANGELOG.md`의 2026-10-17 항목 가운데 dataset을 다시 pin한 것), `shasum -a 256 dataset/build.variants.manifest.json`이 같은 값을 냅니다. 이 pin은 9.14 D12(2026-10-09)에 처음 걸렸고 그 뒤 9.17, 9.18, 9.22, 9.20, 9.23(D10, D17), 9.15(2026-10-16의 rebuild, 2026-10-17의 묶은 data rebuild)를 거치며 다시 걸렸습니다. core manifest가 바뀌면 variants manifest의 `inputs`도 바뀌기 때문입니다.
+pin은 RQ0 gate spec의 `pins.variants.all`입니다. 2026-10-17의 값은 `cdc143191fcd28aec80595e3060f4f391c91ba52c341e076043589124bb579f6`이고(그날의 두 번째 re-pin, `harness/CHANGELOG.md`의 2026-10-17 항목 가운데 dataset을 마지막으로 다시 pin한 것), `shasum -a 256 dataset/build.variants.manifest.json`이 같은 값을 냅니다. 이 pin은 9.14 D12(2026-10-09)에 처음 걸렸고 그 뒤 9.17, 9.18, 9.22, 9.20, 9.23(D10, D17), 9.15(2026-10-16의 rebuild, 2026-10-17의 묶은 data rebuild와 같은 날의 두 번째 data rebuild)를 거치며 다시 걸렸습니다. core manifest가 바뀌면 variants manifest의 `inputs`도 바뀌기 때문입니다.
 
 ---
 
