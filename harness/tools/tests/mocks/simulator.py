@@ -5,11 +5,19 @@ The generator emits a contract-valid trace (data-contracts §9) for any
 workload and config schedule from one rule that models no scheduling: at every
 stimulus instant — a pinned arrival, a pinned wake, a periodic task's tick, and
 each chain stage's wake in turn — the stimulated task is `ready`, runs for
-exactly 1 µs, and ends its run. A task whose first instruction is a WAIT (a
-LOOP's body counting), a spawn child included, blocks in its arrival step as
-the reference simulator's does (`simulator/src/sim.cpp` `on_arrive`, `spawn`):
-its arrival is no stimulus, with no `ready` line and no run, and its first run
-is the wake that completes that WAIT. A finite task exits after its last
+exactly 1 µs, and ends its run. A wake sent to a task before its arrival is no
+stimulus at its own instant: it is stored for the task, as the reference
+simulator stores one on its channel or in the task's mailbox
+(`simulator/src/sim.cpp` `on_ext_wake`, `deliver`), and taken in the arrival
+step, its `ready(wake)` line written at the arrival beside `ready(arrive)` —
+the zero-wait line of the WAIT it completes (metrics doc §11, item 1); the
+generator pairs a wake with its target, whatever its channel. A task whose
+first instruction is a WAIT (a LOOP's body counting), a spawn child included,
+completes that WAIT in its arrival step on a stored wake, its arrival then a
+stimulus like any other's; with none stored it blocks there, as the reference
+simulator's does (`step`'s WAIT, `on_arrive`, `spawn`): its arrival is no
+stimulus, with no `ready` line and no run, and its first run is the wake that
+completes that WAIT. A finite task exits after its last
 stimulus run, a segment-bound task departs at its pinned depart, spawn children
 arrive with their parent, every periodic job gets a met `deadline` line, and each
 schedule entry before the workload's end gets its `config_applied` line at its
@@ -27,7 +35,7 @@ from collections import defaultdict
 
 from harness.reader import RunFileError, read_run_file
 
-SIM = "mock-simulator@1"
+SIM = "mock-simulator@2"
 _RANK = {"config_applied": 0, "task_arrive": 1, "run_end": 2, "deadline": 3,
          "ready": 4, "run_start": 5, "task_end": 6}
 
@@ -175,16 +183,23 @@ def _lines(doc, run, sched):
 
     for tid in order:
         info = run.tasks[tid]
-        arrive_t = stimuli[tid][0][0]
+        arrive_t = next(t for t, cause in stimuli[tid] if cause == "arrive")
         arrival = {"event": "task_arrive", "t": arrive_t, "task": tid, "source": "file"}
         if tid in parent_of:
             arrival["source"] = "spawn"
             arrival["parent"] = parent_of[tid]
         emit(arrive_t, arrival)
+        # a wake sent before the arrival is stored for the task and taken in its arrival step
+        stored = sum(1 for t, cause in stimuli[tid] if cause == "wake" and t < arrive_t)
         groups = defaultdict(list)
         for t, cause in sorted(stimuli[tid], key=lambda s: s[0]):
-            if cause == "arrive" and tid in wait_first:
-                continue                   # blocked in its arrival step: no ready line, no run
+            if t < arrive_t:
+                continue                   # a stored wake: no line before the task exists
+            if cause == "arrive":
+                if tid in wait_first and not stored:
+                    continue               # blocked in its arrival step: no ready line, no run
+                groups[t] += [cause] + ["wake"] * stored   # each stored wake's zero-wait line
+                continue
             groups[t].append(cause)
         finite = info.depart is None and info.period_us is None
         instants = sorted(groups)

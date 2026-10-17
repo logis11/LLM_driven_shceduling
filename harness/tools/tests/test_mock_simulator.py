@@ -131,7 +131,8 @@ def test_one_unit_run_per_stimulus(tmp_path):
     assert _of(lines, "game.chain.1", "deadline") == [
         {"event": "deadline", "t": t + 1, "task": "game.chain.1", "due": t + 300, "met": True,
          "slack_us": 299} for t in (0, 300, 600, 900)]
-    # chain stage, WAIT-first: no arrival line, woken at each tick (its first at its arrival)
+    # chain stage, WAIT-first: no ready(arrive) line, woken at each tick (its first at its arrival,
+    # the same instant, so no wake is stored for it)
     assert [(l["t"], l["cause"]) for l in _of(lines, "game.chain.2", "ready")] == \
         [(0, "wake"), (300, "wake"), (600, "wake"), (900, "wake")]
     assert _of(lines, "game.chain.2", "deadline") == []
@@ -201,6 +202,50 @@ def test_a_wait_first_task_blocks_in_its_arrival_step(tmp_path):
     assert by[("build.j2", "completed")]["value"] == 0 and by[("build.j2", "cpu_delivered")]["value"] == 0
     assert not [r for r in rows if r["metric"] == "ready_wait" and r["cause"] == "arrive"
                 and r["entity"].startswith("build.j")]
+
+
+def test_a_wake_stored_before_the_arrival_completes_the_arrival_wait(tmp_path):
+    """A wake sent to a task before its arrival is stored for it, as the reference simulator's
+    channel store and mailbox keep one (`simulator/src/sim.cpp` `on_ext_wake`, `deliver`), and is
+    taken in the arrival step: a WAIT-first task's WAIT completes on it there, so the arrival is
+    `ready(arrive)` with its run (`step`'s WAIT, `on_arrive`), and each stored wake's `ready(wake)`
+    line, the zero-wait line of the WAIT it completes (metrics doc §11, item 1), is written at the
+    arrival. A chain stage arriving after its head's first tick has that tick's wake stored. No line
+    of a task precedes its arrival, and the primitives read the trace with no guard message."""
+    stage = {"op": "LOOP", "count": "unbounded", "body": [
+        {"op": "WAIT", "channel": "chain:stage"}, {"op": "RUN", "us": 5}]}
+    doc = {"meta": {"id": "tiny"}, "ground_truth": [], "events": [
+        {"op": "arrive", "t": 0, "id": "head", "name": "game.exe", "depart": 1000,
+         "program": [{"op": "LOOP", "count": "unbounded", "body": [
+             {"op": "TIMER", "period_us": 300}, {"op": "RUN", "us": 5},
+             {"op": "WAKE", "target": "stage"}]}]},
+        {"op": "wake", "t": 50, "channel": "job:once", "target": "once"},
+        {"op": "wake", "t": 60, "channel": "job:twice", "target": "twice"},
+        {"op": "wake", "t": 70, "channel": "job:twice", "target": "twice"},
+        {"op": "arrive", "t": 100, "id": "once", "name": "gcc",
+         "program": [{"op": "WAIT", "channel": "job:once"}, {"op": "RUN", "us": 3}, {"op": "EXIT"}]},
+        {"op": "arrive", "t": 100, "id": "twice", "name": "gcc",
+         "program": [{"op": "LOOP", "count": 2, "body": [
+             {"op": "WAIT", "channel": "job:twice"}, {"op": "RUN", "us": 3}]}, {"op": "EXIT"}]},
+        {"op": "arrive", "t": 200, "id": "stage", "name": "game.exe", "depart": 1000, "program": [stage]},
+    ]}
+    out, lines = _lines(tmp_path, doc, {**SCHEDULE, "schedule": SCHEDULE["schedule"][:1]})
+    assert [(l["event"], l["t"]) for l in lines if l.get("task") == "once"] == [
+        ("task_arrive", 100), ("ready", 100), ("ready", 100), ("run_start", 100), ("run_end", 101),
+        ("task_end", 101)]
+    assert [l["cause"] for l in _of(lines, "once", "ready")] == ["arrive", "wake"]
+    assert [(l["t"], l["cause"]) for l in _of(lines, "twice", "ready")] == \
+        [(100, "arrive"), (100, "wake"), (100, "wake")]
+    assert [l["t"] for l in _of(lines, "twice", "task_end")] == [101]
+    assert _of(lines, "stage", "task_arrive")[0]["t"] == 200
+    assert [(l["t"], l["cause"]) for l in _of(lines, "stage", "ready")] == \
+        [(200, "arrive"), (200, "wake"), (300, "wake"), (600, "wake"), (900, "wake")]
+    arrived = {l["task"]: l["t"] for l in lines if l["event"] == "task_arrive"}
+    assert all(l["t"] >= arrived[l["task"]] for l in lines if "task" in l)
+    rows, messages = build(tmp_path / "w.json", out, schedule_path=tmp_path / "s.json")
+    assert messages == []                     # each WAIT has its ready(wake) line; the chain's counts agree
+    # frame 0 ends when the stage, arriving at 200, takes the stored wake and runs (200, 201)
+    assert [r["value"] for r in rows if r["entity"] == "head" and r["metric"] == "job"] == [201, 1, 1, 1]
 
 
 def test_generation_is_byte_identical_across_reruns(tmp_path):
