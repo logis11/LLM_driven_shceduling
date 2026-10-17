@@ -26,7 +26,6 @@ The claim, measurement and compiled-number audits re-run on the final repository
 
 `compiled/uncheckable-by-item.md` lists them by the RQ0 gate spec's conformance item: (b) the TIMER skip rule, (d) `batch_bandwidth_cap` as a work-conserving ceiling, (e) the strict idle class, (g) `WAIT children:<id>` completing when every child it spawned has ended. Each now names its item in its document (H1, P); the list is the check 인경민 runs once each item lands (spec decision 6).
 
-## Remaining
+## The full smoke (9.23 D15's hand-off)
 
-- The full harness smoke on the final build (9.23 D15's hand-off): started detached 2026-10-17 21:50 KST at `a4b6a9da`; its start, end, exit code and log tail land in `gate/smoke-status.txt` (full log in the session scratchpad, `smoke-final.log`). When it ends: record the time here, commit `gate/smoke-status.txt`.
-- Then tick 9.16 in `_dev/TODO.md` and ask 인지오 whether Phase 9 is `[done]`.
+`make -C harness smoke` on the final build, at `a4b6a9da` (the data as `17f28d7f` built it), started detached 2026-10-17 21:50 KST, ended 2026-10-18 02:22 KST: exit 0, 16,313 s (4 h 32 min). 392 invocations over the 49 scored core files, 142 executed and 250 from the cache earlier runs on the same inputs had filled, so the time is not a cold run; the cold figure stays 9.14 D14's 4 h 50 min. Verdict `invalid`, 0 of 49 judging files meeting the criterion — the mocks' verdict, `invalid` by construction (`harness/tools/smoke.py`'s docstring); the smoke checks the plumbing. Start, end and the log's tail: `gate/smoke-status.txt`.
