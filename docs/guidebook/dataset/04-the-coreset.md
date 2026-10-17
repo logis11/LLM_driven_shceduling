@@ -65,7 +65,7 @@ core set의 조직 원리는 한 문장입니다. building plan(`docs/workload/b
 | `video-edit` | 대화형 영상 편집 |
 | `compile` | 소프트웨어 build |
 | `ml-train` | 머신러닝 training 실행 |
-| `render` | offline 3D/그래픽 render |
+| `render` | offline render — 3D 장면이나 영상 project를 파일로 render하는 일 |
 | `transcode` | 일괄 미디어 변환 |
 | `indexing` | 파일 indexing / crawling |
 | `backup` | backup 작업 |
@@ -73,7 +73,7 @@ core set의 조직 원리는 한 문장입니다. building plan(`docs/workload/b
 
 여기에 menu 밖의 label이 하나 더 있습니다. **`ambiguous`**는 ground truth에만 나오는 label입니다. 똑같이 활발한 foreground가 둘이라서 정답 mode를 하나로 정할 수 없는 segment에 붙습니다. recognizer는 이 label을 고를 수 없고 언제나 16개 중 하나를 골라야 하며, `ambiguous` segment는 정확도 채점에서 빠지고 따로 보고됩니다. core set에서 이 label을 단 segment는 `c6-dual`의 하나뿐입니다.
 
-> **열린 자리.** `render`의 정의는 "an offline 3D/graphics render"이지만, Phase 9 재구축 뒤 core set의 render 파일이 묶는 일은 Kdenlive의 영상 export(`kdenlive_render`, 9.10 D10 — render 파일들이 관찰된 Kdenlive export를 묶는다는 결정)입니다. 2026-10-16에 인지오가 이 풀이를 "an offline render — a 3D scene or a video project rendered to a file"로 넓히기로 했습니다. 기존 media의 변환인 `transcode`와는 그대로 구별됩니다. mode의 변경은 vocabulary §4에 따라 세 사람(인지오, 인경민, 박이안)이 정하는 일이라, Phase 9의 final memo가 인경민과 박이안에게 제안하고 두 사람이 동의하면 vocabulary가 §5 기록과 함께 고칩니다. label도 파일도 바뀌지 않습니다. 두 사람의 답 대기.
+> **왜 이렇게 정했나.** Phase 9 재구축 뒤 core set의 render segment(`c1-render`, `c7-render`, `c2-p3a`의 60–326 s)가 묶는 일은 모두 Kdenlive의 영상 export(`kdenlive_render`, 9.10 D10 — render 파일들이 관찰된 Kdenlive export를 묶는다는 결정)이고, 3D 장면을 render하는 파일은 없습니다. 그래서 vocabulary §1은 2026-10-17부터 `render`를 "an offline render — a 3D scene or a video project rendered to a file"로 풀이합니다. 그 전의 풀이는 "an offline 3D/graphics render"였고, 바뀐 날짜와 내용은 vocabulary §5의 2026-10-17 기록에 있습니다. 기존 media의 변환인 `transcode`와는 그대로 구별됩니다. label도 파일도 바뀌지 않았습니다.
 
 ## 1.3 하나뿐인 graded attribute: `background_wanted`
 
@@ -2182,9 +2182,7 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 
 ## 13.8 무엇이 어디서 낡았나
 
-2026-10-14에 이 절은 core set을 옛 상태로 묘사하는 문서를 길게 적었습니다(`docs/workload/coreset-guide.md`, `docs/workload/scenario-catalog.md`, `docs/workload/building-plan.md`, `dataset/README.md`, `docs/recognition-vocabulary.md`, `docs/terminology.md`). 9.15(docs, memo, guidebook을 고치는 Phase 9 sub-task)가 2026-10-16–17에 그 문서들을 지금의 tree에 맞게 고쳤습니다. coreset guide는 51개 파일을, scenario catalog는 9.10 D33대로 dataset이 실제로 묶는 이름과 존재 근거를, building plan은 51개 파일·67개 segment와 재구축 뒤의 그룹들을, README는 그룹 표의 unattended upgrade와 "Demand is reported, not held"를, vocabulary는 `initiated`의 `session`과 지금의 `background_wanted` 예를, terminology는 판정 파일 19개와 K = 10을 적습니다. 남은 것은 셋입니다.
-
-**`docs/recognition-vocabulary.md`의 `render`.** 풀이는 여전히 "an offline 3D/graphics render"이고, 넓힌 풀이는 Phase 9의 final memo가 제안합니다(1.2절).
+2026-10-14에 이 절은 core set을 옛 상태로 묘사하는 문서를 길게 적었습니다(`docs/workload/coreset-guide.md`, `docs/workload/scenario-catalog.md`, `docs/workload/building-plan.md`, `dataset/README.md`, `docs/recognition-vocabulary.md`, `docs/terminology.md`). 9.15(docs, memo, guidebook을 고치는 Phase 9 sub-task)가 2026-10-16–17에 그 문서들을 지금의 tree에 맞게 고쳤습니다. coreset guide는 51개 파일을, scenario catalog는 9.10 D33대로 dataset이 실제로 묶는 이름과 존재 근거를, building plan은 51개 파일·67개 segment와 재구축 뒤의 그룹들을, README는 그룹 표의 unattended upgrade와 "Demand is reported, not held"를, vocabulary는 `initiated`의 `session`과 지금의 `background_wanted` 예, 그리고 2026-10-17부터 Kdenlive의 영상 export까지 담는 `render`의 풀이(1.2절)를, terminology는 판정 파일 19개와 K = 10을 적습니다. 남은 것은 둘입니다.
 
 **`docs/memos/2026-09-10-coreset-before-and-after-phase-7.md`.** memo라서 그 시점의 기록으로 읽으면 됩니다. 이름과 숫자는 재구축 전의 것입니다.
 

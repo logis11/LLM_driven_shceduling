@@ -541,7 +541,7 @@ scheduler가 관찰할 수 있는 것은 각 task가 CPU를 얼마나 오래 잡
    transcode  indexing backup    idle
 ```
 
-`browsing`은 웹 보는 중, `office`는 문서 작업, `mail`은 메일, `dev`는 편집기에서 코드 쓰는 중, `photo`는 사진 편집, `meeting`은 화상 통화 중, `gaming`은 게임, `media`는 영상이나 음악 재생, `video-edit`은 영상 편집, `compile`은 빌드, `ml-train`은 기계학습 학습, `render`는 오프라인 렌더(어휘의 지금 정의는 3D·그래픽 렌더인데, 데이터셋의 render 파일은 Kdenlive의 영상 내보내기라서, "3D 장면이나 영상 프로젝트를 파일로 렌더"로 넓히자는 제안이 세 담당자의 합의를 기다리고 있습니다), `transcode`는 미디어 변환, `indexing`은 파일 색인, `backup`은 백업, `idle`은 사람이 없고 유지보수만 도는 상태입니다.
+`browsing`은 웹 보는 중, `office`는 문서 작업, `mail`은 메일, `dev`는 편집기에서 코드 쓰는 중, `photo`는 사진 편집, `meeting`은 화상 통화 중, `gaming`은 게임, `media`는 영상이나 음악 재생, `video-edit`은 영상 편집, `compile`은 빌드, `ml-train`은 기계학습 학습, `render`는 오프라인 렌더(3D 장면이나 영상 프로젝트를 파일로 렌더하는 것으로, 데이터셋의 render 파일은 Kdenlive의 영상 내보내기입니다), `transcode`는 미디어 변환, `indexing`은 파일 색인, `backup`은 백업, `idle`은 사람이 없고 유지보수만 도는 상태입니다.
 
 ### `subsystems` — 소비자별 이름 공간
 
