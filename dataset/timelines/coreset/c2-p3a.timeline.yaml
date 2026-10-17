@@ -2,8 +2,10 @@
 # swaps in Déjà Dup's scheduled weekly incremental (scheduled bulk). The export
 # is `cpu-batch`'s `kdenlive_render` bound whole from 60 s (9.10 D105, D106).
 # Segment 1 runs 60–326 s in both files; the length is 9.10 D123's, set on a
-# shared lane; under the idle class (9.13) the variant's backup does not end
-# inside it and is scored by progress (9.14); the export ends by about 99.5 s.
+# shared lane; under the idle class (9.13) the variant's backup, 165.7 s of
+# CPU in the about 166 s of lane the editor leaves, finishes about 0.3 s before
+# the segment's end and is scored by its turnaround (9.14 decision 6's header
+# rule; 9.16 decision D4); the export ends by about 99.5 s.
 # The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c2-p3a

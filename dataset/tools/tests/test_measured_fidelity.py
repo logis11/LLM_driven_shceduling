@@ -350,6 +350,17 @@ def test_the_batch_tables_regenerate_from_the_pooled_records(repo_root):
         batch_fold_in.rewrite(text.replace("    tracker_block:", "    tracker_blocks:"), batch_fold_in.load_pools(repo_root))
 
 
+def test_the_module_build_s_tail_work_is_the_landings_mean_tail_cpu(repo_root):
+    # 9.10 D54: tail_work, the serial tail's CPU budget, is the mean over the 26 landings of the tail's CPU, every comm
+    # summed; batch_fold_in.py writes it, so --check covers it (class F6 of the 9.16 measurement audit)
+    from meas import batch_fold_in
+    text = (repo_root / "dataset" / "archetypes.yaml").read_text()
+    assert set(batch_fold_in.CONSTANTS) == {("module-build-orchestrator", "tail_work")}
+    assert "{dist: constant, value_us: 10027983, sampling: per-task," in text
+    moved = text.replace("value_us: 10027983,", "value_us: 10027984,")
+    assert batch_fold_in.rewrite(moved, batch_fold_in.load_pools(repo_root)) == text
+
+
 def test_the_reported_gap_is_the_carried_gap_when_the_phase_start_is_given():
     # the rule reads a component's gap mean from per_thread in the desktop and session pools: given the phase's start
     # it takes the gaps as the carried table does — merged over the threads, wrapped round the phase

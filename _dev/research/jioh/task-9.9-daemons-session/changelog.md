@@ -468,3 +468,7 @@ Decision (option A of three; B, the bus kept sparse with its larger count, and C
 Tooling: `SESSION_SPREAD` gains `system-bus/dbus-daemon` and `SPARSE` is empty in `session/pool.py`; `SPREAD_DECIDED` in `session/fold_in.py`. Tests: `test_a_sparse_component_is_carried_although_it_never_woke_in_some_repeats` reads the class on a constructed component and asserts the two sets. Values changed: none beyond D47's; the two entries' scopes.
 
 Commit: this entry.
+
+## The long-phase probes released (2026-10-17, 9.16 decision D5)
+
+No new 9.9 decision; recorded by 9.16's measurement audit (`_dev/research/jioh/task-9.16-exit-audits/meas/repro-findings.md` M6; 인지오's answer (a), `decisions.md` D5). The three probes D22 read — run 35839696453 repeat 36, run 35861267312 repeat 41, run 35863364163 repeat 44 — and on which `campaign/results/within-run.json` (D28, re-read under D35 and D37) and the `service-manager` and `message-bus` scopes' within-run spreads rest, are release `meas-ci-probes-2026-09-23` (https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-probes-2026-09-23, target `b51df8a4`): `meas-session-session-r36-probe-35839696453.zip`, `meas-session-session-r41-probe-35861267312.zip`, `meas-session-session-r44-probe-35863364163.zip`, and the gated jobs 37–40, 42, 43, 45 and 46 in `gated-reports.zip`. Not repeats, no campaign tag, as the other probe releases. Values changed: none.

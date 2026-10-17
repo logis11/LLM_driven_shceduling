@@ -40,4 +40,4 @@ tasks:
   name: dkms
   source:
     child_name: meas-ci:background:2026-10-02
-    parallelism_cap: design
+    parallelism_cap: convention

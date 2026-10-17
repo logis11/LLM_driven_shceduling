@@ -74,21 +74,45 @@ def coverage_range(entry):
     return min(c), max(c)
 
 
+def _pool(src, app):
+    return json.load(open(os.path.join(src, f"pool-{app}.json")))["runs"][app]
+
+
+def _at_window_limit(run):
+    st = run["stability"]
+    return st["window_limit"] is not None and len(run["repeats"]) >= st["window_limit"]
+
+
 def entries(n, seed=1):
     """Each 9.5 entry whose repeat count the rule chose, in the pools the fold-in carries; an entry that stopped at its
-    recording's last window, or short of it (D99), is listed, not simulated."""
+    recording's last window, or short of it (D99), is listed, not simulated. An entry whose idle phase comes from a
+    pool of its own (control_report.IDLE_FROM_95) is read on that pool's idle values and on its main pool's other
+    phases, as the fold-in carries them — the main pool's left out where it stopped at its recording's last window
+    (thunderbird-send's keys-only pool) — and its widest value is the wider of the two."""
     from meas import control_report as cr
     out = []
     for app, arch in cr.ARCH_95.items():
-        idle_from = cr.IDLE_FROM_95.get(app)
-        src = idle_from or cr.POOL_95[app]
-        run = json.load(open(os.path.join(src, f"pool-{app}.json")))["runs"][app]
-        st = run["stability"]
-        by_window = st["window_limit"] is not None and not idle_from and len(run["repeats"]) >= st["window_limit"]
+        idle_from, main = cr.IDLE_FROM_95.get(app), cr.POOL_95[app]
+        reads = []   # (pool, its run, the phases read in it or None for all, stopped at its window limit)
+        if idle_from:
+            reads.append((idle_from, _pool(idle_from, app), ("idle",), False))
+            mrun = _pool(main, app)
+            others = tuple(sorted({n.split()[0] for n in mrun["stability"]["quantities"]} - {"idle"}))
+            if others and not _at_window_limit(mrun):
+                reads.append((main, mrun, others, False))
+        else:
+            run = _pool(main, app)
+            reads.append((main, run, None, _at_window_limit(run)))
+        read = [(src, run, by_window, *widest(run["stability"]["quantities"], phases))
+                for src, run, phases, by_window in reads]
+        src, run, by_window, name, q = max(read, key=lambda r: r[4]["half_width"])
         short = STOPPED_SHORT.get(app)
-        name, q = widest(st["quantities"], ("idle",) if idle_from else None)
-        e = {"archetype": arch, "app": app, "pool": os.path.relpath(src, cr.REPO), "repeats": len(run["repeats"]),
-             "stopped_at_window_limit": by_window, "widest": {"value": name, **{k: q[k] for k in ("k", "cv", "half_width")}}}
+        pools = [os.path.relpath(r[0], cr.REPO) for r in read]
+        e = {"archetype": arch, "app": app, "pool": pools[0] if len(pools) == 1 else pools,
+             "repeats": len(run["repeats"]), "stopped_at_window_limit": by_window,
+             "widest": {"value": name, **{k: q[k] for k in ("k", "cv", "half_width")}}}
+        if len(pools) > 1:
+            e["widest"]["pool"] = os.path.relpath(src, cr.REPO)
         if short:
             e["stop"] = short
         elif not by_window:

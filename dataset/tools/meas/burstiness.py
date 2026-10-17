@@ -90,7 +90,7 @@ def _campaign_pool_module():
             sys.modules["analyze"] = saved
 
 
-def campaign_streams(app, pooled, root, phase="idle"):
+def campaign_streams(app, pooled, root, phase="idle", mode="full"):
     """{rep: (span, times)} of a 9.5 app's carried repeats: the rows its pool reads (analyze_run with the pool's
     settings, the idle phase from where the pool read it, D83), heavy events aside, in seconds from the phase's start."""
     from meas.campaign.analyze import analyze_run
@@ -98,7 +98,7 @@ def campaign_streams(app, pooled, root, phase="idle"):
     run = pooled["runs"][app]
     out = {}
     for rep in run["repeats"]:
-        D = artifact_dir(root, app, rep, run["run_id"][str(rep)])
+        D = artifact_dir(root, app, rep, run["run_id"][str(rep)], mode)
         _, raw = analyze_run(D, pooled.get("w_ms", 5.0), pooled.get("cap_ms", 0.0),
                              exclude_roles=tuple(pooled.get("exclude_roles") or ()), idle_from_s=run.get("idle_from_s", 0.0))
         pd = raw["phases"][phase]
@@ -131,13 +131,13 @@ def _library():
 
 
 def desktop_entries(root, apps=()):
-    """9.8's four entries over their carried phase (desktop/fold_in.CARRIED): the rows the analyzer keeps; a renderer
-    entry's renderers each a stream."""
+    """9.8's folded entries over their carried phase (desktop/fold_in.FOLDED, CARRIED): the rows the analyzer keeps; a
+    renderer entry's renderers each a stream."""
     from meas import control_report as cr
     from meas.desktop import analyze as a98
-    from meas.desktop.fold_in import CARRIED, IDS
+    from meas.desktop.fold_in import CARRIED, FOLDED, IDS
     lib, out = _library(), {}
-    for app in apps or sorted(CARRIED):
+    for app in apps or sorted(FOLDED):
         run, phase = json.load(open(cr.pool_98(app)))["runs"][app], CARRIED[app]
         measured = {}
         for rep in run["repeats"]:
@@ -179,7 +179,8 @@ def campaign_entries(root, apps=IDLE_95):
     for app in apps:
         arch = cr.ARCH_95[app]
         pooled = json.load(open(os.path.join(cr.IDLE_FROM_95.get(app, cr.POOL_95[app]), f"pool-{app}.json")))
-        out[arch] = _entry(arch, app, "idle", campaign_streams(app, pooled, root), lib[arch]["params"]["components"])
+        out[arch] = _entry(arch, app, "idle", campaign_streams(app, pooled, root, mode=cr.IDLE_MODE_95.get(app, "full")),
+                           lib[arch]["params"]["components"])
     return out
 
 

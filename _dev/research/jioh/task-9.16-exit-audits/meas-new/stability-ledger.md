@@ -1,6 +1,6 @@
 # 9.16 — the stability ledger
 
-The ask of the 2026-09-20 dataset validity memo §3 ("Publish the stability ledger": carry the per-value stability result to the whole library and report how many quantities met the tolerance, how many are carried under a stated exception, and the largest half-width carried), handed to 9.16 by 9.15 on 2026-10-16. Computed 2026-10-17 by `stability_ledger.py` beside this page; its output is reproduced below and kept as `out/stability-ledger-output.md` and `out/stability-ledger.json` (every value with its record, repeat count, half-width and class).
+The ask of the 2026-09-20 dataset validity memo §3 ("Publish the stability ledger": carry the per-value stability result to the whole library and report how many quantities met the tolerance, how many are carried under a stated exception, and the largest half-width carried), handed to 9.16 by 9.15 on 2026-10-16. Computed 2026-10-17 by `stability_ledger.py`, then beside this page and since moved to `dataset/tools/meas/stability_ledger.py` (the data chunk, `../logs/D.md`; the same output from there); its output is reproduced below and kept as `out/stability-ledger-output.md` and `out/stability-ledger.json` (every value with its record, repeat count, half-width and class).
 
 ## What it counts
 

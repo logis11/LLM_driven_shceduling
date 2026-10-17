@@ -238,7 +238,7 @@ variants:
     ops:
       - patch-task: {id: build, name: dkms, archetype: module-build-orchestrator, arrive: 0s,
                      bind: {parallelism_cap: 8, child_name: cc1},
-                     source: {parallelism_cap: design, child_name: "meas-ci:background:2026-10-02"}}
+                     source: {parallelism_cap: convention, child_name: "meas-ci:background:2026-10-02"}}
       - set-segments: [{from: 0s, to: 225.458s, mode: compile,
                          attributes: {background_wanted: false, initiated: scheduled},
                          scenario: [S11]}]

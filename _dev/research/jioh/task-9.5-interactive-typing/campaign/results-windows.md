@@ -66,14 +66,14 @@
 
 ## video-editor (`kdenlive`, idle)
 
-20 repeats, 6 whole windows of 20 s. Per component, pooled over the repeats: each window's wake rate over the component's mean over the windows, each window's run mean (ms), its share of the phase's CPU, and the CPU its windows hold above its median window as a share of the phase's CPU.
+16 repeats, 9 whole windows of 20 s. Per component, pooled over the repeats: each window's wake rate over the component's mean over the windows, each window's run mean (ms), its share of the phase's CPU, and the CPU its windows hold above its median window as a share of the phase's CPU.
 
 | component | wakes/s | wake rate per window, over its mean | run mean per window (ms) | share of CPU | above its median window |
 |---|---|---|---|---|---|
-| `ALL` | 1.363 | 1.08 · 0.96 · 1.08 · 0.97 · 0.95 · 0.96 | 0.050 · 0.062 · 0.054 · 0.058 · 0.058 · 0.057 | 100.0 % | 2.1 % |
-| `Qt bearer threa` | 0.1 | 1.00 · 1.00 · 1.00 · 1.00 · 1.00 · 1.00 | 0.414 · 0.406 · 0.405 · 0.411 · 0.401 · 0.410 | 53.0 % | 0.3 % |
-| `kdenlive` | 1.26 | 1.08 · 0.96 · 1.09 · 0.97 · 0.95 · 0.95 | 0.023 · 0.033 · 0.029 · 0.029 · 0.029 · 0.028 | 46.6 % | 2.1 % |
-| `residual` | 0.002917 | 6.00 · 0.00 · 0.00 · 0.00 · 0.00 · 0.00 | 0.091 · — · — · — · — · — | 0.3 % | 0.3 % |
+| `ALL` | 1.264 | 0.98 · 1.09 · 1.08 · 0.98 · 0.95 · 0.98 · 1.02 · 0.96 · 0.97 | 0.057 · 0.058 · 0.053 · 0.057 · 0.058 · 0.060 · 0.060 · 0.059 · 0.058 | 100.0 % | 2.7 % |
+| `Qt bearer threa` | 0.1 | 1.00 · 1.00 · 1.00 · 1.00 · 1.00 · 1.00 · 1.00 · 1.00 · 1.00 | 0.419 · 0.422 · 0.427 · 0.412 · 0.419 · 0.433 · 0.434 · 0.427 · 0.419 | 58.1 % | 0.5 % |
+| `kdenlive` | 1.161 | 0.98 · 1.09 · 1.08 · 0.98 · 0.95 · 0.98 · 1.01 · 0.96 · 0.97 | 0.025 · 0.030 · 0.023 · 0.025 · 0.026 · 0.027 · 0.027 · 0.026 · 0.026 | 41.5 % | 1.9 % |
+| `residual` | 0.002778 | 0.00 · 2.25 · 0.00 · 0.00 · 0.00 · 1.12 · 5.62 · 0.00 · 0.00 | — · 0.117 · — · — · — · 0.162 · 0.086 · — · — | 0.4 % | 0.4 % |
 
 ## video-editor (`kdenlive`, driven)
 

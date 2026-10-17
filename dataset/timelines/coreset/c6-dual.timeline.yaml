@@ -27,11 +27,11 @@ tasks:
      arrive: 0s, depart: 12072s}
   - {id: build, name: make, archetype: build-orchestrator, arrive: 10s,
      bind: {spawn_count: 2908, parallelism_cap: 8, child_name: cc1},
-     source: {spawn_count: "meas-ci:build:2026-09-18", parallelism_cap: design, child_name: "meas-ci:build:2026-09-18"}}
+     source: {spawn_count: "meas-ci:build:2026-09-18", parallelism_cap: convention, child_name: "meas-ci:build:2026-09-18"}}
 
 # the focus alternates between the editor and the game every 688 s — the mean continuous segment in
-# a working sphere before switching, 11 min 28 s (gonzalez-chi04; 9.10 C-gonzalez-1); the regular
-# alternation, the editor first and the typing's 2 s lead-in are design. The input windows are the
+# a working sphere before switching, 11 min 28 s (gonzalez-chi04; the 2026-09-13 verification's
+# C-gonzalez-1, cited by 9.10 D35); the regular alternation, the editor first and the typing's 2 s lead-in are design. The input windows are the
 # editor's intervals: the user types into the window in front (9.17 spec, decisions 1 and 4).
 input:
   - {from: 2s, to: 688s, task: editor}

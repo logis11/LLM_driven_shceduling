@@ -68,7 +68,7 @@ def test_departs_form_moves_every_task_at_the_boundary_and_scales_the_batch_job(
     assert (editor["arrive"], editor["depart"]) == ("0s", "60s")
     assert build["arrive"] == "2s" and "depart" not in build
     assert build["bind"] == {"spawn_count": round(2908 * 58 / 1592), "parallelism_cap": 8, "child_name": "cc1"}
-    assert build["source"] == {"spawn_count": "design", "parallelism_cap": "design",
+    assert build["source"] == {"spawn_count": "design", "parallelism_cap": "convention",
                                "child_name": "meas-ci:build:2026-09-18"}
     for tid in ("writer-s1", "browser-s1", "renderers-s1", "mail-s1"):
         assert (task(data, tid)["arrive"], task(data, tid)["depart"]) == ("60s", "120s")

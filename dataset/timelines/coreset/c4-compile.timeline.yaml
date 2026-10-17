@@ -37,7 +37,7 @@ tasks:
   name: make
   source:
     child_name: meas-ci:build:2026-09-18
-    parallelism_cap: design
+    parallelism_cap: convention
     spawn_count: meas-ci:build:2026-09-18
 - archetype: web-browser
   arrive: 30s

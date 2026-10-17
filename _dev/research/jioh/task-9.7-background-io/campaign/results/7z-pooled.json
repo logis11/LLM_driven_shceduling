@@ -18618,6 +18618,7 @@
         "perf_cpu_us": 5181149251.0,
         "taskstats_cpu_us": 5182374251.1,
         "perf_over_taskstats": 0.9998,
+        "perf_over_taskstats_threads": 0.9998,
         "disk": {
          "d_state_ns": 477249000,
          "blkio_ns": 471440141,
@@ -18635,6 +18636,7 @@
         "perf_cpu_us": 5032989730.0,
         "taskstats_cpu_us": 5034203783.8,
         "perf_over_taskstats": 0.9998,
+        "perf_over_taskstats_threads": 0.9998,
         "disk": {
          "d_state_ns": 409656000,
          "blkio_ns": 87608743,
@@ -18652,6 +18654,7 @@
         "perf_cpu_us": 5039054245.0,
         "taskstats_cpu_us": 5040393763.0,
         "perf_over_taskstats": 0.9997,
+        "perf_over_taskstats_threads": 0.9997,
         "disk": {
          "d_state_ns": 589768000,
          "blkio_ns": 42909333494,
@@ -18669,6 +18672,7 @@
         "perf_cpu_us": 4881522321.0,
         "taskstats_cpu_us": 4882751770.8,
         "perf_over_taskstats": 0.9997,
+        "perf_over_taskstats_threads": 0.9997,
         "disk": {
          "d_state_ns": 439309000,
          "blkio_ns": 171535651,
@@ -18686,6 +18690,7 @@
         "perf_cpu_us": 5283296839.0,
         "taskstats_cpu_us": 5284542602.0,
         "perf_over_taskstats": 0.9998,
+        "perf_over_taskstats_threads": 0.9998,
         "disk": {
          "d_state_ns": 310029000,
          "blkio_ns": 198093281,
@@ -18703,6 +18708,7 @@
         "perf_cpu_us": 4934715106.0,
         "taskstats_cpu_us": 4936017013.3,
         "perf_over_taskstats": 0.9997,
+        "perf_over_taskstats_threads": 0.9997,
         "disk": {
          "d_state_ns": 632846000,
          "blkio_ns": 109943864,
@@ -21675,6 +21681,7 @@
         "perf_cpu_us": 4713816600.0,
         "taskstats_cpu_us": 4713562752.2,
         "perf_over_taskstats": 1.0001,
+        "perf_over_taskstats_threads": 1.0001,
         "disk": {
          "d_state_ns": 22288000,
          "blkio_ns": 22563009,
@@ -21692,6 +21699,7 @@
         "perf_cpu_us": 4734046803.0,
         "taskstats_cpu_us": 4733813204.6,
         "perf_over_taskstats": 1.0,
+        "perf_over_taskstats_threads": 1.0,
         "disk": {
          "d_state_ns": 17475000,
          "blkio_ns": 17297938,
@@ -21709,6 +21717,7 @@
         "perf_cpu_us": 4661173577.0,
         "taskstats_cpu_us": 4661044665.4,
         "perf_over_taskstats": 1.0,
+        "perf_over_taskstats_threads": 1.0,
         "disk": {
          "d_state_ns": 234255000,
          "blkio_ns": 5668115171,
@@ -21726,6 +21735,7 @@
         "perf_cpu_us": 4692118009.0,
         "taskstats_cpu_us": 4691945611.8,
         "perf_over_taskstats": 1.0,
+        "perf_over_taskstats_threads": 1.0,
         "disk": {
          "d_state_ns": 98529000,
          "blkio_ns": 66702030,
@@ -21743,6 +21753,7 @@
         "perf_cpu_us": 4827177510.0,
         "taskstats_cpu_us": 4826929937.7,
         "perf_over_taskstats": 1.0001,
+        "perf_over_taskstats_threads": 1.0001,
         "disk": {
          "d_state_ns": 104553000,
          "blkio_ns": 2485139004,
@@ -21760,6 +21771,7 @@
         "perf_cpu_us": 4611766619.0,
         "taskstats_cpu_us": 4611629154.0,
         "perf_over_taskstats": 1.0,
+        "perf_over_taskstats_threads": 1.0,
         "disk": {
          "d_state_ns": 1892000,
          "blkio_ns": 1180051,
@@ -40467,6 +40479,7 @@
         "perf_cpu_us": 5250408281.0,
         "taskstats_cpu_us": 5251758432.3,
         "perf_over_taskstats": 0.9997,
+        "perf_over_taskstats_threads": 0.9997,
         "disk": {
          "d_state_ns": 14154611958,
          "blkio_ns": 2924694202403,
@@ -40484,6 +40497,7 @@
         "perf_cpu_us": 4978601110.0,
         "taskstats_cpu_us": 4979934283.8,
         "perf_over_taskstats": 0.9997,
+        "perf_over_taskstats_threads": 0.9997,
         "disk": {
          "d_state_ns": 10904600947,
          "blkio_ns": 896628772921,
@@ -40501,6 +40515,7 @@
         "perf_cpu_us": 5409506427.0,
         "taskstats_cpu_us": 5411010225.0,
         "perf_over_taskstats": 0.9997,
+        "perf_over_taskstats_threads": 0.9997,
         "disk": {
          "d_state_ns": 17253304974,
          "blkio_ns": 2598663257339,
@@ -40518,6 +40533,7 @@
         "perf_cpu_us": 4953698297.0,
         "taskstats_cpu_us": 4955085679.1,
         "perf_over_taskstats": 0.9997,
+        "perf_over_taskstats_threads": 0.9997,
         "disk": {
          "d_state_ns": 11289137946,
          "blkio_ns": 210888830370,
@@ -40535,6 +40551,7 @@
         "perf_cpu_us": 5170050318.0,
         "taskstats_cpu_us": 5171417197.3,
         "perf_over_taskstats": 0.9997,
+        "perf_over_taskstats_threads": 0.9997,
         "disk": {
          "d_state_ns": 13766231949,
          "blkio_ns": 1399327430681,
@@ -40552,6 +40569,7 @@
         "perf_cpu_us": 4906213067.0,
         "taskstats_cpu_us": 4907628353.4,
         "perf_over_taskstats": 0.9997,
+        "perf_over_taskstats_threads": 0.9997,
         "disk": {
          "d_state_ns": 14480207952,
          "blkio_ns": 1148737331823,
@@ -40718,7 +40736,9 @@
       "half_width_abs": 91.2294,
       "leave_one_out": 0.007,
       "passes": true,
-      "needed": 5
+      "needed": 5,
+      "excepted": false,
+      "carried": true
      },
      "7z-mmt8-warm block per run (\u00b5s)": {
       "k": 6,
@@ -40728,10 +40748,13 @@
       "half_width_abs": 0.0646,
       "leave_one_out": 0.126,
       "passes": true,
-      "needed": 5
+      "needed": 5,
+      "excepted": false,
+      "carried": true
      }
     },
-    "passes": true
+    "passes": true,
+    "excepted": []
    },
    "first_batch": {
     "by_quantity": {

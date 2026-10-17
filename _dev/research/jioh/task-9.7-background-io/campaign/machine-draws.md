@@ -10,6 +10,8 @@ Every `meas-background.yml` job of the 9.7 background campaign and the model it 
 | `borg` | `file-backup` | #24–#40 | 55 | 31 | 30 | 24 (EPYC 9V74 8, EPYC 9V45 7, Xeon Platinum 8573C 7, Xeon 6973P-C 2) | — |
 | `steamcmd` | `game-download` | #47–#98 | 76 | 34 | 30 | 35 (EPYC 9V74 13, Xeon Platinum 8573C 13, EPYC 9V45 5, Xeon 6973P-C 4) | 7 |
 
+**The release's gated reports are not this list (read 2026-10-17, the 9.16 measurement audit, finding M7).** `7z-pooled.json`'s `gated_out` lists the 8 `7z` jobs of the `full` campaign the machine gate stopped: run 35475673566 repeats 1, 2, 3 and 6, 35475892675 repeats 1 and 2, 35475946669 repeats 1 and 2 — the rows of the table below. Release `meas-ci-background-2026-09-19`'s `gated-reports.zip` holds 7 `7z` reports: 35475673566 repeats 1, 2, 3 and 6, and three jobs of the tooling's dry runs and probes, 35425404685 repeat 1 (#1), 35425432178 repeat 1 (#2) and 35431588969 repeat 2 (#10); the four of runs 35475892675 and 35475946669 are not in it. `gated_out` is this page's bookkeeping, not a carried value; the re-pool of 2026-10-17 keeps the record's list.
+
 | model | jobs |
 |---|---|
 | AMD EPYC 7763 64-Core Processor | 105 |

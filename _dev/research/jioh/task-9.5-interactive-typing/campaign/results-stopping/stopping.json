@@ -106,14 +106,18 @@
   {
    "archetype": "video-editor",
    "app": "kdenlive",
-   "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine",
+   "pool": [
+    "_dev/research/jioh/task-9.10-scenarios-timelines/campaign/kdenlive-idle/results",
+    "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine"
+   ],
    "repeats": 20,
    "stopped_at_window_limit": false,
    "widest": {
     "value": "driven kdenlive run mean (ms)",
     "k": 20,
     "cv": 0.1068,
-    "half_width": 0.05
+    "half_width": 0.05,
+    "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine"
    },
    "simulated": {
     "normal": {

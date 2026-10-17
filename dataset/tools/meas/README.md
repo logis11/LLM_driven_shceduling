@@ -22,6 +22,7 @@ A campaign runs in four stages:
 | `distribution.py` | pool | the measured table every campaign carries: ten quantiles, the extremes, the eleven interval means |
 | `stability.py` | pool | the stability rule shared by the campaigns: each carried value's 95 % half-width within the tolerance |
 | `stopping.py` | pool | the stability rule's stopping simulated at an observed spread |
+| `stability_ledger.py` | pool | the stability ledger over the pooled records the library is folded from: the values that met the tolerance, those carried under each exception class, the largest half-width carried |
 | `windows.py` | pool | each carried phase read in time windows, per component (`campaign`, `desktop`, `session`) |
 | `burstiness.py` | pool | the compiled streams' burstiness against the measured, per repeat (`campaign`, `desktop`, `session`) |
 | `control.py`, `control_report.py` | pool | the untraced control's shared core and its report: each value traced and untraced, read per job |

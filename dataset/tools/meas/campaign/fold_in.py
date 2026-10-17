@@ -455,7 +455,8 @@ def entry(aid, spec, d):
             scope += (f"Stimulus: SWELL-KW stream {stream} replayed per event by xdotool at recorded gaps (error p99 1.24 ms), "
                       f"keys and pointer events together, pointer positions scaled into the content area (D5, D12); ")
         scope += (f"the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the "
-                  f"process tree until the next input minus the idle rate, so work that is not the idle rate inside a long gap "
+                  f"process tree until the next input minus the idle rate, bounded below by zero (a window quieter than the "
+                  f"idle rate carries no input work), so work that is not the idle rate inside a long gap "
                   f"(an autosave after typing) is charged to the input before it. ")
         if d.get("idle_from_s"):   # D83
             scope += (f"The idle phase is read from {d['idle_from_s']:g} s past its start, past the launch work in it (D83); "

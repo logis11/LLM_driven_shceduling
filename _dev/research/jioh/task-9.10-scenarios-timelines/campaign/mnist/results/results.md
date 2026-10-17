@@ -1,4 +1,4 @@
-# background campaign (9.7; 9.10's `upgrade`, `dkms`, `tracker` and `mnist`) — pooled results (meas-ci:background:2026-10-03)
+# background campaign (9.7; 9.10's `upgrade`, `dkms`, `tracker`, `mnist`, `handbrake`, `kdenlive` and `dejadup`) — pooled results (meas-ci:background:2026-10-03)
 
 Machine EPYC 7763; stopped by the machine gate 0; other-model repeats 0. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9, times in µs, bytes per wake in bytes; the spread is the per-repeat mean. Rules: method §5 and §9.
 
@@ -28,12 +28,12 @@ command s {1: 1379.021, 2: 1404.38, 3: 1455.898, 4: 1294.0, 5: 1407.379, 6: 1399
 | `python#1` | run_us | 120 | 14.0 / 112 / 132 / 188 / 228276 / 43515311 / 238567292 / 348129382 / 876756180 / 997987710 | {1: 114904089.4167, 2: 63828294.1364, 3: 69321618.0, 4: 53910238.75, 5: 87953048.875, 6: 55975640.16} |
 | `python#1` | wait_us | 114 | 31.5 / 46.2 / 99.3 / 216 / 350 / 404 / 478 / 516 / 548 / 560 | {1: 268.0, 2: 311.1429, 3: 369.65, 4: 308.5652, 5: 278.8, 6: 306.3333} |
 
-- repeat 1: `python` [27670] /home/user/venv/bin/python threads 1; perf/taskstats CPU 1.0001; disk {'d_state_ns': 2745000, 'blkio_ns': 0, 'coverage': 0.0, 'accounted': False}
-- repeat 2: `python` [27660] /home/user/venv/bin/python threads 1; perf/taskstats CPU 1.0001; disk {'d_state_ns': 6329000, 'blkio_ns': 0, 'coverage': 0.0, 'accounted': False}
-- repeat 3: `python` [27642] /home/user/venv/bin/python threads 1; perf/taskstats CPU 1.0001; disk {'d_state_ns': 7187000, 'blkio_ns': 0, 'coverage': 0.0, 'accounted': False}
-- repeat 4: `python` [27715] /home/user/venv/bin/python threads 1; perf/taskstats CPU 1.0001; disk {'d_state_ns': 6887000, 'blkio_ns': 0, 'coverage': 0.0, 'accounted': False}
-- repeat 5: `python` [27661] /home/user/venv/bin/python threads 1; perf/taskstats CPU 1.0001; disk {'d_state_ns': 3982000, 'blkio_ns': 0, 'coverage': 0.0, 'accounted': False}
-- repeat 6: `python` [27716] /home/user/venv/bin/python threads 1; perf/taskstats CPU 1.0001; disk {'d_state_ns': 7149000, 'blkio_ns': 0, 'coverage': 0.0, 'accounted': False}
+- repeat 1: `python` [27670] /home/user/venv/bin/python threads 1; perf/taskstats CPU 1.0001 (thread rows 1.0001); disk {'d_state_ns': 2745000, 'blkio_ns': 0, 'coverage': 0.0, 'accounted': False}
+- repeat 2: `python` [27660] /home/user/venv/bin/python threads 1; perf/taskstats CPU 1.0001 (thread rows 1.0001); disk {'d_state_ns': 6329000, 'blkio_ns': 0, 'coverage': 0.0, 'accounted': False}
+- repeat 3: `python` [27642] /home/user/venv/bin/python threads 1; perf/taskstats CPU 1.0001 (thread rows 1.0001); disk {'d_state_ns': 7187000, 'blkio_ns': 0, 'coverage': 0.0, 'accounted': False}
+- repeat 4: `python` [27715] /home/user/venv/bin/python threads 1; perf/taskstats CPU 1.0001 (thread rows 1.0001); disk {'d_state_ns': 6887000, 'blkio_ns': 0, 'coverage': 0.0, 'accounted': False}
+- repeat 5: `python` [27661] /home/user/venv/bin/python threads 1; perf/taskstats CPU 1.0001 (thread rows 1.0001); disk {'d_state_ns': 3982000, 'blkio_ns': 0, 'coverage': 0.0, 'accounted': False}
+- repeat 6: `python` [27716] /home/user/venv/bin/python threads 1; perf/taskstats CPU 1.0001 (thread rows 1.0001); disk {'d_state_ns': 7149000, 'blkio_ns': 0, 'coverage': 0.0, 'accounted': False}
 
 ### Stability rule (D18, D19)
 

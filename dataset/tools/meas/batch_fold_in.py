@@ -7,13 +7,14 @@ batch_fold_in.py [--check]
 (9.7), `package-upgrade` (9.10), `module-build-orchestrator` and `module-compiler-child` (9.10), `file-indexer`, `video-transcoder` and `incremental-backup` (9.10) carry the quantile tables, each one pooled table of the campaign's record: a program's runs between voluntary
 blocks and the block after each run (9.6 D21, D22, D25; 9.7 D29), the object job's per-(role, step) CPU (9.6 D19,
 D20), make's dispatch run. Each is written in the library's table form (distribution.yaml_table: the ten quantiles,
-the extremes, the interval means), keeping the param's own sampling and source tag; nothing else in the entries is
-touched. --check exits 1 if dataset/archetypes.yaml differs from what the records give.
+the extremes, the interval means), keeping the param's own sampling and source tag; `module-build-orchestrator`'s
+`tail_work`, the tail's mean CPU over the landings, as its constant; nothing else in the entries is touched. --check exits 1 if dataset/archetypes.yaml differs from what the records give.
 """
 
 import json
 import os
 import re
+import statistics
 import sys
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -66,6 +67,15 @@ for _kind, _tree in modbuild.TREES.items():
 TABLES[("module-build-orchestrator", "dispatch_overhead")] = ("dkms", _MB + ("dispatch_us",))
 TABLES[("module-build-orchestrator", "tail_run")] = ("dkms", _MB + ("tail_run_us",))
 TABLES[("module-build-orchestrator", "tail_block")] = ("dkms", _MB + ("tail_block_us",))
+# the tail's CPU budget (D54): the mean over the landings of the tail's CPU, every comm's summed, in µs
+CONSTANTS = {("module-build-orchestrator", "tail_work"): ("dkms", _MB + ("tail_cpu_by_comm_ms",))}
+
+
+def tail_work_us(by_landing):
+    return round(statistics.fmean(sum(ms.values()) for ms in by_landing.values()) * 1000)
+
+
+CONSTANT_LINE = re.compile(r'^(\s*)\{dist: constant, value_us: [0-9.]+, sampling: (\S+), source: "([^"]+)"\}\s*$')
 
 PARAM_LINE = re.compile(r'^(\s*)\{dist: quantiles, .*sampling: (\S+), source: "([^"]+)"\}\s*$')
 
@@ -83,6 +93,18 @@ def rewrite(text, pools):
             archetype = m.group(1)
             continue
         m = re.match(r"^\s+([a-z0-9_]+):\s*$", line)
+        if m and (archetype, m.group(1)) in CONSTANTS:
+            record, path = CONSTANTS[(archetype, m.group(1))]
+            node = pools[record]
+            for key in path:
+                node = node[key]
+            cm = CONSTANT_LINE.match(lines[i + 1])
+            if not cm:
+                raise SystemExit(f"{archetype}.{m.group(1)}: the line after the param is not a one-line constant")
+            lines[i + 1] = (f'{cm.group(1)}{{dist: constant, value_us: {tail_work_us(node)}, sampling: {cm.group(2)}, '
+                            f'source: "{cm.group(3)}"}}')
+            written.add((archetype, m.group(1)))
+            continue
         if not m or (archetype, m.group(1)) not in TABLES:
             continue
         record, path = TABLES[(archetype, m.group(1))]
@@ -94,7 +116,7 @@ def rewrite(text, pools):
             raise SystemExit(f"{archetype}.{m.group(1)}: the line after the param is not a one-line quantiles table")
         lines[i + 1] = pm.group(1) + yaml_table(node["table"], pm.group(3), scale=1.0, sampling=pm.group(2))
         written.add((archetype, m.group(1)))
-    missing = sorted(set(TABLES) - written)
+    missing = sorted((set(TABLES) | set(CONSTANTS)) - written)
     if missing:   # a table the library no longer holds is a failure, not a table skipped
         raise SystemExit(f"not in the library: {', '.join(f'{a}.{p}' for a, p in missing)}")
     return "\n".join(lines)
@@ -108,7 +130,7 @@ def main():
     if "--check" in sys.argv[1:]:
         sys.exit(0 if new == text else 1)
     open(path, "w").write(new)
-    print(f"{path}: {len(TABLES)} batch tables written")
+    print(f"{path}: {len(TABLES)} batch tables and {len(CONSTANTS)} constant written")
 
 
 if __name__ == "__main__":

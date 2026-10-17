@@ -55,10 +55,10 @@ sets:
   # turn, form `departs`. Three ordered pairs drawn from the 240 by keyed hash;
   # each file built under two seeds, one tuning and one measurement (decision 6).
   # The intervals are the hold-time plan's step 3 (decision 7): 5 s, 10 s and
-  # 30 s are the debounce values of the daemon-level switches comparable to
-  # ours — GameMode's reaper interval, tuned's dynamic-tuning update interval,
-  # systemd-oomd's pressure duration — each tagged with its source; 2 s is a
-  # point below that range, design.
+  # 30 s are intervals of the daemon-level switches comparable to ours —
+  # GameMode's reaper check interval, tuned's dynamic-tuning update interval
+  # (dynamic tuning off by default), systemd-oomd's pressure sustain duration
+  # — each tagged with its source; 2 s is a point below that range, design.
   flap-stress:
     lead_in: 60s
     alternations: 8

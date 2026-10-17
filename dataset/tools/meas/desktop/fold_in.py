@@ -85,16 +85,16 @@ APPROX = {}
 # `steady`) from 300 s, the visible (run 35501680255, `steady-notimer`) from 0.
 # 9.10 D156: the hidden renderer's own, re-read on 9.10's 3,600 s probe (run 37273691029) past its 1,030 s settle —
 # `within_run.py <probe> steady <analysis.json> 600 60 <comms> 400`
-GRACE = {"meas-ci:desktop:2026-09-20": ("20 s, grace-settle 630 s: 330 s of the documented five-minute default and 300 s "
-                                       "read from the probe, D15"),
-         "meas-ci:desktop:2026-10-05b": ("20 s, grace-settle 1,030 s: 330 s of the documented five-minute default, 300 s "
-                                        "read from the probe (D15) and 400 s past the page thread's settling read from "
-                                        "9.10's 3,600 s probe (9.10 D152)")}
+GRACE = {"meas-ci:desktop:2026-09-20": ("20 s, grace-settle 630 s: 330 s of the documented grace (five minutes while "
+                                       "loading, 60 s once loaded) and 300 s read from the probe, D15"),
+         "meas-ci:desktop:2026-10-05b": ("20 s, grace-settle 1,030 s: 330 s of the documented grace (five minutes while "
+                                        "loading, 60 s once loaded), 300 s read from the probe (D15) and 400 s past the "
+                                        "page thread's settling read from 9.10's 3,600 s probe (9.10 D152)")}
 WINDOWS_1005B = {
     "renderer-hidden": ("Read in 100 s windows over the 5 repeats (9.10 D156): the page's own thread `chrome` runs "
-                        "0.068 ms in the first 100 s and 0.057–0.072 ms after, its settling past; the residual "
-                        "(`MemoryInfra`, `ThreadPoolServi`) wakes at 3.6 times its phase rate in the first 100 s and "
-                        "2.4 times 400–500 s in; the phase's windows hold 5.2 % of its CPU above its median window. The "
+                        "0.068 ms in the first 100 s and 0.057–0.072 ms after, its settling past; `MemoryInfra`, one "
+                        "of the residual's two comms, wakes at 3.6 times its phase rate in the first 100 s and 2.4 "
+                        "times 400–500 s in; the phase's windows hold 5.2 % of its CPU above its median window. The "
                         "carried values are the phase's means."),
 }
 SPAN_1005B = {
@@ -102,14 +102,14 @@ SPAN_1005B = {
                         "page's own thread runs 0.106, 0.083, 0.077 and 0.080 ms a wake in its first four minutes and "
                         "0.055–0.060 ms from the seventh, the settling the 1,030 s settle now covers; past it a 600 s "
                         "window holds the wakes within 3.7 % of the probe's level at every placement and the CPU within "
-                        "−7.2 % and +10.4 %, an episode recurring some 1,800 s apart — the page thread at 0.072–0.075 ms, "
+                        "−7.8 % and +10.4 %, an episode recurring some 1,800 s apart — the page thread at 0.072–0.075 ms, "
                         "`Chrome_ChildIOT` waking 0.243–0.247/s against 0.200–0.210. The probe ran Google Chrome "
                         "154.0.8037.57, the build these repeats ran. That build is not the 152 and 153 9.8's campaign "
                         "and `web-browser` ran, Google's repository serving only its current build (9.5 D69; 9.10 "
                         "D156): against 9.8's 19 repeats the page's own thread wakes 1.72 times as often and "
                         "`Chrome_ChildIOT` 2.51 times, the renderer 0.211 against 0.169 wakes/s, while the page "
-                        "thread's runs, its settling past, are 35 % shorter and the CPU share 9.6 against 9.2 × 10⁻⁵; "
-                        "`web-browser` stays 152 and 153's, the two halves of one browser on two builds."),
+                        "thread's runs, its settling past, are 35 % shorter and the 12 renderers' CPU share 9.6 against "
+                        "9.2 × 10⁻⁵; `web-browser` stays 152 and 153's, the two halves of one browser on two builds."),
 }
 WITHIN_1005B = {("chrome-hidden", "Chrome_ChildIOT"): "±8.1 % (9.10 D156)",
                 ("chrome-hidden", "Compositor"): "±30.6 % (9.10 D156)",
@@ -282,8 +282,14 @@ def entry(app, e):
     reps = ", ".join(str(x) for x in e["repeats"])
     out.append(f"      run: \"{TAG.split(':', 1)[1]}, repeats [{reps}], runs {', '.join(runs)}\"")
     per = ph["wakes_per_s_per_renderer"] if renderer else ph["wakes_per_s"]
+    # the pooled cpu_share is the phase's kept rows — a renderer entry's every measured renderer together (class F1 of
+    # the 9.16 measurement audit), so it is named as theirs, not stated per renderer
+    whose = ""
+    if renderer:
+        n = sorted(set(e["renderers_measured"].values()))
+        whose = f" of the {n[0] if n[0] == n[-1] else f'{n[0]}–{n[-1]}'} renderers"
     stats = [f"{CARRIED[app]} wakes/s{unit} {min(per):.4f}–{max(per):.4f}",
-             f"{CARRIED[app]} cpu-share {min(ph['cpu_share']):.5f}–{max(ph['cpu_share']):.5f}"]
+             f"{CARRIED[app]} cpu-share{whose} {min(ph['cpu_share']):.5f}–{max(ph['cpu_share']):.5f}"]
     out.append("      stats: [" + ", ".join(json.dumps(s) for s in stats) + "]")
 
     machine, session, sparse, machine_comms = exceptions(app, e, ph)

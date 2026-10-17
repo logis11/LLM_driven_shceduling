@@ -30,8 +30,7 @@ import os
 import sys
 
 def _repo(d=os.path.dirname(os.path.abspath(__file__))):
-    """The repository root: the nearest directory up holding dataset/tools (the script runs from 9.16's research
-    folder or from dataset/tools/meas alike)."""
+    """The repository root: the nearest directory up holding dataset/tools."""
     while not os.path.isdir(os.path.join(d, "dataset", "tools")):
         if os.path.dirname(d) == d:
             raise SystemExit("no dataset/tools above this script")

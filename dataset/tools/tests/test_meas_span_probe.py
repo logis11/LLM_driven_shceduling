@@ -37,6 +37,15 @@ def test_the_worst_placement_is_found_inside_the_span_only():
     assert r["wakes_per_s"]["placement"] < 0 < r["wakes_per_s"]["worst"]
 
 
+def test_the_range_a_window_holds_is_its_least_and_largest_placement():
+    # a 300 s span: 30 s at 1 ms/s from 100 s, the rest at 2 — the windows run from below the level to above it
+    cpu = [2.0] * 10 + [1.0] * 3 + [2.0] * 17
+    r = sp.level_reading(cpu, [100.0] * 30, 10.0, 60.0, 300.0)["cpu_ms_per_s"]
+    level = (27 * 2.0 + 3 * 1.0) / 30
+    assert r["least"] == pytest.approx(1.5 / level - 1, abs=1e-4) and r["largest"] == pytest.approx(2.0 / level - 1, abs=1e-4)
+    assert r["least"] <= r["placement"] <= r["largest"] and r["worst"] in (r["least"], r["largest"])
+
+
 def test_a_probe_shorter_than_its_span_is_refused():
     with pytest.raises(ValueError, match="short of the 400 s span"):
         sp.level_reading([1.0] * 30, [1.0] * 30, 10.0, 60.0, 400.0)

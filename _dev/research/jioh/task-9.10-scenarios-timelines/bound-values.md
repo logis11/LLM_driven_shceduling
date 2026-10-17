@@ -24,7 +24,7 @@ Every value a core-set timeline binds — `count`, `spawn_count`, `parallelism_c
 
 | value | task | files | label | decision |
 |---|---|---|---|---|
-| `parallelism_cap: 8` | the kernel build; the module rebuild | `c1-compile`, `c4-compile`, `c3-workday`, `c6-dual`; `c7-compile` | design: the eight-thread desktop | 9.6 D4; D18, D50 |
+| `parallelism_cap: 8` | the kernel build; the module rebuild | `c1-compile`, `c4-compile`, `c3-workday`, `c6-dual`; `c7-compile` | convention: the `nproc` rule applied to an eight-thread desktop (9.6 D4's label; relabelled from design 2026-10-17, 9.16 `decisions.md`, D-F3-08) | 9.6 D4; D18, D50 |
 | `lane_share`: 0.9, 0.95, 1.45, 0.6 | the game chain | 0.9 `c1-gaming`, `c4-gaming`, `c7-gaming`; 0.95 `c2-p2a`, `c2-p2b`; 1.45 `c3-evening`; 0.6 `c6-dual` | design: a calibration size | D31 |
 | `total_work: 30s`, `program: spoof` | the `chrome`-named batch job | `c6-spoof` | design: by construction | 9.6 D7; D31 |
 | `total_work: 6s` | the injected archive job, `7z` (`file-archiver`) | `c4-office` | design: the injection's size, part of 9.7's measured job (4,882–5,283 s of CPU, `meas-ci:background:2026-09-19`), an exception to D17 | D161 |

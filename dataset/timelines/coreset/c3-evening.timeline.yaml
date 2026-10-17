@@ -1,5 +1,5 @@
 # C3 — evening arc (building-plan §3 C3): browsing -> gaming (+chat client)
-# -> media playback.
+# -> media playback. The order is design; no source defines it.
 # The four renderer-hidden tasks are the other tabs' page renderers of one
 # five-tab window: five tabs from Firefox's Linux telemetry (glam; 9.10 D15,
 # D16), one renderer per tab observed in Chrome (meas-ci:desktop:2026-10-04;

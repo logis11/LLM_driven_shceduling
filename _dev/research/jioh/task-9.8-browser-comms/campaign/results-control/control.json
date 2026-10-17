@@ -461,6 +461,7 @@
     "max_abs_z": 5.12
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 14 intervals read, about 0.7 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 steady phase: `HangWatcher` run mean 0.974 (0.950\u20130.998) and wake rate 1.003 (1.002\u20131.003)."
   },
   "renderer-visible": {
@@ -802,6 +803,7 @@
     "max_abs_z": 1.98
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 10 intervals read, about 0.5 differences by chance alone, none found."
   },
   "chat-client": {
@@ -1212,6 +1214,7 @@
     "1@36303380155": "D66: windows 1 and 2 measured twice \u2014 the restarted gate loop relaunched them (#64, then #67 for window 1) after the previous loop's relaunch (#62) had already started; the original launch's copies (#62, 36300233345) are kept",
     "2@36300828888": "D66: windows 1 and 2 measured twice \u2014 the restarted gate loop relaunched them (#64, then #67 for window 1) after the previous loop's relaunch (#62) had already started; the original launch's copies (#62, 36300233345) are kept"
    },
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 12 intervals read, about 0.6 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `Chrome_ChildIOT` run mean 0.931 (0.910\u20130.952), `Chrome_IOThread` run mean 0.843 (0.809\u20130.877), `ThreadPoolForeg` run mean 0.909 (0.861\u20130.958), `ThreadPoolServi` run mean 0.880 (0.807\u20130.952). The second idle run wakes `Chrome_IOThread` and `Chrome_ChildIOT` about 3\u20134 % more than the first, traced or not; the control ran Element 1.12.29, the carried pool 1.12.28."
   },
   "game-client": {
@@ -1930,6 +1933,7 @@
     "max_abs_z": 1.27
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 22 intervals read, about 1.1 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 shown phase: `CJobMgr::m_Work` run mean 0.857 (0.778\u20130.935), `Chrome_ChildIOT` run mean 0.871 (0.844\u20130.899) and wake rate 0.996 (0.993\u20131.000), `Compositor` run mean 0.952 (0.915\u20130.988) and wake rate 0.979 (0.973\u20130.985), `ThreadPoolForeg` run mean 0.816 (0.746\u20130.886) and wake rate 1.076 (1.013\u20131.139), `VizCompositorTh` run mean 0.972 (0.947\u20130.998) and wake rate 0.988 (0.977\u20130.998), `steamwebhelper` wake rate 0.996 (0.993\u20130.999)."
   }
  }

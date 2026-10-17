@@ -5,11 +5,12 @@ repeats — a window's rows over the repeats' time in it. A phase's carried valu
 the phase does part of its work only in part of it — launch work (9.5 D34, D83), work after a harness step or past the
 steady edge — the windows show where. Rows are the ones the pool reads: a heavy event's runs apart (9.5 D64, 9.8 D33),
 a session entry's wakes owed to causes outside the desktop out (9.9 D23, D27). A component the library does not carry
-is read as the residual. An operation phase carries the rows inside its operations (9.5's operations, the pool's
+is read as the residual; with --split-residual (desktop) each of the residual's comms is read apart, as
+`residual/<comm>`. An operation phase carries the rows inside its operations (9.5's operations, the pool's
 `inside`), so it is read over the operations' time: each operation in the window its trigger falls in, and the
 operations one by one in their order. A JSON record and a results page, per archetype.
 
-windows.py <campaign|desktop|session> <artifacts> <out.json> [--md PAGE] [--app APP]...
+windows.py <campaign|desktop|session> <artifacts> <out.json> [--md PAGE] [--app APP]... [--split-residual]
 """
 
 import argparse
@@ -164,7 +165,8 @@ def campaign_entries(root, apps=()):
             carried = [c for c in (run["phases"][phase].get("components") or {}).get("selected") or []]
         readings, win = [], None
         for rep in run["repeats"]:
-            D = b.artifact_dir(root, app, rep, run["run_id"][str(rep)])
+            D = b.artifact_dir(root, app, rep, run["run_id"][str(rep)],
+                               cr.IDLE_MODE_95.get(app, "full") if phase == "idle" else "full")
             _, raw = analyze_run(D, pooled.get("w_ms", 5.0), pooled.get("cap_ms", 0.0),
                                  exclude_roles=tuple(pooled.get("exclude_roles") or ()),
                                  idle_from_s=run.get("idle_from_s", 0.0))
@@ -230,14 +232,14 @@ def campaign_entries(root, apps=()):
     return out
 
 
-def desktop_entries(root, apps=()):
-    """9.8: each entry's carried phase (desktop/fold_in.CARRIED), the rows the analyzer keeps — a renderer entry's
-    renderers together, so its rates are the renderers' sum."""
+def desktop_entries(root, apps=(), split_residual=False):
+    """9.8: each folded entry's carried phase (desktop/fold_in.FOLDED, CARRIED), the rows the analyzer keeps — a
+    renderer entry's renderers together, so its rates are the renderers' sum."""
     from meas import burstiness as b, control_report as cr
     from meas.desktop import analyze as a98
-    from meas.desktop.fold_in import CARRIED, IDS
+    from meas.desktop.fold_in import CARRIED, FOLDED, IDS
     lib, out = _library(), {}
-    for app in sorted(CARRIED):
+    for app in sorted(FOLDED):
         if apps and app not in apps:
             continue
         run, phase = json.load(open(cr.pool_98(app)))["runs"][app], CARRIED[app]
@@ -247,7 +249,8 @@ def desktop_entries(root, apps=()):
             D = b.artifact_dir(root, app, rep, run["run_id"][str(rep)], run.get("mode") or "full")
             ph = a98.analyze_phase(D, phase, app, keep_rows=True)
             win = win or window_of(ph["span_s"])
-            named = [((r.comm if r.comm in carried else "residual"), r.t_in, r.run) for r in ph["_rows"]]
+            named = [((r.comm if r.comm in carried else f"residual/{r.comm}" if split_residual else "residual"),
+                      r.t_in, r.run) for r in ph["_rows"]]
             readings.append(read(named, ph["t0"], ph["span_s"], win))
             print(f"{app} r{rep}", file=sys.stderr)
         out[IDS[app]] = _entry(IDS[app], app, phase, readings, win)
@@ -330,9 +333,13 @@ def main():
     ap.add_argument("artifacts"); ap.add_argument("out")
     ap.add_argument("--md")
     ap.add_argument("--app", action="append", default=[], help="one app (9.9: one entry's program) only, repeatable")
+    ap.add_argument("--split-residual", action="store_true", help="desktop: each residual comm read apart")
     a = ap.parse_args()
+    if a.split_residual and a.family != "desktop":
+        ap.error("--split-residual reads the desktop family only")
     read_ = {"campaign": campaign_entries, "desktop": desktop_entries, "session": session_entries}[a.family]
-    record = {"family": a.family, "archetypes": read_(a.artifacts, tuple(a.app))}
+    kw = {"split_residual": True} if a.split_residual else {}
+    record = {"family": a.family, "archetypes": read_(a.artifacts, tuple(a.app), **kw)}
     json.dump(record, open(a.out, "w"), indent=1)
     if a.md:
         open(a.md, "w").write(render(record))

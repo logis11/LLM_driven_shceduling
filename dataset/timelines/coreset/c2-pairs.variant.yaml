@@ -59,8 +59,10 @@ variants:
   # weekly incremental, `incremental-backup` shown as `deja-dup`, bound whole at
   # its measured CPU total (meas-ci:background:2026-10-04; 9.10 D17, D119, D120).
   # Segment 1 runs 60–326 s in both files; the length is 9.10 D123's, set on a
-  # shared lane; under the idle class (9.13) the backup does not end inside it
-  # and is scored by progress (9.14); the base's export ends by about 99.5 s.
+  # shared lane; under the idle class (9.13) the backup, 165.7 s of CPU in the
+  # about 166 s of lane the editor leaves, finishes about 0.3 s before the
+  # segment's end and is scored by its turnaround (9.14 decision 6's header rule;
+  # 9.16 decision D4); the base's export ends by about 99.5 s.
   # The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
   - id: c2-p3b
     from: c2-p3a.timeline.yaml

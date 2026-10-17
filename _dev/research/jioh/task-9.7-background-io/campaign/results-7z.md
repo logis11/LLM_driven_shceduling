@@ -1,4 +1,4 @@
-# 9.7 background campaign — pooled results (meas-ci:background:2026-09-19)
+# background campaign (9.7; 9.10's `upgrade`, `dkms`, `tracker`, `mnist`, `handbrake`, `kdenlive` and `dejadup`) — pooled results (meas-ci:background:2026-09-19)
 
 Machine EPYC 7763; stopped by the machine gate 8; other-model repeats 0. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9, times in µs, bytes per wake in bytes; the spread is the per-repeat mean. Rules: method §5 and §9.
 
@@ -56,12 +56,12 @@ command s {1: 5183.105, 2: 5034.815, 3: 5041.035, 4: 4883.302, 5: 5285.412, 6: 4
 | `7z#12` | run_us | 3204 | 5.0 / 5.0 / 8.0 / 604 / 1650 / 2888 / 10844 / 87863 / 2364893 / 6803982 | {1: 85372.4962, 2: 79745.1872, 3: 88638.7918, 4: 63938.5625, 5: 86911.8857, 6: 84986.3399} |
 | `7z#12` | wait_us | 3198 | 3.0 / 4.0 / 644 / 3967 / 8068 / 11392 / 14980 / 18508 / 37627 / 24411972 | {1: 63108.4528, 2: 58183.5993, 3: 66004.9407, 4: 51493.7913, 5: 64078.035, 6: 60124.811} |
 
-- repeat 1: `7z` [4071] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9998; disk {'d_state_ns': 477249000, 'blkio_ns': 471440141, 'coverage': 0.9878, 'accounted': True}
-- repeat 2: `7z` [4054] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9998; disk {'d_state_ns': 409656000, 'blkio_ns': 87608743, 'coverage': 0.2139, 'accounted': False}
-- repeat 3: `7z` [3995] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997; disk {'d_state_ns': 589768000, 'blkio_ns': 42909333494, 'coverage': 72.7563, 'accounted': False}
-- repeat 4: `7z` [4100] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997; disk {'d_state_ns': 439309000, 'blkio_ns': 171535651, 'coverage': 0.3905, 'accounted': False}
-- repeat 5: `7z` [4066] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9998; disk {'d_state_ns': 310029000, 'blkio_ns': 198093281, 'coverage': 0.639, 'accounted': False}
-- repeat 6: `7z` [4138] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997; disk {'d_state_ns': 632846000, 'blkio_ns': 109943864, 'coverage': 0.1737, 'accounted': False}
+- repeat 1: `7z` [4071] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9998 (thread rows 0.9998); disk {'d_state_ns': 477249000, 'blkio_ns': 471440141, 'coverage': 0.9878, 'accounted': True}
+- repeat 2: `7z` [4054] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9998 (thread rows 0.9998); disk {'d_state_ns': 409656000, 'blkio_ns': 87608743, 'coverage': 0.2139, 'accounted': False}
+- repeat 3: `7z` [3995] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997 (thread rows 0.9997); disk {'d_state_ns': 589768000, 'blkio_ns': 42909333494, 'coverage': 72.7563, 'accounted': False}
+- repeat 4: `7z` [4100] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997 (thread rows 0.9997); disk {'d_state_ns': 439309000, 'blkio_ns': 171535651, 'coverage': 0.3905, 'accounted': False}
+- repeat 5: `7z` [4066] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9998 (thread rows 0.9998); disk {'d_state_ns': 310029000, 'blkio_ns': 198093281, 'coverage': 0.639, 'accounted': False}
+- repeat 6: `7z` [4138] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997 (thread rows 0.9997); disk {'d_state_ns': 632846000, 'blkio_ns': 109943864, 'coverage': 0.1737, 'accounted': False}
 
 ### 7z-mmt1-warm
 
@@ -87,12 +87,12 @@ command s {1: 4714.221, 2: 4734.415, 3: 4661.466, 4: 4692.376, 5: 4827.667, 6: 4
 | `7z#4` | run_us | 33 | 5.0 / 5.6 / 7.2 / 9.0 / 11.0 / 1031 / 3117 / 4115 / 4163 / 4168 | {1: 831.4, 2: 1048.5, 3: 1045.75, 4: 535.0, 5: 835.0, 6: 604.4286} |
 | `7z#4` | wait_us | 27 | 2.0 / 2.3 / 3.0 / 5.0 / 256 / 364055 / 453271 / 476459 / 519476 / 530899 | {1: 191007.5, 2: 253051.3333, 3: 301762.3333, 4: 107450.2857, 5: 199358.0, 6: 139797.0} |
 
-- repeat 1: `7z` [5154] /usr/lib/7zip/7z threads 4; perf/taskstats CPU 1.0001; disk {'d_state_ns': 22288000, 'blkio_ns': 22563009, 'coverage': 1.0123, 'accounted': True}
-- repeat 2: `7z` [5132] /usr/lib/7zip/7z threads 4; perf/taskstats CPU 1.0; disk {'d_state_ns': 17475000, 'blkio_ns': 17297938, 'coverage': 0.9899, 'accounted': True}
-- repeat 3: `7z` [5028] /usr/lib/7zip/7z threads 4; perf/taskstats CPU 1.0; disk {'d_state_ns': 234255000, 'blkio_ns': 5668115171, 'coverage': 24.1963, 'accounted': False}
-- repeat 4: `7z` [5104] /usr/lib/7zip/7z threads 4; perf/taskstats CPU 1.0; disk {'d_state_ns': 98529000, 'blkio_ns': 66702030, 'coverage': 0.677, 'accounted': False}
-- repeat 5: `7z` [5112] /usr/lib/7zip/7z threads 4; perf/taskstats CPU 1.0001; disk {'d_state_ns': 104553000, 'blkio_ns': 2485139004, 'coverage': 23.7692, 'accounted': False}
-- repeat 6: `7z` [5834] /usr/lib/7zip/7z threads 4; perf/taskstats CPU 1.0; disk {'d_state_ns': 1892000, 'blkio_ns': 1180051, 'coverage': 0.6237, 'accounted': False}
+- repeat 1: `7z` [5154] /usr/lib/7zip/7z threads 4; perf/taskstats CPU 1.0001 (thread rows 1.0001); disk {'d_state_ns': 22288000, 'blkio_ns': 22563009, 'coverage': 1.0123, 'accounted': True}
+- repeat 2: `7z` [5132] /usr/lib/7zip/7z threads 4; perf/taskstats CPU 1.0 (thread rows 1.0); disk {'d_state_ns': 17475000, 'blkio_ns': 17297938, 'coverage': 0.9899, 'accounted': True}
+- repeat 3: `7z` [5028] /usr/lib/7zip/7z threads 4; perf/taskstats CPU 1.0 (thread rows 1.0); disk {'d_state_ns': 234255000, 'blkio_ns': 5668115171, 'coverage': 24.1963, 'accounted': False}
+- repeat 4: `7z` [5104] /usr/lib/7zip/7z threads 4; perf/taskstats CPU 1.0 (thread rows 1.0); disk {'d_state_ns': 98529000, 'blkio_ns': 66702030, 'coverage': 0.677, 'accounted': False}
+- repeat 5: `7z` [5112] /usr/lib/7zip/7z threads 4; perf/taskstats CPU 1.0001 (thread rows 1.0001); disk {'d_state_ns': 104553000, 'blkio_ns': 2485139004, 'coverage': 23.7692, 'accounted': False}
+- repeat 6: `7z` [5834] /usr/lib/7zip/7z threads 4; perf/taskstats CPU 1.0 (thread rows 1.0); disk {'d_state_ns': 1892000, 'blkio_ns': 1180051, 'coverage': 0.6237, 'accounted': False}
 
 ### 7z-mmt8-cold
 
@@ -136,12 +136,12 @@ command s {1: 5253.633, 2: 4981.545, 3: 5413.129, 4: 4956.569, 5: 5173.491, 6: 4
 | `7z#12` | run_us | 2754 | 5.0 / 6.0 / 7.0 / 351 / 1525 / 2674 / 12782 / 160003 / 3504962 / 8501920 | {1: 94588.3057, 2: 88828.3347, 3: 109501.3853, 4: 134258.4718, 5: 140018.3005, 6: 74428.6175} |
 | `7z#12` | wait_us | 2748 | 3.0 / 3.0 / 253 / 3900 / 8160 / 12035 / 15818 / 20857 / 280460 / 24820452 | {1: 69040.7404, 2: 64416.7525, 3: 75452.058, 4: 78839.3145, 5: 81396.8773, 6: 51222.2577} |
 
-- repeat 1: `7z` [5795] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997; disk {'d_state_ns': 14154611958, 'blkio_ns': 2924694202403, 'coverage': 206.6248, 'accounted': False}
-- repeat 2: `7z` [5808] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997; disk {'d_state_ns': 10904600947, 'blkio_ns': 896628772921, 'coverage': 82.2248, 'accounted': False}
-- repeat 3: `7z` [5555] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997; disk {'d_state_ns': 17253304974, 'blkio_ns': 2598663257339, 'coverage': 150.6183, 'accounted': False}
-- repeat 4: `7z` [5659] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997; disk {'d_state_ns': 11289137946, 'blkio_ns': 210888830370, 'coverage': 18.6807, 'accounted': False}
-- repeat 5: `7z` [5768] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997; disk {'d_state_ns': 13766231949, 'blkio_ns': 1399327430681, 'coverage': 101.6493, 'accounted': False}
-- repeat 6: `7z` [6424] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997; disk {'d_state_ns': 14480207952, 'blkio_ns': 1148737331823, 'coverage': 79.3315, 'accounted': False}
+- repeat 1: `7z` [5795] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997 (thread rows 0.9997); disk {'d_state_ns': 14154611958, 'blkio_ns': 2924694202403, 'coverage': 206.6248, 'accounted': False}
+- repeat 2: `7z` [5808] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997 (thread rows 0.9997); disk {'d_state_ns': 10904600947, 'blkio_ns': 896628772921, 'coverage': 82.2248, 'accounted': False}
+- repeat 3: `7z` [5555] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997 (thread rows 0.9997); disk {'d_state_ns': 17253304974, 'blkio_ns': 2598663257339, 'coverage': 150.6183, 'accounted': False}
+- repeat 4: `7z` [5659] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997 (thread rows 0.9997); disk {'d_state_ns': 11289137946, 'blkio_ns': 210888830370, 'coverage': 18.6807, 'accounted': False}
+- repeat 5: `7z` [5768] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997 (thread rows 0.9997); disk {'d_state_ns': 13766231949, 'blkio_ns': 1399327430681, 'coverage': 101.6493, 'accounted': False}
+- repeat 6: `7z` [6424] /usr/lib/7zip/7z threads 34; perf/taskstats CPU 0.9997 (thread rows 0.9997); disk {'d_state_ns': 14480207952, 'blkio_ns': 1148737331823, 'coverage': 79.3315, 'accounted': False}
 
 ### Stability rule (D18, D19)
 

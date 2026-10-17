@@ -64,6 +64,43 @@ def test_a_repeat_s_artifact_is_found_by_its_run_and_repeat(tmp_path):
         burstiness.artifact_dir(str(tmp_path), "code", 43, "36126154552")
 
 
+def test_an_idle_repeat_is_found_under_the_mode_its_campaign_landed_it_in(tmp_path):
+    # 9.10 D146: video-editor's idle campaign lands `meas-interactive-kdenlive-r<k>-idle`, which a `full` lookup misses
+    idle = tmp_path / "interactive-kdenlive-idle" / "37273046929" / "meas-interactive-kdenlive-r1-idle"
+    idle.mkdir(parents=True)
+    assert burstiness.artifact_dir(str(tmp_path), "kdenlive", 1, "37273046929", "idle") == str(idle)
+    with pytest.raises(SystemExit):
+        burstiness.artifact_dir(str(tmp_path), "kdenlive", 1, "37273046929")
+
+
+def test_every_idle_pool_s_mode_is_the_one_the_readers_look_its_landings_up_by():
+    import json
+    import os
+    from meas import control_report as cr
+    for app, src in cr.IDLE_FROM_95.items():
+        run = json.load(open(os.path.join(src, f"pool-{app}.json")))["runs"][app]
+        assert (run.get("mode") or "full") == cr.IDLE_MODE_95.get(app, "full"), app
+
+
+def test_the_desktop_reading_takes_only_the_entries_the_library_folds(tmp_path, monkeypatch):
+    # 9.10 D16 left renderer-visible out of the library; desktop/fold_in.CARRIED still names its phase
+    import json
+    from meas import control_report as cr
+    from meas.desktop.fold_in import FOLDED
+    seen = []
+
+    def no_repeats(app):
+        seen.append(app)
+        p = tmp_path / f"{app}.json"
+        p.write_text(json.dumps({"runs": {app: {"repeats": [], "run_id": {}}}}))
+        return str(p)
+
+    monkeypatch.setattr(cr, "pool_98", no_repeats)
+    monkeypatch.setattr(burstiness, "_entry", lambda *a, **k: {})
+    burstiness.desktop_entries(str(tmp_path))
+    assert sorted(seen) == sorted(FOLDED)
+
+
 def test_a_renderer_entry_reads_each_renderer_as_one_stream():
     # the archetype is one renderer (9.8 D14): each renderer measured in a repeat is one stream beside the compile of one
     from collections import namedtuple

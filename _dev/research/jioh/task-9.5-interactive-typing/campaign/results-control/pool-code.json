@@ -12327,7 +12327,7 @@
     "tolerance": 0.05,
     "abs_floor_ms": 0.001,
     "min_repeats": 5,
-    "window_limit": 44,
+    "window_limit": 57,
     "quantities": {
      "idle gpu/VizCompositorTh wakes/s": {
       "k": 6,

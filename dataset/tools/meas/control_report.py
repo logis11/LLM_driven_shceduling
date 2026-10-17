@@ -32,6 +32,8 @@ POOL_95 = {**{a: SAME for a in ("gimp", "kdenlive", "mpv-audio", "mpv-video", "s
 # 9.10 D146: kdenlive's idle phase from its own campaign past the launch work, meas-ci:interactive:2026-10-05
 KDENLIVE_IDLE = os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "kdenlive-idle", "results")
 IDLE_FROM_95 = {"thunderbird-send": SAME, "kdenlive": KDENLIVE_IDLE}
+# the mode the idle campaign's artifacts are named by (9.10 kdenlive-idle method §1: `meas-interactive-kdenlive-r<k>-idle`)
+IDLE_MODE_95 = {"kdenlive": "idle"}
 ARCH_95 = {"soffice": "office-writer", "code": "code-editor", "chrome": "web-browser", "thunderbird-send": "mail-client",
            "gimp": "image-editor", "kdenlive": "video-editor", "mpv-audio": "audio-player", "mpv-video": "video-player",
            "webrtc": "video-call"}
@@ -414,8 +416,9 @@ def main():
     for app, jobs in sorted(find_jobs(a.family, a.artifacts).items()):
         if a.family == "campaign":
             carried = carried_95(app)
-        else:
-            carried = json.load(open(pool_98(app) if a.family == "desktop" else POOL_99))["runs"][app]
+        else:   # the 2026-09-27 control ran 9.8's phases: every desktop subject read against 9.8's pooled record, the
+            # hidden renderer's among them, not the 9.10 campaign its entry is now folded from (9.16 D6)
+            carried = json.load(open(POOL_98 if a.family == "desktop" else POOL_99))["runs"][app]
         record["archetypes"].update(app_reports(a.family, app, jobs, carried, control_pool=ctl))
     json.dump(record, open(a.out, "w"), indent=1)
     if a.md:

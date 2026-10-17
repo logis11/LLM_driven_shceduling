@@ -1,6 +1,6 @@
 # C3 — creation arc (building-plan §3 C3): gimp -> kdenlive -> HandBrakeCLI.
 # The order is design; SYSmark 30 ACC defines photo editing beside a
-# background encode (existence). The transcode is `video-transcoder`, shown as
+# background encode (existence; BAPCo's whitepaper v1.2, §2.2, in `sysmark30`). The transcode is `video-transcoder`, shown as
 # `HandBrakeCLI`, bound whole at its measured CPU total
 # (meas-ci:background:2026-10-03b; 9.10 D17, D97): its segment runs from 240 s
 # to the smallest whole second by which it ends under every policy — 240 s + the

@@ -7,8 +7,10 @@
       placement every repeat takes, the phase's first <phase-s>; the worst placement of a <phase-s> window inside the
       span, stepped by one slice, beside it. A difference over 5 % in either is a phase that does not hold over the span. <phase> `driven`
       reads a probe-driven run's windows driven-w01, driven-w02, … in order, their slices end to end.
-  span_probe.py level-desktop <run-dir> <app> <phase-s> <span-s> [--s 10] [--json OUT]
-      The same on a desktop probe's carried rows (desktop/analyze.py's view of the subject, 9.8's renderers).
+  span_probe.py level-desktop <run-dir> <app> <phase-s> <span-s> [--s 10] [--from S] [--json OUT]
+      The same on a desktop probe's carried rows (desktop/analyze.py's view of the subject, 9.8's renderers). With
+      --from, the phase's first S seconds are left out: the level and every placement are read over the <span-s>
+      that follow (9.10 D149's reading past the renderer's settling, read 600 s into the phase).
   span_probe.py paired <run-dir> <pool.json> [--json OUT]
       D144: each driven window's per-input run mean — the window rule's `run_ms_minus_idle` (analyze.py), read as the
       pool reads a repeat, the idle rate from the probe's own idle phase — against the pooled record's repeat k's
@@ -61,7 +63,8 @@ def view(run_dir, name, dest):
 
 def level_reading(cpu, wakes, slice_s, phase_s, span_s):
     """D143's reading on one slice profile: the level over the span's slices, the phase's first window against it,
-    and the worst window of the phase's length inside the span. Relative differences, signed."""
+    the worst window of the phase's length inside the span, and the least and largest over every placement (the
+    range a window holds). Relative differences, signed."""
     n, m = int(round(span_s / slice_s)), int(round(phase_s / slice_s))
     if n > len(cpu):
         raise ValueError(f"the probe holds {len(cpu) * slice_s:g} s, short of the {span_s:g} s span")
@@ -74,6 +77,7 @@ def level_reading(cpu, wakes, slice_s, phase_s, span_s):
         worst = max(range(len(rel)), key=lambda i: abs(rel[i]))
         out[key] = {"level": round(level, 4), "placement": round(rel[0], 4),
                     "worst": round(rel[worst], 4), "worst_at_s": round(worst * slice_s, 1),
+                    "least": round(min(rel), 4), "largest": round(max(rel), 4),
                     "holds": abs(rel[0]) <= TOLERANCE}
     out["holds"] = out["cpu_ms_per_s"]["holds"] and out["wakes_per_s"]["holds"]
     return out
@@ -182,6 +186,7 @@ def main():
     ld = sub.add_parser("level-desktop"); ld.add_argument("run_dir"); ld.add_argument("app")
     ld.add_argument("phase_s", type=float); ld.add_argument("span_s", type=float)
     ld.add_argument("--s", type=float, default=10.0); ld.add_argument("--json")
+    ld.add_argument("--from", dest="from_s", type=float, default=0.0, help="leave the phase's first S seconds out")
     pr = sub.add_parser("paired"); pr.add_argument("run_dir"); pr.add_argument("pool"); pr.add_argument("--json")
     a = ap.parse_args()
     if a.cmd == "level":
@@ -195,7 +200,10 @@ def main():
         from meas.desktop.fold_in import CARRIED
         ph = a98.analyze_phase(a.run_dir, CARRIED[a.app], a.app, keep_rows=True)
         cpu, wakes = slices_of_rows([(r.t_in, r.run) for r in ph["_rows"]], ph["t0"], ph["span_s"], a.s)
-        out = level_reading(cpu, wakes, a.s, a.phase_s, a.span_s)
+        k = int(round(a.from_s / a.s))
+        out = level_reading(cpu[k:], wakes[k:], a.s, a.phase_s, a.span_s)
+        if k:
+            out["from_s"] = a.from_s
     else:
         pool = json.load(open(a.pool))
         app = next(iter(pool["runs"]))

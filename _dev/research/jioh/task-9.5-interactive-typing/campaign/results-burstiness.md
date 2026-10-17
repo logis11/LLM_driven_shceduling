@@ -46,11 +46,11 @@
 
 ## video-editor (`kdenlive`, idle)
 
-20 repeats; wakes/s, median over the streams: measured 1.367, compiled 1.342. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
+16 repeats; wakes/s, median over the streams: measured 1.264, compiled 1.261. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
 
 | bin | measured | compiled | measured / compiled |
 |---|---|---|---|
-| 1 ms | 1.378 (1.211–1.54) | 1.078 (1.036–1.185) | 1.255 (1.09–1.452) |
-| 10 ms | 1.526 (1.324–1.809) | 1.077 (1.026–1.198) | 1.383 (1.222–1.706) |
-| 100 ms | 1.465 (1.242–2.026) | 1.029 (0.9569–1.105) | 1.395 (1.163–1.88) |
-| 1 s | 0.7323 (0.5417–1.548) | 0.267 (0.2116–0.3644) | 2.564 (1.673–5.828) |
+| 1 ms | 1.339 (1.082–1.707) | 1.083 (1.035–1.135) | 1.22 (0.9964–1.649) |
+| 10 ms | 1.465 (1.154–1.828) | 1.101 (1.042–1.166) | 1.315 (1.049–1.738) |
+| 100 ms | 1.407 (1.045–2.378) | 1.048 (0.9596–1.091) | 1.319 (0.991–2.478) |
+| 1 s | 0.6401 (0.3–1.416) | 0.2169 (0.1611–0.2732) | 2.757 (1.116–7.964) |

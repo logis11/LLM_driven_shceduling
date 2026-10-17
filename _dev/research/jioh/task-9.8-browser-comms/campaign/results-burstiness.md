@@ -2,25 +2,14 @@
 
 ## renderer-hidden (`chrome-hidden`, steady)
 
-228 streams, one per renderer, over 19 repeats; wakes/s, median over the streams: measured 0.173, compiled 0.167. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
+60 streams, one per renderer, over 5 repeats; wakes/s, median over the streams: measured 0.21, compiled 0.209. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
 
 | bin | measured | compiled | measured / compiled |
 |---|---|---|---|
-| 1 ms | 1.08 (1.018–1.329) | 1.019 (0.9998–1.408) | 1.057 (0.7923–1.33) |
-| 10 ms | 1.187 (1.036–1.443) | 1.02 (0.9982–1.445) | 1.14 (0.7708–1.417) |
-| 100 ms | 1.19 (1.054–1.549) | 1.025 (0.982–1.429) | 1.149 (0.8354–1.545) |
-| 1 s | 1.23 (1.009–1.873) | 0.9899 (0.8533–1.391) | 1.242 (0.9468–1.876) |
-
-## renderer-visible (`chrome-visible`, steady-notimer)
-
-132 streams, one per renderer, over 11 repeats; wakes/s, median over the streams: measured 0.141, compiled 0.14. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
-
-| bin | measured | compiled | measured / compiled |
-|---|---|---|---|
-| 1 ms | 1.101 (1.023–1.556) | 1.046 (0.9998–2.031) | 1.068 (0.5258–1.449) |
-| 10 ms | 1.258 (1.096–1.702) | 1.07 (0.9986–2.917) | 1.192 (0.429–1.664) |
-| 100 ms | 1.353 (1.215–1.85) | 1.08 (0.9858–3.494) | 1.225 (0.3873–1.725) |
-| 1 s | 1.261 (1.085–2.006) | 1.01 (0.87–3.347) | 1.231 (0.3654–2.029) |
+| 1 ms | 1.405 (1.343–1.523) | 1.103 (1.017–1.333) | 1.256 (1.05–1.454) |
+| 10 ms | 1.478 (1.411–1.574) | 1.147 (1.032–1.398) | 1.282 (1.03–1.428) |
+| 100 ms | 1.594 (1.42–2.055) | 1.159 (1.018–1.448) | 1.435 (0.9804–1.819) |
+| 1 s | 1.864 (1.765–2.03) | 1.096 (0.9651–1.395) | 1.709 (1.265–1.944) |
 
 ## chat-client (`element`, idle)
 

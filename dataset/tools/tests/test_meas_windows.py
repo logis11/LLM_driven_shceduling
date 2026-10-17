@@ -84,6 +84,25 @@ def test_the_operations_join_in_blocks_of_consecutive_operations():
     assert b["components"]["a"]["run_mean_ms"] == pytest.approx([1.0, 1.0, 1.0])
 
 
+def test_the_desktop_reading_takes_only_the_entries_the_library_folds(tmp_path, monkeypatch):
+    # 9.10 D16 left renderer-visible out of the library; desktop/fold_in.CARRIED still names its phase
+    import json
+    from meas import control_report as cr
+    from meas.desktop.fold_in import FOLDED
+    seen = []
+
+    def no_repeats(app):
+        seen.append(app)
+        p = tmp_path / f"{app}.json"
+        p.write_text(json.dumps({"runs": {app: {"repeats": [], "run_id": {}}}}))
+        return str(p)
+
+    monkeypatch.setattr(cr, "pool_98", no_repeats)
+    monkeypatch.setattr(windows, "_entry", lambda *a, **k: {})
+    windows.desktop_entries(str(tmp_path))
+    assert sorted(seen) == sorted(FOLDED)
+
+
 def test_every_9_5_operation_is_read():
     import yaml
     from meas import control_report as cr

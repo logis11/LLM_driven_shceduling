@@ -46,8 +46,9 @@ sources:
       composition on Windows (2012). Establishes the replayed input streams
       of the measured interactive archetypes — timing only (keys and
       positions unused): word-c1 (Word, neutral condition), outlook-c23
-      (Outlook, interruption conditions; no c1 keystrokes), ie-c1 (Internet
-      Explorer, neutral). Timestamps quantised at the 15.6 ms Windows tick;
+      (Outlook, blocks 2 and 3 — the e-mail-interruption and time-pressure
+      conditions, in counterbalanced order; no block-1 keystrokes), ie-c1
+      (Internet Explorer, neutral). Timestamps quantised at the 15.6 ms Windows tick;
       motion between pointer events not recorded. Streams built by
       dataset/tools/stimulus/build_streams.py from the files listed in
       dataset/tools/meas/probe/swell-ulog-files.json.
@@ -84,9 +85,10 @@ sources:
     notes: >-
       "make forks and execs 2430 processes, mostly short-lived" (sec-4.3;
       written "2430" in the paper). The workload is a `make -j8` build of
-      DynamoRio 6.1.0 (sec-4.1), not a Linux kernel build. Grounds only the
-      existence and short-lived character of compiler children; the paper
-      gives no lifetime distribution.
+      DynamoRio 6.1.0 (sec-4.1), not a Linux kernel build. Grounds only that
+      a parallel `make` build forks and execs many processes, mostly
+      short-lived (a DynamoRio build; the paper does not say what they run);
+      the paper gives no lifetime distribution.
 
   coetzee-arxiv12:
     type: scholarly
@@ -139,9 +141,10 @@ sources:
     type: deployed-system
     notes: >-
       Establishes the "Allow Downloads During Gameplay" check box (Steam ->
-      Settings -> Downloads), that downloads pause during gameplay by
-      default, and a per-game setting the article leaves unnamed (S10;
-      9.10 D7). Existence only.
+      Settings -> Downloads) and that downloads pause during gameplay by
+      default (FAQ 4F9E-6328-E9B8-47F9), and a per-game setting to allow or
+      prevent the downloading of other updates while playing (FAQ
+      71AB-698D-57EB-178C) (S10; 9.10 D7). Existence only.
 
   steamos-refresh:
     type: deployed-system
@@ -159,13 +162,13 @@ sources:
     notes: >-
       Establishes two shadowing statistics, in their units: ~3 min (3 min
       08 s) per event — one continuous use of a device or one interaction
-      with a person, formal meetings excluded; and 11 min 28 s, the mean
-      continuous segment in a working sphere before switching, central and
+      with a person, formal meetings, unknown and personal events excluded;
+      and 11 min 28 s, the mean continuous segment in a working sphere before switching, central and
       peripheral spheres only (13 min 49 s over all spheres; 12 min 18 s when
       switches shorter than 2 min are ignored; the paper's average time per
       working sphere is 33 min 32 s). Also ~10 spheres per person-day and
       ~2 min 11 s per tool/document before switching. Means and SDs only,
-      14 shadowed knowledge workers. (The figures our earlier docs attributed
+      14 shadowed information workers. (The figures our earlier docs attributed
       to CHI 2005/2008 live here.)
 
   # ---- grounds of the timelines' bound values (9.10 D32; 9.18) -------------

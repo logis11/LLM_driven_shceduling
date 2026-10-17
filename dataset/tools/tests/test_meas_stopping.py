@@ -49,3 +49,18 @@ def test_code_is_listed_with_where_it_stopped_not_simulated(repo_root):
     code = next(e for e in rec["entries"] if e["archetype"] == "code-editor")
     assert "simulated" not in code and code["stop"] == stopping.STOPPED_SHORT["code"]
     assert not code["stopped_at_window_limit"]
+
+
+def test_each_entry_s_widest_value_is_the_record_s_read_over_every_pool_the_fold_in_carries(repo_root):
+    # 9.10 D146 gave video-editor an idle pool of its own; its driven and operation values still come from 9.5's pool,
+    # and the widest of them (driven kdenlive run mean, ±5.00 % over 20 repeats) is the one its caveat rests on
+    import json
+    rec = json.load(open(repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+                         / "results-stopping" / "stopping.json"))
+    now = {e["archetype"]: e for e in stopping.entries(1)}
+    for e in rec["entries"]:
+        got = now[e["archetype"]]
+        assert (got["pool"], got["repeats"], got["widest"]) == (e["pool"], e["repeats"], e["widest"]), e["archetype"]
+    video = now["video-editor"]
+    assert len(video["pool"]) == 2 and video["widest"]["value"].startswith("driven ")
+    assert video["widest"]["pool"].endswith("results-same-machine")
