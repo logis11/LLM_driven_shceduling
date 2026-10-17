@@ -506,9 +506,9 @@ pins:
   scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 2ad757b6196ae1839a76b4f1b2a96d156eee84b40375dec9bd5f66116b6ca14e}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.1", sha256: 24ccb875ff666615de75d80bc5351b7f5c62713d605438844938f9ab6ef1676c}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: 0fba4b3c9822054fad19ef150d1395d91e679d42b6299166b9a89f50ad27960c}
-  dataset:      {path: dataset/build.manifest.json, sha256: d52e7bd45d842b76ce8d21155548b7c54587e008881d9724cdd89ad4468324a7}
+  dataset:      {path: dataset/build.manifest.json, sha256: 0f0af422d4dd92282903342b51cd6617d704d3cad9488d350388a47d7ff3417f}
   variants:
-    all: {path: dataset/build.variants.manifest.json, sha256: 6c1c3e09277f6368d84d88fa15adea27a9cea1d028859dc4f6f2e63568684f0a}
+    all: {path: dataset/build.variants.manifest.json, sha256: cdc143191fcd28aec80595e3060f4f391c91ba52c341e076043589124bb579f6}
 
 criterion:
   type: k_of_n_gap

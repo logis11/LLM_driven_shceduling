@@ -40,7 +40,8 @@ IDS = {"chrome-hidden": "renderer-hidden", "chrome-visible": "renderer-visible",
 LABEL = {"wakes/s": "wake rate", "gap mean (ms)": "gap mean", "run mean (ms)": "run mean"}
 
 MACHINE = ("a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure), the subject pinned "
-           "to one CPU and the harness, page server and homeserver pinned away from it, perf sched record on that CPU")
+           "to one CPU and the harness, page server and homeserver pinned away from it, perf sched record -a from the "
+           "harness CPUs")
 
 OBSERVED = {
     "chrome-hidden": ("{build}, launched as web-browser was (--no-sandbox --disable-gpu, plus "

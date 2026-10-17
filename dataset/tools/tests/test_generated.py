@@ -112,12 +112,12 @@ def test_a_focus_form_second_segment_names_a_s_staying_programs_beside_b_s(layer
     assert len(gained) == 214
 
 
-def test_every_transition_return_and_flap_segment_tags_the_programs_alive_in_it(layer):
+def test_every_transition_return_flap_and_distractor_segment_tags_the_programs_alive_in_it(layer):
     """9.10 D168's rule, as tests/test_coreset.py holds the core set to it and with its map, over every file of the
-    transition grid, the return grid and the flap-stress set: a segment names each scenario whose program is alive in
-    it, a task with no `depart` counting in the segment its arrival falls in."""
+    transition grid, the return grid, the flap-stress set and the distractor grid: a segment names each scenario whose
+    program is alive in it, a task with no `depart` counting in the segment its arrival falls in."""
     from test_coreset import SCENARIO_OF, SCENARIO_OF_PROGRAM
-    for name in ("transition-grid", "return-grid", "flap-stress"):
+    for name in ("transition-grid", "return-grid", "flap-stress", "distractor-grid"):
         for cell in layer["by_set"][name]:
             data = composed(layer, cell["id"])
             for seg in data["segments"]:
@@ -394,6 +394,21 @@ def test_the_out_of_vocabulary_cells_bring_one_measured_program(layer):
     assert cell["segments"][1]["scenario"] == ["S9", "S5"]
     assert cell["focus"] == [{"from": "0s", "to": "120s", "task": "game-s0"}]
     assert cell["input"] == []
+
+
+def test_a_distractor_second_segment_drops_the_tag_only_a_s_batch_job_shows(layer):
+    """9.10 D168 in the distractor grid (인지오's answer to B1, F1, F2, F4 (M1), 2026-10-17): A's batch job has no
+    `depart`, so it counts in the first segment only; where no staying program of A shares its tag — A one of
+    backup, indexing, ml-train, transcode — the second segment names A's staying programs and the arrival's."""
+    assert [s["scenario"] for s in composed(layer, "dx-backup-with-7z")["segments"]] == [["S7", "S15"], ["S7", "S16"]]
+    assert composed(layer, "dx-backup-with-browsing")["segments"][1]["scenario"] == ["S7", "S2"]
+    assert composed(layer, "dx-transcode-with-backup")["segments"][1]["scenario"] == ["S7", "S15"]
+    assert composed(layer, "dx-ml-train-with-office")["segments"][1]["scenario"] == ["S11", "S1", "S2", "S4"]
+    assert composed(layer, "dx-render-with-mail")["segments"][1]["scenario"] == ["S7", "S4"]   # the editor stays, S7
+    dropped = [c["a"] for c in layer["by_set"]["distractor-grid"]
+               if not set(layer["sets"][c["a"]]["segments"][0]["scenario"])
+               <= set(composed(layer, c["id"])["segments"][1]["scenario"])]
+    assert {a: dropped.count(a) for a in set(dropped)} == {"backup": 17, "indexing": 17, "ml-train": 17, "transcode": 17}
 
 
 def test_the_26_cells_whose_focus_holders_share_a_name_are_pre_committed_misses(layer):

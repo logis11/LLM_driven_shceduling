@@ -10,7 +10,7 @@ A placement puts a mode's C1 task set into a segment [start, end) with its tasks
 - segment: the C1 segment's mode, attributes, scenario (and familiarity) over [start, end); the scenario gains the
   tags of another placement's programs alive in the segment (9.10 D168, by its rule: a task with no `depart` counts
   in the segment its arrival falls in) — in the transition grid's `focus` form, the second segment names A's
-  programs that stay beside B's.
+  programs that stay beside B's. A distractor cell's second segment follows the same rule (below).
 - input: the C1 window with the C1's margins kept — start + lead, end − trail (D44); dropped when empty, so a 2 s
   segment shows the task set with no keystroke (decision 3). Within the label segment only: a task set that stays
   past its segment types no more once the focus has moved (decision 2).
@@ -19,10 +19,12 @@ A placement puts a mode's C1 task set into a segment [start, end) with its tasks
 
 9.20 adds two compositions. A distractor cell (decisions 1–3): A's placement labels the first segment while its
 tasks, focus, input and operations run to the file's end (`track_end`); the arrival — B's task set placed without
-tracks, or one program — lands at the boundary and stays; the second segment is A's label again with the arrival's
-scenario tags added, and `pre_committed_miss` where the two focus holders share a name. A ladder cell (decisions
-5–7): the mode's C1 file as it stands, the cell's rename map applied to task names, an orchestrator's child name
-and a chain's member names (their `source` entries becoming `design`), the segment carrying the tier.
+tracks, or one program — lands at the boundary and stays; the second segment is A's label again, its scenario the
+tags of the programs alive in it under 9.10 D168's rule — A's staying programs and the arrival's, A's batch job (no
+`depart`) counting in the first segment only — and `pre_committed_miss` where the two focus holders share a name.
+A ladder cell (decisions 5–7): the mode's C1 file as it stands, the cell's rename map applied to task names, an
+orchestrator's child name and a chain's member names (their `source` entries becoming `design`), the segment
+carrying the tier.
 """
 
 import copy
@@ -169,7 +171,8 @@ def grid_record(data, placements):
 
 def _compose_distractor(cell, sets, defn):
     """9.20 decisions 1–3: A over both segments (its tasks, focus and input to the file's end), the arrival at the
-    boundary without tracks, the second segment A's label with the arrival's scenario tags added."""
+    boundary without tracks, the second segment A's label with the scenario tags of the programs alive in it (9.10
+    D168): A's label in its order less a tag only A's batch job shows, then the arrival's tags."""
     no_input_below = parse_us(defn["no_input_below"])
     L = parse_us(defn["segment_length"])
     seg_a, tasks, windows, focus, operations = _place(sets[cell["a"]], 0, 0, L, 2 * L, no_input_below,
@@ -193,8 +196,11 @@ def _compose_distractor(cell, sets, defn):
         added = [program["scenario"]]
     second = copy.deepcopy(seg_a)
     second.update({"from": fmt_s(L), "to": fmt_s(2 * L)})
-    scenario = list(seg_a.get("scenario") or [])
-    scenario.extend(tag for tag in added if tag not in scenario)
+    shown = [scenario_of(t) for t in tasks if alive_in(t, L, 2 * L)]   # 9.10 D168, as in compose_full
+    scenario = []
+    for tag in list(seg_a.get("scenario") or []) + added + shown:
+        if tag in shown and tag not in scenario:
+            scenario.append(tag)
     second["scenario"] = scenario
     if cell["grid"].get("focus_name_shared"):
         attributes = dict(second.get("attributes") or {})
