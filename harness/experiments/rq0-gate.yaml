@@ -341,8 +341,8 @@ statements:
       under every algorithm (the 2026-10-08 declared-class memo); (f) the frame
       chain's woken stages in EDF's deadline class with the frame's deadline
       (recognition-vocabulary §2, 2026-10-06); (g) an orchestrator's WAIT
-      children:<id> completes when the last child it spawned ends, and without
-      blocking when none is live at the WAIT (the interpretation contract's
+      children:<id> completes when every child it spawned has ended, and
+      without blocking when none is live at the WAIT (the interpretation contract's
       WAIT(channel) row and FORK semantics; data contracts §4 Example B and
       §14, 2026-10-16: proposed there, in force once the simulator's owner
       agrees; this spec requires it of the run); (h) the simulator run through
