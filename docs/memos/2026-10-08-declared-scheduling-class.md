@@ -33,6 +33,7 @@ The recognizer's view (`docs/data-contracts.md` §4, "The two derived views": na
 
 ## Correction (2026-10-17)
 
-One statement above is corrected; the field and the rule are unchanged.
+Two statements above are corrected; the field and the rule are unchanged.
 
 - **§1, "`c5-t3` shows two media players as `tracker-miner-f` and `baloo_file`, and they stay `normal`."** The file is now `c6-alias` (9.20, 2026-10-12; `docs/data-contracts.md` §14): `c1-media`'s two players under the two indexers' real names — `video` as `baloo_file`, `music` as `tracker-miner-f` — its segment carrying `spoof: true` and `pre_committed_miss: true` and no familiarity tier (`dataset/timelines/coreset/c6.variant.yaml`). Both players still declare `normal`.
+- **§1, "`idle` on the two entries whose programs declare it".** Since the dataset rebuild (task 9.13) three entries carry `idle`: `file-indexer`, `incremental-backup`, and `game-download-idle`, compiled into `c2-p2a-idle` (the 9.16 compiled-number audit, `_dev/research/jioh/task-9.16-exit-audits/compiled/report.md` §2.6).

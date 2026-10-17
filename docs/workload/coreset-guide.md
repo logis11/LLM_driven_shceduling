@@ -194,7 +194,7 @@ LOOP { TIMER(period) → RUN(cycle_run) }
 
 program은 `LOOP { WAIT(timer) → RUN(event) }`: timer component만 있어요(keystroke도 cadence도 없음, 사람이 없는 상태로 측정). 주기적인 heartbeat TIMER가 아니에요. `game-client`는 드문 큰 run(`CHTTPClientThre`)도 heavy event로 들고 있어요.
 
-Chrome을 보여주는 파일은 browser(`web-browser`) 옆에 `renderer-hidden` 넷을 둬요(`count: 4`): Firefox Linux telemetry의 창당 탭 다섯(`glam`)과 Chrome에서 관찰한 탭당 renderer 하나(`meas-ci:desktop:2026-10-04`)에서 온 수예요. 실제 page의 cross-site iframe이 가져갈 renderer는 빠져 있으니 이 수는 하한이에요. 보이는 page의 renderer는 `web-browser` task 안에 있어요.
+Chrome을 보여주는 파일은 browser(`web-browser`) 옆에 `renderer-hidden` 넷을 둬요(`count: 4`): Firefox Linux telemetry의 탭 다섯과 창 하나(`glam`)와 Chrome에서 관찰한 탭당 renderer 하나(`meas-ci:desktop:2026-10-04`)에서 온 수예요. 실제 page의 cross-site iframe이 가져갈 renderer는 빠져 있으니 이 수는 하한이에요. 보이는 page의 renderer는 `web-browser` task 안에 있어요.
 
 Steam client는 측정된 상태 그대로예요: 로그아웃, 계정 없음, library 없음, 뒤에 도는 game 없음, `gameoverlayui` 없음. gaming timeline들의 header가 이걸 적어요.
 
@@ -231,7 +231,7 @@ download는 `steam`이라는 이름으로 보이지만 측정은 SteamCMD(Steam�
 ```
 LOOP { RUN(dispatch_overhead) → FORK ×6 }  → WAIT(children) → EXIT
 ```
-object job마다 dispatch RUN 하나(make 자신의 CPU, 측정 중앙값 676 µs) 뒤에 FORK 여섯. `fork_cap` = `parallelism_cap` × 6: simulator는 살아 있는 task를 세고 job 하나가 멤버 여섯이니, make의 jobserver처럼 job이 cap개까지 동시에 돌아요(cap 8이면 48). `parallelism_cap` 8은 8-thread 데스크톱에 `nproc` 규칙을 적용한 값이에요(design). `binding_params`: `spawn_count`(object job 수), `parallelism_cap`, `child_name`.
+object job마다 dispatch RUN 하나(make 자신의 CPU, 측정 중앙값 676 µs) 뒤에 FORK 여섯. `fork_cap` = `parallelism_cap` × 6: simulator는 살아 있는 task를 세고 job 하나가 멤버 여섯이니, make의 jobserver처럼 job이 cap개까지 동시에 돌아요(cap 8이면 48). `parallelism_cap` 8은 8-thread 데스크톱에 `nproc` 규칙을 적용한 값이에요(convention; 9.6 D4, compile slice의 병렬도 결정). `binding_params`: `spawn_count`(object job 수), `parallelism_cap`, `child_name`.
 
 **`compiler-child`** — object job 하나는 멤버 여섯: `sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`, 각자 spawn table의 entry 하나. `sh`가 먼저 돌고, 나머지는 자기 `job:` channel에서 기다리다가 job의 부모-자식 순서대로 깨워져요: sh → gcc → cc1 → gcc → as → gcc → sh → fixdep → sh → rm → sh. 각 멤버의 step CPU는 그 (role, step)의 측정 분위수 표에서 뽑아요(`sh` 4 step, `gcc` 3, 나머지 1). 일을 마친 멤버는 CPU 없이 기다리다가 `sh`가 job을 끝낼 때 같이 `EXIT`해요. 측정된 것은 이 role별 표예요(예: `cc1` step 평균 439.1 ms). 파일별 총합(`c1-compile`의 자식 17,448개 CPU 1,313.9 s)은 그 표에서 뽑은 draw예요.
 
@@ -239,7 +239,7 @@ object job마다 dispatch RUN 하나(make 자신의 CPU, 측정 중앙값 676 µ
 
 ### 4.6 game chain
 
-**`game-task-chain`** — 게임. 유일하게 topology가 parameter인 archetype이고, 유일하게 우리 측정이 아닌 entry예요. 출처는 `lavd-ossna24`의 slide 12–17이고, 이름 모를 game을 이름 모를 machine에서 `perf sched record`로 본 관찰 하나로 읽어요. CI runner에는 GPU가 없어서 Proton game을 직접 잴 수 없어요.
+**`game-task-chain`** — 게임. 유일하게 topology가 parameter인 archetype이고, 유일하게 우리 측정이 아닌 entry예요. 출처는 `lavd-ossna24`의 slide 12–17이고, 이름 모를 game을 이름 모를 machine에서 본 관찰 하나로 읽어요. 2024년 slide는 trace를 무엇으로 모았는지 적지 않아요. `perf sched record`는 Min이 나중에 LPC 2025에서 소개한 분석 도구 VaporMark가 읽는 기록으로 나와요(`edge-lwn26`). CI runner에는 GPU가 없어서 Proton game을 직접 잴 수 없어요.
 
 ```
 constructor: chain
@@ -249,7 +249,7 @@ member:  LOOP { WAIT(chain:<self>) → RUN(per_schedule_run) → WAKE(다음 멤
 
 compile 때 constructor가 멤버 17개를 만들어요. head(`game.chain.1`, task 자신의 이름), 그 바로 뒤의 `game.wineserver`(이름 `wineserver`, RUN = `wineserver_run` 260 µs — slide 13의 coordination task), 그리고 `game.chain.2` … `game.chain.16`(15개, 이름은 timeline의 `member_names`). `chain_length` 16은 slide의 "game-specific task 15–20개" 안에서 고른 점(design)이고, wineserver는 그 수 밖이에요. head만 `TIMER(16667)`을 갖고(frame_period: Steam Deck의 60 Hz 기본 refresh에 맞춘 design, `steamos-refresh`), RUN 뒤 다음 멤버를 `WAKE`해요. 마지막 멤버는 RUN만. frame 하나가 17단을 릴레이로 지나가요. 각 멤버의 RUN은 멤버마다 한 번 뽑아 고정해요(slide 13이 든 두 예, wineserver 260 µs와 task worker 1.65 ms를 p05/p95로 읽은 lognormal). slide는 waker–waiter graph를 fan-in, 2-cycle, wineserver 중심의 hub로 그리는데, 여기서는 그걸 한 줄 relay로 폈어요(우리 linearization).
 
-멤버 이름은 timeline이 `member_names`로 줘요(slide 16이 보여주는 game thread 이름, comm 한도 15자로 잘린 그대로). 지금 gaming 파일 여덟 개가 모두 같은 목록이라 recognizer는 `Troy.exe ×7`(head 포함), `Task worker thr ×4`, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli`, `wineserver`를 봐요.
+멤버 이름은 timeline이 `member_names`로 줘요(slide 16이 보여주는 game thread 이름, comm 한도 15자로 잘린 그대로). slide 16에는 `Troy.exe` node가 하나뿐이에요. 멤버 여섯이 process 이름 `Troy.exe`를 갖는 것은 우리 규칙이에요: 이름을 직접 정하지 않은 Wine thread는 process의 `comm`을 그대로 가져요(9.10 D26, scenarios slice의 `comm` 규칙). 지금 gaming 파일 여덟 개가 모두 같은 목록이라 recognizer는 `Troy.exe ×7`(head 포함), `Task worker thr ×4`, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli`, `wineserver`를 봐요.
 
 chain 밖의 game thread는 없어요. slide는 game이 도는 동안 system 전체에서 약 300개 task가 schedule된다고 하지만, scheduling의 95 %가 상위 30–40개 task에 있고 그 밖의 task는 설명하지 않아요. 그래서 chain과 `wineserver` 밖의 game thread는 생략해요 — 이 entry의 `modeling_notes`와 gaming timeline들의 header가 그렇게 적어요.
 
@@ -394,7 +394,7 @@ simulator와 harness가 읽는 유일한 형식. `dataset/build/coreset-single/<
 "meta": {
   "id": "c2-p1a",
   "derived_from": "dataset/timelines/coreset/c2-p1a.timeline.yaml@a0effee9…",
-  "sampled": { "archetypes": "archetypes.yaml@803395dc…", "seed": 201 }
+  "sampled": { "archetypes": "archetypes.yaml@c78d8cf9…", "seed": 201 }
 }
 ```
 
@@ -585,7 +585,7 @@ core set 51개(`dataset/build.manifest.json`의 `demand`):
 
 파생 관계: C4 = C1 + injection, C5 = C1 + rename, C7 = C1 + unwanted job 또는 같은 job의 label flip, C2의 b = a + 배경 task 교체와 segment 1 수정, C6 셋은 `c1-media`나 `c1-browsing` 파생. 진짜 새로 쓴 timeline은 23개(C1 16, C2의 base 3, C3 3, `c6-dual`)이고 나머지 28개는 `*.variant.yaml` recipe 다섯 개로 생성돼요(11장). 파생 파일은 base의 seed를 물려받아서 "변경한 것 외에는 byte-identical"이 보장돼요.
 
-**core set 밖의 짝.** generated layer(1장)가 C3–C5의 rate 주장을 맡아요: C3에는 transition grid(480개 = 16 mode의 순서쌍 240 × 두 form: 경계에서 A의 task가 떠나는 `departs`, A가 남고 focus만 옮기는 `focus`), return grid A → B → A(720개 = 240쌍 × 가운데 segment 60·10·2 s), flap-stress set(24개, hold-time 조정 재료; 간격 5·10·30 s는 GameMode, tuned, systemd-oomd의 debounce 값, 2 s는 design); C4에는 distractor grid(272개: 사용자는 mode A에 머물고 60초에 다른 process set이 도착 — B의 C1 task set 전체(240쌍) 또는 어느 mode에도 속하지 않는 측정된 program 하나); C5에는 familiarity ladder(66개: 16 mode × tier 4·5, 그리고 render와 backup의 job을 tier 3 이름(`melt-7`, `duplicity`)으로; 이름을 바꾸는 범위 — focus를 가진 task의 이름 / 나머지 / 전부 — 를 축으로).
+**core set 밖의 짝.** generated layer(1장)가 C3–C5의 rate 주장을 맡아요: C3에는 transition grid(480개 = 16 mode의 순서쌍 240 × 두 form: 경계에서 A의 task가 떠나는 `departs`, A가 남고 focus만 옮기는 `focus`), return grid A → B → A(720개 = 240쌍 × 가운데 segment 60·10·2 s), flap-stress set(24개, hold-time 조정 재료; 간격 5·10·30 s는 GameMode reaper의 5 s 점검 간격, tuned의 10 s dynamic tuning 갱신 간격(dynamic tuning은 기본으로 꺼져 있음), systemd-oomd의 30 s 압력 지속 시간, 2 s는 design); C4에는 distractor grid(272개: 사용자는 mode A에 머물고 60초에 다른 process set이 도착 — B의 C1 task set 전체(240쌍) 또는 어느 mode에도 속하지 않는 측정된 program 하나); C5에는 familiarity ladder(66개: 16 mode × tier 4·5, 그리고 render와 backup의 job을 tier 3 이름(`melt-7`, `duplicity`)으로; 이름을 바꾸는 범위 — focus를 가진 task의 이름 / 나머지 / 전부 — 를 축으로).
 
 **RQ0에서의 역할**(`harness/experiments/rq0-gate.yaml`; RQ0는 gate 실험: 이 workload에서 configuration이 애초에 중요한가). 파일이 판정(judging)하는 조건은 label이 바뀌는 쌍의 한쪽이고 그 채점 term이 설계상 row 차이를 담는 것이에요. 판정 파일 19개: C2 쌍의 normal-class 쪽(`c2-p1a`, `c2-p2a`, `c2-p2b`, `c2-p3a`), job에 row의 몫이 닿는 batch C1 base 넷(`c1-compile`, `c1-ml-train`, `c1-render`, `c1-transcode`), C7 counterpart 열하나(browsing, office, dev, photo, meeting, gaming, video-edit, compile, ml-train, render, transcode). 나머지 32개는 reporting-only예요: interactive·periodic C1 base, `c1-gaming`(별도 line), idle 쌍, idle-class 일을 가진 여섯 파일(`c1-indexing`, `c7-indexing`, `c2-p1b`, `c1-backup`, `c7-backup`, `c2-p3b`), `c7-mail`, `c7-media`, C3, C4, C5, C6, 그리고 `c2-p2a-idle`. C3–C6는 돌고 보고되지만 Layer 2(scheduling 채점) aggregation에서는 빠져요. 그리고 `pre_committed_miss` segment를 가진 여덟 파일은 Layer 1(recognition 정확도)에서 빠져요(`layer1_exclusions`, 12장).
 
@@ -604,7 +604,7 @@ core set 51개(`dataset/build.manifest.json`의 `demand`):
 
 손으로 쓴 timeline의 header와 recipe의 주석이 이 셋을 적어요. 다만 header는 compile된 파일에 실리지 않으니(`meta`는 `derived_from`, `id`, `sampled`뿐) dataset을 쓰는 사람이 읽는 곳은 이 문서와 `dataset/README.md`예요.
 
-**design으로 정한 크기.** 측정에서 오지 않은 크기는 design이에요(`bind` 값이면 timeline의 `source`가 `design`이라고 적어요). chain의 `lane_share`(`c1-gaming`·`c4-gaming`·`c7-gaming` 0.9, download 쌍과 `c2-p2b` 0.95, `c3-evening` 1.45 — chain이 혼자서도 frame을 못 맞추도록, `c6-dual` 0.6); interactive·periodic 파일의 60 s와 batch 파일의 길이(job 전체가 들어가거나 job이 segment 내내 살아 있는 길이); batch job의 도착 시각(C1 2 s, C2 60 s, `c3-workday` 120 s, `c3-creation` 240 s, `c6-dual` 10 s, C7 0 s); C4의 주입 시각 30 s와 주입한 program의 정체(chat client, 6 s의 7z, Chrome); `c6-spoof`의 spoof(20 s 도착, 30 s짜리 RUN 하나); keystroke window의 위치와 양 끝 2 s 여백(각 파일의 표대로; `c6-dual`은 focus 교대를 따라 아홉); `c6-dual`에서 게임과 build가 같이 있는 것; build의 `parallelism_cap` 8.
+**design으로 정한 크기.** 측정에서 오지 않은 크기는 design이에요(`bind` 값이면 timeline의 `source`가 `design`이라고 적어요). chain의 `lane_share`(`c1-gaming`·`c4-gaming`·`c7-gaming` 0.9, download 쌍과 `c2-p2b` 0.95, `c3-evening` 1.45 — chain이 혼자서도 frame을 못 맞추도록, `c6-dual` 0.6); interactive·periodic 파일의 60 s와 batch 파일의 길이(job 전체가 들어가거나 job이 segment 내내 살아 있는 길이); batch job의 도착 시각(C1 2 s, C2 60 s, `c3-workday` 120 s, `c3-creation` 240 s, `c6-dual` 10 s, C7 0 s); C4의 주입 시각 30 s와 주입한 program의 정체(chat client, 6 s의 7z, Chrome); `c6-spoof`의 spoof(20 s 도착, 30 s짜리 RUN 하나); keystroke window의 위치와 양 끝 2 s 여백(각 파일의 표대로; `c6-dual`은 focus 교대를 따라 아홉); `c6-dual`에서 게임과 build가 같이 있는 것. build의 `parallelism_cap` 8은 convention이에요(8 thread 데스크톱에 적용한 `nproc` 규칙, 9.6 D4; `source`가 `convention`이라고 적어요).
 
 ---
 
@@ -657,7 +657,7 @@ VS Code에 타이핑하면서 2초에 Linux kernel(defconfig)을 `make -j8`로 �
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
 | editor | code | code-editor | 0 → 1594 | input 2–1592 s: keystroke 2,544개 + timer wake 178,482개, RUN 합 275.3 s |
-| build | make | build-orchestrator | 2 → finite | object job 2,908개(`spawn_count`, `meas-ci:build:2026-09-18`), cap 8(`parallelism_cap`, `design`) → `fork_cap` 48. dispatch RUN 2,908개 합 1.98 s |
+| build | make | build-orchestrator | 2 → finite | object job 2,908개(`spawn_count`, `meas-ci:build:2026-09-18`), cap 8(`parallelism_cap`, `convention`) → `fork_cap` 48. dispatch RUN 2,908개 합 1.98 s |
 | build.j1.sh … build.j2908.rm | sh, gcc, cc1, as, fixdep, rm | compiler-child | spawn | 17,448개(job당 여섯; `child_name: cc1`, `meas-ci:build:2026-09-18`), CPU 합 1,313.9 s |
 
 recognizer: 0 s `code`. 2 s `as ×2908, cc1 ×2908, code, fixdep ×2908, gcc ×2908, make, rm ×2908, sh ×2908`(자식은 부모와 함께 보임). 1594 s `make`와 자식들(finite라 안 사라짐).
@@ -886,7 +886,7 @@ Chrome 검색 → LibreOffice 글쓰기 → kernel build → Thunderbird 메일.
 | browser | chrome | web-browser | 0 → 1545 | input 2–58 s: keystroke 7개 + timer wake 67,612개, page-load 30 s, RUN 합 4.74 s |
 | renderers.1–4 | chrome | renderer-hidden | 0 → 1545 | timer wake 312–372개씩 |
 | writer | soffice.bin | office-writer | 60 → 1545 | launch phase를 재생한 뒤 steady. input 62–118 s: keystroke 139개 + timer wake 5,850개, RUN 합 3.24 s |
-| build | make | build-orchestrator | 120 → finite | object job 2,908개(`meas-ci:build:2026-09-18`), cap 8(`design`) → `fork_cap` 48; 자식 17,448개 CPU 합 1,358.0 s |
+| build | make | build-orchestrator | 120 → finite | object job 2,908개(`meas-ci:build:2026-09-18`), cap 8(`convention`) → `fork_cap` 48; 자식 17,448개 CPU 합 1,358.0 s |
 | mailer | thunderbird-bin | mail-client | 1485 → 1545 | launch phase 재생(파일이 그 안에서 끝나요). input 1487–1543 s: keystroke 60개 + timer wake 17,789개, send 1,525 s |
 
 focus: browser 0–60, writer 60–1485, mailer 1485–1545.
@@ -1086,7 +1086,7 @@ harness: browser의 input P99(c1-browsing의 term). utilization 0.3144(segment 0
 |---|---|---|---|---|
 | game.chain.1–16, game.wineserver | Troy.exe ×7, …, wineserver | game-task-chain | 0 → 12072 | `lane_share: 0.6`(`design`): 멤버 RUN 175 µs–1.07 ms, 합 10,002 µs |
 | editor | code | code-editor | 0 → 12072 | input window 9개(686–688 s씩): keystroke 13,751개 + timer wake 1,357,541개, RUN 합 1,518.6 s |
-| build | make | build-orchestrator | 10 → finite | object job 2,908개(`meas-ci:build:2026-09-18`), cap 8(`design`) → `fork_cap` 48; 자식 CPU 합 1,361.2 s |
+| build | make | build-orchestrator | 10 → finite | object job 2,908개(`meas-ci:build:2026-09-18`), cap 8(`convention`) → `fork_cap` 48; 자식 CPU 합 1,361.2 s |
 
 focus는 0초의 editor부터 688 s마다 editor ↔ 게임으로 교대해요(18 interval). 688 s는 working sphere에서 전환하기 전의 평균 연속 구간 11분 28초예요(`gonzalez-chi04`). 규칙적인 교대, editor가 먼저인 것, 첫 window의 2 s 지연은 design이에요. input window는 editor가 focus를 가진 아홉 구간이에요 — 사용자는 앞에 있는 창에 타이핑해요.
 

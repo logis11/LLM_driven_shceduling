@@ -212,7 +212,7 @@ This is the file at the center of everything — everything soft in the two cont
 "meta": {
   "id": "c2-p1a",
   "derived_from": "dataset/timelines/coreset/c2-p1a.timeline.yaml@a0effee…",
-  "sampled": { "seed": 201, "archetypes": "archetypes.yaml@803395d…" }
+  "sampled": { "seed": 201, "archetypes": "archetypes.yaml@c78d8cf…" }
 },
 "ground_truth": [
   { "t_start": 0,        "t_end": 60000000, "mode": "dev",      "attributes": { "background_wanted": true } },

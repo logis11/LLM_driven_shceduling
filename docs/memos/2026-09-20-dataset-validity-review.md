@@ -1,7 +1,7 @@
 # Dataset validity for the recognition research — a review
 
 > Status: memo · Created 2026-09-20 · Updated 2026-10-17
-> Open — §3's ask, the stability-ledger summary (the quantities that met the tolerance, those carried under each exception class, the largest half-width carried), to be computed by a script over the slices' pooled records and published in `docs/workload/measurement-overview.md`'s stability sections, with 9.16's measurement audit (`_dev/TODO.md`); owner 인지오. §4's ask is answered by 9.14 decision 4, the demand reported rather than held (`docs/workload/building-plan.md` §5a; the correction below), and §5's by the scoping carried into `docs/research-claims.md` 'What is not claimed', no real-desktop comparison opened.
+> Closed — §3's ask is answered by the stability ledger in `docs/workload/measurement-overview.md` §7, computed by `dataset/tools/meas/stability_ledger.py` over the pooled records the library is folded from (2026-10-17): of 406 values on the stability lists, 369 met the tolerance and 37 are carried under a stated exception, with two rare events carried beside the rule; the largest half-width carried is ±61.3 %, `renderer-hidden`'s residual run mean. §4's ask is answered by 9.14 decision 4, the demand reported rather than held (`docs/workload/building-plan.md` §5a; the correction below), and §5's by the scoping carried into `docs/research-claims.md` 'What is not claimed', no real-desktop comparison opened.
 > A read of `dataset/archetypes.yaml`, its grounding documents and the 9.5 measurement method against what the research's two claims need from the workload dataset. Assessment only; nothing in the repository was changed.
 
 **Verdict: sound for the recognition claim, bounded for the scheduling-benefit claim.**

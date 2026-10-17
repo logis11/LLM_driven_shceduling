@@ -51,7 +51,7 @@
 | 시스템 | 무슨 장치인가 | 그 장치를 무엇이 켜는가 |
 |---|---|---|
 | Linux | scheduling class — 실시간용, 배경 작업용, 유휴용 등으로 나뉜 계층 | 프로그램 자신, 함께 설치되는 systemd unit, 또는 실행을 감싸는 wrapper(`chrt`)가 system call로 선언 |
-| Linux | `sched_ext` — scheduling policy를 kernel 밖에서 작성해 실행 중에 끼워 넣는 기능 | 관리자가 policy 프로그램을 올림 |
+| Linux | `sched_ext` — scheduling policy를 kernel 밖에서 작성해 실행 중에 끼워 넣는 기능 | BPF scheduler 프로그램을 실행 중에 올림 |
 | macOS | QoS class — 작업이 자기 의도를 이름으로 선언하는 방식 | 개발자가 코드에 적음. 적지 않은 작업은 `default`로 취급 |
 | macOS (Sonoma 14 이상, Apple silicon) | 게임 모드 | 게임이 전체 화면에 들어가면 켜짐. macOS 26부터는 앱이 `LSSupportsGameMode`로 지원을 선언. 무엇을 게임으로 알아보는지는 문서에 없음 |
 | Windows | 게임 모드 | 대부분의 게임에 기본으로 켜짐. 앞에 있고 focus를 가진 게임에 적용. 무엇을 게임으로 알아보는지는 문서에 없음. 게임이 도는 동안 Windows Update의 driver 설치와 재시작 알림을 미룸 |

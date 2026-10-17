@@ -241,7 +241,7 @@ timeline의 모든 시간과 길이는 사람이 읽는 문자열로 씁니다. 
 
 왜 microsecond이고, 왜 정수일까요. interpretation contract §1은 simulator의 시간을 "Virtual time, discrete-event; integer microseconds throughout (rt-app precedent)"로 정합니다. 가상의 시계가 사건에서 사건으로 건너뛰는 discrete-event simulation이고, 그 시계의 눈금이 정수 µs입니다. 실수(float)를 쓰면 같은 계산이 기계마다 마지막 자리에서 달라질 수 있습니다. 정수는 그렇지 않습니다. 바이트 단위 재현(10장)을 지키려면 시간이 정수여야 합니다.
 
-`discrete-event simulation` — 시계를 일정 간격으로 흘리지 않고, 다음 사건이 일어나는 시각으로 곧장 건너뛰는 simulation 방식입니다. 이 연구의 simulator가 이 방식입니다. `rt-app` — Linux scheduler 연구에서 널리 쓰는 workload 생성 도구로, 시간을 µs 정수로 다룹니다. contract가 그것을 선례로 듭니다.
+`discrete-event simulation` — 시계를 일정 간격으로 흘리지 않고, 다음 사건이 일어나는 시각으로 곧장 건너뛰는 simulation 방식입니다. 이 연구의 simulator가 이 방식입니다. `rt-app` — workload 생성 도구로, task 사건의 시간(run, sleep, timer 주기, deadline 매개변수)을 µs 정수로 다룹니다(use case 전체의 길이는 초 단위). contract가 그것을 선례로 듭니다.
 
 ## 2.4 `segments`: 시간 구간마다의 정답
 
@@ -416,7 +416,7 @@ tree의 library에서 `binding_params`가 비어 있지 않은 archetype은 이�
 
 core set에서 `count`를 쓰는 곳은 브라우저의 숨은 탭 renderer 하나뿐입니다. `c1-browsing`, `c1-office`, `c3-workday`, `c3-evening`과 그 파생 파일들, 그리고 `c4-compile`에 끼어드는 `injected-renderers`가 모두 `count: 4`입니다.
 
-> **왜 이렇게 정했나.** 4라는 숫자는 `c1-office` 머리 주석이 근거를 적습니다. 한 브라우저 창에 탭이 다섯 개라는 것은 Firefox의 Linux telemetry(`glam`, 9.10 D15, D16)에서, 탭 하나에 renderer 하나라는 것은 CI runner에서 관찰한 Chrome(`meas-ci:desktop:2026-10-04`, 9.10 D126–D129, D131)에서 왔습니다. 그래서 앞에 보이는 탭을 뺀 나머지 네 탭의 page renderer가 네 개의 `renderer-hidden` task입니다. 이 넷은 실제 사이트를 보는 경우의 바닥값입니다. 실제 page의 cross-site iframe(광고, embed, 로그인 widget)은 site isolation 아래에서 renderer를 따로 띄우는데 이 count는 그것을 넣지 않고, 얼마나 더 되는지는 읽은 출처가 말하지 않습니다(9.10 D126, D131). 9.10 D32는 `count`도 묶인 값(bound value)으로 보아 출처를 요구합니다. 그래서 이 task는 `source: {count: [glam, "meas-ci:desktop:2026-10-04"]}`를 가집니다.
+> **왜 이렇게 정했나.** 4라는 숫자는 `c1-office` 머리 주석이 근거를 적습니다. 탭이 다섯 개라는 것은 Firefox의 Linux telemetry(`glam`, 9.10 D15, D16)에서 client마다 모든 창을 통틀어 연 탭 수의 최댓값, 그 중앙값 4.67을 다섯으로 올린 것이고(창 수 최댓값의 중앙값이 1이라 창 하나에 둠), 탭 하나에 renderer 하나라는 것은 CI runner에서 관찰한 Chrome(`meas-ci:desktop:2026-10-04`, 9.10 D126–D129, D131)에서 왔습니다. 그래서 앞에 보이는 탭을 뺀 나머지 네 탭의 page renderer가 네 개의 `renderer-hidden` task입니다. 이 넷은 실제 사이트를 보는 경우의 바닥값입니다. 실제 page의 cross-site iframe(광고, embed, 로그인 widget)은 site isolation 아래에서 renderer를 따로 띄우는데 이 count는 그것을 넣지 않고, 얼마나 더 되는지는 읽은 출처가 말하지 않습니다(9.10 D126, D131). 9.10 D32는 `count`도 묶인 값(bound value)으로 보아 출처를 요구합니다. 그래서 이 task는 `source: {count: [glam, "meas-ci:desktop:2026-10-04"]}`를 가집니다.
 
 `count`가 1보다 큰 task에는 두 가지 제약이 따라옵니다. 첫째, focus를 받을 수 없습니다(4.4절). 실제 화면에서 focus를 받는 창은 하나인데, 네 instance 중 어느 것인지 timeline이 특정할 방법이 없기 때문입니다. 둘째, 중간에 시작하는 task가 launch phase를 재생할 때, 같은 묶음의 instance들은 측정 repeat 하나를 공유하고 그 안의 서로 다른 stream을 나눠 씁니다(11.3절).
 
@@ -448,7 +448,7 @@ core set에서 `count`를 쓰는 곳은 브라우저의 숨은 탭 renderer 하�
 
 `lane_share` 0.9는 측정값이 아니라 실험을 위해 정한 값이고, 구성원 이름들은 LAVD 발표 자료 16번 slide의 process tree에서 왔다는 뜻입니다.
 
-tree의 51개 timeline을 세면, 131개 task 중 53개가 `source`를 가집니다. key별로는 `total_work` 30, `count` 10, `lane_share` 8, `member_names` 8, `program` 7, `parallelism_cap` 5, `child_name` 5, `spawn_count` 4입니다. 값에 나오는 출처는 `meas-ci` 53회, label `design` 16회, `glam` 10회, `lavd-ossna24` 8회, `pytorch-examples` 3회, `kdenlive` 3회입니다. `convention`과 `arithmetic` label은 core timeline에서 한 번도 쓰이지 않습니다(이 권을 쓰며 tree에서 센 값입니다).
+tree의 51개 timeline을 세면, 131개 task 중 53개가 `source`를 가집니다. key별로는 `total_work` 30, `count` 10, `lane_share` 8, `member_names` 8, `program` 7, `parallelism_cap` 5, `child_name` 5, `spawn_count` 4입니다. 값에 나오는 출처는 `meas-ci` 53회, label `design` 11회, `glam` 10회, `lavd-ossna24` 8회, label `convention` 5회(모두 `parallelism_cap`), `pytorch-examples` 3회, `kdenlive` 3회입니다. `arithmetic` label은 core timeline에서 한 번도 쓰이지 않습니다(2026-10-17의 tree에서 센 값입니다).
 
 > **왜 이렇게 정했나.** 이 field의 근거는 9.10 D32입니다(2026-10-01). 결정은 "each bound value (`count`, `spawn_count`, `parallelism_cap`, `total_work`, `lane_share`, `member_names`, the bound program) carries `source: <id>:<locator>` or a label (design, convention, arithmetic), linted against `dataset/sources.yaml`"입니다. 기록된 이유는 세 가지입니다. building-plan §6의 출처 주장(모든 숫자가 출처를 가진다)이 library에만 적용되고 있었습니다. timeline 값에는 출처를 적을 자리 자체가 없었습니다(`timeline.py`, 2026-09-13 critical-findings memo의 B7). 그리고 archetype-plan은 count를 "binding-time parameters with a source tag"라고 부르면서도 그 tag를 둘 곳이 없었습니다. 9.10은 내용을 정하고 field와 lint는 9.13에 넘겼는데, 9.13은 이 일을 하지 않았습니다. 2026-10-10 dataset audit가 이것을 A2로 찾아냈고("Timeline bound values carry no source field … `timeline.py` has no source slot"), 9.18의 결정 4(2026-10-11)가 마침내 field와 lint를 만들었습니다(`_dev/docs/spec/jioh/task-9.18-compiler-schema-and-build-gate.md`).
 
@@ -718,7 +718,7 @@ op의 집합은 닫혀 있습니다. deriver의 `OPS` 튜플에 있는 아홉 �
 ```yaml
       - patch-task: {id: build, name: dkms, archetype: module-build-orchestrator, arrive: 0s,
                      bind: {parallelism_cap: 8, child_name: cc1},
-                     source: {parallelism_cap: design, child_name: "meas-ci:background:2026-10-02"}}
+                     source: {parallelism_cap: convention, child_name: "meas-ci:background:2026-10-02"}}
 ```
 
 base `c1-compile`의 `build` task는 `bind`에 `spawn_count: 2908`이 있었습니다. 이 op는 `bind`를 통째로 새 map으로 바꾸므로 `spawn_count`가 사라집니다. 바뀐 archetype `module-build-orchestrator`는 `spawn_count`를 받지 않으므로(3.3절의 표) 그것이 맞습니다. 같은 이유로 `patch-segment`에 `attributes`를 주면 attribute 전체가 바뀝니다. `c2-p1b`의 op가 `background_wanted`만 바꾸는 것처럼 보여도 실제로는 attribute map 전체를 `{background_wanted: false, initiated: session}`으로 갈아 끼웁니다. 9.18의 결정 4가 "Variant ops that write a `bind` write its `source`"라고 정한 것도 이 때문입니다. `bind`를 통째로 바꾸면서 `source`를 그대로 두면 key 집합이 어긋나고, lint가 그것을 잡습니다.
@@ -860,11 +860,11 @@ meta:
 "meta": {
   "derived_from": "dataset/timelines/coreset/c1-office.timeline.yaml@1b5295f96a851b62184a3a1dbe3f575f45bb3bbc",
   "id": "c1-office",
-  "sampled": {"archetypes": "archetypes.yaml@803395dc5462940050ba09bfe25c69d269633d9f", "seed": 101}
+  "sampled": {"archetypes": "archetypes.yaml@c78d8cf911ecd820413602226ea8adb71945edd1", "seed": 101}
 }
 ```
 
-`@` 뒤의 `1b5295f9…`는 이 timeline 파일의 git blob hash입니다. `git hash-object dataset/timelines/coreset/c1-office.timeline.yaml`로 확인하면 같은 값이 나옵니다. `803395dc…`은 `dataset/archetypes.yaml`의 blob hash입니다(2026-10-17 tree. timeline이나 library의 byte가 바뀔 때마다 두 hash도 바뀝니다). `demand: calibration`은 canonical `meta`에 없고 compile report의 `demand_class`로만 갑니다.
+`@` 뒤의 `1b5295f9…`는 이 timeline 파일의 git blob hash입니다. `git hash-object dataset/timelines/coreset/c1-office.timeline.yaml`로 확인하면 같은 값이 나옵니다. `c78d8cf9…`는 `dataset/archetypes.yaml`의 blob hash입니다(2026-10-17 tree. timeline이나 library의 byte가 바뀔 때마다 두 hash도 바뀝니다). `demand: calibration`은 canonical `meta`에 없고 compile report의 `demand_class`로만 갑니다.
 
 ```yaml
 segments:
@@ -1090,7 +1090,7 @@ canonical 파일은 JSON object 하나이고, key가 정확히 네 개입니다.
 "meta": {
   "derived_from": "dataset/timelines/coreset/c2-p1a.timeline.yaml@a0effee93e945b3d39f8aa3501475f31896d58d8",
   "id": "c2-p1a",
-  "sampled": {"archetypes": "archetypes.yaml@803395dc5462940050ba09bfe25c69d269633d9f", "seed": 201}
+  "sampled": {"archetypes": "archetypes.yaml@c78d8cf911ecd820413602226ea8adb71945edd1", "seed": 201}
 }
 ```
 
@@ -1726,7 +1726,7 @@ tree의 `c7-compile` artifact에서 `dkms`는 `fork_cap` 48, spawn table 9,980�
 
 **왜 lane scaling이 필요한가.** LAVD 자료의 게임은 여러 core에서 돌았습니다. 그 per-schedule runtime을 그대로 열일곱 단계에 쓰면, frame 하나에 CPU를 얼마나 쓸지가 측정한 기계의 core 수와 무관하게 정해집니다. simulator는 CPU 하나뿐이므로, 그 값이 CPU 하나의 몇 %인지가 실험 조건을 좌우합니다. 그래서 chain의 총량을 timeline이 정하는 비율(`lane_share`)로 맞춥니다. 개별 RUN의 상대적 크기(어느 단계가 무거운가)는 뽑은 값을 따르고, 총량만 맞춥니다. tree의 library에서 `scalable`이 비어 있지 않은 entry는 `game-task-chain` 하나뿐이고, 그 rule은 "scale the chain's aggregate demand per frame to lane_share of the lane (building-plan §5a)"입니다.
 
-> **왜 이렇게 정했나.** lane scaling은 2026-08-26 grill의 D15와 D16에서 시작합니다. D15는 CPU 하나짜리 simulator를 유지하기로 하면서 그 대가를 적습니다. "Multi-core-measured archetype demands (LAVD gaming: ~300 tasks at 65–95% of a many-core machine) cannot fit the simulator's single lane". D16은 그 해결로 "Scaling is a per-archetype declared compiler pass (fields + rule + evidence in `modeling_notes`), never baked into `archetypes.yaml` values"를 정합니다. archetype의 값은 측정 그대로 두고, compile 단계에서만 줄인다는 뜻입니다. `lane_share`의 네 값(`c1-gaming` 0.9, `c2-p2a` 가족 0.95, `c3-evening` 1.45, `c6-dual` 0.6)은 9.10 D31이 design으로 기록했고, `source` map에 `design` label로 적혀 있습니다.
+> **왜 이렇게 정했나.** lane scaling은 2026-08-26 grill의 D15와 D16에서 시작합니다. D15는 CPU 하나짜리 simulator를 유지하기로 하면서 그 대가를 적습니다. "Multi-core-measured archetype demands (LAVD gaming: ~300 tasks at 65–95% of a many-core machine) cannot fit the simulator's single lane". LAVD 슬라이드는 trace를 잰 기계를 밝히지 않으므로 "many-core"는 archive의 읽기입니다. D16은 그 해결로 "Scaling is a per-archetype declared compiler pass (fields + rule + evidence in `modeling_notes`), never baked into `archetypes.yaml` values"를 정합니다. archetype의 값은 측정 그대로 두고, compile 단계에서만 줄인다는 뜻입니다. `lane_share`의 네 값(`c1-gaming` 0.9, `c2-p2a` 가족 0.95, `c3-evening` 1.45, `c6-dual` 0.6)은 9.10 D31이 design으로 기록했고, `source` map에 `design` label로 적혀 있습니다.
 
 > **왜 이렇게 정했나.** `wineserver`가 chain 구성원인 것은 9.4 D4(2026-09-13)입니다. 이전에는 별도의 daemon task로 묶었는데, LAVD 자료의 slide 11(게임 dispatcher thread들의 hub), 13(coordination task), 16(가장 큰 edge가 `wineserver → Troy.exe` epoll 134,200회와 `Troy.exe → wineserver` pipe_read 58,134회)이 wineserver를 게임 그래프의 일부로 보여 준다는 것이 기록된 근거입니다. 요청-응답의 왕복을 한 방향 릴레이로 펴는 것은 "our linearisation"으로 modeling note에 적혀 있습니다. 구성원 이름 15개는 9.10 D26이 같은 slide 16의 process tree에서 가져왔습니다. 머리 뒤의 네 `Task worker thr`, `dxvk-cs`, `dxvk-submit`, 두 `winepulse_*`, `FAudio_AudioCli`, 그리고 이름이 나오지 않는 여섯 구성원은 process의 comm인 `Troy.exe`를 씁니다.
 
@@ -2394,4 +2394,4 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 | `make -j8` / jobserver | OS | `make`가 job을 최대 8개 동시에 돌리게 하는 옵션 / 그 수를 세는 장치(3.3) |
 | discrete-event simulation | OS | 다음 사건 시각으로 곧장 건너뛰는 simulation 방식(2.3) |
 | `DES core` / `VM` | project | simulator의 사건 엔진 / task 하나의 program을 실행하는 해석기(7.6) |
-| `rt-app` | OS | 시간을 µs 정수로 다루는 Linux scheduler 연구용 workload 생성 도구. contract가 선례로 듦(2.3) |
+| `rt-app` | OS | task 사건의 시간(run, sleep, timer 주기, deadline 매개변수)을 µs 정수로 다루는 workload 생성 도구(use case의 길이는 초). contract가 선례로 듦(2.3) |

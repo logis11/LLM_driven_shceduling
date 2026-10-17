@@ -413,3 +413,10 @@ recognition log(`docs/data-contracts.md` §8)는 고정된(frozen) contract라�
 - 저작권자는 둘 다 Jioh In, Kyungmin Inn, Ian Park이에요.
 - `dataset/stimulus/`의 입력 stream과 `dataset/meas/streams/`의 SWELL-KW window는 SWELL Knowledge Work dataset(Koldijk et al., 2014; DANS, CC-BY-NC-SA-4.0)에서 가져왔고, `dataset/LICENSE`가 출처를 밝혀요.
 - `dataset/meas/streams/aalto-*` window와 `aalto-windows.json`(136M Keystrokes dataset, Dhakal et al., 2018)은 licence의 대상이 아니에요: 출처의 조건(비상업적 사용, 저자 표시) 그대로 배포되고, `dataset/LICENSE`는 그것에 대한 권리를 주지 않아요.
+
+## 정정 (2026-10-17)
+
+같은 날 끝난 Phase 9 종료 감사(9.16)로 위 문장 둘을 고쳐요.
+
+- **§7.2의 "`c2-p2a`의 다운로드는 쉬지 않고 돌아서 batch class예요".** 측정된 다운로드는 프로그램 전체로 보면 CPU의 74 %가 batch class지만, 26.385초 창이 EDF에서 주는 부분(약 1초)은 짧은 run이 이어지는 시작 단계라 batch class가 아니에요. 어느 쪽이든 cap은 이 다운로드에 닿지 않고, boot MLFQ가 오히려 더 줘요(3.0초 대 1.1초). frame 점수와 다운로드 progress에 대한 결론은 그대로예요(`_dev/research/jioh/task-9.16-exit-audits/compiled/report.md` §2.7; `docs/daemon/prior-table-pair-review.md`의 finding 1).
+- **§10의 인지오 항목, `2026-09-20-dataset-validity-review.md`.** 닫혔어요: 안정성 ledger가 `docs/workload/measurement-overview.md` §7에 실렸고, `dataset/tools/meas/stability_ledger.py`가 측정 기록에서 계산해요.

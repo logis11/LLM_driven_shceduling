@@ -514,7 +514,7 @@ TIMER는 **첫 task에만** 있어요. 그래서 simulator가 내는 `deadline` 
 
 단일 TIMER task(`video`)는 길이 1짜리 chain이라 같은 규칙이 그대로 적용돼요. 그 결과가 simulator의 `deadline` line과 같아야 하니, `deadline`은 공짜 cross-check가 돼요.
 
-**규칙:** tick 하나마다 row 하나(소비됐든 건너뛰었든). entity는 chain의 head(또는 단일 TIMER task). `t` = tick 시각, `value` = 완료 − tick(건너뛴 tick은 빈칸), `period_us`와 `skipped`를 row에. harness는 tail의 iteration 수가 head가 소비한 tick 수와 같은지 guard해요.
+**규칙:** tick 하나마다 row 하나(소비됐든 건너뛰었든). entity는 chain의 head(또는 단일 TIMER task). `t` = tick 시각, `value` = 완료 − tick(건너뛴 tick은 빈칸), `period_us`와 `skipped`를 row에. harness는 window 안에서 tail이 끝낸 iteration 수가 head가 소비한 tick 수를 넘지 않는지 guard해요. 모자란 건 guard가 아니에요: `T_end`에 아직 돌고 있는 iteration은 window 안에 끝나지 않은 것이에요(9장) — `c7-gaming`의 마지막으로 소비된 tick은 `T_end` 1,139 µs 전이고 frame 하나는 14,999 µs예요.
 
 12장에서 3단 chain을 실제로 계산해요.
 
@@ -1084,7 +1084,7 @@ entity는 chain의 head인 s1이에요. "이 chain의 frame"이라는 뜻으로.
 
 **`deadline` line과 비교:** head의 line은 frame 1을 met이라고 해요(31000 < 33334). 하지만 화면에 frame이 나온 건 34500이고 이건 33334를 넘었어요. 게임 파일의 17개 task chain에서는 이 차이가 훨씬 커요. `c1-gaming`에서 head는 631 µs이고 나머지 16개 task가 합쳐서 14,368 µs니까. 그래서 harness가 재구성하고, `deadline`은 단일 TIMER task에서만 cross-check로 써요.
 
-**guard:** tail의 iteration 수(3) = head가 소비한 tick 수(3). 맞아요. wake가 큐에 쌓이지 않고 사라지는 simulator면 어느 stage에서 frame 하나가 빠지고 이 guard가 깨져요.
+**guard:** tail이 끝낸 iteration 수(3)가 head가 소비한 tick 수(3)를 넘지 않아요. 통과예요. 넘으면 head가 보낸 적 없는 wake로 frame이 끝났다는 뜻이에요. 반대로 wake가 큐에 쌓이지 않고 사라지는 simulator면 어느 stage에서 frame 하나가 빠져 tail이 모자라는데, 이 guard는 그걸 잡지 못해요 — `T_end`에 아직 도는 frame과 같은 모양이니까요. guard spec의 `tick_count` grounding이 이 약점을 적어요.
 
 **`ready_wait`도 같이 나와요.** chain stage의 `WAIT`가 완료되는 것도 `cause=wake`예요. trace는 channel을 안 적지만, harness가 run file에서 그 `WAIT`의 channel 종류를 읽어 row에 실으니(4.4) chain stage의 row는 `channel=chain`, keystroke의 row는 `channel=input`으로 구분돼요. 그래서 `c6-dual`처럼 editor와 게임이 한 파일에 있어도 섞이지 않아요.
 
@@ -1192,7 +1192,7 @@ RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 jud
 |---|---|
 | C2의 normal-class 쪽 4개(`c2-p1a`, `c2-p2a`, `c2-p2b`, `c2-p3a`) | judging |
 | C1 batch base 4개(`c1-compile`, `c1-ml-train`, `c1-render`, `c1-transcode`) | judging — row의 share가 job까지 닿아요 |
-| C7 counterpart 11개(`browsing`, `office`, `dev`, `photo`, `meeting`, `gaming`, `video-edit`, `compile`, `ml-train`, `render`, `transcode`) | judging. EDF를 쓰는 judging 파일(`c2-p2a`, `c2-p2b`, `c7-gaming`, `c7-meeting`)에서는 두 row가 scored term에서 설계상 비겨요 — EDF가 deadline class인 chain이나 call을 cap과 상관없이 먼저 돌리니까 — 그래서 gap은 EDF 대 random이 뽑은 algorithm, 즉 mode recognition을 읽어요. `c7-meeting`은 2026-10-09부터 judging이에요. 측정된 call의 cycle이 boot slice(10 ms)를 다섯 번에 한 번꼴로 다 써서 demotion되니, 예전의 짧은 burst에서 `fixed`와 비기던 일이 없어졌어요 |
+| C7 counterpart 11개(`browsing`, `office`, `dev`, `photo`, `meeting`, `gaming`, `video-edit`, `compile`, `ml-train`, `render`, `transcode`) | judging. EDF를 쓰는 judging 파일(`c2-p2a`, `c2-p2b`, `c7-gaming`, `c7-meeting`)에서는 두 row가 scored term에서 설계상 비겨요 — EDF가 deadline class인 chain이나 call을 cap과 상관없이 먼저 돌리니까 — 그래서 gap은 EDF 대 random이 뽑은 algorithm, 즉 mode recognition을 읽어요. `c7-meeting`은 2026-10-09부터 judging이에요. 측정된 call의 cycle이 boot slice(10 ms)를 스무 번에 한 번꼴로(측정된 table에서 4.9 %, compile된 파일에서 5.5 %) 다 써서, 100 ms boost 간격 열 번 중 약 네 번은 call이 demotion되어 다음 boost까지 upgrade 뒤에서 기다려요(1 − 0.95¹⁰, cycle을 서로 독립으로, boost 간격 하나에 cycle 열 개로 본 계산). 그래서 예전의 짧은 burst에서 `fixed`와 비기던 일이 없어졌어요 |
 | idle class job을 가진 6개(`c1-indexing`, `c7-indexing`, `c2-p1b`: Tracker의 indexer; `c1-backup`, `c7-backup`, `c2-p3b`: Déjà Dup의 backup) | 보고만. executor는 idle task를 다른 class의 task가 runnable하지 않을 때만 돌리고(모든 algorithm에서), cap은 work-conserving이라 어떤 row도 background job에 닿지 않아요 |
 | `c7-mail` | 보고만. counterpart의 keystroke 창은 `c1-mail`의 것을 잘라 온 것인데, `c1-mail`의 keystroke 35개는 45.9–53.1초에 있어서 2–24.385초 창에 하나도 없어요. 그래서 term이 mailer 자신의 wake를 읽고, keystroke latency는 못 읽어요 |
 | `c7-media` | 보고만. 측정된 table로는 `fixed`와도, 두 row 사이에서도 headroom이 없어요. video의 최악 cycle이 16.0 ms(주기 33.3 ms)이고 boot MLFQ가 줄 수 있는 가장 긴 대기까지 합쳐도 32 ms라, 여유 1.3 ms예요 |
@@ -1225,7 +1225,7 @@ interaction latency term은 2026-10-09부터 모두 `channel`을 적어요. keys
 | `c2-p1a` / `c2-p1b` | editor P99 (`input`, 60–99.435 s) 1.0 · hog progress 0.5 / 없음 |
 | `c2-p2a` / `c2-p2b` | `game.chain.1` miss rate (60–86.385 s) 1.0 · download progress 0.5 / 없음 |
 | `c2-p2a-idle` | `c2-p2a`와 같음 |
-| `c2-p3a` / `c2-p3b` | editor P99 (`timer`, 60–326 s) 1.0 · bulk turnaround 0.5 (export가 모든 row에서 끝나요) / bulk progress **0.25** (예약된 backup. idle class라 끝나지 않아요) |
+| `c2-p3a` / `c2-p3b` | editor P99 (`timer`, 60–326 s) 1.0 · bulk turnaround 0.5 (export가 모든 row에서 끝나요) / bulk turnaround **0.25** (예약된 backup. idle class라 editor가 남긴 lane만 받지만, 그 lane이 약 166초라 모든 row에서 파일 끝 약 0.3초 전에 끝나요) |
 | `c3-workday` | browser · writer · mailer P99 (`input`) 각 1.0 · build progress 0.5 |
 | `c3-evening` | browser P99 (`input`) 1.0 · chain miss rate 1.0 · music miss rate 1.0 · video miss rate 0.5 |
 | `c3-creation` | photo-editor · video-editor P99 (`timer`) 각 1.0 · batch progress 0.5 |
@@ -1270,7 +1270,7 @@ experiment spec은 generated 파일을 이름으로 나열하지 않고, pin한 
 
 ## 16. guard — score와 별개로 항상 확인하는 것
 
-score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요. guard 여덟 개의 목록, threshold, 그리고 그 threshold를 왜 그렇게 잡았는지(grounding)는 **guard spec**(`harness/guards/guard-spec.yaml`, 8.3에서 만들었고 2026-10-09부터 version 1.1)이 데이터로 갖고, 코드(`harness/tools/harness/guards.py`)는 guard마다 이름 붙은 함수 하나예요. 결과는 run마다 guard 하나에 row 하나인 `guards` 파일(pass / fail / not_applicable, 잰 값, 적용된 threshold, 짝 run, fail이면 이유)로 나와요. 입력이 없어서 못 잰 guard는 fail이에요(통과시킨 게 아니니까). `not_applicable`은 guard의 범위가 그 run을 애초에 안 보는 경우만이에요(예: `fixed`에는 recognition이 없으니 provenance 비율을 안 봐요).
+score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요. guard 여덟 개의 목록, threshold, 그리고 그 threshold를 왜 그렇게 잡았는지(grounding)는 **guard spec**(`harness/guards/guard-spec.yaml`, 8.3에서 만들었고 2026-10-17부터 version 1.2)이 데이터로 갖고, 코드(`harness/tools/harness/guards.py`)는 guard마다 이름 붙은 함수 하나예요. 결과는 run마다 guard 하나에 row 하나인 `guards` 파일(pass / fail / not_applicable, 잰 값, 적용된 threshold, 짝 run, fail이면 이유)로 나와요. 입력이 없어서 못 잰 guard는 fail이에요(통과시킨 게 아니니까). `not_applicable`은 guard의 범위가 그 run을 애초에 안 보는 경우만이에요(예: `fixed`에는 recognition이 없으니 provenance 비율을 안 봐요).
 
 | guard | 무엇을 재나 | threshold | 왜 |
 |---|---|---|---|
@@ -1279,7 +1279,7 @@ score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요. gu
 | starvation floor | task별 `ready_wait` max(cause 무관, 파일 전체, idle class task 포함; `fixed`를 포함한 모든 condition) | 30 000 000 µs(30초) 이하 (design) | sched_ext의 watchdog이 최대이자 기본값으로 강제하는 한계(`kernel/sched/ext.c`, v6.17)를 이 연구가 가는 배포 경로의 타당성 한계로 빌려 왔어요. 어떤 task가 이보다 오래 기다린 run은 실제 sched_ext 배포라면 계속 돌 수 없는 configuration을 그린 거예요. executor에는 starvation 안전망이 없어요 |
 | determinism | trace 파일의 SHA-256 vs 같은 run을 한 번 더 돌린 trace의 SHA-256 | byte-identical | 같은 입력 두 번 → 같은 trace. 두 번째 실행을 언제 어떻게 만드는지는 runner(8.6)의 일 |
 | utilisation sanity | `busy / T_end` | 1.0 이하, 그리고 scoring spec에 term이 있는 파일이면 0 초과 | 물리적으로 말이 되나; 파싱은 됐는데 비어 있는 trace를 잡음 |
-| tick count | primitives가 records를 만들면서 낸 consistency 메시지(tail의 iteration 수 = head가 소비한 tick 수, keystroke row 수, `deadline` 교차검사, `config_applied`와 schedule의 일치) | 메시지 0개 | simulator가 frame이나 wake를 빠뜨리지 않았나 |
+| tick count | primitives가 records를 만들면서 낸 consistency 메시지(window 안에서 tail이 끝낸 iteration 수가 head가 소비한 tick 수 이하, keystroke row 수, `deadline` 교차검사, `config_applied`와 schedule의 일치) | 메시지 0개 | records가 trace·run file과 맞나 — head가 보낸 적 없는 wake로 끝난 frame, 빠진 keystroke row 같은 것. chain 검사는 tail이 모자란 것은 잡지 않아서, 중간에 사라진 chain wake는 이 guard로 안 잡혀요 |
 | `validation` = `provenance` | recognition log의 `validation` 순서 = config schedule의 `provenance` 순서(boot 제외), 위치별 비교 | 불일치 0개 | log와 schedule이 서로 맞나 |
 | C2 pair | C2 pair(P1 `c2-p1a`/`c2-p1b`, P2 `c2-p2a`/`c2-p2b`, P3 `c2-p3a`/`c2-p3b`) 두 run의 config schedule. 정답이 다른 segment의 시작에 걸려 있던 configuration과 그 segment 안에 찍힌 entry 전부를 (algorithm, params, cap)으로 entry마다 비교. 짝은 같은 condition·seed·boot default의 다른 파일 | `oracle`과 recognition 조건(`shipped_catalogue`, `strongest_name_table`, `llm_vocab`, `llm_algo`, `llm_full`)에서 두 sequence가 같으면 fail. `fixed`와 `random`은 not_applicable. trace는 비교하지 않고, `fixed`에서 두 파일이 같아야 한다는 요구도 없어요 | 두 sequence가 같으면 recognizer의 답이 wanted/unwanted 사이에서 한 번도 안 바뀌었다는 뜻이라, gap 0을 recognition 결과로 읽으면 안 됨(table이나 recognizer의 결함). trace는 pair마다 background job이 다른 측정된 프로그램이라 configuration과 상관없이 달라서 비교할 의미가 없어요. `oracle`에서는 설계상 다르니 plumbing 확인이에요 |
 
@@ -1351,7 +1351,7 @@ Phase 8 전체를 관통하는 원칙 하나: **evaluator가 적용하는 판단
 
 ### 19.1 spec에 무엇이 있나
 
-- **generic part** — 어떤 실험에나 필요한 것: condition 목록, telemetry 모양 목록(RQ0는 `focus` 하나), seed 수 N, boot default(primary와 alternatives), judging 파일·reporting 파일·sensitivity line이 읽는 variant 파일(그리고 generated set에서 축으로 고른 파일, 15.5), `pre_committed_miss`에서 **유도된** Layer-1 exclusion(lint가 실제 annotation과 맞는지 확인해요 — 손으로 고를 수 없어요), guard 예외(이유 필수), typed reporting line, 그리고 **pin** — scoring spec·guard spec(version 1.1)·driver table·dataset manifest·variants manifest의 SHA-256(generated 파일을 고르는 spec이면 그 manifest마다 하나 더).
+- **generic part** — 어떤 실험에나 필요한 것: condition 목록, telemetry 모양 목록(RQ0는 `focus` 하나), seed 수 N, boot default(primary와 alternatives), judging 파일·reporting 파일·sensitivity line이 읽는 variant 파일(그리고 generated set에서 축으로 고른 파일, 15.5), `pre_committed_miss`에서 **유도된** Layer-1 exclusion(lint가 실제 annotation과 맞는지 확인해요 — 손으로 고를 수 없어요), guard 예외(이유 필수), typed reporting line, 그리고 **pin** — scoring spec·guard spec(version 1.2)·driver table·dataset manifest·variants manifest의 SHA-256(generated 파일을 고르는 spec이면 그 manifest마다 하나 더).
 - **statements** — 숫자의 근거를 적은 글. evaluator가 보고서에 그대로 옮겨 적어요. RQ0 gate spec에는 열다섯 개가 있어요: 판정 set의 규칙, idle class 파일 여섯이 보고만 하는 이유, executor 가정(인경민의 2026-10-01 simulator 상태 memo와 9.11 결정 위에 둔 committed assumption. 그중 두 가지에 대한 인경민의 정식 답은 2026-10-08 memo로 요청), simulator conformance(RQ0 run 전에 simulator가 hand fixture에서 보여야 할 여덟 항목 (a)–(h). (h)는 2026-10-17에 더해진 것으로, simulator가 runner가 부르는 대로 invocation contract에 따라 실행되는 것 — workload와 config schedule을 `--workload`·`--schedule`로, trace 경로를 `--out-trace`로 받고 trace를 그 파일에 쓰는 것(18장)), g·K·N의 근거, random condition의 정의, prior table의 중복 구조, boot-default sweep의 설계, sensitivity line들, 다시 측정할 조건, Layer-1 구간의 caveat, 실패 절차, held-out-rows 사전등록.
 - **criterion** — 실험별 판정 규칙. RQ0는 `k_of_n_gap`: judging 파일 19개 중 **K = 10개 이상**이 gap **g = 0.5 이상**이면 pass.
 

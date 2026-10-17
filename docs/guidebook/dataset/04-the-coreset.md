@@ -238,7 +238,7 @@ core set 51개가 모두 같은 무게로 쓰이는 것은 아닙니다. 가장 
 - idle class 작업을 담은 여섯 파일(`c1-indexing`, `c7-indexing`, `c2-p1b`, `c1-backup`, `c7-backup`, `c2-p3b`)은 보고 파일이 되었습니다. 이 파일들의 background 작업(Tracker indexer, Déjà Dup backup)은 스스로 idle scheduling class를 선언하는 프로그램이고, 실행기는 idle task를 다른 task가 하나도 runnable하지 않을 때만 돌립니다. 그래서 어떤 row의 몫이나 상한도 그 작업에 닿지 않습니다(RQ0 gate spec의 statement `idle-class-files`).
 - `c7-mail`은 보고 파일이 되었습니다. 이 파일은 `c1-mail`의 앞 26.385 s를 잘라 쓰는데, `c1-mail`의 keystroke 35개가 모두 45.9 s와 53.1 s 사이에 있어 잘린 구간에 keystroke가 하나도 없습니다(9.14 decision 2의 2026-10-09 수정).
 - `c7-media`는 보고 파일로 남았습니다. 측정된 player의 최악 cycle이 16.0 ms로 33.3 ms 주기 안에 있고, boot MLFQ가 줄 수 있는 최장 대기를 더해도 32 ms라 headroom이 없습니다(1.3 ms 여유).
-- 반대로 `c7-meeting`은 다시 들어왔습니다. 측정된 통화의 10 ms 오디오 cycle이 약 다섯 번에 한 번 boot slice를 다 써서 강등되므로, 예전의 동률이 깨졌습니다.
+- 반대로 `c7-meeting`은 다시 들어왔습니다. 측정된 통화의 10 ms 오디오 cycle이 약 스무 번에 한 번 boot slice를 다 써서, 100 ms boost 구간 열에 넷쯤에서 통화가 강등되므로(산술: 1 − 0.95¹⁰, cycle을 서로 독립으로 보고 boost 구간 하나에 cycle 열) 예전의 동률이 깨졌습니다(9.16 D1, `c7-meeting`을 판정 파일로 두고 9.14의 "약 다섯 번에 한 번"을 이 수치로 다시 적은 결정).
 
 - **idle class** — 프로그램이 스스로 "다른 일이 없을 때만 나를 돌려라"라고 선언하는 Linux의 scheduling policy(`SCHED_IDLE`)입니다. 이 dataset에서는 모든 task 기록에 `declared_class`(`normal` 또는 `idle`)로 실립니다.
 
@@ -729,7 +729,7 @@ segment 0–60 s `media`, `true`, `[S13]`. input 없음, focus video 0–60 s.
 
 **짝과 파생.** C1(calibration 그룹) 가운데 이름 실험의 base입니다. `c5-t4`, `c5-t5`(이름을 tier 4, 5로 바꿈), `c6-alias`(indexer의 진짜 이름을 붙임), `c7-media`(upgrade injection)가 여기서 나옵니다. building plan §1은 그 이유를 "the familiarity ladder (C5) is definable as 'same archetype, different name,' guaranteeing that recognition differences come from the name alone"이라고 적습니다.
 
-**정한 결정.** 9.10 D24가 `spotify`를 `mpv`로 바꿨습니다. Spotify 네이티브 client는 계정이 필요하기 때문입니다.
+**정한 결정.** 9.10 D24가 `spotify`를 `mpv`로 바꿨습니다. `audio-player`가 관찰한 프로그램이 mpv이기 때문입니다.
 
 **채점.** 음악 job miss rate(1.0)와 영상 job miss rate(0.5). scoring spec은 "The audio : video weighting 1.0 : 0.5 on the media files is a stated assumption (an audio dropout is heard at once; a dropped frame at 60 Hz often is not)"이라고 적고, 이 파일을 "no headroom" 목록에 올립니다. 측정된 player는 어떤 row에서도 자기 overrun만큼만 놓칩니다.
 
@@ -770,7 +770,7 @@ segment 0–1,594 s `compile`, `true`, `[S11]`. input 2–1,592 s, focus 0–1,5
 **정한 결정.**
 - 9.10 D18(사용자의 build는 측정된 kernel build 전체, object job 2,908개를 cap 8로라는 결정, 2026-10-01). 이유: 측정된 build는 `meas-ci:build:2026-09-18`의 kernel defconfig, warm, `-j8`이고, 그 build에서 object job이 2,908개였습니다. 예전 값 100개는 job 하나가 약 89 ms짜리 process 하나이던 시절의 크기였습니다.
 - 9.10 D141(사용자의 build를 통째로 묶어 `c1-compile`은 1,594 s, 2026-10-05). 계산은 2 s + build CPU 1,315.907 s + 편집기 CPU 275.298 s = 1,593.204 s, 올림해서 1,594 s입니다.
-- `parallelism_cap: 8`은 design입니다(`source: design`). 9.6 D4가 "the eight-thread desktop"이라는 전제를 적었습니다.
+- `parallelism_cap: 8`은 convention입니다(`source: convention`). 9.6 D4(compile 조각의 `-j`와 cap 기본값을 정한 결정)가 8 thread 데스크톱에 적용한 `nproc` 규칙으로 정하고 "convention, grounds cited for the choice"라고 이름표를 붙였습니다.
 
 **RQ0에서.** 판정 파일. 편집기 P99(1.0)와 build turnaround(1.0).
 
@@ -949,9 +949,9 @@ building plan §3 C2(intent pair 그룹)는 2026-10-16에 이 방향대로 고�
 
 ## 5.3 C2의 채점과 RQ0에서의 역할
 
-scoring spec의 C2(intent pair 그룹) term은 두 번째 segment, 곧 60 s부터 파일 끝까지를 window로 갖습니다. 9.14 decision 5(window는 숫자이고 lint가 segment 경계와 맞는지 검사한다는 결정)에 따라 window의 두 끝은 compile된 파일의 ground-truth segment 경계와 일치해야 합니다. latency와 frame term은 그 window 안에서, progress term은 window 없이 셉니다. job이 파일 안에서 끝나지 않으면 turnaround를 셀 수 없으니 progress(받은 CPU)를 셉니다. P3(export 대 backup 쌍)의 export만 파일 안에서 끝나므로 turnaround입니다(9.14 decision 6).
+scoring spec의 C2(intent pair 그룹) term은 두 번째 segment, 곧 60 s부터 파일 끝까지를 window로 갖습니다. 9.14 decision 5(window는 숫자이고 lint가 segment 경계와 맞는지 검사한다는 결정)에 따라 window의 두 끝은 compile된 파일의 ground-truth segment 경계와 일치해야 합니다. latency와 frame term은 그 window 안에서, progress term은 window 없이 셉니다. job이 파일 안에서 끝나지 않으면 turnaround를 셀 수 없으니 progress(받은 CPU)를 셉니다. P3(export 대 backup 쌍)의 두 job, export와 backup은 모든 row에서 파일 안에서 끝나므로 turnaround입니다(9.14 decision 6의 규칙; backup은 9.16 D4, `c2-p3b`의 backup을 turnaround로 채점한다는 결정).
 
-원치 않는 job은 term이 없습니다. 그래서 b-파일의 term은 a-파일의 term에서 batch term을 뺀 것입니다. `c2-p1b`는 편집기 P99 하나, `c2-p2b`는 chain miss rate 하나입니다. 예외는 `c2-p3b`입니다. P3(export 대 backup 쌍)의 b쪽 backup은 원치 않는 일이 아니라(예약된 원하는 backup) progress term(0.25)을 갖습니다.
+원치 않는 job은 term이 없습니다. 그래서 b-파일의 term은 a-파일의 term에서 batch term을 뺀 것입니다. `c2-p1b`는 편집기 P99 하나, `c2-p2b`는 chain miss rate 하나입니다. 예외는 `c2-p3b`입니다. P3(export 대 backup 쌍)의 b쪽 backup은 원치 않는 일이 아니라(예약된 원하는 backup) turnaround term(0.25; 9.16 D4가 progress에서 바꿈)을 갖습니다.
 
 RQ0 gate에서는 normal-class 절반 넷(`c2-p1a`, `c2-p2a`, `c2-p2b`, `c2-p3a`)이 판정 파일이고, idle class job을 담은 `c2-p1b`, `c2-p3b`와 bounding 파일 `c2-p2a-idle`이 보고 파일입니다. 그 밖에 guard spec(`harness/guards/guard-spec.yaml`)의 `c2_pair` guard가 세 쌍을 따로 봅니다. 9.14 decision 7은 이 guard가 두 파일의 실제 적용된 설정을 다른 segment 위에서 항목별로 비교하고, `oracle`과 recognition 조건에서 두 설정 순서가 같으면 실패로 본다고 정했습니다. 같은 결정은 "a C2 pair is a recipe variant that changes a segment's label, so the idle variant is not one and the list stays at three"라고 적습니다. label을 바꾸지 않는 `c2-p2a-idle`은 C2(intent pair 그룹) pair가 아닙니다.
 
@@ -1151,9 +1151,9 @@ segment 1은 60–326 s `backup`, `background_wanted: true`, `initiated: schedul
 
 **정한 결정.** 9.10 D8, D112–D125: Déjà Dup의 주간 incremental(4.19절과 같은 job). 9.10 D123, D125: segment 1은 backup이 그 안에서 끝나는 가장 작은 정수 초. 9.10 D162가 여유 0.337 s를 확인했습니다.
 
-**채점.** 편집기 P99(timer, window 60–326 s, 1.0)와 backup progress(0.25). scoring spec 주석은 "the idle-class backup gets the editor's idle lane only, about 162 s of its 165.7 s, and does not finish"라고 적습니다. idle class라서 편집기가 쉬는 틈에만 돌고, 그래서 파일 안에서 끝나지 못합니다. 이것이 길이 계산(work-conserving policy에서 끝나는 상한)과 어긋나 보이는 이유는, idle class는 다른 task가 runnable하지 않을 때만 돌기 때문에 길이 계산의 전제가 그대로 맞지 않기 때문입니다. RQ0에서는 보고 파일입니다(idle class).
+**채점.** 편집기 P99(timer, window 60–326 s, 1.0)와 backup turnaround(0.25). scoring spec 주석은 "the idle-class backup gets the editor's idle lane only, about 166 s of it against its 165.7 s of CPU and 0.2 s of sleeps, and finishes about 0.3 s before the end under every row"라고 적습니다. idle class라서 편집기가 쉬는 틈에만 돌지만, 혼자 replay하면 편집기가 60–326 s에서 99.8 s를 쓰고 166.2 s의 빈 lane을 남기므로 backup은 파일 끝보다 약 0.3 s 앞에 끝납니다. 모든 row에서 끝나는 job은 turnaround로 채점한다는 header 규칙(9.14 decision 6)에 따라, 9.16 D4(2026-10-17)가 term을 progress에서 `c1-backup`의 것과 같은 `bulk` turnaround로 바꿨습니다. 그 전의 주석("about 162 s of its 165.7 s, and does not finish")은 manifest가 편집기의 CPU를 고르게 펼친 값에서 나왔습니다. RQ0에서는 보고 파일입니다(idle class).
 
-> **왜 이렇게 정했나.** P3(export 대 backup 쌍)의 segment 1 길이는 backup이 "모든 work-conserving policy에서" 끝나도록 정했는데(9.10 D123), idle class가 9.13(2026-10-09)에 들어온 뒤로 backup은 편집기가 쉬는 틈에만 돌아 파일 안에서 끝나지 못합니다. 2026-10-16에 인지오가 길이를 그대로 두기로 했습니다. segment 1은 두 파일 모두 60–326 s이고, `c2-p3a.timeline.yaml`의 머리 주석이 지금의 사실을 적습니다. "the length is 9.10 D123's, set on a shared lane; under the idle class (9.13) the variant's backup does not end inside it and is scored by progress (9.14); the export ends by about 99.5 s"입니다. `c2-p3b`의 recipe 주석도 같은 문장을 적습니다.
+> **왜 이렇게 정했나.** P3(export 대 backup 쌍)의 segment 1 길이는 backup이 "모든 work-conserving policy에서" 끝나도록 정했는데(9.10 D123), idle class가 9.13(2026-10-09)에 들어온 뒤로 backup은 편집기가 쉬는 틈에만 돕니다. 2026-10-16에 인지오가 길이를 그대로 두기로 했습니다. segment 1은 두 파일 모두 60–326 s이고, export는 약 99.5 s까지 끝나며, backup은 편집기가 남긴 빈 lane으로 파일 끝보다 약 0.3 s 앞에 끝납니다(9.16 D4, `c2-p3b`의 backup을 turnaround로 채점한다는 결정).
 
 ---
 
@@ -1717,7 +1717,7 @@ photo, video-edit, render, transcode, backup은 GIMP와 Kdenlive라 keystroke가
 
 **`c7-photo`.** unsharp mask가 13.1925 s로 옮겨졌습니다. keystroke 흐름이 없으므로 term은 GIMP의 timer channel P99입니다. 판정 파일이고 venue variant 둘이 붙습니다.
 
-**`c7-meeting`.** 통화 task(`voice`, `chrome`)와 upgrade 둘입니다. 9.14 decision 2가 이 파일을 다시 판정에 넣었습니다. 기록된 이유는 "the measured call's cycle runs consume the boot slice in about a fifth of its cycles, so the tie with the boot default that moved it out in 8.8 no longer holds"입니다. 측정된 통화의 cycle이 약 다섯 번에 한 번 boot MLFQ의 10 ms slice를 다 써서 강등되고, 강등되면 upgrade의 slice 뒤에서 기다리므로 boot 기본 설정과의 동률이 깨졌다는 뜻입니다. 다만 RQ0 gate spec의 note는 "the cap axis is inert and the gap reads EDF against the drawn algorithm"이라고 적습니다. EDF는 deadline class인 통화를 상한과 상관없이 먼저 돌리므로, 이 파일의 gap은 attribute row의 차이(상한)가 아니라 mode recognition(EDF냐 아니냐)을 읽습니다. venue variant 둘과 trace-replay variant 하나가 붙습니다.
+**`c7-meeting`.** 통화 task(`voice`, `chrome`)와 upgrade 둘입니다. 9.14 decision 2가 이 파일을 다시 판정에 넣었습니다. 기록된 이유는 "the measured call's cycle runs consume the boot slice in about a fifth of its cycles, so the tie with the boot default that moved it out in 8.8 no longer holds"였습니다. "about a fifth"는 `cycle_run`의 분위 표(p1부터 p99.9까지 열 점)를 십분위로 읽은 값이어서, 9.16 D1(2026-10-17, `c7-meeting`을 판정 파일로 두고 이유를 맞는 수치로 다시 적은 결정)이 이유를 다시 적었습니다. 측정된 통화의 cycle은 약 스무 번에 한 번(측정된 표에서 4.9 %, compile된 파일에서 5.5 %) boot MLFQ의 10 ms slice를 다 쓰고, 그래서 100 ms boost 구간 열에 넷쯤(산술: 1 − 0.95¹⁰, cycle을 독립으로 보고 boost 하나에 cycle 열)에서 통화가 강등되어 다음 boost까지 upgrade의 slice 뒤에서 기다립니다. 그래서 boot 기본 설정과의 동률이 깨졌습니다. 다만 RQ0 gate spec의 note는 "the cap axis is inert and the gap reads EDF against the drawn algorithm"이라고 적습니다. EDF는 deadline class인 통화를 상한과 상관없이 먼저 돌리므로, 이 파일의 gap은 attribute row의 차이(상한)가 아니라 mode recognition(EDF냐 아니냐)을 읽습니다. venue variant 둘과 trace-replay variant 하나가 붙습니다.
 
 **`c7-gaming`.** chain과 Steam client가 26.385 s에 떠납니다. 판정 파일이고, 9.14 decision 2와 RQ0 gate spec note는 `c7-meeting`과 같은 이유로 "the gap reads EDF against the drawn algorithm"이라고 적습니다. venue 둘, chain scale 둘, corner 둘의 variant가 붙습니다(11장).
 
@@ -1738,7 +1738,7 @@ recipe의 연산:
 ```yaml
 - patch-task: {id: build, name: dkms, archetype: module-build-orchestrator, arrive: 0s,
                bind: {parallelism_cap: 8, child_name: cc1},
-               source: {parallelism_cap: design, child_name: "meas-ci:background:2026-10-02"}}
+               source: {parallelism_cap: convention, child_name: "meas-ci:background:2026-10-02"}}
 - set-segments: [{from: 0s, to: 225.458s, mode: compile,
                   attributes: {background_wanted: false, initiated: scheduled}, scenario: [S11]}]
 - patch-task: {id: editor, depart: 225.458s}
@@ -1759,7 +1759,7 @@ recipe의 연산:
 - 9.10 D4(`c7-compile`의 module 재build는 실제 module의 관찰된 DKMS autoinstall이라는 결정, 2026-10-01). 이유: 예전 counterpart는 사용자의 kernel build 값을 그대로 둔 채 이름만 바꾼 것이었습니다. DKMS의 hook은 kernel이나 header를 설치할 때 `dkms autoinstall`을 돌립니다. DKMS는 Ubuntu 24.04의 기본 layer에는 없지만 Debian popcon에서 14.70 %에 설치되어 있습니다.
 - 9.10 D46, D47: module은 NVIDIA의 595 branch open module. 이유: Ubuntu의 `ubuntu-drivers`가 open을 먼저 고르고, NVIDIA가 "We recommend the use of open kernel modules on all GPUs that support it"이라고 적으며, Steam의 2026년 8월 Linux 조사에서 NVIDIA 점유율의 87.0 %가 open module을 지원합니다.
 - 9.10 D48, D51: 2026-09-23의 보안 kernel(`7.0.0-31` → `7.0.0-34`) 설치가 hook을 부릅니다. 상태는 2026-09-22T17:00Z의 archive입니다. 그래서 segment에 `initiated: scheduled`가 붙습니다. kernel을 설치하는 것은 매일 도는 무인 업데이트입니다.
-- 9.10 D50, D52–D55, D57: job은 두 DKMS hook 아래의 모든 process. `-j8`은 `OMP_NUM_THREADS=8`로 전달한 design입니다(8 thread 데스크톱). `fork_cap`은 cap × 6 = 48입니다(object job이 여섯 process이기 때문). `conftest` 단계에서는 동시 job이 8보다 적다는 것을 명시했습니다.
+- 9.10 D50, D52–D55, D57: job은 두 DKMS hook 아래의 모든 process. `-j8`은 `OMP_NUM_THREADS=8`로 전달하고, NVIDIA의 `dkms.conf`와 dkms가 읽는 것이 `nproc`이므로 9.6 D4(compile 조각의 `-j` 결정)의 `nproc` 규칙을 8 thread 데스크톱에 적용한 convention입니다. `fork_cap`은 cap × 6 = 48입니다(object job이 여섯 process이기 때문). `conftest` 단계에서는 동시 job이 8보다 적다는 것을 명시했습니다.
 - 9.10 D56(`c7-compile`은 base의 앞 C초이고 module build가 0 s부터 사용자의 build 자리에 온다는 결정, 2026-10-02). 이유: build가 2 s에 오면 처음 2 s가 label 없이 남고, base 길이(약 23분)로 두면 label이 약 19분 동안 원치 않는 일 없이 서 있게 됩니다.
 - 9.10 D59(DKMS campaign이 26 landing에서 안정, 2026-10-02). C = 225.458 s는 이 파일의 seed로 compile한 build의 CPU 225.4586 s를 ms 단위로 내림한 값입니다. `meas-ci:background:2026-10-02`.
 
@@ -1914,9 +1914,9 @@ variant가 필요한 이유는 dataset의 값 가운데 일부가 불확실하�
 
 각 set의 이유는 `variants.yaml`과 RQ0 gate spec의 `reason`에 적혀 있습니다.
 
-**venue(장비) 축.** game chain의 member를 뺀 모든 task의 RUN에 공통 배율 하나(0.8 또는 1.25)를 곱합니다(`dataset/tools/wlc/variants.py`의 `scale_runs`). 이유: "the venue factor's lower edge, 1/1.25 (9.6 D32; the bracket contains the ×1.144 huge-page ratio of 9.10 D88 and the tracing overhead's ×1.02–1.16)". bracket(×1/1.25부터 ×1.25까지)이 담는 것은 측정된 두 환경 효과입니다. 하나는 9.10 D88(MNIST training이 데스크톱 kernel의 huge page 모드 `madvise`에서 CPU를 ×1.144 더 쓴다는 측정)이고, 다른 하나는 9.5의 untraced control(측정 도구 `perf`가 값에 주는 영향이 ×1.02–1.16)입니다. bracket은 다른 CPU 기종을 나타내지 않습니다. 다른 CPU는 program마다 다른 배율로 빠르기를 바꾸기 때문입니다. 9.6의 build campaign에서 Intel Xeon Platinum 8573C는 `cc1`을 EPYC 7763 시간의 0.72배에, `fixdep`을 0.50배에 돌렸고, 공통 배율 하나로는 그것을 재현하지 못합니다. 2026-10-16에 인지오는 bracket을 그대로 두고 이 한계를 적기로 했습니다(9.15 작업 목록 W-0752). `docs/research-claims.md`의 "What is not claimed"는 scheduling 결과가 다른 CPU나 다른 기계 구성으로 옮겨 간다고 주장하지 않는다는 항목을 갖고, `dataset/README.md`의 Sensitivity variants 절과 `docs/workload/measurement-overview.md` §11도 같은 한계를 적습니다. chain은 자기 축이 따로 있어서 뺍니다.
+**venue(장비) 축.** game chain의 member를 뺀 모든 task의 RUN에 공통 배율 하나(0.8 또는 1.25)를 곱합니다(`dataset/tools/wlc/variants.py`의 `scale_runs`). 이유: "the venue factor's lower edge, 1/1.25 (9.6 D32; the bracket contains the ×1.144 huge-page ratio of 9.10 D88 and the tracing overhead's ×1.02–1.16)". bracket(×1/1.25부터 ×1.25까지)이 담는 것은 측정된 두 환경 효과입니다. 하나는 9.10 D88(MNIST training이 데스크톱 kernel의 huge page 모드 `madvise`에서 CPU를 ×1.144 더 쓴다는 측정)이고, 다른 하나는 9.5의 untraced control(측정 도구 `perf`가 값에 주는 영향이 ×1.02–1.16)입니다. bracket은 다른 CPU 기종을 나타내지 않습니다. 다른 CPU는 program마다 다른 배율로 빠르기를 바꾸기 때문입니다. 9.6의 build campaign에서 Intel Xeon Platinum 8573C는 `cc1`을 EPYC 7763 시간의 0.72배에, `fixdep`을 0.50배에 돌렸고, 공통 배율 하나로는 그것을 재현하지 못합니다. 2026-10-16에 인지오는 bracket을 그대로 두고 이 한계를 적기로 했습니다(9.15 작업 목록에서 venue 변형의 bracket을 둘지 넓힐지 물은 항목 W-0752). `docs/research-claims.md`의 "What is not claimed"는 scheduling 결과가 다른 CPU나 다른 기계 구성으로 옮겨 간다고 주장하지 않는다는 항목을 갖고, `dataset/README.md`의 Sensitivity variants 절과 `docs/workload/measurement-overview.md` §11도 같은 한계를 적습니다. chain은 자기 축이 따로 있어서 뺍니다.
 
-**chain 축.** game chain은 library에서 유일하게 측정이 아니라 문헌에서 온 archetype입니다. 이유: "the chain's per-schedule runtime read as the per-wake RUN understates a wake by the schedules it is cut into (9.4 D9; lavd-ossna24 s14, about 1.4 on average)". LAVD 자료의 per-schedule runtime을 wake 하나의 RUN으로 읽으면, wake 하나가 여러 schedule로 쪼개지는 만큼(평균 약 1.4배) 일을 과소평가한다는 뜻입니다. RQ0 gate spec은 1.4배에서 "the chain exceeds the lane in all three files (1.14 and 1.26 lanes), so the expected reading is that the gaming verdicts depend on the literature-grounded archetype's scale — its stated limitation, not a result"라고 미리 적습니다.
+**chain 축.** game chain은 library에서 유일하게 측정이 아니라 문헌에서 온 archetype입니다. 이유: "the chain's per-schedule runtime read as the per-wake RUN understates a wake by the schedules it is cut into (9.4 D9; lavd-ossna24 s14, about 1.4 on average)". LAVD 자료의 per-schedule runtime을 wake 하나의 RUN으로 읽으면, wake 하나가 여러 schedule로 쪼개지는 만큼(평균 약 1.4배) 일을 과소평가한다는 뜻입니다. 1.4는 slide 14가 적은 값이 아니라, slide 14의 `sched_preempt` 28.78 %에서 9.4 D9가 계산한 1/(1 − 0.2878)입니다. RQ0 gate spec은 1.4배에서 "the chain exceeds the lane in all three files (1.33 and 1.26 lanes), so the expected reading is that the gaming verdicts depend on the literature-grounded archetype's scale — its stated limitation, not a result"라고 미리 적습니다.
 
 **segment 길이 축.** 이유: "the C2 pairs' first segment, the one authored length a judging file has (60 s, design, 9.10 D31), halved (9.10 D169)". 판정 파일의 길이 가운데 측정된 job의 CPU 총량이 아닌 손으로 정한 길이는 C2(intent pair 그룹)의 첫 segment 60 s 하나뿐이라, 그것을 반으로 줄이고 두 배로 늘려 봅니다. 9.10 D169(어느 task도 맡지 않은 남은 일 세 가지에 주인을 정한 결정, 2026-10-07)가 segment 길이 민감도 sweep을 9.14에 넘겼습니다. 120 s 쪽은 "expected unchanged, the terms reading the second segment"입니다. term이 두 번째 segment를 읽으니 바뀌지 않을 것으로 예상한다는 뜻입니다. `segment-length`는 다시 compile하므로 utilization이 바뀝니다. 예를 들어 `c2-p1a@seg1-30s`는 20.5301, `c2-p1a@seg1-120s`는 9.1614입니다(base 14.505). 파일이 짧아지면 같은 training CPU를 더 짧은 길이로 나누기 때문입니다.
 
@@ -1929,7 +1929,7 @@ variant가 필요한 이유는 dataset의 값 가운데 일부가 불확실하�
 - **stability rule** — 측정값을 실을 때의 기준입니다. 반복들 사이의 평균에 대한 95 % 구간의 반폭이 평균의 5 % 이하(또는 1 µs 이하)이고 반복이 다섯 번 이상이어야 합니다(`docs/workload/measurement-overview.md` §6).
 - **exception-carried value** — 이 기준을 통과하지 못했지만, 퍼짐이 프로그램이 아니라 기계나 세션에서 온다는 이유로 반폭을 명시한 채 실린 값입니다.
 
-`variants.yaml`의 `carried_values`는 이런 값을 표 단위로 열아홉 줄, 반폭과 함께 적습니다. 한 줄이 entry 하나의 component나 program 하나에 딸린 표(gap, run 또는 block의 표) 하나입니다. 2026-10-17에 `renderer-hidden`의 `Compositor`와 `PerfettoTrace`가 gap과 run 표 둘씩 더해져 열다섯 줄에서 열아홉 줄이 되었습니다(9.15 작업 목록 W-0898). 두 thread의 값은 `meas-ci:desktop:2026-10-05b`부터 session 사이에서 변하는 값으로 실렸지만(9.10 D156), 그 전까지 corner set이 훑지 않았습니다.
+`variants.yaml`의 `carried_values`는 이런 값을 표 단위로 열아홉 줄, 반폭과 함께 적습니다. 한 줄이 entry 하나의 component나 program 하나에 딸린 표(gap, run 또는 block의 표) 하나입니다. 2026-10-17에 `renderer-hidden`의 `Compositor`와 `PerfettoTrace`가 gap과 run 표 둘씩 더해져 열다섯 줄에서 열아홉 줄이 되었습니다(9.15 작업 목록에서 `carried_values`가 그 두 thread를 빠뜨렸다고 적은 항목 W-0898). 두 thread의 값은 `meas-ci:desktop:2026-10-05b`부터 session 사이에서 변하는 값으로 실렸지만(9.10 D156), 그 전까지 corner set이 훑지 않았습니다.
 
 | entry | component / 표 | 반폭 | 출처 결정 |
 |---|---|---|---|
@@ -1963,7 +1963,7 @@ RQ0 gate spec의 `files.variants`가 78개를 모두 이름으로 나열하고, 
 
 variant는 base의 term으로 채점됩니다. 9.14 D11(variant 파일은 base의 term으로, 자기 segment 위의 window로 채점된다는 결정, 2026-10-09)이 `scoring.with_variants`를 만들었습니다. 기록된 계기는 "a variant run … would have been aggregated without its windows and never scored — every sensitivity line reading an empty gap"입니다. 이것이 없었다면 variant run은 window 없이 합산되어 채점되지 않았고, 모든 민감도 line이 빈 gap을 읽었을 것이라는 뜻입니다. `segment-length` variant는 segment 경계가 옮겨지므로 window도 variant 자신의 segment를 따라갑니다.
 
-pin은 RQ0 gate spec의 `pins.variants.all`입니다. 2026-10-17의 값은 `cdc143191fcd28aec80595e3060f4f391c91ba52c341e076043589124bb579f6`이고(그날의 두 번째 re-pin, `harness/CHANGELOG.md`의 2026-10-17 항목 가운데 dataset을 마지막으로 다시 pin한 것), `shasum -a 256 dataset/build.variants.manifest.json`이 같은 값을 냅니다. 이 pin은 9.14 D12(2026-10-09)에 처음 걸렸고 그 뒤 9.17, 9.18, 9.22, 9.20, 9.23(D10, D17), 9.15(2026-10-16의 rebuild, 2026-10-17의 묶은 data rebuild와 같은 날의 두 번째 data rebuild)를 거치며 다시 걸렸습니다. core manifest가 바뀌면 variants manifest의 `inputs`도 바뀌기 때문입니다.
+pin은 RQ0 gate spec의 `pins.variants.all`입니다. 2026-10-17의 값은 `8e2948b18812a546375ccd1f67d61604ee06c51d87060b8a1a48f5aa6cd0f1a4`이고(출구 감사 9.16의 re-pin, `harness/CHANGELOG.md`의 2026-10-17 항목 가운데 dataset을 마지막으로 다시 pin한 것), `shasum -a 256 dataset/build.variants.manifest.json`이 같은 값을 냅니다. 이 pin은 9.14 D12(2026-10-09)에 처음 걸렸고 그 뒤 9.17, 9.18, 9.22, 9.20, 9.23(D10, D17), 9.15(2026-10-16의 rebuild, 2026-10-17의 묶은 data rebuild와 같은 날의 두 번째 data rebuild), 9.16(2026-10-17, 출구 감사의 data rebuild)을 거치며 다시 걸렸습니다. core manifest가 바뀌면 variants manifest의 `inputs`도 바뀌기 때문입니다.
 
 ---
 

@@ -168,7 +168,7 @@ reporting_lines:
     name: chain-x1.2
     axis: chain_scale
     value: "1.2"
-    reason: "the frame chain's RUN values scaled by 1.2 (9.4 D9; 9.5's scale check of the one archetype still grounded in literature at another machine's scale): the deck's per-schedule runtime understates a wake's demand by the schedules a wake is cut into, about 1.4 on average (lavd-ossna24 s14)"
+    reason: "the frame chain's RUN values scaled by 1.2 (9.4 D9; 9.5's scale check of the one archetype still grounded in literature at another machine's scale): the deck's per-schedule runtime understates a wake's demand by the schedules a wake is cut into, about 1.4 on average (arithmetic on lavd-ossna24 s14's preemption share, 9.4 D9)"
     files: {c2-p2a: c2-p2a@chain-x1.2, c2-p2b: c2-p2b@chain-x1.2, c7-gaming: c7-gaming@chain-x1.2}
   - type: variant_set
     name: chain-x1.4

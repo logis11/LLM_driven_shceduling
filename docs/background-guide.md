@@ -129,7 +129,7 @@ The whole experiment's raw material is a directory of **canonical workload files
     "id": "c2-p1a",
     // the hashes after @ are the source files' git blobs; they move with each file's bytes
     "derived_from": "dataset/timelines/coreset/c2-p1a.timeline.yaml@a0effee…",
-    "sampled": { "seed": 201, "archetypes": "archetypes.yaml@803395d…" }
+    "sampled": { "seed": 201, "archetypes": "archetypes.yaml@c78d8cf…" }
   },
 
   "ground_truth": [
@@ -218,7 +218,7 @@ A reference table — skim now, return when a term bites you. These are the mean
 | **batch task** | consumes all CPU it's given until done (a compiler). Cares about turnaround/throughput |
 | **MLFQ** | Multi-Level Feedback Queue — the textbook form of classifying tasks by their behaviour (OSTEP ch. 8; Corbató 1962) and this project's baseline, not a family every OS ships: Windows' priority boosts and decay are an MLFQ form, macOS's Clutch/Edge scheduler runs EDF over QoS buckets with usage-decayed priority per thread, and Linux's default, EEVDF, is a proportional-share algorithm. Several priority queues; use up your allotment at a level (a slice's worth of CPU, counted across sleeps) → demoted (probably batch); give up the CPU before using it up → stay at your level, the CPU still counted (probably interactive); every boost interval everything returns to the top queue, so nothing starves |
 | **EDF** | Earliest Deadline First — always run the task whose deadline is nearest. The right tool when tasks *have* deadlines (frames, audio buffers) |
-| **lottery scheduling** | each task holds tickets; draw a ticket to pick who runs. Gives proportional shares ("background gets ~15%") |
+| **lottery scheduling** | each task holds tickets; draw a ticket to pick who runs. Gives shares proportional to tickets in expectation |
 | **FIFO** | run to completion in arrival order. Maximal throughput, no interactivity |
 | **deadline** | for periodic work: each job must finish within its period, or the frame is shown late or dropped, or the audio clicks — a late game frame is shown at the next vertical blank under FIFO presentation (Vulkan's `VK_PRESENT_MODE_FIFO_KHR`), a video sink drops a frame later than its allowed lateness, a late audio buffer is an xrun |
 | **mode** | the ground-truth label for what the machine is being used for in an interval (`gaming`, `office`, `dev`…) |

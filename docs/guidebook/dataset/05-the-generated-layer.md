@@ -691,7 +691,7 @@ meta:
 
 `<desc>`는 `describe(cell)`가 만드는 한 줄 설명입니다. 예: "compile -> office, form departs (A departs and B arrives)", "mail -> idle -> mail, the middle segment 10s; tuning half", "the user stays in dev while compile's task set arrives at the boundary (cross-mode); the two focus holders share a name, a pre-committed miss".
 
-이 주석은 사람을 위한 것이지만, 그 byte는 compile 결과에 영향을 줍니다. compile된 workload의 `meta.derived_from`은 `<timeline 경로>@<그 파일 내용의 git blob hash>`입니다(예: `dataset/generated/transition-grid/tr-compile-to-office-departs.timeline.yaml@d82db0fe…`). 파일이 commit되지 않아도 내용의 hash는 계산됩니다. 그래서 주석 한 글자를 바꾸면 1,562개 artifact의 hash가 모두 바뀝니다. 9.20 D10이 실제로 이 일을 겪었습니다. "A first run had changed every generated artifact through `meta.derived_from` because the generated files' header comment had been reworded ('composed or renamed'); the wording was restored and the sets regenerated — the header is part of the timeline bytes the artifact pins." 주석의 문구를 "composed or renamed"로 바꿨더니 모든 artifact가 바뀌어서, 문구를 되돌렸다는 기록입니다.
+이 주석은 사람을 위한 것이지만, 그 byte는 compile 결과에 영향을 줍니다. compile된 workload의 `meta.derived_from`은 `<timeline 경로>@<그 파일 내용의 git blob hash>`입니다(예: `dataset/generated/transition-grid/tr-compile-to-office-departs.timeline.yaml@c002ee56…`). 파일이 commit되지 않아도 내용의 hash는 계산됩니다. 그래서 주석 한 글자를 바꾸면 1,562개 artifact의 hash가 모두 바뀝니다. 9.20 D10이 실제로 이 일을 겪었습니다. "A first run had changed every generated artifact through `meta.derived_from` because the generated files' header comment had been reworded ('composed or renamed'); the wording was restored and the sets regenerated — the header is part of the timeline bytes the artifact pins." 주석의 문구를 "composed or renamed"로 바꿨더니 모든 artifact가 바뀌어서, 문구를 되돌렸다는 기록입니다.
 
 `render_bytes`는 주석 다음에 timeline dict를 `yaml.safe_dump(data, sort_keys=True)`로 씁니다. 키가 정렬되므로 생성된 파일에서는 `focus`, `input`, `meta`, `operations`, `segments`, `tasks` 순으로 나옵니다. 사람이 쓴 C1 파일(`meta`가 맨 위)과 순서가 다른 것은 이 때문입니다.
 
@@ -773,7 +773,7 @@ cell id 하나가 거치는 이름들을 `tr-compile-to-office-departs`로 따�
 | artifact | `dataset/build/transition-grid-single/tr-compile-to-office-departs.workload.json` (4,451,924 byte) | 안 함 (`dataset/build/`) |
 | report | `dataset/build/transition-grid-single/tr-compile-to-office-departs.report.json` | 안 함 |
 | manifest의 키 | `transition-grid-single/tr-compile-to-office-departs.workload.json` (`artifacts`, `demand`, `grid`), `transition-grid-single/tr-compile-to-office-departs.report.json` (`reports`) | 함 (`dataset/build.transition-grid.manifest.json`) |
-| compile된 파일 안 | `meta.id = "tr-compile-to-office-departs"`, `meta.derived_from = "dataset/generated/transition-grid/tr-compile-to-office-departs.timeline.yaml@d82db0fe…"`, `meta.sampled.seed = 1857729296` | — |
+| compile된 파일 안 | `meta.id = "tr-compile-to-office-departs"`, `meta.derived_from = "dataset/generated/transition-grid/tr-compile-to-office-departs.timeline.yaml@c002ee56…"`, `meta.sampled.seed = 1857729296` | — |
 | harness가 쓰는 workload id | `tr-compile-to-office-departs` (manifest 키의 파일 이름에서 `.workload.json`을 뗀 것; `harness/tools/harness/manifests.py`의 `workload_id`) | — |
 
 report는 compile이 artifact 옆에 남기는 요약입니다. 파일 길이(`duration_us`), CPU 수요(`demand_us`, `utilization`, `demand_class`), task별 CPU(`per_task`), segment별 수요(`per_segment`), operation 기록(`operations`)을 담습니다. 9.18(2026-10-11)부터 report도 manifest가 hash로 못 박는 blessed artifact입니다.
@@ -886,7 +886,7 @@ segment의 label은 C1의 것을 그대로 복사합니다(5.2의 6단계). 그�
 **③ placement 0을 놓습니다** (`compile`, 0–60 s, task는 60 s까지). C1 `compile`의 task는 둘입니다.
 
 - `editor`(`code`, `code-editor`, 0 s 도착, `depart` 있음) → `editor-s0`, 0 s 도착, 60 s 떠남.
-- `build`(`make`, `build-orchestrator`, 2 s 도착, `depart` 없음) → `build-s0`, 2 s 도착. `spawn_count`는 2908 × (60 − 2) / (1594 − 2) = 105.9 → 106, 출처 `design`. `parallelism_cap: 8`은 크기와 무관하니 그대로(출처 `design`도 C1 그대로), `child_name: cc1`도 그대로(출처 `meas-ci:build:2026-09-18`).
+- `build`(`make`, `build-orchestrator`, 2 s 도착, `depart` 없음) → `build-s0`, 2 s 도착. `spawn_count`는 2908 × (60 − 2) / (1594 − 2) = 105.9 → 106, 출처 `design`. `parallelism_cap: 8`은 크기와 무관하니 그대로(출처 `convention`도 C1 그대로), `child_name: cc1`도 그대로(출처 `meas-ci:build:2026-09-18`).
 - segment: `{from: 0s, to: 60s, mode: compile, attributes: {background_wanted: true}, scenario: [S11]}`.
 - `input`: C1 창 2–1592 s → `[0 + 2, 60 − (1594 − 1592)] = [2 s, 58 s]`, task `editor-s0`.
 - `focus`: C1 0–1594 s → `[0, 60 − 0] = [0 s, 60 s]`, task `editor-s0`.
@@ -919,7 +919,7 @@ tasks:
 - {archetype: code-editor, arrive: 0s, depart: 60s, id: editor-s0, name: code}
 - {archetype: build-orchestrator, arrive: 2s, id: build-s0, name: make,
    bind: {child_name: cc1, parallelism_cap: 8, spawn_count: 106},
-   source: {child_name: "meas-ci:build:2026-09-18", parallelism_cap: design, spawn_count: design}}
+   source: {child_name: "meas-ci:build:2026-09-18", parallelism_cap: convention, spawn_count: design}}
 - {archetype: office-writer, arrive: 60s, depart: 120s, id: writer-s1, name: soffice.bin}
 - {archetype: web-browser, arrive: 60s, depart: 120s, id: browser-s1, name: chrome}
 - {archetype: renderer-hidden, arrive: 60s, count: 4, depart: 120s, id: renderers-s1, name: chrome,
@@ -1505,7 +1505,7 @@ split은 없습니다. 9.20 decision 5가 "The set … has no split"이라고 �
 1. 이름: `familiarity-ladder`, mode `compile`, tier 5, carrier `all`.
 2. 이름 목록: `names_of(c1-compile)` = `cc1`, `code`, `make`. focus holder `code`. `all` = 세 이름 전부. `focus` = `[code]`, `others` = `[cc1, make]`로 셋 다 다르므로 `compile`은 세 칸 mode입니다.
 3. tier 5 이름: 4.6에서 손으로 계산한 대로 `code` → `owcp`, `make` → `lgar`, `cc1` → `xsfc`. 셋 다 첫 시도에서 아는 이름과 겹치지 않았습니다.
-4. timeline: `editor-s0`이 `owcp`, `build-s0`이 `lgar`이고 그 `child_name`이 `xsfc`, `spawn_count` 106. `build-s0`의 출처는 `child_name: design`, `parallelism_cap: design`, `spawn_count: design`. segment에 `familiarity: 5`. seed 3,475,926,447.
+4. timeline: `editor-s0`이 `owcp`, `build-s0`이 `lgar`이고 그 `child_name`이 `xsfc`, `spawn_count` 106. `build-s0`의 출처는 `child_name: design`, `parallelism_cap: convention`, `spawn_count: design`. segment에 `familiarity: 5`. seed 3,475,926,447.
 5. 머리 주석: "familiarity-ladder: compile at familiarity tier 5, every name substituted (cc1 -> xsfc, code -> owcp, make -> lgar)."
 6. compile하면 `ground_truth`의 segment에 `familiarity: 5`가 실립니다. compiler는 저작된 `familiarity` annotation을 그대로 옮깁니다(2026-09-08부터의 규칙).
 
@@ -1646,7 +1646,7 @@ placement 기록의 모양은 set마다 이렇게 다릅니다(9.21 D1의 "Shape
 
 ## 12.8 다시 bless하기와 pin의 역사
 
-"bless"는 이 저장소에서 "build를 다시 해서 나온 manifest를 commit해 공식 기준으로 삼는다"는 뜻입니다. generated manifest는 2026-10-11부터 2026-10-17까지 여덟 번 bless되었습니다. hash 앞 8자리로 적습니다.
+"bless"는 이 저장소에서 "build를 다시 해서 나온 manifest를 commit해 공식 기준으로 삼는다"는 뜻입니다. generated manifest는 2026-10-11부터 2026-10-17까지 아홉 번 bless되었습니다. hash 앞 8자리로 적습니다.
 
 | 시점 | `transition-grid` | `return-grid` | `flap-stress` | `distractor-grid` | `familiarity-ladder` | 무엇이 바뀌었나 |
 |---|---|---|---|---|---|---|
@@ -1658,8 +1658,9 @@ placement 기록의 모양은 set마다 이렇게 다릅니다(9.21 D1의 "Shape
 | 9.15 (2026-10-16) | `a8eebb33` | `2e57a6c1` | `dd6a7c24` | `264d3333` | `58a34d65` | compiler의 쓰이지 않던 경로 삭제, lint, library와 C1 timeline의 주석 등(`harness/CHANGELOG.md` 2026-10-16). 모든 artifact가 library hash에서만 다르고, `inputs`가 고친 C1 timeline과 도구를 고정 |
 | 9.15 (2026-10-17, 첫째) | `4bb7a444` | `ec7ca574` | `79a6c5c4` | `3478a908` | `415cfbd6` | generator가 9.10 D168의 꼬리표 규칙을 따르게 되어(`gen/compose.py`, 5.2) `transition-grid`의 `focus` 형태 timeline 214개가 바뀌고, 그 artifact가 `meta.derived_from`에서도 다름. 그 밖에는 library의 머리 주석과 notes 때문에 모든 artifact가 library hash에서만 다름. `inputs`에서는 library, schema, `c1-idle`, `gen/compose.py`, `wlc/compiler.py`·`timeline.py`·`variants.py`의 hash가 바뀜. `grid`, `demand`, `reports`는 그대로(`harness/CHANGELOG.md` 2026-10-17의 "the corner sets sweep the hidden renderer's quiet threads; the generated tags under one rule; …" 항목) |
 | 9.15 (2026-10-17, 둘째) | `d84fb68a` | `a6980482` | `92676677` | `1d129a51` | `8c38e7a8` | `distractor-grid`의 두 번째 segment도 9.10 D168의 꼬리표 규칙을 따르게 되어(`gen/compose.py`, 5.7) A가 `backup`, `indexing`, `ml-train`, `transcode`인 timeline 68개가 바뀌고, 그 artifact가 `meta.derived_from`에서도 다름. 그 밖에는 library의 scope 문장(측정 항목들의 trace 문장, `video-editor`의 유휴 탐침 문장) 때문에 모든 artifact가 library hash에서만 다름. `inputs`에서는 library, `grids.yaml`, `gen/compose.py`의 hash가 바뀜. `grid`, `demand`, `reports`는 그대로(`harness/CHANGELOG.md` 2026-10-17의 "the distractor grid's tags under one rule; …; the dataset re-pinned" 항목) |
+| 9.16 (2026-10-17) | `01e539ee` | `2d80cff9` | `53420ed5` | `21502219` | `1dd08130` | 출구 감사가 찾은 library의 문장과 꼬리표 수정 때문에 모든 artifact가 library hash에서 다름. compile set의 `parallelism_cap` 꼬리표가 `design`에서 `convention`이 되어(9.6 D4, compile 조각의 `-j`와 cap을 정한 결정이 붙인 꼬리표) 그 timeline을 합성한 artifact가 `meta.derived_from`에서도 다름(transition grid 60개, return grid 90개, distractor grid 32개, familiarity ladder 6개, flap-stress 0개). `inputs`에서는 library, `grids.yaml`(주석), `c1-compile` timeline의 hash가 바뀜. `grid`, `demand`, `reports`는 그대로(`harness/CHANGELOG.md` 2026-10-17의 "the exit audits' data findings; …; the dataset re-pinned" 항목) |
 
-9.21 D1은 "checked section by section against `HEAD`"라고 적습니다. 다시 bless할 때 artifact가 바뀌지 않았다는 것을 section마다 확인했다는 뜻입니다. 9.20 spec의 invariant도 같은 원칙입니다. "The 9.19 sets' artifacts are unchanged; their manifests move only where they pin the generator and the grid definition by content." 이 hash들은 마지막 audit(9.16)이 재현할 목록으로 넘겨졌습니다(`_dev/TODO.md` 9.16 줄). 2026-10-17 tree의 다섯 manifest의 SHA-256은 마지막 줄(9.15, 2026-10-17, 둘째)의 값과 같습니다.
+9.21 D1은 "checked section by section against `HEAD`"라고 적습니다. 다시 bless할 때 artifact가 바뀌지 않았다는 것을 section마다 확인했다는 뜻입니다. 9.20 spec의 invariant도 같은 원칙입니다. "The 9.19 sets' artifacts are unchanged; their manifests move only where they pin the generator and the grid definition by content." 이 hash들은 마지막 audit(9.16)이 재현할 목록으로 넘겨졌습니다(`_dev/TODO.md` 9.16 줄). 2026-10-17 tree의 다섯 manifest의 SHA-256은 마지막 줄(9.16, 2026-10-17)의 값과 같습니다.
 
 # 13장 · 생성한 파일은 어떻게 점수를 받나
 
@@ -1707,7 +1708,7 @@ C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡
 
 > No generated file has an entry in the scoring spec. Its terms are derived when the harness runs, the way `with_variants` derives a variant's from its base's (9.14 decision 12): for each placement in the file — a mode's C1 task set under one id suffix — the `c1-<mode>` entry's terms, their entities carrying the placement's suffix, their latency and periodic terms windowed to the segments the placement is labelled in, their batch terms unwindowed. The rule's statement lives in the scoring spec's text, so it is pinned with the spec.
 
-1,562개 entry를 손으로 쓰거나 기계로 써서 scoring spec에 넣을 수도 있었습니다. 그 대신 규칙을 택한 근거로 기록이 드는 것은 선례입니다. 9.14 decision 12(2026-10-09)가 sensitivity variant 78개에 같은 방식을 썼습니다. variant는 entry 없이 base 파일의 term을 실행 시점에 물려받습니다(`with_variants`). generated 파일도 C1 entry를 실행 시점에 물려받습니다(`with_generated`). 규칙의 문장은 scoring spec의 header 주석에 있으므로, scoring spec을 pin하면 규칙도 함께 pin됩니다. 실제로 9.21은 이 header 문장을 고쳤고, 그래서 scoring spec이 다시 frozen되어 hash `0ff71b1f…`가 되었고, RQ0 gate spec의 scoring-spec pin이 그 값으로 따라 움직였습니다(9.21 D6). 9.23 D3이 같은 header에 batch term의 censored 경우(13.12)를 더했을 때도 같은 일이 일어나, 지금의 hash는 `2ad757b6…`입니다(9.23 D10).
+1,562개 entry를 손으로 쓰거나 기계로 써서 scoring spec에 넣을 수도 있었습니다. 그 대신 규칙을 택한 근거로 기록이 드는 것은 선례입니다. 9.14 decision 12(2026-10-09)가 sensitivity variant 78개에 같은 방식을 썼습니다. variant는 entry 없이 base 파일의 term을 실행 시점에 물려받습니다(`with_variants`). generated 파일도 C1 entry를 실행 시점에 물려받습니다(`with_generated`). 규칙의 문장은 scoring spec의 header 주석에 있으므로, scoring spec을 pin하면 규칙도 함께 pin됩니다. 실제로 9.21은 이 header 문장을 고쳤고, 그래서 scoring spec이 다시 frozen되어 hash `0ff71b1f…`가 되었고, RQ0 gate spec의 scoring-spec pin이 그 값으로 따라 움직였습니다(9.21 D6). 9.23 D3이 같은 header에 batch term의 censored 경우(13.12)를 더했을 때도 같은 일이 일어나 hash가 `2ad757b6…`가 되었고(9.23 D10), 출구 감사 9.16이 `c2-p3b`의 backup term을 turnaround로 바꾸고(9.16 D4) `c7-meeting`의 이유 문장을 고쳐(9.16 D1) 지금의 hash는 `f7d1df4c…`입니다.
 
 ## 13.3 규칙 전문과 단계
 
@@ -1976,7 +1977,7 @@ generator가 canonical artifact를 직접 쓰지 않고 "ordinary timeline YAML"
 | on-demand | 필요한 run에서만 만든다 | 기각 |
 | pinned subset | 일부 파일만 만든다 | 기각 |
 
-> **왜 이렇게 정했나.** 기각한 두 안에 대해 기록된 이유는 하나입니다. "both put an exception into the gate's rule that `build/` equals the union of every manifest." gate의 규칙은 예외가 없습니다. `build/`에 있는 파일은 정확히 manifest들의 합집합이어야 합니다. on-demand나 부분 build를 하면 "이 run에서는 generated manifest의 파일이 없어도 된다"는 예외를 넣어야 합니다. 채택한 안의 근거는 측정입니다. 다섯 set이 4 vCPU runner에서 5분 13초, 전체 run 12분 04초의 일부이고, `build/`는 6.8 GB로 runner의 저장 공간 14 GB 안에 들어갑니다. runner의 사양은 9.21 D8이 새 deployed-system reference로 등록했습니다. `gh-hosted-runners`(GitHub Docs, "GitHub-hosted runners reference", 2026-10-13에 읽음): 공개 저장소의 표준 Linux runner는 "4 vCPU, 16 GB RAM and 14 GB SSD". 이 항목은 `docs/references.md`에만 있고 `dataset/sources.yaml`에는 없습니다. 데이터셋이 이 값에서 아무 값도 끌어내지 않기 때문입니다.
+> **왜 이렇게 정했나.** 기각한 두 안에 대해 기록된 이유는 하나입니다. "both put an exception into the gate's rule that `build/` equals the union of every manifest." gate의 규칙은 예외가 없습니다. `build/`에 있는 파일은 정확히 manifest들의 합집합이어야 합니다. on-demand나 부분 build를 하면 "이 run에서는 generated manifest의 파일이 없어도 된다"는 예외를 넣어야 합니다. 채택한 안의 근거는 측정입니다. 다섯 set이 4 vCPU runner에서 5분 13초, 전체 run 12분 04초의 일부이고, `build/`는 6.8 GB로 runner의 저장 공간 14 GB 안에 들어갑니다. runner의 사양은 9.21 D8이 새 deployed-system reference로 등록했습니다. `gh-hosted-runners`(GitHub Docs, "GitHub-hosted runners reference", 2026-10-13에 읽음): 공개 저장소의 표준 Linux runner는 processor 4, memory 16 GB, storage(SSD) 14 GB. 이 항목은 `docs/references.md`에만 있고 `dataset/sources.yaml`에는 없습니다. 데이터셋이 이 값에서 아무 값도 끌어내지 않기 때문입니다.
 
 언제 다시 볼지도 적혀 있습니다. `dataset/README.md`: "The strategy is revisited when a set is added — the naturalistic set on the backlog would be the occasion — or when the generated step's time or the build's size against the runner's storage moves the whole run past what a push can wait for; an on-demand build or a pinned subset would then be weighed, each at the cost of an exception to `check`'s rule that `build/` equals the union of every manifest." set이 하나 더 생길 때(backlog의 naturalistic set이 그 계기가 될 것), 또는 generated 단계의 시간이나 build 크기가 push 한 번이 기다릴 수 있는 수준을 넘을 때 다시 저울질합니다.
 

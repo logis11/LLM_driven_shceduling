@@ -4,7 +4,7 @@ A guard is a check that must pass before a run's numbers are read. It does not s
 
 Two files live here. `guard-spec.yaml` is the list of guards with their thresholds, the conditions each applies to, the C2 pairs, and a grounding for every threshold. `schema/guards.schema.json` is the shape of the guards file the checks write.
 
-**The guard spec is frozen at version 1.0** (2026-09-12, `../CHANGELOG.md`). The RQ0 gate spec pins its bytes and its version. Exemptions are never written here: they are the experiment's data, with a reason each, in the per-experiment spec.
+**The guard spec is frozen at version 1.2** (2026-10-17, `../CHANGELOG.md`). The RQ0 gate spec pins its bytes and its version. Exemptions are never written here: they are the experiment's data, with a reason each, in the per-experiment spec.
 
 ## The eight guards
 
@@ -15,7 +15,7 @@ Two files live here. `guard-spec.yaml` is the list of guards with their threshol
 | `starvation_floor` | a ready task waiting longer than 30 s, the bound sched_ext's watchdog enforces |
 | `determinism` | a rerun trace that is not byte-identical to the first |
 | `utilisation_sanity` | delivered CPU exceeding the lane's elapsed time, or a scored file that delivered none: an empty trace that parsed |
-| `tick_count` | any consistency message from the records build: a chain tail's iterations not matching its head's ticks, the deadline cross-check, stimulus counts against the run file, a wake line past the last WAIT of its task's program, applied config lines against the schedule |
+| `tick_count` | any consistency message from the records build: a chain tail completing more iterations inside the window than its head consumed ticks there (a tail short at `T_end` is not a message, so a wake dropped mid-run is not caught), the deadline cross-check, stimulus counts against the run file, a wake line past the last WAIT of its task's program, applied config lines against the schedule |
 | `validation_matches_provenance` | the log's `validation` sequence not equal, entry by entry, to the schedule's `provenance` sequence after the boot entry |
 | `c2_pair` | the two files of a C2 pair receiving identical configuration sequences over the segment whose label differs, under a recognition-driven condition: the recognizer's answer never changed between wanted and unwanted (since 2026-10-09; the trace-body reading before it passed vacuously once every pair's background task was a different job) |
 

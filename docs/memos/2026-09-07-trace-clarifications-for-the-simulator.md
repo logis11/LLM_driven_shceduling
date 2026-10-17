@@ -88,3 +88,11 @@ The harness fixes its observation window as `[0, T_end]`, with `T_end` read from
 | 5 | Stop at the workload's end if you like (§7) | advice | nothing; the harness never reads past it |
 
 If any of 1–3 goes differently, tell 인지오 before the harness's mock traces are finalised, because they encode these assumptions and would be changed deliberately rather than discovered wrong later. The full reasoning behind each item is in `_dev/archive/2026-09-07-phase-5-primitive-metrics.md`.
+
+## Correction (2026-10-17)
+
+Three examples above read the 2026-09 core set. On the rebuilt files (the 9.16 compiled-number audit, `_dev/research/jioh/task-9.16-exit-audits/compiled/report.md` §2.6) they read as follows; the point each illustrates holds.
+
+- **§3c, "The game chain is sixteen tasks".** Every chain file's chain has 17 members: 16 stages and `wineserver`.
+- **§6, "did the input stage finish its 230 µs before the next tick".** The head runs 0.2–0.9 ms: 225 µs in the C2 gaming pair (`c2-p2a` and `c2-p2b`), 631 µs in `c1-gaming`, `c4-gaming` and `c7-gaming`, 746 µs in `c3-evening`, 911 µs in `c6-dual`. All are sub-millisecond, so the head's `deadline` line still answers almost always yes.
+- **§7, "`c2-p1a`'s training run has 130 s of work from t = 60 s in a file whose labels end at 180 s".** It has 1,389.885 s of work from t = 60 s in a file whose labels end at 99.435 s; the advice holds.

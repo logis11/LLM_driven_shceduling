@@ -67,7 +67,7 @@ memo의 판정은 한 줄입니다. "Verdict: sound for the recognition claim, b
 
 인용문 자체는 정확했지만, 그 숫자가 무엇의 숫자인지가 틀렸습니다. kernel build가 아니라 DynamoRio build였습니다. 그리고 이 프로젝트가 같은 일을 직접 잰 kernel build(`meas-ci:cli:3`, linux-6.6 defconfig, `make -j8`, 5회 반복)는 compiler 계열 프로세스를 중앙값 11,883개 만들었습니다(critical findings memo A1). 같은 "빌드"라도 다섯 배 가까이 차이 나는 숫자에 엉뚱한 이름표를 붙이고 있었던 셈입니다.
 
-**둘째, 16.7 ms.** 게임 archetype `game-task-chain`의 `frame_period`(게임 한 frame의 주기)는 16,667 µs였고, 출처 태그는 LAVD 발표(Changwoo Min, Open Source Summit North America 2024)의 슬라이드였습니다. 2026-09-13에 30장의 슬라이드를 텍스트와 그림까지 다 확인해 보니 16.7, 16.67, 60 fps, "frame budget"이라는 말이 어디에도 없었습니다. 유일한 시간 예산은 slide 27의 "targeted latency (e.g., 15 msec)"였는데, 이것은 scheduler의 스케줄링 창이지 frame 주기가 아닙니다(critical findings memo A2). 이 숫자는 모든 게임 파일의 박자와 부하 크기를 정하는 값이었습니다.
+**둘째, 16.7 ms.** 게임 archetype `game-task-chain`의 `frame_period`(게임 한 frame의 주기)는 16,667 µs였고, 출처 태그는 LAVD 발표(Changwoo Min, Open Source Summit North America 2024)의 슬라이드였습니다. 2026-09-13에 30장의 슬라이드를 텍스트와 그림까지 다 확인해 보니 16.7 ms, frame budget, 60 fps 목표를 말하는 슬라이드는 없었습니다. 60 FPS / 16.5 ms라는 표시는 slide 29의 benchmark screenshot에만, 설명 없이 나옵니다. 유일한 시간 예산은 slide 27의 "targeted latency (e.g., 15 msec)"였는데, 이것은 scheduler의 스케줄링 창이지 frame 주기가 아닙니다(critical findings memo A2). 이 숫자는 모든 게임 파일의 박자와 부하 크기를 정하는 값이었습니다.
 
 두 사례에서 배우는 것은, 출처 태그가 붙어 있다고 근거가 있는 것은 아니라는 점입니다. 태그는 "이 숫자를 저 문서가 말한다"는 주장일 뿐이고, 그 주장 자체도 검증해야 합니다. 이것이 3장에서 볼 Phase 9 결정 1, 검증 기준의 출발점입니다.
 
@@ -536,7 +536,7 @@ Phase 9 spec의 Scope는 memo 밖의 발견 여섯 개를 따로 적었습니다
 1. **interbench의 Compile 부하는 프로세스를 하나도 fork하지 않는다.** K1 C-interbench-9는 `CONTRADICTED`였습니다. `archetype-plan.md:53`은 interbench의 Compile("heavy make -j4")이 compiler-child를 교차 확인한다고 적었는데, 원문의 Compile은 Burn, Write, Read 스레드 셋을 한 프로세스 안에서 돌릴 뿐입니다. 이것은 "이름이 같다고 같은 것을 말하는 것이 아니다"의 좋은 예입니다.
 2. **"~5.7 ms" download sleep은 어떤 판본의 `archetypes.yaml`과도 맞지 않는다.** compile된 숫자 감사는 `network-bulk.net_wait`이 커밋 `8416025`(2026-08-28) 이후 16,700 µs였으므로 "~5.7 ms"는 한 번도 compile된 적이 없다고 확인했습니다. compile된 `c2-p2a` download의 SLEEP 중앙값은 16,712 µs, 평균 18,954 µs였습니다. 출처 없는 숫자가 문서(coreset guide)에만 떠돌던 경우입니다.
 3. **Roeser의 Table 3은 archetype이 "convention"이라 부른 퍼짐을 보고한다.** Table 3에는 fluent 퍼짐 0.29가 두 과제 모두에 있었습니다(R08). 즉 관례라고 적었던 값 일부는 실제로 출처에 있었습니다. 표시가 틀린 방향이 "출처가 있는데 없다고 함"인 드문 예입니다.
-4. **LAVD 슬라이드 12장과 16장의 wineserver.** 슬라이드 12장은 wine을 시스템 task로 분류하고, 16장의 그래프는 wineserver를 중심으로 한 구조를 보입니다(K2 C-lavd-4 `MISATTRIBUTED`). 9.4 D4가 wineserver를 chain의 구성원으로 넣고 260 µs(`lavd-ossna24:s13`)를 주었습니다.
+4. **LAVD 슬라이드 12장과 16장의 wineserver.** 슬라이드 12장은 wine을 시스템 task로 셉니다. wineserver를 중심에 둔 그래프는 11장의 것이고(게임 process 하나의 dispatcher thread들과 함께), 16장에서 wineserver는 게임 본체 `Troy.exe`, `explorer.exe`와 잇는 곁가지 고리입니다(K2 C-lavd-4 `MISATTRIBUTED`). 9.4 D4가 wineserver를 chain의 구성원으로 넣고 260 µs(`lavd-ossna24:s13`)를 주었습니다.
 5. **CpsMark+는 "time-shared compositions"를 반박한다.** `archetype-plan.md:69`는 창작 프로그램이 시간을 나눠 쓰는 조합이라는 주장에 `cpsmark-tbench23:table-4`를 달았는데, Table 4는 작업별 하드웨어 민감도(GPU/CPU/저장장치) 표입니다. 그리고 K2 C-cpsmark-6은 저장소가 인용한 "1.77×"가 Table 4가 아니라 Table 5의 CC 모듈 수치라고 `MISATTRIBUTED` 판정했습니다.
 6. **`chang-chi21`의 세부.** K4는 "~8 %가 10개 넘는 탭을 열었다"는 `SUPPORTED`(정확히는 MTurk가 아닌 참가자 중 7.8 %), "Article 149"는 `UNVERIFIABLE`, "fatter modern tail"(현대의 탭 분포 꼬리가 더 두껍다)은 우리 해석(`OURS`)으로 판정했습니다. `chang-chi21`은 어떤 값도 받치지 않게 되었고, 9.15(2026-10-16)에서 registry와 `references.md`를 떠났습니다(2.4절).
 
@@ -799,12 +799,12 @@ family마다 세부는 다르지만, job 하나의 뼈대는 같습니다. `back
 - **wake**(깨어남): "A schedule-in preceded by a wakeup event for that thread since its last sleep; a resume after preemption is folded into the wake it continues." 스레드가 잠들었다가 누군가에게 깨워져 CPU에 올라가는 것이 wake 하나입니다. **schedule-in**은 스레드가 CPU를 받는 순간입니다. **preemption**(선점)은 스레드가 스스로 잠들지 않았는데 scheduler가 CPU를 빼앗아 다른 스레드에 주는 것입니다. 선점당했다가 다시 올라가는 것은 새 wake가 아니라 이전 wake의 연장으로 셉니다. 웹으로 비유하면, `await`에서 잠들었다 깨어나는 것이 wake이고, 같은 callback이 time slice 때문에 잠시 밀렸다 이어지는 것은 같은 실행의 연속입니다.
 - **run**: wake 하나의 CPU 시간. 선점으로 끊긴 조각들은 합칩니다.
 - **gap**: 한 component의 연속된 wake 사이 시간. 9.5 D71 이후로 gap은 component의 모든 스레드를 합친 wake 시각들 위에서 재고, 관찰 구간을 고리처럼 이어 마지막 wake의 gap이 첫 wake로 넘어가게 합니다. 그래서 "the gaps sum to the span, one per wake, so the rate a gap table implies is the rate measured." gap 표가 암시하는 wake 빈도가 측정된 빈도와 정확히 같아집니다.
-- **component**: 한 프로세스 역할 안의 스레드 이름(comm) 하나(예: `gpu/Chrome_ChildIOT`, `pid1/systemd`). 9.5 D67은 "a component is identified by its process role and comm together"로 정했습니다. component는 wake 빈도가 큰 순서로 단계 wake의 95 %를 덮을 때까지 고르고, 나머지는 **residual**(나머지) 하나로 묶습니다.
+- **component**: 한 프로세스 역할 안의 스레드 이름(comm) 하나(예: `gpu/Chrome_ChildIOT`, `pid1/systemd`). `chat-client`와 `game-client`에서는 9.8 desktop slice의 규칙대로 tree의 프로세스들을 가로지른 comm 하나입니다. 9.5 D67은 "a component is identified by its process role and comm together"로 정했습니다. component는 wake 빈도가 큰 순서로 단계 wake의 95 %를 덮을 때까지 고르고, 나머지는 **residual**(나머지) 하나로 묶습니다.
 - **table**(표): "the ten pooled quantiles p1 … p99.9, the sample's minimum and maximum, and the measured mean of the samples in each of the eleven intervals they bound". 열 개의 분위수(p1, p5, p10, p25, p50, p75, p90, p95, p99, p99.9), 최솟값과 최댓값, 그리고 그 열두 값이 나누는 열한 구간 각각의 실제 평균. 구간 평균을 함께 들고 다니므로 표에서 뽑은 값의 평균이 표본의 평균과 같아집니다(`distribution.py`의 docstring: "so a table's mean is the sample's mean").
 
 entry의 종류에 따라 담는 것이 다릅니다.
 
-- **타이핑 entry**(`office-writer`, `code-editor`, `mail-client`, `web-browser`): component들과 함께 **per-input run**(입력 하나당 run)을 담습니다. 9.5 D13의 "window rule"에 따라 "all run time of the process tree until the next input minus the idle rate", 곧 한 입력에서 다음 입력까지 process tree 전체가 쓴 CPU에서 유휴 상태의 기본 소비를 뺀 값입니다.
+- **타이핑 entry**(`office-writer`, `code-editor`, `mail-client`, `web-browser`): component들과 함께 **per-input run**(입력 하나당 run)을 담습니다. 9.5 D13의 "window rule"에 따라 "all run time of the process tree until the next input minus the idle rate", 곧 한 입력에서 다음 입력까지 process tree 전체가 쓴 CPU에서 유휴 상태의 기본 소비를 뺀 값입니다. 음수는 0으로 자릅니다(9.5 D13). 유휴 속도보다 조용한 창은 입력의 일을 갖지 않습니다.
 - **operation**: 벤치마크가 정의한 무거운 동작(GIMP의 unsharp mask, Kdenlive의 preview render, Chrome의 page load, Thunderbird의 send)은 지속 시간 표와 자기 component들을 담습니다.
 - **재생과 통화 entry**: 매체의 주기마다 periodic job 하나 — 주기(`period`)와 주기당 CPU(`cycle_run`)(9.5 D75).
 - **build, 일괄, 백그라운드 entry**: "runs between voluntary blocks and the block after each run", 곧 스스로 잠들기 전까지 연속으로 쓴 CPU 덩어리와, 그 뒤 잠들어 있던 시간의 표(9.6 D21, D22, D25; 9.7 D29). **voluntary block**은 스레드가 I/O나 다른 사건을 기다리며 스스로 CPU를 내려놓는 것입니다.
@@ -879,7 +879,7 @@ stability rule은 한 문장으로 이렇습니다. "for every value the fold-in
 | 어떤 값을 | fold-in이 담는 모든 값. component마다 따로, residual 포함. component들의 평균으로 뭉뚱그리지 않음 | 설계(9.5 D30, 9.6 D23, 9.8 D17) |
 | 기준 | 95 % t 반폭이 평균의 5 % 이하, 시간 값이면 1 µs가 더 클 때 1 µs | 5 %는 설계: 보고하는 가장 작은 효과의 절반. 1 µs는 trace의 해상도 |
 | 최소 | 같은 기계 반복 최소 다섯 | `kalibera-ismm13` §11 |
-| 추가와 멈춤 | 한 번씩(또는 pool의 예측치까지 한 batch) 더하며, 매번 규칙을 읽고, 모든 값이 통과하면 멈춤. 상한 없음 | `kalibera-ismm13` §11; `georges-oopsla07` §4 |
+| 추가와 멈춤 | 한 번씩(또는 pool의 예측치까지 한 batch) 더하며, 매번 규칙을 읽고, 모든 값이 통과하면 멈춤. 상한 없음(9.5 D33, 반복 수에 상한을 두지 않는다는 결정) | `kalibera-ismm13` §11; `georges-oopsla07` §4.3(정한 정밀도까지 run을 더함) |
 | 멈춤이 보장하는 것 | 처음 통과한 지점에서 멈추면 그때의 반폭은 낙관적 | `chow-aoms65` |
 
 몇 낱말을 풀어 둡니다.
@@ -1036,7 +1036,7 @@ timeline은 측정 단계보다 훨씬 긴 시간 동안 프로그램을 붙잡�
 
 **재현하는 것.** 테스트(`dataset/tools/tests/test_measured_fidelity.py` 등)가 확인합니다. 표에서 뽑은 값의 평균이 표의 평균과 같은가, component마다 gap 표가 암시하는 wake 빈도가 측정 빈도와 2 % 안인가, 그리고 측정 archetype마다 compile된 흐름이 담은 wake 빈도를 "within 5 % or four standard errors of the count (`feller-ipta50`)"로 맞추는가. 표준오차는 Feller의 갱신 과정(recurrent event) 정리에서 옵니다(9.5 D86이 확인되지 않은 `feller-tams49` 대신 책 `feller-ipta50`을 인용하도록 바꿈).
 
-**재현하지 못하는 것.** 컴파일러는 component마다 gap을 표에서 **독립적으로** 뽑습니다(9.5 D77). 그래서 각 component의 빈도와 gap 분포와 run 분포는 유지되지만, gap들이 실제로 어떤 순서로 왔는지(몰려서 오는지)와 여러 component가 함께 깨어나는지는 유지되지 않습니다. `dataset/tools/meas/burstiness.py`가 이것을 쟀습니다. 1 ms, 10 ms, 100 ms, 1 s 구간마다 wake 수를 세어 분산을 평균으로 나눈 값(dispersion; Poisson 흐름이면 1, 몰리면 1보다 큼)을 측정 흐름과 compile된 흐름에서 각각 구하고 그 비를 봅니다. `measurement-overview.md` §8이 적은 결과(2026-09-27에 읽음, 담은 반복들의 중앙값)는 이렇습니다. 1–100 ms에서 측정이 compile보다 `chat-client` 3.3–11배, `code-editor` 2.6–3.4배, `web-browser` 2.8–3.4배, `mail-client` 1.9–3.0배, `game-client` 1.9–3.0배, `video-editor` 1.3–1.4배, `renderer-hidden` 1.06–1.15배 더 몰려 있고, `audio-server`, `service-manager`, `message-bus`는 약 1, `compositor-shell` 0.86–0.97, `office-writer` 0.60–0.91(compile된 쪽이 더 몰림)입니다. `video-editor`의 값은 `meas-ci:interactive:2026-09-18`의 유휴 단계에서, `renderer-hidden`의 값은 `meas-ci:desktop:2026-09-20`에서 읽은 것이고, 두 entry가 지금 담은 pool(`meas-ci:interactive:2026-10-05`, `meas-ci:desktop:2026-10-05b`)은 아직 읽지 않았습니다. 그 다시 읽기는 9.16의 측정 감사에 들어 있습니다(`_dev/TODO.md` 9.16 줄).
+**재현하지 못하는 것.** 컴파일러는 component마다 gap을 표에서 **독립적으로** 뽑습니다(9.5 D77). 그래서 각 component의 빈도와 gap 분포와 run 분포는 유지되지만, gap들이 실제로 어떤 순서로 왔는지(몰려서 오는지)와 여러 component가 함께 깨어나는지는 유지되지 않습니다. `dataset/tools/meas/burstiness.py`가 이것을 쟀습니다. 1 ms, 10 ms, 100 ms, 1 s 구간마다 wake 수를 세어 분산을 평균으로 나눈 값(dispersion; Poisson 흐름이면 1, 몰리면 1보다 큼)을 측정 흐름과 compile된 흐름에서 각각 구하고 그 비를 봅니다. `measurement-overview.md` §8이 적은 결과(2026-09-27에 읽음, 담은 반복들의 중앙값)는 이렇습니다. 1–100 ms에서 측정이 compile보다 `chat-client` 3.3–11배, `code-editor` 2.6–3.4배, `web-browser` 2.8–3.4배, `mail-client` 1.9–3.0배, `game-client` 1.9–3.0배, `renderer-hidden` 1.26–1.44배, `video-editor` 1.22–1.32배 더 몰려 있고, `audio-server`, `service-manager`, `message-bus`는 약 1, `compositor-shell` 0.86–0.97, `office-writer` 0.60–0.91(compile된 쪽이 더 몰림)입니다. `renderer-hidden`과 `video-editor`의 값은 두 entry가 지금 담은 pool(`meas-ci:desktop:2026-10-05b`, `meas-ci:interactive:2026-10-05`의 유휴 단계)에서 2026-10-17에 다시 읽은 것입니다. 같은 항목에 묶인 task 사이의 동시 깨어남도 유지되지 않습니다. `renderer-hidden`의 측정에서 숨은 renderer 열둘은 process를 넘어 함께 깨는데(9.8 D15, 2026-09-20 probe에서 renderer들의 wake 맞물림을 잰 기록), Chrome 파일에 묶인 renderer task 넷은 각자 독립적으로 compile됩니다.
 
 이것은 **threat to validity**(타당성 위협)로 진술하기로 2026-09-26 검토가 정했고, `measurement-overview.md` §8이 그 위협을 진술합니다. TODO에 적힌 문장은 이렇습니다. "the compiled wake streams reproduce each component's rate, gap and run distributions, not the order of its gaps nor its components waking together." 그리고 이 위협이 결과에 영향을 주는지는 Phase 10의 **trace-replay check**로 확인합니다. 9.14 decision 10은 이것을 RQ0 gate spec에 사전 등록했습니다. `c7-dev`, `c7-browsing`, `c7-meeting`, `c2-p1a` 네 파일을 compile된 그대로 한 번, 측정된 반복 하나의 흐름(실제 순서)을 그대로 재생한 variant로 한 번 돌려, "each file's gap falls on the same side of g under both builds and differs by less than 0.17"이면 일치로 봅니다. 재생하는 흐름은 entry에 따라 세 종류입니다. `code-editor`, `web-browser`, `renderer-hidden`은 wake 순서(`wakes`), `package-upgrade`와 `cpu-batch`의 `python3`는 run과 그 뒤의 block(`runs`), `video-call`은 통화의 cycle(`cycles`)입니다(각 흐름 파일의 `kind`; `dataset/variants.yaml`의 `trace-replay` 주석은 2026-10-17부터 이렇게 적습니다). 네 파일 모두 batch job의 run 흐름도 재생합니다(variants manifest의 `replay` 항목: `c7-dev`, `c7-browsing`, `c7-meeting`의 upgrade, `c2-p1a`의 `python3`). 재생 흐름은 `dataset/replay/`에 있고, `replay_fold_in.py`가 release 원자료에서 만들며, `--check`로 바이트까지 재현됩니다.
 
@@ -1072,7 +1072,7 @@ release에는 착지한 반복만이 아니라 gate에 걸린 job의 report도 �
 
 ## 9.2 release 목록
 
-2026-10-17에 `gh release list`로 확인한 release는 33개입니다(이 권의 처음 판은 32개라고 적었지만 그때의 release는 표의 처음 31행이 전부였습니다. 마지막 두 행은 9.15가 2026-10-17에 만든 것입니다). 제목은 release에 붙은 그대로이고, "담은 것"은 기록 문서들에서 옮겼습니다.
+2026-10-17에 `gh release list`로 확인한 release는 34개입니다(이 권의 처음 판은 32개라고 적었지만 그때의 release는 표의 처음 31행이 전부였습니다. 그다음 두 행은 9.15가 2026-10-17에 만든 것이고, 마지막 행은 9.16이 같은 날 만든 것입니다). 제목은 release에 붙은 그대로이고, "담은 것"은 기록 문서들에서 옮겼습니다.
 
 | release | 제목 | 담은 것 |
 |---|---|---|
@@ -1109,6 +1109,7 @@ release에는 착지한 반복만이 아니라 gate에 걸린 job의 report도 �
 | `meas-local-m1pro-llm-2026-10-08` | meas-local:m1pro-llm:2026-10-08 — raw records | 인지오의 M1 Pro 노트북 관찰(`meas-ci` 아님, 9.12 D110) |
 | `meas-ci-probes-2026-10-17` | 9.15 Kdenlive idle span probe | `video-editor` 유휴 단계의 `c3-creation` span 읽기(8.4절) |
 | `meas-ci-probes-2026-09-20` | 9.5 long-phase probes | settle을 정한 9.5의 긴 단계 탐침(`thunderbird-send`, `chrome`, `code`, `webrtc`; 6.5절) |
+| `meas-ci-probes-2026-09-23` | 9.9 session long-phase probes | `service-manager`와 `message-bus` scope의 run 안 흩어짐을 읽은 9.9 session 캠페인의 긴 단계 탐침 36, 41, 44(세 탐침을 release로 낸다는 9.16 D5에 따라 2026-10-17에 공개) |
 
 이름에 주의할 점이 있습니다. 2026-09-24의 session campaign release는 `meas-ci-session-2026-09-24`입니다. 이름이 `meas-ci-2026-09-24`인 release는 없습니다. 다만 `meas-ci-2026-09-18`과 `meas-ci-2026-09-20`은 2026-09-24에 공개되었습니다(9.5 D70의 fold-in 때). 그리고 release 이름의 날짜는 캠페인 태그의 날짜와 같은 규칙(첫 batch를 띄운 날)을 따르므로, 공개된 날과 다를 수 있습니다.
 
@@ -1315,7 +1316,7 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 
 결정 5는 "What a runner cannot observe comes from literature or public traces, or to 인지오 as a decision"이라고 했습니다. 실제로 어디서 왔는지 항목별로 봅니다.
 
-**게임의 task chain.** runner에서는 Proton(Windows 게임을 Linux에서 돌리는 Valve의 호환 계층) 게임을 돌릴 수 없습니다. `game-task-chain`의 `validation_stats.reason`이 이유를 적습니다. "a CI runner cannot observe a Proton game's Wine, DXVK or audio structure (no GPU; Proton runs only under the Steam client), so no own measurement referees it." 그래서 LAVD 발표 슬라이드 12–17장을 "one observation"으로 받아들였고(9.4 D1, 인지오의 결정), frame 주기는 Steam Deck 사양(`steamos-refresh`)에 기댄 design입니다. 이 entry의 심판(referee)은 `none`이며, "validation against LAVD would be circular — LAVD is also the parameter source"라고 적혀 있습니다. 2026-10-10 감사는 이것을 이렇게 평가했습니다. "`game-task-chain` paces 8 of 51 files (3 judging: c2-p2a, c2-p2b, c7-gaming) on a talk deck." 2026-10-11 인지오의 결정(감사의 A3 해결)은 "resolved as is. The figures stand as the talk's reported values; the chain-x1.2 and chain-x1.4 variants are the sensitivity check."였습니다.
+**게임의 task chain.** runner에서는 Proton(Windows 게임을 Linux에서 돌리는 Valve의 호환 계층) 게임을 돌릴 수 없습니다. `game-task-chain`의 `validation_stats.reason`이 이유를 적습니다. "a CI runner cannot observe a Proton game's Wine, DXVK or audio structure (no GPU; Proton is documented only as a tool for use with the Steam client), so no own measurement referees it." 그래서 LAVD 발표 슬라이드 12–17장을 "one observation"으로 받아들였고(9.4 D1, 인지오의 결정), frame 주기는 Steam Deck 사양(`steamos-refresh`)에 기댄 design입니다. 이 entry의 심판(referee)은 `none`이며, "validation against LAVD would be circular — LAVD is also the parameter source"라고 적혀 있습니다. 2026-10-10 감사는 이것을 이렇게 평가했습니다. "`game-task-chain` paces 8 of 51 files (3 judging: c2-p2a, c2-p2b, c7-gaming) on a talk deck." 2026-10-11 인지오의 결정(감사의 A3 해결)은 "resolved as is. The figures stand as the talk's reported values; the chain-x1.2 and chain-x1.4 variants are the sensitivity check."였습니다.
 
 **사람의 입력 간격.** 9.5의 S4 기록은 "Not observable on a runner: human inter-arrival is replay input, not a measurement"라고 적습니다. 사람의 타이핑 시각은 runner가 만들 수 없으므로 공개 데이터(SWELL-KW)를 재생합니다(user-side 값은 어느 플랫폼에서 와도 된다는 규칙, 6.7절).
 
@@ -1377,7 +1378,7 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 
 **맡은 것.** `game-task-chain` 하나.
 
-**찾은 것.** `search/candidates.md`의 "Observations that exist" 표는 관찰(숫자가 있는 모집단, trace, run)을 문서와 구분합니다. S1(문헌)은 LAVD의 OSS NA 2024 슬라이드 12–17장(이름 없는 게임, 이름 없는 기계; 그림은 적어도 세 프로세스 트리에서 옴), 같은 그림을 쓴 LPC 2024 슬라이드, 그리고 Android(Pixel 8의 Angry Birds)와 Windows 연구를 찾았습니다. S3(공개 trace)은 sched-ext/scx 저장소의 issue #234와 #296에 붙은 `scx_lavd` 표본 로그(Helldivers 2, Apex Legends, Diablo III, StarCraft II)를 찾았습니다. 이것들은 다른 scheduler(`scx_lavd`) 아래의 EWMA 값이고 자주 스케줄되는 task 쪽으로 치우친 표본입니다. S2(문서)는 Valve의 SteamOS 3.2 공지(60 Hz 기본, "60hz = 16.66ms/frame"), gamescope의 frame 제한 메커니즘, DXVK와 MangoHud의 제한기를 찾았습니다. S4(runner)는 Proton 게임을 runner에서 돌릴 길이 없음(GPU 없음, Proton은 Steam client 아래에서만)을 확인했습니다.
+**찾은 것.** `search/candidates.md`의 "Observations that exist" 표는 관찰(숫자가 있는 모집단, trace, run)을 문서와 구분합니다. S1(문헌)은 LAVD의 OSS NA 2024 슬라이드 12–17장(이름 없는 게임, 이름 없는 기계; 그림은 적어도 세 프로세스 트리에서 옴), 같은 그림을 쓴 LPC 2024 슬라이드, 그리고 Android(Pixel 8의 Angry Birds)와 Windows 연구를 찾았습니다. S3(공개 trace)은 sched-ext/scx 저장소의 issue #234와 #296에 붙은 `scx_lavd` 표본 로그(Helldivers 2, Apex Legends, Diablo III, StarCraft II)를 찾았습니다. 이것들은 다른 scheduler(`scx_lavd`) 아래의 EWMA 값이고 자주 스케줄되는 task 쪽으로 치우친 표본입니다. S2(문서)는 Valve의 SteamOS 3.2 공지(60 Hz 기본, "60hz = 16.66ms/frame"), gamescope의 frame 제한 메커니즘, DXVK와 MangoHud의 제한기를 찾았습니다. S4(runner)는 Proton 게임을 runner에서 돌릴 길이 없음(GPU 없음, Proton은 Steam client와 함께 쓰는 도구로만 문서화됨)을 확인했습니다.
 
 **못 찾은 것.** Proton 게임의 frame 주기를 task 구조와 묶은 관찰, 상위 30–40개 밖의 task를 설명하는 관찰.
 
@@ -1397,7 +1398,7 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 
 **맡은 것.** `desktop-interactive`(편집기, 워드프로세서 등 모든 상호작용 프로그램을 한 entry로), 그리고 경계 판단으로 `audio-playback`, `video-playback`.
 
-**찾은 것.** 입력 간격에 대해 S1과 S3는 많은 타이핑 데이터를 찾았습니다(136M Keystrokes, Roeser의 OSF 데이터, How-We-Type, CMU 비밀번호, KeyRecs, SWELL-KW 등). 그 가운데 응용 프로그램 이름과 함께 자유 작문의 키 입력 시각을 담은 것은 SWELL-KW였습니다. 입력 하나당 CPU에 대해서는 문헌에 Linux 관찰이 있었지만 모두 2000–2004년의 100–664 MHz 기계였습니다(Flautner, Tsafrir/Etsion 등). S4는 runner가 아홉 프로그램을 Xvfb에서 띄우고 재생하고 perf로 기록할 수 있음을 탐침으로 확인했습니다(`meas-probe.yml`, 재생 오차 p99 1.24 ms).
+**찾은 것.** 입력 간격에 대해 S1과 S3는 많은 타이핑 데이터를 찾았습니다(136M Keystrokes, Roeser의 OSF 데이터, How-We-Type, CMU 비밀번호, KeyRecs, SWELL-KW 등). 그 가운데 응용 프로그램 이름과 함께 자유 작문의 키 입력 시각을 담은 것은 SWELL-KW였습니다. 입력 하나당 CPU에 대해서는 문헌에 Linux 관찰이 있었지만 2000–2006년의 300–664 MHz 기계였고(Flautner, Tsafrir/Etsion), 100 MHz 관찰(Endo)은 Windows NT와 BSD/OS 위였습니다. S4는 runner가 아홉 프로그램을 Xvfb에서 띄우고 재생하고 perf로 기록할 수 있음을 탐침으로 확인했습니다(`meas-probe.yml`, 재생 오차 p99 1.24 ms).
 
 **인지오의 결정으로 온 것(골라서).**
 
@@ -1424,7 +1425,7 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 - **D1.** 9.5의 두 규칙(CPU 하나 고정, 반응 쪽 값은 Linux 관찰에서만)을 모든 결정에. 1990년대 UNIX 수명 연구, Windows XP 안티바이러스 연구, 2006년 Antfarm, 1999·2006년 LKML 글은 후보가 아니라 맥락.
 - **D2.** 단위는 make job 하나 = 역할별 프로세스 사슬(4.4절 B3).
 - **D3.** 관찰은 perf sched와 taskstats를 함께(6.2절).
-- **D4.** `-j8`과 `parallelism_cap` 기본값 8: "design: the eight-thread desktop".
+- **D4.** `-j8`과 `parallelism_cap` 기본값 8: 8 thread 데스크톱에 적용한 `nproc` 규칙("Label: convention, grounds cited for the choice").
 - **D10, D11.** CPU 모델 하나, machine gate, 규칙이 반복 수를 정함(6.2절, 7장). 이 두 결정이 그 뒤 모든 캠페인의 틀이 되었습니다.
 - **D12–D16.** Tracker의 전체 재색인을 별도 entry로 뺐다가(D12–D15) 같은 날 되돌렸습니다(D16). 포화도를 프로세스 수명이 아니라 job 동안으로 다시 계산하자 재색인도 포화된 일괄 작업이었기 때문입니다. 기록은 D12의 숫자가 harness의 멈춤 규칙(상태 질의 세 번)에서 온 인공물이었다고 적습니다. 결정이 틀렸을 때 그것을 지우지 않고 "withdrawn"으로 남기는 기록 방식의 예입니다.
 - **D29.** machine-spread 예외(7.5절).
@@ -1551,7 +1552,7 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 
 **무엇이 바뀌었나.**
 
-- 3번의 ledger는 `measurement-campaign-record.md`(캠페인마다 규칙이 덮는 값, 가장 넓은 반폭, 예외)와 각 entry의 scope 문장(9.5 D76, 2026-09-26: "the nine scopes state the stability rule and the values it was not held to"), 그리고 `measurement-overview.md` §7, §9에 담겼습니다. 라이브러리 전체의 요약 수치(규칙을 통과한 값의 수, 예외 class마다 담은 값의 수, 담은 가장 넓은 반폭)를 한곳에 모은 표는 아직 없습니다. 가장 가까운 것은 campaign record의 2026-09-24 단락("7 of the 133 values the rule is read on … have half-widths of 4.5 % or more")입니다. 인지오가 2026-10-16에 이 요약을 만들기로 정했습니다(9.15 작업 목록 W-0739). 조각들의 pooled record 위에서 도는 스크립트가 계산하고 `measurement-overview.md`의 stability 절에 싣는 일이며, 9.16의 측정 감사에 들어 있습니다(`_dev/TODO.md` 9.16 줄).
+- 3번의 ledger는 `measurement-campaign-record.md`(캠페인마다 규칙이 덮는 값, 가장 넓은 반폭, 예외)와 각 entry의 scope 문장(9.5 D76, 2026-09-26: "the nine scopes state the stability rule and the values it was not held to"), 그리고 `measurement-overview.md` §7, §9에 담겼습니다. 라이브러리 전체의 요약 수치는 `measurement-overview.md` §7의 ledger 단락에 있습니다(`dataset/tools/meas/stability_ledger.py`, 2026-10-17). 28개 측정 entry가 접혀 나온 pooled record의 stability 목록에 값이 406개 있고(그중 4개는 136M 자극 민감도 점검의 입력당 평균으로, 목록에는 있지만 싣지 않음), 369개가 허용 오차를 통과했으며(9개는 1 µs 바닥으로), 37개가 예외 class로 실렸습니다(session 사이에서 변함 15, 녹화가 끝남 10, machine 따라 흩어짐 9, 드문 component 3). 드문 사건 2개는 규칙 밖에서 따로 실렸습니다. 실린 가장 넓은 반폭은 ±61.3 %, `renderer-hidden`의 residual run 평균입니다.
 - 4번의 demand window는 그 뒤 더 나아갔습니다. 9.14 decision 4(2026-10-09)가 그것을 gate에서 은퇴시켰습니다. "The compiler records demand per file … and per segment … and never fails on it. … the `oversubscribed` class marks a file designed to hold contention, its demand a measured fact reported, not a window held." memo의 "a file outside it is redesigned rather than waved through"는 그날로 낡은 문장이 되었습니다. 은퇴의 이유는 인지오가 2026-10-16에 밝혔습니다(9.15 작업 목록 W-0737). 9.10 D17이 모든 작업을 측정된 그대로 통째로 묶으므로 파일의 수요는 측정에서 따라 나오고, 그것을 창 안에 맞추려면 측정된 길이를 구부려야 했다는 것입니다. 그래서 수요는 맞추지 않고 파일마다, segment마다 보고하며, 짝 검토(pair review)가 경합이 있는 segment를 읽습니다. `dataset/README.md`의 "Demand is reported, not held" 규칙이 이것을 이유와 함께 적습니다(14.4절).
 - 5번은 각 entry의 scope와 `measurement-overview.md` §11에 들어갔고, 2026-10-16에 인지오가 그 범위를 논문에 싣기로 정했습니다(`docs/research-claims.md`의 "What is not claimed"). 실제 데스크톱 비교는 열지 않습니다(11.3절).
 - "Untouched"의 segment 구성은 2026-10-11 감사의 열린 항목과 이어지고(13.4절), 생성 층(generated layer를 다루는 5권)과 backlog의 naturalistic set으로 갔습니다.
@@ -1672,7 +1673,7 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 | `renderer-hidden`의 pool(`meas-ci:desktop:2026-10-05b`)과 `video-editor`의 유휴 pool(`meas-ci:interactive:2026-10-05`)에서 burstiness와 시간 창을 다시 읽고 `measurement-overview.md`의 위협 문장을 그 값으로(8.5절) | 9.15 (2026-10-16) |
 | stability ledger: 허용 오차를 통과한 값, 예외 class마다 담은 값, 담은 가장 넓은 반폭을 조각들의 pooled record에서 스크립트로 계산해 `measurement-overview.md`의 stability 절에(13.1절) | 9.15 (2026-10-16; 2026-09-20 memo §3) |
 
-2026-10-11 검토의 항목("the five gate pins and the generated layer's pins equal the committed bytes")이 대는 것은 그때의 커밋된 바이트입니다. 위 표의 하위 작업 시점 hash 뒤에 9.23 D10(2026-10-14)과 D17(2026-10-15), 그리고 9.15의 세 rebuild(2026-10-16에 한 번, 2026-10-17에 두 번; `harness/CHANGELOG.md`의 2026-10-16 항목과 2026-10-17의 두 data 항목)가 다시 bless와 pin을 했습니다. 2026-10-17 현재의 pin은 9.15의 2026-10-17 두 번째 rebuild의 것입니다. dataset manifest `0f0af422…`, variants manifest `cdc14319…`, scoring spec `2ad757b6…`(9.23 D10), guard spec `24ccb875…`, driver table `0fba4b3c…`(RQ0 gate spec의 `pins`), 그리고 생성 층의 다섯 manifest `d84fb68a…`(transition grid), `a6980482…`(return grid), `92676677…`(flap-stress), `1d129a51…`(distractor grid), `8c38e7a8…`(familiarity ladder)입니다. 같은 날 첫 rebuild의 값(dataset `d52e7bd4…`, variants `6c1c3e09…`, 생성 층 `4bb7a444…`/`ec7ca574…`/`79a6c5c4…`/`3478a908…`/`415cfbd6…`)이 그 바로 앞의 pin이고, 9.15의 2026-10-16 값(dataset `b6017a10…`, variants `087ef27c…`, 생성 층 `a8eebb33…`/`2e57a6c1…`/`dd6a7c24…`/`264d3333…`/`58a34d65…`)이 그 앞, 9.23 D17의 값(dataset `81d3213d…`, variants `7079e677…`, 생성 층 `826c719c…`/`392d6071…`/`97ba813f…`/`919bb2c0…`/`b6f82df5…`)이 그 앞입니다.
+2026-10-11 검토의 항목("the five gate pins and the generated layer's pins equal the committed bytes")이 대는 것은 그때의 커밋된 바이트입니다. 위 표의 하위 작업 시점 hash 뒤에 9.23 D10(2026-10-14)과 D17(2026-10-15), 9.15의 세 rebuild(2026-10-16에 한 번, 2026-10-17에 두 번; `harness/CHANGELOG.md`의 2026-10-16 항목과 2026-10-17의 두 data 항목), 그리고 출구 감사 9.16의 두 항목(2026-10-17; harness 항목과 data rebuild 항목)이 다시 bless와 pin을 했습니다. 2026-10-17 현재의 pin은 9.16의 것입니다. dataset manifest `8e1eb753…`, variants manifest `8e2948b1…`(data rebuild), scoring spec `f7d1df4c…`, guard spec 1.2 `c2dad06f…`, driver table `e1155a72…`(harness 항목; RQ0 gate spec의 `pins`), 그리고 생성 층의 다섯 manifest `01e539ee…`(transition grid), `2d80cff9…`(return grid), `53420ed5…`(flap-stress), `21502219…`(distractor grid), `1dd08130…`(familiarity ladder)입니다. 9.15의 2026-10-17 두 번째 rebuild의 값(dataset `0f0af422…`, variants `cdc14319…`, scoring spec `2ad757b6…`(9.23 D10), guard spec 1.1 `24ccb875…`, driver table `0fba4b3c…`, 생성 층 `d84fb68a…`/`a6980482…`/`92676677…`/`1d129a51…`/`8c38e7a8…`)이 그 바로 앞의 pin이고, 같은 날 첫 rebuild의 값(dataset `d52e7bd4…`, variants `6c1c3e09…`, 생성 층 `4bb7a444…`/`ec7ca574…`/`79a6c5c4…`/`3478a908…`/`415cfbd6…`)이 그 앞, 9.15의 2026-10-16 값(dataset `b6017a10…`, variants `087ef27c…`, 생성 층 `a8eebb33…`/`2e57a6c1…`/`dd6a7c24…`/`264d3333…`/`58a34d65…`)이 그 앞, 9.23 D17의 값(dataset `81d3213d…`, variants `7079e677…`, 생성 층 `826c719c…`/`392d6071…`/`97ba813f…`/`919bb2c0…`/`b6f82df5…`)이 그 앞입니다.
 
 그리고 13.3절에서 본 대로, 2026-09-28의 coverage sweep이 9.5–9.9를 닫았으므로 "a later review of them is this audit's"입니다. 9.9 D27이 넘긴 "9.5–9.8 ran beside the same `php-fpm` and workflow loops"(다른 캠페인의 component에도 runner 배경의 wake가 섞였을 수 있음)도 이 감사가 볼 거리입니다.
 
@@ -1690,7 +1691,7 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 6. **예외로 담은 값.** 그 반폭보다 작은 차이에 어떤 결과도 기댈 수 없음(9.6 D29).
 7. **추적의 영향.** run 평균이 추적 아래에서 최대 약 28 % 길게 잡힘(0.72–0.98), entry별로 notes에 적음(9.5 D82 등).
 8. **자극.** SWELL-KW 하나(2012, Windows 실험실, 키만, 15.6 ms 양자화); 다른 타이핑으로 바꾸면 입력당 CPU가 −9 %에서 +34 % 달라짐(8.3절). 포인터 입력 없음; GIMP와 Kdenlive는 스크립트 포인터(design).
-9. **순서와 동시 깨어남.** compile된 흐름은 component의 빈도와 분포를 재현하나 gap의 순서와 함께 깨어남은 재현하지 않음(`measurement-overview.md` §8의 위협 진술; trace-replay check로 경계).
+9. **순서와 동시 깨어남.** compile된 흐름은 component의 빈도와 분포를 재현하나 gap의 순서와 함께 깨어남은 재현하지 않음(`measurement-overview.md` §8의 위협 진술; trace-replay check로 경계). 측정된 숨은 renderer들은 process를 넘어 함께 깨지만(9.8 D15, renderer들의 wake 맞물림을 잰 기록), 묶인 renderer task들은 독립적으로 compile됨.
 10. **디스플레이와 GPU의 방향.** compositor 주기는 60 Hz이나 위상이 없음; CPU 래스터화가 run 길이를 과대(9.5 D24).
 11. **X11과 Wayland.** 응용은 X11 client로, 세션은 Wayland에서 잼; Wayland 데스크톱에서의 각 프로그램은 관찰 안 됨(9.10 D172).
 12. **조합.** task set, 동시 출현, 순서, 길이는 design; "the scheduling-benefit result holds on these compositions, which are not shown to be typical"(9.10 D2).
