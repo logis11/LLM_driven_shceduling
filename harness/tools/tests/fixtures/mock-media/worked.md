@@ -76,11 +76,11 @@ The consumed ticks of `video` are five and its iteration ends five, so the chain
 
 **Lifetime**
 
-| task | occupancy | `cpu_delivered` | `demand` | `completed` | `turnaround` | `preempt_count` |
-|---|---|---|---|---|---|---|
-| `video` | [0,6667] [16667,23334] [70000,83334] [85834,92501] | 6667+6667+13334+6667 = 33335 | — | 0 | — | 0 |
-| `music` | [6667,9167] [83334,85834] | 5000 | — | 0 | — | 0 |
-| `scan` | [23334,70000] | 46666 | 46666 | 1 at 70000 | 70000 − 20000 = 50000 | 0 |
+| task | `arrival` | occupancy | `cpu_delivered` | `demand` | `completed` | `turnaround` | `preempt_count` |
+|---|---|---|---|---|---|---|---|
+| `video` | 0 | [0,6667] [16667,23334] [70000,83334] [85834,92501] | 6667+6667+13334+6667 = 33335 | — | 0 | — | 0 |
+| `music` | 0 | [6667,9167] [83334,85834] | 5000 | — | 0 | — | 0 |
+| `scan` | 20000 | [23334,70000] | 46666 | 46666 | 1 at 70000 | 70000 − 20000 = 50000 | 0 |
 
 `busy` = 33335 + 5000 + 46666 = 85001.
 

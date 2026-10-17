@@ -161,6 +161,37 @@ def _wake_records(condition, wakes, t_end=100000, extra=()):
     return rows
 
 
+def test_censored_turnaround_reads_the_arrival_row():
+    """Metrics doc §9: an unfinished task's turnaround is scored on T_end − arrival, the
+    arrival its task_arrive line's time, which its `arrival` row carries (§6.6). A task
+    whose first instruction is a WAIT has no ready(cause = arrive) line (§11 item 5) and
+    keeps its bound: `waiter` arrives at 300 blocked, first runs on a wake at 500, never
+    ends — 1000 − 300 = 700. `runner`, ready at its arrival (200), gets 800 as before."""
+    from harness.primitives import compute
+    from harness.reader import RunFile, TaskInfo
+    tasks = {tid: TaskInfo(id=tid, name=tid, arrive=t, depart=None, demand=None, period_us=None,
+                           wake_targets=[], waits=w)
+             for tid, t, w in (("runner", 200, ["timer"]), ("waiter", 300, ["timer"]))}
+    run = RunFile(workload_id="w", t_end=1000, tasks=tasks, chains=[], input_wakes={})
+    events = [{"event": "task_arrive", "t": 200, "task": "runner", "source": "file"},
+              {"event": "ready", "t": 200, "task": "runner", "cause": "arrive"},
+              {"event": "run_start", "t": 200, "task": "runner"},
+              {"event": "run_end", "t": 300, "task": "runner", "reason": "block", "blocked_on": "wait"},
+              {"event": "task_arrive", "t": 300, "task": "waiter", "source": "file"},
+              {"event": "ready", "t": 500, "task": "waiter", "cause": "wake"},
+              {"event": "run_start", "t": 500, "task": "waiter"},
+              {"event": "run_end", "t": 600, "task": "waiter", "reason": "block", "blocked_on": "wait"}]
+    ident = {"workload_id": "w", "condition": "fixed", "source_sha256": "0" * 64, "sim": "mock@0"}
+    rows = [dict(ident, **r) for r in compute(run, events).rows]
+    assert {(r["entity"], r["t"], r["value"]) for r in rows if r["metric"] == "arrival"} == {
+        ("runner", 1000, 200), ("waiter", 1000, 300)}
+    assert not any(r["entity"] == "waiter" and r.get("cause") == "arrive" for r in rows)
+    out = {(r["entity"], r["aggregate"]): r["value"]
+           for r in agg.compute_aggregates(rows) if r["metric"] == "turnaround"}
+    assert out == {("runner", "turnaround_censored"): "800.000000000000",
+                   ("waiter", "turnaround_censored"): "700.000000000000"}
+
+
 def test_wake_aggregates_split_by_channel():
     """Metrics doc §8: the ready_wait aggregates over cause wake come once over
     every channel and once per channel kind, so interaction latency can read the

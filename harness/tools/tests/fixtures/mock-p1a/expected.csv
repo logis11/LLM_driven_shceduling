@@ -1,4 +1,5 @@
 workload_id,condition,table,seed,boot_default,telemetry,sim,source_sha256,entity,metric,t,value,cause,channel,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss,skipped
+mock-p1a,llm_vocab,prior,,,names,mock@0,9262878f54b598f50dc0f59fa70ed9f06328d7c2e6de8c1b4cd3bbcca8f7432a,editor,arrival,120000,0,,,,,,,,,,,,,
 mock-p1a,llm_vocab,prior,,,names,mock@0,9262878f54b598f50dc0f59fa70ed9f06328d7c2e6de8c1b4cd3bbcca8f7432a,editor,completed,120000,0,,,,,,,,,,,,,
 mock-p1a,llm_vocab,prior,,,names,mock@0,9262878f54b598f50dc0f59fa70ed9f06328d7c2e6de8c1b4cd3bbcca8f7432a,editor,cpu_delivered,120000,15000,,,,,,,,,,,,,
 mock-p1a,llm_vocab,prior,,,names,mock@0,9262878f54b598f50dc0f59fa70ed9f06328d7c2e6de8c1b4cd3bbcca8f7432a,editor,demand,120000,15000,,,,,,,,,,,,,
@@ -7,6 +8,7 @@ mock-p1a,llm_vocab,prior,,,names,mock@0,9262878f54b598f50dc0f59fa70ed9f06328d7c2
 mock-p1a,llm_vocab,prior,,,names,mock@0,9262878f54b598f50dc0f59fa70ed9f06328d7c2e6de8c1b4cd3bbcca8f7432a,editor,ready_wait,30000,0,wake,input,,,,,,,,,,,
 mock-p1a,llm_vocab,prior,,,names,mock@0,9262878f54b598f50dc0f59fa70ed9f06328d7c2e6de8c1b4cd3bbcca8f7432a,editor,ready_wait,54500,1500,wake,input,,,,,,,,,,,
 mock-p1a,llm_vocab,prior,,,names,mock@0,9262878f54b598f50dc0f59fa70ed9f06328d7c2e6de8c1b4cd3bbcca8f7432a,editor,ready_wait,71000,3000,wake,input,,,,,,,,,,,
+mock-p1a,llm_vocab,prior,,,names,mock@0,9262878f54b598f50dc0f59fa70ed9f06328d7c2e6de8c1b4cd3bbcca8f7432a,hog,arrival,120000,50000,,,,,,,,,,,,,
 mock-p1a,llm_vocab,prior,,,names,mock@0,9262878f54b598f50dc0f59fa70ed9f06328d7c2e6de8c1b4cd3bbcca8f7432a,hog,completed,120000,0,,,,,,,,,,,,,
 mock-p1a,llm_vocab,prior,,,names,mock@0,9262878f54b598f50dc0f59fa70ed9f06328d7c2e6de8c1b4cd3bbcca8f7432a,hog,cpu_delivered,120000,65000,,,,,,,,,,,,,
 mock-p1a,llm_vocab,prior,,,names,mock@0,9262878f54b598f50dc0f59fa70ed9f06328d7c2e6de8c1b4cd3bbcca8f7432a,hog,demand,120000,90000,,,,,,,,,,,,,

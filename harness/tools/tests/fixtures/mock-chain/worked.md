@@ -71,12 +71,12 @@ The head's `deadline` lines say 900 / 29900 / 35500, all met. They measure the i
 
 **Lifetime**
 
-| task | `cpu_delivered` | `demand` | `completed` | `turnaround` | `preempt_count` |
-|---|---|---|---|---|---|
-| `input` | 3 × 900 = 2700 | — | 0 | — | 0 |
-| `engine` | 3 × 2600 = 7800 | — | 0 | — | 0 |
-| `display` | 3 × 2100 = 6300 | — | 0 | — | 0 |
-| `hog` | 14000 | 14000 | 1 at 29000 | 14000 | 0 |
+| task | `arrival` | `cpu_delivered` | `demand` | `completed` | `turnaround` | `preempt_count` |
+|---|---|---|---|---|---|---|
+| `input` | 0 | 3 × 900 = 2700 | — | 0 | — | 0 |
+| `engine` | 0 | 3 × 2600 = 7800 | — | 0 | — | 0 |
+| `display` | 0 | 3 × 2100 = 6300 | — | 0 | — | 0 |
+| `hog` | 15000 | 14000 | 14000 | 1 at 29000 | 14000 | 0 |
 
 **`config_interval`** — two entries at the same instant: index 0 (`fallback`, MLFQ) with value 0, superseded at once; index 1 (`unmodified`, FIFO) with value 50000.
 
@@ -84,4 +84,4 @@ The head's `deadline` lines say 900 / 29900 / 35500, all met. They measure the i
 
 **`busy`** — 2700 + 7800 + 6300 + 14000 = 30800.
 
-Total 32 rows.
+Total 36 rows.

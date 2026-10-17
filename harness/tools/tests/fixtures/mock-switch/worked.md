@@ -71,11 +71,11 @@ The trace carries the applied instants; the schedule carries the params. `W_sing
 
 **Lifetime**
 
-| task | occupancy (clipped) | `cpu_delivered` | `demand` | `completed` | `preempt_count` |
-|---|---|---|---|---|---|
-| `editor` | [42600,44600] [49100,53100] [62600,64600] [68600,69600] [90000,93000] | 2000 + 4000 + 2000 + 1000 + 3000 = 12000 | 12000 | 0 (`depart`) | 2 (44600, 64600) |
-| `hog` | [10000,42600] [45100,49100] [53100,62600] [64600,68600] [69600,90000] [93000,100000 clip] | 32600 + 4000 + 9500 + 4000 + 20400 + 7000 = 77500 | 300000 | 0 | 5 (42600, 49100, 62600, 68600, 90000) |
-| `probe` | [44600,45100] | 500 | 500 | 0 (`depart`) | 0 |
+| task | `arrival` | occupancy (clipped) | `cpu_delivered` | `demand` | `completed` | `preempt_count` |
+|---|---|---|---|---|---|---|
+| `editor` | 0 | [42600,44600] [49100,53100] [62600,64600] [68600,69600] [90000,93000] | 2000 + 4000 + 2000 + 1000 + 3000 = 12000 | 12000 | 0 (`depart`) | 2 (44600, 64600) |
+| `hog` | 10000 | [10000,42600] [45100,49100] [53100,62600] [64600,68600] [69600,90000] [93000,100000 clip] | 32600 + 4000 + 9500 + 4000 + 20400 + 7000 = 77500 | 300000 | 0 | 5 (42600, 49100, 62600, 68600, 90000) |
+| `probe` | 40000 | [44600,45100] | 500 | 500 | 0 (`depart`) | 0 |
 
 **`config_interval`**
 
@@ -106,7 +106,7 @@ The FIFO row's hog count is the memo's known bias in the other direction: both t
 
 **`busy`** — 12000 + 77500 + 500 = 90000.
 
-Total 27 rows.
+Total 30 rows.
 
 ## The aggregates, by hand (metrics doc §8)
 

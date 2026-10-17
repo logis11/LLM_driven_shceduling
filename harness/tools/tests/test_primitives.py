@@ -381,6 +381,41 @@ def test_same_algorithm_entry_is_not_a_switch():
     assert len(rows_of(r, "config_interval")) == 2
 
 
+def test_boost_grid_restarts_at_a_same_algorithm_entry():
+    """The simulator restarts MLFQ's boost timer at every applied MLFQ entry, a
+    same-algorithm one included (`simulator/src/sim.cpp`: `apply_config` voids the
+    policy timers and `Mlfq::start` arms the boost at the applied time + its
+    `boost_interval_us`), so the boost grid restarts at the entry (metrics doc §6.10)."""
+    run = runfile(30000, [task("a", arrive=100)])
+    sched = schedule((0, "MLFQ", MLFQ_2MS), (1, "FIFO", {}),
+                     (2, "MLFQ", {"num_queues": 3, "timeslice_us": 3000,         # W_single 9000
+                                  "timeslice_growth": 2, "boost_interval_us": 5000}),
+                     (3, "MLFQ", {"num_queues": 2, "timeslice_us": 500,          # W_single 500
+                                  "timeslice_growth": 2, "boost_interval_us": 4000}))
+    events = [cfg(0, 0, "MLFQ"), cfg(10, 1, "FIFO"),
+              {"event": "task_arrive", "t": 100, "task": "a", "source": "file"},
+              {"event": "ready", "t": 100, "task": "a", "cause": "arrive"},
+              {"event": "run_start", "t": 100, "task": "a"},
+              cfg(1000, 2, "MLFQ")]
+    for t in range(2000, 30001, 1000):                    # a holds the lane, preempted every 1000 µs
+        if t == 8000:
+            events.append(cfg(8000, 3, "MLFQ"))           # same algorithm: the boost timer restarts
+        events.append({"event": "run_end", "t": t, "task": "a", "reason": "preempt"})
+        if t < 30000:
+            events.append({"event": "run_start", "t": t, "task": "a"})
+    r = compute(run, events, sched)
+    # Entry 2's grid from 1000 by 5000 gives 6000 before entry 3 applies at 8000; entry 3's
+    # from 8000 by 4000 gives 12000 … 28000 before T_end. The 6000 window (W_single 9000,
+    # reached at 15000) is clipped at the next boost, 12000; the rest close 500 µs after
+    # their instant. Kept on the switch's grid (1000 + k · 5000) they would fall at 6000
+    # (clipped at 11000), 11000, 16000, 21000 and 26000.
+    assert [(x["t"], x["value"], x["index"], x["hogs"]) for x in rows_of(r, "boost_window")] == [
+        (6000, 6000, 2, 1), (12000, 500, 3, 1), (16000, 500, 3, 1), (20000, 500, 3, 1),
+        (24000, 500, 3, 1), (28000, 500, 3, 1)]
+    assert [(x["t"], x["value"]) for x in rows_of(r, "switch_window")] == [(10, 0), (1000, 9000)]
+    assert r.guards == []
+
+
 def test_switch_at_or_after_t_end_is_ignored():
     run = runfile(1000, [])
     sched = schedule((0, "MLFQ", MLFQ_2MS), (1, "EDF", {"residual_timeslice_us": 2000}))

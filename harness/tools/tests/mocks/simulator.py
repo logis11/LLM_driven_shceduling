@@ -27,7 +27,7 @@ from collections import defaultdict
 
 from harness.reader import RunFileError, read_run_file
 
-SIM = "mock-simulator@0"
+SIM = "mock-simulator@1"
 _RANK = {"config_applied": 0, "task_arrive": 1, "run_end": 2, "deadline": 3,
          "ready": 4, "run_start": 5, "task_end": 6}
 

@@ -64,7 +64,7 @@ def test_expand_runs_every_condition_under_every_telemetry_shape(tmp_path):
 
 def test_load_machine_resolves_paths_against_the_root():
     m = load_machine(EXAMPLE, REPO)
-    assert m.daemon.version and m.simulator.version == "mock-simulator@0"
+    assert m.daemon.version and m.simulator.version == "mock-simulator@1"
     assert m.daemon.command[-1].endswith("mock_daemon.py") and m.build_dir == BUILD
     assert m.boot_defaults_dir == REPO / "harness" / "boot-defaults"
 

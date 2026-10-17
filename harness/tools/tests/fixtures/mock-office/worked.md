@@ -39,10 +39,10 @@ Three `cause=wake` rows for three keystrokes: the queued ones are counted, at ze
 
 **Lifetime**
 
-| task | occupancy | `cpu_delivered` | `demand` | `completed` | `preempt_count` |
-|---|---|---|---|---|---|
-| `writer` | [10000,26000] | 16000 | 16000 | 0 (`depart`) | 0 |
-| `browser` | — | 0 | 0 | 0 (`depart`) | 0 |
+| task | `arrival` | occupancy | `cpu_delivered` | `demand` | `completed` | `preempt_count` |
+|---|---|---|---|---|---|---|
+| `writer` | 0 | [10000,26000] | 16000 | 16000 | 0 (`depart`) | 0 |
+| `browser` | 0 | — | 0 | 0 | 0 (`depart`) | 0 |
 
 No `turnaround` rows (nothing completed).
 
@@ -50,4 +50,4 @@ No `turnaround` rows (nothing completed).
 
 **`busy`** — 16000 at `T_end`.
 
-Total 13 rows.
+Total 15 rows.

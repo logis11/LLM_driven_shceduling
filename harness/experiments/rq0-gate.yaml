@@ -345,7 +345,14 @@ statements:
       blocking when none is live at the WAIT (the interpretation contract's
       WAIT(channel) row and FORK semantics; data contracts §4 Example B and
       §14, 2026-10-16: proposed there, in force once the simulator's owner
-      agrees; this spec requires it of the run). (c) and (f) the
+      agrees; this spec requires it of the run); (h) the simulator run through
+      the invocation contract as the runner invokes it — the workload and the
+      config schedule as --workload and --schedule and the trace's path as
+      --out-trace, with no positional argument, the trace written to that file
+      with standard output ignored, exit 0 only when it is written, a
+      byte-identical trace from the same argument line, and the trace header's
+      sim the version string the runner's machine configuration names (data
+      contracts §11, contract 10). (c) and (f) the
       simulator does today; the others its owner holds as owed. The run does not
       start until each is shown.
   - id: g-grounding

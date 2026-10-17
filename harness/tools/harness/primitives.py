@@ -173,6 +173,9 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
         if st.arrive_t is None or st.arrive_t > t_end:
             continue
         info = run.tasks.get(tid)
+        # the task_arrive line's time, the arrival §9's censored turnaround reads: a task
+        # whose first instruction is a WAIT has no ready(cause = arrive) line (§11 item 5)
+        rows.append(_row(tid, "arrival", t_end, st.arrive_t))
         rows.append(_row(tid, "cpu_delivered", t_end, st.cpu))
         busy += st.cpu
         if info is not None and info.demand is not None:
@@ -235,22 +238,33 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                     reached = limit
                 end = max(end, reached)
             value = end - t_apply
-            # ---- boost windows (§6.10): one per boost instant t_apply + k·boost_interval_us
-            # inside this MLFQ interval, sized by the same rule from that instant with the
-            # params in force there, clipped at the next boost (or the interval's end)
-            boost = int(entry.params["boost_interval_us"])
-            k = 1
-            while t_apply + k * boost < limit:
-                t_b = t_apply + k * boost
-                t_next = min(t_apply + (k + 1) * boost, limit)
-                in_force = ev
-                for later in configs[i + 1:]:
-                    if later["t"] > t_b:
-                        break
-                    if later["algorithm"] == "MLFQ" and later["t"] <= t_b:
-                        in_force = later
-                force_entry = schedule.entry(in_force["index"])
-                need_b = w_single(force_entry.params) if force_entry is not None else need
+            # ---- boost windows (§6.10): the boost timer restarts at every applied MLFQ
+            # entry of this interval, a same-algorithm one included, as in the reference
+            # simulator (`apply_config` voids the policy timers, `Mlfq::start` arms the
+            # boost at the applied time + boost_interval_us). So the instants are
+            # t_e + k·boost_interval_us (k ≥ 1) of the latest applied entry e, before the
+            # next entry applies and before the interval's end; each window is sized by the
+            # same rule from its instant with e's params, clipped at the next boost instant
+            # (or the interval's end). An entry the schedule does not carry as MLFQ (a guard
+            # above) keeps the params before it.
+            segments = [(ev, entry.params)]
+            for later in configs[i + 1:]:
+                if later["algorithm"] != ev["algorithm"]:
+                    break
+                later_entry = schedule.entry(later["index"])
+                ok = later_entry is not None and later_entry.algorithm == "MLFQ"
+                segments.append((later, later_entry.params if ok else segments[-1][1]))
+            instants = []                               # (t_b, entry in force, its params)
+            for j, (e, params) in enumerate(segments):
+                stop = segments[j + 1][0]["t"] if j + 1 < len(segments) else limit
+                boost = int(params["boost_interval_us"])
+                t_b = e["t"] + boost
+                while t_b < stop:
+                    instants.append((t_b, e, params))
+                    t_b += boost
+            for n, (t_b, in_force, params) in enumerate(instants):
+                t_next = instants[n + 1][0] if n + 1 < len(instants) else limit
+                need_b = w_single(params)
                 hogs_b = [tid for tid in order if _is_hog(tasks[tid], t_b)]
                 end_b = t_b
                 for tid in hogs_b:
@@ -260,7 +274,6 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                     end_b = max(end_b, reached)
                 rows.append(_row("schedule", "boost_window", t_b, end_b - t_b,
                                  algorithm="MLFQ", index=in_force["index"], hogs=len(hogs_b)))
-                k += 1
         else:
             value = 0
         switches.append(Switch(t=t_apply, index=ev["index"], algorithm=ev["algorithm"],

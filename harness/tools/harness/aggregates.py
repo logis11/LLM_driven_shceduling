@@ -171,7 +171,9 @@ def compute_aggregates(rows, windows=None, interactive=()):
     for metric in ("cpu_delivered", "demand", "completed", "turnaround", "preempt_count"):
         for _, r in df[df["metric"] == metric].iterrows():
             per_entity.setdefault(r["entity"], {})[metric] = (int(r["t"]), int(r["value"]))
-    arrivals = {r["entity"]: int(r["t"]) for _, r in rw[rw["cause"] == "arrive"].iterrows()}
+    # the censored bound's arrival is the task's `arrival` row, its task_arrive line's time
+    # (metrics doc §6.6, §9) — a WAIT-first task has no ready(cause = arrive) row
+    arrivals = {r["entity"]: int(r["value"]) for _, r in df[df["metric"] == "arrival"].iterrows()}
     lane_preempts = 0
     for entity in sorted(per_entity):
         m = per_entity[entity]
