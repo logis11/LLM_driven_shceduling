@@ -1028,7 +1028,7 @@ CPU 모델 하나만 받는 규칙의 비용은 버려지는 job입니다. `meas
 
 archetype이 담는 값은 단계 전체의 평균입니다. 그런데 단계 안에서 일이 고르게 일어나지 않으면, 평균은 그 사실을 숨깁니다. 2026-09-28의 검토가 이것을 지적했고, 그 결과 `dataset/tools/meas/windows.py`가 모든 담은 단계를 시간 창(100 s, 짧은 단계는 20 s)으로 나눠 component마다 wake 빈도, run 평균, CPU를 읽게 되었습니다(9.5 D85, D87; 9.8 D34; 9.9 D42). 값은 바꾸지 않고, 단계의 일부에서만 일하는 것이 보이면 scope에 적습니다. 예를 들어 `web-browser`의 page load 56회 가운데 반복마다 첫 번째가 739 ms와 CPU 545 ms로 나머지 55회 평균(485 ms, 341 ms)보다 무거웠고, 그 사실이 scope에 적혀 있습니다(9.5 D87).
 
-timeline은 측정 단계보다 훨씬 긴 시간 동안 프로그램을 붙잡아 둡니다(예: `c6-dual`은 12,068 s 동안 VS Code에 초점을 두었습니다. 9.17 D1이 그 초점을 686–688 s마다 게임과 번갈아 쥐게 하기 전의 일이고, 그 12,068 s가 VS Code의 span probe를 읽은 길이입니다. library의 `code-editor` scope가 9.23 D8 이후 그렇게 적습니다. "Read over 12,068 s, the span `c6-dual` held it focused before its focus alternated with the game every 688 s (9.17 D1)". 탐침의 길이와 읽은 값은 그대로입니다). 측정한 10분이 그 긴 시간에도 성립할까요? 9.10은 이것을 **span probe**(측정 단계보다 긴 탐침)로 확인했습니다(9.10 D143–D154, release `meas-ci-probes-2026-10-05`). 탐침은 반복이 아니며 어떤 값도 바꾸지 않습니다. 결과의 예를 몇 개 들면, `renderer-hidden`은 1,545 s 동안 wake 빈도는 유지되었으나 CPU는 그렇지 않았고, `code-editor`는 두 번째 탐침에서 매 창 전에 파일을 되돌리자 입력당 run 평균이 9.5의 같은 창 대비 1.00(0.97–1.03)이었습니다. 반면 첫 탐침에서는 줄 하나가 계속 길어지며 값이 올라갔고, 두 탐침 모두에서 VS Code의 extension host가 창 2–4개 동안 창당 최대 400 s의 CPU를 쓰는 일화가 있었는데, 그 일화는 담지 않고 scope에 밝혔습니다. 이렇게 확인한 뒤 `video-editor`의 유휴 단계는 Kdenlive의 launch 꼬리 뒤에서 다시 쟀습니다(9.10 D146, `meas-ci:interactive:2026-10-05`).
+timeline은 측정 단계보다 훨씬 긴 시간 동안 프로그램을 붙잡아 둡니다(예: `c6-dual`은 12,068 s 동안 VS Code에 초점을 두었습니다. 9.17 D1이 그 초점을 686–688 s마다 게임과 번갈아 쥐게 하기 전의 일이고, 그 12,068 s가 VS Code의 span probe를 읽은 길이입니다. library의 `code-editor` scope가 9.23 D8 이후 그렇게 적습니다. "Read over 12,068 s, the span `c6-dual` held it focused before its focus alternated with the game every 688 s (9.17 D1)". 탐침의 길이와 읽은 값은 그대로입니다). 측정한 10분이 그 긴 시간에도 성립할까요? 9.10은 이것을 **span probe**(측정 단계보다 긴 탐침)로 확인했습니다(9.10 D143–D154, release `meas-ci-probes-2026-10-05`). 탐침은 반복이 아니며 어떤 값도 바꾸지 않습니다. 결과의 예를 몇 개 들면, `renderer-hidden`은 1,545 s 동안 wake 빈도는 유지되었으나 CPU는 그렇지 않았고, `code-editor`는 두 번째 탐침에서 매 창 전에 파일을 되돌리자 입력당 run 평균이 9.5의 같은 창 대비 1.00(0.97–1.03)이었습니다. 반면 첫 탐침에서는 줄 하나가 계속 길어지며 값이 올라갔고, 두 탐침 모두에서 VS Code의 extension host가 창 2–4개 동안 창당 최대 400 s의 CPU를 쓰는 일화가 있었는데, 그 일화는 담지 않고 scope에 밝혔습니다. 이렇게 확인한 뒤 `video-editor`의 유휴 단계는 Kdenlive의 launch 꼬리 뒤에서 다시 쟀습니다(9.10 D146, `meas-ci:interactive:2026-10-05`). 그 단계를 받친 탐침은 240 s settle 뒤 2,790 s를 읽어, `c3-creation`이 그 상태를 붙잡는 2,851 s보다 61 s 짧았습니다. 그래서 9.15가 그 span 전체를 담는 탐침을 하나 더 돌려(`kdenlive` 13, run 38976976741, release `meas-ci-probes-2026-10-17`; 인지오의 결정, 2026-10-17) 2,851 s 위에서 다시 읽었고, 180 s 단계는 9.10 D143의 5 % 기준을 지켰습니다(모든 반복이 받는 자리에서 CPU −0.3 %, wake +2.9 %; 가장 나쁜 자리에서 +4.5 %, +3.8 %).
 
 ## 8.5 compile이 측정을 재현하는가, 그리고 재현하지 못하는 것
 
@@ -1072,7 +1072,7 @@ release에는 착지한 반복만이 아니라 gate에 걸린 job의 report도 �
 
 ## 9.2 release 목록
 
-2026-10-17에 `gh release list`로 확인한 release는 31개입니다(이 권의 처음 판은 32개라고 적었지만 표의 31행이 전부입니다). 제목은 release에 붙은 그대로이고, "담은 것"은 기록 문서들에서 옮겼습니다.
+2026-10-17에 `gh release list`로 확인한 release는 33개입니다(이 권의 처음 판은 32개라고 적었지만 그때의 release는 표의 처음 31행이 전부였습니다. 마지막 두 행은 9.15가 2026-10-17에 만든 것입니다). 제목은 release에 붙은 그대로이고, "담은 것"은 기록 문서들에서 옮겼습니다.
 
 | release | 제목 | 담은 것 |
 |---|---|---|
@@ -1107,6 +1107,8 @@ release에는 착지한 반복만이 아니라 gate에 걸린 job의 report도 �
 | `meas-ci-probes-2026-10-07b` | 9.11 class census | 모든 측정 대상의 scheduling class 조사 |
 | `meas-ci-costs-2026-10-08` | 9.12 kernel-cost and LLM-latency campaign | 본문용 커널 비용과 LLM 지연(archetype 아님) |
 | `meas-local-m1pro-llm-2026-10-08` | meas-local:m1pro-llm:2026-10-08 — raw records | 인지오의 M1 Pro 노트북 관찰(`meas-ci` 아님, 9.12 D110) |
+| `meas-ci-probes-2026-10-17` | 9.15 Kdenlive idle span probe | `video-editor` 유휴 단계의 `c3-creation` span 읽기(8.4절) |
+| `meas-ci-probes-2026-09-20` | 9.5 long-phase probes | settle을 정한 9.5의 긴 단계 탐침(`thunderbird-send`, `chrome`, `code`, `webrtc`; 6.5절) |
 
 이름에 주의할 점이 있습니다. 2026-09-24의 session campaign release는 `meas-ci-session-2026-09-24`입니다. 이름이 `meas-ci-2026-09-24`인 release는 없습니다. 다만 `meas-ci-2026-09-18`과 `meas-ci-2026-09-20`은 2026-09-24에 공개되었습니다(9.5 D70의 fold-in 때). 그리고 release 이름의 날짜는 캠페인 태그의 날짜와 같은 규칙(첫 batch를 띄운 날)을 따르므로, 공개된 날과 다를 수 있습니다.
 
@@ -1670,7 +1672,7 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 | `renderer-hidden`의 pool(`meas-ci:desktop:2026-10-05b`)과 `video-editor`의 유휴 pool(`meas-ci:interactive:2026-10-05`)에서 burstiness와 시간 창을 다시 읽고 `measurement-overview.md`의 위협 문장을 그 값으로(8.5절) | 9.15 (2026-10-16) |
 | stability ledger: 허용 오차를 통과한 값, 예외 class마다 담은 값, 담은 가장 넓은 반폭을 조각들의 pooled record에서 스크립트로 계산해 `measurement-overview.md`의 stability 절에(13.1절) | 9.15 (2026-10-16; 2026-09-20 memo §3) |
 
-2026-10-11 검토의 항목("the five gate pins and the generated layer's pins equal the committed bytes")이 대는 것은 그때의 커밋된 바이트입니다. 위 표의 하위 작업 시점 hash 뒤에 9.23 D10(2026-10-14)과 D17(2026-10-15), 그리고 9.15의 두 rebuild(2026-10-16과 2026-10-17; `harness/CHANGELOG.md`의 두 날짜의 항목)가 다시 bless와 pin을 했습니다. 2026-10-17 현재의 pin은 9.15의 2026-10-17 것입니다. dataset manifest `d52e7bd4…`, variants manifest `6c1c3e09…`, scoring spec `2ad757b6…`(9.23 D10), guard spec `24ccb875…`, driver table `0fba4b3c…`(RQ0 gate spec의 `pins`), 그리고 생성 층의 다섯 manifest `4bb7a444…`(transition grid), `ec7ca574…`(return grid), `79a6c5c4…`(flap-stress), `3478a908…`(distractor grid), `415cfbd6…`(familiarity ladder)입니다. 9.15의 2026-10-16 값(dataset `b6017a10…`, variants `087ef27c…`, 생성 층 `a8eebb33…`/`2e57a6c1…`/`dd6a7c24…`/`264d3333…`/`58a34d65…`)이 그 바로 앞의 pin이고, 9.23 D17의 값(dataset `81d3213d…`, variants `7079e677…`, 생성 층 `826c719c…`/`392d6071…`/`97ba813f…`/`919bb2c0…`/`b6f82df5…`)이 그 앞입니다.
+2026-10-11 검토의 항목("the five gate pins and the generated layer's pins equal the committed bytes")이 대는 것은 그때의 커밋된 바이트입니다. 위 표의 하위 작업 시점 hash 뒤에 9.23 D10(2026-10-14)과 D17(2026-10-15), 그리고 9.15의 세 rebuild(2026-10-16에 한 번, 2026-10-17에 두 번; `harness/CHANGELOG.md`의 2026-10-16 항목과 2026-10-17의 두 data 항목)가 다시 bless와 pin을 했습니다. 2026-10-17 현재의 pin은 9.15의 2026-10-17 두 번째 rebuild의 것입니다. dataset manifest `0f0af422…`, variants manifest `cdc14319…`, scoring spec `2ad757b6…`(9.23 D10), guard spec `24ccb875…`, driver table `0fba4b3c…`(RQ0 gate spec의 `pins`), 그리고 생성 층의 다섯 manifest `d84fb68a…`(transition grid), `a6980482…`(return grid), `92676677…`(flap-stress), `1d129a51…`(distractor grid), `8c38e7a8…`(familiarity ladder)입니다. 같은 날 첫 rebuild의 값(dataset `d52e7bd4…`, variants `6c1c3e09…`, 생성 층 `4bb7a444…`/`ec7ca574…`/`79a6c5c4…`/`3478a908…`/`415cfbd6…`)이 그 바로 앞의 pin이고, 9.15의 2026-10-16 값(dataset `b6017a10…`, variants `087ef27c…`, 생성 층 `a8eebb33…`/`2e57a6c1…`/`dd6a7c24…`/`264d3333…`/`58a34d65…`)이 그 앞, 9.23 D17의 값(dataset `81d3213d…`, variants `7079e677…`, 생성 층 `826c719c…`/`392d6071…`/`97ba813f…`/`919bb2c0…`/`b6f82df5…`)이 그 앞입니다.
 
 그리고 13.3절에서 본 대로, 2026-09-28의 coverage sweep이 9.5–9.9를 닫았으므로 "a later review of them is this audit's"입니다. 9.9 D27이 넘긴 "9.5–9.8 ran beside the same `php-fpm` and workflow loops"(다른 캠페인의 component에도 runner 배경의 wake가 섞였을 수 있음)도 이 감사가 볼 거리입니다.
 
