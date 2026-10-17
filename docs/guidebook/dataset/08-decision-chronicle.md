@@ -931,7 +931,7 @@ slice의 작업 방식은 9.4를 시작하면서 2026-09-13에 정해졌습니�
 
 - **chain**은 앞의 task가 일을 마치고 다음 task를 깨우는 순서로 연결된 task들입니다. 게임에서는 입력 처리, 게임 logic, 그래픽 명령 제출이 이렇게 이어집니다.
 
-**9.4 D1(출처 하나를 관찰로 인정한 결정).** 인지오의 결정으로 `game-task-chain`은 `lavd-ossna24`(Valve의 LAVD scheduler 발표 슬라이드)를 하나의 출처로 유지했습니다. 슬라이드 12–17을 "one observation of an unnamed game on an unnamed machine, collected with `perf sched record`"로 받아들였습니다. 택하지 않은 대안은 공개된 `scx_lavd` sample log와 "our own CI measurement of a native game"이었습니다. 이 결정은 2026-10-11 audit의 class-A 결함 A3("game chain이 talk 등급의 출처에 기대고 있다")로 다시 올라오지만, 인지오가 "resolved as is"로 닫습니다(9장).
+**9.4 D1(출처 하나를 관찰로 인정한 결정).** 인지오의 결정으로 `game-task-chain`은 `lavd-ossna24`(Changwoo Min의 LAVD scheduler 발표 슬라이드)를 하나의 출처로 유지했습니다. 슬라이드 12–17을 "one observation of an unnamed game on an unnamed machine, collected with `perf sched record`"로 받아들였습니다. 택하지 않은 대안은 공개된 `scx_lavd` sample log와 "our own CI measurement of a native game"이었습니다. 이 결정은 2026-10-11 audit의 class-A 결함 A3("game chain이 talk 등급의 출처에 기대고 있다")로 다시 올라오지만, 인지오가 "resolved as is"로 닫습니다(9장).
 
 **9.4 D2(frame 주기를 design으로 바꾼 결정).** `frame_period` 16667 µs는 값은 그대로 두고 tag를 `lavd-ossna24`에서 `steamos-refresh`로 바꿨습니다. label은 design입니다. "the game is modelled as display-paced at the Steam Deck LCD default refresh with the 1:1 frame limit; 16667 µs is 1/60 s arithmetic." 이유는 critical finding A2 그대로입니다. "The deck states no frame period." 새 entry `steamos-refresh`의 원문은 Valve의 "The SteamOS 3.2 Update"(2022-05-26)의 "The default is 60Hz … 60hz = 16.66ms/frame"입니다. 택하지 않은 대안은 25000 µs(40 Hz 모드)와 주기 없음(슬라이드의 무제한 benchmark)이었습니다.
 
@@ -1166,7 +1166,7 @@ slice의 작업 방식은 9.4를 시작하면서 2026-09-13에 정해졌습니�
 
 - **9.12 D6.** `whitelist` 조건이 둘로 나뉩니다. 배포된 catalogue(`shipped_catalogue`)와 가장 강한 이름 표(`strongest_name_table`)입니다. 9.14의 guard spec이 이것을 모든 frozen 목록에 반영했습니다.
 - **9.12 D110.** 노트북에서 잰 측정에 `meas-local`이라는 registry 형식이 생겼습니다(`meas-local:m1pro-llm:2026-10-08`).
-- **9.12 D113.** 발표, 학회 초록, 뉴스 기사를 위한 id 유형이 생겼습니다. "footnote tier, their claims the speaker's or reporter's." 2026-10-10 audit의 A3는 `lavd-ossna24`가 아직 이 유형으로 바뀌지 않았다고 지적합니다. 2026-10-15에 인지오가 re-type하기로 정했고(9.15 작업 목록 W-0072), `docs/references.md`의 entry는 talk·학회 초록·뉴스 기사의 절로 옮겨져 숫자를 "Min's reported figures of 2024-04-17"로 적습니다. 값과 data 파일은 바뀌지 않았고, `dataset/sources.yaml`의 registry는 이 id를 여전히 `type: deployed-system`으로 둡니다(이 `type`은 lint하지 않습니다).
+- **9.12 D113.** 발표, 학회 초록, 뉴스 기사를 위한 id 유형이 생겼습니다. "footnote tier, their claims the speaker's or reporter's." 2026-10-10 audit의 A3는 `lavd-ossna24`가 아직 이 유형으로 바뀌지 않았다고 지적합니다. 2026-10-15에 인지오가 re-type하기로 정했고(9.15 작업 목록 W-0072), `docs/references.md`의 entry는 talk·학회 초록·뉴스 기사의 절로 옮겨져 숫자를 "Min's reported figures of 2024-04-17"로 적습니다. 값과 data 파일은 바뀌지 않았습니다. 2026-10-17에 인지오의 답((b), 9.15 작업 목록)으로 `dataset/sources.yaml`의 registry도 D112(deployed-system 등급을 넓힌 결정)와 D113을 따릅니다. 이 id의 `type`은 talk·학회 초록·뉴스 기사의 type("talk, conference abstract or news report")이고, `notes`는 숫자를 Min이 2024-04-17에 보고한 값으로 적으며, 머리 주석의 `type` 규칙은 id 규칙의 네 type과 등급 규칙의 문장(줄여 옮긴 것)으로 다시 적혔습니다. `type`과 `notes`는 lint하지 않고 이 파일은 어느 manifest의 입력도 아니어서, 다시 bless된 manifest는 없습니다.
 - **9.12 D55–D116(audit).** slice 자신의 audit이 D30–D53의 대부분을 고쳤습니다. 예를 들어 D61은 D41을 뒤집었습니다. "the indexer does *not* leave a third idle — 88–91 % busy once indexing."
 
 ## 7.13 이 구간의 중간 점검들
@@ -1919,7 +1919,7 @@ audit의 "Recommended order before 9.15 proper"는 첫 항목으로 "Heads-up to
 | 2026-10-14 | 9.21 D13 `coreset_wide` marker, harness run 38547043521 초록. 9.15 grill → spec, WIP. simulator 쪽 TIMER 행을 Phase 10으로. 이 guidebook의 발견 목록, 9.23 grill과 D1–D10(C6의 pre-committed miss, segment 67개, rebuild) | `task-9.21-…/changelog.md`; `task-9.15-docs-memos-and-guidebook-corrections.md`; `_dev/TODO.md`; `_dev/docs/audit/jioh/2026-10-14-guidebook-findings.md`; `task-9.23-guidebook-findings/changelog.md` |
 | 2026-10-15 | 9.23 D11–D18: launch stream을 inputs에, `check`가 파생 timeline과 coverage grid도, `make lint`의 freeze, canonical lint 셋, requirements 고정과 smoke는 손으로, program이 depart 전에 끝나지 않게. rebuild(CI 38722675475, 38722678829) | `task-9.23-guidebook-findings/changelog.md`; `harness/CHANGELOG.md` |
 | 2026-10-16 | 9.15: 작업 목록의 질문에 대한 인지오의 답(일부는 2026-10-15). 그 답의 data와 code 수정을 묶은 rebuild(쓰이지 않는 compile 경로 삭제, bound value의 freeze, release map, 머리 주석과 library v0.2), driver table re-pin | `_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/work-list.md`; `harness/CHANGELOG.md` |
-| 2026-10-17 | 9.15: 정정 작업이 찾은 data와 code 수정을 다시 묶은 rebuild(generated layer의 scenario tag를 9.10 D168의 한 규칙으로, corner set이 숨은 탭 renderer의 조용한 thread 둘까지 쓸어 봄, library의 머리 주석과 notes, schema의 설명, `c1-idle`의 머리 주석, code의 주석과 docstring), 일곱 manifest re-bless, dataset과 variants re-pin | `_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/logs/B1-data-rebuild.md`; `harness/CHANGELOG.md` |
+| 2026-10-17 | 9.15: 정정 작업이 찾은 data와 code 수정을 다시 묶은 rebuild(transition grid의 `focus` 꼴 파일 214개의 scenario tag를 9.10 D168의 한 규칙으로, corner set이 숨은 탭 renderer의 조용한 thread 둘까지 쓸어 봄, library의 머리 주석과 notes, schema의 설명, `c1-idle`의 머리 주석, code의 주석과 docstring), 일곱 manifest re-bless, dataset과 variants re-pin | `_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/logs/B1-data-rebuild.md`; `harness/CHANGELOG.md` |
 
 # 14장 · 용어 정리
 

@@ -728,7 +728,7 @@ dataset/
 ├── Makefile                     모든 작업의 입구 (23줄)
 ├── LICENSE                      데이터의 licence: CC-BY-NC-SA-4.0
 ├── archetypes.yaml              ① 행동 library: 29개 archetype (1,946줄)
-├── sources.yaml                 ① 출처 registry: 19개 id (252줄)
+├── sources.yaml                 ① 출처 registry: 19개 id (267줄)
 ├── meas-releases.yaml           측정 campaign → 원시 기록이 있는 GitHub release와 asset의 SHA-256 (lint가 검사)
 ├── grids.yaml                   ② generated layer의 정의: 다섯 집합 (137줄)
 ├── variants.yaml                ② RQ0 sensitivity variant의 정의: 아홉 집합 (137줄)
@@ -759,7 +759,7 @@ dataset/
 
 이 파일의 머리 주석은 2026-10-17부터 자신을 "the archetype library (v0.2)"라고 부릅니다. version은 `dataset/README.md`, `docs/data-contracts.md` §1·§2와 같습니다. 그 전의 "(v0.1)"은 2026-10-09의 9.13 spec 결정 9("library의 표기 version을 v0.1에서 v0.2로 올린다")가 data-contracts §2와 README만 고치고 남긴 것이었고, 2026-10-10 감사가 문서 정리 목록에 올린 뒤 9.15의 재빌드(commit `37c2e233`, 2026-10-16)에서 고쳐졌습니다. 그 뒤에도 남아 있던 "Layer 1"은 데이터셋의 층에 번호를 붙이던 옛 이름이었고(1.3의 용어 상자), 9.15의 두 번째 재빌드(commit `7b024003`, 2026-10-17)에서 빠졌습니다. 이 파일은 모든 manifest의 입력이라 주석 한 줄을 고쳐도 일곱 manifest가 다시 bless되고 RQ0 gate spec이 다시 pin됩니다. 두 재빌드 모두 그랬습니다.
 
-**`sources.yaml`** — 데이터셋이 값이나 구조를 끌어오는 출처의 기계용 목록입니다. 2026-10-17에 19개 id가 있고, 종류는 scholarly 5개, deployed-system 12개, measurement 2개입니다(tree에서 센 값). 2026-10-16에 데이터셋 파일 어디도 인용하지 않는 id 열한 개가 빠졌습니다(그 전에는 30개).
+**`sources.yaml`** — 데이터셋이 값이나 구조를 끌어오는 출처의 기계용 목록입니다. 2026-10-17에 19개 id가 있고, 종류는 scholarly 5개, deployed-system 11개, talk·학회 초록·뉴스 보도 1개(`lavd-ossna24`), measurement 2개입니다(tree에서 센 값). 2026-10-16에 데이터셋 파일 어디도 인용하지 않는 id 열한 개가 빠졌습니다(그 전에는 30개).
 
 **`meas-releases.yaml`** — 데이터가 인용하는 `meas-ci` campaign마다, 그 원시 기록을 담은 GitHub release(하나 이상)와 각 asset의 SHA-256을 적은 지도입니다(2026-10-16). compile은 읽지 않고, `make lint`가 지도에 없는 campaign tag를 실패시킵니다(6.2). 인용 문자열은 여기 없고 `docs/references.md`에 있습니다. 이 둘의 관계는 6장에서 봅니다.
 
@@ -1128,7 +1128,7 @@ code-editor:                    meas-ci:                             ### `meas-c
 
 ## 6.3 출처의 등급
 
-모든 출처가 같은 무게를 갖지는 않습니다. `docs/references.md`의 "Citation-tier rule"이 등급을 정합니다. 2026-10-16에 9.15가 9.12 D112(deployed-system 등급을 넓힌 결정)와 D113(talk·학회 초록·뉴스 보도 등급을 더한 결정)을 그 규칙에 적용했습니다. `sources.yaml`의 `type`은 여전히 셋(scholarly, deployed-system, measurement)이라, registry에서 `lavd-ossna24`는 `deployed-system`으로 남아 있습니다.
+모든 출처가 같은 무게를 갖지는 않습니다. `docs/references.md`의 "Citation-tier rule"이 등급을 정합니다. 2026-10-16에 9.15가 9.12 D112(deployed-system 등급을 넓힌 결정)와 D113(talk·학회 초록·뉴스 보도 등급을 더한 결정)을 그 규칙에 적용했습니다. 2026-10-17에는 `sources.yaml`도 따랐습니다(9.15에서 인지오의 답). registry에서 `lavd-ossna24`의 `type`은 talk·학회 초록·뉴스 보도("talk, conference abstract or news report")이고, 그 `notes`는 숫자를 Min이 2024-04-17에 보고한 값으로 적습니다. 머리 주석의 `type` 규칙은 id 규칙의 네 type(scholarly, deployed-system, talk·학회 초록·뉴스 보도, measurement)을 나열하고, 각 type의 등급을 등급 규칙의 문장을 줄여 옮깁니다. measurement는 등급 규칙에 줄이 없어서(그 범위는 `meas-ci` 항목의 role이 정합니다, 6.4) 머리 주석에도 등급이 없습니다. 그 전에는 `type`이 셋(scholarly, deployed-system, measurement)이었고 `lavd-ossna24`는 `deployed-system`이었습니다.
 
 | 등급 | id 꼴 | 뒷받침할 수 있는 주장 | 예 |
 |---|---|---|---|
@@ -1140,7 +1140,7 @@ code-editor:                    meas-ci:                             ### `meas-c
 
 > **용어.** `role`(references.md 항목의)은 그 출처가 뒷받침할 수 있는 주장의 범위입니다. 출처는 자기 role 밖에서 인용하지 않습니다. 예를 들어 deployed-system 출처는 "GameMode의 reaper가 5초 간격으로 돈다"는 **존재**는 말해 줄 수 있지만, "desktop 사용자가 평균 몇 초마다 창을 바꾼다" 같은 행동 통계는 말해 줄 수 없습니다.
 
-2026-10-17 현재 `sources.yaml`의 19개 id 가운데 scholarly가 5개, deployed-system이 12개, measurement가 2개(`meas-ci`와 측정을 기다리는 값의 표시 `meas-pending`)입니다(tree에서 센 값). 2026-10-16에 데이터셋 파일 어디도 인용하지 않는 id 열한 개가 registry에서 빠졌고(그 전에는 30개), 그 `docs/references.md` 항목은 문서가 인용하는 한 남습니다.
+2026-10-17 현재 `sources.yaml`의 19개 id 가운데 scholarly가 5개, deployed-system이 11개, talk·학회 초록·뉴스 보도가 1개(`lavd-ossna24`), measurement가 2개(`meas-ci`와 측정을 기다리는 값의 표시 `meas-pending`)입니다(tree에서 센 값). 2026-10-16에 데이터셋 파일 어디도 인용하지 않는 id 열한 개가 registry에서 빠졌고(그 전에는 30개), 그 `docs/references.md` 항목은 문서가 인용하는 한 남습니다.
 
 > **왜 이렇게 정했나 — `lavd-ossna24`의 숫자는 발표자가 보고한 값.** `lavd-ossna24`(game chain의 숫자를 대는 LAVD 발표 자료)는 8개 파일(판정 파일 셋 포함)의 game chain 속도를 정합니다. 2026-10-10 감사의 A3는 이것과 "footnote 등급은 존재 주장만 뒷받침한다"는 당시 저장소 자신의 규칙 사이의 긴장을 지적했고, 2026-10-11에 인지오는 "그대로 둔다. 숫자는 발표자가 보고한 값으로 서고, `chain-x1.2`와 `chain-x1.4` variant가 민감도 확인이다"라고 결정했습니다(감사 기록의 "Resolutions"). 2026-10-16에 9.15는 관련 연구 문장을 다룬 sub-task 9.12의 결정 D113대로 `docs/references.md`에서 이 항목을 talk 등급으로 옮기고, 그 숫자를 Min이 2024-04-17에 보고한 값으로, chain의 꼴을 design으로 적었습니다(2026-10-15, 인지오의 결정). 값과 데이터 파일은 바뀌지 않았습니다.
 
