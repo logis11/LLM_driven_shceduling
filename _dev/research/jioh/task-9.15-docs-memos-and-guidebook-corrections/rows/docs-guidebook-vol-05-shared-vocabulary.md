@@ -40,3 +40,11 @@ Chunk K16, Research guidebook, volumes 4-6 (wave 4). 4 open rows. The file has 2
 - Sources: `logs/K09.md` ## Rows for other chunks (X2), the W-0453 row, ## Review round 2; `dataset/build/coreset-single/c1-browsing.workload.json`, `c1-compile.workload.json`, `c1-gaming.workload.json`
 - Cross-ref: W-0670; W-0893; W-0453
 - Notes: found in K09. W-0670 keeps :468, :486 and :1197.
+
+### W-1011 · applied
+- At: `docs/guidebook/vol-05-shared-vocabulary.md` the mode table (§3.1), the `render` row, line 452 ("사람이 기다리지 않는 3D·그래픽 렌더")
+- Change: The new `render` gloss, in the volume's Korean. The review decision names only §3.2's 제안 box (`:502`), §9.6 (`:2543`) and the glossary (`:2628`).
+- Final word: The final memo's review (2026-10-17): the `render` gloss (W-0827, W-0432), (b), applied now — `docs/recognition-vocabulary.md` §1's `render` row 'an offline render — a 3D scene or a video project rendered to a file' (applied in R2, `:34`).
+- Sources: `logs/R2.md` ## Rows for other chunks; `logs/R4.md` ## Found rows, applied (R4-2)
+- Cross-ref: W-0432; W-0827; W-1010
+- Notes: found in R2. Applied in R4 (its R4-2, found there too, the same wave): "사람이 기다리지 않는 렌더 — 3D 장면이나 영상 프로젝트를 파일로 렌더링하는 것".

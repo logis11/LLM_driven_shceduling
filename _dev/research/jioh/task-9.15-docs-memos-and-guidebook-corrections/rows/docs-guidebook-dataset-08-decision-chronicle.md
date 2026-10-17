@@ -84,7 +84,7 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0606; W-0857; W-0601
 - Notes: found in K02. X7's other parts are carried by open rows whose apply-after rows K02 has applied: the dataset guidebook vol-01's §5.1, §5.2 and §5.6 notes (W-0498, W-0499, W-0500, W-0503) and vol-04 §13.8 (W-0549). Whether §12.8 is updated row by row or closed once 9.15's rows are applied is the editing agent's call (W-0606), as W-0857 says.
 
-### W-0934 · open
+### W-0934 · carried (after the final memo, with W-0602's pass)
 - At: `docs/guidebook/dataset/08-decision-chronicle.md` §12.1 (9.15's section, W-0602's place); §10.7's closing sentence; §13's 2026-10-16 row
 - Change: In W-0602's pass, state in 9.15's outcome its 2026-10-16 batched rebuild (`37c2e233`) and the batch after wave 4; §10.7's closing sentence and §13's 2026-10-16 row point there.
 - Final word: K14's decisions 5 and 8: vol-08 gains §10.7, the account of 9.23; 9.15's own account stays W-0602's, deferred until the final memo is committed (9.15 spec decision 13). `37c2e233` (2026-10-16) is 9.15's batched rebuild (`harness/CHANGELOG.md`'s 2026-10-16 entry; W-0729's answer: one rebuild for the data and code edits answered before the waves).
@@ -100,7 +100,7 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0876; W-0951
 - Notes: found in G3. K14's file: a follow-up chunk.
 
-### W-0956 · open
+### W-0956 · carried (after the final memo, with W-0602's pass)
 - At: `docs/guidebook/dataset/08-decision-chronicle.md` §12.8's table, rows 1 and 2, their 2026-10-17 cells, lines 1873–1874 ("`docs/README.md`의 coreset guide 설명 줄에는 "all 50 coreset files"가 남아 있음"; "… "the twelve archetypes"가 남아 있음")
 - Change: Mark both cells fixed: `docs/README.md`'s coreset-guide line now reads "the 29 archetypes" and "all 51 core-set files".
 - Final word: W-0710, applied 2026-10-17 in K18: `docs/README.md:77` restated (29 entries in `dataset/archetypes.yaml`; 51 artifacts in `dataset/build.manifest.json`; the coreset guide's §4 "archetype 29개" and §10 "51개 파일 상세").

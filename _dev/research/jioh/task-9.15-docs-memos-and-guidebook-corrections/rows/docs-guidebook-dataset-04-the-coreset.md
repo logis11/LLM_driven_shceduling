@@ -170,6 +170,14 @@ Chunk K12, Dataset guidebook, volumes 3-4 (wave 3). 17 open rows. The file has 2
 - Cross-ref: W-0957; W-0959; W-0960; W-0962; W-0963
 - Notes: found in H2. K12's file: a follow-up chunk.
 
+### W-1010 · applied
+- At: `docs/guidebook/dataset/04-the-coreset.md` §1.2's mode table, the `render` row, line 68 ("offline 3D/그래픽 render")
+- Change: The new `render` gloss, in the volume's Korean; the table copies the vocabulary §1's one-line definitions. The review decision names only §1.2's note (`:76`) and §13.8 (`:2187`).
+- Final word: The final memo's review (2026-10-17): the `render` gloss (W-0827, W-0432), (b), applied now — `docs/recognition-vocabulary.md` §1's `render` row 'an offline render — a 3D scene or a video project rendered to a file' (applied in R2, `:34`).
+- Sources: `logs/R2.md` ## Rows for other chunks; `logs/R4.md` ## Found rows, applied (R4-1)
+- Cross-ref: W-0432; W-0827; W-1011
+- Notes: found in R2. Applied in R4 (its R4-1, found there too, the same wave): "offline render — 3D 장면이나 영상 project를 파일로 render하는 일".
+
 ## Also on this file, not for editing from this list
 
 - W-0550 · closed, carried — `_dev/TODO.md:200` (Backlog: 'Unwanted jobs to measure — how many the attribute's `false` side needs is decided in the RQ1 experiment spec's session …') carrie…

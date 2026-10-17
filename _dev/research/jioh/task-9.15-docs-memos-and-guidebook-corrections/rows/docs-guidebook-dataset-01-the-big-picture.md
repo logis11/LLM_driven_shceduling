@@ -240,6 +240,14 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 24 open rows. The file has 1
 - Cross-ref: W-0971; W-0972
 - Notes: found in L1. K11's file: a follow-up chunk.
 
+### W-1013 · open
+- At: `docs/guidebook/dataset/01-the-big-picture.md` §2.5, line 372 ("`make`의 마지막 자식이 끝날 때")
+- Change: → "`make`가 spawn한 자식이 모두 끝났을 때".
+- Final word: The final memo's review (2026-10-17): conformance item (g)'s wording, (a) — 'when every child it spawned has ended'; no rule moves. Applied in R3 to the six sources the decision names (the dataset guidebook vol-08 `:1817` in Korean: "spawn한 자식이 모두 끝났을 때").
+- Sources: `logs/R3.md` ## Rows for other chunks (X2)
+- Cross-ref: W-0743; W-0758; W-1012; W-1014; W-1015
+- Notes: found in R3. K11's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0507 · blocked, simulator TIMER (outside the spec's list) — §2.4 여섯 개의 primitive, open note line 288

@@ -307,6 +307,14 @@ Chunk K03, Coreset guide (wave 1). 35 open rows. The file has 1060 lines at `d5c
 - Cross-ref: —
 - Notes: found in I2 (left as written: its brief kept line 950). K03's file: a follow-up chunk.
 
+### W-1012 · open
+- At: `docs/workload/coreset-guide.md` §3's `children:<task id>` bullet, line 142 ("orchestrator가 spawn한 마지막 자식이 끝날 때"); `c1-compile`, line 665 ("마지막 자식이 끝날 때 완료돼야"); §12, line 1201 ("마지막 자식이 끝날 때 완료하지 않아요")
+- Change: "(spawn한) 마지막 자식이 끝날 때" → "spawn한 자식이 모두 끝났을 때", the rest of each sentence unchanged.
+- Final word: The final memo's review (2026-10-17): conformance item (g)'s wording, (a) — 'when every child it spawned has ended'; no rule moves. Applied in R3 to the six sources the decision names (`harness/experiments/rq0-gate.yaml:344–345`, `docs/data-contracts.md:274`, `:587`, `docs/simulator/interpretation-contract.md:32`, `:59`, `docs/simulator/simulator-guide.md:157`, the dataset guidebook vol-08 `:1817` in Korean: "spawn한 자식이 모두 끝났을 때").
+- Sources: `logs/R3.md` ## Rows for other chunks (X1); the work list's ## Final memo, "The final memo's review", (g)'s wording (a)
+- Cross-ref: W-0743; W-0758; W-1013; W-1014; W-1015
+- Notes: found in R3. K03's file (a full-pass doc, spec decision 4): a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0189 · blocked, simulator TIMER (on the spec's list) — ## 3 primitive table, `TIMER(P)` row line 111 ('지나간 tick은 backlog로 쌓여 즉시 완료') and the TIMER/SLEEP paragraph line 118 ('늦으면 밀린 tick이 쌓여요 … 따…

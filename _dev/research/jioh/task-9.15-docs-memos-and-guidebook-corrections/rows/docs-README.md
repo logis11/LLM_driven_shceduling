@@ -62,7 +62,7 @@ Chunk K18, Docs index (wave 5). 4 open rows. The file has 156 lines at `d5cc7711
 - Cross-ref: W-0710; W-0662; W-0673; W-0937
 - Notes: found in K16. The vol-06 part meets W-0710's lines 18 and 131 (the twelve entries); one edit serves both.
 
-### W-1008 · open
+### W-1008 · applied
 - At: `docs/README.md` ## Memos (`memos/`), ### Open, the invocation memo's entry, line 96 ("Open: both programs run in that command shape — the simulator still takes positional arguments and writes the trace to stdout, and no daemon program is in the repository yet; owners 인경민 (simulator), 박이안 (daemon)")
 - Change: Optional, mirroring W-1005: the Open summary adds that the RQ0 gate spec's `simulator-conformance` item (h) requires the simulator side before the RQ0 run.
 - Final word: 인지오's answer (c) of 2026-10-17 to K17 (item (h)); `harness/experiments/rq0-gate.yaml:348–357` (item (h): the simulator run as the runner invokes it, `--workload`, `--schedule`, `--out-trace`, no positional argument, the trace written to that file; "The run does not start until each is shown."); W-1005 (applied 2026-10-17 in Q3: the memo's open header line says so).

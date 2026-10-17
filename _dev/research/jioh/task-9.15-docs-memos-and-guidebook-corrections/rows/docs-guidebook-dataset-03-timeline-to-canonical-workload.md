@@ -129,6 +129,14 @@ Chunk K12, Dataset guidebook, volumes 3-4 (wave 3). 14 open rows. The file has 2
 - Cross-ref: W-0957; W-0959; W-0961; W-0962; W-0963
 - Notes: found in H2. K12's file: a follow-up chunk.
 
+### W-1014 · open
+- At: `docs/guidebook/dataset/03-timeline-to-canonical-workload.md` §7.7's channel table, line 1212 ("마지막 자식이 끝날 때"); §7.7's open note, line 1218 ("그 orchestrator가 낳은 마지막 자식이 끝날 때"); §16.2 item 2, line 2247 ("마지막 자식이 끝날 때")
+- Change: "(낳은) 마지막 자식이 끝날 때" → "자식이 모두 끝났을 때".
+- Final word: The final memo's review (2026-10-17): conformance item (g)'s wording, (a) — 'when every child it spawned has ended'; no rule moves. Applied in R3 to the six sources the decision names (the dataset guidebook vol-08 `:1817` in Korean: "spawn한 자식이 모두 끝났을 때").
+- Sources: `logs/R3.md` ## Rows for other chunks (X3)
+- Cross-ref: W-0743; W-0758; W-1012; W-1013; W-1015
+- Notes: found in R3. K12's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0532 · blocked, simulator TIMER (outside the spec's list) — §16.2 기록이 아직 정하지 않은 곳, item 4, line 2259
