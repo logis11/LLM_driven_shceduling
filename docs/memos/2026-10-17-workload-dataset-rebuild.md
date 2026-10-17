@@ -1,14 +1,14 @@
 # Phase 9 결과 — workload dataset을 다시 만들면서 생긴 것, 바뀐 것, 없어진 것
 
-> Status: memo · Created 2026-10-17 · Updated 2026-10-17
+> Status: memo · Created 2026-10-17 · Updated 2026-10-18
 > 열림 — 인경민: simulator의 loader가 spawn된 child를 target으로 하는 WAKE를 받는 것(§4.1, §6.1), RQ0 run 전에 남은 simulator conformance 항목 (a)·(b)·(d)·(e)·(g)·(h)를 hand fixture로 보여 주는 것과 (g)에 대한 동의(§6.2), rebuild된 core set에서 regression check와 EDF 재측정(§6.3). 박이안: recognition log에 formatted prompt를 남길지, chat template이 넣는 날짜를 고정할지 기록할지(§8.2). 셋이 같이: 제안 둘(§9). 담당 인경민, 박이안.
 > From 인지오 to 인경민, 박이안.
 
 ## 0. 이 문서
 
-Phase 9에서 workload dataset을 처음부터 다시 만들었어요. 이 문서는 dataset을 직접 만들지 않은 사람이 읽고, 자기 프로그램 — 인경민의 simulator, 박이안의 daemon — 에 무엇이 달라지는지 알 수 있게 정리한 보고서예요.
+Phase 9에서 workload dataset을 처음부터 다시 만들었어요. 이 문서는 dataset을 직접 만들지 않은 사람이 읽고 인경민의 simulator나 박이안의 daemon 같은 자기 프로그램에 무엇이 달라지는지 알 수 있게 정리한 보고서예요.
 
-변경마다 같은 순서로 적었어요: **왜** 바꿨는지, **무엇이 어떻게** 바뀌었는지(전/후 예시), 그래서 **누구에게 무슨 영향**이 있는지. 결정의 자세한 근거는 각 항목에 적은 파일에 있어요. 급하면 §2의 표와 §6(인경민), §8(박이안)만 읽어도 돼요.
+변경마다 **왜** 바꿨는지, **무엇이 어떻게** 바뀌었는지(전/후 예시), 그래서 **누구에게 무슨 영향**이 있는지를 같은 순서로 적었어요. 결정의 자세한 근거는 각 항목에 적은 파일에 있어요. 급하면 §2의 표와 §6(인경민), §8(박이안)만 읽어도 돼요.
 
 **workload dataset이 뭔지 한 번 더.** simulator가 돌리는 입력이에요. workload 파일 하나는 "가상의 desktop에서 어떤 program이 언제 도착해서, CPU를 얼마나 쓰고, 언제 잠들고 깨는지"를 시간순 event로 적은 JSON이에요. 만드는 순서는 이래요.
 
@@ -24,12 +24,12 @@ workload 파일       simulator가 읽는 event 목록                         d
 
 9월 중순에 archetype 값들의 출처를 원문과 하나씩 대조해 보니 맞지 않는 게 많았어요(`docs/memos/2026-09-13-critical-findings.md`). 예를 들어 "kernel build는 process 2,430개를 만든다"는 값은 Linux kernel build가 아니라 DynamoRIO build에서 나온 숫자였어요. 남의 논문에서 빌려 온 숫자가 우리 workload의 뼈대였기 때문에, 그 위에 올린 실험 결과도 믿기 어려웠어요.
 
-그래서 값을 빌려 오는 대신 직접 쟀어요. GitHub Actions runner(AMD EPYC 7763 core 하나)에서 실제 program — VS Code, Chrome, Thunderbird, Kdenlive, kernel build, PyTorch 학습, 파일 색인기 등 — 을 돌리고, `perf sched`로 scheduler event를 trace해서 "얼마나 오래 돌고, 얼마나 자주 깨는지"를 분포로 뽑았어요.
+그래서 값을 빌려 오는 대신 직접 쟀어요. GitHub Actions runner(AMD EPYC 7763 core 하나)에서 VS Code, Chrome, Thunderbird, Kdenlive, kernel build, PyTorch 학습, 파일 색인기 등의 실제 program을 돌리고 `perf sched`로 scheduler event를 trace해서 "얼마나 오래 돌고, 얼마나 자주 깨는지"를 분포로 뽑았어요.
 
 결과적으로:
 
 - archetype 29개 중 28개가 우리가 잰 값이에요. 남은 하나(`game-task-chain`, 게임이 frame마다 거치는 thread 사슬)만 LAVD scheduler 발표(`lavd-ossna24`)의 수치예요.
-- 그 위에 서 있던 것들 — 점수 계산 규칙(scoring spec), run이 망가졌는지 보는 검사(guard spec), 첫 실험의 사전등록(RQ0 gate spec), daemon의 prior driver table — 도 새 파일 기준으로 다시 맞췄어요.
+- 점수 계산 규칙(scoring spec), run이 망가졌는지 보는 검사(guard spec), 첫 실험의 사전등록(RQ0 gate spec), daemon의 prior driver table처럼 그 위에 서 있던 것들도 새 파일 기준으로 다시 맞췄어요.
 - 파일 형식에도 몇 가지가 생기고 바뀌었어요. 이게 이 문서의 대부분이에요.
 
 ## 2. 한눈에
@@ -53,7 +53,7 @@ workload 파일       simulator가 읽는 event 목록                         d
 
 **왜.** Linux에서 program은 자기 scheduling class를 스스로 정할 수 있어요. 파일 색인기 Tracker(`tracker-miner-f`)는 자기 thread 모두에 `SCHED_IDLE`을 걸고, 백업 도구 Déjà Dup은 백업을 `chrt --idle 0`으로 시작해요. idle class인 task는 "다른 task가 CPU를 원하지 않을 때만" 돌아요. 이전 dataset은 이걸 표현할 수 없어서, 색인기가 editor와 똑같은 자격으로 CPU를 두고 경쟁했어요. 실제 desktop과 다른 상황이고, 그러면 "어떤 scheduler 설정이 맞는가"의 답도 달라져요.
 
-**무엇이 바뀌었나.** 모든 task — `arrive` event와 spawn table의 child 하나하나 — 에 `declared_class`가 필수로 붙어요. 값은 `normal`과 `idle` 둘뿐이고 기본값은 없어요. 예시는 `c1-indexing`에서 색인기가 도착하는 event예요(program은 줄였어요).
+**무엇이 바뀌었나.** 모든 task(`arrive` event와 spawn table의 child 하나하나)에 `declared_class`가 필수로 붙어요. 값은 `normal`과 `idle` 둘뿐이고 기본값은 없어요. 예시는 `c1-indexing`에서 색인기가 도착하는 event예요(program은 줄였어요).
 
 ```jsonc
 // 전
@@ -66,7 +66,7 @@ workload 파일       simulator가 읽는 event 목록                         d
   "program": [ { "op": "RUN", "us": 38048 }, { "op": "SLEEP", "us": 123 }, … ] }
 ```
 
-`idle`인 program은 세 종류예요: 파일 색인기, 증분 백업, 그리고 다운로드를 idle로 돌리는 경우를 보기 위한 `game-download-idle`. 이 program이 들어간 core 파일은 일곱 개예요(`c1-indexing`, `c7-indexing`, `c2-p1b`, `c1-backup`, `c7-backup`, `c2-p3b`, `c2-p2a-idle`). 나머지는 모두 `normal`이에요.
+`idle`인 program은 파일 색인기, 증분 백업, 그리고 다운로드를 idle로 돌리는 경우를 보기 위한 `game-download-idle`의 세 종류예요. 이 program이 들어간 core 파일은 일곱 개예요(`c1-indexing`, `c7-indexing`, `c2-p1b`, `c1-backup`, `c7-backup`, `c2-p3b`, `c2-p2a-idle`). 나머지는 모두 `normal`이에요.
 
 **규칙.** `idle` task는 `normal` task가 하나도 runnable하지 않을 때만 돌고, `normal` task가 깨어나면 바로 preempt돼요. FIFO를 포함해 어느 algorithm이든, 그 algorithm이 정하는 순서 아래 층으로 적용돼요(`docs/data-contracts.md` §4).
 
@@ -80,17 +80,17 @@ workload 파일       simulator가 읽는 event 목록                         d
 
 ### 3.2 지금 focus를 가진 window: `focus`
 
-**왜.** 같은 program들이 떠 있어도, 사용자가 지금 어느 window를 보고 있는지에 따라 상황이 달라요. 예를 들어 browser와 game이 둘 다 떠 있어도, game window를 보고 있으면 게임 중이고 browser를 보고 있으면 웹서핑 중이에요. 실제 OS도 이 정보를 써요: Windows의 Game Mode는 game이 foreground이고 focus를 가지고 있어야 켜져요(research proposal의 shipping system 표, `gamemode-docs`). 그래서 recognizer가 이 정보를 쓸 수 있게 넣었어요. 그리고 이게 실제로 얼마나 도움이 되는지 재기 위해, 같은 파일을 focus가 있는 입력과 없는 입력 두 가지로 돌려요.
+**왜.** 같은 program들이 떠 있어도, 사용자가 지금 어느 window를 보고 있는지에 따라 상황이 달라요. 예를 들어 browser와 game이 둘 다 떠 있어도, game window를 보고 있으면 게임 중이고 browser를 보고 있으면 웹서핑 중이에요. 실제 OS도 이 정보를 써요. Windows의 Game Mode는 game이 foreground이고 focus가 있어야 켜져요(research proposal의 shipping system 표, `gamemode-docs`). 그래서 recognizer가 이 정보를 쓸 수 있게 넣었어요. 그리고 이게 실제로 얼마나 도움이 되는지 재기 위해, 같은 파일을 focus가 있는 입력과 없는 입력 두 가지로 돌려요.
 
 **무엇이 바뀌었나.**
 
-- workload 파일에 네 번째 top-level key `focus`가 생겼어요. 어느 task가 언제부터 언제까지 focus를 가졌는지예요. `c1-indexing`에서는 이래요:
+- workload 파일에 네 번째 top-level key `focus`가 생겼어요. 어느 task에 언제부터 언제까지 focus가 있었는지예요. `c1-indexing`에서는 이래요:
 
   ```jsonc
   "focus": [ { "t_start": 0, "t_end": 60000000, "task": "editor" } ]
   ```
 
-- daemon이 recognizer에게 보여 주는 telemetry snapshot이 두 모양(shape)으로 나뉘어요. 같은 순간의 snapshot이 shape마다 이렇게 달라요:
+- daemon은 recognizer에게 telemetry snapshot을 보여 주는데 이 snapshot이 두 모양(shape)으로 나뉘어요. 같은 순간의 snapshot이 shape마다 이렇게 달라요:
 
   ```jsonc
   // names shape: 전과 같은 모양
@@ -106,11 +106,11 @@ workload 파일       simulator가 읽는 event 목록                         d
 
 - **박이안:** daemon은 shape를 필수 flag `--telemetry focus|names`로 받아서, snapshot을 그 shape로 만들고, recognition log의 top-level `telemetry`에 어느 shape를 보여 줬는지 적어야 해요(`docs/data-contracts.md` §5, §8, §11). run 하나는 workload 하나 × condition 하나 × shape 하나 × (난수를 쓰는 condition이면) seed 하나예요.
 - **인경민:** simulator가 읽는 run file(`meta.id`와 `events`)은 그대로라서 바뀔 게 없어요.
-- harness의 records에 shape를 적는 column `telemetry`가 생겼어요(column 25개). 첫 실험(RQ0)은 `focus` shape 하나만 돌려요 — RQ0의 세 condition은 telemetry를 읽지 않기 때문이에요.
+- harness의 records에 shape를 적는 column `telemetry`가 생겼어요(column 25개). 첫 실험(RQ0)은 `focus` shape 하나만 돌려요. RQ0의 세 condition은 telemetry를 읽지 않기 때문이에요.
 
 ### 3.3 generated layer와 sensitivity variant
 
-**왜.** core set 51개는 사람이 장면 하나씩 쓴 시나리오라서, "상황이 바뀌는 순간을 따라가는가", "모르는 이름이어도 읽는가" 같은 질문을 체계적으로 묻기엔 수가 적어요. 그래서 mode마다 하나씩 있는 측정 기반 파일 16개의 task 집합을 기계적으로 조합해서, 질문마다 파일 묶음을 만들었어요. 모두 설계된 파일이고, 실제 desktop에서 그런 순서가 얼마나 자주 나오는지는 주장하지 않아요.
+**왜.** core set 51개는 사람이 장면 하나씩 쓴 시나리오라서, "상황이 바뀌는 순간을 따라가는가", "모르는 이름이어도 읽는가" 같은 질문을 체계적으로 묻기엔 수가 적어요. 그래서 측정 기반 파일 16개(mode마다 하나씩)의 task 집합을 기계적으로 조합해서 질문마다 파일 묶음을 만들었어요. 모두 설계된 파일이고, 실제 desktop에서 그런 순서가 얼마나 자주 나오는지는 주장하지 않아요.
 
 | set | 묻는 질문 | 개수 | 예시 파일과 뜻 |
 |---|---|---|---|
@@ -183,7 +183,7 @@ depart가 정해지지 않은 task는 top-level이든 spawn된 것이든 `EXIT`�
 
 ### 4.3 config가 적용되는 시점: drain과 순서
 
-**배경.** daemon은 run 도중에 scheduler 설정을 바꿔요. 그 목록이 config schedule이에요: "시각 T에 설정이 C가 된다"는 entry의 목록. 문제는 algorithm을 바꾸는 순간 지금 CPU를 잡고 있는 task를 어떻게 하느냐예요. 이번에 두 규칙이 contract(`docs/data-contracts.md` §7)에 들어갔어요.
+**배경.** daemon은 run 도중에 scheduler 설정을 바꿔요. 그 목록, 곧 "시각 T에 설정이 C가 된다"는 entry의 목록이 config schedule이에요. 문제는 algorithm을 바꾸는 순간 지금 CPU를 잡고 있는 task를 어떻게 하느냐예요. 이번에 두 규칙이 contract(`docs/data-contracts.md` §7)에 들어갔어요.
 
 - **Drain.** MLFQ, EDF, LOTTERY에서 다른 algorithm으로 바꾸는 entry가, 어떤 task가 CPU를 잡고 있을 때 오면 바로 적용되지 않아요. 그 task가 CPU를 놓을 때 — slice나 지금 RUN이 끝나거나, preempt되거나, depart할 때 — 적용돼요. CPU가 비어 있을 때의 switch, FIFO에서 나가는 switch, 같은 algorithm 안에서 params만 바꾸는 entry는 찍힌 시각에 바로 적용돼요.
 - **순서.** entry는 목록 순서대로 적용돼요. switch가 drain 중일 때 찍힌 entry는 같은 algorithm이어도 그 뒤에 줄 서서, 같은 순간에 그 다음으로 적용돼요.
@@ -223,9 +223,9 @@ mode 이름 `render`와 정답 label, 파일은 그대로예요. `transcode`(이
 
 내용은 그대로이고 이름만 바뀌었어요.
 
-- **core 파일 하나:** `c5-t3`이 2026-10-12부터 `c6-alias`예요. task, archetype, seed는 같아요. 예전 결과와 맞춰 볼 때 "파일이 사라지고 새 파일이 생겼다"가 아니라 이름만 바뀐 거예요.
+- **core 파일 하나:** `c5-t3`이 2026-10-12부터 `c6-alias`예요. task, archetype, seed는 같아요. 예전 결과와 맞춰 볼 때는 같은 파일로 보면 돼요.
 - **연구 주장의 사슬:** `docs/research-claims.md`의 chain은 'link 1'–'link 7', 일곱 개예요(전에는 'six links'라고 적혀 있었어요). C1–C7은 core set의 파일 그룹 이름으로만 남아요.
-- **dataset의 층:** 번호 대신 이름으로 불러요 — archetype library, scenario catalog, timelines. 'Layer 1/2'는 평가의 두 층(recognition 정확도, scheduling 성능)만 뜻해요.
+- **dataset의 층:** 번호 대신 archetype library, scenario catalog, timelines라는 이름으로 불러요. 'Layer 1/2'는 평가의 두 층(recognition 정확도, scheduling 성능)만 뜻해요.
 
 ### 4.6 '주장하지 않는 것'이 하나 늘었어요
 
@@ -245,7 +245,7 @@ mode 이름 `render`와 정답 label, 파일은 그대로예요. `transcode`(이
 
 ### 6.2 RQ0 run 전에 simulator가 보여야 할 것: conformance (a)–(h)
 
-**배경.** RQ0는 첫 실험이에요: 상황을 완벽하게 알아보는 경우(`oracle`)가 무작위로 고르는 경우(`random`)보다 잴 만큼 좋은가. 그 결과를 믿으려면 simulator가 정해진 동작을 해야 해서, RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)이 여덟 항목을 정해 뒀어요. 손으로 유도한 작은 fixture를 simulator로 돌려서 trace가 줄 단위로 맞는 걸 보이기 전에는 RQ0 run을 시작하지 않아요. 지금 (c)와 (f)는 코드에 있고, 여섯이 남았어요.
+**배경.** RQ0는 첫 실험이에요. 상황을 완벽하게 알아보는 경우(`oracle`)가 무작위로 고르는 경우(`random`)보다 잴 만큼 좋은지를 봐요. 그 결과를 믿으려면 simulator가 정해진 동작을 해야 해서, RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)이 여덟 항목을 정해 뒀어요. 작은 fixture를 손으로 유도해 simulator로 돌리고 trace가 줄 단위로 맞는 걸 보이기 전에는 RQ0 run을 시작하지 않아요. 지금 (c)와 (f)는 코드에 있고, 여섯이 남았어요.
 
 | 항목 | 쉬운 말로 | 상태 |
 |---|---|---|
@@ -287,7 +287,7 @@ mode 이름 `render`와 정답 label, 파일은 그대로예요. `transcode`(이
 ### 6.3 rebuild된 core set에서 regression check와 EDF 재측정
 
 - 마지막 regression check는 rebuild 전 24개 파일에서였어요(`simulator/memo/memo_261010.md` Part B, D). §6.1의 loader가 고쳐지면 rebuild된 core set 51개와 variant 78개에서 다시 돌려 줘요.
-- 함께, 인경민 backlog의 EDF 재측정이에요(memo_261010 Part F; `simulator/notes/note-for-jioh-edf-chain-stage-class.md`의 Answer): rebuild된 `c1-gaming`과 `c2-p2b`에서, 두 EDF row가 게임의 frame(`game.chain.1`)에 대해 여전히 차이가 없는지. rebuild로 장면이 조금 바뀌었어요: `c1-gaming`에는 compositor가 없고, `c2-p2b`의 background는 이제 OS의 자동 업데이트(`package-upgrade`, 이름 `unattended-upgr`)예요. 대조할 prior table의 gaming row는 §7.2에 있어요.
+- 함께, 인경민 backlog의 EDF 재측정이에요(memo_261010 Part F; `simulator/notes/note-for-jioh-edf-chain-stage-class.md`의 Answer): rebuild된 `c1-gaming`과 `c2-p2b`에서, 두 EDF row가 게임의 frame(`game.chain.1`)에 대해 여전히 차이가 없는지. rebuild로 장면이 조금 바뀌었어요. `c1-gaming`에는 compositor가 없고 `c2-p2b`의 background는 이제 OS의 자동 업데이트(`package-upgrade`, 이름 `unattended-upgr`)예요. 대조할 prior table의 gaming row는 §7.2에 있어요.
 
 ## 7. 인경민에게 — 답과 알림
 
@@ -296,28 +296,28 @@ mode 이름 `render`와 정답 label, 파일은 그대로예요. `transcode`(이
 memo_261010 Part F의 'Questions for jioh' 표 순서예요.
 
 - **TIMER가 밀리면 backlog로 처리할지, frame을 버릴지**(`simulator/notes/note-for-jioh-timer-backlog-vs-drop.md`): 버리는 쪽, skip rule로 정했어요(2026-10-07 TIMER memo). 구현은 §6.2의 (b)예요.
-- **`fork_cap`이 무엇을 세는가**(`simulator/notes/note1010.md`): kernel build 파일들(`c1-compile`, `c3-workday`, `c4-compile`, `c6-dual`, generated의 compile 파일)에서 job 하나는 child 여섯이고, 일을 마친 member는 `sh`가 job을 끝낼 때까지 CPU 없이 기다려요. 그래서 `fork_cap` = `make -jN`의 N × 6(`c1-compile`은 8 × 6 = 48)이 동시에 도는 job 수를 정확히 N개로 묶어요 — `-jN`의 단위는 process가 아니라 make job이에요. `c7-compile`의 DKMS module build도 같은 48을 쓰지만 그 job은 member가 6, 8, 10개라서(job 1,557개: 6개짜리 1,325, 8개짜리 145, 10개짜리 87), 거기서는 동시에 살아 있는 child 48개를 묶고 job 수를 정확히 묶지는 않아요. spawn table이 있는 파일에는 모두 `fork_cap`이 있어요.
+- **`fork_cap`이 무엇을 세는가**(`simulator/notes/note1010.md`): kernel build 파일들(`c1-compile`, `c3-workday`, `c4-compile`, `c6-dual`, generated의 compile 파일)에서 job 하나는 child 여섯이고, 일을 마친 member는 `sh`가 job을 끝낼 때까지 CPU 없이 기다려요. 그래서 `fork_cap` = `make -jN`의 N × 6(`c1-compile`은 8 × 6 = 48)이 동시에 도는 job 수를 정확히 N개로 묶어요. `-jN`의 단위는 process가 아니라 make job이에요. `c7-compile`의 DKMS module build도 같은 48을 쓰지만 그 job은 member가 6, 8, 10개라서(job 1,557개: 6개짜리 1,325, 8개짜리 145, 10개짜리 87), 거기서는 동시에 살아 있는 child 48개를 묶고 job 수를 정확히 묶지는 않아요. spawn table이 있는 파일에는 모두 `fork_cap`이 있어요.
 - **`mock-switch` 질문 1**(slice가 끝났을 때 더 높은 queue에 task가 기다리는 경우): mock이 틀렸어요. MLFQ 규칙대로 44600에 `probe`가 CPU를 가져가도록 fixture를 다시 만들었어요(`harness/tools/tests/fixtures/mock-switch/worked.md`).
 - **질문 2**(경쟁자 없이 slice가 끝나는 경우): §9.1의 제안이에요.
 - **질문 3**(simulator guide의 예시 program에 instruction 하나가 모자람): 끝의 WAIT는 이제 data의 규칙이고(§4.2), guide의 예시도 세 번째 WAIT로 끝나요.
-- **제가 물었던 executor 질문 셋**도 답이 있어요: LOTTERY에서 non-batch class가 비었으면, 두 class가 다 runnable할 때만 `batch_share`로 class를 고르고 아니면 runnable한 class 안에서 균등하게 뽑아요(simulator가 정한 대로); EDF에서 게임 사슬의 깨어나는 stage는 deadline class예요(2026-10-10 답); RUN 중에 온 키 입력은 mailbox에 쌓여요.
+- **제가 물었던 executor 질문 셋**도 답이 있어요. LOTTERY에서 non-batch class가 비었으면, 두 class가 다 runnable할 때만 `batch_share`로 class를 고르고 아니면 runnable한 class 안에서 균등하게 뽑아요(simulator가 정한 대로); EDF에서 게임 사슬의 깨어나는 stage는 deadline class예요(2026-10-10 답); RUN 중에 온 키 입력은 mailbox에 쌓여요.
 
 ### 7.2 prior table의 gaming row
 
 2026-10-10의 답(게임 frame 사슬 전체가 EDF deadline class이고 head의 deadline을 물려받음)을 기준으로, daemon의 prior table(`daemon/driver-table/prior.yaml`)에서 gaming row 둘과 그 검토 문서(`docs/daemon/prior-table-pair-review.md`)를 rebuild된 파일 기준으로 다시 썼어요.
 
 - EDF가 어떤 다른 task보다 frame을 먼저 처리하니, row마다 다른 batch 상한(cap 0.333과 0.05)이 frame 쪽 점수에 닿지 않아요. 그래서 두 row는 frame 점수에서 같아요.
-- 기본 MLFQ와의 차이는 EDF 대 MLFQ의 차이예요: MLFQ의 100 ms boost가, 여유가 1.7 ms도 안 되는 frame 도중에 업데이트에게 10 ms slice를 줘요.
+- 기본 MLFQ와의 차이는 EDF 대 MLFQ의 차이예요. MLFQ의 100 ms boost가, 여유가 1.7 ms도 안 되는 frame 도중에 업데이트에게 10 ms slice를 줘요.
 - 게임 사슬이 CPU를 쓰는 비율은 `c1-gaming`에서 0.9, `c2-p2a`·`c2-p2b`에서 0.95라 CPU 하나에 들어가지만, `c3-evening`에서는 1.45로 넘쳐요. 1을 넘으면 EDF도 miss를 막지 못하고 순서만 정해요.
 - `c2-p2a`의 다운로드는 쉬지 않고 돌아서 batch class예요.
 
 ### 7.3 MLFQ boost timer는 적용된 entry마다 다시 시작
 
-harness는 reference simulator가 하는 그대로 읽어요: boost timer는 MLFQ entry가 적용될 때마다, 같은 algorithm entry여도 다시 시작해요(`simulator/src/sim.cpp:597`, `:603`, `:210`). 예를 들어 boost 주기가 100 ms이고 0 ms와 250 ms에 MLFQ entry가 적용되면, boost는 100, 200 ms 다음에 300 ms가 아니라 350, 450 ms…에 와요. harness의 `boost_window`도 이제 entry마다 grid를 새로 깔아요. 그래서 memo_261010 Part F의 'Ours to decide and write down' 표의 "Same-algorithm MLFQ entry: restart the boost grid?" 줄은 지금 동작(restarts)으로 정해졌다고 적어도 돼요.
+harness는 reference simulator가 하는 그대로 읽어요. boost timer는 MLFQ entry가 적용될 때마다, 같은 algorithm entry여도 다시 시작해요(`simulator/src/sim.cpp:597`, `:603`, `:210`). 예를 들어 boost 주기가 100 ms이고 0 ms와 250 ms에 MLFQ entry가 적용되면, boost는 100, 200 ms 다음에 300 ms가 아니라 350, 450 ms…에 와요. harness의 `boost_window`도 이제 entry마다 grid를 새로 깔아요. 그래서 memo_261010 Part F의 'Ours to decide and write down' 표의 "Same-algorithm MLFQ entry: restart the boost grid?" 줄은 지금 동작(restarts)으로 정해졌다고 적어도 돼요.
 
 ### 7.4 첫 instruction이 block하는 task의 도착
 
-harness의 mock도 이제 reference simulator와 같아요: 첫 instruction이 WAIT인 task(spawn된 child 포함)는 미리 와 있는 wake가 없으면 도착하자마자 block되고, `ready` line도 길이 0인 CPU 점유도 없어요(simulator의 `on_arrive`, `spawn`). 그래서 같은 표의 "Zero-length occupancy for an arriving task whose first instruction blocks" 줄("none, only `x_block`. The mock has one")도 지금 동작(점유 없이 `x_block`만)으로 정해졌다고 적어도 돼요.
+harness의 mock도 이제 reference simulator와 같아요. 첫 instruction이 WAIT인 task(spawn된 child 포함)는 미리 와 있는 wake가 없으면 도착하자마자 block되고 `ready` line도 길이 0인 CPU 점유도 없어요(simulator의 `on_arrive`, `spawn`). 그래서 같은 표의 "Zero-length occupancy for an arriving task whose first instruction blocks" 줄("none, only `x_block`. The mock has one")도 지금 동작(점유 없이 `x_block`만)으로 정해졌다고 적어도 돼요.
 
 ### 7.5 `simulator/src/notes.md` §4의 gap 1과 gap 3
 
@@ -328,7 +328,7 @@ harness의 mock도 이제 reference simulator와 같아요: 첫 instruction이 W
 
 ### 7.6 workload가 끝난 뒤의 config entry
 
-contract(`docs/data-contracts.md` §7의 End 규칙)는 workload가 끝나는 시각이나 그 뒤에 찍힌 entry를 simulator가 무시한다고 해요. reference simulator는 그런 entry도 적용하고 trace에 적어요. 예를 들어 60 s에 끝나는 workload에 60 s에 찍힌 entry가 있으면 trace에 `{"event":"config_applied","t":60000000,…}`이 남아요. 숫자는 바뀌지 않아요 — harness가 끝 시각이나 그 뒤의 `config_applied` line을 버리기 때문이에요. contract와 harness는 그대로 두고, 차이가 있다는 것만 알려요.
+contract(`docs/data-contracts.md` §7의 End 규칙)는 workload가 끝나는 시각이나 그 뒤에 찍힌 entry를 simulator가 무시한다고 해요. reference simulator는 그런 entry도 적용하고 trace에 적어요. 예를 들어 60 s에 끝나는 workload에 60 s에 찍힌 entry가 있으면 trace에 `{"event":"config_applied","t":60000000,…}`이 남아요. 숫자는 바뀌지 않아요. harness가 끝 시각이나 그 뒤의 `config_applied` line을 버리기 때문이에요. contract와 harness는 그대로 두고, 차이가 있다는 것만 알려요.
 
 ### 7.7 starvation safety net은 만들지 않아요
 
@@ -353,7 +353,7 @@ simulator가 load할 core 파일 중 가장 큰 건 `c6-dual`(187,601,795 B, 약
 recognition log(`docs/data-contracts.md` §8)는 고정된(frozen) contract라서, 바꾸려면 우리 셋의 동의와 기록이 필요해요. 같은 telemetry snapshot이 어느 날 돌려도 같은 입력이 되게 하려고 두 가지를 물어볼게요.
 
 1. recognition log에 formatted prompt(chat template을 적용한 뒤 model이 실제로 받는 text)를 남길까요?
-2. chat template이 넣는 날짜 — 예를 들어 Llama 3.1은 prompt에 "Today Date: …"를 넣어요 — 를 prompt에서 고정할까요, 아니면 log에 기록할까요? 날짜가 바뀌면 같은 snapshot이어도 model 입력이 달라져요.
+2. chat template이 넣는 날짜(예를 들어 Llama 3.1은 prompt에 "Today Date: …"를 넣어요)를 prompt에서 고정할까요, 아니면 log에 기록할까요? 날짜가 바뀌면 같은 snapshot이어도 model 입력이 달라져요.
 
 지금 contract와 `daemon/`에는 둘 다 정해진 게 없어요.
 
@@ -404,7 +404,7 @@ recognition log(`docs/data-contracts.md` §8)는 고정된(frozen) contract라�
 
 **인지오**
 
-- `2026-09-20-dataset-validity-review.md` — 측정의 안정성 요약(허용오차를 만족한 양, 예외로 실린 양, 가장 큰 불확실성 폭)을 측정 기록에서 script로 계산해, 이번 dataset rebuild를 마무리하는 measurement audit과 함께 `docs/workload/measurement-overview.md`에 실을게요.
+- `2026-09-20-dataset-validity-review.md` — 측정의 안정성 요약(허용오차를 만족한 양, 예외로 실린 양, 가장 큰 불확실성 폭)을 측정 기록에서 script로 계산해 `docs/workload/measurement-overview.md`에 실을게요. 이번 dataset rebuild를 마무리하는 measurement audit과 함께요.
 
 ## 11. licence
 
@@ -412,11 +412,11 @@ recognition log(`docs/data-contracts.md` §8)는 고정된(frozen) contract라�
 - **dataset의 data:** CC-BY-NC-SA-4.0, `dataset/LICENSE`. 대상은 `dataset/` 아래에서 code(`dataset/tools/`, `dataset/Makefile`)와 136M Keystrokes window를 뺀 모든 파일, 거기서 compile된 workload(`dataset/build/`, commit된 manifest가 pin하는 그대로), 측정 campaign의 raw record를 담은 release asset(`dataset/meas-releases.yaml`이 나열하는 것)이에요.
 - 저작권자는 둘 다 Jioh In, Kyungmin Inn, Ian Park이에요.
 - `dataset/stimulus/`의 입력 stream과 `dataset/meas/streams/`의 SWELL-KW window는 SWELL Knowledge Work dataset(Koldijk et al., 2014; DANS, CC-BY-NC-SA-4.0)에서 가져왔고, `dataset/LICENSE`가 출처를 밝혀요.
-- `dataset/meas/streams/aalto-*` window와 `aalto-windows.json`(136M Keystrokes dataset, Dhakal et al., 2018)은 licence의 대상이 아니에요: 출처의 조건(비상업적 사용, 저자 표시) 그대로 배포되고, `dataset/LICENSE`는 그것에 대한 권리를 주지 않아요.
+- `dataset/meas/streams/aalto-*` window와 `aalto-windows.json`(136M Keystrokes dataset, Dhakal et al., 2018)은 licence의 대상이 아니에요. 출처의 조건(비상업적 사용, 저자 표시) 그대로 배포되고 `dataset/LICENSE`는 그것에 대한 권리를 주지 않아요.
 
 ## 정정 (2026-10-17)
 
-같은 날 끝난 Phase 9 종료 감사(9.16)로 위 문장 둘을 고쳐요.
+Phase 9 종료 감사(9.16)가 같은 날 끝났어요. 그 결과로 위 문장 둘을 고쳐요.
 
 - **§7.2의 "`c2-p2a`의 다운로드는 쉬지 않고 돌아서 batch class예요".** 측정된 다운로드는 프로그램 전체로 보면 CPU의 74 %가 batch class지만, 26.385초 창이 EDF에서 주는 부분(약 1초)은 짧은 run이 이어지는 시작 단계라 batch class가 아니에요. 어느 쪽이든 cap은 이 다운로드에 닿지 않고, boot MLFQ가 오히려 더 줘요(3.0초 대 1.1초). frame 점수와 다운로드 progress에 대한 결론은 그대로예요(`_dev/research/jioh/task-9.16-exit-audits/compiled/report.md` §2.7; `docs/daemon/prior-table-pair-review.md`의 finding 1).
-- **§10의 인지오 항목, `2026-09-20-dataset-validity-review.md`.** 닫혔어요: 안정성 ledger가 `docs/workload/measurement-overview.md` §7에 실렸고, `dataset/tools/meas/stability_ledger.py`가 측정 기록에서 계산해요.
+- **§10의 인지오 항목, `2026-09-20-dataset-validity-review.md`.** 닫혔어요. 안정성 ledger가 `docs/workload/measurement-overview.md` §7에 실렸고 `dataset/tools/meas/stability_ledger.py`가 측정 기록에서 계산해요.
