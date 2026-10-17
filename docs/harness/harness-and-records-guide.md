@@ -576,6 +576,14 @@ t=2158   task_end     build.j1.as  reason=exit
 entity=build.j1.as, metric=turnaround, t=2158, value=158
 ```
 
+**`arrival`** — 등장 시각도 row 하나로 나와요(2026-10-17, 9.15에 추가). task마다 하나, `t`는 `T_end`, `value`는 그 task의 `task_arrive` 시각이에요.
+
+```
+entity=build.j1.as, metric=arrival, t=180000, value=2000
+```
+
+window 안에 못 끝난 task에는 `turnaround` row가 없으니, 그 task의 turnaround term은 censored bound `T_end − 등장`으로 채점돼요(15.3, metrics doc의 normalisation 절). aggregate는 그 등장 시각을 이 row에서 읽어요. `ready(cause=arrive)` row가 없는 task — 첫 명령이 `WAIT`인 task(10.3) — 에도 이 row는 있어요.
+
 `c1-compile`의 makespan(빌드 전체 시간)은 `make`(task `build`)의 `turnaround`예요. `make`는 자식 17,448개를 만들어요 — object job 2,908개, job마다 `sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm` 여섯 — 동시에 살아 있는 자식은 많아야 48개(`fork_cap`, `-j8`의 8 × 6)이고, 마지막 `FORK` 뒤에 자기 `children:build` channel에서 `WAIT`했다가 `EXIT`해요. 그 `WAIT`은 마지막 자식이 끝날 때 완료돼요 — interpretation contract에 제안된 규칙이고 RQ0 gate spec의 simulator-conformance 항목 (g)예요. reference simulator는 아직 이 `WAIT`을 깨우지 않아서, 그 전까지는 `make`가 `EXIT`에 못 가고 이 row가 안 나와요. 각 자식도 자기 row를 갖는데, 자식의 등장 시각은 trace의 `task_arrive(source=spawn)`에서 와요.
 
 ### 7.7 `preempt_count` — 강제로 끌려 내려온 횟수
@@ -641,7 +649,7 @@ editor도 hog로 세요. switch 순간에 살아 있었고, 그 뒤 첫 `run_end
 entity=schedule, metric=switch_window, t=40600, value=12500, algorithm=MLFQ, index=3, hogs=2
 ```
 
-**`boost_window` (8.10에 추가).** MLFQ로 들어간 interval 안에서 boost가 일어날 때마다(`t_apply + k × boost_interval_us`, k ≥ 1) 같은 규칙으로 창을 하나씩 더 재요: 그 순간 H를 세고, 마지막 hog가 그 순간부터 `W_single`을 받으면 닫혀요. 다음 boost나 interval의 끝에서는 guard 없이 잘라요(boost 창이 다음 boost까지 가는 건 정상이니까). row는 `switch_window`와 같은 column에 `metric`만 `boost_window`. `mock-switch`에서는 boost가 20000마다라 60600과 80600에 row가 하나씩이고, 60600의 창은 editor가 3000밖에 못 받은 채 다음 boost에서 잘려 20000, 80600의 창은 hog 하나가 끊김 없이 6000을 받아 6000이에요.
+**`boost_window` (8.10에 추가).** MLFQ로 들어간 interval 안에서 boost가 일어날 때마다 같은 규칙으로 창을 하나씩 더 재요: 그 순간 H를 세고, 마지막 hog가 그 순간부터 `W_single`을 받으면 닫혀요. boost timer는 그 interval에서 MLFQ entry가 적용될 때마다 다시 시작해요 — switch의 `t_apply`에서, 그리고 그 뒤 params나 cap만 바뀐 같은 algorithm의 entry가 적용될 때마다요(13장 가정 5번; 같은 algorithm의 entry에서 다시 시작하는 건 2026-10-17, 9.15부터). 그래서 boost 시점은 가장 최근에 적용된 entry의 적용 시각 + k × 그 entry의 `boost_interval_us`(k ≥ 1)이고, 다음 entry가 적용되기 전까지예요. 창의 `W_single`도 그 entry의 params로 계산하고, row의 `index`는 그 boost 시점이 놓인 grid의 entry예요. 다음 boost나 interval의 끝에서는 guard 없이 잘라요(boost 창이 다음 boost까지 가는 건 정상이니까). row는 `switch_window`와 같은 column에 `metric`만 `boost_window`. `mock-switch`에서는 boost가 20000마다라 60600과 80600에 row가 하나씩이고, 60600의 창은 editor가 3000밖에 못 받은 채 다음 boost에서 잘려 20000, 80600의 창은 hog 하나가 끊김 없이 6000을 받아 6000이에요.
 
 이 row들 위에서 나오는 숫자(metrics doc의 aggregate 절): switch window `[t, t + value]` 안에 있는 editor의 keystroke `ready_wait`(`cause=wake`, `channel=input`) 평균에서 같은 config interval의 어느 창에도 안 든 row의 평균을 뺀 **초과분**(switch 변형), 그리고 같은 계산을 boost window들로 한 것(boost 변형). 둘이 비슷하면 "switch는 boost 한 번 값이었다", 더 크면 이전 algorithm에서 넘어온 몫. 그리고 전체 시간 중 switch window 안에 든 비율. `mock-switch`에서는 switch 변형이 0 µs(창 안의 keystroke가 editor의 burst 중에 와서 대기 0으로 완료), boost 변형이 600 µs, 비율이 0.125예요. **score에 weight로 들어가지 않고 옆에 보고만 해요.**
 
@@ -657,11 +665,12 @@ fixture `mock-switch`(`harness/tools/tests/fixtures/mock-switch/worked.md`)가 �
 | `demand` | 원래 필요한 시간 | task | task당 1 | — | RUN 총합 |
 | `completed` | 끝났나 | task | task당 1 | `task_end(exit)` 유무 | `T_end` |
 | `turnaround` | 등장부터 퇴장까지 | task | completed일 때 1 | `task_arrive` → `task_end(exit)` | — |
+| `arrival` | 등장 시각 | task | task당 1 | `task_arrive`의 시각 | `T_end` |
 | `preempt_count` | 끌려온 횟수 | task | task당 1 | `run_end(preempt)` 개수 | — |
 | `busy` | 의자가 찬 시간 합 | `lane` | trace당 1 | 모든 run interval | `T_end` |
 | `config_interval` | 설정 유지 시간 | `schedule` | `config_applied`마다 | `config_applied` → 다음 것 | `T_end` |
 | `switch_window` | algorithm 전환 뒤 재학습 구간 | `schedule` | algorithm이 바뀌는 `config_applied`마다 | `config_applied`, 각 task의 첫 `run_end`, hog의 occupancy | config schedule의 params (`index`로) |
-| `boost_window` | switch로 들어간 MLFQ 안의 boost 뒤 재학습 구간 | `schedule` | 그 interval 안의 boost 시점마다 | boost grid, 각 task의 첫 `run_end`, hog의 occupancy | config schedule의 `boost_interval_us`와 params |
+| `boost_window` | switch로 들어간 MLFQ 안의 boost 뒤 재학습 구간 | `schedule` | 그 interval 안의 boost 시점마다 | 그 interval의 MLFQ entry가 적용될 때마다 다시 시작하는 boost grid, 각 task의 첫 `run_end`, hog의 occupancy | config schedule의 `boost_interval_us`와 params (`index`로) |
 
 ---
 
@@ -776,7 +785,7 @@ Phase 5의 sub-task 5.1에서 실제로 하게 될 일이에요. 여기서는 �
 
 ### 10.2 config schedule (이 trace를 만든 조건)
 
-condition `llm_vocab`, prior table. boot 설정이 0에, recognizer의 답이 40000 + latency 450 = 40450에 적용돼요. algorithm은 그대로 MLFQ이고 cap만 바뀌는 entry라서 찍힌 시각에 바로 적용되고(drain 없음), hog의 queue level과 받은 slice는 그대로예요. algorithm이 바뀌는 entry만 지금 도는 task의 slice가 끝난 뒤 적용돼요(2026-09-08 memo, 7절).
+condition `llm_vocab`, prior table. boot 설정이 0에, recognizer의 답이 40000 + latency 450 = 40450에 적용돼요. algorithm은 그대로 MLFQ이고 cap만 바뀌는 entry라서 찍힌 시각에 바로 적용되고(drain 없음, 앞에서 drain 중인 switch도 없음), hog의 queue level과 받은 slice는 그대로예요. MLFQ의 boost timer는 이 시각에서 다시 시작해요(13장 가정 5번). algorithm이 바뀌는 entry는, FIFO에서 나가는 것이 아니면, task가 의자에 앉아 있을 때 의자가 빌 때까지 기다렸다가 적용돼요(drain; data-contracts 문서의 config schedule 절, 13장 가정 6번).
 
 ### 10.3 trace
 
@@ -786,9 +795,6 @@ scheduler는 아무 legal한 것이어도 돼요. 이 mock은 MLFQ(queue 3개, s
 {"event":"meta","workload_id":"mock-c2-p1a","condition":"llm_vocab","sim":"mock@0","schedule_entries":2}
 {"event":"config_applied","t":0,"index":0,"algorithm":"MLFQ","provenance":"fallback"}
 {"event":"task_arrive","t":0,"task":"editor","source":"file"}
-{"event":"ready","t":0,"task":"editor","cause":"arrive"}
-{"event":"run_start","t":0,"task":"editor"}
-{"event":"run_end","t":0,"task":"editor","reason":"block","blocked_on":"wait"}
 {"event":"ready","t":10000,"task":"editor","cause":"wake"}
 {"event":"run_start","t":10000,"task":"editor"}
 {"event":"run_end","t":13000,"task":"editor","reason":"block","blocked_on":"wait"}
@@ -813,7 +819,7 @@ scheduler는 아무 legal한 것이어도 돼요. 이 mock은 MLFQ(queue 3개, s
 
 | 시각 | 일어난 일 |
 |---|---|
-| 0 | boot 설정 적용. editor 등장, 앉자마자 첫 명령이 `WAIT`라 바로 일어남(길이 0짜리 occupancy) |
+| 0 | boot 설정 적용. editor 등장. 첫 명령이 `WAIT`라 등장하는 step에서 바로 block — `ready` line도, 의자에 앉는 일도 없음 |
 | 10000 | keystroke 1. 의자가 비어 있어 바로 앉음. 3000 일함 — Q0 slice 2000을 다 써서 12000에 Q1로 내려감. 13000에 block, Q1에 머묾 |
 | 22000 | keystroke 2. 바로 앉음. 4000 일함 — Q1 slice 4000을 26000에 다 쓰고 Q2로. block |
 | 40000 | hog 등장, Q0에 바로 앉음. 80000짜리 일 시작 |
@@ -825,17 +831,16 @@ scheduler는 아무 legal한 것이어도 돼요. 이 mock은 MLFQ(queue 3개, s
 | 100000 | `T_end`. editor 퇴장(`depart`). hog는 아직 앉아 있음 |
 | 122000 | hog 일 끝남(`exit`). window 밖 |
 
-시각 0의 "길이 0짜리 occupancy"는 이 mock이 정한 거예요. task가 등장하면 runnable이 되고, 의자에 앉아 첫 명령 `WAIT`를 실행하니 즉시 block. 지금의 reference simulator는 이걸 다르게 해요: 등장하는 step에서 task의 앞쪽 명령을 실행하니, 첫 `WAIT`에서 바로 block되고 `ready(arrive)`도 occupancy도 없어요(`on_arrive`). 어느 쪽으로 할지는 인경민의 결정이고, 결정이 나면 mock을 그에 맞춰 바꿔요. mock이 어떤 가정을 갖고 있는지는 metrics doc 한 곳에 목록으로 적어둬요.
+시각 0의 editor처럼 첫 명령이 `WAIT`인 task는 등장하는 step에서 앞쪽 명령을 의자 없이 실행하다가 그 `WAIT`에서 block돼요(그 channel에 미리 와 있는 wake가 없으면요). 그래서 trace에는 `task_arrive`만 있고 `ready(arrive)`도 `run_start`도 occupancy도 없어요. reference simulator가 이렇게 하고(`on_arrive`; `FORK`로 만든 자식은 `spawn`에서 같은 일), harness의 mock도 2026-10-17부터 그대로 따라요(metrics doc의 simulator 가정 5번). 그 task의 첫 `ready` line은 그 `WAIT`을 완료하는 wake예요 — 여기서는 10000의 keystroke. mock이 어떤 가정을 갖고 있는지는 metrics doc 한 곳에 목록으로 적어둬요.
 
 ### 10.4 records 계산
 
 identity column은 모든 row가 같아요. `workload_id=mock-c2-p1a`, `condition=llm_vocab`, `table=prior`, `seed=` (빈칸), `boot_default=` (빈칸, primary), `telemetry=focus`, `sim=mock@0`, `source_sha256=` (trace 파일의 sha256). 아래에서는 observation과 attribute만 써요.
 
-**`ready_wait`** — `ready` line 5개 → row 5개. wake row는 완료한 `WAIT`의 channel 종류를 실어요(모두 `input`).
+**`ready_wait`** — `ready` line 4개 → row 4개. editor는 등장할 때 `ready` line이 없으니 `cause=arrive` row도 없어요(10.3). wake row는 완료한 `WAIT`의 channel 종류를 실어요(모두 `input`).
 
 | ready line | 다음 run_start | value | row |
 |---|---|---|---|
-| t=0 editor arrive | 0 | 0 | `editor, ready_wait, 0, 0, cause=arrive` |
 | t=10000 editor wake | 10000 | 0 | `editor, ready_wait, 10000, 0, cause=wake, channel=input` |
 | t=22000 editor wake | 22000 | 0 | `editor, ready_wait, 22000, 0, cause=wake, channel=input` |
 | t=40000 hog arrive | 40000 | 0 | `hog, ready_wait, 40000, 0, cause=arrive` |
@@ -846,12 +851,14 @@ identity column은 모든 row가 같아요. `workload_id=mock-c2-p1a`, `conditio
 **task lifetime** — task마다.
 
 editor:
-- occupancy: [0,0], [10000,13000], [22000,26000], [46000,48000] → `cpu_delivered` = 0 + 3000 + 4000 + 2000 = 9000
+- `arrival` = 0 (`task_arrive`의 시각)
+- occupancy: [10000,13000], [22000,26000], [46000,48000] → `cpu_delivered` = 3000 + 4000 + 2000 = 9000
 - `task_end`가 `depart`라서 `completed` = 0, `turnaround` 없음
 - `demand` = 9000
 - `preempt_count` = 0
 
 hog:
+- `arrival` = 40000
 - occupancy: [40000,46000], [48000, 열림) → `T_end`에서 clip: [48000,100000] → `cpu_delivered` = 6000 + 52000 = 58000
 - `task_end(exit)`은 122000, window 밖 → `completed` = 0, `turnaround` 없음
 - `demand` = 80000
@@ -859,16 +866,18 @@ hog:
 
 | row |
 |---|
+| `editor, arrival, 100000, 0` |
 | `editor, cpu_delivered, 100000, 9000` |
 | `editor, completed, 100000, 0` |
 | `editor, demand, 100000, 9000` |
 | `editor, preempt_count, 100000, 0` |
+| `hog, arrival, 100000, 40000` |
 | `hog, cpu_delivered, 100000, 58000` |
 | `hog, completed, 100000, 0` |
 | `hog, demand, 100000, 80000` |
 | `hog, preempt_count, 100000, 1` |
 
-task 전체에 대한 값의 `t`는 `T_end`로 적었어요. `completed=1`이면 `t`는 `task_end`의 시각이에요. 이 anchor 규칙은 5.1에서 확정됐어요: window 전체에 대한 값(`cpu_delivered`, `demand`, `preempt_count`, `busy`, 그리고 0인 `completed`)은 `T_end`, `completed=1`과 `turnaround`는 `task_end`의 시각.
+task 전체에 대한 값의 `t`는 `T_end`로 적었어요. `completed=1`이면 `t`는 `task_end`의 시각이에요. 이 anchor 규칙은 5.1에서 확정됐어요: window 전체에 대한 값(`arrival`, `cpu_delivered`, `demand`, `preempt_count`, `busy`, 그리고 0인 `completed`)은 `T_end`, `completed=1`과 `turnaround`는 `task_end`의 시각. `arrival`은 2026-10-17(9.15)에 같은 자리로 더해졌어요(7.6).
 
 **`config_interval`** — `config_applied` 2개 → row 2개.
 
@@ -887,15 +896,16 @@ task 전체에 대한 값의 `t`는 `T_end`로 적었어요. `completed=1`이면
 
 ```
 workload_id,condition,table,seed,boot_default,telemetry,sim,source_sha256,entity,metric,t,value,cause,channel,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss,skipped
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,ready_wait,0,0,arrive,,,,,,,,,,,,
 mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,ready_wait,10000,0,wake,input,,,,,,,,,,,
 mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,ready_wait,22000,0,wake,input,,,,,,,,,,,
 mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,ready_wait,40000,0,arrive,,,,,,,,,,,,
 mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,ready_wait,45000,1000,wake,input,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,arrival,100000,0,,,,,,,,,,,,,
 mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,cpu_delivered,100000,9000,,,,,,,,,,,,,
 mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,completed,100000,0,,,,,,,,,,,,,
 mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,demand,100000,9000,,,,,,,,,,,,,
 mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,preempt_count,100000,0,,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,arrival,100000,40000,,,,,,,,,,,,,
 mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,cpu_delivered,100000,58000,,,,,,,,,,,,,
 mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,completed,100000,0,,,,,,,,,,,,,
 mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,demand,100000,80000,,,,,,,,,,,,,
@@ -905,7 +915,7 @@ mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,schedule,config_interval,40450,
 mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,lane,busy,100000,67000,,,,,,,,,,,,,
 ```
 
-row의 순서는 정해져 있어요: `entity`, `metric`, `t`(숫자), `cause`, `channel` 순. 위 표는 계산 순서대로 적은 것이라 정렬 전이에요. `<sha>` 자리에는 실제 fixture에서 trace 파일의 sha256이 그대로 들어가고, 나머지 attribute column(recognizer row의 것, `hogs`, `job`의 `period_us`와 `skipped`)은 여기서 전부 빈칸이에요. 이 trace와 run file을 harness의 `records.build`에 넣으면 정렬된 같은 16개 row가 나와요.
+row의 순서는 정해져 있어요: `entity`, `metric`, `t`(숫자), `cause`, `channel` 순. 위 표는 계산 순서대로 적은 것이라 정렬 전이에요. `<sha>` 자리에는 실제 fixture에서 trace 파일의 sha256이 그대로 들어가고, 나머지 attribute column(recognizer row의 것, `hogs`, `job`의 `period_us`와 `skipped`)은 여기서 전부 빈칸이에요. 이 trace와 run file을 harness의 `records.build`에 넣으면 정렬된 같은 17개 row가 나와요.
 
 ### 10.6 이 records에서 읽히는 것
 
@@ -932,15 +942,15 @@ fixture `mock-media`(`harness/tools/tests/fixtures/mock-media/`)는 `c1-media`�
 | `music` | `spotify` | 0 | 95000 | `LOOP { TIMER(50000) → RUN(2500) }` |
 | `scan` | `clamscan` | 20000 | — | `RUN(46666) → EXIT` |
 
-scheduler는 FIFO(block할 때까지 돌고 preempt 없음)예요. oracle의 답이 boot 설정 옆에 0으로 찍혀서 FIFO가 돼요. `T_end` = 95000. `video`의 tick은 0, 16667, 33334, 50001, 66668, 83335(100002는 `T_end` 뒤).
+scheduler는 FIFO(block할 때까지 돌고 preempt 없음)예요. oracle의 답이 boot 설정 옆에 0으로 찍혀서 FIFO가 돼요. `T_end` = 95000. 두 player 모두 등장하는 step에서 첫 TIMER를 실행하니 grid는 0에서 시작해요(7.2). `video`의 tick은 0, 16667, 33334, 50001, 66668, 83335(100002는 `T_end` 뒤), `music`의 tick은 0, 50000(100000은 `T_end` 뒤).
 
 ### 11.1 trace (video 부분)
 
 ```jsonl
 {"event":"task_arrive","t":0,"task":"video","source":"file"}
 {"event":"ready","t":0,"task":"video","cause":"arrive"}
-{"event":"run_start","t":0,"task":"video"}
 {"event":"ready","t":0,"task":"video","cause":"timer_tick"}
+{"event":"run_start","t":0,"task":"video"}
 {"event":"run_end","t":6667,"task":"video","reason":"block","blocked_on":"timer"}
 {"event":"deadline","t":6667,"task":"video","due":16667,"met":true,"slack_us":10000}
 {"event":"ready","t":16667,"task":"video","cause":"timer_tick"}
@@ -963,7 +973,7 @@ scheduler는 FIFO(block할 때까지 돌고 preempt 없음)예요. oracle의 답
 
 무슨 일이 일어났나:
 
-- 0: `video`가 먼저 앉아(file 순서) TIMER를 실행해요. tick 0이 지금이라 block 없이 완료되고, `ready(timer_tick)`가 자기 occupancy 안에 찍혀요. frame 0을 그리고 6667에 다음 TIMER에서 block.
+- 0: `video`와 `music`이 등장하고(file 순서), 각자 등장하는 step에서 의자 없이 첫 명령 TIMER를 실행해요. tick 0이 지금이라 block 없이 완료되고, `ready(arrive)`와 `ready(timer_tick)`가 첫 `run_start` 앞에 찍혀요. `video`가 먼저 앉아 frame 0을 그리고 6667에 다음 TIMER에서 block. `music`은 6667에 처음 앉아요.
 - 16667: tick 1. 바로 앉아서 frame 1, 23334에 끝.
 - 20000에 `scan`이 와서 줄 서고, 23334에 `video`가 block하자 앉아요. FIFO라 끝날 때(70000)까지 안 내려와요.
 - 33334: tick 2. `video`가 runnable해졌지만 의자에 `scan`.
@@ -971,7 +981,7 @@ scheduler는 FIFO(block할 때까지 돌고 preempt 없음)예요. oracle의 답
 - 70000: `scan` 종료. `video`가 앉아 frame 2를 그리고 76667에 끝내요. 마감(50001)을 한참 넘긴 miss.
 - 76667: `video`가 다음 TIMER에 도달. tick 3(50001)과 tick 4(66668)는 지났고 tick 5(83335)는 아직이에요. skip 규칙: 가장 최근에 지난 **tick 4를 바로 소비**하고(`ready(timer_tick)`가 76667에, 자기 occupancy 안에) **tick 3은 건너뛰어요** — 그 tick의 일은 아예 안 해요. simulator는 tick 순서대로 `deadline` line을 써요: job 2의 것(miss), 건너뛴 tick 3의 것(`met: false`, 완료가 없으니 harness는 slack 말고 `met`만 읽어요).
 - tick 4의 job(frame 4)은 76667에 시작해서 83334에 끝나요. 마감은 다음 tick인 83335라 1 µs 차로 met. 83334에 TIMER에 도달하면 tick 5까지 1 µs가 남아 진짜로 block해요.
-- 83334에 `music`이 앉고(56667부터 줄 서 있었어요), 83335의 tick 5에 `video`가 runnable해져도 FIFO라 85834까지 기다렸다가 frame 5를 그려요(92501, met).
+- 83334에 `music`이 앉고(tick 1의 50000부터 줄 서 있었어요), 83335의 tick 5에 `video`가 runnable해져도 FIFO라 85834까지 기다렸다가 frame 5를 그려요(92501, met).
 
 **`ready` line이 즉시 완료된 TIMER에서 나오지 않았다면** 76667의 line이 없어요. 그러면 70000부터 83334까지는 `run_start` 하나, `run_end` 하나뿐인 13334 µs짜리 occupancy 하나이고, frame 2와 frame 4의 경계가 trace에 안 보여요. harness는 그 trace를 "frame 2가 83334에 끝났고 tick 3과 4를 둘 다 건너뛰었다"로 읽게 돼요 — miss가 하나 늘고, `deadline` 교차검사가 두 군데서 어긋나요. 정확히 늦은 frame들에서만 생기는 일이에요. 그래서 이 규칙을 인경민에게 요청했어요(metrics doc의 simulator 가정 1번). reference simulator는 아직 이 zero-wait line을 안 내요 — RQ0 gate spec의 simulator-conformance 항목 (a)로 owed예요 — 그리고 harness의 skip 읽기는 그 line에 기대고 있어요.
 
@@ -982,7 +992,7 @@ scheduler는 FIFO(block할 때까지 돌고 preempt 없음)예요. oracle의 답
 | ready | 짝 | value | 비고 |
 |---|---|---|---|
 | 0 `arrive` | `run_start` 0 | 0 | |
-| 0 `timer_tick` | occupancy [0, 6667] 안 | 0 | tick 0을 등장하자마자 소비 |
+| 0 `timer_tick` | `run_start` 0 | 0 | tick 0을 등장하는 step에서 소비 |
 | 16667 `timer_tick` | `run_start` 16667 | 0 | |
 | 33334 `timer_tick` | `run_start` 70000 | 36666 | 진짜 기다림 |
 | 76667 `timer_tick` | occupancy [70000, 83334] 안 | 0 | tick 4를 바로 소비 |
@@ -1014,7 +1024,7 @@ video, job, 83335, 9166,  period_us=16667, skipped=0
 
 **guard:** 소비된 tick 다섯 = iteration 끝 다섯이라 chain guard가 통과해요. 소비가 tick 번호를 앞으로 못 밀면 그것도 guard예요. `deadline` line 여섯은 tick 순서로 row와 짝지어지고, 소비된 tick의 line은 완료 시각과 slack이 row와 같아야 하고, 건너뛴 tick의 line은 `met: false`이기만 하면 돼요.
 
-**`music`.** fixture의 `music`은 0에 왔지만 의자에 `video`가 있어서 6667에 처음 앉고, fixture는 그 첫 dispatch에서 첫 TIMER를 실행한 것으로 grid를 6667, 56667에 놓았어요(job 0: 6667 → 9167, job 1: 56667 → 85834, 둘 다 met). 이건 이 fixture가 2026-10-09에 다시 유도될 때의 읽기예요. 2026-10-16에 정한 읽기로는 첫 TIMER가 등장하는 순간에 실행되니 `t₀`는 등장 시각(0)이고(metrics doc의 simulator 가정 4번), 그 읽기로는 `music`의 grid가 0과 50000이에요. fixture의 `music` 부분은 아직 예전 읽기 그대로예요.
+**`music`.** `music`도 등장하는 step에서 첫 TIMER를 실행하니 `t₀`는 등장 시각 0이고 grid는 0과 50000이에요(metrics doc의 simulator 가정 4번). 의자에 `video`가 있어서 6667에 처음 앉아 job 0을 9167에 끝내고(0 → 9167), job 1은 `scan`과 `video` 뒤에서 83334에 앉아 85834에 끝내요(50000 → 85834, value 35834). 마감은 각각 50000과 100000이라 둘 다 met이에요. tick 0의 `ready(timer_tick)`는 등장하는 순간, 자기 occupancy 밖에 찍히니 다음 `run_start`(6667)와 짝지어져 `ready_wait`가 6667이에요. fixture는 2026-10-17에 이 읽기로 다시 유도됐어요.
 
 ---
 
@@ -1090,9 +1100,9 @@ mock trace는 어떤 simulator 동작을 전제하고 쓰여요. 그 전제가 m
 | 2 | wake는 깊이를 갖고 큐에 쌓임. stage 6이 stage 7을 두 번 깨우면 stage 7은 나중에 `WAIT` 두 개를 완료 | chain 중간에서 frame이 빠지고 그 뒤 모든 tick/iteration 짝이 어긋남 (12장) |
 | 3 | 같은 µs에 일어난 event의 순서가 문서화된 deterministic 규칙을 따름 | mock과 실제 trace를 byte 비교할 수 없음 |
 | 4 | `deadline` line은 contract대로 계속 emit | cross-check를 잃음 |
-| 5 | MLFQ로 switch된 뒤 boost timer는 `t_apply`에서 다시 시작 (인경민 확인, 2026-09-09) | 7.10의 boost 변형이 보는 시점들이 달라짐 |
-| 6 | FIFO에서 나가는 switch는 즉시 적용, 다른 algorithm에서 나갈 때는 slice 경계에서 (memo의 규칙 (a), 인경민 확인, 2026-09-09) | `mock-switch`의 적용 시각이 달라짐 |
-| 7 | 같은 algorithm의 entry(params나 cap만 바뀜)는 찍힌 시각에 바로 적용, queue level 유지 (인경민 확인, 2026-09-09) | `mock-p1a`와 10장의 적용 시각이 달라짐 |
+| 5 | boost timer는 MLFQ entry가 적용될 때마다 그 적용 시각에서 다시 시작: MLFQ로의 switch의 `t_apply`(인경민 확인, 2026-09-09)와 그 뒤 같은 algorithm의 entry 각각(reference simulator가 entry를 적용할 때마다 boost를 새로 걸어요; 2026-10-17 결정) | 7.10의 boost 변형이 보는 시점들이 달라짐 |
+| 6 | FIFO에서 나가는 switch는 즉시 적용(지금 앉아 있는 task는 새 algorithm이 막 dispatch한 것으로 침), 다른 algorithm에서 나가는 switch는 task가 의자에 있으면 의자가 빌 때 적용 — 그 task의 slice나 지금의 `RUN`이 끝나거나, preempt되거나 depart할 때(drain). 의자가 비어 있으면 찍힌 시각에 (memo의 규칙 (a), 인경민 확인, 2026-09-09; drain의 시점은 data-contracts 문서의 config schedule 절, 2026-10-17) | `mock-switch`의 적용 시각이 달라짐 |
+| 7 | 같은 algorithm의 entry(params나 cap만 바뀜)는 switch가 아니라 찍힌 시각에 바로 적용, queue level 유지 (인경민 확인, 2026-09-09). 단 entry는 index 순서로 적용돼서, switch가 drain 중일 때 찍힌 entry는 같은 algorithm의 것이어도 그 switch 뒤에서 기다렸다가 같은 순간 그 다음에 적용 (2026-10-17 결정; reference simulator는 2026-10-10부터 그렇게 해요). MLFQ면 boost timer가 그 적용 시각에서 다시 시작(5번) | `mock-p1a`와 10장의 적용 시각이 달라짐 |
 
 그리고 조언 하나: `T_end` 뒤는 harness가 안 읽으니 거기서 멈춰도 돼요. 이건 contract가 아니에요.
 
@@ -1329,9 +1339,9 @@ simulator: --workload W.json --schedule S.json --out-trace TRACE.jsonl
 
 **mock daemon**은 `fixed`·`oracle`·`random`에 대해 **충실**해요. workload에서 visible projection(daemon이 실제로 보게 될 것: task마다 process 이름, `declared_class`, focus 구간)을 뽑고, 여섯 가지 telemetry 규칙으로 query point를 찾고(여섯 번째가 focus를 가진 process의 이름도 집합에 넣는 규칙이라 focus 이동도 query point예요), `oracle`이면 ground truth를, `random`이면 seed된 균등 draw로 table의 row 하나를, `fixed`면 아무것도 답하지 않고, contract에 맞는 schedule과 log를 써요. validator가 없어서 `unmodified`만 내고, `held`·`clamped`·LLM 경로는 없어요. oracle의 답이 정의되지 않는 곳(ambiguous segment, terminal snapshot)에서는 query가 `fallback`을 달고 schedule entry가 boot default를 반복해요 — `c6-dual`의 fallback 100%가 여기서 나와요.
 
-**mock simulator**는 두 가지예요. **generator**는 어떤 workload와 schedule에도 contract에 맞는 trace를 내지만, **scheduling을 전혀 모델하지 않아요**: 자극이 올 때마다 그 task가 ready가 되고 정확히 1 µs 돌고 끝나요. 그래서 core set 51개 파일 전부가 pipeline을 통과하지만, `fixed`·`oracle`·`random`의 점수가 같고, 모든 judging 파일이 no headroom으로 나와요. 이건 queue를 모델하지 않는 simulator의 **정상 결과**이지 결함이 아니에요. **replay**는 손으로 쓴 fixture trace를 그대로 복사해요 — 10–12장에서 손으로 계산한 값이 runner의 같은 경로로 흘러가게 하려고요.
+**mock simulator**는 두 가지예요. **generator**는 어떤 workload와 schedule에도 contract에 맞는 trace를 내지만, **scheduling을 전혀 모델하지 않아요**: 자극이 올 때마다 그 task가 ready가 되고 정확히 1 µs 돌고 끝나요. 첫 명령이 `WAIT`인 task(`LOOP`으로 시작하면 그 몸통의 첫 명령; `FORK`로 만든 자식 포함)는 예외예요. 그 `WAIT`에 쓸 wake가 등장 전에 와 있지 않으면 reference simulator처럼 등장하는 step에서 block되니(10.3), 등장은 자극이 아니고 `ready` line도 run도 없어요. 처음 도는 건 그 `WAIT`을 완료하는 wake에서예요. generator는 pinned wake와 tick과 chain stage 사이의 wake만 자극으로 내고 다른 task의 `WAKE` 명령은 모델하지 않아서, 형제의 `WAKE`로만 깨워지는 task(`c1-compile`의 job member 같은)는 mock에서 한 번도 돌지 않고 끝나지도 않아요. 그래서 core set 51개 파일 전부가 pipeline을 통과하지만, `fixed`·`oracle`·`random`의 점수가 같고, 모든 judging 파일이 no headroom으로 나와요. 이건 queue를 모델하지 않는 simulator의 **정상 결과**이지 결함이 아니에요. **replay**는 손으로 쓴 fixture trace를 그대로 복사해요 — 10–12장에서 손으로 계산한 값이 runner의 같은 경로로 흘러가게 하려고요.
 
-두 mock이 있어서 harness의 위쪽 절반 전체가 실제 프로그램 없이 test돼요. 전체 smoke(`make -C harness smoke`: scoring spec에 entry가 있는 core 파일 49개 전부를 mock으로)는 다시 지은 dataset 위에서 집 기계로 약 4시간 50분이 걸려서 요청할 때만 돌아요(`.github/workflows/harness-smoke.yml`). 대신 push마다 CI의 `make test`가 같은 smoke 경로를 파일 한 개에서 세 개까지로 돌려요(`harness/tools/tests/test_runner.py`). smoke의 판정은 만들 때부터 `invalid`예요 — smoke spec에는 guard 예외가 없어서 `c6-dual`의 `oracle` run이 fallback만으로 돌아 provenance guard에 걸리니까요. smoke는 판정이 아니라 배관을 확인해요. 인경민의 simulator와 박이안의 daemon이 오면 runner의 machine 설정(명령 prefix와 version 문자열)만 바뀌고 나머지는 그대로예요.
+두 mock이 있어서 harness의 위쪽 절반 전체가 실제 프로그램 없이 test돼요. 전체 smoke(`make -C harness smoke`: scoring spec에 entry가 있는 core 파일 49개 전부를 mock으로)는 다시 지은 dataset 위에서 집 기계로 약 4시간 50분이 걸려서 요청할 때만 돌아요(`.github/workflows/harness-smoke.yml`). 대신 push마다 CI의 `make test`가 같은 smoke 경로를 파일 한 개에서 세 개까지로 돌려요(`harness/tools/tests/test_runner.py`). smoke의 판정은 만들 때부터 `invalid`예요 — smoke spec에는 guard 예외가 없어서 `c6-dual`의 `oracle` run이 fallback만으로 돌아 provenance guard에 걸리니까요. smoke는 판정이 아니라 배관을 확인해요. 인경민의 simulator와 박이안의 daemon이 오면 runner의 machine 설정(명령 prefix와 version 문자열)만 바뀌고 나머지는 그대로예요 — 두 프로그램이 invocation contract대로 실행되면요. simulator 쪽은 그게 RQ0 gate spec의 simulator-conformance 항목 (h)예요(19.1). 지금의 reference simulator는 workload와 config schedule을 위치 인자로 받고 trace를 stdout에 써요.
 
 ---
 
@@ -1342,7 +1352,7 @@ Phase 8 전체를 관통하는 원칙 하나: **evaluator가 적용하는 판단
 ### 19.1 spec에 무엇이 있나
 
 - **generic part** — 어떤 실험에나 필요한 것: condition 목록, telemetry 모양 목록(RQ0는 `focus` 하나), seed 수 N, boot default(primary와 alternatives), judging 파일·reporting 파일·sensitivity line이 읽는 variant 파일(그리고 generated set에서 축으로 고른 파일, 15.5), `pre_committed_miss`에서 **유도된** Layer-1 exclusion(lint가 실제 annotation과 맞는지 확인해요 — 손으로 고를 수 없어요), guard 예외(이유 필수), typed reporting line, 그리고 **pin** — scoring spec·guard spec(version 1.1)·driver table·dataset manifest·variants manifest의 SHA-256(generated 파일을 고르는 spec이면 그 manifest마다 하나 더).
-- **statements** — 숫자의 근거를 적은 글. evaluator가 보고서에 그대로 옮겨 적어요. RQ0 gate spec에는 열다섯 개가 있어요: 판정 set의 규칙, idle class 파일 여섯이 보고만 하는 이유, executor 가정(인경민의 2026-10-01 simulator 상태 memo와 9.11 결정 위에 둔 committed assumption. 그중 두 가지에 대한 인경민의 정식 답은 2026-10-08 memo로 요청), simulator conformance(RQ0 run 전에 simulator가 hand fixture에서 보여야 할 일곱 항목 (a)–(g)), g·K·N의 근거, random condition의 정의, prior table의 중복 구조, boot-default sweep의 설계, sensitivity line들, 다시 측정할 조건, Layer-1 구간의 caveat, 실패 절차, held-out-rows 사전등록.
+- **statements** — 숫자의 근거를 적은 글. evaluator가 보고서에 그대로 옮겨 적어요. RQ0 gate spec에는 열다섯 개가 있어요: 판정 set의 규칙, idle class 파일 여섯이 보고만 하는 이유, executor 가정(인경민의 2026-10-01 simulator 상태 memo와 9.11 결정 위에 둔 committed assumption. 그중 두 가지에 대한 인경민의 정식 답은 2026-10-08 memo로 요청), simulator conformance(RQ0 run 전에 simulator가 hand fixture에서 보여야 할 여덟 항목 (a)–(h). (h)는 2026-10-17에 더해진 것으로, simulator가 runner가 부르는 대로 invocation contract에 따라 실행되는 것 — workload와 config schedule을 `--workload`·`--schedule`로, trace 경로를 `--out-trace`로 받고 trace를 그 파일에 쓰는 것(18장)), g·K·N의 근거, random condition의 정의, prior table의 중복 구조, boot-default sweep의 설계, sensitivity line들, 다시 측정할 조건, Layer-1 구간의 caveat, 실패 절차, held-out-rows 사전등록.
 - **criterion** — 실험별 판정 규칙. RQ0는 `k_of_n_gap`: judging 파일 19개 중 **K = 10개 이상**이 gap **g = 0.5 이상**이면 pass.
 
 ### 19.2 gap 하나 손으로
