@@ -64,7 +64,14 @@ prior table에 들어간 값이에요. 채점 비중은 `harness/scoring/scoring
   - indexing의 1.0은 scoring spec이 직접 stated assumption이라고 적어 둔 값이에요.
 - prior table은 이론으로 채운 출발점이에요. calibrated table은 configuration search로 값을 맞춰요.
 
-## 3. 인경민에게
+## 3. cap 값에 대한 우려
+
+- cap의 범위, 최저치, 행마다 값은 근거가 design이에요. 출처가 있는 건 batch class 규칙(OSTEP 8장, Liu & Layland 1973)과 이런 장치가 존재한다는 사실(`linux-sched-bwc`)까지예요.
+- 모든 condition이 같은 driver table을 쓰기 때문에 cap 값이 condition 사이의 비교를 한쪽으로 기울이지는 않아요. 하지만 `random`과 `oracle` 사이 차이의 크기는 cap 값에 따라 달라져요.
+- 그 영향이 한곳에 몰려 있어요. RQ0 판정용 file 중 9개가 MLFQ에 cap 0.05인 행으로 가요(RQ0 gate spec의 `prior-table-structure`). 최저치 0.05 하나가 판정의 큰 몫을 차지하는 셈이에요.
+- 대응: RQ0 gate spec에 cap band line을 넣어요. g band line처럼 다른 cap 값 아래에서의 판정 수를 primary 옆에 찍는 방식이고, 쓸 값은 RQ0 run 전에 spec에서 고정해요(인지오, Phase 10). 행마다 값을 측정으로 맞추는 건 configuration search로 만드는 calibrated table의 몫이에요.
+
+## 4. 인경민에게
 
 - 새 요청은 없어요. 남은 일은 conformance item (d), executor가 cap을 batch class에 work-conserving 상한으로 적용하는 것이에요. 상한을 재는 window는 설계에 맡기고, 정한 window를 simulator 문서에 적어 주세요. harness는 결과만 읽어요.
 - B1·B2는 simulator에 있는 그대로 적었어요. declared idle 규칙은 conformance item (e)로 따로 열려 있어요(declared-class memo). 다른 점이 있으면 알려 주세요.
