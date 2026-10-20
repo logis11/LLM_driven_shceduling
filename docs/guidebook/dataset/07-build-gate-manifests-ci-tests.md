@@ -1,6 +1,6 @@
 # 7권 · Build gate, manifest, CI, tests: 같은 바이트를 보장하는 장치
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-17
+> Status: draft · Created 2026-10-14 · Updated 2026-10-20
 
 **아무도 commit하지 않는 `build/`가 어떻게 모두에게 같은 파일임이 보장되고, 무엇이 그것을 지키나.**
 
@@ -647,7 +647,7 @@ RQ0 gate spec의 dataset과 variants pin이 지금까지 어떻게 움직였는�
 
 이 기간에 scoring spec pin은 `5d8a3243…`(9.14) → `1f7e9e30…`(9.18, 주석만) → `9cd9a155…`(9.20) → `0ff71b1f…`(9.21, 머리글의 규칙 문장) → `2ad757b6…`(9.23 D10, 머리글 문장) → `f7d1df4c…`(9.16, `c2-p3b`의 backup을 turnaround로 채점하는 term과 `c7-meeting`의 이유 문장)으로 움직였습니다. guard spec은 9.14의 1.1(`24ccb875…`)에서 9.16의 1.2(`c2dad06f…`, `tick_count`의 chain 검사를 window 규칙으로)가 되었습니다. driver table은 9.14의 `6e271dd0…`에서 9.15의 2026-10-16 re-pin으로 `0fba4b3c…`가 되었고(compile row의 LOTTERY 설명 문장, 값은 그대로), 9.16에서 `e1155a72…`가 되었습니다(문장만, 값은 그대로).
 
-generated manifest의 hash도 같은 방식으로 기록되어 있습니다(각 sub-task changelog와 `harness/CHANGELOG.md`). 어떤 실험도 이것을 pin하지 않지만, 9.16(최종 audit)이 이 값들을 재현 대상으로 받습니다.
+generated manifest의 hash도 같은 방식으로 기록되어 있습니다(각 sub-task changelog와 `harness/CHANGELOG.md`). 어떤 실험도 이것을 pin하지 않습니다. sub-task마다의 이 값들은 9.16(최종 audit)의 TODO 줄에 재현 대상으로 넘겨졌고, 9.16은 중간 pin을 이름 짓는 이 항목들을 집에서 한 번 돌린 dataset gate와 최종 build의 CI run으로 닫았습니다. 각 중간 pin은 최종 상태의 pin으로 대체되었습니다(9.16 spec decision 3; 9.16 기록 `_dev/research/jioh/task-9.16-exit-audits/handed/checks.md`의 마지막 표).
 
 | set | 9.19 (2026-10-11) | 9.20 (2026-10-12) | 9.21 (2026-10-13) | 9.23 D10 (2026-10-14) | 9.23 D17 (2026-10-15) | 9.15 (2026-10-16) | 9.15 (2026-10-17 첫째) | 9.15 (2026-10-17 둘째) | 9.16 (2026-10-17, 현재) |
 |---|---|---|---|---|---|---|---|---|---|
@@ -808,7 +808,7 @@ committed manifest가 아예 없으면 셋 다 "no committed manifest to check a
 
 - 2026-10-10 audit는 `make check`(당시는 재compile 포함, 1,517초)와 `variants.py --check`(2,098초)로 집 기계에서 set이 바이트 단위로 재현됨을 확인했습니다.
 - 9.19 changelog D5는 generated set 세 개를 `generate.py --check`로 2분 15초에 재현했습니다.
-- 9.16(최종 audit, 아직 열림)의 TODO 줄은 각 sub-task가 넘긴 재현 확인을 이 flag들로 적습니다. 예를 들어 "the variants manifest reproduces from `dataset/variants.yaml`, the library and the blessed manifest with `dataset/tools/variants.py --check`"입니다.
+- 9.16(최종 audit, 2026-10-17–18)의 TODO 줄은 각 sub-task가 넘긴 재현 확인을 이 flag들로 적었습니다. 예를 들어 "the variants manifest reproduces from `dataset/variants.yaml`, the library and the blessed manifest with `dataset/tools/variants.py --check`"입니다. 9.16은 중간 pin을 이름 짓는 이 항목들을 하나씩 돌리지 않고, 집에서 한 번 돌린 dataset gate(372초, 커밋 `2b080333`)와 최종 build의 CI run(dataset run 39030123144, 커밋 `17f28d7f`)으로 닫았습니다(9.16 spec decision 3; 9.16 기록 `_dev/research/jioh/task-9.16-exit-audits/README.md`, `handed/checks.md`).
 
 웹 개발로 비유하면, gate의 `check_committed`는 CI에서 "lockfile이 바뀌었는데 commit되지 않았나"를 보는 검사이고, 세 `--check`는 "lockfile을 지우고 처음부터 resolve해도 같은 lockfile이 나오나"를 별도로 보는 재현성 검사입니다. 후자는 비싸서 매 push마다 돌리지 않고, audit 같은 때에 돌립니다.
 
@@ -1183,7 +1183,7 @@ jobs:
 
 ## 6.5 언제 도나: `main`, pull request, `workflow_dispatch`
 
-`dataset.yml`과 `harness.yml`은 push에는 `main` branch에서만 반응하고, `harness-smoke.yml`은 2026-10-15부터 push에 반응하지 않습니다. 그런데 Phase 9의 모든 작업은 `jioh/dataset-rebuild` branch에서 이루어졌고(`_dev/TODO.md`의 Phase 9 규칙: "always work on branch `jioh/dataset-rebuild`"), 2026-10-17 현재 `main`은 rebuild 이전 상태를 가지고 있습니다(마지막 커밋 `6bf9d850`, 2026-10-10). 9.21 changelog D11은 이 사실을 "the harness workflow runs on a push to `main`, which holds the pre-rebuild state"라고 적습니다. 그래서 rebuild branch의 push는 CI를 깨우지 않습니다.
+`dataset.yml`과 `harness.yml`은 push에는 `main` branch에서만 반응하고, `harness-smoke.yml`은 2026-10-15부터 push에 반응하지 않습니다. 그런데 Phase 9의 모든 작업은 `jioh/dataset-rebuild` branch에서 이루어졌고(`_dev/TODO.md`의 Phase 9 규칙: "always work on branch `jioh/dataset-rebuild`"), 2026-10-17 현재 `main`은 rebuild 이전 상태를 가지고 있습니다(마지막 커밋 `6bf9d850`, 2026-10-10). 9.21 changelog D11은 이 사실을 "the harness workflow runs on a push to `main`, which holds the pre-rebuild state"라고 적습니다. 그래서 rebuild branch의 push는 CI를 깨우지 않습니다. rebuild branch는 Phase 9가 끝난 뒤 2026-10-18에 PR #19로 `main`에 merge되었습니다(merge commit `92b2b743`).
 
 9.14 시점까지는 이 때문에 CI가 rebuild된 set을 한 번도 보지 못했습니다. 9.14 changelog D12는 "The three CI workflows (`dataset`, `harness`, `harness-smoke`) run on pushes to `main` alone, so on this branch their steps were run locally"라고 적고, 2026-10-10 audit는 이것을 "CI has never compiled this manifest"라고 A4의 한 항목으로 지적했습니다.
 
@@ -1282,7 +1282,9 @@ README는 다시 볼 기준을 이렇게 적습니다. "The strategy is revisite
 
 smoke도 같은 크기의 문제를 만났습니다. `harness-smoke.yml`은 2026-10-14까지 머리 주석에 "about eight minutes"라고 적었습니다. 이것은 Phase 8의 48개 파일 시절 측정입니다. 9.14 changelog D13은 "The 8.6 smoke's 'about eight minutes' was measured on the old, far smaller files"라고 적고, D14는 rebuild된 set에서의 smoke가 집 기계에서 4시간 50분, 그중 `c6-dual`의 네 run이 약 3시간이었다고 적습니다. 같은 D13은 "a runner with less than about 8 GB free should expect to swap on that file"이라고도 적습니다. 이 workflow는 rebuild 이후 runner에서 돈 적이 없습니다(마지막 run은 2026-10-10 `main`의 38051784588, 9.23 D15). 2026-10-14에 이 권은 이 branch가 `main`에 합쳐지면 첫 push가 그 workflow를 깨운다는 것을 열린 자리로 적었습니다.
 
-> **왜 이렇게 정했나.** 9.23 D15(2026-10-15, 인지오의 결정)가 smoke를 손으로만 돌리게 했습니다. 이유는 위의 숫자들과 runner의 한도입니다. 기록은 runner를 "where the job limit is 6 h and the two coreset-wide mock tests were killed at `c6-dual` (9.21)"이라고 적습니다. 그래서 `harness-smoke.yml`의 trigger는 `workflow_dispatch` 하나가 되었고 머리 주석이 그렇게 고쳐졌으며(6.4), 매 push의 smoke 경로는 `harness.yml`의 `make test` 안의 `test_runner.py`가 파일 하나에서 셋까지로 돌립니다. 최종 build 위에서 채점되는 core 파일 전부의 smoke를 집 기계에서 돌리고 그 시간을 적는 일은 9.16(최종 audit)의 TODO 줄에 있습니다("from 9.23 (D15): the full smoke at home (`make -C harness smoke`) on the final build, its time recorded").
+> **왜 이렇게 정했나.** 9.23 D15(2026-10-15, 인지오의 결정)가 smoke를 손으로만 돌리게 했습니다. 이유는 위의 숫자들과 runner의 한도입니다. 기록은 runner를 "where the job limit is 6 h and the two coreset-wide mock tests were killed at `c6-dual` (9.21)"이라고 적습니다. 그래서 `harness-smoke.yml`의 trigger는 `workflow_dispatch` 하나가 되었고 머리 주석이 그렇게 고쳐졌으며(6.4), 매 push의 smoke 경로는 `harness.yml`의 `make test` 안의 `test_runner.py`가 파일 하나에서 셋까지로 돌립니다. 최종 build 위에서 채점되는 core 파일 전부의 smoke를 집 기계에서 돌리고 그 시간을 적는 일은 9.16(최종 audit)의 TODO 줄에 있었습니다("from 9.23 (D15): the full smoke at home (`make -C harness smoke`) on the final build, its time recorded").
+
+9.16이 그 smoke를 돌렸습니다. 최종 build(커밋 `a4b6a9da`, data는 `17f28d7f`가 build한 그대로)에서 2026-10-17 21:50 KST에 시작해 2026-10-18 02:22 KST에 exit 0으로 끝났고, 16,313초(4시간 32분)가 걸렸습니다. 채점되는 core 파일 49개에 걸친 호출 392번 가운데 142번이 실행되었고 250번은 같은 입력으로 앞서 돈 run이 채운 cache에서 왔으므로, 이 시간은 cold run의 것이 아닙니다. 9.16 기록은 cold 수치로 9.14 D14의 4시간 50분을 두지만, 9.14 D14의 smoke도 호출 392번 가운데 254번이 cache에서 왔습니다(9.14 changelog D14). 판정은 `invalid`(판정 파일 49개 중 기준을 만족한 것 0개)인데, mock의 판정이라 구성상 `invalid`이고(`harness/tools/smoke.py`의 docstring) smoke는 배관을 확인합니다(9.16 기록 `_dev/research/jioh/task-9.16-exit-audits/README.md`, `gate/smoke-status.txt`).
 
 ## 6.11 `meas-*` workflow들
 
@@ -1304,9 +1306,9 @@ smoke도 같은 크기의 문제를 만났습니다. `harness-smoke.yml`은 2026
 - **2026-10-14, run 38547043521** — marker로 나눈 harness test(296개)가 Linux에서 통과.
 - **2026-10-15, run 38722675475와 38722678829** — 9.23 D17의 manifest 일곱 개, 파생 timeline, `coverage-grid.json`이 고정된 도구 버전으로 Linux에서 재현됨. dataset test suite, harness lint, harness test도 Linux에서 통과.
 
-9.15의 2026-10-16 rebuild가 쓴 manifest와 2026-10-17의 두 rebuild가 쓴 manifest(두 번째 것이 지금의 manifest, 3.7의 "현재" 열)를 Linux에서 재현한 run은 2026-10-17까지 기록에 없습니다.
+9.15의 2026-10-16 rebuild와 2026-10-17 첫 rebuild가 쓴 manifest를 Linux에서 재현한 run은 기록에 없습니다. 9.15의 두 번째 rebuild 뒤의 판(커밋 `2b080333`)은 dataset run 39014790007이, 9.16의 rebuild가 쓴 지금의 manifest(커밋 `17f28d7f`, 3.7의 "현재" 열)는 dataset run 39030123144(약 17분)가 초록으로 통과했습니다(9.16 기록 `_dev/research/jioh/task-9.16-exit-audits/README.md`).
 
-이 기록들은 sub-task 9.16(최종 audit)의 TODO 줄에 "hands to 9.16"으로 넘겨져 있습니다. 예를 들어 "CI run 38243554308 reproduces the seven manifests on Linux (D11)"가 그 줄에 있습니다. 즉 이 run들은 최종 audit가 다시 확인할 재현의 증거로 쓰입니다.
+이 기록들은 sub-task 9.16(최종 audit)의 TODO 줄에 "hands to 9.16"으로 넘겨졌습니다. 예를 들어 "CI run 38243554308 reproduces the seven manifests on Linux (D11)"가 그 줄에 있습니다. 9.16은 이 run들이 대는 중간 pin을 다시 확인하지 않고, 그 항목들을 집에서 한 번 돌린 dataset gate와 최종 build의 CI run으로 닫았습니다. 각 중간 pin은 최종 상태의 pin으로 대체되었습니다(9.16 spec decision 3; 9.16 기록 `handed/checks.md`).
 
 ---
 

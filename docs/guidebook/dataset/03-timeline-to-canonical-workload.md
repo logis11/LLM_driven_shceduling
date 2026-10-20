@@ -1,6 +1,6 @@
 # 3권 · Timeline에서 canonical workload로: 포맷과 compiler
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-17
+> Status: draft · Created 2026-10-14 · Updated 2026-10-20
 
 **사람이 쓴 timeline 파일 하나가 어떤 규칙으로 simulator가 읽는 workload JSON이 되나.**
 
@@ -148,7 +148,7 @@ timeline에서 소비자까지 가는 길을 그림으로 보면 이렇습니다
 | 9.11 | scheduler 쪽 상수 연구 slice. declared class, TIMER 규칙 | `_dev/research/jioh/task-9.11-scheduler-constants/changelog.md` |
 | 9.13 | 재건 build. native 삭제, `declared_class`, bless | spec과 `_dev/research/jioh/task-9.13-rebuild/` |
 | 9.14 | dataset을 읽는 쪽의 rework. demand window 은퇴, variant | spec과 `_dev/research/jioh/task-9.14-consumer-rework/` |
-| 9.15, 9.16 | 문서·memo·guidebook 정정(2026-10-15부터)과 그 안에서 인지오가 정한 dataset·compiler 수정 / 종료 감사(9.15 뒤) | `_dev/TODO.md`, 9.15의 work list와 chunk log(`_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/`) |
+| 9.15, 9.16 | 문서·memo·guidebook 정정(2026-10-15부터)과 그 안에서 인지오가 정한 dataset·compiler 수정 / 종료 감사(2026-10-17/18) | `_dev/TODO.md`, 9.15의 work list와 chunk log(`_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/`), 9.16의 감사 기록과 인지오의 답(`_dev/research/jioh/task-9.16-exit-audits/`의 `README.md`, `decisions.md`) |
 | 9.17 | focus를 telemetry에. `input`과 `focus` track | spec과 changelog |
 | 9.18 | compiler, schema, build gate. `slice_of`, `source`, manifest | spec과 changelog |
 | 9.19–9.21 | generated layer | spec과 changelog |
@@ -2060,7 +2060,7 @@ loader는 첫 오류에서 멈춥니다(예외를 던지므로). 그래서 한 t
 
 YAML 그대로 읽기 때문에 생기는 성질이 하나 있습니다. `count: 1`을 굳이 적으면 그것도 묶인 값이 되어 출처가 필요합니다. loader는 `count`가 없으면 1로 보지만, lint는 "적었는가"를 봅니다. "값을 적었다면 그 값의 이유도 적어라"는 규칙이므로 자연스럽습니다.
 
-> **왜 이렇게 정했나.** 3.5절에서 본 것처럼 9.10 D32가 규칙을 정했고(2026-10-01), 9.18의 결정 4가 field와 lint를 구현했습니다(2026-10-11). 결정 4는 처음에 `bind`만 말했다가 구현하면서 `count`를 더했습니다. 9.18 D2의 기록. "The spec's decision 4 is amended to name `count` among the bound values, as D32 does." 같은 기록이 이 lint의 한계를 9.16(종료 감사)에 넘깁니다. "`bound-values.md` and the timelines' `source` maps agree entry for entry (the lint checks form, not that each tag is the right ground)." lint는 tag가 registry에 있는지는 보지만, 그 출처가 정말 그 값을 받치는지는 보지 못합니다. 그것은 사람이 감사할 일입니다.
+> **왜 이렇게 정했나.** 3.5절에서 본 것처럼 9.10 D32가 규칙을 정했고(2026-10-01), 9.18의 결정 4가 field와 lint를 구현했습니다(2026-10-11). 결정 4는 처음에 `bind`만 말했다가 구현하면서 `count`를 더했습니다. 9.18 D2의 기록. "The spec's decision 4 is amended to name `count` among the bound values, as D32 does." 같은 기록이 이 lint의 한계를 9.16(종료 감사)에 넘깁니다. "`bound-values.md` and the timelines' `source` maps agree entry for entry (the lint checks form, not that each tag is the right ground)." lint는 tag가 registry에 있는지는 보지만, 그 출처가 정말 그 값을 받치는지는 보지 못합니다. 그것은 사람이 감사할 일입니다. 9.16이 2026-10-17에 이 감사를 했습니다. core timeline의 `source` map을 `bound-values.md`와 양방향으로 대조해 77개 항목의 tag와 값이 모두 일치했고(`_dev/research/jioh/task-9.16-exit-audits/handed/checks.md`의 9.18 decision 6 항목), dataset 쪽 claim audit이 tag를 slice의 읽기 기록과 대조한 결과 `parallelism_cap` 8의 꼬리표가 `design`에서 `convention`으로 바뀌었습니다(9.6 D4, compile slice가 `-j`와 cap을 정하면서 붙인 꼬리표; 같은 폴더의 `claims/dataset-findings.md` D-F3-08과 `decisions.md`).
 
 이 lint의 test는 네 개입니다(`dataset/tools/tests/test_lint.py`). `test_real_timelines_bound_values_are_sourced`는 tree의 모든 timeline이 깨끗한지, `test_bound_values_carry_a_source_tag_or_a_label`은 13가지 경우(빠진 key, 남는 key, 목록 안의 label, registry에 없는 id 등)를 보고, 2026-10-16에 더한 `test_freeze_rejects_a_bound_value_tagged_meas_pending`과 `test_real_timelines_are_freeze_clean`이 freeze를 봅니다.
 
@@ -2256,7 +2256,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 
 **7. Python 버전과 결정성 — 닫힘.** 2026-10-16에 인지오가 Python 3.12로 정했고, 직접 의존성은 9.23 D15가 정확한 version으로 고정했습니다. 다른 Python version에서 같은 byte가 나오는지는 확인하지 않았습니다(10.6절).
 
-**8. 종료 감사.** 이 권이 설명한 compile 경로의 재현(artifact, report, variant가 timeline에서 다시 만들어지는가)과 묶인 값의 출처가 정말 그 값을 받치는지는 9.16(종료 감사)의 몫이고, 9.16은 9.15가 끝난 상태에서 돕니다(`_dev/TODO.md`).
+**8. 종료 감사 — 닫힘.** 이 권이 설명한 compile 경로의 재현(artifact, report, variant가 timeline에서 다시 만들어지는가)과 묶인 값의 출처가 정말 그 값을 받치는지는 9.16(종료 감사)이 2026-10-17에 확인했습니다. 재현은 9.15의 마지막 판(`2b080333`)에서 집의 dataset gate(372 s)와 dataset run 39014790007이, 9.16이 고친 data로 다시 build한 판(`17f28d7f`)에서 dataset run 39030123144가 통과했습니다. 그 재build에서 모든 artifact의 byte는 `meta`에서만 바뀌었고 compile된 workload(task, event, ground truth)는 어디서도 바뀌지 않았으며, RQ0 gate spec이 dataset을 `8e1eb753…`, variant를 `8e2948b1…`로 다시 pin했습니다(`_dev/research/jioh/task-9.16-exit-audits/README.md`, `logs/D.md`). 출처 쪽의 결과는 14.4절에 적었습니다. simulator가 구현해야 확인되는 문장은 RQ0 gate spec의 simulator 적합성 항목별로 같은 폴더의 `compiled/uncheckable-by-item.md`에 모였고, 각 항목이 구현될 때 인경민이 돌릴 확인입니다. 위의 2(`children:<id>` channel, 항목 (g))와 4(TIMER skip 규칙, 항목 (b))는 그대로 열려 있습니다.
 
 ---
 

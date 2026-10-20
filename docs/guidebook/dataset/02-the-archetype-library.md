@@ -1,6 +1,6 @@
 # 2권 · Archetype library: 프로그램 한 종류를 scheduler의 눈으로 적기
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-17
+> Status: draft · Created 2026-10-14 · Updated 2026-10-20
 
 **`archetypes.yaml`의 29개 항목은 각각 무엇을 어떻게 흉내 내고, 그 숫자들은 어디서 왔나.**
 
@@ -10,7 +10,7 @@
 
 그래서 이 dataset에서 "숫자"가 사는 곳은 거의 이 library 하나뿐입니다. `dataset/README.md`의 "Rules of the tree"는 이것을 규칙으로 적어 둡니다. "Behavior parameters live in `archetypes.yaml`, never inline in a timeline" — 행동을 정하는 숫자는 `archetypes.yaml`에만 있고, timeline은 archetype이 허락한 손잡이(`binding_params`)에만 값을 넣습니다. 그러니 "이 workload에서 editor가 key 하나에 CPU를 몇 ms 쓰나", "build는 process를 몇 개 띄우나", "game은 몇 ms마다 깨어나나" 같은 질문의 답은 모두 이 library에서 시작합니다.
 
-지금 library에는 항목이 29개 있습니다(아래 1장 끝에서 shell 명령으로 세어 확인합니다). 그중 28개는 이 repository가 직접 GitHub의 CI runner 위에서 실제 프로그램을 돌려 잰 값을 담습니다. 나머지 하나, `game-task-chain`은 LAVD scheduler 발표 자료에서 숫자를 가져옵니다. 이 상태는 2026-09-13부터 2026-10-13까지 이어진 Phase 9 재건(rebuild)의 결과입니다. 그 전의 library는 문헌과 benchmark에서 숫자를 모아 온 열두 항목이었고, 그 숫자들을 원문과 대조하다 심각한 문제가 발견되어 통째로 다시 만들어졌습니다. 이 권은 그 역사도 다룹니다.
+지금 library에는 항목이 29개 있습니다(아래 1장 끝에서 shell 명령으로 세어 확인합니다). 그중 28개는 이 repository가 직접 GitHub의 CI runner 위에서 실제 프로그램을 돌려 잰 값을 담습니다. 나머지 하나, `game-task-chain`은 LAVD scheduler 발표 자료에서 숫자를 가져옵니다. 이 상태는 2026-09-13부터 2026-10-18까지 이어진 Phase 9 재건(rebuild)의 결과입니다. 그 전의 library는 문헌과 benchmark에서 숫자를 모아 온 열두 항목이었고, 그 숫자들을 원문과 대조하다 심각한 문제가 발견되어 통째로 다시 만들어졌습니다. 이 권은 그 역사도 다룹니다.
 
 이 권은 다음 순서로 갑니다. 먼저 scheduler가 process에서 무엇을 보는지, 그것을 적는 여섯 개의 primitive가 무엇인지 설명합니다(1장). 다음으로 항목 하나가 어떤 field로 적히는지 실제 항목 하나를 끝까지 따라가며 설명합니다(2장). 숫자를 어떻게 쟀는지는 tag를 읽을 수 있을 만큼만 설명하고, 방법과 검증 기준의 자세한 내용은 측정 방법을 다루는 6권에 넘깁니다(3장). 그다음 29개 항목을 만든 연구 slice(Phase 9가 영역별로 나눈 연구·결정 단위, 4장 첫머리에서 설명)별로 하나씩 봅니다(4장–10장). 끝으로 library가 예전에 어땠는지, 왜 다시 만들었는지(11장), 기록이 스스로 밝히는 한계(12장)를 정리하고, 용어 정리(13장)로 마칩니다. timeline이 archetype을 어떻게 묶는지와 compiler가 workload를 어떻게 쓰는지는 timeline과 compile을 다루는 권에서 자세히 다룹니다. 이 권에서는 archetype을 이해하는 데 필요한 만큼만 다룹니다.
 
@@ -337,7 +337,7 @@ timeline이 application을 파일 중간에 시작시키면(0초가 아닌 시�
 
 `video-player`, `audio-player`, `video-call`은 component 대신 **주기 job** 하나를 가집니다. `period`(constant, 매체의 한 주기)와 `cycle_run`(한 주기 동안 process tree 전체가 쓴 CPU의 quantile table)입니다. compiler는 task가 사는 동안 `TIMER period` + `RUN cycle_run` 쌍을 주기마다 하나씩 펼칩니다. 이 RUN의 기한은 다음 주기의 시작입니다.
 
-> **왜 이렇게 정했나.** 9.5 D75(2026-09-26, "the playback and call archetypes: one periodic job per medium cycle, period and run measured")가 정했습니다. D74가 TIMER를 "deadline이 있는 주기 job"으로 정의했으므로, 진짜 주기가 있는 이 셋만 TIMER를 갖고, 그 주기는 측정에서 읽습니다. 주기의 시작은 기준 thread로 정했습니다. `video-player`는 video 출력 thread `vo`가 1 ms 이상 도는 frame 복사, `audio-player`는 5 ms 조용한 뒤 audio 출력 thread `ao`의 첫 wake, `video-call`은 audio worker thread의 wake(10 ms audio frame마다)입니다. 기한은 `liu-jacm73`의 period-implicit deadline(다음 요청 시각까지)입니다. 측정 기록에 남은 이 cycle 정의와 값들은 측정 campaign의 pooled record 안 `cycle` 블록에 있고, `archetypes.yaml`에는 그 결과인 `period`와 `cycle_run`만 실립니다. 9.16(exit audit) 항목은 "the three periodic pools' `cycle` blocks reproduce from releases `meas-ci-2026-09-18` and `meas-ci-2026-09-20`"을 아직 할 일로 남겨 두었습니다.
+> **왜 이렇게 정했나.** 9.5 D75(2026-09-26, "the playback and call archetypes: one periodic job per medium cycle, period and run measured")가 정했습니다. D74가 TIMER를 "deadline이 있는 주기 job"으로 정의했으므로, 진짜 주기가 있는 이 셋만 TIMER를 갖고, 그 주기는 측정에서 읽습니다. 주기의 시작은 기준 thread로 정했습니다. `video-player`는 video 출력 thread `vo`가 1 ms 이상 도는 frame 복사, `audio-player`는 5 ms 조용한 뒤 audio 출력 thread `ao`의 첫 wake, `video-call`은 audio worker thread의 wake(10 ms audio frame마다)입니다. 기한은 `liu-jacm73`의 period-implicit deadline(다음 요청 시각까지)입니다. 측정 기록에 남은 이 cycle 정의와 값들은 측정 campaign의 pooled record 안 `cycle` 블록에 있고, `archetypes.yaml`에는 그 결과인 `period`와 `cycle_run`만 실립니다. 9.16(exit audit) 항목의 "the three periodic pools' `cycle` blocks reproduce from releases `meas-ci-2026-09-18` and `meas-ci-2026-09-20`"은 2026-10-17에 확인되었습니다. `cc51eb8`의 `pool.py`를 두 release에 돌리자 세 pool 전체가 그 commit의 기록과 같았고(`audio-player` 4,243 leaf, `video-player` 3,966, `video-call` 24,867), 각 `cycle` 블록은 지금의 것과도 같았습니다(`_dev/research/jioh/task-9.16-exit-audits/meas/repro-table.md`의 E절).
 
 ## 2.5 batch 항목의 부품: `batch-loop`
 
@@ -1473,7 +1473,7 @@ decision 2의 직접적인 결과는, 거의 모든 항목이 우리 CI 측정�
 
 지금 library에서 이 경계(composition seam)는 한 곳입니다. LAVD 발표의 이름 없는 machine(여러 core)에서 온 `game-task-chain`과, runner의 core 하나에서 잰 나머지 28개 항목이 gaming 파일에서 만납니다. chain은 `lane_share`로 크기를 맞추지만, 그 맞춤은 "our calibration, not the source's"입니다(`modeling_notes`). runner 항목들끼리도 측정 날짜와 프로그램 판이 다르지만, 모두 같은 CPU 모델(EPYC 7763) 위에서 쟀습니다.
 
-> **왜 이렇게 정했나 — 이 문장이 놓인 곳.** decision 13은 이 한계를 "stated once at the library level"이라고 정했지만, 이 권을 처음 쓴 2026-10-14에는 `dataset/archetypes.yaml` 머리 주석, `dataset/README.md`, `docs/` 어디에도 이 문장이 없었습니다(spec과 slice scope card에만 있었음). 2026-10-16에 9.15가 이 문장을 library를 주제로 하는 문서인 `docs/workload/archetype-plan.md` §2의 "Observation venues" 문단에 decision 13의 문장 그대로 적었습니다. `dataset/README.md`와 measurement-overview §11은 이것을 다시 적지 않습니다. `archetypes.yaml` 머리 주석에 넣지 않은 것은, 그 파일을 고치면 일곱 manifest가 모두 다시 bless되고 RQ0 gate spec이 다시 pin되기 때문입니다(9.15 작업 목록 `_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/work-list.md`의 "Settled at merge"). 함께 넘겨진 두 일 가운데 9.14의 민감도 검사는 아래 12.2절의 `venue-x0.8`/`venue-x1.25`와 `chain-x1.2`/`chain-x1.4` 변형으로 들어갔고, 9.16(exit audit)의 "venue mix listed per timeline"은 9.16의 할 일로 남아 있습니다.
+> **왜 이렇게 정했나 — 이 문장이 놓인 곳.** decision 13은 이 한계를 "stated once at the library level"이라고 정했지만, 이 권을 처음 쓴 2026-10-14에는 `dataset/archetypes.yaml` 머리 주석, `dataset/README.md`, `docs/` 어디에도 이 문장이 없었습니다(spec과 slice scope card에만 있었음). 2026-10-16에 9.15가 이 문장을 library를 주제로 하는 문서인 `docs/workload/archetype-plan.md` §2의 "Observation venues" 문단에 decision 13의 문장 그대로 적었습니다. `dataset/README.md`와 measurement-overview §11은 이것을 다시 적지 않습니다. `archetypes.yaml` 머리 주석에 넣지 않은 것은, 그 파일을 고치면 일곱 manifest가 모두 다시 bless되고 RQ0 gate spec이 다시 pin되기 때문입니다(9.15 작업 목록 `_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/work-list.md`의 "Settled at merge"). 함께 넘겨진 두 일 가운데 9.14의 민감도 검사는 아래 12.2절의 `venue-x0.8`/`venue-x1.25`와 `chain-x1.2`/`chain-x1.4` 변형으로 들어갔고, 9.16(exit audit)의 "venue mix listed per timeline"은 2026-10-17에 9.16이 timeline마다 묶는 항목의 venue를 나열해 확인했습니다(`_dev/research/jioh/task-9.16-exit-audits/handed/checks.md`). core set 51개 가운데 두 venue(runner와 `lavd-ossna24`)를 섞는 것은 `game-task-chain`을 묶는 여덟 개(`c1-gaming`, `c2-p2a`, `c2-p2a-idle`, `c2-p2b`, `c3-evening`, `c4-gaming`, `c6-dual`, `c7-gaming`)이고, 나머지 43개는 runner만 씁니다. generated layer에서 두 venue를 섞는 파일도 모두 `game-task-chain`을 묶습니다.
 
 ## 12.2 venue의 한계
 

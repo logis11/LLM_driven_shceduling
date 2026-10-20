@@ -1,6 +1,6 @@
 # 4권 · 51개의 coreset: 파일마다 어떤 질문에 답하나
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-17
+> Status: draft · Created 2026-10-14 · Updated 2026-10-20
 
 **core set의 파일 하나하나는 무슨 상황을 적고, 어떤 label을 달고, 어떤 질문에 답하나.**
 
@@ -2341,12 +2341,13 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 | Phase 6 | driver table 초안과 scoring spec, pair review(2026-09-08/09) |
 | Phase 7 / 7.1–7.7 | core set의 attribute coverage(2026-09-09→11). 24 → 50, C7 신설, 판정 파일 27 |
 | 8.8 | RQ0 gate spec 첫 commit(2026-09-12). 판정 파일 25, K 13 |
-| Phase 9 | 측정 위의 dataset 재구축(2026-09-13부터) |
+| Phase 9 | 측정 위의 dataset 재구축(2026-09-13 → 2026-10-18) |
 | 9.10 | scenario와 timeline(2026-10-01→07). 결정 D1–D174 |
 | 9.11 | scheduler 쪽 상수와 근거. declared class, nice |
 | 9.13 | 재build(2026-10-09). native 폐지, `declared_class`, `c2-p2a-idle`, bless |
 | 9.14 | 소비자 쪽 재작업(2026-10-09/10). demand window 폐지, 판정 19, variant 78 |
 | 9.15 | docs·memo·guidebook 수정(2026-10-15부터)과 그 안에서 정한 dataset 수정(머리 주석의 생략 문장) |
+| 9.16 | 종료 감사(2026-10-17/18). `c7-meeting`의 판정 이유를 맞는 수치로(D1), `c2-p3b`의 backup을 turnaround로(D4), dataset과 variant의 re-pin |
 | 9.17 | focus를 telemetry에(2026-10-11). `input`/`focus` 분리 |
 | 9.18 | compiler, schema, build gate(2026-10-11). `slice_of`, `source` |
 | 9.19 / 9.20 / 9.21 | generated layer와 그 소비자 쪽(2026-10-11→13). `c5-t3` → `c6-alias` |

@@ -1,6 +1,6 @@
 # 5권 · Generated layer: 열여섯 task set으로 만든 1,562개 파일
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-17
+> Status: draft · Created 2026-10-14 · Updated 2026-10-20
 
 **왜 손으로 쓴 core set 옆에 생성한 층이 있고, 그 파일들은 어떤 규칙으로 만들어지며 어떻게 점수를 받나.**
 
@@ -146,7 +146,7 @@ generated layer는 나흘 사이에 만들어졌습니다.
 | 2026-10-13 | 9.21: manifest의 placement·segment 기록, scoring 규칙, coverage 표, `files.select`, `flip_cost`, CI 전략 | 9.21 spec, changelog D1–D11 |
 | 2026-10-13 ~ 14 | 9.21 D12·D13: harness CI의 메모리 문제와 `coreset_wide` marker | 9.21 changelog |
 
-Phase 9의 실행 순서는 `_dev/TODO.md`에 "… → 9.22 → 9.19 → 9.20 → 9.21 → 9.15 → 9.16"으로 적혀 있습니다. 9.15는 문서·memo·guidebook 정리, 9.16은 마지막 audit입니다. generated layer를 설명해야 하는 문서들(research proposal의 Family 4, coreset guide의 C3·C4·C5·C6 서술, research-claims chain의 link 3, daemon guide §9.3, harness guide)은 9.15에서 고쳐 썼습니다(16.4).
+Phase 9의 실행 순서는 `_dev/TODO.md`에 "… → 9.22 → 9.19 → 9.20 → 9.21 → 9.23 → 9.15 → 9.16"으로 적혀 있습니다. 9.23은 이 guidebook이 찾은 결함의 처리, 9.15는 문서·memo·guidebook 정리, 9.16은 마지막 audit입니다. generated layer를 설명해야 하는 문서들(research proposal의 Family 4, coreset guide의 C3·C4·C5·C6 서술, research-claims chain의 link 3, daemon guide §9.3, harness guide)은 9.15에서 고쳐 썼습니다(16.4).
 
 ## 1.8 다섯 set 한눈에
 
@@ -1660,7 +1660,7 @@ placement 기록의 모양은 set마다 이렇게 다릅니다(9.21 D1의 "Shape
 | 9.15 (2026-10-17, 둘째) | `d84fb68a` | `a6980482` | `92676677` | `1d129a51` | `8c38e7a8` | `distractor-grid`의 두 번째 segment도 9.10 D168의 꼬리표 규칙을 따르게 되어(`gen/compose.py`, 5.7) A가 `backup`, `indexing`, `ml-train`, `transcode`인 timeline 68개가 바뀌고, 그 artifact가 `meta.derived_from`에서도 다름. 그 밖에는 library의 scope 문장(측정 항목들의 trace 문장, `video-editor`의 유휴 탐침 문장) 때문에 모든 artifact가 library hash에서만 다름. `inputs`에서는 library, `grids.yaml`, `gen/compose.py`의 hash가 바뀜. `grid`, `demand`, `reports`는 그대로(`harness/CHANGELOG.md` 2026-10-17의 "the distractor grid's tags under one rule; …; the dataset re-pinned" 항목) |
 | 9.16 (2026-10-17) | `01e539ee` | `2d80cff9` | `53420ed5` | `21502219` | `1dd08130` | 출구 감사가 찾은 library의 문장과 꼬리표 수정 때문에 모든 artifact가 library hash에서 다름. compile set의 `parallelism_cap` 꼬리표가 `design`에서 `convention`이 되어(9.6 D4, compile 조각의 `-j`와 cap을 정한 결정이 붙인 꼬리표) 그 timeline을 합성한 artifact가 `meta.derived_from`에서도 다름(transition grid 60개, return grid 90개, distractor grid 32개, familiarity ladder 6개, flap-stress 0개). `inputs`에서는 library, `grids.yaml`(주석), `c1-compile` timeline의 hash가 바뀜. `grid`, `demand`, `reports`는 그대로(`harness/CHANGELOG.md` 2026-10-17의 "the exit audits' data findings; …; the dataset re-pinned" 항목) |
 
-9.21 D1은 "checked section by section against `HEAD`"라고 적습니다. 다시 bless할 때 artifact가 바뀌지 않았다는 것을 section마다 확인했다는 뜻입니다. 9.20 spec의 invariant도 같은 원칙입니다. "The 9.19 sets' artifacts are unchanged; their manifests move only where they pin the generator and the grid definition by content." 이 hash들은 마지막 audit(9.16)이 재현할 목록으로 넘겨졌습니다(`_dev/TODO.md` 9.16 줄). 2026-10-17 tree의 다섯 manifest의 SHA-256은 마지막 줄(9.16, 2026-10-17)의 값과 같습니다.
+9.21 D1은 "checked section by section against `HEAD`"라고 적습니다. 다시 bless할 때 artifact가 바뀌지 않았다는 것을 section마다 확인했다는 뜻입니다. 9.20 spec의 invariant도 같은 원칙입니다. "The 9.19 sets' artifacts are unchanged; their manifests move only where they pin the generator and the grid definition by content." 이 hash들은 마지막 audit(9.16)이 재현할 목록으로 넘겨졌고(`_dev/TODO.md` 9.16 줄), 9.16이 2026-10-17에 그 목록을 닫았습니다. 목록의 hash는 모두 뒤의 bless로 대체되었으므로, 9.15의 마지막 판(`2b080333`)의 manifest를 집의 dataset gate(`generated`와 `check` 단계)와 dataset run 39014790007이 확인했고(`_dev/research/jioh/task-9.16-exit-audits/handed/checks.md`의 마지막 표), 9.16이 다시 bless한 판(`17f28d7f`, 표의 마지막 줄)은 dataset run 39030123144가 통과했습니다(같은 폴더의 `README.md`). 2026-10-17 tree의 다섯 manifest의 SHA-256은 마지막 줄(9.16, 2026-10-17)의 값과 같습니다.
 
 # 13장 · 생성한 파일은 어떻게 점수를 받나
 
@@ -2061,7 +2061,8 @@ README의 문장: "If you edit any timeline, variant file, `archetypes.yaml`, a 
 |---|---|---|
 | 규칙 없이 flap의 필요성 재기(계획의 step 1; flap-stress set과 저작된 C4 파일 `c4-*`, `oracle`과 `random`) | Phase 10 통합 직후 | hold-time 계획; backlog |
 | generated 파일을 쓰는 첫 run | RQ1·RQ4 run | — |
-| 다섯 generated manifest의 hash와 CI run의 재현 확인 | 9.16 | `_dev/TODO.md` 9.16 줄 |
+
+다섯 generated manifest의 hash와 CI run의 재현 확인(`_dev/TODO.md` 9.16 줄)은 2026-10-17에 9.16에서 끝났습니다(12.8).
 
 generated layer를 설명해야 하는 문서들의 고쳐 쓰기는 9.15에서 끝났습니다(`_dev/TODO.md` 9.15 줄의 9.19·9.20·9.21 hand-off). research proposal의 Family 4(return grid로, 8.1), coreset guide의 C3(전환 arc)·C4(distractor)·C5(친숙도 사다리)·C6(한계 파일) 서술과 `c5-t3`를 쓰던 표(`c6-alias`로), research-claims chain의 link 3(그 문서의 주장 사슬에서 "상황이 process 이름에 드러난다"는 세 번째 고리, 지금은 focus holder까지), daemon guide §9.3(선례 범위 5–30 s와 규칙 없는 측정), harness guide(generated 파일의 점수 규칙, `files.select`, `flip_cost`)입니다.
 

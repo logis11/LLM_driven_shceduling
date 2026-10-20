@@ -1,6 +1,6 @@
 # 6권 · 근거, 측정, 검증: 숫자 하나가 믿을 수 있게 되는 길
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-17
+> Status: draft · Created 2026-10-14 · Updated 2026-10-20
 
 **데이터셋의 숫자와 구조는 어떤 기준으로 근거를 얻고, 우리가 직접 잰 것은 어떻게 재고 확인했으며, 틀린 것은 어떻게 찾아내 고쳤나.**
 
@@ -12,7 +12,7 @@
 
 이 권의 이야기에는 날짜가 있습니다. 2026-09-13, 데이터셋의 출처를 원문(primary text)과 하나하나 대조한 검증에서 심각한 오류들이 나왔습니다. 대표적으로, 컴파일러 프로세스 수의 근거로 쓰던 "2,430개 프로세스"가 Linux kernel build의 숫자가 아니라 DynamoRio라는 다른 프로젝트의 build 숫자였습니다. 이 발견들(`docs/memos/2026-09-13-critical-findings.md`, 이하 critical findings memo)이 Phase 9, 곧 데이터셋 재건축의 방아쇠가 되었습니다. Phase 9는 검증 기준을 새로 세우고(2026-09-13), 측정 도구를 고치고, 영역별 연구 조각(research slice) 아홉 개로 모든 값을 다시 찾거나 다시 재었으며, 그 뒤에도 여러 번의 검토와 감사로 틀린 곳을 찾아 고쳤습니다. 이 권은 그 과정을 "숫자 하나가 믿을 수 있게 되는 길"로 따라갑니다.
 
-마지막으로 이 권은 아직 끝나지 않은 일을 숨기지 않습니다. 문서 전체를 데이터에 맞추는 정리 작업(9.15)과 최종 상태에서 검증을 다시 돌리는 exit audit(9.16)은 이 권을 쓰는 2026-10-14 현재 아직 끝나지 않았습니다. 그래서 이 권에는 "열린 자리"가 여럿 나옵니다. 각 자리마다 무엇이 열려 있고, 무엇이 먼저 있어야 하고, 누가 결정하는지를 적었습니다. 9.15는 그 뒤 2026-10-17에 끝났습니다(14.1).
+마지막으로 이 권은 아직 끝나지 않은 일을 숨기지 않습니다. 문서 전체를 데이터에 맞추는 정리 작업(9.15)과 최종 상태에서 검증을 다시 돌리는 exit audit(9.16)은 이 권을 쓰는 2026-10-14 현재 아직 끝나지 않았습니다. 그래서 이 권에는 "열린 자리"가 여럿 나옵니다. 각 자리마다 무엇이 열려 있고, 무엇이 먼저 있어야 하고, 누가 결정하는지를 적었습니다. 9.15는 그 뒤 2026-10-17에 끝났습니다(14.1). 9.16은 2026-10-17에 시작해 2026-10-18에 끝났고, 같은 날 Phase 9도 끝났습니다(14.2).
 
 ---
 
@@ -105,7 +105,7 @@ memo의 판정은 한 줄입니다. "Verdict: sound for the recognition claim, b
 - 4장과 5장은 그 규칙을 낳은 2026-09-13 검증과, 검증 기록을 저장하고 측정 도구를 고친 9.1과 9.3을 봅니다.
 - 6장부터 10장은 우리 자신의 측정, `meas-ci` 캠페인을 처음부터 끝까지 봅니다. 10장에서는 측정값 하나를 job에서 `archetypes.yaml`의 태그까지 손으로 따라갑니다.
 - 11장은 runner가 볼 수 없는 것, 12장은 아홉 연구 조각이 각자 어떻게 찾고 무엇을 들고 인지오에게 왔는지를 봅니다.
-- 13장은 그 뒤의 검토와 감사, 14장은 아직 남은 일과 기록이 밝힌 한계를 봅니다.
+- 13장은 그 뒤의 검토와 감사, 14장은 Phase 9의 마무리(9.15와 9.16)와 기록이 밝힌 한계를 봅니다.
 
 ---
 
@@ -318,7 +318,7 @@ spec의 범위(Scope)는 다음과 같습니다.
 - 데이터셋이 출처에서 가져온 모든 주장, 특히 그전에 원문과 대조한 적이 없는 registry 항목 열두 개(`pcmark10`, `sysmark30`, `sysmark25`, `procyon`, `gamemode-docs`, `steam-downloads`, `dkms-man`, `dkms-debian`, `zhang-chb15`, `gonzalez-chi04`, `mark-chi05`, `focal-arxiv26`).
 - 모든 `meas-ci` 값을, 원자료 release와 그 값을 만든 방법에 대고.
 - 2026-09-13 검증이 찾은 모든 것.
-- 네 무리의 산출물: 데이터셋 자체, 데이터셋을 소비하는 것(우선순위 표, scoring spec, guard spec, RQ0 gate spec, demand window 규칙), 데이터셋 밖의 인용(관련 연구 서술, harness 상수 등), 팀 memo.
+- 네 무리의 산출물: 데이터셋 자체, 데이터셋을 소비하는 것(prior driver table, scoring spec, guard spec, RQ0 gate spec, demand window 규칙), 데이터셋 밖의 인용(관련 연구 서술, harness 상수 등), 팀 memo.
 
 그리고 spec은 열 개의 결정을 고정했습니다(9와 10은 2026-10-11에 추가). 이 권의 주제는 1번부터 5번이며, 6번부터 8번은 뒤의 장들이 기대는 틀이라 짧게 함께 봅니다.
 
@@ -470,7 +470,7 @@ spec 끝의 "Open items"는 "The format and location of the verification records
 
 **(4) 측정 감사(measurement audit), `meas-report.md`.** 그때의 측정 요약 `dataset/meas/summary.json`(Phase 2의 요약; 9.15가 2026-10-16에 지웠고(커밋 `37c2e233`), 그 앞의 커밋에서 읽을 수 있습니다)을 원자료 release `meas-ci-2026-08-28`에서 다시 만들어 보고(재현 결과: `out_cli3.json`이 `summary.json`과 바이트 단위로 같았습니다, 1,083개 leaf field), 측정 방법을 감사하고, `meas-ci` 태그를 단 파라미터마다 M(measured, 재현됨), D(derived, 산술 확인), C(convention 또는 placeholder), X(불일치)로 분류했습니다. X 항목이 X1부터 X16까지 열여섯 개입니다(4.6절).
 
-**(5) compile된 숫자 감사(compiled-number audit), `compiled-numbers-report.md`.** 우선순위 표, 짝 검토(pair review), scoring spec, guard spec, RQ0 gate spec, memo, spec들에 적힌 "compile된 파일이 이렇다"는 숫자 진술을 실제 build에 대고 판정했습니다. 판정 어휘는 `HOLDS`(성립), `STALE`(낡았으나 결론은 성립), `WRONG`(틀림), `UNCHECKABLE`(확인 불가)입니다(4.7절).
+**(5) compile된 숫자 감사(compiled-number audit), `compiled-numbers-report.md`.** prior driver table, 짝 검토(pair review), scoring spec, guard spec, RQ0 gate spec, memo, spec들에 적힌 "compile된 파일이 이렇다"는 숫자 진술을 실제 build에 대고 판정했습니다. 판정 어휘는 `HOLDS`(성립), `STALE`(낡았으나 결론은 성립), `WRONG`(틀림), `UNCHECKABLE`(확인 불가)입니다(4.7절).
 
 ## 4.2 판정 어휘
 
@@ -562,7 +562,7 @@ compile된 숫자 감사는 데이터셋을 소비하는 문서들의 숫자 진
 
 | 항목 | 내용 | 그 뒤 |
 |---|---|---|
-| J1 | `c2-p2a`에서 10 ms slice(scheduler가 한 번에 주는 CPU 시간 조각)로는 어떤 task도 batch class(executor가 CPU를 오래 쓰는 행동을 보고 분류하는 등급으로, 설정의 `batch_bandwidth_cap`이 그 몫을 제한함; `docs/recognition-vocabulary.md`)에 들어가지 않아 우선순위 표의 두 행(EDF, 곧 마감이 가장 이른 일을 먼저 돌리는 알고리즘에서 cap을 0.333과 0.05로 둔 두 설정)이 같은 schedule을 냄 | 9.14 decision 2가 `c2-p2a`를 판정 파일로 두되 caveat를 deadline-class chain 기준으로 다시 씀 |
+| J1 | `c2-p2a`에서 10 ms slice(scheduler가 한 번에 주는 CPU 시간 조각)로는 어떤 task도 batch class(executor가 CPU를 오래 쓰는 행동을 보고 분류하는 등급으로, 설정의 `batch_bandwidth_cap`이 그 몫을 제한함; `docs/recognition-vocabulary.md`)에 들어가지 않아 prior driver table의 두 행(EDF, 곧 마감이 가장 이른 일을 먼저 돌리는 알고리즘에서 cap을 0.333과 0.05로 둔 두 설정)이 같은 schedule을 냄 | 9.14 decision 2가 `c2-p2a`를 판정 파일로 두되 caveat를 deadline-class chain 기준으로 다시 씀 |
 | J2 | `c1-backup`의 borg가 혼자 돌아도 60 s 파일 안에 끝나지 못함(132.2 s), turnaround가 항상 잘림 | 9.10 D17: 일괄 작업은 측정된 전체를 돌리고 파일이 그 길이에 맞춰 늘어남 |
 | H1 | `c7-meeting`/`c7-media`의 "fixed도 동률" 진술 | 9.14 decision 2: `c7-meeting` 판정 집합 재진입, `c7-media`는 보고 전용 |
 | H2 | `c1-backup`의 `bulk` turnaround가 no-headroom 목록에서 빠짐 | 9.14 decision 6이 no-headroom 머리말을 다시 씀 |
@@ -823,7 +823,7 @@ entry의 종류에 따라 담는 것이 다릅니다.
 
 **desktop (9.8, 9.10).** 백그라운드 탭의 숨은 Chrome renderer, 보이는 창의 renderer, 로그인한 Element Desktop(로컬 Synapse homeserver 상대), 로그아웃 상태로 창을 보인 Steam client를 쟀고, 9.10이 Chrome 다섯 탭의 renderer 개수 세기(`chrome-tabs`, perf 없음)와 열 개 프로그램의 launch 단계 기록(`launch-*`)을 더했습니다.
 
-**session (9.9).** `ubuntu-desktop-minimal`의 GNOME 세션을 GDM 자동 로그인으로 띄우고, 사람이 없는 상태로 300 s 유휴 지연이 지나 화면이 잠기고 꺼진 "terminal idle state"에서, 네 entry의 프로세스만 측정 CPU에 두고 1,800 s를 쟀습니다. 9.9 D9의 이유는 "nobody present past the idle delay"라는 우선순위 표의 상황 정의("Nobody present, maintenance only")와 그 상태를 정하는 문서화된 메커니즘들입니다.
+**session (9.9).** `ubuntu-desktop-minimal`의 GNOME 세션을 GDM 자동 로그인으로 띄우고, 사람이 없는 상태로 300 s 유휴 지연이 지나 화면이 잠기고 꺼진 "terminal idle state"에서, 네 entry의 프로세스만 측정 CPU에 두고 1,800 s를 쟀습니다. 9.9 D9의 이유는 "nobody present past the idle delay"라는 prior driver table의 상황 정의("Nobody present, maintenance only")와 그 상태를 정하는 문서화된 메커니즘들입니다.
 
 **costs (9.12).** archetype이 아니라 논문 본문(관련 연구와 제안서의 커널 비용, LLM 응답 지연 문장)을 위해, 데이터셋과 같은 기계에서 context switch 비용과 공정 class의 다음 task 고르기(pick) 비용, 그리고 3B와 8B 모델의 구조화 응답 지연을 쟀습니다(`meas-ci:costs:2026-10-08`). 이유는 9.12 D31에 "Literature gives switch costs only on 2007–2021 machines … nothing for the pick … The dataset's values are this machine's"로 기록되어 있습니다.
 
@@ -947,7 +947,7 @@ stability rule도 같은 구조입니다. 반복을 하나씩 더하며 매번 �
 
 1. **발견(2026-09-24).** `measurement-campaign-record.md`의 "What the half-widths do and do not claim" 단락(자체 검토 중에 적음, "no decision taken")입니다. "the value that stopped an application sat at the boundary by construction: `soffice` 4.93 %, `mpv-audio` 4.93 %, `kdenlive` 4.94 %, `webrtc` 4.95 %, `mpv-video` 4.98 %, `thunderbird-send` 5.00 %, `gimp` 4.59 %." 멈추게 한 값은 구조상 경계에 앉아 있었습니다. 같은 단락은 라이브러리 전체에서 규칙을 읽는 133개 값 가운데 7개만 반폭이 4.5 % 이상이고 나머지는 여유 있게 통과했다는 것, "Stopping at the first crossing cannot bias a mean, so the values themselves stand; it does make the stated precision of that one value per application optimistic"라는 것, 그리고 미리 정한 반복 수로 다시 재면 "about three hours for `webrtc`, `mpv-video` and `mpv-audio` … about a day for `chrome` and `code`"가 든다는 것을 적었습니다.
 2. **결정(2026-09-28, 9.5 D88).** 다시 재지 않고, 멈춤을 모의실험해 그 크기를 밝히기로 했습니다. `dataset/tools/meas/stopping.py`가 entry마다 규칙을 읽는 값 가운데 가장 넓은 것의 반복별 변동계수로 반복을 뽑아(정규와 로그정규, 각 4,000번의 캠페인), 규칙대로 멈추게 하고, 멈춘 평균의 치우침과 멈춘 구간이 참값을 덮는 비율을 셉니다. 결과는 "coverage 91.3–92.7 %, 91.3–91.4 %, 92.1–92.4 %; bias −0.09 to +0.20 %"(`office-writer`, `video-editor`, `audio-player`)였고, "Stopping at the first crossing cannot bias a mean"이 0.2 % 안에서 성립함을 확인했습니다. 이 단서는 해당 entry의 scope 문장에 들어갔습니다(`fold_in.py`의 `STOPPING_STATED`). 예를 들어 `office-writer`의 scope에는 "The repeat count is the rule's first pass (D88): simulated at the spread of the widest value … the rule's stated 95 % interval covers the true mean in about 91–93 % of campaigns and the stopped mean leans by at most 0.2 %"라고 적혀 있습니다.
-3. **남은 일(9.16).** `_dev/TODO.md`의 9.16 줄은 "from 9.5's self-review: the measurement audit reads how each campaign's repeat count was chosen, the stopping rule being what makes the binding value's half-width optimistic"라고 적습니다. 여기서 **binding value**는 캠페인을 멈추게 한 값, 곧 멈춘 순간 기준선에 가장 가까웠던 값입니다. 최종 측정 감사는 캠페인마다 반복 수가 어떻게 정해졌는지 읽어야 합니다.
+3. **읽은 것(9.16, 2026-10-17).** `_dev/TODO.md`의 9.16 줄은 "from 9.5's self-review: the measurement audit reads how each campaign's repeat count was chosen, the stopping rule being what makes the binding value's half-width optimistic"라고 적었습니다. 여기서 **binding value**는 캠페인을 멈추게 한 값, 곧 멈춘 순간 기준선에 가장 가까웠던 값입니다. 9.16의 측정 감사가 캠페인마다 반복 수가 어떻게 정해졌는지 읽었습니다(`_dev/research/jioh/task-9.16-exit-audits/meas/class-repeat-counts.md`). 멈춤이 binding value의 반폭을 낙관적으로 만드는 곳은 pool 다섯입니다. 기준선에서 반 point 안(반폭 4.5 % 이상)에 든 9.5의 pool 넷, 곧 `office-writer` 14회, `video-editor`의 driven 단계 20회, `mail-client`의 유휴 단계 77회, `audio-player` 31회(멈추게 한 값을 지금은 담지 않으므로 보수적인 셈)와, 선 아래에서 약하게 `video-editor`의 유휴 단계 16회입니다. 앞의 넷은 모두 scope 문장에 그것을 적습니다. 9.5 밖 캠페인이 규칙으로 담은 값은 어느 것도 4.5 %에 이르지 않고(가장 높은 것이 session의 ±4.48 %), 그 첫 통과와 projection 묶음 멈춤이 구간을 약하게 낙관적으로 만들지만 `stopping.py`로 모의실험하지는 않았습니다. 반복 수가 첫 통과로 정해지지 않은 곳도 넷입니다. `web-browser`와 키만 쓰는 `mail-client`는 녹화가 끝나서 멈췄고, `code-editor`는 Word 녹화의 57개 창보다 먼저 44에서 멈췄으며(9.5 D99), `incremental-backup`은 반복 수를 미리 정했습니다. 감사는 `video-editor`의 committed 멈춤 기록이 도구의 지금 계산과 맞지 않는 것도 찾았습니다(도구가 유휴 pool만 읽게 되어 있었음). `stopping.py`가 두 pool을 모두 읽도록 고쳐 기록을 다시 만들었고, 값은 그대로입니다. 가장 넓은 값은 driven 단계 `kdenlive` run 평균의 ±5.00 %(20회), 덮는 비율 91.35 %·91.4 %입니다(커밋 `17f28d7f`; 9.16 기록 `logs/D.md`).
 
 > **왜 이렇게 정했나.** 9.5 D88이 다시 재지 않고 단서를 다는 쪽을 고른 기록된 이유는 "taken before 9.13 on the question the self-review left to 9.14 and 9.16 — the count is chosen by the estimate it produces"입니다. 9.13의 재건축 전에 이 질문에 답을 내야 했다는 것입니다. 그리고 9.14 decision 3은 "The stated-precision caveats of 9.5 D88 are carried, not re-measured"로 이 선택을 확정했습니다.
 
@@ -1145,7 +1145,7 @@ release에는 착지한 반복만이 아니라 gate에 걸린 job의 report도 �
 
 측정값이 원자료에서 다시 나오는지는 세 층에서 확인할 수 있습니다.
 
-**1. 원자료 → pooled record.** release의 asset을 내려받아 `pool_runs.py`(또는 family의 `pool.py`)를 돌리면 `pooled.json`이 다시 나옵니다. 이 단계의 재현은 지금 테스트에 들어 있지 않고, 9.16의 측정 감사가 할 일입니다. TODO 9.16 줄이 구체적인 경우를 적습니다. 예: "from 9.5 (D75): the three periodic pools' `cycle` blocks reproduce from releases `meas-ci-2026-09-18` and `meas-ci-2026-09-20` with `pool.py` at `cc51eb8`", "from 9.9 (D26, D47): reproduction from release `meas-ci-session-2026-09-24` with the tooling of 9.9 D47", "from 9.5 (D94, D97): `mail-client`'s 77-repeat idle pool reproduces from releases `meas-ci-2026-09-18` and `meas-ci-2026-09-28` at `0aa25ac`". 도구가 그 뒤에 바뀌었을 수 있으므로 커밋까지 고정해 둔 것입니다.
+**1. 원자료 → pooled record.** release의 asset을 내려받아 `pool_runs.py`(또는 family의 `pool.py`)를 돌리면 `pooled.json`이 다시 나옵니다. 이 단계의 재현은 테스트에 들어 있지 않고, 9.16의 측정 감사(2026-10-17)가 release를 내려받아 직접 해 보았습니다(`_dev/research/jioh/task-9.16-exit-audits/meas/repro-table.md`). TODO 9.16 줄이 구체적인 경우를 적었습니다. 예: "from 9.5 (D75): the three periodic pools' `cycle` blocks reproduce from releases `meas-ci-2026-09-18` and `meas-ci-2026-09-20` with `pool.py` at `cc51eb8`", "from 9.9 (D26, D47): reproduction from release `meas-ci-session-2026-09-24` with the tooling of 9.9 D47", "from 9.5 (D94, D97): `mail-client`'s 77-repeat idle pool reproduces from releases `meas-ci-2026-09-18` and `meas-ci-2026-09-28` at `0aa25ac`". 도구가 그 뒤에 바뀌었을 수 있으므로 커밋까지 고정해 둔 것이고, 셋 모두 그 커밋의 도구로 기록과 같게 재현되었습니다. 감사 전체로는 60행에서, 재현하지 않은 행(`meas/repro-findings.md`)을 data 묶음(커밋 `17f28d7f`)이 고친 뒤 모든 값이 release에서 재현됩니다. session entry의 run 안 흩어짐은 9.16 D5(release가 없던 session 캠페인의 긴 단계 탐침 셋을 release로 낸다는 결정)가 공개한 release `meas-ci-probes-2026-09-23`에서 재현됩니다(9.16 기록 `README.md`; 9.2절).
 
 **2. pooled record → `archetypes.yaml`.** 이 단계는 테스트가 매번 확인합니다.
 
@@ -1473,7 +1473,7 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 
 - **D1.** 시스템 서비스와 세션 프로세스를 나눔. 이유: "the two populations differ in every class searched"(서비스는 타이머와 사건으로 깨고, Mutter의 frame clock은 화면이 꺼지면 IDLE, PipeWire는 유휴 node가 멈추면 멈춤 등).
 - **D8, D9.** Ubuntu 데스크톱 세션 하나를 runner에서 새로 측정, 사람이 없는 "terminal idle state"에서.
-- **D27.** wake마다 원인을 trace를 따라 추적하고, 관찰한 데스크톱 밖의 원인(데스크톱 manifest에 없는 패키지, harness)에서 온 wake는 component에서 뺌. 예: pid 1의 wakeup 행 7,943개 중 54.4 %가 runner 이미지에 있던 `php-fpm8.3`(10.001 s마다)이었습니다. 이것을 빼지 않았다면 `service-manager`의 wake 빈도는 runner의 PHP 설치를 잰 것이 되었을 것입니다. 이 결정의 "Hands to 9.16"은 "9.5–9.8 ran beside the same `php-fpm` and workflow loops"입니다. 다른 캠페인들도 같은 runner의 같은 배경 위에서 돌았으므로, exit audit이 확인할 거리입니다.
+- **D27.** wake마다 원인을 trace를 따라 추적하고, 관찰한 데스크톱 밖의 원인(데스크톱 manifest에 없는 패키지, harness)에서 온 wake는 component에서 뺌. 예: pid 1의 wakeup 행 7,943개 중 54.4 %가 runner 이미지에 있던 `php-fpm8.3`(10.001 s마다)이었습니다. 이것을 빼지 않았다면 `service-manager`의 wake 빈도는 runner의 PHP 설치를 잰 것이 되었을 것입니다. 이 결정의 "Hands to 9.16"은 "9.5–9.8 ran beside the same `php-fpm` and workflow loops"입니다. 다른 캠페인들도 같은 runner의 같은 배경 위에서 돌았고, 그 release의 wakeup 행으로 같은 원인 조사를 할 수 있다는 것입니다. 이 조사는 TODO의 9.16 줄에 옮겨지지 않았고, 9.16의 기록(`_dev/research/jioh/task-9.16-exit-audits/`)에도 9.5–9.8의 wakeup 행을 원인별로 센 기록은 없습니다.
 - **D32 → D47.** sysstat의 수집기를 데스크톱 밖으로 뺐다가(D32, 2026-09-25) 다시 데스크톱의 것으로 되돌렸습니다(D47, 2026-10-01). 데스크톱 이미지(`casper/minimal.squashfs`)가 `sysstat.service`를 켜 둔다는 것을 ISO를 직접 읽어 확인했기 때문입니다.
 
 ## 12.8 9.10 시나리오와 timeline
@@ -1500,13 +1500,13 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 
 ## 12.9 9.11 scheduler 쪽 상수 — 데이터셋에 닿는 부분
 
-**맡은 것.** harness와 simulator 쪽의 상수와 그 근거(`docs/harness/metrics.md` §8–§11의 상수, 우선순위 표의 boot default, guard 문턱값 등). 대부분 데이터셋 밖입니다. 이 조각의 scope card는 판정 어휘에 `NOT READ`를 더했습니다. 2026-09-13 검증의 주장 목록이 `docs/memos/`, `harness/`, `docs/harness/`를 읽지 않았기 때문입니다.
+**맡은 것.** harness와 simulator 쪽의 상수와 그 근거(`docs/harness/metrics.md` §8–§11의 상수, prior driver table의 boot default, guard 문턱값 등). 대부분 데이터셋 밖입니다. 이 조각의 scope card는 판정 어휘에 `NOT READ`를 더했습니다. 2026-09-13 검증의 주장 목록이 `docs/memos/`, `harness/`, `docs/harness/`를 읽지 않았기 때문입니다.
 
 **데이터셋에 닿은 결정: declared scheduling class.** 9.11 D4(2026-10-07)는 "the simulated machine honours a task's declared scheduling class"로 정했습니다. 기록된 이유는 "Background programs declare their class themselves, and a stock Linux kernel acts on it"입니다. Tracker(LocalSearch)는 시작할 때마다 자기 스레드에 `SCHED_IDLE`, nice 19, idle I/O class를 걸고(`tracker-main.c`), Déjà Dup의 backend는 `chrt --idle 0`과 `ionice -c3` 아래에서 돕니다. **SCHED_IDLE**은 Linux의 scheduling policy 가운데 하나로, 다른 일이 있으면 거의 CPU를 받지 못하는 가장 낮은 class입니다(커널 무게 3, nice 0의 1,024에 비해). **nice**는 보통 class 안에서의 상대적 무게를 정하는 -20부터 19까지의 값입니다.
 
 이 결정의 근거는 측정입니다. D4의 단계 (1)은 "each measured entry's observed scheduling policy and nice value, read from its campaign's raw records"였고, 그 결과가 `_dev/research/jioh/task-9.11-scheduler-constants/classes/audit.md`입니다. 두 부분입니다. 첫째, taskstats를 남긴 build와 background family는 release의 zip에서 `ac_sched`와 `ac_nice`를 HTTP range read로 읽었습니다. 둘째, perf 텍스트만 남긴 나머지 family는 class census(2026-10-07)로 새로 조사했습니다. 주체마다 dry job 하나에서 `dataset/tools/meas/sched/classes.py`가 job 내내 2 s마다 모든 스레드의 policy, 실시간 우선순위, nice를 `/proc/<pid>/task/<tid>/stat`에서 읽었습니다(원자료 release `meas-ci-probes-2026-10-07b`). "A declared class is configuration, not timing, so one job per subject and no machine gate." 결과: `file-indexer`(Tracker의 68개 스레드 모두 IDLE)와 `incremental-backup`(`deja-dup`, `duplicity`, `gpg`)만 idle class의 일을 담고, 나머지 측정 entry는 모두 NORMAL nice 0이었습니다. 몇 가지 예외(SteamCMD의 nice 10 스레드, 업그레이드의 nice 19 `apt-check`/`dpkg`, Mesa의 `disk$0` 스레드)는 notes와 한계로 남았습니다.
 
-이것이 9.13에서 `declared_class` 필드(모든 archetype entry와 모든 task 기록, 값은 `normal`과 `idle`)가 된 경위입니다. 그리고 TODO의 9.16 줄은 "every entry's `declared_class` rests on 9.11's class census"를 감사가 확인할 것으로 적습니다.
+이것이 9.13에서 `declared_class` 필드(모든 archetype entry와 모든 task 기록, 값은 `normal`과 `idle`)가 된 경위입니다. 그리고 TODO의 9.16 줄은 "every entry's `declared_class` rests on 9.11's class census"를 감사가 확인할 것으로 적었습니다. 9.16의 확인(2026-10-17)에서 library의 29개 entry 가운데 27개가 census가 관찰한 class를 담았고, `game-download-idle`의 `idle`은 경계를 재는 variant로서의 design입니다. 남은 `game-task-chain`의 `normal`은 census가 "no measurement"로 적은 entry라 census에 기대지 않았습니다. 9.13 재건축의 기본값이고 출처 `lavd-ossna24`가 class를 적지 않으므로, design 꼬리표를 달았습니다(9.16 기록 `handed/checks.md`, `handed/findings.md`의 F3; 커밋 `17f28d7f`).
 
 **함께 결정된 한계들.** D6과 D20: nice는 담지 않음(SteamCMD의 일 75.33 %가 nice 10인데 보통 우선순위로 돌므로 `c2-p2a`에서 download의 게임 방해가 과대, 가설에 유리한 방향). D21: 그 한계의 경계를 재기 위해 `game-download-idle`과 `c2-p2a-idle` variant를 만듦. D16: 색인기의 `background.slice` 한계(11.2절, 가설에 불리한 방향).
 
@@ -1533,7 +1533,7 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 2026-09-26  9.5–9.9 검토              ──▶ 추적 없는 대조군, 순서 위협, 반복별 점검 읽기
 2026-09-28  9.5–9.9 검토와 coverage sweep ─▶ 시간 창, web-browser의 renderer, 기록과 코드의 불일치 정리
 2026-10-10/11 9.15 전 데이터셋 감사        ──▶ class A 결함 넷, fidelity map, 문서 낡음, 9.17–9.21
-(열림)       9.16 exit audits
+2026-10-17/18 9.16 exit audits          ──▶ 세 감사를 최종 상태에서 다시, 찾은 것의 수정, simulator를 기다리는 진술(14.2절)
 ```
 
 ## 13.1 2026-09-20: 데이터셋 타당성 검토 memo
@@ -1624,13 +1624,13 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 - compile된 흐름이 측정 빈도를 지키는지(8.5절).
 - `--check` 모드: `compile.py`, `variants.py`, `generate.py`, `derive.py`, `replay_fold_in.py`, `batch_fold_in.py`.
 
-검사가 지키지 못하는 것은 2.7절에서 본 그대로입니다. 형식은 지키지만 근거가 옳은지는 사람이 읽어야 하고, 그것이 9.16의 일입니다.
+검사가 지키지 못하는 것은 2.7절에서 본 그대로입니다. 형식은 지키지만 근거가 옳은지는 사람이 읽어야 합니다. Phase 9의 끝에서 그 일을 한 것이 9.16의 주장 감사, 그리고 core set의 모든 timeline의 `source` map을 `bound-values.md`에 대어 본 확인(통과)입니다(14.2절).
 
 ---
 
 # 14장 · Phase 9의 마무리: 9.15, 9.16, 그리고 기록이 밝힌 한계
 
-이 장은 "Phase 9가 끝나려면 무엇이 남았고, 지금까지의 기록이 스스로 밝힌 한계는 무엇이며, 문서와 tree가 어디서 어긋나는가"라는 질문에 답합니다. `_dev/TODO.md`의 인지오 절에서 9.15는 2026-10-14에 `[WIP]`가 되어 2026-10-17에 끝났고(`[x]`), 9.16은 `[ ]`입니다. 실행 순서는 "… → 9.21 → 9.23 → 9.15 → 9.16"이므로, 다음은 9.16입니다.
+이 장은 "Phase 9는 어떻게 끝났고, 지금까지의 기록이 스스로 밝힌 한계는 무엇이며, 문서와 tree가 어디서 어긋나는가"라는 질문에 답합니다. `_dev/TODO.md`의 인지오 절에서 9.15는 2026-10-14에 `[WIP]`가 되어 2026-10-17에 끝났고(`[x]`), 9.16은 2026-10-17에 `[WIP]`가 되어 2026-10-18에 끝났으며(`[x]`), Phase 9는 `[done]`입니다(커밋 `272d1019`, 2026-10-18). 실행 순서는 "… → 9.21 → 9.23 → 9.15 → 9.16"이었으므로, 9.16이 Phase 9의 마지막 하위 작업입니다.
 
 ## 14.1 9.15: 문서, memo, guidebook 정리
 
@@ -1649,7 +1649,7 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 
 ## 14.2 9.16: exit audits
 
-**무엇인가.** "Exit audits — the claim, measurement and compiled-number audits re-run on the final state (spec decision 8)." 2026-09-13 검증의 세 감사(4.1절의 (1)–(3), (4), (5))를 최종 상태에서 다시 돌리는 것입니다. 결정 8의 조건을 다시 적으면: 모든 주장이 결정 1을 만족하고, 모든 archetype과 timeline의 모든 현실 주장이 결정 2와 3을 만족하거나 인지오의 기록된 결정을 갖고, 모든 측정값이 공개된 원자료에서 재현되고 그 방법이 잰 것을 기술하며, 우선순위 표, 짝 검토, scoring spec, guard spec, RQ0 gate spec, memo의 어떤 진술도 다시 지은 데이터에 대해 틀리거나 낡지 않을 것.
+**무엇인가.** "Exit audits — the claim, measurement and compiled-number audits re-run on the final state (spec decision 8)." 2026-09-13 검증의 세 감사(4.1절의 (1)–(3), (4), (5))를 최종 상태에서 다시 돌리는 것입니다. 결정 8의 조건을 다시 적으면: 모든 주장이 결정 1을 만족하고, 모든 archetype과 timeline의 모든 현실 주장이 결정 2와 3을 만족하거나 인지오의 기록된 결정을 갖고, 모든 측정값이 공개된 원자료에서 재현되고 그 방법이 잰 것을 기술하며, prior driver table, 짝 검토, scoring spec, guard spec, RQ0 gate spec, memo의 어떤 진술도 다시 지은 데이터에 대해 틀리거나 낡지 않을 것.
 
 **TODO 9.16 줄이 모은 확인 목록.** 조각들이 각자 "Hands to 9.16"으로 넘긴 것을 모은 것입니다. 측정과 근거에 닿는 것만 정리합니다.
 
@@ -1675,9 +1675,42 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 
 2026-10-11 검토의 항목("the five gate pins and the generated layer's pins equal the committed bytes")이 대는 것은 그때의 커밋된 바이트입니다. 위 표의 하위 작업 시점 hash 뒤에 9.23 D10(2026-10-14)과 D17(2026-10-15), 9.15의 세 rebuild(2026-10-16에 한 번, 2026-10-17에 두 번; `harness/CHANGELOG.md`의 2026-10-16 항목과 2026-10-17의 두 data 항목), 그리고 출구 감사 9.16의 두 항목(2026-10-17; harness 항목과 data rebuild 항목)이 다시 bless와 pin을 했습니다. 2026-10-17 현재의 pin은 9.16의 것입니다. dataset manifest `8e1eb753…`, variants manifest `8e2948b1…`(data rebuild), scoring spec `f7d1df4c…`, guard spec 1.2 `c2dad06f…`, driver table `e1155a72…`(harness 항목; RQ0 gate spec의 `pins`), 그리고 생성 층의 다섯 manifest `01e539ee…`(transition grid), `2d80cff9…`(return grid), `53420ed5…`(flap-stress), `21502219…`(distractor grid), `1dd08130…`(familiarity ladder)입니다. 9.15의 2026-10-17 두 번째 rebuild의 값(dataset `0f0af422…`, variants `cdc14319…`, scoring spec `2ad757b6…`(9.23 D10), guard spec 1.1 `24ccb875…`, driver table `0fba4b3c…`, 생성 층 `d84fb68a…`/`a6980482…`/`92676677…`/`1d129a51…`/`8c38e7a8…`)이 그 바로 앞의 pin이고, 같은 날 첫 rebuild의 값(dataset `d52e7bd4…`, variants `6c1c3e09…`, 생성 층 `4bb7a444…`/`ec7ca574…`/`79a6c5c4…`/`3478a908…`/`415cfbd6…`)이 그 앞, 9.15의 2026-10-16 값(dataset `b6017a10…`, variants `087ef27c…`, 생성 층 `a8eebb33…`/`2e57a6c1…`/`dd6a7c24…`/`264d3333…`/`58a34d65…`)이 그 앞, 9.23 D17의 값(dataset `81d3213d…`, variants `7079e677…`, 생성 층 `826c719c…`/`392d6071…`/`97ba813f…`/`919bb2c0…`/`b6f82df5…`)이 그 앞입니다.
 
-그리고 13.3절에서 본 대로, 2026-09-28의 coverage sweep이 9.5–9.9를 닫았으므로 "a later review of them is this audit's"입니다. 9.9 D27이 넘긴 "9.5–9.8 ran beside the same `php-fpm` and workflow loops"(다른 캠페인의 component에도 runner 배경의 wake가 섞였을 수 있음)도 이 감사가 볼 거리입니다.
+그리고 13.3절에서 본 대로, 2026-09-28의 coverage sweep이 9.5–9.9를 닫았으므로 "a later review of them is this audit's"였습니다. 아래의 측정 감사는 데이터셋이 담은 모든 `meas-ci` 값을 release에서 재현하고 class를 읽었으므로, 9.5–9.9의 값도 그 안에 있습니다. 9.9 D27이 넘긴 "9.5–9.8 ran beside the same `php-fpm` and workflow loops"(다른 캠페인의 component에도 runner 배경의 wake가 섞였을 수 있음)는 TODO의 9.16 줄에 옮겨지지 않았고, 9.16의 기록에 그 원인 조사는 없습니다(12.7절).
 
-> **열린 자리.** 9.16은 아직 시작되지 않았습니다(미실행). 9.15가 먼저 끝나야 했고, 9.15는 2026-10-17에 끝났습니다. 9.16 자신의 spec은 아직 없습니다. 위 목록이 감사의 형식(누가, 어떤 도구로, 무엇을 "해결됨"으로 볼지)을 정하지는 않으므로, 그것은 9.16의 spec 세션에서 인지오가 정합니다.
+**spec.** 9.16의 spec은 2026-10-17의 grill에서 정해졌습니다(`_dev/docs/spec/jioh/task-9.16-exit-audits.md`). 위 목록이 정하지 않던 감사의 형식을 여섯 결정이 정했습니다.
+
+- **decision 1, 주장 감사.** 최종 저장소에서 주장 목록을 만들고, 주장마다 Phase 9 결정 1(검증 기준, 3장)을 만족하는 조각의 읽기 기록으로 추적되는지, 저장소의 문구가 그 구절이 말하는 범위 안인지 봅니다. 읽은 뒤 문구가 바뀐 주장과 조각마다의 표본은 저장소의 설명을 모르는 채(blind) 다시 읽습니다.
+- **decision 2, 측정 감사.** 모든 `meas-ci` 값을 조각들의 committed 도구로 release에서 재현하고, 값마다 그 방법이 잰 것에 대어 class(measured, 산술로 derived, 우리 convention)를 읽습니다.
+- **decision 3, 넘겨받은 항목은 최종 상태만.** 중간 pin(9.17, 9.18, 9.22, 9.19, 9.20, 9.21의 pin)을 이름 짓는 항목은 집에서 돌리는 dataset gate 한 번과 최종 build의 CI run 한 번으로 닫고, 지금도 유효한 내용의 항목은 적힌 대로 돌립니다. 9.15가 넘긴 두 계산(burstiness와 시간 창 다시 읽기, stability ledger)도 9.16에서 합니다.
+- **decision 4, 찾은 것은 9.16 안에서 고침.** 9.15의 순서대로 code와 data를 먼저(rebuild는 많아야 한 번), 그다음 문서와 memo를 고치고, 판단이 필요한 것은 인지오에게 한 질문씩 가져갑니다.
+- **decision 5, compile된 숫자 감사의 범위.** prior driver table, 짝 검토, scoring spec, guard spec, RQ0 gate spec, 열림 줄을 단 memo, 최종 memo. 닫힌 memo와 9.15가 정리한 문서와 guidebook은 다시 감사하지 않습니다.
+- **decision 6, simulator를 기다리는 진술.** reference simulator가 아직 구현하지 않은 executor 규칙에 참이 기대는 진술은, 그 문서가 RQ0 gate spec의 어느 conformance 항목을 기다리는지 이름 지으면 해결된 것으로 봅니다. exit 기록이 그런 진술을 항목별로 적어, 인경민이 각 항목이 들어왔을 때 돌릴 확인으로 삼습니다.
+
+**무엇을 찾았나.** 9.16 기록(`_dev/research/jioh/task-9.16-exit-audits/README.md`)의 표를 옮깁니다. blind 다시 읽기와 compile된 숫자 감사의 판정 어휘는 4장의 것입니다. 주장 감사의 다섯 판정은 9.16의 주장 감사가 쓴 것으로, 기준을 갖춘 읽기 기록까지 추적됨, 기록은 있으나 문구가 구절이 말하는 범위 밖, 기록이 결정 1의 기준(원문 그대로의 구절, 위치, 읽은 사본)에 못 미침, 기록 없음, 그리고 출처가 말하지 않는 값에 꼬리표(2.6절)가 붙음입니다.
+
+| 감사 | 기록 | 결과 |
+|---|---|---|
+| 주장 감사, 데이터셋 쪽(decision 1) | `claims/dataset-*.md` | 주장 221개: 추적됨 164, 문구가 구절 밖 19, 기록이 기준 미달 15, 기록 없음 4, 꼬리표 19 |
+| 주장 감사, 데이터셋 밖 | `claims/outside-*.md` | 주장 353개: 추적됨 270, 문구가 구절 밖 41, 기록이 기준 미달 23, 기록 없음 11, 꼬리표 8 |
+| blind 다시 읽기(decision 1의 표본, 그리고 구절이 `docs/references.md`에만 있던 출처) | `reads/B1`–`B4` | 비교한 주장 188개: SUPPORTED 131, WORDING-FIX 41, CONTRADICTED 3, NOT IN SOURCE 4, UNVERIFIABLE 9(CpsMark+ 전문, Field와 Welsh 2007, 세 조항에 닿지 못함; 앞선 기록이 그대로 섬) |
+| 측정 감사, 재현(decision 2) | `meas/repro-*.md` | 60행; data 묶음 뒤 모든 값이 release에서 재현, session의 run 안 흩어짐은 9.16 D5가 낸 release에서(9.4절) |
+| 측정 감사, class read | `meas/class-*.md` | 값 304개: measured 300, derived 4, convention 0; 2026-09-13 감사의 불일치(X) 항목 모두 해결 |
+| 9.15가 넘긴 두 계산(decision 3) | `meas-new/` | `renderer-hidden`과 `video-editor` 유휴 pool의 burstiness 다시 읽음(8.5절); stability ledger는 값 406개 중 369개가 허용 오차 통과, 37개가 예외 class로 실림, 미해결 0(13.1절, `dataset/tools/meas/stability_ledger.py`) |
+| compile된 숫자 감사(decision 5) | `compiled/report.md`, `findings.md` | HOLDS 88, STALE 45, WRONG 3(`c7-gaming`의 `tick_count` guard, `c2-p3b`의 backup, batch class memo의 예) |
+| 넘겨받은 확인(decision 3) | `handed/` | 통과 6, 실패 3(boot-default sweep의 분위수 이름, `systemd-oomd`의 태그, `game-task-chain`의 class 꼬리표); 중간 pin 항목은 gate로 닫힘 |
+| dataset gate와 CI | `gate/` | 집의 gate 372 s(커밋 `2b080333`); CI dataset run 39014790007 초록(9.15의 마지막 판), 39030123144 초록(커밋 `17f28d7f`, 약 17분) |
+
+**어떻게 고쳤나.** 커밋 순서대로입니다. 판단이 필요했던 것에 대한 인지오의 답 D1–D6은 9.16 기록의 `decisions.md`에 있습니다.
+
+- **`3fbb7c25`, harness.** `tick_count` guard의 chain 검사를 metrics 문서의 window 규칙대로 고침(9.16 D3: `T_end`에 아직 도는 반복은 오류가 아니고, tail이 head가 쓴 tick보다 많은 반복을 끝냈을 때만 실패; guard spec 1.2). `c2-p3b`의 backup을 turnaround로 채점(D4: 이 job은 모든 row에서 끝나므로). boot-default sweep의 숫자와 `c7-meeting`의 이유 문장(D1: `c7-meeting`은 판정 파일로 남고, 이유는 cycle 20번에 1번꼴로 바로잡음). scoring spec, guard spec, driver table re-pin.
+- **`17f28d7f`, code와 data.** 측정 도구, 다시 만든 기록(9.8의 추적 없는 대조군을 그것이 돈 9.8의 단계에 대어 읽음, D6), library와 출처 문장, `parallelism_cap`을 convention으로. 단 한 번의 rebuild(dataset `8e1eb753…`, variants `8e2948b1…`). release `meas-ci-probes-2026-09-23`(D5).
+- **`1a092508`, 문서.** 찾은 것을 문서, memo, 두 guidebook에 반영하고 한 번의 합친 검토를 거침.
+
+**전체 smoke.** 9.23 D15가 넘긴 일(최종 build 위에서 집에서 `make -C harness smoke`를 돌리고 시간을 적음)도 9.16에서 했습니다. 최종 build(커밋 `a4b6a9da`, data는 `17f28d7f`가 build한 그대로)에서 2026-10-17 21:50 KST에 시작해 2026-10-18 02:22 KST에 exit 0으로 끝났고, 16,313초(4시간 32분)가 걸렸습니다. 채점되는 core 파일 49개에 걸친 호출 392번 가운데 142번이 실행되었고 250번은 같은 입력으로 앞서 돈 run이 채운 cache에서 왔으므로, 이 시간은 cold run의 것이 아닙니다. 9.16 기록은 cold 수치로 9.14 D14의 4시간 50분을 두지만, 9.14 D14의 smoke도 호출 392번 가운데 254번이 cache에서 왔습니다(9.14 changelog D14). 판정은 `invalid`(판정 파일 49개 중 기준을 만족한 것 0개)인데, mock의 판정이라 구성상 `invalid`이고(`harness/tools/smoke.py`의 docstring) smoke는 배관을 확인합니다(9.16 기록 `gate/smoke-status.txt`).
+
+**어떻게 끝났나.** 9.16은 2026-10-18에 끝났고(TODO의 9.16 줄 `[x]`, 커밋 `8951bb65`), 같은 날 Phase 9가 `[done]`이 되었습니다(커밋 `272d1019`, "the workload dataset rebuilt, the exit audits clean").
+
+> **열린 자리.** decision 6에 따라 해결된 것으로 본 진술들은 simulator를 기다립니다. 9.16 기록의 `compiled/uncheckable-by-item.md`가 그것을 RQ0 gate spec의 `simulator-conformance` 항목별로 적습니다. (b) TIMER skip 규칙(tick이 지나간 뒤 닿은 TIMER가 가장 최근 tick을 쓰고 나머지를 건너뜀)에는 `c3-evening`의 chain term이, (d) `batch_bandwidth_cap`을 행동상 batch class의 work-conserving 상한으로 읽고 적용하는 것에는 짝 검토의 cap 문장들이, (e) 엄격한 idle class(다른 class의 task가 runnable이 아닐 때만 돌고, 그런 task가 깨면 바로 밀려남)에는 idle class 파일 여섯의 "headroom 없음" 같은 진술이, (g) `WAIT children:<id>`가 spawn한 child가 모두 끝나면 완료되는 것에는 `c1-compile`과 `c4-compile`의 build turnaround가 기댑니다. 이 목록이 인경민이 각 항목이 들어왔을 때 돌릴 확인이고, (g)의 확인에는 최종 memo §6.1이 요구하는 loader 수정(spawn된 child를 대상으로 하는 WAKE)도 필요합니다. (a) blocking primitive가 끝날 때마다의 ready 줄과 (h) runner가 부르는 호출 계약대로의 simulator 실행은 특정 진술에 기대지 않지만, (c)와 (f) 밖의 다른 항목들처럼 simulator 담당이 아직 갚을 것으로 두고 있습니다. 각 항목이 보여지기 전에는 RQ0 run이 시작되지 않습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
 
 ## 14.3 기록이 스스로 밝힌 한계
 

@@ -1,6 +1,6 @@
 # 8권 · 의사결정 연대기: 2026-08-23부터 지금까지
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-17
+> Status: draft · Created 2026-10-14 · Updated 2026-10-20
 
 **이 데이터셋의 모양을 정한 결정들은 언제, 왜, 무엇을 대신해서 내려졌고, 무엇이 아직 열려 있나.**
 
@@ -8,7 +8,7 @@
 
 이 시리즈의 다른 권들은 지금 있는 workload dataset을 설명합니다. archetype library에 들어 있는 29개 entry가 무엇이고 어떻게 쟀는지, core set의 51개 timeline이 각각 무엇을 보여 주는지, generated layer의 1,562개 파일이 어떤 규칙으로 만들어지는지, compile과 build gate가 어떻게 같은 bytes를 다시 만들어 내는지를 다룹니다. 이 권은 그 결과물 대신 과정을 다룹니다. 지금의 모양에 어떻게 도달했는지, 그 사이에 무엇을 시도했다가 버렸는지를 시간 순서로 따라갑니다.
 
-이야기는 2026-08-23의 설계 회의에서 시작합니다. 그 회의에서 "코어는 몇 개인가", "workload란 무엇이고 label은 어디에 붙나", "workload set이 충분히 강하다는 기준은 무엇인가" 같은 질문이 처음 적혔습니다. 2026-08-26의 grill에서 그 질문들에 답이 붙었고, 2026-08-28까지 24개 파일짜리 첫 데이터셋이 만들어졌습니다. 2026-09-10에 파일이 50개로 늘었습니다. 그리고 2026-09-13에 데이터셋의 근거를 원문과 대조한 검증이 열세 개의 critical finding을 내놓았고, 데이터셋을 처음부터 다시 짓는 Phase 9가 시작되었습니다. Phase 9는 아직 진행 중입니다. 이 글을 쓰는 2026-10-14 현재, 문서와 memo를 바로잡는 9.15가 WIP이고 마지막 exit audit인 9.16이 남아 있습니다. 9.15는 2026-10-17에 끝났습니다(12.1).
+이야기는 2026-08-23의 설계 회의에서 시작합니다. 그 회의에서 "코어는 몇 개인가", "workload란 무엇이고 label은 어디에 붙나", "workload set이 충분히 강하다는 기준은 무엇인가" 같은 질문이 처음 적혔습니다. 2026-08-26의 grill에서 그 질문들에 답이 붙었고, 2026-08-28까지 24개 파일짜리 첫 데이터셋이 만들어졌습니다. 2026-09-10에 파일이 50개로 늘었습니다. 그리고 2026-09-13에 데이터셋의 근거를 원문과 대조한 검증이 열세 개의 critical finding을 내놓았고, 데이터셋을 처음부터 다시 짓는 Phase 9가 시작되었습니다. 이 권을 처음 쓴 2026-10-14에는 문서와 memo를 바로잡는 9.15가 WIP였고 마지막 exit audit인 9.16이 남아 있었습니다. 9.15는 2026-10-17에 끝났고(12.1), 9.16은 2026-10-17에 감사와 수정을 마친 뒤 2026-10-18에 최종 build 위의 full smoke 기록과 함께 끝났습니다. 같은 날 Phase 9도 끝났습니다(12.2).
 
 이 권은 이야기로 쓰지만, 이야기의 근거는 저장소의 기록입니다. 각 결정마다 날짜, 기록이 적은 이유, 그 결정이 대신한 것을 함께 적습니다. 기록에 이유가 없으면 "기록된 이유는 없습니다"라고 씁니다. 결정의 내용은 이야기에 필요한 만큼만 반복하고, 자세한 설명은 그 내용을 다루는 권으로 넘깁니다. 예를 들어 archetype 하나하나의 측정값은 archetype library를 다루는 권에서, compile 과정은 compiler와 build를 다루는 권에서 설명합니다.
 
@@ -111,10 +111,10 @@
 연대기 전체를 다섯 구간으로 나누면 아래와 같습니다. 날짜는 모두 기록에 적힌 날짜입니다.
 
 ```text
-2026-08-23 ─ 08-26 ─ 08-28 ── 09-06 ── 09-10/11 ── 09-13 ─────────── 10-09/10 ── 10-11 ───────── 10-14
+2026-08-23 ─ 08-26 ─ 08-28 ── 09-06 ── 09-10/11 ── 09-13 ─────────── 10-09/10 ── 10-11 ────── 10-17/18
    │          │        │        │          │           │                  │           │              │
- 설계 회의   grill   Phase 2  Phase 3   Phase 7    critical         9.13 rebuild   audit 결과로     9.15 WIP
- 질문 Q1–Q8  D1–D22  24 파일   freeze    50 파일    findings         51 파일 bless  generated      9.16 남음
+ 설계 회의   grill   Phase 2  Phase 3   Phase 7    critical         9.13 rebuild   audit 결과로     9.15, 9.16 끝
+ 질문 Q1–Q8  D1–D22  24 파일   freeze    50 파일    findings         51 파일 bless  generated      Phase 9 끝
              Phase 1                              Phase 9 시작     9.14 rework    layer 추가
                                                                                   (9.17–9.22)
 │◄── 구간 1: 전사 ──►│◄─ 구간 2: 첫 데이터셋 ─►│◄──── 구간 3: 넓히기 ────►│◄─ 구간 4: 다시 짓기 ─►│◄─ 구간 5: 넓히기와 마무리 ─►│
@@ -124,7 +124,7 @@
 - **구간 2, 첫 데이터셋(2026-08-26 → 09-06).** Phase 1의 문서 작업, Phase 2의 compiler와 24개 파일, Phase 3의 검증과 contract freeze입니다. 3장과 4장에서 다룹니다.
 - **구간 3, 넓히기(2026-09-09 → 09-12).** Phase 7이 32개 cell을 모두 채우면서 파일이 50개가 됩니다. Phase 8이 RQ0 gate spec을 처음 확정합니다. 5장에서 다룹니다.
 - **구간 4, 다시 짓기(2026-09-13 → 10-10).** critical findings, Phase 9 spec, 아홉 개의 research slice, 한 번의 rebuild, 한 번의 consumer rework입니다. 6장, 7장, 8장에서 다룹니다.
-- **구간 5, 다시 넓히기와 마무리(2026-10-10 → 지금).** audit, generated layer, focus, build gate와 build time, 이 guidebook이 찾은 결함의 처리(9.23), 그리고 2026-10-17에 끝난 9.15와 아직 열려 있는 9.16입니다. 9장, 10장, 12장에서 다룹니다.
+- **구간 5, 다시 넓히기와 마무리(2026-10-10 → 10-18).** audit, generated layer, focus, build gate와 build time, 이 guidebook이 찾은 결함의 처리(9.23), 2026-10-17에 끝난 9.15, 그리고 2026-10-18에 끝난 9.16(exit audit)과 Phase 9입니다. 9장, 10장, 12장에서 다룹니다.
 
 11장은 시간 순서를 잠시 벗어나, 뒤집힌 결정만 모아 "전 → 후 → 이유 → 날짜"로 정리합니다.
 
@@ -868,13 +868,13 @@ spec의 열린 항목은 "Left to each sub-task's own spec session"이라는 제
 결정 6의 구조를 TODO의 실행 순서와 함께 그리면 아래와 같습니다. TODO의 문장은 "9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1 and 9.3 → 9.13 → 9.14 → 9.17 → 9.18 → 9.22 → 9.19 → 9.20 → 9.21 → 9.15 → 9.16"입니다.
 
 ```text
-2026-09-13          2026-09-13 → 10-09                  10-09     10-09/10     10-11 → 10-14                         10-14 →
+2026-09-13          2026-09-13 → 10-09                  10-09     10-09/10     10-11 → 10-14                         10-14 → 10-18
 ┌──────────┐   ┌─────────────────────────────────┐   ┌──────┐   ┌──────┐   ┌──────────────────────────────┐   ┌──────┐   ┌──────┐
 │ 9.1 기록  │   │ research slices (병렬)           │   │ 9.13 │   │ 9.14 │   │ 2026-10-11에 추가된 다섯과 하나 │   │ 9.15 │   │ 9.16 │
 │ 9.2 memo │──►│ 9.4 gaming   9.5 interactive    │──►│ re-  │──►│ con- │──►│ 9.17 focus                    │──►│ docs │──►│ exit │
 │ 9.3 도구  │   │ 9.6 compile  9.7 background/IO  │   │ build│   │ sumer│   │ 9.18 compiler·schema·gate     │   │ sweep│   │ audit│
 └──────────┘   │ 9.8 browser  9.9 daemon·session │   └──────┘   │ re-  │   │ 9.22 build time               │   └──────┘   └──────┘
-               │ 9.10 scenarios·timelines        │              │ work │   │ 9.19 generator, C3 grids      │    (WIP)      (open)
+               │ 9.10 scenarios·timelines        │              │ work │   │ 9.19 generator, C3 grids      │    (done)     (done)
                │ 9.11 scheduler constants        │              └──────┘   │ 9.20 C4·C5 grids, C5 → C6     │
                │ 9.12 related-work prose         │                         │ 9.21 generated layer 소비자    │
                └─────────────────────────────────┘                         └──────────────────────────────┘
@@ -895,7 +895,7 @@ slice의 작업 방식은 9.4를 시작하면서 2026-09-13에 정해졌습니�
 3. **decision session.** 항목을 하나씩 후보와 함께 인지오에게 가져가고, 결정이 나면 바로 `dataset/archetypes.yaml`에 적용하고 다시 compile하고 changelog와 함께 commit합니다.
 4. **hand-off.** changelog가 9.10, 9.13, 9.14, 9.15에 넘기는 인터페이스가 됩니다.
 
-**기록.** "The public docs (`docs/`, `dataset/README.md`) carry no changelog of Phase 9 corrections and no account of the prior values. They describe the final state; 9.15 brings them there." 그래서 2026-09-13부터 지금까지 공개 문서는 대부분 Phase 9 이전의 데이터셋을 설명하고 있습니다. 이것이 9.15가 해야 할 일의 크기입니다(12장).
+**기록.** "The public docs (`docs/`, `dataset/README.md`) carry no changelog of Phase 9 corrections and no account of the prior values. They describe the final state; 9.15 brings them there." 그래서 2026-09-13부터 9.15가 끝난 2026-10-17까지 공개 문서는 대부분 Phase 9 이전의 데이터셋을 설명했습니다. 이것이 9.15가 맡은 일의 크기였습니다(12.1).
 
 > **왜 이렇게 정했나.** slice를 영역별로 나누고 병렬로 돌린 이유는 Phase 9 결정 6이 적습니다("research-and-decision slices by domain, runnable in parallel"). 결정을 바로 `archetypes.yaml`에 적용하는 이유에 대해서는 workflow 문서가 "Each decision is applied as it lands"라고만 적고, 별도의 논거는 기록되어 있지 않습니다. 다만 결과적으로 slice마다 compile이 깨지지 않는지 바로 확인되었고, 각 changelog entry에 "make lint clean, make check verified" 같은 확인이 붙어 있습니다(예: 9.4 D2).
 
@@ -907,7 +907,7 @@ slice의 작업 방식은 9.4를 시작하면서 2026-09-13에 정해졌습니�
 
 9.1의 spec(`_dev/docs/spec/jioh/task-9.1-verification-records.md`)은 2026-09-13의 검증 결과를 저장소에 옮기는 규칙 여섯 개를 정했습니다. 위치는 `_dev/research/jioh/2026-09-13-verification/`입니다(결정 1). 글로 된 기록과 audit script, 그 출력은 commit하고(결정 2), 출처의 사본과 raw 측정 데이터는 local에 두고 gitignore합니다(결정 3). 예외는 `meas-ci:names:2`의 artifact 사본 하나로, 그것만은 commit합니다(결정 4). 기록은 경로 외에는 고치지 않고 옮깁니다(결정 5). "passages, locators, verdicts and the known input errors that the comparisons already correct stay as they were."
 
-이 결정 덕분에, 이후 slice들은 "C-lavd-9 NOT IN SOURCE" 같은 판정을 근거로 인용할 수 있었습니다. 9.16의 exit audit도 이 기록을 출발점으로 다시 돌릴 예정입니다.
+이 결정 덕분에, 이후 slice들은 "C-lavd-9 NOT IN SOURCE" 같은 판정을 근거로 인용할 수 있었습니다. 9.16의 claim audit(2026-10-17)도 이 기록의 read(`_dev/research/jioh/2026-09-13-verification/reads/`)를, verbatim passage와 locator와 읽은 사본을 갖춘 것이면 claim의 read 기록으로 받아들였습니다(12.2).
 
 ## 7.2 9.2 — 예고 memo (2026-09-13)
 
@@ -1756,7 +1756,7 @@ library의 판 번호는 2026-10-14에 기록과 파일이 어긋나 있었습�
 
 # 12장 · 지금 열려 있는 자리
 
-이 장은 "2026-10-14 현재, 데이터셋과 그 주변에서 무엇이 아직 정해지지 않았거나 실행되지 않았고, 누가 정하나"라는 질문에 답합니다. 각 항목은 기록에서 인용하고, 무엇이 미정인지, 어떤 선택지나 전제 조건이 있는지, 누가 정하는지를 적습니다. 출처는 주로 `_dev/TODO.md`의 9.15, 9.16, Phase 10, Backlog 줄과, 각 spec과 handoff의 열린 항목입니다. TODO는 다른 session이 동시에 고칠 수 있는 파일이므로, 이 장의 인용은 2026-10-14에 읽은 상태입니다. 그 뒤 닫히거나 바뀐 자리는 2026-10-17에 다시 읽어 고쳐 적었습니다.
+이 장은 "2026-10-14 현재, 데이터셋과 그 주변에서 무엇이 아직 정해지지 않았거나 실행되지 않았고, 누가 정하나"라는 질문에 답합니다. 각 항목은 기록에서 인용하고, 무엇이 미정인지, 어떤 선택지나 전제 조건이 있는지, 누가 정하는지를 적습니다. 출처는 주로 `_dev/TODO.md`의 9.15, 9.16, Phase 10, Backlog 줄과, 각 spec과 handoff의 열린 항목입니다. TODO는 다른 session이 동시에 고칠 수 있는 파일이므로, 이 장의 인용은 2026-10-14에 읽은 상태입니다. 그 뒤 닫히거나 바뀐 자리는 2026-10-17에 다시 읽어 고쳐 적었고, 9.16과 Phase 9가 끝난 뒤(2026-10-18)의 자리는 2026-10-20에 다시 읽어 고쳐 적었습니다.
 
 ## 12.1 9.15 — 문서, memo, guidebook 정정 (2026-10-14 → 10-17, 끝남)
 
@@ -1786,7 +1786,7 @@ library의 판 번호는 2026-10-14에 기록과 파일이 어긋나 있었습�
 
 **최종 memo가 실은 것.** spec 결정 13과 TODO는 최종 memo의 내용을 정해 두었고, 최종 memo는 그것을 실었습니다. "the field `declared_class` on every archetype entry and every task record …, the closed set `normal` and `idle` …; the archetype contract at v0.2 … — and tells 인경민 the simulator loads files up to 190 MB (`c6-dual`), the set 681 MB in all"(190 MB와 681 MB는 9.13의 bless 때의 크기입니다. 9.23 D8은 최종 memo의 크기 행에 9.23 D10의 rebuild(2026-10-14) 뒤 크기, 곧 `c6-dual` 187,601,756 bytes와 core set 678,168,083 bytes를 넘겼고, 다음 날 9.23 D17의 rebuild가 그 크기를 바꾸었습니다. 그래서 최종 memo는 D17 뒤의 크기, 곧 `c6-dual` 187.6 MB(187,601,795 bytes)와 core set 약 678 MB(51개 파일; 정확히는 678,172,716 bytes)를 실었습니다. 2026-10-17의 build에서도 같은 크기입니다), 그리고 "the simulator loader's refusal of child-targeted WAKEs (`simulator/src/sim.cpp:874-904`; `c1-compile`, `c7-compile`, `c3-workday`, `c4-compile`, `c6-dual`; 9.6 D19), the four executor conformance items owed, the telemetry's focus and the generated layer." 그리고 spec 결정 13이 더하는 것은 "the memos still open, the simulator's skip rule and zero-wait `ready` line as owed, and the licences chosen"입니다. 박이안에게는 9.14 결정 11의 recognition log 항목 두 개("the formatted prompt kept in the recognition log, the chat template's inserted date … fixed or recorded")가 frozen contract의 질문으로 갔습니다. executor 적합성 항목은 그 뒤 RQ0 gate spec에서 (a)–(h) 여덟이 되었고, 최종 memo는 그 가운데 simulator가 아직 보이지 않은 (a), (b), (d), (e), (g), (h)를 인경민에게 부탁합니다. (a)가 zero-wait `ready` 줄이고 (b)가 skip rule입니다.
 
-## 12.2 9.16 — exit audit (2026-10-17 시작, 진행 중)
+## 12.2 9.16 — exit audit (2026-10-17 → 10-18, 끝남)
 
 9.16은 Phase 9 spec 결정 8의 끝나는 조건을 확인하는 일입니다. TODO의 줄은 "Exit audits — the claim, measurement and compiled-number audits re-run on the final state (spec decision 8)"로 시작합니다. task spec은 2026-10-17의 grill에서 나왔습니다(`_dev/docs/spec/jioh/task-9.16-exit-audits.md`). claim audit은 claim마다 slice의 read 기록까지 따라가고 표본을 blind로 다시 읽습니다. 측정 감사는 모든 `meas-ci` 값을 release된 raw data에서 slice의 fold-in 도구로 재현하고, 값마다 class(측정, 산술로 파생, 우리의 convention)를 읽습니다. compiled-number 감사는 소비자 문서의 숫자를 지금의 파일에 대어 읽습니다. 발견은 9.16 안에서 고칩니다(code와 data 먼저, rebuild는 많아야 한 번, 그다음 문서와 memo).
 
@@ -1802,7 +1802,7 @@ library의 판 번호는 2026-10-14에 기록과 파일이 어긋나 있었습�
 - "every timeline's `source` map agrees entry for entry with `_dev/research/jioh/task-9.10-scenarios-timelines/bound-values.md` (the lint checks form, not that each tag is the right ground)"
 - CI run 38131040159와 38243554308의 재현, "`gh-hosted-runners` read 2026-10-13"
 
-> **열린 자리.** 9.16은 9.15가 끝난 상태 위에서 돈다고 9.15 spec 결정 14가 적습니다("9.16's exit audits run on that state"). 그리고 Phase 9 결정 8이 요구하는 "every measured value reproduces from the released raw data"는 9.16에서 처음 전체로 확인됩니다. 위의 마지막 항목이 적듯이, 지금의 `source` lint는 형식만 확인하고 "그 tag가 맞는 근거인가"는 확인하지 않습니다.
+9.16은 9.15가 끝난 상태 위에서 돌았습니다(9.15 spec 결정 14: "9.16's exit audits run on that state"). Phase 9 결정 8이 요구하는 "every measured value reproduces from the released raw data"는 9.16의 측정 감사에서 처음 전체로 확인되었습니다. `source` lint는 형식만 확인하므로, core set 각 timeline의 `source` map이 `bound-values.md`와 entry마다 맞는지는 넘겨받은 항목의 점검이 따로 읽었고, 통과했습니다(`_dev/research/jioh/task-9.16-exit-audits/handed/checks.md`).
 
 **9.16의 결정(2026-10-17).** 감사의 발견 가운데 판단이 필요한 것은 인지오에게 한 질문씩 갔고(9.16 spec 결정 4), 답은 `_dev/research/jioh/task-9.16-exit-audits/decisions.md`에 있습니다.
 
@@ -1810,17 +1810,49 @@ library의 판 번호는 2026-10-14에 기록과 파일이 어긋나 있었습�
 
 **9.16 D2(research guidebook의 "foreground window 우대" 행을 Windows로 줄인 결정, 2026-10-17).** research guidebook 1권(`docs/guidebook/vol-01-systems-and-scheduling.md`)의 비교 표는 foreground 창 우대를 "Linux 부분적 / Windows 있음 / macOS 있음"으로 적었지만, 기록이 있는 것은 Windows 칸뿐입니다(9.12 related-work 검색: "the scheduler boosts the priority class of the process associated with the foreground window"). 행은 Windows 칸을 그 기록과 함께 두고, Linux와 macOS 칸은 적지 않습니다. 새 출처는 더하지 않았습니다.
 
-**9.16 D3(`tick_count` guard가 window 규칙을 따른다는 결정, 2026-10-17).** guard의 chain 검사는 `T_end`까지 소비된 머리 tick을 `T_end`까지 끝난 꼬리 반복과 대어 셌습니다. `c7-gaming`에서는 마지막으로 소비된 tick이 `T_end`보다 1,139 µs 앞이고 frame 하나에 14,999 µs가 필요해, 모든 run이 실패하고 RQ0 판정이 `invalid`가 됩니다. 이제 `T_end`에 아직 도는 반복은 오류가 아니고(metrics doc §4의 window 규칙: "A task alive at `T_end` is *not completed within the window*"), guard는 꼬리가 머리가 소비한 tick보다 많은 반복을 끝냈을 때만 실패합니다. 기록된 약점은 simulator가 run 중간에 떨어뜨린 wake를 이 guard가 더는 잡지 못한다는 것입니다. 바뀐 것은 code와 문서(`harness/tools/harness/primitives.py`, guard spec의 `tick_count` 근거, metrics doc §6.2)이고, guard spec은 1.2로 RQ0 gate spec에서 다시 pin되었으며, 데이터셋의 byte는 바뀌지 않았습니다.
+**9.16 D3(`tick_count` guard가 window 규칙을 따른다는 결정, 2026-10-17).** guard의 chain 검사는 `T_end`까지 소비된 머리 tick을 `T_end`까지 끝난 꼬리 반복과 대어 셌습니다. `c7-gaming`에서는 마지막으로 소비된 tick이 `T_end`보다 1,139 µs 앞이고 frame 하나에 14,999 µs가 필요해, 옛 검사로는 구조상 모든 run이 실패하고 RQ0 판정이 `invalid`로 나오게 되어 있었습니다. 같은 일이 `c3-evening`, `c6-dual`, `c7-gaming`의 variant 여섯, 그리고 `c2-p2a`/`c2-p2b`의 variant(@seg1-30s, @seg1-120s, @chain-x1.2, @chain-x1.4)에서도 일어났습니다. 이제 `T_end`에 아직 도는 반복은 오류가 아니고(metrics doc §4의 window 규칙: "A task alive at `T_end` is *not completed within the window*"), guard는 꼬리가 머리가 소비한 tick보다 많은 반복을 끝냈을 때만 실패합니다. 기록된 약점은 simulator가 run 중간에 떨어뜨린 wake를 이 guard가 더는 잡지 못한다는 것입니다. 바뀐 것은 code와 문서(`harness/tools/harness/primitives.py`, guard spec의 `tick_count` 근거, metrics doc §6.2)이고, guard spec은 1.2로 RQ0 gate spec에서 다시 pin되었으며, 데이터셋의 byte는 바뀌지 않았습니다.
 
 **9.16 D4(`c2-p3b`의 backup이 turnaround로 채점된다는 결정, 2026-10-17).** 혼자 replay하면 `c2-p3b`의 편집기는 60–326 s에서 99.8 s를 쓰고, backup의 CPU 165.67 s와 sleep 0.19 s에 대해 166.2 s의 빈 lane을 남깁니다. backup은 모든 row에서 `T_end`보다 약 0.3 s 앞에 끝납니다. scoring spec의 옛 주석("about 162 s of its 165.7 s, and does not finish")은 manifest가 편집기의 CPU를 고르게 펼친 값에서 나왔습니다. header 규칙(9.14 결정 6: 모든 row에서 끝나는 job은 turnaround로 채점)에 따라 term은 `c1-backup`의 것처럼 `bulk` turnaround, weight 0.25가 되었습니다. C2 intent pair 가운데 P1(training run 대 index)과 P2(다운로드 대 upgrade)의 batch task는 끝나지 않고, P3(export 대 backup)의 두 job은 끝납니다. 파일은 보고 파일이고 headroom 없음 그대로이며, D1의 scoring spec 변경과 함께 다시 pin되었습니다.
 
 **9.16 D5(세 session probe를 release로 낸다는 결정, 2026-10-17).** `service-manager`와 `message-bus` scope의 run 안 흩어짐은 긴 phase probe 36, 41, 44에 기대는데, 어떤 release도 이 probe를 담지 않았고 그 workflow artifact(각 약 85 MB)는 2026-12-22에 만료됩니다. 그 artifact 위에서 `session/within_run.py`는 `within-run.json`을 leaf 50개 모두 재현합니다. 세 probe는 다른 probe release(`meas-ci-probes-…`)와 같은 꼴로 release로 나가고(반복이 아님, campaign tag 없음, 도구 commit 명시), 그 release가 9.9의 기록에 적힙니다. release는 `meas-ci-probes-2026-09-23`이고(2026-10-17 공개), 9.9의 `campaign/method.md`와 changelog가 그것을 적습니다.
 
-**9.16 D6(9.8의 untraced control을 그것이 돈 phase에 대어 읽는다는 결정, 2026-10-17).** untraced control은 job마다 같은 phase를 `perf sched record`로 추적하며 한 번, 추적 없이 한 번 돌려 추적의 영향을 읽는 대조군입니다(7.5절). 9.8 control(`meas-ci-control-2026-09-27`)의 `control.json`은 그때의 commit `244c1681`의 `control_report.py`로 leaf마다 재현되지만, HEAD의 도구는 `renderer-hidden`의 control을 9.8이 돈 phase(`meas-ci:desktop:2026-09-20`, Chrome 153, settle 630 s)가 아니라 이어받은 9.10 pool(`meas-ci:desktop:2026-10-05b`, Chrome 154, settle 1,030 s)에 대어 읽었습니다. 그러면 구간 수가 14에서 12로, workload 점검의 가장 큰 |z|가 5.12에서 63.03으로 바뀝니다. `control_report.py`는 `renderer-hidden`의 control을 9.8의 pooled record에 대어 읽고, `control.json`, `results-control.md`와 두 control pool은 HEAD에서 다시 만들어집니다. library의 notes는 그대로입니다.
+**9.16 D6(9.8의 untraced control을 그것이 돈 phase에 대어 읽는다는 결정, 2026-10-17).** untraced control은 job마다 같은 phase를 `perf sched record`로 추적하며 한 번, 추적 없이 한 번 돌려 추적의 영향을 읽는 대조군입니다(7.5절). 9.8 control(`meas-ci-control-2026-09-27`)의 `control.json`은 그때의 commit `244c1681`의 `control_report.py`로 leaf마다 재현되지만, HEAD의 도구는 `renderer-hidden`의 control을 9.8이 돈 phase(`meas-ci:desktop:2026-09-20`, Chrome 153, settle 630 s)가 아니라 이어받은 9.10 pool(`meas-ci:desktop:2026-10-05b`, Chrome 154, settle 1,030 s)에 대어 읽었습니다. 그러면 구간 수가 14에서 12로, workload 점검의 가장 큰 |z|가 5.12에서 63.03으로 바뀝니다. `control_report.py`는 `renderer-hidden`의 control을 9.8의 pooled record에 대어 읽게 되었고, `control.json`, `results-control.md`와 두 control pool이 HEAD에서 다시 만들어졌습니다(`17f28d7f`). 다시 만든 `control.json`은 commit된 기록과 leaf 1,205개가 모두 같고 archetype마다 빈 `no_ratio` 목록만 더해졌으며, `results-control.md`는 byte가 같습니다. `renderer-hidden`의 읽기는 구간 14개, 우연으로 약 0.7, 가장 큰 |z| 5.12 그대로입니다. library의 notes는 그대로입니다.
+
+> **왜 이렇게 정했나.** `decisions.md`가 각 결정에 적은 근거는 이렇습니다. D1(`c7-meeting`은 판정 파일로 남음)은 고친 수치 자체가 이유입니다. 통화는 약 스무 cycle에 한 번 boot slice를 다 쓰고, 100 ms boost 구간 열에 넷쯤에서 강등되어 다음 boost까지 upgrade 뒤에서 기다립니다(열에 넷은 산술입니다. cycle을 서로 독립으로 보고 boost 구간마다 cycle 10개로 놓은 1 − 0.95¹⁰). D2(foreground 창 행을 Windows로 줄임)는 기록이 있는 칸이 Windows뿐이라는 것입니다. D3(`tick_count` guard가 window 규칙을 따름)은 metrics doc §4의 window 규칙, 곧 `T_end`에 살아 있는 task는 "not completed within the window"라는 규칙입니다. D4(`c2-p3b`의 backup을 turnaround로 채점)는 scoring spec의 header 규칙(9.14 결정 6)입니다. D5(세 session probe를 release로 냄)는 어떤 release도 그 probe를 담지 않고 workflow artifact가 2026-12-22에 만료된다는 것입니다. D6(9.8 control을 그것이 돈 phase에 대어 읽음)은 HEAD의 도구가 control이 돈 phase가 아닌 다른 pool(다른 Chrome 판, 다른 settle 시간)에 대어 읽고 있었다는 것입니다. 기록은 질문마다 고른 답의 기호((a), (i), (ii))와 그 내용만 적고, 고르지 않은 선택지와 그것을 버린 이유는 적지 않습니다.
+
+**질문 없이 처리한 두 가지(9.16 spec 결정 1을 그대로 적용).** `decisions.md`는 인지오에게 묻지 않고 spec대로 처리한 항목 둘도 적습니다. 첫째, 측정 방법의 출처 여섯, `glean`, Ubuntu packaging 출처 셋, `gh-artifact-retention`, RFC 8290, kernel의 `sched_waking` 위치와 kernel Makefile의 `-pipe`는 passage가 `docs/references.md`에만 있었고 그것을 쓴 것은 결정을 내린 session이었습니다. spec 결정 1이 독립된 read를 요구하므로 이 출처들은 blind 재독에 들어갔고(`claims/extra-blind-topics.md`), 그 read 기록이 이들의 기록이 되었습니다. 둘째, `parallelism_cap` 8의 이름표입니다. 9.6 D4(compile slice가 run의 `-j`와 cap을 정한 결정, 인지오의 결정)는 그 기본값을 8 thread 데스크톱에 적용한 `nproc` 규칙, 곧 convention으로 이름 붙였고, 9.10 D160(bound value 목록, 위임으로 정함)은 9.6 D4를 인용하면서 compile cap을 design으로 적었습니다. 목록의 인용은 자기 결정을 갖지 않으므로 이름표는 9.6 D4를 따라 convention이 되었습니다. timeline의 `source` map, `bound-values.md`, 문서가 그렇게 바뀌었습니다.
+
+**감사가 찾은 것(2026-10-17).** 감사마다의 기록은 `_dev/research/jioh/task-9.16-exit-audits/`에 있고, 결과는 그 폴더의 `README.md`가 표로 모읍니다.
+
+- **claim audit, 데이터셋 쪽(spec 결정 1).** claim 221개 가운데 164개가 기준을 맞춘 read 기록까지 따라가졌습니다. 19개는 기록은 있으나 문장이 passage를 넘었고, 15개는 기록이 Phase 9 결정 1의 기준(verbatim passage, locator, 읽은 사본)에 못 미쳤고, 4개는 기록이 없었으며, 19개는 출처 없는 값으로 이름표(convention, arithmetic, placeholder, design)가 붙어 있었습니다.
+- **claim audit, 데이터셋 밖.** claim 353개 가운데 270개가 따라가졌고, passage를 넘은 문장 41, 기준에 못 미친 기록 23, 기록 없음 11, 이름표 8이었습니다.
+- **blind 재독.** spec 결정 1의 표본과 위의 `docs/references.md`에만 passage가 있던 출처들을, 저장소의 문장을 보지 않고 먼저 읽고 나중에 대조했습니다. claim 188개 가운데 131개가 뒷받침되었고, 문장을 고칠 것 41, 출처와 어긋남 3, 출처에 없음 4, 확인할 수 없음 9였습니다. 확인할 수 없는 9개는 CpsMark+ 전문, Field & Welsh 2007, 닿지 않는 조항 셋이고, 그 이전의 기록이 그대로 유지됩니다.
+- **측정 감사의 재현(spec 결정 2).** 60행 모두, data 수정(`17f28d7f`) 뒤 각자의 release에서 재현됩니다. session의 run 안 흩어짐은 D5가 낸 release에서 재현됩니다.
+- **측정 감사의 class 읽기.** 값 304개 가운데 측정 300, 산술로 파생 4, convention 0이었고, 2026-09-13의 불일치 항목은 모두 풀렸습니다.
+- **9.15가 넘긴 두 계산(spec 결정 3).** burstiness와 window 읽기가 `renderer-hidden`의 pool과 `video-editor`의 idle pool에서 다시 돌았습니다. stability ledger는 값 406개 가운데 369개가 허용 오차를 맞췄고, 37개는 예외 class로 실렸으며, 풀리지 않은 것은 없습니다. 계산하는 script는 `dataset/tools/meas/stability_ledger.py`이고, ledger는 `docs/workload/measurement-overview.md` §7에 실렸습니다. 그래서 2026-09-20 validity memo의 인지오 항목이 닫혔습니다(최종 memo의 2026-10-17 정정).
+- **compiled-number 감사(spec 결정 5).** 88개가 맞았고, 45개가 낡았고, 3개가 틀렸습니다. 틀린 셋은 `c7-gaming`의 `tick_count` guard(D3), `c2-p3b`의 backup(D4), 그리고 2026-09의 core set을 읽은 batch-class memo의 예시(memo의 정정 절)입니다.
+- **넘겨받은 항목(spec 결정 3).** 6개가 통과하고 3개가 실패했습니다. 실패한 셋은 boot-default sweep의 분위 이름표(D1), `systemd-oomd` 기록이 release tag가 아니라 branch를 읽은 것(`docs/references.md`를 systemd v262.1로 고침), `game-task-chain`의 `declared_class: normal`이 9.11의 class census에 기대지 않는 것(`docs/workload/archetype-plan.md`가 그것을 9.13 rebuild spec의 기본값, 곧 design으로 이름 붙임)입니다. 중간 pin을 묻는 항목들(9.17, 9.18, 9.22, 9.19, 9.20, 9.21의 pin)은 집에서 돌린 dataset gate 한 번과 최종 build의 CI run 한 번으로 닫혔습니다.
+- **dataset gate와 CI.** 집 기계의 gate는 `2b080333`에서 372초였고, CI run 39014790007(9.15의 마지막 상태)과 `17f28d7f` 위의 39030123144(약 17분)가 초록이었습니다.
+
+**고친 순서(spec 결정 4: code와 data 먼저, rebuild는 한 번, 그다음 문서).**
+
+1. `3fbb7c25`(H1, harness 쪽): `tick_count` guard를 window 규칙으로(D3, guard spec 1.2), `c2-p3b`의 turnaround(D4), boot-default sweep의 수치와 `c7-meeting`의 이유(D1), compile된 숫자의 정정과 simulator에 기대는 문장에 conformance 항목 이름 붙이기. scoring spec, guard spec, driver table을 다시 pin했습니다.
+2. `17f28d7f`(D, code와 data): 측정 도구의 수정, 다시 만든 기록(9.8 control을 그 phase에 대어, D6), library와 `sources.yaml`의 문장, convention이 된 `parallelism_cap`, 그리고 단 한 번의 rebuild입니다. release `meas-ci-probes-2026-09-23`(D5)도 이때 나갔습니다.
+3. `1a092508`(문서): 감사의 발견을 workload 문서, references, 산문, memo(정정 bullet), pair review, 두 guidebook에 적용하고 D1–D6을 옮겼습니다. 문서 chunk 전체를 한 번의 review가 보았습니다.
+
+**rebuild와 최종 pin(2026-10-17, `17f28d7f`).** rebuild에서 모든 artifact의 byte가 바뀌었지만 모두 `meta`에서만 바뀌었습니다. library의 hash가 모든 파일에서, `derived_from`이 timeline의 byte가 움직인 파일(core set 8개 등)에서 바뀌었고, compile된 workload(task, event, ground truth)는 어디서도 바뀌지 않았습니다(`logs/D.md`). 파일 수는 core set 51, variant 78, generated layer 480 / 720 / 24 / 272 / 66 그대로입니다. 최종 pin은 위 목록의 manifest와 pin 항목 끝에 적은 9.16의 re-pin과 같습니다. scoring spec `f7d1df4c…`, guard spec 1.2 `c2dad06f…`, driver table `e1155a72…`(`3fbb7c25`), dataset `8e1eb753…`, variants `8e2948b1…`(`17f28d7f`)이고, 다섯 생성 manifest의 hash는 `harness/CHANGELOG.md`의 2026-10-17 항목에 있습니다.
+
+**full smoke(2026-10-17 → 10-18).** 9.23 D15(smoke는 집 기계에서 손으로만 돌린다는 결정)가 넘긴 항목입니다. `make -C harness smoke`가 최종 build 위에서, `a4b6a9da`(data는 `17f28d7f`가 build한 그대로)에서 2026-10-17 21:50 KST에 시작해 2026-10-18 02:22 KST에 끝났습니다. exit 0, 16,313초(4시간 32분)입니다. 채점되는 core 파일 49개에 걸친 invocation 392번 가운데 142번이 실행되었고 250번은 같은 입력으로 앞서 돈 run이 채운 cache에서 왔으므로, 이 시간은 cold run의 시간이 아닙니다. 기록은 cold 수치로 9.14 D14(MLFQ boost 구간의 hog 판정을 이분 탐색으로 읽게 한 결정)가 적은 4시간 50분을 그대로 둡니다. 다만 9.14 D14의 smoke도 invocation 392번 가운데 254번이 cache에서 왔습니다(9.14 changelog D14). 판정은 `invalid`, 판정 파일 49개 중 기준을 맞춘 것 0개인데, 이것은 mock의 판정이라 구조상 `invalid`입니다(`harness/tools/smoke.py`의 docstring). smoke는 배관을 확인합니다. 시작, 끝, log의 꼬리는 `gate/smoke-status.txt`에 있습니다.
+
+**끝(2026-10-18).** smoke의 기록과 함께 TODO의 9.16 줄이 [x]가 되었고(`8951bb65`), 같은 날 Phase 9가 [done]이 되었습니다(`272d1019`, "the workload dataset rebuilt, the exit audits clean"). 작업 브랜치 `jioh/dataset-rebuild`는 PR #19로 `main`에 merge되었습니다(`92b2b743`).
+
+**simulator를 기다리는 문장(spec 결정 6).** compile된 숫자에 관한 문장 가운데 참인지가 reference simulator가 아직 구현하지 않은 executor 규칙에 달린 것은, 그 문서가 기다리는 RQ0 gate spec의 conformance 항목을 이름으로 부르면 해결된 것으로 칩니다. exit 기록은 그런 문장을 항목별로 `compiled/uncheckable-by-item.md`에 모았습니다. (b) TIMER skip 규칙, (d) `batch_bandwidth_cap`을 work-conserving 상한으로 적용, (e) 엄격한 idle class, (g) `WAIT children:<id>`가 spawn한 자식이 모두 끝났을 때 완료됨입니다. (a) zero-wait `ready` 줄과 (h) invocation contract대로 실행되는 simulator에는 어느 한 문장만 기대지 않습니다. (a)는 ready 줄에서 읽는 모든 term과 D3의 `tick_count` 읽기의 바탕이고, (h)는 실행의 모양 자체이기 때문입니다. 각 문장은 이제 자기 문서에서 그 항목을 부릅니다(`3fbb7c25`, `1a092508`).
+
+> **열린 자리.** 9.16과 Phase 9는 끝났지만, 위 목록의 문장들은 아직 확인되지 않았습니다. 그 확인은 인경민이 항목 (b), (d), (e), (g)를 simulator에 구현한 뒤 항목마다 돌리는 점검입니다(`compiled/uncheckable-by-item.md`의 "Check" 줄; 9.16 spec 결정 6). 빚으로 남은 conformance 항목은 (a), (b), (d), (e), (g), (h)의 여섯이고, 구현은 인경민의 몫이며, 그 전에는 RQ0 실행이 허용되지 않습니다(12.4).
 
 ## 12.3 9.22의 나머지
 
-9.22는 2026-10-11에 끝났고(TODO의 [x]), 남은 작업은 없습니다. 넘긴 것만 있습니다. 9.15에는 coreset guide §5.1의 CI 문장("CI가 다시 compile해서 hash를 `build.manifest.json`과 비교해요")을 지금의 gate(build가 manifest를 다시 쓰고 `check`가 commit된 bytes와 비교)에 맞게 고치는 일을, 9.16에는 세 pin과 CI run 38131040159의 재현을 넘겼습니다(9.22 D6). 9.18이 9.21에 넘긴 "schema 검증 0.6 MB/s" 문제는 9.22가 `jsonschema-rs`로 풀었고, 9.21이 generated layer의 CI 전략을 정하면서 측정을 다시 적었습니다.
+9.22는 2026-10-11에 끝났고(TODO의 [x]), 남은 작업은 없습니다. 넘긴 것만 있습니다. 9.15에는 coreset guide §5.1의 CI 문장("CI가 다시 compile해서 hash를 `build.manifest.json`과 비교해요")을 지금의 gate(build가 manifest를 다시 쓰고 `check`가 commit된 bytes와 비교)에 맞게 고치는 일을, 9.16에는 세 pin과 CI run 38131040159의 재현을 넘겼습니다(9.22 D6). 9.16은 중간 pin을 묻는 다른 항목들과 함께 이것을 집에서 돌린 dataset gate 한 번과 최종 build의 CI run 한 번으로 닫았습니다(9.16 spec 결정 3, 12.2). 9.18이 9.21에 넘긴 "schema 검증 0.6 MB/s" 문제는 9.22가 `jsonschema-rs`로 풀었고, 9.21이 generated layer의 CI 전략을 정하면서 측정을 다시 적었습니다.
 
 ## 12.4 Phase 10 — 통합과 RQ0 실행
 
@@ -1936,7 +1968,8 @@ audit의 "Recommended order before 9.15 proper"는 첫 항목으로 "Heads-up to
 | 2026-10-14 | 9.21 D13 `coreset_wide` marker, harness run 38547043521 초록. 9.15 grill → spec, WIP. simulator 쪽 TIMER 행을 Phase 10으로. 이 guidebook의 발견 목록, 9.23 grill과 D1–D10(C6의 pre-committed miss, segment 67개, rebuild) | `task-9.21-…/changelog.md`; `task-9.15-docs-memos-and-guidebook-corrections.md`; `_dev/TODO.md`; `_dev/docs/audit/jioh/2026-10-14-guidebook-findings.md`; `task-9.23-guidebook-findings/changelog.md` |
 | 2026-10-15 | 9.23 D11–D18: launch stream을 inputs에, `check`가 파생 timeline과 coverage grid도, `make lint`의 freeze, canonical lint 셋, requirements 고정과 smoke는 손으로, program이 depart 전에 끝나지 않게. rebuild(CI 38722675475, 38722678829) | `task-9.23-guidebook-findings/changelog.md`; `harness/CHANGELOG.md` |
 | 2026-10-16 | 9.15: 작업 목록의 질문에 대한 인지오의 답(일부는 2026-10-15). 그 답의 data와 code 수정을 묶은 rebuild(쓰이지 않는 compile 경로 삭제, bound value의 freeze, release map, 머리 주석과 library v0.2), driver table re-pin(12.1) | `_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/work-list.md`; `harness/CHANGELOG.md` |
-| 2026-10-17 | 9.15: 정정 작업이 찾은 data와 code 수정을 다시 묶은 rebuild(transition grid의 `focus` 꼴 파일 214개의 scenario tag를 9.10 D168의 한 규칙으로, corner set이 숨은 탭 renderer의 조용한 thread 둘까지 쓸어 봄, library의 머리 주석과 notes, schema의 설명, `c1-idle`의 머리 주석, code의 주석과 docstring)와, 인지오의 답 세 가지를 묶은 같은 날의 두 번째 rebuild(distractor grid의 파일 68개의 scenario tag도 같은 한 규칙으로, 측정 entry의 trace 범위 문장, `video-editor`의 idle probe 문장을 `kdenlive` 13의 probe로). 두 번 모두 일곱 manifest re-bless, dataset과 variants re-pin. RQ0 gate spec의 conformance 항목 (h)(invocation contract대로 실행되는 simulator). 최종 memo commit, 9.15 끝(12.1). 9.15가 끝난 뒤 인지오의 결정: 두 guidebook이 TIMER skip 규칙을 규칙으로 적음(9.15 spec 결정 9를 guidebook에 대해서만 뒤집음; simulator 쪽 문서는 구현까지 backlog 문장, 12.4). 9.16 grill과 spec, 감사의 질문에 대한 인지오의 답 D1–D6(`c7-meeting`은 판정으로, foreground 창 행은 Windows로, chain guard는 window 규칙으로, `c2-p3b`의 backup은 turnaround로, 세 session probe는 release로, 9.8 control은 그 phase에 대어; 12.2) | `_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/logs/B1-data-rebuild.md`, `logs/B4-data-rebuild.md`, `logs/B3-harness.md`; `harness/CHANGELOG.md`; `docs/memos/2026-10-17-workload-dataset-rebuild.md`; 9.15 작업 목록의 "After 9.15's close"; `_dev/docs/spec/jioh/task-9.16-exit-audits.md`; `_dev/research/jioh/task-9.16-exit-audits/decisions.md` |
+| 2026-10-17 | 9.15: 정정 작업이 찾은 data와 code 수정을 다시 묶은 rebuild(transition grid의 `focus` 꼴 파일 214개의 scenario tag를 9.10 D168의 한 규칙으로, corner set이 숨은 탭 renderer의 조용한 thread 둘까지 쓸어 봄, library의 머리 주석과 notes, schema의 설명, `c1-idle`의 머리 주석, code의 주석과 docstring)와, 인지오의 답 세 가지를 묶은 같은 날의 두 번째 rebuild(distractor grid의 파일 68개의 scenario tag도 같은 한 규칙으로, 측정 entry의 trace 범위 문장, `video-editor`의 idle probe 문장을 `kdenlive` 13의 probe로). 두 번 모두 일곱 manifest re-bless, dataset과 variants re-pin. RQ0 gate spec의 conformance 항목 (h)(invocation contract대로 실행되는 simulator). 최종 memo commit, 9.15 끝(12.1). 9.15가 끝난 뒤 인지오의 결정: 두 guidebook이 TIMER skip 규칙을 규칙으로 적음(9.15 spec 결정 9를 guidebook에 대해서만 뒤집음; simulator 쪽 문서는 구현까지 backlog 문장, 12.4). 9.16 grill과 spec, 감사의 질문에 대한 인지오의 답 D1–D6(`c7-meeting`은 판정으로, foreground 창 행은 Windows로, chain guard는 window 규칙으로, `c2-p3b`의 backup은 turnaround로, 세 session probe는 release로, 9.8 control은 그 phase에 대어; 12.2). 9.16의 감사(claim, blind 재독, 측정 재현과 class 읽기, compiled-number, 넘겨받은 항목, gate와 CI)와 수정: harness 쪽 `3fbb7c25`(guard spec 1.2, scoring spec과 driver table re-pin), code와 data 쪽 `17f28d7f`(9.16의 유일한 rebuild, 일곱 manifest re-bless, dataset `8e1eb753…`과 variants `8e2948b1…` re-pin, release `meas-ci-probes-2026-09-23`), 문서 쪽 `1a092508`. 21:50 KST에 최종 build 위의 full smoke 시작 | `_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/logs/B1-data-rebuild.md`, `logs/B4-data-rebuild.md`, `logs/B3-harness.md`; `harness/CHANGELOG.md`; `docs/memos/2026-10-17-workload-dataset-rebuild.md`; 9.15 작업 목록의 "After 9.15's close"; `_dev/docs/spec/jioh/task-9.16-exit-audits.md`; `_dev/research/jioh/task-9.16-exit-audits/decisions.md`, `README.md`, `logs/` |
+| 2026-10-18 | full smoke 끝(02:22 KST, exit 0, 4시간 32분, invocation 392번 중 250번은 cache; mock의 판정이라 구조상 `invalid`). 9.16 끝(`8951bb65`), Phase 9 끝(`272d1019`), `jioh/dataset-rebuild`가 PR #19로 `main`에 merge(`92b2b743`)(12.2) | `_dev/research/jioh/task-9.16-exit-audits/gate/smoke-status.txt`; `_dev/TODO.md` 9.16, Phase 9 |
 
 # 14장 · 용어 정리
 
