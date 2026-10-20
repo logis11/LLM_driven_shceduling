@@ -15,6 +15,13 @@ the frozen menu), **stage T** (children traced under their spawn_table id) and *
 (config-switch semantics: MLFQ cold start, same-algorithm entries, drain), matching the
 one-rung-at-a-time ladder in `../steps/`.
 
+**Ported 2026-10-20 (V — `batch_bandwidth_cap`):** the executor now applies the cap as a
+work-conserving ceiling on the behavioural batch class (RQ0 conformance item (d)). The accounting
+window is a token bucket, rate = cap and depth = one slice (decision D10, `../steps/README.md`).
+`src/sim` equals `steps/sim_v` byte for byte on 96 coreset runs (24 files × 4 schedules) and 18
+hand-workload runs, `meta.sim` normalised. Verification and the two defects found on the way:
+`../steps/README.md`, the v rows; status `../memo/memo_261020.md` Part F.
+
 **Ported 2026-10-10 (T + U):** `src/sim` equals `steps/sim_u` byte for byte after normalizing
 `meta.sim`. The check covered 25 workloads (the 24 coreset files plus the harness
 `mock-switch` run file) under 4 schedules each: none, the one-entry boot default, the
@@ -109,11 +116,18 @@ independent of the `sim_r` comparison.
 
 ### Gaps / divergences (against the docs)
 
-1. **`batch_bandwidth_cap` not enforced** — guide §5 ("per-class bandwidth caps,
-   enforced by the executor"); the batch-class rule (B1/B2) is fully specified in
-   `docs/memos/2026-09-09-batch-class-rule-for-the-simulator.md`. The field is not
-   even read from the config. This is the experiment's central knob. Out of the A–R
-   ladder scope, but a real functional gap.
+1. ~~**`batch_bandwidth_cap` not enforced**~~ — **done in stage V (2026-10-20).** The loader
+   reads the field (null → no ceiling) and the executor applies it to the batch class while a
+   non-batch task is runnable. The accounting window the batch memo §7 item 3 left to this tree
+   is D10: a token bucket, rate = cap, depth = one slice, so contiguous batch interference is
+   bounded by the quantity the algorithm already imposes on everyone and no new constant is
+   invented; the implied window is slice/cap. Remaining in this area: the two unit tests of the
+   batch memo §7.6, the `x_batch_class` diagnostic (V emits `x_cap_park` instead, which records
+   the throttle rather than the class), and checking that the rebuilt core set's batch tasks
+   enter the class as §4 predicts. Two consequences need 인지오's confirmation, both in
+   `../memo/memo_261020.md` Part F: under FIFO the cap must preempt, since a ceiling over a
+   non-preemptive algorithm has no other lever; and a stretch that opens mid-occupancy leaves a
+   debt rather than re-arming the holder, bounded by one grant (measured: one bucket depth).
 2. ~~EDF and lottery policies not implemented~~ — **done in stage S.** Remaining:
    no executor starvation safety net (EDF's deadline class and FIFO have no horizon); no
    range clamping or cross-field rule 5 (`batch_share ≤ cap`) in the loader — like MLFQ, it

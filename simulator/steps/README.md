@@ -38,10 +38,14 @@ make lines      # 단계별 코드 줄수
 | **s** | EDF + LOTTERY + `TaskView` 이음매(B1/B2 부류) + 정책 타이머 epoch | 769 (+167) | EDF 마감 100% vs MLFQ 0% (`edfheavy`) / LOTTERY batch 몫 0.15→14.8%, 0.5→49.1% |
 | **t** | 자식 trace id = 파일의 `spawn_table` id (q 의 버그 수정) | 773 (+1) | coreset 24파일 중 자식 없는 20개는 sim_s 와 바이트 동일. 자식 있는 4개(c1-compile, c3-workday, c4-compile, c6-dual)는 `task`/`parent` 문자열 말고 diff 0, spawn 된 id 전부가 파일 테이블에 있다 |
 | **u** | 교체 의미론: MLFQ cold start(U1) / 같은 알고리즘 엔트리는 홀더 불간섭·큐 순서 유지(U2) / drain(U3) | 801 (+28) | harness `mock-switch` 손 유도 trace 의 `config_applied` 4개 시각 일치(t 는 2번이 10600, 기대 12000). 스케줄 없음·boot 1엔트리 48/48 sim_t 와 바이트 동일. 9엔트리 4알고리즘 스케줄: u 24/24 종료·재현·index 전부 순서대로, t 는 23/24 assert 로 죽는다 |
+| **v** | `batch_bandwidth_cap` 집행 (conformance (d)): 토큰 버킷(D10) + park + cap 자기 타이머, 상태 전이 외길 `set_st` | 922 (+121) | **음성 대조**: cap 이 전부 null 이면 24/24 바이트 동일 — 스케줄 없음, 그리고 4엔트리 교체 스케줄 둘 다. **양성**: 손 워크로드에서 MLFQ cap 0.05→5.2 %, 0.2→17.0 %, 0.5→30.0 %(=천장 위, 비구속) / LOTTERY 0.05→4.42 % / FIFO 0.05 는 비선점 홀더를 끊어 주기 태스크를 0→99 job 으로 올린다 |
 
-큰 델타 넷(h, n, r, s)은 쪼갤 수 없는 단위다 — MLFQ 다섯 규칙, FORK 의 생애주기, 두 번째 입력,
+큰 델타 다섯(h, n, r, s, v)은 쪼갤 수 없는 단위다 — MLFQ 다섯 규칙, FORK 의 생애주기, 두 번째 입력,
 그리고 **부류**: EDF 와 LOTTERY 는 같은 실행기 부류(B2 주기 / B1 batch)를 읽으므로 따로 얹으면
 이음매를 두 번 설계하게 된다.
+v 도 마찬가지다: cap 을 집행하려면 "batch 아닌 runnable 이 있나"를 물어야 하는데 그 집합이 코어에
+없었고(정책마다 ready set 구조가 다르다), 그걸 만들면 상태 전이 외길과 park/해제와 cap 타이머가
+한 덩어리로 따라온다.
 
 ### 나중 단계가 앞 단계를 고친 곳
 
@@ -60,6 +64,8 @@ make lines      # 단계별 코드 줄수
 | 선점 복귀의 `ready` 제거 (f→g) | 계약의 `ready.cause` 에 preempt 가 없다 |
 | `PolicyTimer` 에 config epoch (i/r→s) | 정책 타이머가 config 적용을 넘어 살아남았다. MLFQ 가 다시 `start()` 할 때마다 boost 사슬이 하나씩 늘고, 사슬끼리 서로를 `q_` 에 남겨 `arm()` 의 종료 규칙을 무력화한다. **c1-compile × mock-switch 가 sim_r 에서 끝나지 않는다** (15초에 가상 45시간, 2,400만 줄). r 의 검증은 이 조합을 돌리지 않았다 |
 | `Policy::start(params, cold)` (g→s) | "알고리즘이 바뀌었나"를 정책이 알아야 하는 건 **같은 알고리즘 엔트리는 슬라이스 유지, 교체는 새 dispatch** (switch 메모 §2a·§7)를 둘 다 지키는 정책이 생긴 다음이다 |
+| `batch()` 가 유효 burst 를 센다 (s→v) | `burst` 는 release 에서만 큰다. 레인을 **놓지 않는** 태스크가 없어서 안 보였다 — FIFO 에 cap 을 걸어 보기 전에는 B1 이 "슬라이스를 쓰는 그 순간"이 아니라 "놓는 순간"으로 동작했다 |
+| 상태 전이를 `set_st` 외길로 (b→v) | runnable 집합을 들 이유가 cap 전에는 없었다. "batch 아닌 runnable 이 있나"는 정책의 ready set 으로는 답할 수 없다 (구조가 정책마다 다르다) |
 | `deliver(target)` → `deliver(waker, target)` (m→s) | WAKE 가 **마감을 싣는다** — 체인 단계는 TIMER 가 없어서 깨운 쪽의 마감 말고는 마감을 가질 길이 없다 |
 
 ---
@@ -102,6 +108,7 @@ make lines      # 단계별 코드 줄수
 | **D7** | EDF 동률 / 마감 부류의 슬라이스 | (마감, id) 순. 마감 부류는 지평선 없음, 동률은 선점 안 함. residual 은 RR, 선점당하면 남은 슬라이스 유지 | vocab "ties broken by a fixed executor rule" — D1 과 같은 id. Liu & Layland EDF 는 quantum 이 없다 |
 | **D8** | LOTTERY 추첨 | ① 두 부류가 다 runnable 이면 bp 로 부류 ② 부류 안 균등. splitmix64, rejection 으로 편향 제거. seed = FNV-1a(workload 파일의 `meta.id`), 런당 1회 | "부류별 split + 부류 안 동일 티켓" 과 같은 분포. 스케줄 파일의 `workload_id` 는 쓰지 않는다 — 덮이기 전에 시드한다 |
 | **D9** | FIFO 아래 B1 문턱 | boot default 의 `timeslice_us` = **10000** | batch 메모 §3 의 "2000 µs" 는 09-11 이전 문장. boot-default 메모 §5 가 "이제 10000 으로 읽으면 된다"고 이미 답했다 |
+| **D10** | cap 의 회계 창 (batch 메모 §7-3 이 "네 설계"라고 넘긴 것) | **토큰 버킷. 비율 = cap, 깊이 = 슬라이스 하나(`batch_slice_`).** capped 구간에만 적립, batch 로 받은 레인 시간만 차감, 버킷이 비면 park · 차면 해제. 묵시적 창 = slice/f | 고정 창(100 ms 등)은 **새 상수를 발명**한다 — cgroup `cpu.max` 의 period 를 빌리려면 `linux-sched-bwc` 를 existence-only 에서 승격시켜야 하고(references 절차), 그 전엔 근거 없는 숫자다. 깊이를 슬라이스로 두면 연속 간섭이 **알고리즘이 이미 모두에게 물리는 양**으로 묶이고 자유 파라미터가 0이다. 정상 상태에서 run `D/(1−f)` · wait `D/f` → 몫이 정확히 f |
 | **D5** | 알고리즘 교체 시 ready set | 떠나는 정책의 `handoff()` → id 정렬 → 새 정책 `start()` → `on_ready` 각각. 레인 홀더는 release 후 되돌려주고 재무장 | guide §5 가 미뤄둔 항목. 홀더를 ready set 에 넣으면 불필요한 컨텍스트 스위치가 생기고, 안 건드리면 새 정책의 지평선이 반영 안 된다 |
 
 ### 미결 (기록만 하고 넘어감)
@@ -110,9 +117,17 @@ make lines      # 단계별 코드 줄수
   (다음 FORK 는 cap 이 비어 블록 없이 통과 → 결과 동일). 부모가 FORK 에 도달하는 바로 그
   순간 자식이 EXIT 하면 블록하지 않는다 (EXIT 처리가 먼저 끝나 live_children 이 이미 줄었다).
   둘 다 D1 이 결정한다.
-- **`batch_bandwidth_cap`**: 여전히 집행하지 않는다 (읽지도 않는다). B1/B2 부류는 s 에서 생겼으니
-  남은 건 "non-batch 가 runnable 한 동안 batch 몫 ≤ cap" 의 회계 창 하나다. 실행기 안전망(starvation
-  window)도 미구현 — EDF 마감 부류와 FIFO 는 지평선이 없다.
+- ~~**`batch_bandwidth_cap`**: 여전히 집행하지 않는다~~ → **v 에서 집행한다** (D10). 실행기
+  안전망(starvation window)은 **만들지 않기로 확정**됐다 — 2026-10-08 declared-class 메모 §2,
+  batch 메모의 2026-10-17 correction, RQ0 `executor-assumptions` (3). harness 의
+  `starvation_floor` guard 가 30 s 로 묶는다(1,000,000 µs 플레이스홀더가 아니다).
+- **v 가 남긴 것 두 가지, 인지오 확인 필요**:
+  ① **FIFO 에서 cap 은 선점한다.** 비선점 알고리즘 위에 천장을 얹으면 그 수밖에 없다 — 실행기
+     규칙은 알고리즘 **아래**에 깔린다(batch 메모 §3 "identical across algorithms"). 측정에서
+     주기 태스크가 0 → 99 job 으로 올라간 것이 이 선점 덕이다.
+  ② **capped 구간이 점유 도중에 열리면 홀더를 재무장하지 않는다** — 초과분은 빚(allow_ < 0)으로
+     남기고 다음에 class 가 돌기 전에 갚는다. 재무장은 charge 안 된 지평선을 다시 주는 것이라
+     U2 가 밟은 음수 지평선 자리다. 오차는 grant 하나로 묶인다.
 - **cross-field 규칙 5** (`batch_share ≤ cap`) 와 범위 clamp: 로더가 하지 않는다. MLFQ 와 같이
   상류(validator)가 합성한 설정을 믿는다.
 - **c1-gaming 은 EDF 에서 무너진다** (마감 5/5,664) — ~~과부하라 버그 아님~~ 은 반쪽 설명이었다.
@@ -171,6 +186,25 @@ s 의 검증 (24파일 전수, 스케줄 6종):
 다음 dispatch 의 지평선이 0 → 길이 0 occupancy 가 생겼다. "경계와 같은 µs 의 선점 = 슬라이스 끝"으로 고쳤다.
 첫 수정은 그 태스크를 ready set 에서 **지워버렸다**(t=166670 이후 scan 이 영영 안 뜀) — 레인이
 일감을 두고 노는 걸 보고 잡았다. 상태 기록: `../memo/memo_261001.md`.
+
+v 의 검증 (전부 이번 세션 실측):
+
+| 무엇 | 결과 |
+|---|---|
+| **음성 대조** — cap 이 전부 null 이면 `sim_u` 와 바이트 동일 | 스케줄 없음 24/24, 4엔트리 교체 24/24 |
+| coreset 전수 × capped 스케줄 3종 (MLFQ 0.05 / MLFQ 0.5 / mock-switch 0.15) | 24×3 전부 종료, 두 번 돌려 바이트 동일 |
+| 빚(`allow_` 최솟값)의 상한 | cap 0.05 **−1 µs**, mock-switch −353 µs, cap 0.5 −10,000 µs = **버킷 깊이 하나** (설계가 말한 "grant 하나") |
+| 천장 — 손 워크로드(주기 1 + hog 1, 둘 다 늘 runnable) | MLFQ cap 0.05 → 5.23 %, 0.2 → 17.0 %, 0.5 → 30.0 %(=cap 없을 때와 같다, 천장이 비구속) / LOTTERY 0.05 → 4.42 % |
+| FIFO — 비선점 홀더를 cap 이 끊는가 | 주기 태스크가 0 job → **99 job**. cap 이 없으면 hog 가 100 % 를 쥐고 안 놓는다 |
+| `src/sim` == `steps/sim_v` (`meta.sim` 만 정규화) | coreset 24 × 스케줄 4 = 96/96, 손 워크로드 18/18 |
+
+⚠️ 두 번 밟은 함정, 둘 다 **규모를 보고** 잡았다:
+1. `drain_in` 이 빚(`allow_<0`)을 그대로 나눠 59 µs 같은 지평선을 냈다 → 길이 0 점유 → MLFQ 가
+   `SliceEnd` 로 읽고 강등 → 재디스패치 → **같은 µs 에서 무한루프**. `c2-p3b` 가 trace 7.4 GB 를
+   뱉었다. `a` 를 0 으로 clamp 하고, 지평선 경계 대신 cap 자기 타이머 하나로 통일해 고쳤다.
+2. 레인이 비어 있을 때의 `cap_gate` 는 볼 홀더가 없어 타이머를 못 건다 → dispatch 직후에 다시
+   걸어야 한다. 안 걸면 홀더가 이벤트 없이 한참 달려 빚이 **−255,706 µs** 까지 갔다 (고친 뒤 −1).
+   ⇒ "종료했다"가 "맞게 돌았다"가 아니다. 빚의 최솟값을 안 찍었으면 2번은 못 봤다.
 
 ### §7 통합 게이트
 

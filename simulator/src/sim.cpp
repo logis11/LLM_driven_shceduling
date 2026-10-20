@@ -381,9 +381,11 @@ struct Lottery : Policy {
 };
 
 // One line of a config schedule. The loader fills it; the core consumes it via ConfigApply
-struct ConfigEntry { i64 t_us; std::string algorithm; Params params; std::string provenance; };
+// cap_bp: batch_bandwidth_cap as an integer in 1/10000. -1 = null (no ceiling) — no float at run time
+struct ConfigEntry { i64 t_us; std::string algorithm; Params params; std::string provenance;
+                     int cap_bp = -1; };
 
-enum class Kind { Arrive, Lane, Wake, Unblock, Depart, PolicyTimer, ConfigApply };
+enum class Kind { Arrive, Lane, Wake, Unblock, Depart, PolicyTimer, ConfigApply, CapRefill };
 struct Event { i64 t; std::uint64_t seq; Kind kind; int task; std::uint64_t gen = 0; int tag = 0; };
 
 // D1 (guide §9.3): at equal µs, ① kind priority (config apply first) ② insertion order
@@ -409,7 +411,13 @@ class Sim : public Trace, public Clock, public TaskView {
   }
   bool batch(int id) const override {
     const Task& t = tasks_[(std::size_t)id];
-    return !t.periodic && t.burst >= batch_slice_;
+    if (t.periodic) return false;
+    // burst grows only at release(). B1 says a task enters the class "the moment it has
+    // consumed one full time slice", so the unsettled part of the current occupancy counts:
+    // without it a task that never gives up the lane (FIFO) is never seen as batch. At pick
+    // time running_ is -1, so what the policies read does not change (V).
+    const i64 b = t.burst + (id == running_ ? now_ - lane_start_ : 0);
+    return b >= batch_slice_;
   }
   void note(const char* what, int id) override {           // a policy's x_ line
     assert(what[0] == 'x' && what[1] == '_');
@@ -425,6 +433,14 @@ class Sim : public Trace, public Clock, public TaskView {
                 "\"met\":%s,\"slack_us\":%lld}\n", (long long)now_,
                 tasks_[(std::size_t)id].sid.c_str(), (long long)due,
                 met ? "true" : "false", (long long)slack);
+  }
+
+  // V's diagnostic. The harness ignores x_ lines (its event set is closed, data-contracts §9).
+  // It is the only trace of the cap biting: a park leaves no other mark but run_end(preempt)
+  void ev_cap(int id, bool parked) {
+    std::printf("{\"event\":\"x_cap_park\",\"t\":%lld,\"task\":\"%s\",\"in\":%s,"
+                "\"allow_us\":%lld}\n", (long long)now_, tasks_[(std::size_t)id].sid.c_str(),
+                parked ? "true" : "false", (long long)allow_);
   }
 
   // ── contract events (data-contracts §9) ──
@@ -520,6 +536,7 @@ class Sim : public Trace, public Clock, public TaskView {
       q_.pop();
       assert(e.t >= now_);
       now_ = e.t;
+      settle_cap();            // V: settle the accrual over [cap_mark_, now_] first
       switch (e.kind) {
         case Kind::Arrive:      on_arrive(e.task);      break;
         case Kind::Lane:        on_lane(e);             break;
@@ -528,8 +545,11 @@ class Sim : public Trace, public Clock, public TaskView {
         case Kind::Depart:      on_depart(e.task);      break;
         case Kind::PolicyTimer: on_policy_timer(e);     break;
         case Kind::ConfigApply: on_config_apply(e.tag); break;
+        case Kind::CapRefill:   break;   // V: waking up is the work — cap_gate below judges
       }
+      cap_gate();              // V: park/admit is judged even while the lane is held
       dispatch();
+      capped_ = capped_now();  // V: the verdict for the next interval; no time passed here
     }
   }
 
@@ -558,6 +578,135 @@ class Sim : public Trace, public Clock, public TaskView {
   int running_ = -1;
   i64 lane_start_ = 0, now_ = 0;
   bool check_gen_ = true;
+
+  // ── V: batch_bandwidth_cap ────────────────────────────────────────────────
+  int cap_bp_ = -1;              // the running config's cap, 1/10000. -1 = null → path off
+  i64 allow_ = 0;                // token bucket, µs. Negative = debt from a stretch that
+                                 // opened mid-occupancy
+  i64 accrue_rem_ = 0;           // remainder of the integer accrual — keeps it drift-free
+  i64 cap_mark_ = 0;             // the accrual is settled up to here
+  bool capped_ = false;          // was [cap_mark_, now_] capped (what accrual and spend read)
+  std::vector<int> runnable_;    // Ready+Running — the population "is a non-batch task runnable"
+  std::vector<int> parked_;      // batch tasks held out of the policy's ready set, in park order
+  std::uint64_t cap_epoch_ = 0;  // generation of the CapRefill reservation
+  i64 cap_timer_at_ = -1;        // the cap timer now armed (so it is not armed twice)
+
+  static bool is_run_state(State s) { return s == State::Ready || s == State::Running; }
+
+  // The single funnel for every state transition; runnable_ is maintained here alone. Batch
+  // membership changes with burst, without a transition, so the set is kept and the question
+  // is asked of batch() each time
+  void set_st(int id, State s) {
+    Task& t = T(id);
+    const bool was = is_run_state(t.st), now = is_run_state(s);
+    t.st = s;
+    if (was == now) return;
+    if (now) runnable_.push_back(id);
+    else {
+      runnable_.erase(std::remove(runnable_.begin(), runnable_.end(), id), runnable_.end());
+      parked_.erase(std::remove(parked_.begin(), parked_.end(), id), parked_.end());
+    }
+  }
+
+  bool capped_now() const {      // is any non-batch task runnable (batch-class memo §3)
+    for (int id : runnable_) if (!batch(id)) return true;
+    return false;
+  }
+
+  // Accrual and spending in one place. Over [cap_mark_, now_] neither the runnable set nor the
+  // holder changes — both move only at decision points, and every decision point passes here —
+  // so the interval is homogeneous
+  void settle_cap() {
+    const i64 dt = now_ - cap_mark_;
+    cap_mark_ = now_;
+    if (cap_bp_ < 0 || dt <= 0 || !capped_) return;
+    const i64 num = dt * cap_bp_ + accrue_rem_;
+    allow_ += num / kShareDen;
+    accrue_rem_ = num % kShareDen;
+    if (allow_ > batch_slice_) { allow_ = batch_slice_; accrue_rem_ = 0; }   // bucket depth
+    // Spend only what this interval delivered to a task while it was in the batch class. The
+    // interval is split at the B1 threshold for an occupancy that crosses it (FIFO, where
+    // nothing preempts). burst grows only at release(), so count the effective burst here
+    if (running_ >= 0 && !T(running_).periodic) {
+      const i64 b0 = T(running_).burst + (cap_mark_ - dt - lane_start_);
+      const i64 in_class = (b0 + dt) - std::max(b0, batch_slice_);
+      if (in_class > 0) allow_ -= in_class;
+    }
+  }
+
+  // Empty bucket → hold every runnable batch task out of the policy's ready set; full bucket or
+  // no ceiling → give them back. Called at every decision point, so pick() never sees a task it
+  // may not run and the verdict is never late. Idempotent
+  void cap_gate() {
+    if (cap_bp_ < 0) { unpark_all(); return; }
+    if (!capped_now() || allow_ >= batch_slice_) { unpark_all(); arm_cap_timer(); return; }
+    if (allow_ > 0) { arm_cap_timer(); return; }   // still in credit — nothing to park
+    // The bucket is empty. A batch holder comes off the lane first: when the stretch opened
+    // mid-occupancy its horizon was set with no ceiling, and the debt would keep growing
+    if (running_ >= 0 && batch(running_)) {
+      const int v = running_;
+      release();
+      ev("run_end", v, "reason", "preempt");
+      if (T(v).run_left == 0) advance(v);          // coincided with a RUN boundary
+      else { set_st(v, State::Ready); park(v); }
+    }
+    for (std::size_t k = 0; k < runnable_.size(); ++k) {
+      const int id = runnable_[k];
+      if (batch(id) && !is_parked(id)) park(id);
+    }
+    arm_cap_timer();
+  }
+
+  bool is_parked(int id) const {
+    return std::find(parked_.begin(), parked_.end(), id) != parked_.end();
+  }
+  void park(int id) {
+    pol_->on_yield(id, Yield::Blocked);   // "remove from the ready set" in all four policies
+    parked_.push_back(id);
+    ev_cap(id, true);
+  }
+  void unpark_all() {
+    if (parked_.empty()) return;
+    const std::vector<int> back = parked_;         // park order — deterministic
+    parked_.clear();
+    cap_timer_at_ = -1;
+    for (int id : back) { pol_->on_ready(id); ev_cap(id, false); }
+    for (int id : back) maybe_preempt(id);         // the policy may take the lane back
+  }
+
+  // The cap judges at decision points, and a decision point may never come — under FIFO a
+  // holder's horizon can be a whole second with no event in between. So the cap arms its own
+  // timer. Two cases: ① parked → when the bucket is full again (without it the admit is late
+  // and the class is served below its ceiling); ② a holder spending → when it empties.
+  // ②'s rate: inside a capped stretch accrual f runs beside the spend 1, so the net is (1−f)
+  void arm_cap_timer() {
+    if (cap_bp_ <= 0) return;
+    i64 at = -1;
+    if (!parked_.empty()) {
+      const i64 need = batch_slice_ - allow_;
+      if (need > 0) at = now_ + (need * kShareDen + cap_bp_ - 1) / cap_bp_;      // ceil
+    }
+    if (running_ >= 0 && cap_bp_ < kShareDen && capped_now()) {
+      const i64 d = drain_in(running_);            // when the holder reaches the ceiling
+      if (d >= 0 && (at < 0 || now_ + d < at)) at = now_ + d;
+    }
+    if (at < 0 || at == cap_timer_at_) return;     // none, or already armed for that instant
+    cap_timer_at_ = at;
+    push(at, Kind::CapRefill, -1, ++cap_epoch_);   // the epoch voids every earlier reservation
+  }
+
+  // How long until the bucket empties if id keeps running as it is. -1 for a periodic task
+  i64 drain_in(int id) const {
+    if (T2(id).periodic) return -1;
+    const i64 b = T2(id).burst + (now_ - lane_start_);
+    const i64 to_class = std::max<i64>(0, batch_slice_ - b);   // free until the B1 threshold
+    i64 a = allow_ + to_class * cap_bp_ / kShareDen;           // which still accrues meanwhile
+    if (a > batch_slice_) a = batch_slice_;
+    if (a < 0) a = 0;   // in debt: it is over the moment it crosses. Dividing a negative here
+                        // yields a nonsense horizon — the defect that looped sim_v on c2-p3b
+    return to_class + (a * kShareDen + (kShareDen - cap_bp_) - 1) / (kShareDen - cap_bp_);
+  }
+  const Task& T2(int id) const { return tasks_[static_cast<std::size_t>(id)]; }
   std::map<std::string, int> chan_id_;
   std::vector<std::deque<int>> chan_waiters_;
   std::vector<int> chan_pending_;               // channel mailboxes
@@ -599,10 +748,14 @@ class Sim : public Trace, public Clock, public TaskView {
     // B1's slice (batch-class memo §3). FIFO has no slice, so it uses the boot default's
     batch_slice_ = c.algorithm == "EDF"  ? c.params.residual_timeslice_us
                  : c.algorithm == "FIFO" ? Params{}.timeslice_us : c.params.timeslice_us;
+    // V: the cap and the bucket depth move together. A parked task is not in handoff, so it
+    // stays parked and the next cap_gate judges it under the new config
+    cap_bp_ = c.cap_bp;
+    if (allow_ > batch_slice_) { allow_ = batch_slice_; accrue_rem_ = 0; }
     pol_ = next;
     pol_->start(c.params, cold);
     for (int id : waiting) pol_->on_ready(id);
-    if (holder >= 0 && cold) { running_ = holder; T(holder).st = State::Running;
+    if (holder >= 0 && cold) { running_ = holder; set_st(holder, State::Running);
                                lane_start_ = now_; arm_lane(holder); }
     // U2: same algorithm — the holder is untouched; its pending Lane event (same gen) is
     // the slice it was granted
@@ -619,7 +772,7 @@ class Sim : public Trace, public Clock, public TaskView {
     if (holder < 0) return;
     if (pol_->horizon(holder) == 0) { ev("run_end", holder, "reason", "preempt");
                                       yield_lane(holder, Yield::SliceEnd); }
-    else { running_ = holder; T(holder).st = State::Running;           // no switch → nothing traced
+    else { running_ = holder; set_st(holder, State::Running);           // no switch → nothing traced
            lane_start_ = now_; arm_lane(holder); }
   }
 
@@ -659,10 +812,10 @@ class Sim : public Trace, public Clock, public TaskView {
     for (int guard = 0; ; ++guard) {
       if (guard > 1000000) { std::fprintf(stderr, "step: %s does not advance\n",
                                           t.name.c_str()); std::abort(); }
-      if (t.pc >= t.prog.size()) { t.st = State::Done; return; }
+      if (t.pc >= t.prog.size()) { set_st(id, State::Done); return; }
       switch (t.prog[t.pc].op) {
-        case Op::RUN:  t.st = State::Ready; t.run_left = t.prog[t.pc].us; return;
-        case Op::SLEEP: t.st = State::Blocked; t.blocked_by = 's'; t.burst = 0;
+        case Op::RUN:  set_st(id, State::Ready); t.run_left = t.prog[t.pc].us; return;
+        case Op::SLEEP: set_st(id, State::Blocked); t.blocked_by = 's'; t.burst = 0;
                         push(now_ + t.prog[t.pc].us, Kind::Unblock, id); return;
         case Op::TIMER: {
           const i64 P = t.prog[t.pc].period_us;
@@ -679,7 +832,7 @@ class Sim : public Trace, public Clock, public TaskView {
           const i64 due = t.timer_next;                   // ahead of the grid — block until next tick
           t.job_tick = due; t.job_period = P; t.job_open = true;
           t.timer_next += P;
-          t.st = State::Blocked; t.blocked_by = 't'; t.burst = 0;   // a voluntary block
+          set_st(id, State::Blocked); t.blocked_by = 't'; t.burst = 0;   // a voluntary block
           push(due, Kind::Unblock, id);
           return;
         }
@@ -689,7 +842,7 @@ class Sim : public Trace, public Clock, public TaskView {
                                                    t.chain_dl = -1; ++t.pc; break; }
           if (t.mailbox > 0) { --t.mailbox; t.chain_dl = t.mail_dl.front(); t.mail_dl.pop_front();
                                ++t.pc; break; }
-          t.st = State::Blocked; t.blocked_by = 'w'; t.wait_chan = c; t.burst = 0;
+          set_st(id, State::Blocked); t.blocked_by = 'w'; t.wait_chan = c; t.burst = 0;
           chan_waiters_[(std::size_t)c].push_back(id);
           return;
         }
@@ -697,11 +850,11 @@ class Sim : public Trace, public Clock, public TaskView {
         case Op::FORK:
           if (t.spawn_next >= t.spawn_table.size()) { ++t.pc; break; }   // table exhausted
           if (t.fork_cap > 0 && t.live_children >= t.fork_cap) {
-            t.st = State::Blocked; t.blocked_by = 'f'; t.wait_chan = -1;  // wait for a slot
+            set_st(id, State::Blocked); t.blocked_by = 'f'; t.wait_chan = -1;  // wait for a slot
             return;                                                       // pc stays put
           }
           spawn(id); ++t.pc; break;
-        case Op::EXIT: t.st = State::Done;    return;
+        case Op::EXIT: set_st(id, State::Done); return;
         case Op::LOOP_BEGIN:
           if (t.prog[t.pc].count == 0) { t.pc = (std::size_t)t.prog[t.pc].jump; break; }
           t.loop_left.push_back(t.prog[t.pc].count);
@@ -716,7 +869,7 @@ class Sim : public Trace, public Clock, public TaskView {
   }
 
   void enqueue(int id, const char* cause) {
-    T(id).st = State::Ready; pol_->on_ready(id); ev("ready", id, "cause", cause);
+    set_st(id, State::Ready); pol_->on_ready(id); ev("ready", id, "cause", cause);
   }
   static const char* cause_of(const Task& t) {
     switch (t.blocked_by) { case 's': return "sleep_end"; case 't': return "timer_tick";
@@ -727,7 +880,7 @@ class Sim : public Trace, public Clock, public TaskView {
                             case 'f': return "fork_slot"; default: return "wait"; }
   }
   void yield_lane(int id, Yield why) {
-    if (why == Yield::SliceEnd || why == Yield::Preempted) T(id).st = State::Ready;
+    if (why == Yield::SliceEnd || why == Yield::Preempted) set_st(id, State::Ready);
     pol_->on_yield(id, why);
   }
 
@@ -767,7 +920,7 @@ class Sim : public Trace, public Clock, public TaskView {
     if (p.st == State::Blocked && p.wait_chan < 0) on_unblock_fork(t.parent);
   }
   void on_unblock_fork(int id) {   // a slot opened — retry the same FORK (no pc advance)
-    T(id).st = State::Ready;
+    set_st(id, State::Ready);
     ev("ready", id, "cause", "fork_slot");
     step(id);
     if (T(id).st == State::Ready) { pol_->on_ready(id); maybe_preempt(id); } else settled(id);
@@ -826,12 +979,15 @@ class Sim : public Trace, public Clock, public TaskView {
       const int idx = pending_.front(); pending_.pop_front();
       apply_config(idx);
     }
+    cap_gate();                               // V: filter before the policy picks
     const int id = pol_->pick();
     if (id < 0) return;
     running_ = id;
-    T(id).st = State::Running;
+    set_st(id, State::Running);
     lane_start_ = now_;
     arm_lane(id);
+    arm_cap_timer();        // V: armed once the holder is known — the gate call before the
+                            // pick had no holder to look at
     ev("run_start", id);
   }
 
@@ -841,7 +997,7 @@ class Sim : public Trace, public Clock, public TaskView {
       auto& w = chan_waiters_[(std::size_t)T(id).wait_chan];
       w.erase(std::remove(w.begin(), w.end(), id), w.end());
     }
-    T(id).st = State::Done;
+    set_st(id, State::Done);
     ev("task_end", id, "reason", "depart");
     on_task_end(id);
     pol_->on_yield(id, Yield::Ended);   // off the ready set too, wherever it sat
@@ -944,6 +1100,15 @@ static void load_schedule(const std::string& path, Sim& s) {
     ce.t_us = e.at("t_us").as_int("t_us");
     ce.algorithm = c.at("algorithm").as_str("algorithm");
     ce.provenance = e.at("provenance").as_str("provenance");
+    // V: the cap. null = no ceiling. Clamping into 0.05–0.95 is the upstream validator's job,
+    // as for the MLFQ params — what is checked here is only that the arithmetic holds
+    const Json& bc = c.at("batch_bandwidth_cap");
+    if (bc.k == Json::K::Null) ce.cap_bp = -1;
+    else {
+      const double v = bc.as_num("batch_bandwidth_cap");
+      if (!(v > 0.0 && v <= 1.0)) die("batch_bandwidth_cap must be null or in (0,1]");
+      ce.cap_bp = (int)std::llround(v * kShareDen);
+    }
     const Json& pp = c.at("params");
     if (ce.algorithm == "MLFQ") {            // params: exactly the fields declared per algorithm
       if (pp.obj.size() != 4) die("MLFQ params must have 4 fields");
