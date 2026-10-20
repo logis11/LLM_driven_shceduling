@@ -57,7 +57,7 @@ prior table에 들어간 값이에요. 채점 비중은 `harness/scoring/scoring
 
 **근거의 성격.** 이 값들은 측정값도 문헌값도 아니에요.
 
-- 범위 0.05–0.95와 최저치는 이 프로젝트가 정한 값이에요(recognition-vocabulary §2). Linux CFS bandwidth control(`linux-sched-bwc`)은 cgroup에 주기당 quota를 거는 같은 종류의 장치가 실제로 있다는 근거로만 써요.
+- 범위 0.05–0.95와 최저치는 이 프로젝트가 정한 값이에요(recognition-vocabulary §2). 장치의 모양은 Linux의 두 장치에서 반씩 왔어요(§3).
 - 채점 비중도 design 값이에요.
   - 0.5는 C2·C3 file의 progress 항목에서 왔어요.
   - backup의 0.25는 `c2-p3b`에서 왔어요.
@@ -66,7 +66,8 @@ prior table에 들어간 값이에요. 채점 비중은 `harness/scoring/scoring
 
 ## 3. cap 값에 대한 우려
 
-- cap의 범위, 최저치, 행마다 값은 근거가 design이에요. 출처가 있는 건 batch class 규칙(OSTEP 8장, Liu & Layland 1973)과 이런 장치가 존재한다는 사실(`linux-sched-bwc`)까지예요.
+- cap의 범위, 최저치, 행마다 값은 근거가 design이에요. 출처가 있는 건 batch class 규칙(OSTEP 8장, Liu & Layland 1973)과 cap 모양의 두 반쪽까지예요.
+- 그 두 반쪽은 kernel 문서 원문으로 확인했어요(2026-10-20). 상한이라는 면은 CFS bandwidth control(`cpu.max`, `linux-sched-bwc`)이에요. 다만 이 장치는 quota를 다 쓰면 다른 task가 CPU를 원하지 않아도 다음 period까지 throttle해서 work-conserving이 아니에요. 경쟁할 때만 나눈다는 면은 cgroup v2의 `cpu.weight`(`linux-cgroup-v2`)인데, 이건 상한이 아니라 비율이에요. 둘을 합친 "batch가 아닌 task가 runnable할 때만 걸리는 상한"은 우리 design이에요(`docs/references.md`, recognition-vocabulary §2).
 - 모든 condition이 같은 driver table을 쓰기 때문에 cap 값이 condition 사이의 비교를 한쪽으로 기울이지는 않아요. 하지만 `random`과 `oracle` 사이 차이의 크기는 cap 값에 따라 달라져요.
 - 그 영향이 한곳에 몰려 있어요. RQ0 판정용 file 중 9개가 MLFQ에 cap 0.05인 행으로 가요(RQ0 gate spec의 `prior-table-structure`). 최저치 0.05 하나가 판정의 큰 몫을 차지하는 셈이에요.
 - 대응: RQ0 gate spec에 cap band line을 넣어요. g band line처럼 다른 cap 값 아래에서의 판정 수를 primary 옆에 찍는 방식이고, 쓸 값은 RQ0 run 전에 spec에서 고정해요(인지오, Phase 10). 행마다 값을 측정으로 맞추는 건 configuration search로 만드는 calibrated table의 몫이에요.
