@@ -208,7 +208,46 @@ Stage 6. Swap mocks for the real simulator and daemon, end-to-end smoke, run all
 ### Phase 1 — Simulator to the first integration gate
 Build the simulator per `docs/simulator/simulator-guide.md` (binding fine print: `docs/simulator/interpretation-contract.md`). The gate: one C1 workload runs end-to-end under a one-entry config schedule with byte-identical traces across reruns. Working order and sub-tasks are 경민's to define.
 
-- [ ] **1.1** (sub-tasks to be defined by 경민)
+- [x] **1.1** Steps ladder A–U (`simulator/steps/`) and `src/sim.cpp` at stage U. All four algorithms, loader, config schedule; children traced under their spawn id (T); switch semantics with cold start, same-algorithm entry, and drain (U). Status: `simulator/memo/memo_261001.md`, `memo_261010.md`
+- [x] **1.2** `batch_bandwidth_cap` enforced — ladder step V, ported to `src/sim.cpp`. RQ0 gate spec conformance item (d). The accounting window the batch memo §7 item 3 left to this tree is decision D10: a token bucket, rate = cap, depth = one slice, implied window slice/cap. Negative control (every cap null) byte-identical to `sim_u` on 24×2 runs; three capped schedules 24×3 terminate and reproduce; `src/sim` == `steps/sim_v` 96/96 + 18 hand runs. Status: `simulator/memo/memo_261020.md` Part F — done 2026-10-20
+- [ ] **1.3** §7 gate sanity checks automated: delivered CPU ≤ elapsed; every completed task's RUN demand delivered; segment-bound tasks gone at depart; no out-of-order event. Gate items 1–3 are already met (`steps/README.md` §7)
+
+### Backlog
+Open simulator items after the gate. The binding list is the RQ0 gate spec's `simulator-conformance` statement, eight items, of which (c), (d) and (f) are met. Details: `simulator/memo/memo_261020.md` (the review and the open list), `memo_261010.md` (Parts A–E), `simulator/src/notes.md` §4.
+
+Implementation owed (the docs already answer):
+- RUN→RUN boundary fix — conformance (a). Zero-wait `ready(cause)` inside one occupancy, no lane hand-back, plus the `x_run_cont` diagnostic. Changes every MLFQ baseline trace (memo_261010 Part C; trace-clarifications memo §4). Lands together with Q2 below, same principle and same traces
+- **TIMER skip rule — conformance (b).** Decided 2026-10-07 (9.11 D3, `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`): a TIMER reached after ticks have passed consumes the latest and skips the earlier ones, each skipped tick a `deadline` line with `met: false` and no work. It answers the backlog-vs-drop note and overrules its recommendation. Needs (a) first, since the harness reads consumed ticks off `ready(timer_tick)`
+- **Strict idle class — conformance (e).** Decided 2026-10-08 (9.11 D4–D6/D16, `docs/memos/2026-10-08-declared-scheduling-class.md`): the loader reads `declared_class`, and an idle task runs only when no other-class task is runnable and is preempted at once when one wakes, under every algorithm. Needs the rebuilt dataset — the local build predates the field
+- **`WAIT children:<id>` — conformance (g).** Completes when every child the orchestrator spawned has ended, without blocking when none is live (`docs/data-contracts.md` §14, proposed 2026-10-16, in force once 인경민 agrees). Without it `c1-compile`'s build-turnaround term, judging weight 1.0, is censored under every condition
+- Q2, a lone holder's slice expiry: decided the mock's way on 2026-10-16 — no `run_end` when no ready task sits in the holder's new queue or a higher one. The simulator's `run_end(preempt)`/`run_start` pair is the side that changes, and it feeds `context_switches`
+- Invocation contract — conformance (h): `--workload`/`--schedule`/`--out-trace` flags, no positional argument, gzip on `.gz`, exit codes, `meta.sim` the machine configuration's version string (invocation memo 2026-09-11; src/notes.md gap 7; `harness/tools/harness/runner.py:301–309`)
+- ~~Starvation safety net~~ — **not owed.** The executor builds none (declared-class memo §2; batch memo's 2026-10-17 correction; RQ0 `executor-assumptions` item 3). The bound is the harness's `starvation_floor` guard at 30 s, not the 1,000,000 µs placeholder memo_261010 quotes
+- Remaining batch-class work after V: the two unit tests of batch memo §7.6, the `x_batch_class` diagnostic (V emits `x_cap_park`, which records the throttle rather than the class), and checking the rebuilt core set's batch tasks against §4's prediction — all three wait on the dataset rebuild
+- `x_mlfq_level {t, task, from, to}` diagnostic (memo_261010 Part D4)
+- Unit tests: the batch memo's two (§7.6), and demand conservation across a switch (memo_261010 Part D2)
+- Semantics notes into a contract-side doc: D1–D9, U1–U3, B1/B2 (src/notes.md gap 8; memo_261010 Part D3, Part A #11)
+- Merge the two mailboxes into one, D2 decided 2026-10-10. Recommended: keep the task mailbox; the loader reads the wake event's `target`. Regression: coreset byte-identical (channel ↔ task is 1:1 in all 24 files) (memo_261010 Part E)
+- Re-measure EDF after 인지오's dataset rework: `c1-gaming` loses the compositor, and `c2-p2b`'s clamscan becomes unattended-upgrade. Re-check whether the p2 pair's two EDF rows still differ on the frames (`simulator/notes/note-for-jioh-edf-chain-stage-class.md`, Answer)
+
+Questions for 인지오:
+- ~~TIMER backlog vs frame drop~~ — answered 2026-10-07 by the skip-rule memo; the note is not updated yet
+- ~~`mock-switch` Q1/Q2/Q3~~ — all answered: Q1 the mock was wrong and was re-derived on 2026-10-16; Q2 decided the mock's way (implementation owed, above); Q3 the guide's §4½ listing now carries its fifth instruction
+- `fork_cap` rationale, absent-field meaning, and B3 (measured peak 16) (`simulator/notes/note1010.md`) — still open
+- Replies owed from 인경민, not questions to 인지오: the declared-class memo §4 item 4 (memo_261001 §6 answers 1 and 2 confirmed as the formal reply the RQ0 `executor-assumptions` statement asks for — a message, not code), §4 item 1 (the idle rule), and agreement to (g). Two consequences of V also need confirming: under FIFO the cap preempts, and a capped stretch opening mid-occupancy leaves a debt rather than re-arming the holder (memo_261020 Part F4)
+
+Ours to decide and write down:
+- TIMER t₀, D4 (memo_261001 §5.4: no coreset effect)
+- Open job at depart: miss or never-due (guide §9.4)
+- Fork-slot edge cases (guide §9.5)
+- Zero-length occupancy for an arriving task whose first instruction blocks (metrics §11.5)
+- `fork_cap` absent → unbounded
+- Run end `T_end` and the `arm()` stop rule
+- Reply to 인지오's three questions (boot-default memo §5; memo_261001 §6)
+- 1–7 zero-length occupancies per file under EDF, cause unknown (memo_261001 §9)
+- ~~Does a same-algorithm MLFQ entry restart the boost grid~~ — the harness adopted the simulator's behaviour on 2026-10-17 (`boost_window` lays the grid from each applied MLFQ entry); unbounded drain from an EDF deadline-class holder is still ours (memo_261010 Part B)
+- ~~Zero-length occupancy for an arriving task whose first instruction blocks~~ — decided our way; six fixtures re-derived on 2026-10-17 and the simulator guide §6 now describes our behaviour
+- The dataset is rebuilt to 51 files plus 78 variants while every regression baseline stands on the stale 24-file build of 2026-09-04, which carries no `declared_class`. Rebuild and re-baseline before (e) (memo_261020 Part D)
 
 ## 박이안 (ian)
 
