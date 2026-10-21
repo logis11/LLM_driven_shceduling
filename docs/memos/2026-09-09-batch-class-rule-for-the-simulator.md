@@ -1,7 +1,7 @@
 # The batch class — who the cap applies to, and the rule the simulator should use to decide it
 
-> Status: memo · Created 2026-09-09 · Updated 2026-10-17
-> Open — §7 item 3, `batch_bandwidth_cap` applied as a ceiling on the batch class while a non-batch task is runnable, with its accounting window written down: the simulator does not read the field yet (the RQ0 gate spec's conformance item (d)); with it items 5 and 6, the rules in the simulator's semantics notes and the two unit tests, as the simulator's own record keeps them open (`simulator/memo/memo_261010.md` Part A, items 4, 5, 8 and 11); owner 인경민. Rules B1 and B2 are in the simulator (`simulator/src/sim.cpp`, stage S).
+> Status: memo · Created 2026-09-09 · Updated 2026-10-21
+> Open — §7 items 5 and 6, the rules in the simulator's semantics notes and the two unit tests, as the simulator's own record keeps them open (`simulator/memo/memo_261020.md` Part E item 6 and §F5); owner 인경민. Rules B1 and B2 are in the simulator (`simulator/src/sim.cpp`, stage S); §7 item 3, `batch_bandwidth_cap` applied as a ceiling on the batch class while a non-batch task is runnable (the RQ0 gate spec's conformance item (d)), is in it since stage V (2026-10-20), its accounting window 인경민's decision D10, a token bucket of rate cap and depth one slice (`simulator/memo/memo_261020.md` Part F).
 > From 인지오 to 인경민. Specifies the one behavioural rule the config schema promises but nobody has written yet: which tasks are in the **batch class** that `batch_bandwidth_cap` bounds. Comes out of the prior driver table's pair review (`docs/daemon/prior-table-pair-review.md`). Absorb into the simulator guide once implemented. No OS background assumed; the worked examples carry the argument.
 
 ## 1. The problem in plain words

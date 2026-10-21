@@ -1,6 +1,6 @@
 # 8권 · 의사결정 연대기: 2026-08-23부터 지금까지
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-20
+> Status: draft · Created 2026-10-14 · Updated 2026-10-21
 
 **이 데이터셋의 모양을 정한 결정들은 언제, 왜, 무엇을 대신해서 내려졌고, 무엇이 아직 열려 있나.**
 
@@ -1756,7 +1756,7 @@ library의 판 번호는 2026-10-14에 기록과 파일이 어긋나 있었습�
 
 # 12장 · 지금 열려 있는 자리
 
-이 장은 "2026-10-14 현재, 데이터셋과 그 주변에서 무엇이 아직 정해지지 않았거나 실행되지 않았고, 누가 정하나"라는 질문에 답합니다. 각 항목은 기록에서 인용하고, 무엇이 미정인지, 어떤 선택지나 전제 조건이 있는지, 누가 정하는지를 적습니다. 출처는 주로 `_dev/TODO.md`의 9.15, 9.16, Phase 10, Backlog 줄과, 각 spec과 handoff의 열린 항목입니다. TODO는 다른 session이 동시에 고칠 수 있는 파일이므로, 이 장의 인용은 2026-10-14에 읽은 상태입니다. 그 뒤 닫히거나 바뀐 자리는 2026-10-17에 다시 읽어 고쳐 적었고, 9.16과 Phase 9가 끝난 뒤(2026-10-18)의 자리는 2026-10-20에 다시 읽어 고쳐 적었습니다.
+이 장은 "지금 데이터셋과 그 주변에서 무엇이 아직 정해지지 않았거나 실행되지 않았고, 누가 정하나"라는 질문에 답합니다. 각 항목은 기록에서 인용하고, 무엇이 미정인지, 어떤 선택지나 전제 조건이 있는지, 누가 정하는지를 적습니다. 출처는 주로 `_dev/TODO.md`의 9.15, 9.16, Phase 10, Backlog 줄과, 각 spec과 handoff의 열린 항목입니다. TODO는 다른 session이 동시에 고칠 수 있는 파일이므로, 이 장의 인용은 2026-10-14에 읽은 상태입니다. 그 뒤 닫히거나 바뀐 자리는 2026-10-17에 다시 읽어 고쳐 적었고, 9.16과 Phase 9가 끝난 뒤(2026-10-18)의 자리는 2026-10-20에 다시 읽어 고쳐 적었습니다. 2026-10-21에 다시 읽어 Phase 10의 새 항목들(12.4의 6–8)과 conformance 항목 (d)의 구현을 더했습니다.
 
 ## 12.1 9.15 — 문서, memo, guidebook 정정 (2026-10-14 → 10-17, 끝남)
 
@@ -1848,7 +1848,7 @@ library의 판 번호는 2026-10-14에 기록과 파일이 어긋나 있었습�
 
 **simulator를 기다리는 문장(spec 결정 6).** compile된 숫자에 관한 문장 가운데 참인지가 reference simulator가 아직 구현하지 않은 executor 규칙에 달린 것은, 그 문서가 기다리는 RQ0 gate spec의 conformance 항목을 이름으로 부르면 해결된 것으로 칩니다. exit 기록은 그런 문장을 항목별로 `compiled/uncheckable-by-item.md`에 모았습니다. (b) TIMER skip 규칙, (d) `batch_bandwidth_cap`을 work-conserving 상한으로 적용, (e) 엄격한 idle class, (g) `WAIT children:<id>`가 spawn한 자식이 모두 끝났을 때 완료됨입니다. (a) zero-wait `ready` 줄과 (h) invocation contract대로 실행되는 simulator에는 어느 한 문장만 기대지 않습니다. (a)는 ready 줄에서 읽는 모든 term과 D3의 `tick_count` 읽기의 바탕이고, (h)는 실행의 모양 자체이기 때문입니다. 각 문장은 이제 자기 문서에서 그 항목을 부릅니다(`3fbb7c25`, `1a092508`).
 
-> **열린 자리.** 9.16과 Phase 9는 끝났지만, 위 목록의 문장들은 아직 확인되지 않았습니다. 그 확인은 인경민이 항목 (b), (d), (e), (g)를 simulator에 구현한 뒤 항목마다 돌리는 점검입니다(`compiled/uncheckable-by-item.md`의 "Check" 줄; 9.16 spec 결정 6). 빚으로 남은 conformance 항목은 (a), (b), (d), (e), (g), (h)의 여섯이고, 구현은 인경민의 몫이며, 그 전에는 RQ0 실행이 허용되지 않습니다(12.4).
+> **열린 자리.** 9.16과 Phase 9는 끝났지만, 위 목록의 문장들은 아직 확인되지 않았습니다. 그 확인은 인경민이 항목 (b), (d), (e), (g)를 simulator에 구현한 뒤 항목마다 돌리는 점검입니다(`compiled/uncheckable-by-item.md`의 "Check" 줄; 9.16 spec 결정 6). (d)는 2026-10-20에 구현되었고(12.4의 4), 그 확인은 아직 돌지 않았습니다. 빚으로 남은 conformance 항목은 (a), (b), (e), (g), (h)의 다섯이고, 구현은 인경민의 몫이며, 그 전에는 RQ0 실행이 허용되지 않습니다(12.4).
 
 ## 12.3 9.22의 나머지
 
@@ -1856,7 +1856,7 @@ library의 판 번호는 2026-10-14에 기록과 파일이 어긋나 있었습�
 
 ## 12.4 Phase 10 — 통합과 RQ0 실행
 
-Phase 10의 TODO 줄은 "Swap mocks for the real simulator and daemon, end-to-end smoke, run all coreset files × 3 conditions, check guards before looking at results, judge per the RQ0 gate spec; on failure, config search before workload redesign. Depends on Phase 9, 경민's integration gate and algorithm extension, and 이안's daemon"입니다. 데이터셋과 관계된 열린 항목은 다섯입니다.
+Phase 10의 TODO 줄은 "Swap mocks for the real simulator and daemon, end-to-end smoke, run all coreset files × 3 conditions, check guards before looking at results, judge per the RQ0 gate spec; on failure, config search before workload redesign. Depends on Phase 9, 경민's integration gate and algorithm extension, and 이안's daemon"입니다. 데이터셋과 관계된 열린 항목은 여덟입니다.
 
 **1. trace-replay 점검.** "a few scored files built twice — as compiled, and with the measured wake trace replayed — and their verdicts compared; its files, its agreement criterion and what a disagreement leads to are fixed in the RQ0 gate spec before the RQ0 run (9.14; from the 2026-09-28 review of 9.5–9.9)." 9.14가 이미 파일 넷(`c7-dev`, `c7-browsing`, `c7-meeting`, `c2-p1a`)과 일치 기준("each file's gap falls on the same side of g under both builds and differs by less than 0.17")을 gate spec에 사전 등록했습니다(9.14 결정 10). 실행은 Phase 10의 것입니다.
 
@@ -1864,11 +1864,17 @@ Phase 10의 TODO 줄은 "Swap mocks for the real simulator and daemon, end-to-en
 
 **3. TIMER 문서.** 2026-10-14에 9.15에서 넘어온 줄입니다. "TIMER docs restated to the skip rule once 인경민's simulator implements it … the simulator-side TIMER rows 9.15 leaves blocked." 규칙은 정해져 있습니다. 9.11 D3(2026-10-07)가 정한 skip 규칙이고, 2026-10-07 TIMER memo의 §1–§4가 그 규칙과 60 fps의 예, 근거를 적으며, harness는 그 규칙으로 읽습니다(`docs/harness/metrics.md` §6.2). 이 줄이 기다리는 것은 문서의 고침이고, 그 전제 조건은 인경민이 simulator에 skip 규칙을 구현하는 것, 곧 RQ0 gate spec의 conformance 항목 (b)입니다(아래 4번 항목). 최종 memo가 60 fps의 예와 함께 그 구현을 부탁합니다(`docs/memos/2026-10-17-workload-dataset-rebuild.md` §6.2의 (b)). reference simulator는 지금도 backlog 규칙을 돌립니다(`simulator/src/sim.cpp`의 step K, "TIMER+backlog"). 2026-10-17, 9.15가 끝난 뒤 인지오가 guidebook은 이 줄을 기다리지 않기로 정했습니다(9.15 spec 결정 9를 guidebook에 대해서만 뒤집음; 9.15 작업 목록의 "After 9.15's close"). 그래서 두 guidebook(이 dataset guidebook과 `docs/guidebook/`의 guidebook 시리즈)은 skip 규칙을 규칙으로 적고, reference simulator가 아직 backlog 규칙을 돌린다는 것은 지금의 사실로만 적습니다. 이 줄에 남는 것은 simulator 쪽 문서(simulator guide와 interpretation contract의 TIMER 행), `docs/data-contracts.md`, coreset guide, `docs/references.md`의 role 줄, schema의 TIMER 설명이고, 이 문서들은 구현이 들어올 때까지 backlog 문장을 그대로 둡니다.
 
-**4. simulator의 blocker.** 9장에서 본 두 가지입니다. loader의 child-targeted WAKE 거부와, conformance 항목 (a) zero-wait `ready` 줄, (b) TIMER skip 규칙, (d) `batch_bandwidth_cap`, (e) 엄격한 idle class의 구현입니다. 인경민의 2026-10-10 memo는 이것들을 "Implementation owed (the docs already answer)"에 넣었습니다. 9.14 결정 1이 gate spec에 conformance statement를 넣었으므로, 이것들이 구현되기 전에는 RQ0 실행이 허용되지 않습니다. 2026-10-16에 인지오가 statement를 고쳤습니다(9.15 작업 목록 W-0758, W-0743). 끝 문장이 "(c) and (f) the simulator does today"가 되었고(cold start로 MLFQ에 들어가는 (c)는 `simulator/src/sim.cpp`의 2026-10-10 수정에 있음), 일곱째 항목 (g)가 더해졌습니다. orchestrator의 `WAIT children:<id>`는 그 orchestrator가 spawn한 자식이 모두 끝났을 때 완료되고, WAIT에 닿았을 때 살아 있는 자식이 없으면 막지 않고 완료된다는 항목입니다. (g)가 없으면 `c1-compile`의 build turnaround term(judging, weight 1.0)이 모든 조건에서 똑같이 censored가 되기 때문입니다. (g)의 규칙은 interpretation contract와 `docs/data-contracts.md`에 제안으로 적혀 있고 인경민이 동의하면 효력을 가지며, RQ0 gate spec은 실행에 그것을 요구합니다. 2026-10-17에는 인지오의 답으로 여덟째 항목 (h)가 더해졌습니다(9.15 작업 목록 W-0997, `harness/CHANGELOG.md`의 2026-10-17 항목). "the simulator run through the invocation contract as the runner invokes it"입니다. invocation contract(`docs/data-contracts.md` §11의 contract 10)는 simulator를 `--workload`, `--schedule`, `--out-trace`로 부르고 trace를 그 파일에 쓰게 하는데, reference simulator는 두 입력을 위치 인자로 받고 trace를 standard output에 씁니다(`simulator/src/sim.cpp`의 `main`). 인경민의 2026-10-10 memo도 이것을 "Implementation owed"에 넣었습니다. 그래서 지금 빚으로 남은 conformance 항목은 (a), (b), (d), (e), (g), (h)의 여섯입니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
+**4. simulator의 blocker.** 9장에서 본 두 가지입니다. loader의 child-targeted WAKE 거부와, conformance 항목 (a) zero-wait `ready` 줄, (b) TIMER skip 규칙, (d) `batch_bandwidth_cap`, (e) 엄격한 idle class의 구현입니다. 인경민의 2026-10-10 memo는 이것들을 "Implementation owed (the docs already answer)"에 넣었습니다. 9.14 결정 1이 gate spec에 conformance statement를 넣었으므로, 이것들이 구현되기 전에는 RQ0 실행이 허용되지 않습니다. 2026-10-16에 인지오가 statement를 고쳤습니다(9.15 작업 목록 W-0758, W-0743). 끝 문장이 "(c) and (f) the simulator does today"가 되었고(cold start로 MLFQ에 들어가는 (c)는 `simulator/src/sim.cpp`의 2026-10-10 수정에 있음), 일곱째 항목 (g)가 더해졌습니다. orchestrator의 `WAIT children:<id>`는 그 orchestrator가 spawn한 자식이 모두 끝났을 때 완료되고, WAIT에 닿았을 때 살아 있는 자식이 없으면 막지 않고 완료된다는 항목입니다. (g)가 없으면 `c1-compile`의 build turnaround term(judging, weight 1.0)이 모든 조건에서 똑같이 censored가 되기 때문입니다. (g)의 규칙은 interpretation contract와 `docs/data-contracts.md`에 제안으로 적혀 있고 인경민이 동의하면 효력을 가지며, RQ0 gate spec은 실행에 그것을 요구합니다. 2026-10-17에는 인지오의 답으로 여덟째 항목 (h)가 더해졌습니다(9.15 작업 목록 W-0997, `harness/CHANGELOG.md`의 2026-10-17 항목). "the simulator run through the invocation contract as the runner invokes it"입니다. invocation contract(`docs/data-contracts.md` §11의 contract 10)는 simulator를 `--workload`, `--schedule`, `--out-trace`로 부르고 trace를 그 파일에 쓰게 하는데, reference simulator는 두 입력을 위치 인자로 받고 trace를 standard output에 씁니다(`simulator/src/sim.cpp`의 `main`). 인경민의 2026-10-10 memo도 이것을 "Implementation owed"에 넣었습니다. 그래서 2026-10-17에 빚으로 남은 conformance 항목은 (a), (b), (d), (e), (g), (h)의 여섯입니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`). 2026-10-20에 인경민이 (d)를 simulator stage V에 구현했습니다(커밋 `1074b14d`, `simulator/memo/memo_261020.md` Part F). executor가 `batch_bandwidth_cap`을 behavioural batch class에 work-conserving 상한으로 적용하고, 상한을 재는 window는 인경민의 decision D10, rate가 cap이고 깊이가 slice 하나인 token bucket입니다. 그래서 지금 빚으로 남은 항목은 (a), (b), (e), (g), (h)의 다섯입니다. gate spec의 statement 끝 문장은 아직 "(c) and (f) the simulator does today"입니다.
 
 **5. `c6-dual`의 비용.** 9.14 handoff의 "the records build on `c6-dual` costs about 40 minutes a run … the RQ0 run's 100 `random` seeds on that file are a cost to plan for"입니다. "a cheaper records path is a task of its own"이라고 적혔지만, 2026-10-14에는 TODO에 줄이 없었습니다. 2026-10-16에 인지오가 지금 어느 대응도 고르지 않고 비용을 Phase 10의 TODO 줄에 올렸습니다(9.15 작업 목록 W-0757). 그 줄은 `random` 조건의 seed 100개에 이 파일 하나로 약 67시간, 한 run의 memory 최고점이 1,450만 row라고 적고, 대응(더 싼 records 경로, gate spec의 `n-grounding` statement 아래에서 N을 바꾸기, 비용을 그대로 지기)은 실제 simulator로 잰 비용 위에서 Phase 10에 정한다고 적습니다(8.5).
 
-> **열린 자리.** Phase 10의 시작은 인경민의 통합 gate와 박이안의 daemon에 달려 있습니다(TODO). simulator 쪽 여섯 항목과 loader 수정은 인경민이, `c6-dual` records 비용의 대응은 Phase 10에 인지오가 정합니다. trace-replay 점검의 실행 결과에 따라 "what a disagreement leads to"가 이미 gate spec에 고정되어 있어야 한다는 것이 TODO 줄의 조건입니다.
+**6. Link 2의 반증 조건.** 9.15의 작업 목록(K15의 질문)에서 온 줄입니다. 연구 주장의 사슬에서 link 2는 "차이의 일부는 행동 관찰로 보이지 않는다"이고(`docs/research-claims.md:40`), TODO 줄은 "no record sets one, and the RQ0 gate spec names no link; fixed in the RQ0 gate spec before the RQ0 run"입니다. 정하는 사람은 인지오입니다.
+
+**7. cap band line.** 2026-10-20에 더해진 줄입니다. "A cap band line in the RQ0 gate spec, in the g band line's form: the verdict count printed beside the primary under other `batch_bandwidth_cap` values (the unwanted rows' floor, the wanted rows' values), the values fixed in the RQ0 gate spec before the RQ0 run." cap의 범위, 최저치, 행마다의 값은 design이고(`docs/recognition-vocabulary.md` §2, `daemon/driver-table/prior.yaml`의 header), RQ0 판정 file 아홉이 MLFQ에 cap 0.05인 행으로 갑니다(gate spec의 `prior-table-structure`). 2026-10-20 memo `docs/memos/2026-10-20-batch-class-and-cap.md` §3이 이 우려를 적습니다. 정하는 사람은 인지오입니다.
+
+**8. smoke의 cold 수치.** 2026-10-20에 더해진 줄입니다. "The smoke's cold figure measured on the real simulator: no cold run is on record — 9.16's full smoke took 250 of 392 invocations from the cache … and 9.14 D14's 4 h 50 min took 254." cache 없이 처음부터 도는 smoke의 시간은 기록에 없고, real simulator로 Phase 10에서 잽니다.
+
+> **열린 자리.** Phase 10의 시작은 인경민의 통합 gate와 박이안의 daemon에 달려 있습니다(TODO). simulator 쪽 다섯 항목과 loader 수정은 인경민이, `c6-dual` records 비용의 대응은 Phase 10에 인지오가 정합니다. trace-replay 점검의 실행 결과에 따라 "what a disagreement leads to"가 이미 gate spec에 고정되어 있어야 한다는 것이 TODO 줄의 조건입니다.
 
 ## 12.5 Backlog
 

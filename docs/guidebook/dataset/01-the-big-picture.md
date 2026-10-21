@@ -1,6 +1,6 @@
 # 1권 · 데이터셋의 큰 그림
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-20
+> Status: draft · Created 2026-10-14 · Updated 2026-10-21
 
 **이 데이터셋은 무엇이고, 연구에서 어떤 일을 맡으며, 왜 이런 모양인가.**
 
@@ -1204,7 +1204,7 @@ Phase 9는 영역별 조사와 측정(9.4 gaming, 9.5 interactive와 typing, 9.6
 
 > **출구 감사(9.16)의 결과.** 9.16은 2026-10-17에 세 감사를 최종 상태에서 다시 돌렸습니다(`_dev/research/jioh/task-9.16-exit-audits/README.md`). 주장 감사는 데이터셋 쪽 주장 221개와 데이터셋 밖 주장 353개를 출처의 기록까지 따라갔고, 표본과 `docs/references.md`에만 구절이 있던 출처는 비교 전에 원문을 따로 다시 읽어(blind re-read) 188개 주장을 대조했습니다. 131개가 원문과 맞았고, 41개는 문장을 고쳤고, 3개는 원문과 어긋났고, 4개는 원문에 없었고, 9개는 원문에 닿지 못해 이전 기록이 그대로 남았습니다(CpsMark+의 전문, Field & Welsh 2007, 세 구절). 측정 감사에서는 data 쪽 수정 뒤 60개 행의 모든 값이 그 release에서 재현되었고, `archetypes.yaml`의 `meas-ci` 값 304개가 무엇인지 하나씩 읽으니 300개가 측정, 4개가 측정에서 계산한 파생, convention은 0개였습니다. compile된 숫자의 감사는 88개가 맞고, 45개가 낡았고, 3개가 틀렸습니다(`c7-gaming`의 `tick_count` guard, `c2-p3b`의 backup, batch-class memo의 예). 발견은 9.16 안에서 고쳤습니다. harness 쪽(`3fbb7c25`: 인지오의 결정 D3에 따라 `tick_count` guard가 창 규칙, 곧 `T_end`에 아직 도는 반복은 오류가 아니라는 metrics 문서 §4의 규칙을 따르게 함, guard spec 1.2), code와 data 쪽(`17f28d7f`: 측정 도구의 수정과 한 번의 재빌드, dataset `8e1eb753…`, variants `8e2948b1…`), 그리고 문서(`1a092508`, 이 guidebook 포함) 순서입니다. 최종 build의 전체 smoke(`make -C harness smoke`)는 2026-10-18에 exit 0으로 끝났습니다. 16,313초(4시간 32분)였지만 392번의 호출 가운데 250번은 cache에서 왔으므로 cold run의 시간이 아니고, 판정 `invalid`는 mock이 만드는 구조상의 결과입니다(smoke는 배관을 검사합니다; `gate/smoke-status.txt`).
 
-> **열린 자리.** 출구 감사는 compile된 숫자의 문장 가운데 simulator가 아직 보이지 않은 동작에 기대는 것들을 RQ0 gate spec의 statement `simulator-conformance` 항목별로 모았습니다(`_dev/research/jioh/task-9.16-exit-audits/compiled/uncheckable-by-item.md`). (b) TIMER의 skip 규칙, (d) `batch_bandwidth_cap`을 behavioural batch class에 work-conserving 상한으로 적용하는 것, (e) 엄격한 idle class, (g) orchestrator의 `WAIT children:<id>`가 자신이 띄운 자식이 모두 끝나면 완료되는 것입니다. 이 목록은 각 항목이 simulator에 들어올 때 인경민이 돌릴 확인이고(9.16 spec 결정 6), 그때까지 이 문장들은 확인되지 않은 채 열려 있습니다. 항목 (a)(막는 primitive가 끝날 때마다 ready 줄을 쓰는 것)는 ready 줄에서 읽는 모든 항의 바탕이고, (h)(runner가 부르는 invocation 계약대로 simulator를 돌리는 것)는 호출의 모양이라, 특정 문장에 매이지 않습니다. 그래도 (a)와 (h)는 (b), (d), (e), (g)와 함께 simulator 담당이 아직 갚을 항목이고, 여섯이 모두 보여지기 전에는 RQ0 run이 시작되지 않습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
+> **열린 자리.** 출구 감사는 compile된 숫자의 문장 가운데 simulator가 아직 보이지 않은 동작에 기대는 것들을 RQ0 gate spec의 statement `simulator-conformance` 항목별로 모았습니다(`_dev/research/jioh/task-9.16-exit-audits/compiled/uncheckable-by-item.md`). (b) TIMER의 skip 규칙, (d) `batch_bandwidth_cap`을 behavioural batch class에 work-conserving 상한으로 적용하는 것, (e) 엄격한 idle class, (g) orchestrator의 `WAIT children:<id>`가 자신이 띄운 자식이 모두 끝나면 완료되는 것입니다. 이 목록은 각 항목이 simulator에 들어올 때 인경민이 돌릴 확인이고(9.16 spec 결정 6), 그때까지 이 문장들은 확인되지 않은 채 열려 있습니다. (d)는 2026-10-20에 인경민이 simulator stage V에 구현했습니다(커밋 `1074b14d`; 상한을 재는 window는 인경민의 decision D10, rate가 cap이고 깊이가 slice 하나인 token bucket; `simulator/memo/memo_261020.md` Part F). 그 항목에 기대는 문장들의 확인은 아직 돌지 않았습니다. 항목 (a)(막는 primitive가 끝날 때마다 ready 줄을 쓰는 것)는 ready 줄에서 읽는 모든 항의 바탕이고, (h)(runner가 부르는 invocation 계약대로 simulator를 돌리는 것)는 호출의 모양이라, 특정 문장에 매이지 않습니다. 그래도 (a)와 (h)는 (b), (e), (g)와 함께 simulator 담당이 아직 갚을 항목이고, 항목마다 보여지기 전에는 RQ0 run이 시작되지 않습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
 
 ## 6.7 숫자가 주장하는 것과 주장하지 않는 것
 

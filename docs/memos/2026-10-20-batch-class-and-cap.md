@@ -1,7 +1,7 @@
 # batch class와 `batch_bandwidth_cap` — 정의와 cap 값의 기준
 
-> Status: memo · Created 2026-10-20 · Updated 2026-10-20
-> 열림 — 인경민: executor가 `batch_bandwidth_cap`을 batch class에 적용하는 것(RQ0 gate spec의 conformance item (d), cap을 work-conserving 상한으로 적용), 그 상한을 재는 window를 simulator 문서에 적는 것. batch-class memo(`2026-09-09-batch-class-rule-for-the-simulator.md`) §7 item 3과 같은 요청이에요. 담당 인경민.
+> Status: memo · Created 2026-10-20 · Updated 2026-10-21
+> 닫힘 (2026-10-21) — 인경민이 conformance item (d), executor가 `batch_bandwidth_cap`을 batch class에 work-conserving 상한으로 적용하는 것을 simulator stage V에 구현했어요(2026-10-20, 커밋 `1074b14d`). 상한을 재는 window는 인경민의 decision D10이고 `simulator/memo/memo_261020.md` Part F에 적혀 있어요. 남은 것은 (d)에 기대는 문장들의 확인이에요(§4).
 > From 인지오 to 인경민.
 
 ## 0. 이 문서
@@ -35,6 +35,7 @@ batch class가 무엇이고, driver table의 cap 값이 어떤 기준으로 정�
 
 - **상한만 있어요.** batch에게 몇 %를 보장하는 장치는 executor에 없어요. 30 s `starvation_floor`는 harness guard예요. 넘으면 run이 invalid가 될 뿐, CPU를 나눠 주지는 않아요.
 - **work-conserving이에요.** batch가 아닌 task가 runnable하지 않으면 cap은 꺼져요. batch 작업 혼자면 cap이 0.05여도 CPU를 다 써요.
+- **window는 token bucket이에요**(인경민의 decision D10, `simulator/memo/memo_261020.md` Part F). batch가 아닌 task가 runnable한 동안에만 cap의 속도로 차고, batch class가 받은 CPU 시간만큼 빠져요. 깊이는 slice 하나예요. 그래서 batch class는 길게 보면 cap만큼 받고, batch가 아닌 task가 기다리는 동안 한 번에 이어 도는 길이는 slice 하나를 넘지 않아요. cap 0.05에 slice 10 ms면 200 ms마다 10 ms예요.
 - **LOTTERY만 몫이 있어요.** `batch_share`는 batch class의 ticket 비율, 즉 기대값으로 받는 몫이에요. `batch_share ≤ cap`이고, prior table에서는 둘이 같아요.
 
 **값의 기준** (`daemon/driver-table/prior.yaml` header)
@@ -74,5 +75,6 @@ prior table에 들어간 값이에요. 채점 비중은 `harness/scoring/scoring
 
 ## 4. 인경민에게
 
-- 새 요청은 없어요. 남은 일은 conformance item (d), executor가 cap을 batch class에 work-conserving 상한으로 적용하는 것이에요. 상한을 재는 window는 설계에 맡기고, 정한 window를 simulator 문서에 적어 주세요. harness는 결과만 읽어요.
+- conformance item (d)는 끝났어요(stage V, 2026-10-20). window는 decision D10으로 simulator 문서에 적혀 있어요.
+- 남은 것은 (d)에 기대는 문장들의 확인이에요(9.16 기록 `compiled/uncheckable-by-item.md`의 (d) "Check" 줄). `c7-browsing`, `c7-office`, `c7-dev`, `c7-photo`, `c7-video-edit`와 `c6-spoof`에서 foreground의 P99가 cap 0.05일 때 cap 0.5일 때보다 나쁘지 않은지, foreground가 runnable한 동안 batch class의 CPU가 cap 이하인지 봐요.
 - B1·B2는 simulator에 있는 그대로 적었어요. declared idle 규칙은 conformance item (e)로 따로 열려 있어요(declared-class memo). 다른 점이 있으면 알려 주세요.
