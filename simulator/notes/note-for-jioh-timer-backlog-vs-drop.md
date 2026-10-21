@@ -1,7 +1,11 @@
 # Note for jioh — TIMER backlog vs. frame-drop for periodic (game/video) work
 
-> Status: memo · Created 2026-09-29 · Updated 2026-09-29
+> Status: memo · Created 2026-09-29 · Updated 2026-10-21 · **Answered 2026-10-07 — overruled; see the end**
 > Author: kyungmin. Raised while reading the `steps/` ladder (sim_k, TIMER). Not a spec change — a design question with a tentative resolution, left here for jioh to confirm or overrule.
+
+> **Read the end first.** 인지오 decided the opposite on 2026-10-07 (9.11 D3, the **TIMER skip
+> rule**). The "Tentative resolution" below — keep backlog — was **not** adopted. The sections
+> between here and the answer are kept as the reasoning that was put, not as current policy.
 
 ## The question
 
@@ -87,7 +91,45 @@ to name the logic-tick layer explicitly.
 
 ## Open items for jioh
 
-- [ ] Confirm backlog stays; or decide Proposal B is worth the invariant change.
-- [ ] Consider softening `simulator-guide.md:127/129` "like a real game engine" to scope it
-      to the logic-tick (fixed-timestep) layer, since render presentation does drop.
-- [ ] No code change implied by this note unless the above is decided.
+- [x] ~~Confirm backlog stays; or decide Proposal B is worth the invariant change.~~
+      **Answered 2026-10-07 — backlog does not stay.** See below.
+- [x] ~~Consider softening `simulator-guide.md:127/129` "like a real game engine"~~ — moot: the
+      skip rule replaces the sentence's premise.
+- [x] ~~No code change implied by this note unless the above is decided.~~ **A code change is
+      implied**: conformance (b), still owed.
+
+---
+
+## Answer — from 인지오, 2026-10-07 (recorded here 2026-10-21)
+
+**This note's recommendation was overruled.** 9.11 D3 adopted the **TIMER skip rule**
+(`docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`; rule §1, the 60 fps worked
+example §2, the grounds §4, with a 2026-10-08 correction):
+
+> A TIMER reached after one or more grid ticks have passed **consumes the latest tick and skips
+> the earlier ones**. Each skipped tick is a `deadline` line with `met: false` and no work.
+
+Two grounds are recorded, and both cut against this note:
+
+1. **The programs 9.11 read do not replay a missed period by default.** interbench and the ROS 2
+   executor skip a late period, mpv drops a late video frame, and rt-app — the precedent this
+   project cites for TIMER itself — re-arms its timer at the late time in its default mode. So
+   backlog is not the faithful model; it is the outlier.
+2. **Backlog destroys the measurement it was supposed to protect.** Under backlog a chain that is
+   over lane capacity never catches up, so `c3-evening`'s gaming segment misses nearly every
+   frame under *every* condition — the differences between policies vanish. Under the skip rule
+   the missed fraction is the share of ticks not served in time, and it still separates policies
+   in overload. The harness's `job` metric is read under the skip rule
+   (`docs/harness/metrics.md` §6.2).
+
+So "demand is conserved so aggregates compare directly", the core of the argument above, is
+exactly what was rejected: conserving demand for work nobody would do flattens the comparison.
+
+**Consequences for this tree.** The skip rule is conformance item (b) of
+`harness/experiments/rq0-gate.yaml`'s `simulator-conformance` statement and is **still owed** —
+`src/sim.cpp` consumes the backlog. It needs (a), the zero-wait `ready` line, first, because the
+harness reads consumed ticks off `ready(timer_tick)`. Until then
+`docs/simulator/interpretation-contract.md` §3's TIMER row and the simulator guide keep their
+backlog wording **on purpose** (the rebuild guidebook, `docs/guidebook/dataset/01-the-big-picture.md`
+§2.4, says so explicitly) — that is the contract waiting for the implementation, not a
+contradiction to fix.

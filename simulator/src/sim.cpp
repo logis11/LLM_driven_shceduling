@@ -15,6 +15,7 @@
 //   P deadline events · Q workload loader (mini_json) · R config schedule + handoff
 //   S EDF + LOTTERY via a TaskView seam (executor-owned task classes)
 //   T children traced under their spawn_table id · U config-switch semantics (cold/same/drain)
+//   V batch_bandwidth_cap enforced (token bucket, D10) · W spawn-table WAKE targets
 //
 // Design notes worth carrying:
 //   · gen (F): a preempted Lane reservation cannot be removed from a priority_queue, so
@@ -54,6 +55,14 @@
 //        Entries arriving meanwhile queue behind it, so every index applies, in order.
 //   · child ids (T): a spawned child is traced under its spawn_table `id`, the id the run
 //     file and the harness know it by.
+//   · spawn-table WAKE targets (W; dataset audit 2026-10-10 blocker 1, 9.6 D19/9.10 D53):
+//     a make job is six (or, for the module build's trees, eight or ten) member processes
+//     that wake *each other* by spawn-table id. Such a target has no task index until the
+//     parent forks it, so the loader resolves it to a negative target (-slot-1) and the
+//     birth fills the slot. A wake that beats the birth is held and handed over at the
+//     birth, not dropped: fork_cap is a multiple of six, so an eight- or ten-member job is
+//     split by the cap and the root can wake a member not yet forked (c7-compile). Dropping
+//     it would block that member forever and deadlock the job.
 //   · policy-timer epoch (S, fixes R): a policy timer used to survive a config apply, so each
 //     MLFQ start() added one more boost chain, and the chains kept each other alive past the
 //     arm() stop rule — c1-compile under the mock-switch schedule never terminated. The switch
@@ -81,7 +90,8 @@ struct Instr { Op op; i64 us = 0; i64 period_us = 0; int jump = -1; i64 count = 
                int chan = -1; int target = -1; };
 
 // One entry of a FORK spawn table — a child spec straight from the file (id/name/program)
-struct ChildSpec { std::string sid, name; std::vector<Instr> prog; bool periodic = false; };
+struct ChildSpec { std::string sid, name; std::vector<Instr> prog; bool periodic = false;
+                   int slot = -1; };   // W: this entry's deferred-WAKE slot (-1 = never a target)
 
 // Ready vs Running: the scheduler *picks from* the Ready set
 enum class State { Ready, Running, Blocked, Done };
@@ -481,6 +491,13 @@ class Sim : public Trace, public Clock, public TaskView {
     chan_pending_.push_back(0);
     return c;
   }
+  // W: one slot per spawn-table entry that a WAKE can name. The index is unknown until the
+  // parent forks it, so the slot carries the birth and holds wakes that arrive before it
+  int spawn_slot(const std::string& sid) {
+    spawn_sid_.push_back(sid);
+    spawn_live_.push_back(-1);
+    return (int)spawn_sid_.size() - 1;
+  }
   // For forward references: a WAKE target may name a task not yet added. The loader reads
   // every arrive to build the name→index table *before* resolving any program
   void set_prog(int id, std::vector<Instr> prog) { T(id).prog = std::move(prog); }
@@ -513,7 +530,11 @@ class Sim : public Trace, public Clock, public TaskView {
     std::vector<int> work;
     auto mark = [&](int id) { if (!T(id).periodic) { T(id).periodic = true; work.push_back(id); } };
     auto seed_targets = [&](const std::vector<Instr>& p) {
-      for (const Instr& i : p) if (i.op == Op::WAKE) mark(i.target);
+      // W: a negative target names a spawn-table entry, not a task index. No spawned child in
+      // the dataset carries a TIMER (compiler-child and module-compiler-child are RUN/WAIT/
+      // WAKE/EXIT only), so the B2 closure never has to cross into the spawn table. If one
+      // ever does, this is the seat: the closure would have to mark ChildSpec::periodic.
+      for (const Instr& i : p) if (i.op == Op::WAKE && i.target >= 0) mark(i.target);
     };
     for (std::size_t k = 0; k < tasks_.size(); ++k) {
       if (has(tasks_[k].prog, Op::TIMER)) mark((int)k);
@@ -710,6 +731,10 @@ class Sim : public Trace, public Clock, public TaskView {
   std::map<std::string, int> chan_id_;
   std::vector<std::deque<int>> chan_waiters_;
   std::vector<int> chan_pending_;               // channel mailboxes
+  std::vector<std::string> spawn_sid_;          // W: slot → the file's id (diagnostics only)
+  std::vector<int> spawn_live_;                 // W: slot → task index, -1 before the birth
+  std::map<int, std::deque<i64>> spawn_mail_;   // W: slot → deadlines of wakes before the birth
+                                                // (sparse — most slots never take an early one)
 
   void push(i64 t, Kind k, int task, std::uint64_t gen = 0) { q_.push({t, seq_++, k, task, gen, 0}); }
   Task& T(int id) { return tasks_[static_cast<std::size_t>(id)]; }
@@ -898,10 +923,20 @@ class Sim : public Trace, public Clock, public TaskView {
     c.prog = par.spawn_table[par.spawn_next].prog;
     c.periodic = par.spawn_table[par.spawn_next].periodic;
     c.parent = parent_id;
+    const int slot = par.spawn_table[par.spawn_next].slot;   // W: read before the push_back
     ++par.spawn_next; ++par.live_children;
     tasks_.push_back(std::move(c));            // deque, so the par reference stays valid
     const int id = (int)tasks_.size() - 1;
     T(id).born = now_;
+    if (slot >= 0) {                           // W: the slot is live from here on, and any wake
+      spawn_live_[(std::size_t)slot] = id;     // that beat the birth is handed over now —
+      auto it = spawn_mail_.find(slot);        // before step() reaches the first WAIT, which is
+      if (it != spawn_mail_.end()) {           // where the mailbox is consumed
+        T(id).mailbox = (int)it->second.size();
+        T(id).mail_dl.assign(it->second.begin(), it->second.end());
+        spawn_mail_.erase(it);
+      }
+    }
     ev("task_arrive", id, "source", "spawn", "parent", T(parent_id).sid.c_str());
     step(id);
     if (T(id).st == State::Ready) { enqueue(id, "arrive"); maybe_preempt(id); } else settled(id);
@@ -938,6 +973,12 @@ class Sim : public Trace, public Clock, public TaskView {
   // WAKE instruction — task-addressed. It carries the waker's deadline, so a frame's
   // deadline follows it down the chain
   void deliver(int waker, int target) {
+    if (target < 0) {                           // W: a spawn-table sibling, resolved at its birth
+      const int slot = -target - 1;
+      const int live = spawn_live_[(std::size_t)slot];
+      if (live < 0) { spawn_mail_[slot].push_back(deadline(waker)); return; }   // held, not lost
+      target = live;
+    }
     Task& t = T(target);
     if (t.st == State::Done) return;
     const i64 dl = deadline(waker);
@@ -1012,7 +1053,8 @@ class Sim : public Trace, public Clock, public TaskView {
 // ── loader ──────────────────────────────────────────────────────────────────
 using IdMap = std::map<std::string, int>;
 
-static void compile_prog(const Json& a, Sim& s, const IdMap& ids, std::vector<Instr>& out) {
+static void compile_prog(const Json& a, Sim& s, const IdMap& ids, const IdMap& spawn,
+                         std::vector<Instr>& out) {
   for (const Json& in : a.arr) {
     const std::string& op = in.at("op").as_str("op");
     if      (op == "RUN")   out.push_back({Op::RUN,   in.at("us").as_int("RUN.us")});
@@ -1028,9 +1070,15 @@ static void compile_prog(const Json& a, Sim& s, const IdMap& ids, std::vector<In
     else if (op == "WAIT")  { Instr i{Op::WAIT}; i.chan = s.channel(in.at("channel").as_str("ch"));
                               out.push_back(i); }
     else if (op == "WAKE")  { const std::string& tg = in.at("target").as_str("target");
+                              Instr i{Op::WAKE};
                               auto it = ids.find(tg);
-                              if (it == ids.end()) die("WAKE target is not a top-level task: " + tg);
-                              Instr i{Op::WAKE}; i.target = it->second; out.push_back(i); }
+                              if (it != ids.end()) i.target = it->second;   // top-level: fixed here
+                              else {                                        // W: a spawn-table entry
+                                auto st = spawn.find(tg);
+                                if (st == spawn.end()) die("WAKE target is not a known task: " + tg);
+                                i.target = -st->second - 1;                 // resolved at its birth
+                              }
+                              out.push_back(i); }
     else if (op == "LOOP")  {
       const std::size_t b = out.size();
       Instr bi{Op::LOOP_BEGIN};
@@ -1038,7 +1086,7 @@ static void compile_prog(const Json& a, Sim& s, const IdMap& ids, std::vector<In
       if (c.k == Json::K::Str) { if (c.s != "unbounded") die("LOOP.count: " + c.s); bi.count = -1; }
       else bi.count = c.as_int("LOOP.count");
       out.push_back(bi);
-      compile_prog(in.at("body"), s, ids, out);
+      compile_prog(in.at("body"), s, ids, spawn, out);
       Instr e{Op::LOOP_END}; e.jump = (int)(b + 1); out.push_back(e);
       out[b].jump = (int)out.size();
     } else die("unknown op: " + op);
@@ -1059,20 +1107,32 @@ static void load_workload(const std::string& path, Sim& s) {
     const i64 dep = e.has("depart") ? e.at("depart").as_int("depart") : -1;
     ids[sid] = s.add(sid, e.at("t").as_int("t"), {}, dep);
   }
+  IdMap spawn;                                  // pass 1b (W) — every spawn-table entry gets a
+  for (const Json& e : evs.arr) {               // slot before any program is resolved, since a
+    if (e.at("op").as_str("op") != "arrive") continue;   // member wakes siblings both earlier
+    if (!e.has("spawn_table")) continue;                 // and later in the table
+    for (const Json& c : e.at("spawn_table").arr) {
+      const std::string& cid = c.at("id").as_str("id");
+      if (ids.count(cid)) die("spawn_table id collides with a top-level task: " + cid);
+      if (!spawn.emplace(cid, 0).second) die("duplicate spawn_table id: " + cid);
+      spawn[cid] = s.spawn_slot(cid);
+    }
+  }
   for (const Json& e : evs.arr) {               // pass 2 — programs and wakes
     const std::string& op = e.at("op").as_str("op");
     if (op == "arrive") {
       const int id = ids.at(e.at("id").as_str("id"));
       std::vector<Instr> prog;
-      compile_prog(e.at("program"), s, ids, prog);
+      compile_prog(e.at("program"), s, ids, spawn, prog);
       s.set_prog(id, std::move(prog));
       if (e.has("spawn_table")) {
         std::vector<ChildSpec> tab;
         for (const Json& c : e.at("spawn_table").arr) {
           std::vector<Instr> cp;
-          compile_prog(c.at("program"), s, ids, cp);
-          tab.push_back(ChildSpec{c.at("id").as_str("id"), c.at("name").as_str("name"),
-                                  std::move(cp)});
+          compile_prog(c.at("program"), s, ids, spawn, cp);
+          ChildSpec cs{c.at("id").as_str("id"), c.at("name").as_str("name"), std::move(cp)};
+          cs.slot = spawn.at(cs.sid);           // W: the slot its siblings' WAKEs resolve through
+          tab.push_back(std::move(cs));
         }
         s.set_spawn(id, std::move(tab), (int)e.at("fork_cap").as_int("fork_cap"));
       }

@@ -15,6 +15,13 @@ the frozen menu), **stage T** (children traced under their spawn_table id) and *
 (config-switch semantics: MLFQ cold start, same-algorithm entries, drain), matching the
 one-rung-at-a-time ladder in `../steps/`.
 
+**2026-10-21 (W — spawn-table `WAKE` targets):** the loader resolves a `WAKE` target that names a
+spawn-table entry, not only a top-level `arrive` id, and holds a wake that lands before the child's
+birth. Without it the rebuilt build's compile files do not load at all (§4 item 13). Not in the
+`steps/` ladder, so `src/sim == steps/sim_<last>` now holds only up to V. Negative control
+120/120 byte-identical to the pre-W binary on the local build; positive control on two fixtures
+built by the dataset's own `_object_job`/`_tree_job`. Status: `../memo/memo_261020.md` Part G.
+
 **Ported 2026-10-20 (V — `batch_bandwidth_cap`):** the executor now applies the cap as a
 work-conserving ceiling on the behavioural batch class (RQ0 conformance item (d)). The accounting
 window is a token bucket, rate = cap and depth = one slice (decision D10, `../steps/README.md`).
@@ -36,7 +43,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -o sim sim.cpp
 ```
 `sim.cpp` depends on `mini_json.hpp` (in this directory).
 
-## 2. Stages implemented (A–S)
+## 2. Stages implemented (A–W)
 
 | stage | feature |
 |---|---|
@@ -51,6 +58,10 @@ g++ -std=c++17 -O2 -Wall -Wextra -o sim sim.cpp
 | Q | workload loader — `mini_json.hpp`, 2-pass forward-reference resolution, whole-file rejection on any violation |
 | R | config schedule + `handoff()` — mid-run policy switch (e.g. MLFQ→FIFO→MLFQ) |
 | S | EDF + LOTTERY behind a third seam, `TaskView` (executor-owned classes: B2 periodic, B1 batch); WAKE carries the waker's deadline down a chain; lottery PRNG seeded from the workload id; `Policy::start(params, cold)`; policy-timer epoch (fixes an R hang, §4 item 9) |
+| T | a spawned child is traced under its `spawn_table` id, not a synthetic one (fixes §4 item 5) |
+| U | config-switch semantics: U1 a switch into MLFQ is a cold start, U2 a same-algorithm entry leaves the holder and the queue order alone, U3 a switch out of MLFQ/EDF/LOTTERY drains until the lane is free |
+| V | `batch_bandwidth_cap` enforced — conformance (d). Token bucket (D10: rate = cap, depth = one slice), `park`, the cap's own timer, one-way state transitions through `set_st` (fixes §4 item 1) |
+| W | the loader resolves a `WAKE` target that names a **spawn-table entry**, not only a top-level `arrive` id — conformance-adjacent, see §4 item 13 (2026-10-21) |
 
 ## 3. Verification performed
 
@@ -196,6 +207,21 @@ independent of the `sim_r` comparison.
    as its slice end kept the fully used slice, so its next dispatch had horizon 0 (600
    zero-length occupancies on the boot-default memo's video/music/scan scenario). Now counted
    as a slice end. The status of everything above is recorded in `../memo/memo_261001.md`.
+13. **Fixed in W — a `WAKE` naming a spawn-table entry rejected the whole file.** `compile_prog`
+   resolved every target against the top-level `arrive` id table, so the rebuilt build's make
+   jobs — six member processes waking each other by spawn-table id (9.6 D19), and the module
+   build's trees of 6/6/8/10 (9.10 D53) — failed to load: `"WAKE target is not a top-level
+   task: build.j1.gcc"`. It rejected `c1-compile`, `c7-compile` (both judging files),
+   `c3-workday`, `c4-compile`, `c6-dual`, 8 compile variants and 188 generated files. Found by
+   the 2026-10-10 dataset audit as blocker 1; relayed in the 2026-10-17 rebuild memo. It is
+   **not** one of the eight `simulator-conformance` items. W resolves such a target to a
+   negative slot that the child's birth fills, and **holds** a wake that arrives before the
+   birth instead of dropping it — `fork_cap` is a multiple of six while the trees are 8 and 10
+   members, so the cap splits a job and a job's root can wake a member not yet forked; dropping
+   it deadlocks the job (measured: 6 of 13 and 10 of 19 tasks never end). Details and the
+   negative/positive controls: `../memo/memo_261020.md` Part G.
+   **Invisible on the local build** — the 2026-09-04 build predates the structure and its
+   `c1-compile` has zero child WAKE targets, so this and the rebuild have to land together.
 
 ### Deferred (cannot be settled from code alone)
 
@@ -209,7 +235,13 @@ independent of the `sim_r` comparison.
 The contract skeleton — the 7 non-negotiables, the 8 instructions, the 8 trace
 events, the config schedule, determinism, and the whole-file-rejecting loader — is
 satisfied and byte-identical to the ladder's final rung across every coreset
-workload. The open items are `batch_bandwidth_cap`, EDF/lottery (both beyond the
-A–R scope), two genuine doc-vs-code discrepancies (TIMER `t0`, zero-wait `ready`
-lines) that are harmless on the current coreset but need 인지오's ruling, and some
-invocation-side plumbing (gzip, version string, spawn id).
+workload — up to V; W is in this tree only.
+
+`batch_bandwidth_cap` (V) and EDF/lottery (S) are done. What is open, as of 2026-10-21, is the
+`simulator-conformance` statement of `harness/experiments/rq0-gate.yaml`: **(c), (d), (f) met;
+(a) the zero-wait `ready` line, (b) the TIMER skip rule, (e) the strict idle class, (g)
+`WAIT children:<id>`, (h) the invocation contract still owed.** The RQ0 run does not start until
+all eight are shown. Beside them: TIMER `t0` (§4 item 3) still needs 인지오's ruling, and the
+remaining invocation plumbing is (h). The regression baselines all stand on the stale 2026-09-04
+24-file build while the dataset is rebuilt to 51 files plus 78 variants — re-baselining is the
+precondition for (e) and for checking W on real files, and it is 인지오's to run.
