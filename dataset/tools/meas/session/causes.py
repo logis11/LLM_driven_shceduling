@@ -23,6 +23,14 @@ releases.ubuntu.com, read 2026-09-24, SHA-256 6c200933618b2e382e7732b69b247aa5f6
            stock install leaves disabled and the runner image enabled (D32, D37), or the harness
   event    a desktop job bound to a clock time (D23's form)                               leaves, stated
   unknown  a cause the trace does not resolve                                             kept, stated
+
+Checked only on the idle session entries this tree measures: of the 18,678 wakes the rule takes out of them, 8,987
+are raised by the outside row itself and the rest inherited, no outside row reaching more than 22 wakes, every chain
+and D-continuation wake within 25 ms of its row (the php-fpm census, `_dev/research/jioh/php-fpm-census/`, 2026-10-21).
+On a busy program the inheritance has no end: threads that wake one another with no timer between them hand one
+outside row to the whole job — 6 `pgrep` wakes became 36,040 of `kdenlive_render`'s. The rule carries no stopping
+point; before using it beyond these entries, split the outside wakes into direct and inherited and read the long
+inherited runs (the census's `direct.py`, `chain_roots.py`).
 """
 
 import bisect

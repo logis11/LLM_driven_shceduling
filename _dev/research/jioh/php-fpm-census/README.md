@@ -398,6 +398,8 @@ Under census_core's rule as written, 1.02 % of the 11,876,597 traced wakes trace
 
 **Decision (인지오, 2026-10-21): the launch phases are read from 2 s before the exec.** The trace holds the launched tree from 2 s before the exec, and read from there census_core's launch rule (a measured program's launch by `run.sh` is its arrival) sees the fork the phase's start cuts off. The rule-as-written figures above are the phase window's artefact and stay as such. Read so, no launch stream moves by more than 0.22 % of a repeat's wakes or 0.10 % of its CPU.
 
+**Decision (인지오, 2026-10-21): the chain rule keeps no stopping point.** The rule is left as it is; its limit — checked only on the idle session entries, unbounded inheritance on a busy program, and the direct/inherited split to read before any use beyond them — is written into `dataset/tools/meas/session/causes.py`'s docstring.
+
 Guidebook sentence: *The 9.10 campaigns' wakes were traced to their causes as 9.9 D27 traced the session's (`_dev/research/jioh/php-fpm-census/`): the upgrade, the module build, the training run, the transcode and the Kdenlive export hold no outside-cause wake but 10 of `multipathd`'s; the rest the rule would take out are runner processes named by interrupt context, the launched applications' own start-up cut off at the exec, and the Tracker index's and the Déjà Dup backup's own work reached through the desktop services of the session the harness opens for them; read so, no carried value moves beyond its half-width but `HangWatcher`'s timer, by 0.08 %, and the values stand as carried.*
 
 ### Not checked
