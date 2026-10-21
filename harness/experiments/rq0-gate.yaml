@@ -357,7 +357,7 @@ statements:
       with standard output ignored, exit 0 only when it is written, a
       byte-identical trace from the same argument line, and the trace header's
       sim the version string the runner's machine configuration names (data
-      contracts §11, contract 10). (c) and (f) the
+      contracts §11, contract 10). (c), (d) and (f) the
       simulator does today; the others its owner holds as owed. The run does not
       start until each is shown.
   - id: g-grounding

@@ -179,7 +179,7 @@ flowchart TB
 ```
 
 - **simulator**(인경민 담당, `simulator/`)는 실제 process를 돌리지 않고 scheduling 결과를 "종이 위에서" 계산하는 discrete-event 엔진입니다. CPU 하나(lane 하나)를 두고, workload 파일의 task들이 언제 CPU를 원하는지 보면서 scheduler가 누구에게 CPU를 줄지 정하고, 그 결과를 **trace**라는 시간표로 씁니다. 시계는 microsecond 정수이고, 아무 일도 없는 구간은 건너뜁니다. simulator 자체에는 난수가 없습니다(`docs/simulator/interpretation-contract.md` §1).
-- **daemon**(박이안 담당, `daemon/`)은 recognizer 쪽 program입니다. workload에서 recognizer가 볼 수 있는 부분만 받아 telemetry snapshot(그 순간 살아 있는 process 이름과 개수, focus를 쥔 이름을 담은 메시지)을 만들고, condition에 해당하는 recognizer에 물어, 답을 검증하고 driver table로 설정을 고른 뒤, config schedule과 recognition log를 씁니다. 2026-10-14 현재 저장소의 `daemon/`에는 driver table과 그 lint만 있고 실제 recognizer는 아직 없습니다. 대신 harness의 시험용 mock daemon(`harness/tools/tests/mocks/daemon.py`)이 `fixed`, `random`, `oracle` 세 condition에 대해 계약대로 동작합니다.
+- **daemon**(박이안 담당, `daemon/`)은 recognizer 쪽 program입니다. workload에서 recognizer가 볼 수 있는 부분만 받아 telemetry snapshot(그 순간 살아 있는 process 이름과 개수, focus를 쥔 이름을 담은 메시지)을 만들고, condition에 해당하는 recognizer에 물어, 답을 검증하고 driver table로 설정을 고른 뒤, config schedule과 recognition log를 씁니다. 2026-10-21에 `daemon/daemon.py`의 skeleton이 들어왔습니다(커밋 `9a8d65c6`). recognizer가 필요 없는 `fixed`, `oracle`, `random` 세 condition이 돌고, recognizer가 필요한 다섯 condition(`shipped_catalogue`, `strongest_name_table`, `llm_vocab`, `llm_algo`, `llm_full`)은 아직 없습니다. harness의 시험용 mock daemon(`harness/tools/tests/mocks/daemon.py`)도 앞의 세 condition에 대해 계약대로 동작합니다.
 - **harness**(인지오 담당, `harness/`)는 실험을 돌리고 채점합니다. trace와 recognition log를 읽어 records(관찰 한 줄씩의 CSV)를 만들고, 채점 규칙으로 점수를 내고, RQ0 gate spec 같은 사전 등록 파일에 따라 판정을 씁니다.
 
 > **용어.** `trace`는 simulator의 출력입니다. 어느 task가 언제 CPU를 잡았는지, 어떤 주기 작업이 마감을 지켰는지를 한 줄씩 적은 사건 기록이고, 모든 성능 지표는 trace에서 읽어 냅니다.
