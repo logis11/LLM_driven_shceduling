@@ -234,7 +234,6 @@ Implementation owed (the docs already answer):
 
 Questions for 인지오: — all of these, and the replies owed the other way, are indexed in `simulator/memo/memo_261021.md` Part B
 
-- **Gaps 3 and 4 are also the reference `sim_r`'s behaviour** (TIMER `t0`; the zero-wait `ready` line): whether the code is wrong, or `docs/harness/metrics.md` §11 describes the harness's *mock* rather than a hard requirement, or the harness in fact reads `deadline` lines. A contract-reading question, not decidable from the simulator source (`simulator/src/notes.md` §4 Deferred). **Added to this tracker 2026-10-21 — it had been sitting only in `src/notes.md`**
 - **B3's reading** (`docs/memos/2026-09-13-critical-findings.md:18`, measured peak concurrency 16 at `-j8`): the cap already takes the child = process reading, `parallelism_cap × 6`, so 48 processes is 8 jobs — not 16 of anything. Settling child = process vs child = make job decides whether the value moves (`simulator/notes/note1010.md`)
 - **Stage W's blocker**: a ninth conformance item, folded into (g), or beside the eight? Recorded as conformance-adjacent (`memo_261021.md` Part E)
 - **Does a loader fix earn a `steps/` rung?** No `steps/sim_w.cpp` exists, so `src/sim == steps/sim_<last>` holds only to V (`memo_261021.md` Part E4)

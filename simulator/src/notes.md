@@ -227,10 +227,20 @@ independent of the `sim_r` comparison.
 
 > **Indexed in `../memo/memo_261021.md` Part B**, the single entry point for everything addressed to 인지오.
 
-- Gaps 3 and 4 are also the behaviour of the reference `sim_r`. Whether the code is
+- ~~Gaps 3 and 4 are also the behaviour of the reference `sim_r`. Whether the code is
   wrong, or `metrics.md §11` describes the harness's *mock* rather than a hard
   requirement, or the harness in fact reads `deadline` lines — is a contract-reading
-  question for 인지오, not decidable from the simulator source.
+  question for 인지오, not decidable from the simulator source.~~
+
+  **Both settled; nothing deferred here (corrected 2026-10-21).** This paragraph predates the
+  RQ0 gate spec's `simulator-conformance` statement, which answers it:
+
+  - **Gap 4 is conformance item (a)**, ratified as a requirement — "a ready line at every
+    completion of a blocking primitive, at zero wait when it did not block, inside the occupancy
+    after the run_start (metrics doc §11 item 1)". So `metrics.md` §11 item 1 is a hard
+    requirement, not a description of the mock, and the code is the side that is wrong. Owed.
+  - **Gap 3 is ours**, as gap 3's own last sentence says: guide §9.2 leaves the pick to the
+    builder. It is on `_dev/TODO.md` under "Ours to decide" as TIMER t₀, D4.
 
 ## 5. Bottom line
 
