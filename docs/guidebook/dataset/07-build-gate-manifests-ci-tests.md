@@ -1,6 +1,6 @@
 # 7권 · Build gate, manifest, CI, tests: 같은 바이트를 보장하는 장치
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-20
+> Status: draft · Created 2026-10-14 · Updated 2026-10-21
 
 **아무도 commit하지 않는 `build/`가 어떻게 모두에게 같은 파일임이 보장되고, 무엇이 그것을 지키나.**
 
@@ -170,9 +170,17 @@ generated layer의 timeline(`dataset/generated/<set>/`)도 같은 이유로 comm
                                  rebuild, re-bless, re-pin
 2026-10-17  9.15                 distractor grid의 timeline 68개도 같은 한 규칙으로, 측정 entry의 trace 범위 문장,
                                  video-editor의 probe 문장: rebuild, re-bless, re-pin
+2026-10-17  9.16                 tick_count guard의 chain 검사를 window 규칙으로(guard spec 1.2), c2-p3b의 backup을
+                                 turnaround로 채점: scoring spec, guard spec, driver table re-pin (dataset pin은 그대로)
+2026-10-17  9.16                 출구 감사가 찾은 library의 문장과 꼬리표, compile timeline의 parallelism_cap 꼬리표
+                                 design → convention: 한 번의 rebuild, re-bless, re-pin
+2026-10-17  9.16                 중간 pin을 이름 짓는 넘겨받은 재현 항목을 집의 dataset gate 한 번(2b080333)과
+                                 최종 build의 CI run 한 번(39030123144, 17f28d7f)으로 닫음
+2026-10-17  9.16                 최종 build 위의 full smoke를 집에서 손으로: 이튿날 02:22에 exit 0, 4 h 32 min
+                                 (호출 392번 중 250번이 cache에서)
 ```
 
-여기서 9.13, 9.14, 9.15, 9.17, 9.18, 9.19, 9.20, 9.21, 9.22, 9.23은 Phase 9(workload dataset rebuild)의 sub-task 번호입니다. 각각 rebuild 실행(9.13), 소비자 쪽 재작업(9.14), 문서·memo·guidebook 정정(9.15), window focus를 telemetry에 넣은 작업(9.17), compiler·schema·build gate 정비(9.18), generator와 C3 grid(9.19), C4·C5 grid(9.20), generated layer의 소비자 작업(9.21), build 시간 단축(9.22), 이 guidebook이 찾은 scoring·dataset·gate의 결함 처리(9.23)를 맡았습니다. 실행 순서는 번호 순이 아니라 9.13 → 9.14 → 9.17 → 9.18 → 9.22 → 9.19 → 9.20 → 9.21 → 9.23 → 9.15입니다(`_dev/TODO.md`와 각 changelog의 날짜). 9.22는 9.18의 검증 run이 너무 오래 걸린 것을 보고 2026-10-11에 추가되어 9.19보다 먼저 돌았습니다. 9.15의 2026-10-16 rebuild는 인지오가 그 정정 작업 중에 정한 data와 code의 수정을 한 번에 묶은 것이고, 2026-10-17 rebuild는 그 뒤 정정 작업이 찾은 data와 code의 수정을 다시 한 번에 묶은 것입니다(9.15 기록 `logs/B1-data-rebuild.md`). 같은 날의 두 번째 rebuild는 인지오가 정정 작업의 질문에 답한 세 가지 수정을 묶은 것입니다(9.15 기록 `logs/B4-data-rebuild.md`).
+여기서 9.13, 9.14, 9.15, 9.16, 9.17, 9.18, 9.19, 9.20, 9.21, 9.22, 9.23은 Phase 9(workload dataset rebuild)의 sub-task 번호입니다. 각각 rebuild 실행(9.13), 소비자 쪽 재작업(9.14), 문서·memo·guidebook 정정(9.15), 최종 상태에 다시 돌린 claim·측정·compile된 숫자의 출구 감사(9.16), window focus를 telemetry에 넣은 작업(9.17), compiler·schema·build gate 정비(9.18), generator와 C3 grid(9.19), C4·C5 grid(9.20), generated layer의 소비자 작업(9.21), build 시간 단축(9.22), 이 guidebook이 찾은 scoring·dataset·gate의 결함 처리(9.23)를 맡았습니다. 실행 순서는 번호 순이 아니라 9.13 → 9.14 → 9.17 → 9.18 → 9.22 → 9.19 → 9.20 → 9.21 → 9.23 → 9.15 → 9.16입니다(`_dev/TODO.md`와 각 changelog의 날짜). 9.22는 9.18의 검증 run이 너무 오래 걸린 것을 보고 2026-10-11에 추가되어 9.19보다 먼저 돌았습니다. 9.15의 2026-10-16 rebuild는 인지오가 그 정정 작업 중에 정한 data와 code의 수정을 한 번에 묶은 것이고, 2026-10-17 rebuild는 그 뒤 정정 작업이 찾은 data와 code의 수정을 다시 한 번에 묶은 것입니다(9.15 기록 `logs/B1-data-rebuild.md`). 같은 날의 두 번째 rebuild는 인지오가 정정 작업의 질문에 답한 세 가지 수정을 묶은 것입니다(9.15 기록 `logs/B4-data-rebuild.md`). 9.16은 같은 날 먼저 `tick_count` guard와 `c2-p3b`의 채점 같은 harness 쪽 발견을 고쳐 scoring spec, guard spec, driver table을 다시 pin했고(커밋 `3fbb7c25`, 9.16 기록 `logs/H1.md`), 그 뒤 출구 감사가 찾은 data의 수정을 한 번의 rebuild로 묶었습니다(커밋 `17f28d7f`, 9.16 기록 `logs/D.md`). 넘겨받은 재현 항목 가운데 중간 pin을 이름 짓는 것들은 집의 dataset gate 한 번과 최종 build의 CI run 한 번으로 닫았고(9.16 spec decision 3, 6.12), full smoke는 최종 build(커밋 `a4b6a9da`) 위에서 2026-10-17 21:50 KST에 시작해 2026-10-18 02:22 KST에 끝났습니다(6.10; 9.16 기록 `_dev/research/jioh/task-9.16-exit-audits/README.md`, `gate/smoke-status.txt`).
 
 task-2.3 decision 6의 마지막 문장은 "Release artifacts publish from tagged CI builds, not the repo tree"입니다. 즉 dataset의 build를 tag된 CI build에서 release로 공개한다는 계획이었습니다. 어떤 workflow도 이것을 구현하지 않았고(`dataset.yml`은 build하고 비교할 뿐 업로드 단계가 없습니다), 2026-10-16에 인지오가 다르게 정했습니다(9.15 작업 목록에서 compile된 데이터셋을 어떻게 공개하는지 물은 항목 W-0733). 논문을 제출하기 전에는 build를 공개하지 않습니다. build는 저장소와 committed manifest에서 다시 만들어 확인하는 것입니다(`make dataset variants generated`, 그 다음 `make check`). 제출할 때 저장소의 tag와 compile된 build를 snapshot으로 DOI를 발급하는 data 보관소에 올리고, data는 CC-BY-NC-SA-4.0을 따릅니다. release workflow는 두지 않습니다. `dataset/README.md`의 "Licence and data availability" 절이 이것을 적습니다. 라이선스 파일은 9.15 spec decision 12대로 생겼습니다. 저장소 root의 `LICENSE`는 code를 MIT로, `dataset/LICENSE`는 dataset의 data와 그 build, 측정 release의 asset을 CC-BY-NC-SA-4.0으로 두고, 둘 다 Jioh In, Kyungmin Inn, Ian Park을 저작권자로 적습니다. `dataset/LICENSE`는 stimulus stream의 출처인 SWELL-KW를 크레딧하고, 136M Keystrokes에서 자른 `aalto-*` 창은 이 라이선스 밖에 두어 출처의 조건을 따르게 합니다.
 
@@ -1203,7 +1211,7 @@ README는 디스크를 "`build/` holds 6.8 GB, `coreset-single/`'s 1.6 GB among 
 
 ## 6.7 기록된 CI run들
 
-다음은 rebuild 이후 changelog에 run id와 함께 기록된 CI run 전부입니다.
+다음은 rebuild 이후 sub-task의 changelog와 기록에 run id와 함께 적힌 CI run 전부입니다.
 
 | run id | 날짜 | workflow | commit | 결과 | lint | dataset | variants | generated | test | check | 합계 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -1218,6 +1226,8 @@ README는 디스크를 "`build/` holds 6.8 GB, `coreset-single/`'s 1.6 GB among 
 | 38547043521 | 2026-10-14 | harness | `2e0a887c` | 성공 | dataset 3:02, variants 5:16, generated 9:58, check 9 s, harness lint 5:11, harness test 37:29 | | | | | | 1:01:28 |
 | 38722675475 | 2026-10-15 | dataset | `d5cc7711` | 성공 | 통과 | 2:09 | 4:00 | 7:23 | 3:11 | 통과 | 17:04 |
 | 38722678829 | 2026-10-15 | harness | `d5cc7711` | 성공 | build와 check, harness lint 5:03, harness test 36:15 | | | | | | 1:00:40 |
+| 39014790007 | 2026-10-17 | dataset | `2b080333` | 성공 | 2 s | 3:06 | 5:28 | 10:20 | 4:09 | 7 s | 23:26 |
+| 39030123144 | 2026-10-17 | dataset | `17f28d7f` | 성공 | 2 s | 2:11 | 4:02 | 7:25 | 3:11 | 6 s | 17:09 |
 
 각 run이 무엇을 확인했는지 짧게 적습니다.
 
@@ -1230,6 +1240,10 @@ README는 디스크를 "`build/` holds 6.8 GB, `coreset-single/`'s 1.6 GB among 
 - **38387289484, 38396745220** — 9.21 changelog D11. dataset 쪽은 모두 통과했고 harness lint도 통과했지만 harness test가 runner에 의해 kill되었습니다. 6.10에서 다룹니다.
 - **38547043521** — 9.21 changelog D11. 두 test에 `coreset_wide` marker를 붙인 commit(D13)으로 harness workflow가 초록이 되었습니다. `make -C harness test`는 296 passed, 2 deselected입니다. 9.23 D15는 이 run이 설치한 도구 버전을 근거로 들었습니다(6.8).
 - **38722675475, 38722678829** — 9.23 changelog D18. 9.23 D17이 다시 bless한 tree(`d5cc7711`)를 손으로 돌린 두 run이고, runner가 고정된 버전(6.8)을 설치했습니다. dataset run은 `make lint`(`--freeze`)부터 `check`까지 초록이고("build verified (3304 files, 7 manifests)"), `make test`는 534 passed, 1 skipped입니다. 일곱 manifest, 파생 timeline, coverage grid가 Linux에서 바이트 단위로 재현되었습니다. harness run은 harness lint와 `make test`(296 passed, 2 deselected)가 초록입니다.
+- **39014790007** — 9.16 기록(`_dev/research/jioh/task-9.16-exit-audits/README.md`의 "Dataset gate and CI" 줄)은 이 run을 "9.15's last state"의 초록 run으로 적습니다. 9.16을 시작한 커밋 `2b080333`을 손으로(`workflow_dispatch`) 돌렸고, 이 커밋은 `_dev/TODO.md`만 바꿨으므로 manifest는 9.15의 두 번째 rebuild가 쓴 것(core `0f0af422…`, variants `cdc14319…`, 3.7)입니다. runner는 고정된 버전(`PyYAML-6.0.1`, `jsonschema-rs-0.29.1`, `numpy-1.26.4`, `pytest-8.3.4`)을 설치했고, `make lint`는 "lint clean", `make test`는 544 passed, 1 skipped, `check`는 "verified — 67 segments on the grid"와 "build verified (3304 files, 7 manifests)"입니다(`gh run view 39014790007 --log`). 같은 커밋에서 집의 dataset gate도 372초에 통과했습니다(9.16 기록의 같은 줄).
+- **39030123144** — 9.16 기록의 같은 줄이 "green on `17f28d7f` (about 17 min)"이라고 적습니다. 출구 감사가 찾은 data의 수정을 rebuild하고 bless한 커밋 `17f28d7f`를 손으로 돌린 run이고, 지금의 manifest 일곱 개(3.7의 "현재" 열), 파생 timeline, coverage grid가 Linux에서 바이트 단위로 재현되었습니다. runner는 같은 고정 버전을 설치했고, `make test`는 551 passed, 1 skipped, `check`는 "build verified (3304 files, 7 manifests)"입니다(`gh run view 39030123144 --log`). 9.16 spec decision 3은 넘겨받은 항목 가운데 중간 pin을 이름 짓는 것들을 집의 dataset gate 한 번과 최종 build의 CI run 한 번으로 닫게 했고, 그 CI run이 이것입니다(6.12).
+
+두 run의 단계별 시간과 합계는 9.16 기록에 없습니다. 표의 값은 `gh run view <id>`가 주는 각 step의 시작과 끝 시각(초 단위)의 차이이고, 합계는 job의 시작에서 끝까지입니다(2026-10-21 조회). 같은 방식으로 재면 run 38243554308의 값이 9.20 changelog D11의 값(dataset 1:36, variants 2:48, generated 5:13, test 2:05, check 5 s, 합계 12:04)과 같습니다.
 
 > **코드로.** 같은 step이라도 run마다 시간이 두 배 가까이 다릅니다. 9.19 changelog D7은 38135623993에 대해 "This runner ran the unchanged steps about 1.9× slower than run 38131040159's (`dataset` 1 min 34 s, `variants` 2 min 49 s there), so the generated step's share on a runner of that speed is about 4 min"이라고 적습니다. 9.21의 38387283407(dataset 3:02, generated 10:02)과 38396745220(build 18:32)도 changelog가 "a slower runner"라고 적습니다. GitHub가 어떤 하드웨어에 job을 배정하느냐에 따라 같은 `ubuntu-latest`도 속도가 다르다는 것입니다. 그래서 이 권의 runner 시간은 범위로 읽어야 합니다. 대략 "빠른 runner에서 12분, 느린 runner에서 20분 이상"입니다.
 
@@ -1499,12 +1513,14 @@ dataset suite의 크기와 시간은 Phase 9 동안 이렇게 움직였습니다
 | 2026-10-16 | 9.15 (`logs/A5-fixups.md`) | 539 passed, 1 skipped | 2 min 11 s |
 | 2026-10-17 | 9.15 (`logs/B1-data-rebuild.md`) | 543 passed, 1 skipped | 2 min 17 s |
 | 2026-10-17 | 9.15 (`logs/B4-data-rebuild.md`) | 544 passed, 1 skipped | 2 min 17 s |
+| 2026-10-17 | 9.16 (`gate/gate-test.log`, 커밋 `2b080333`) | 544 passed, 1 skipped | 116.69 s (0:01:56) |
+| 2026-10-17 | 9.16 (`logs/D.md`) | 551 passed, 1 skipped | 2 min 36 s |
 
-표의 "sub-task 기록" 열은 그 숫자를 적은 sub-task와 changelog 항목입니다. 9.13 D8은 rebuild 직후 library 도구를 고친 항목, 9.14 D12는 variant를 build하고 re-pin한 항목, 9.17 D6은 focus 작업 후의 rebuild 항목, 9.18 D7은 build gate의 검증 run, 9.22 After는 build 시간 단축 후의 측정, 9.19 D7은 generator 작업의 CI run 항목, 9.20 D10은 C4·C5 grid의 build 항목, 9.21 D10은 generated layer 소비자 작업의 검증 항목, 9.23 D10과 D17은 guidebook의 발견을 처리한 두 rebuild 항목, 9.15의 것은 그 정정 작업이 묶은 rebuild 뒤의 확인 기록(`_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/`)입니다.
+표의 "sub-task 기록" 열은 그 숫자를 적은 sub-task와 changelog 항목입니다. 9.13 D8은 rebuild 직후 library 도구를 고친 항목, 9.14 D12는 variant를 build하고 re-pin한 항목, 9.17 D6은 focus 작업 후의 rebuild 항목, 9.18 D7은 build gate의 검증 run, 9.22 After는 build 시간 단축 후의 측정, 9.19 D7은 generator 작업의 CI run 항목, 9.20 D10은 C4·C5 grid의 build 항목, 9.21 D10은 generated layer 소비자 작업의 검증 항목, 9.23 D10과 D17은 guidebook의 발견을 처리한 두 rebuild 항목, 9.15의 것은 그 정정 작업이 묶은 rebuild 뒤의 확인 기록(`_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/`)입니다. 9.16의 첫 줄은 출구 감사가 9.15의 마지막 판(커밋 `2b080333`)에서 집의 dataset gate를 한 번 돌린 기록의 `test` 단계이고(gate 전체 372초), 둘째 줄은 감사가 찾은 data의 수정을 묶은 rebuild 뒤의 확인으로, 9.15의 두 번째 rebuild 뒤의 544개에 이 rebuild가 더한 test 일곱 개입니다(`_dev/research/jioh/task-9.16-exit-audits/`의 `README.md`, `gate/gate-test.log`, `logs/D.md`). 같은 두 판을 Linux runner에서도 돌렸습니다(6.7의 dataset run 39014790007은 544 passed, 1 skipped, 39030123144는 551 passed, 1 skipped).
 
 9.18의 세 실패는 9.17이 keystroke track의 이름을 `focus`에서 `input`으로 바꾼 뒤 `test_measured.py`의 helper가 옛 이름을 쓰고 있었던 것이었습니다(9.18 changelog D7). 9.13의 네 실패와 harness 쪽 실패들(9.13 reads R6: 264개 중 9개)도 rebuild로 바뀐 사실에 test의 기대값이 따라가지 못한 것이었습니다. 즉 이 suite는 rebuild 동안 "새 사실이 옛 문장과 어긋나는 곳"을 찾는 역할도 했습니다.
 
-harness suite는 9.18에서 284개 중 283개 통과(26분 44초), 9.19에서 284개(30분 19초), 9.20에서 284개(32분 11초), 9.21에서 298개(약 34분)였고, 9.21 D13 이후 CI가 돌리는 `make test`는 296개 17분 23초입니다. 그 뒤 집 기계의 기록은 9.23 D10의 `make test` 296 passed, 2 deselected(17분 03초), D17의 `make test-full` 298 passed(29분 00초), 9.15의 2026-10-16 rebuild 뒤 `make test` 296 passed, 2 deselected(17분 12초)입니다. 9.15의 2026-10-17 첫 rebuild는 harness의 test를 바꾸지 않았고, 그 뒤에는 `make -C harness lint`만 돌았습니다(9.15 기록 `logs/B1-data-rebuild.md`). 같은 날 9.15의 harness 작업 두 단계가 test를 더했습니다. 첫 단계(mock simulator가 WAIT로 시작하는 task를 도착 단계에서 막게 한 것)가 하나를 더해 `make test` 297 passed, 2 deselected(15분 41초), 둘째 단계가 둘(boost grid가 같은 algorithm의 entry에서 다시 시작함, censored turnaround가 `arrival` row를 읽음)을 더해 299 passed, 2 deselected(16분 05초)입니다(9.15 기록 `logs/B2-harness.md`, `logs/B3-harness.md`). 두 번째 data rebuild 뒤에는 다시 `make -C harness lint`만 돌았습니다(`logs/B4-data-rebuild.md`). 그 뒤 9.15의 harness 작업 셋째 단계(mock simulator가 도착 전에 온 wake를 저장해 두었다가 도착 단계에서 받게 한 것, WAIT로 시작하는 task는 그 wake로 첫 WAIT를 끝냄; `mock-simulator@2`)가 test 하나를 더해 `make test` 300 passed, 2 deselected(16분 34초)입니다(9.15 기록 `logs/P1.md`). 이로써 suite는 302개 collect, 그중 `make test`가 300개입니다.
+harness suite는 9.18에서 284개 중 283개 통과(26분 44초), 9.19에서 284개(30분 19초), 9.20에서 284개(32분 11초), 9.21에서 298개(약 34분)였고, 9.21 D13 이후 CI가 돌리는 `make test`는 296개 17분 23초입니다. 그 뒤 집 기계의 기록은 9.23 D10의 `make test` 296 passed, 2 deselected(17분 03초), D17의 `make test-full` 298 passed(29분 00초), 9.15의 2026-10-16 rebuild 뒤 `make test` 296 passed, 2 deselected(17분 12초)입니다. 9.15의 2026-10-17 첫 rebuild는 harness의 test를 바꾸지 않았고, 그 뒤에는 `make -C harness lint`만 돌았습니다(9.15 기록 `logs/B1-data-rebuild.md`). 같은 날 9.15의 harness 작업 두 단계가 test를 더했습니다. 첫 단계(mock simulator가 WAIT로 시작하는 task를 도착 단계에서 막게 한 것)가 하나를 더해 `make test` 297 passed, 2 deselected(15분 41초), 둘째 단계가 둘(boost grid가 같은 algorithm의 entry에서 다시 시작함, censored turnaround가 `arrival` row를 읽음)을 더해 299 passed, 2 deselected(16분 05초)입니다(9.15 기록 `logs/B2-harness.md`, `logs/B3-harness.md`). 두 번째 data rebuild 뒤에는 다시 `make -C harness lint`만 돌았습니다(`logs/B4-data-rebuild.md`). 그 뒤 9.15의 harness 작업 셋째 단계(mock simulator가 도착 전에 온 wake를 저장해 두었다가 도착 단계에서 받게 한 것, WAIT로 시작하는 task는 그 wake로 첫 WAIT를 끝냄; `mock-simulator@2`)가 test 하나를 더해 `make test` 300 passed, 2 deselected(16분 34초)입니다(9.15 기록 `logs/P1.md`). 이로써 suite는 302개 collect, 그중 `make test`가 300개입니다. 9.16의 harness 작업(`tick_count` guard의 chain 검사를 window 규칙으로 바꾸고 `c2-p3b`의 backup을 turnaround로 채점하게 한 것) 뒤에는 `make test`가 302 passed, 2 deselected(16분 53초)입니다(9.16 기록 `logs/H1.md`). 9.16의 data rebuild 뒤에는 `make -C harness lint`만 돌았습니다(9.16 기록 `logs/D.md`).
 
 > **코드로.** 2026-10-14에 집 기계에서 확인하면 dataset suite의 skip 하나는 `test_meas_send.py`의 SMTP test입니다. `pytest.importorskip("aiosmtpd")`가 `aiosmtpd` package가 없어서 skip합니다(`SKIPPED [1] tools/tests/test_meas_send.py:48: could not import 'aiosmtpd'`). `requirements.txt`에 `aiosmtpd`가 없으므로 CI에서도 같은 test가 skip될 것입니다. 이 test는 측정 도구(Thunderbird의 `send` 측정에 쓰는 SMTP 상대)의 test이고 build와는 관계가 없습니다.
 
