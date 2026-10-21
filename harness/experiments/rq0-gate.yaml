@@ -357,9 +357,12 @@ statements:
       with standard output ignored, exit 0 only when it is written, a
       byte-identical trace from the same argument line, and the trace header's
       sim the version string the runner's machine configuration names (data
-      contracts §11, contract 10). (c), (d) and (f) the
-      simulator does today; the others its owner holds as owed. The run does not
-      start until each is shown.
+      contracts §11, contract 10); (i) a WAKE naming a spawn-table entry reaching
+      that child, a wake sent before the child's birth held and taken at its
+      birth (the interpretation contract's WAKE(target) row; data contracts
+      §14, 2026-10-21; the 2026-10-10 dataset audit's blocker 1). (c), (d), (f)
+      and (i) the simulator does today; the others its owner holds as owed. The
+      run does not start until each is shown.
   - id: g-grounding
     text: >
       g = 0.5 reads: recognition accounts for at least half of the achievable

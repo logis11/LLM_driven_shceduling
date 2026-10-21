@@ -1,5 +1,5 @@
 # Interpretation Contract — workload ⇄ simulator
-> Status: normative · Created 2026-08-26 · Updated 2026-10-17
+> Status: normative · Created 2026-08-26 · Updated 2026-10-21
 
 The contract between the workload dataset and the simulator: what a canonical workload file contains and how the simulator turns it into scheduled tasks. Written before the simulator exists; simulator Phase 0 is built to this document. Decision record: `_dev/archive/2026-08-26-workload-generation-grill.md` (D10–D16).
 
@@ -30,7 +30,7 @@ Each task is a small program over six primitives; the interpreter is a per-task 
 | `SLEEP(duration)` | voluntary relative wait; task not runnable until now+duration |
 | `TIMER(period)` | absolute periodic wake: runnable at t₀+k·period regardless of when the previous iteration finished — drift-free (rt-app `timer` with `"mode": "absolute"`). Late iterations accumulate as backlog; they are not silently skipped |
 | `WAIT(channel)` | block until a WAKE (or exogenous wake event) on `channel`. Proposed (2026-10-16, `docs/data-contracts.md` §14), in force once 인경민 agrees: an orchestrator's `WAIT children:<id>` completes when every child it spawned has ended, and without blocking, with a zero-wait `ready` line, when none is live at the WAIT (§5) |
-| `WAKE(target)` | make `target` runnable (waker–waiter edges). `target` is any task id of the file, a spawn-table child included: the build trees' object jobs wire their members child to child |
+| `WAKE(target)` | make `target` runnable (waker–waiter edges). `target` is any task id of the file, a spawn-table child included: the build trees' object jobs wire their members child to child. A wake sent to a child not yet forked is held and taken at its birth (2026-10-21, `docs/data-contracts.md` §14) |
 | `FORK` / `EXIT` | create the next child from the spawn table (§5) / terminate this task |
 
 Periodic tasks use TIMER, never SLEEP loops: relative sleeps drift under delay, silently lowering demand exactly under bad configs.

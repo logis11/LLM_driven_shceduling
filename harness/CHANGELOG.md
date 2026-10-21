@@ -2,6 +2,11 @@
 
 The harness tree's own record of what its committed data files and programs changed, newest first. The scoring spec (`scoring/scoring-spec.yaml`) and the guard spec (`guards/guard-spec.yaml`) are frozen here (Phase 8 spec, decision 19): a change to either after its freeze is an entry below before any run reads it, and the RQ0 gate spec (`experiments/rq0-gate.yaml`) pins the frozen bytes by hash. The metrics doc and the data contracts keep their own changelogs.
 
+## 2026-10-21 — the conformance statement gains (i), a wake to a spawn-table child held until its birth (jioh)
+
+- **RQ0 gate spec**, `experiments/rq0-gate.yaml`, statement `simulator-conformance`: a ninth item, (i) — a WAKE naming a spawn-table entry reaches that child, and a wake sent before the child's birth is held and taken at its birth (the interpretation contract's `WAKE(target)` row; `docs/data-contracts.md` §14, 2026-10-21). The rebuilt build's make jobs wake their members child to child (9.6 D19, 9.10 D53), so without the first half the loader rejects `c1-compile` and `c7-compile`, both judging files; without the second a job split by `fork_cap` deadlocks with no error (`simulator/memo/memo_261021.md` Part E2: 6 of 13 and 10 of 19 fixture tasks never end). Decided by 인지오 on that memo's Part B. The closing sentence reads "(c), (d), (f) and (i) the simulator does today": the reference simulator's stage W (2026-10-21, commit `d183ab1c`).
+- The scoring spec, the guard spec, the driver table and the dataset manifests unchanged.
+
 ## 2026-10-21 — the conformance statement's closing sentence names (d) among the items the simulator does (jioh)
 
 - **RQ0 gate spec**, `experiments/rq0-gate.yaml`, statement `simulator-conformance`: the closing sentence reads "(c), (d) and (f) the simulator does today" in place of "(c) and (f)". The reference simulator applies `batch_bandwidth_cap` as a work-conserving ceiling on the behavioural batch class since its stage V (2026-10-20, commit `1074b14d`; the accounting window its decision D10, a token bucket of rate cap and depth one slice; `simulator/memo/memo_261020.md` Part F), as 인경민's `simulator/memo/memo_261021.md` Part D asks. The run still waits until each item is shown on the hand fixtures.
