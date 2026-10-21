@@ -199,3 +199,220 @@ All run with `python3 -I` on the downloaded data, reading the committed tools (`
 | `by_cause.py`, `labels.py` | the counts by cause group; every non-own label per component |
 | `check_irq.py`, `fixed_count.py` | the two checks |
 | `render.py` | the components table |
+
+## 9.9's own removals under the chain rule
+
+Run 2026-10-21. 9.9 took out of its four session entries' components every wake whose cause the trace leads to outside the observed desktop (D27; `dataset/tools/meas/session/causes.py`), a wake raised by a thread running in such a wake taking that wake's cause (D27 decision 2). On a busy program that rule over-attributes: 6 `pgrep` wakes of `kdenlive_render` became 36,040, the render's threads waking one another with no timer between them (above). This section reads 9.9's own removals the same way. `<scratch2>` is `/private/tmp/claude-501/-Users-jiohin-Desktop-future-of-sw-LLM-driven-shceduling/43e369a1-b5c7-40a2-b57d-cc4fcdb568dc/scratchpad/phpfpm2`. The releases of this section and the next were downloaded again into `<scratch2>/rel/`, each of the 241 assets' sha256 equal to `dataset/meas-releases.yaml`'s; the outputs are in `<scratch2>/out/`.
+
+### What ran
+
+Release `meas-ci-session-2026-09-24`, the 24 pooled repeats. `session/pool.py`, unchanged, reproduces the committed `_dev/research/jioh/task-9.9-daemons-session/campaign/results/pooled.json` exactly: all 18 carried values with their half-widths and carried status, and every entry's causes, components and tables. `session/fold_in.py` on it gives `compositor-shell`, `audio-server`, `service-manager` and `message-bus` as `dataset/archetypes.yaml` carries them. `session_split.py` runs the same pool with `causes.Causes` replaced, inside `session/analyze.py` at run time, by a subclass that records for each wake that leaves how its cause reached it and the row the cause was read from; its class and label equal `Causes.cause`'s for all 48,245 entry wakes. The four ways a cause reaches a wake:
+
+- **direct**: the wake's own wakeup row names the outside waker;
+- **chain**: an entry thread woke it while running in a wake whose cause is outside;
+- **D-continuation**: it continues the wake before it after a switch-out in D (pid 1 waiting for an RCU grace period);
+- **follow-up**: WirePlumber's worker's own timer, firing 100.2 ms after a wake, takes that wake's cause (`FOLLOW_UP`).
+
+### Counts
+
+Over the 24 repeats, per repeat min–max in brackets; wakes kept are the carried component's.
+
+| entry | component | wakes kept | outside | direct | chain | D-continuation | follow-up | by cause |
+|---|---|---|---|---|---|---|---|---|
+| `message-bus` | `system-bus/dbus-daemon` | 603 | 5,236 | 0 | 5,236 (192–264) | 0 | 0 | `php8.3-fpm` 4,989, PHP's session cleanup 149, `podman` 92, `systemd-networkd` 6: all chain |
+| `service-manager` | `pid1/systemd` | 3,034 | 4,671 | 4,550 (186–193) | 0 | 121 (0–11) | 0 | `php8.3-fpm` 4,316 direct and 109 D-continuation; `systemd-networkd` 201 and 3; `podman` 9 and 9; PHP's session cleanup 24 direct |
+| `audio-server` | `wireplumber/gmain` | 402 | 8,759 | 4,429 (183–187) | 1 | 0 | 4,329 (175–181) | the harness 4,351 direct (4,317 of them the workflow's wait loop, `bash`) and 4,306 follow-up; PHP's session cleanup 70 direct, 23 follow-up, 1 chain; `podman` 8 direct |
+| `compositor-shell` | `gnome-shell/gmain` | 10,793 | 3 | 0 | 3 (0–1) | 0 | 0 | `php8.3-fpm` 3 |
+| `compositor-shell` | `gnome-shell/gnome-shell` | 1,501 | 1 | 0 | 1 | 0 | 0 | `php8.3-fpm` 1 |
+| `compositor-shell` | `gnome-shell/JS Helper` | 13,068 | 0 | — | — | — | — | — |
+
+In all, 18,678 outside-cause wakes: 8,987 direct, 5,241 chain, 4,329 follow-up, 121 D-continuation. The user manager's 8 (`podman`, direct) belong to no carried component. The wakes that leave as events, desktop jobs bound to a clock time (D23's form), split the same way and stay out in every reading below: `message-bus` 70, all chain; `audio-server` 51, 37 direct and 14 follow-up; pid 1 37, 35 direct and 2 D-continuation. `direct.py`'s reading (the last row at or before the wake names an outside waker) agrees for the worker (4,429) and the bus (0); for pid 1 it gives 4,565, the own rows of 15 D-continuation wakes naming an outside waker and most of the rest an `rcu_` kernel thread.
+
+### The inherited runs
+
+Each of the 8,987 outside rows a cause was read from reaches 1–22 wakes: 2 for 8,380 of them, 1 for 310, 3 for 192. The largest, one `podman` row in repeat 47, reaches 22 wakes (pid 1's 4, the bus's 18) within 12.7 ms, through 2 threads and at most 4 hops; the largest `php8.3-fpm` rows reach 11–15 within 9–20 ms. From the row to an inherited wake: median 8.9 ms, at most 101.2 ms; every chain and D-continuation wake within 25 ms, every follow-up at 100.2 ms (median) to 100.3 ms (99th percentile). The commonest form, 4,052 rows, is an outside process signalling pid 1 and pid 1, in that run, waking the bus once: 4,743 of the bus's 5,236 wakes are one hop from their row, the rest 2–4 hops of pid 1 and the bus answering each other within the same burst (median 0.3 ms, at most 24.9 ms after the row). pid 1's D-continuation wakes come 10 ms (median) to 24 ms after the row and run 0.51 ms on average, against the component's 0.171 ms: the rest of the run the outside row started, resumed after an RCU wait. None has the `kdenlive_render` form.
+
+### How far each value would move with the inherited wakes put back
+
+Re-pooled by `session/pool.py`'s own reading: (ii) only the direct wakes removed, the chain, D-continuation and follow-up wakes put back; (iii) the direct and follow-up wakes removed, the chain and D-continuation wakes put back. The rule as written reproduces the committed values exactly. "D29" marks a value carried with its half-width over the 24 repeats, its spread lying in part between sessions (9.9 D29, D48).
+
+| component | value | carried | half-width | (ii) | (iii) |
+|---|---|---|---|---|---|
+| `gnome-shell/JS Helper` | wake rate · gap mean · run mean | 0.3025 /s · 3305.8 ms · 0.0137 ms | ±0.73 · ±0.73 · ±1.01 % | 0 · 0 · 0 | 0 · 0 · 0 |
+| `gnome-shell/gmain` | wake rate · gap mean · run mean | 0.2498 /s · 4002.6 ms · 0.0497 ms | ±0.05 · ±0.05 · ±2.15 % | +0.03 · −0.03 · −0.00 % | the same |
+| `gnome-shell/gnome-shell` | wake rate · gap mean · run mean | 0.0347 /s · 28780.9 ms · 5.6996 ms | ±1.49 · ±1.49 · ±2.82 % | +0.07 · −0.07 · −0.04 % | the same |
+| `wireplumber/gmain` | wake rate | 0.0093 /s | ±4.48 % | +1077 % (0.110 /s) **beyond both** | +0.25 % |
+| | gap mean | 107,463 ms | ±4.48 % | −91.5 % **beyond both** | −0.25 % |
+| | run mean | 0.035 ms | ±2.82 % | +2.18 % | −0.03 % |
+| `pid1/systemd` | wake rate | 0.0702 /s | ±1.87 % | +3.99 % **beyond the half-width** | the same |
+| | gap mean | 14,238.6 ms | ±1.87 % | −3.84 % **beyond the half-width** | the same |
+| | run mean | 0.171 ms (D29) | ±7.77 % | +7.61 % (0.184 ms) **beyond ±5 %** | the same |
+| `system-bus/dbus-daemon` | wake rate | 0.0140 /s (D29) | ±11.05 % | +868 % (0.135 /s) **beyond both** | the same |
+| | gap mean | 71,641.9 ms (D29) | ±11.05 % | −89.7 % **beyond both** | the same |
+| | run mean | 0.121 ms (D29) | ±10.74 % | +129.8 % (0.278 ms) **beyond both** | the same |
+
+Under (ii) the rule would fail on `wireplumber/gmain`'s run mean (±5.33 %), which D29 does not carry; under (iii) it holds, the bus's three values passing outright (±2.58, ±2.58, ±2.79 %) with `php8.3-fpm`'s relay every 10 s in them. Each move is the inherited wakes' own form. The bus put back is the bus before D27 (0.135 wakes/s against the 0.137 D27 recorded), every one of its outside-cause wakes pid 1's relay inside a run an outside row began, the 99.95 % D27 read. The worker's move under (ii) is its 4,329 follow-ups, each 100.2–100.3 ms after a wake the wait loop raised (D27: 4,316 of the loop's 4,320 wakes followed so). pid 1's is its 121 D-continuation wakes.
+
+### Verdict
+
+Of the 18,678 wakes D27's rule took out of the session entries, 8,987 were raised by the outside cause's own row. The rest reached their component within 25 ms of that row, through pid 1 relaying it to the bus or a resumed RCU wait, or 100.2 ms after it through WirePlumber's timer it armed. No outside row reaches more than 22 wakes, and none hands its cause to a program's own work as the render's `pgrep` wakes did. The inherited wakes are the indirect wakes D27's decision 2 takes out, and the values stand as carried. Guidebook sentence: *9.9's removals were traced as the census traced 9.5–9.8's (`_dev/research/jioh/php-fpm-census/`): of the 18,678 wakes taken out of the session entries, 8,987 were raised by the outside cause itself, and the rest followed it within 25 ms through pid 1's relay to the system bus or a resumed kernel wait, or 100.2 ms later through WirePlumber's timer; no inherited run resembles the Kdenlive render's, and the values stand as carried.*
+
+### Not checked
+
+- What pid 1 sends the bus on each `php8.3-fpm` notification is not read from a primary source; only the trace's order and timing are stated.
+- Root rows whose waker the trace prints as `9` (24 of PHP's session cleanup, 8 of `podman`) or with no comm (`:<pid>`) are placed by `Causes` through ancestry and not looked at further.
+- The within-run spreads of pid 1's run mean and the bus's values (9.9's placement of each spread within one run against across the repeats, D28, D35, D48) are not re-read under (ii) or (iii).
+
+### Scripts
+
+| script | what it does |
+|---|---|
+| `session_split.py` | the subclass of `causes.Causes` recording how each leaving wake's cause reached it and its root row; the session pool as written, (ii) and (iii) |
+
+## The 9.10 campaigns on the same runner image
+
+Run 2026-10-21, on every carried value of a campaign in 9.10's span that counts wakes or sums their runs, by the census's method: each repeat read as its pool reads it, every wake traced by `chain_roots.py` (census_core's rules and classes, checked wake by wake against `census_core.Tracer`: 0 differences in every section), how its cause reached it and the row it was read from kept, `harness-python` and `stimulus` counted apart from `outside`. `census_core`'s command-name table is unchanged.
+
+### What ran
+
+| campaign (tag) | release | entries and carried phase | repeats traced |
+|---|---|---|---|
+| `meas-ci:interactive:2026-10-05` | `meas-ci-interactive-2026-10-05` | `video-editor` idle components (`kdenlive`, `Qt bearer threa`), the 180 s phase after the 240 s settle | 16 |
+| `meas-ci:desktop:2026-10-05b` | `meas-ci-desktop-2026-10-05b` | `renderer-hidden` steady components, 12 measured renderers a repeat; its launch phase, a stream per renderer | 5, 5 |
+| `meas-ci:desktop:2026-10-05` | `meas-ci-desktop-2026-10-05` | `video-editor` launch phase (the re-trace to the 240 s settle) | 5 |
+| `meas-ci:desktop:2026-10-04b` | `meas-ci-desktop-2026-10-04b` | launch phases of `office-writer`, `mail-client`, `web-browser`, `video-player`, `audio-player`, `video-call` (the call opened in a running Chrome), `chat-client`, `game-client` | 5 each |
+| `meas-ci:background:2026-10-01` | `meas-ci-background-2026-10-01` | `package-upgrade` (the unattended upgrade, `upgrade-install`) | 9 |
+| `meas-ci:background:2026-10-02` | `meas-ci-background-2026-10-02` | `module-build-orchestrator`, `module-compiler-child` (`dkms-install`, the hook run that built the module) | 26 landings |
+| `meas-ci:background:2026-10-02b` | `meas-ci-background-2026-10-02b` | `file-indexer` (the Tracker index, `tracker-index`, within the job's window) | 18 |
+| `meas-ci:background:2026-10-03` | `meas-ci-background-2026-10-03` | `cpu-batch`'s `python3` (the MNIST training run, `mnist-train`) | 6 |
+| `meas-ci:background:2026-10-03b` | `meas-ci-background-2026-10-03b` | `video-transcoder` (the HandBrakeCLI transcode, `handbrake-transcode`) | 5 |
+| `meas-ci:background:2026-10-03c` | `meas-ci-background-2026-10-03c` | `cpu-batch`'s `kdenlive_render` (the Kdenlive export, `kdenlive-export`) | 30 |
+| `meas-ci:background:2026-10-04` | `meas-ci-background-2026-10-04` | `incremental-backup` (the Déjà Dup backup, `dejadup-incremental`, to deja-dup's exit) | 28 |
+
+The background CPU totals are also the timelines' `total_work`. Not traced: the Chrome tab-set campaign (`meas-ci:desktop:2026-10-04`), which the timelines carry as a count of `renderer-hidden` tasks, not a wake value; 10-04b's `kdenlive` and `chrome-hidden` launches, which the re-traces replace; the MNIST campaign's `madvise` check and every dry or probe job.
+
+Check: `video-editor`'s six idle values reproduce exactly (`kdenlive` 1.1611 wakes/s ±1.71 %, gap mean 861.25 ms, run mean 0.0261 ms ±4.45 %; `Qt bearer threa` 0.1 wakes/s ±0.00 %, run mean 0.4237 ms ±1.77 %). `renderer-hidden`'s per-renderer rates equal the library's, and its rate and gap half-widths the pooled record's; its run-mean half-widths are within 0.13 points, `campaign/pool.py`'s `table_pairs` rebuilding the sums from per-repeat means rounded to four places. Each of the 50 launch landings equals the committed `dataset/launch/launch-<entry>.json.gz` wake by wake. The 78 background quantities (each batch job's run between voluntary blocks, block per run and CPU total; the module build's 56 member steps, make's dispatch, the tail's run and block and the carried CPU total) reproduce within 2.2 × 10⁻⁵.
+
+Classes as the census has them, and: the loopback page server named by `httpd.pid` is `harness-python` (6 wakes, `renderer-hidden`'s launch); the `chrome` the harness runs to open the call page in the running browser is `stimulus` (`video-call`'s launch, 4 a repeat); Synapse by `synapse.pid` is `stand-in`.
+
+### Counts per entry
+
+The rule as census_core applies it (`by_cause.py`'s groups).
+
+| section | campaign | k | wakes | outside | php-fpm | PHP session cleanup | podman | sphinxsearch | runner agent / provisioner | tracer (perf) | workflow step / run.sh | Azure VM daemons | other runner-only services |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| video-editor idle | meas-ci:interactive:2026-10-05 | 16 | 3640 | 18 | 0 | 0 | 8 | 0 | 5 | 0 | 0 | 5 | 0 |
+| renderer-hidden steady | meas-ci:desktop:2026-10-05b | 5 | 7588 | 4 | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 0 | 0 |
+| launch office-writer | meas-ci:desktop:2026-10-04b | 5 | 4254 | 128 | 0 | 0 | 0 | 0 | 43 | 0 | 84 | 1 | 0 |
+| launch mail-client | meas-ci:desktop:2026-10-04b | 5 | 65614 | 217 | 0 | 0 | 0 | 0 | 20 | 0 | 190 | 0 | 7 |
+| launch web-browser | meas-ci:desktop:2026-10-04b | 5 | 125835 | 270 | 5 | 0 | 2 | 0 | 55 | 6 | 187 | 14 | 1 |
+| launch video-player | meas-ci:desktop:2026-10-04b | 5 | 126982 | 278 | 0 | 0 | 0 | 0 | 20 | 0 | 255 | 3 | 0 |
+| launch audio-player | meas-ci:desktop:2026-10-04b | 5 | 34598 | 259 | 0 | 0 | 0 | 0 | 20 | 0 | 239 | 0 | 0 |
+| launch video-call | meas-ci:desktop:2026-10-04b | 5 | 2080805 | 518 | 0 | 0 | 0 | 0 | 512 | 0 | 0 | 2 | 4 |
+| launch chat-client | meas-ci:desktop:2026-10-04b | 5 | 48795 | 2598 | 0 | 0 | 0 | 0 | 0 | 0 | 2598 | 0 | 0 |
+| launch game-client | meas-ci:desktop:2026-10-04b | 5 | 1554842 | 2652 | 12 | 72 | 0 | 0 | 1244 | 0 | 853 | 433 | 38 |
+| launch video-editor | meas-ci:desktop:2026-10-05 | 5 | 10826 | 14 | 0 | 0 | 3 | 0 | 7 | 0 | 4 | 0 | 0 |
+| launch renderer-hidden | meas-ci:desktop:2026-10-05b | 5 | 42103 | 21 | 0 | 3 | 0 | 0 | 12 | 0 | 0 | 5 | 1 |
+| package-upgrade | meas-ci:background:2026-10-01 | 9 | 132088 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| module build | meas-ci:background:2026-10-02 | 26 | 931467 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| file-indexer | meas-ci:background:2026-10-02b | 18 | 378343 | 43105 | 0 | 0 | 4 | 0 | 0 | 0 | 43101 | 0 | 0 |
+| cpu-batch (`python3`) | meas-ci:background:2026-10-03 | 6 | 120 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| video-transcoder | meas-ci:background:2026-10-03b | 5 | 3711965 | 10 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 10 |
+| cpu-batch (`kdenlive_render`) | meas-ci:background:2026-10-03c | 30 | 256908 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| incremental-backup | meas-ci:background:2026-10-04 | 28 | 2359824 | 70929 | 0 | 0 | 0 | 0 | 14 | 0 | 70914 | 1 | 0 |
+
+The video-transcoder's 10 are `multipathd`'s. Over the 4,105,882 desktop and interactive wakes: own 91.20 %, `stand-in` 8.25 % (Xvfb; Synapse's 24,270 in `chat-client`'s launch), desktop 0.28 % (mostly a `dbus-daemon` acting on its own and `systemd-resolved`), `outside` 0.170 %, unknown 0.090 %, kernel 0.005 %, `harness-python` 57 wakes, `stimulus` 20. The unknown are 2,438 wakes by `gdbus`, the D-Bus worker threads of udisksd, polkitd, packagekitd and the desktop portals, all desktop packages but classed by the thread's name, and 1,166 chains deeper than 25 hops in `renderer-hidden`'s launch. The background jobs: `package-upgrade` own 99.33 %, kernel 0.67 %; the module build all own; `file-indexer` own 88.51 %, `outside` 11.39 %, desktop 0.10 %; the training run's 120 wakes own, the run preempted rather than woken; `video-transcoder` own but for the 10 and 3 kernel; `kdenlive_render` `stand-in` 99.62 % (Xvfb), own 0.22 %, unknown 0.16 %; `incremental-backup` desktop 92.40 %, own 4.37 %, `outside` 3.01 %, `stand-in` 0.22 %. `harness-python` and `stimulus` are 0 in every background job.
+
+Two of these counts are the tracing's own form, not the phase's causes:
+
+- **The launch phases' start.** Each launch phase begins at the application's exec. `launch_app` in `dataset/tools/meas/desktop/run.sh` forks the process, which runs about 0.4 ms and blocks in D before its exec; the row that ends the block names whatever ran then: the subshell recording the affinity, `$(taskset -p "$APP_PID" | sed …)`, in 21 of the 45 launches it starts, the idle task in 22, a `.NET` runner thread and `sed` in one each (audio-player repeat 1: `bash[2637]` forks 4736, which runs 0.430 ms and blocks; `bash[4737]` wakes it; the exec of `/usr/bin/mpv` follows 4 ms later). The phase cuts off the fork wake and the block, so neither the launch rule nor the D rule reaches them, and the run that execs the application (40–56 ms for mpv and Kdenlive) traces to that row; the chain rule hands it to the whole start-up, the wrapper scripts, Element's V8 workers, Steam's setup scripts. Traced on the tree's wakes from the trace's start, 2 s before the exec (census_core's rules, with the predecessors the phase's start cuts off), the launch phases' outside-cause wakes fall from 6,955 to 2,503 (0.061 %): runner processes the trace names as interrupt context, 6–62 tree rows a CPU-second against Xvfb's 4,800–17,800 and `systemd-resolved`'s 628–2,804.
+- **The jobs' own session.** The Tracker index and the Déjà Dup backup run in a session bus of the user's own, which the harness opens with `dbus-run-session` in the chroot (each campaign's `method.md`). census_core names a process born in the phase after its long-lived ancestor, and the session's services descend from the runner's step shell, so every wake they raise is `the harness (workflow step / run.sh)`: in the Tracker index `gvfsd-fuse` 22,438, `gvfsd` 17,245, gvfs's volume monitors 1,343, GNOME Online Accounts 82; in the Déjà Dup backup `gvfsd` 68,002, `xdg-desktop-portal` 1,628, `gvfsd-metadata` 388, `dconf-service` 156 and the session bus's helpers. Each is a desktop package in the manifest (matched by executable name). With those executables classed by their package (`census_bg910.py --session-by-package`), the Tracker index holds 1,640 outside-cause wakes (0.43 %) and the Déjà Dup backup 15.
+
+### How far each value would move
+
+The idle and steady components (`effect_split.py`): the rule as written, and with only the wakes whose own row names the outside waker removed (the inherited put back).
+
+| entry | phase | component | k | wakes | outside (direct) | per repeat, min–max | wake rate: shift / half-width | gap mean | run mean | direct only |
+|---|---|---|---|---|---|---|---|---|---|---|
+| video-editor | idle | `kdenlive` | 16 | 3344 | 18 (18) | 0–6 | −0.538 % / ±1.71 % | +0.541 % / ±1.71 % | −1.282 % / ±4.45 % | the same |
+| video-editor | idle | `Qt bearer threa` | 16 | 288 | 0 (0) | 0–0 | 0 / ±0.00 % | 0 / ±0.00 % | 0 / ±1.77 % | — |
+| renderer-hidden | steady | `HangWatcher` | 5 | 3600 | 3 (3) | 0–2 | −0.083 % / ±0.00 % **beyond** | +0.083 % / ±0.00 % **beyond** | +0.015 % / ±17.95 % | the same |
+| renderer-hidden | steady | `chrome` | 5 | 2409 | 1 (1) | 0–1 | −0.042 % / ±1.59 % | +0.042 % / ±1.59 % | −0.013 % / ±11.43 % | the same |
+| renderer-hidden | steady | `Chrome_ChildIOT`, `Compositor`, `PerfettoTrace`, residual | 5 | 634, 300, 300, 345 | 0 | 0 | 0 | 0 | 0 | — |
+
+`HangWatcher` wakes 720 times in each of the 5 repeats (12 renderers × 60), and all 3 outside-cause wakes fall in those repeats: its own 10 s timer's wakes, named after the runner task the interrupt found running (the runner processes raise 3.3–5.9 tree rows a CPU-second, Xvfb 18,308), the census's fixed-count case. `video-editor`'s `kdenlive` holds 8 direct wakes by the `podman` job in repeats 8 and 12, 4 in each, at 107 tree rows a CPU-second against the runner processes' 0.5–8.8; the mechanism is not read here.
+
+The launch phases carry each repeat's stream as observed, with no half-width (9.10 D136); "spread" is the 95 % half-width of the 5 per-repeat values, a reading of the repeats. In brackets the worst repeat.
+
+| entry | k | wakes | outside (direct) | per repeat, min–max | CPU: shift / spread | wakes: shift / spread | CPU, direct only | read from 2 s before the exec: outside, CPU shift |
+|---|---|---|---|---|---|---|---|---|
+| office-writer | 5 | 4254 | 128 (2) | 0–43 | −1.54 % (−2.74 %) / ±1.96 % | −3.01 % (−5.13 %) / ±1.40 % | −0.01 % | 1, −0.00 % (−0.02 %) |
+| mail-client | 5 | 65614 | 217 (7) | 0–198 | −0.51 % (−2.46 %) / ±3.07 % | −0.33 % (−1.51 %) / ±0.39 % | −0.00 % | 27, −0.01 % (−0.03 %) |
+| web-browser | 5 | 125835 | 270 (34) | 21–68 | −2.64 % (−3.74 %) / ±9.26 % | −0.21 % (−0.27 %) / ±2.40 % | −0.02 % | 83, −0.04 % (−0.05 %) |
+| video-player | 5 | 126982 | 278 (9) | 0–138 | −0.76 % (−2.17 %) / ±10.05 % | −0.22 % (−0.57 %) / ±6.16 % | −0.52 % (−1.49 %) | 23, −0.00 % (−0.01 %) |
+| audio-player | 5 | 34598 | 259 (8) | 4–122 | **−6.76 % (−18.23 %)** / ±4.61 % | −0.75 % (−1.78 %) / ±1.13 % | −4.52 % (−12.52 %) | 20, −0.04 % (−0.07 %) |
+| video-call | 5 | 2080805 | 518 (96) | 74–189 | −0.01 % (−0.01 %) / ±1.30 % | −0.02 % (−0.05 %) / ±0.45 % | −0.00 % | 518, −0.01 % (−0.01 %) |
+| chat-client | 5 | 48795 | 2598 (2) | 0–1303 | **−9.55 % (−23.45 %)** / ±4.21 % | **−5.32 % (−13.36 %)** / ±0.13 % | −0.22 % (−0.58 %) | 0, 0 |
+| game-client | 5 | 1554842 | 2652 (962) | 214–795 | −0.37 % (−0.87 %) / ±8.80 % | −0.17 % (−0.26 %) / ±0.99 % | −0.04 % | 1800, −0.07 % (−0.10 %) |
+| video-editor | 5 | 10826 | 14 (14) | 1–4 | −1.50 % (−2.19 %) / ±3.77 % | −0.13 % (−0.18 %) / ±1.20 % | −1.50 % (−2.19 %) | 10, −0.01 % (−0.02 %) |
+| renderer-hidden (12 streams) | 5 | 42103 | 21 (13) | 0–8 | −0.03 % (−0.04 %) / ±3.69 % | −0.05 % (−0.10 %) / ±7.23 % | −0.02 % | 21, −0.03 % (−0.04 %) |
+
+Under the rule as written `audio-player`'s CPU and `chat-client`'s CPU and wakes move beyond ±5 % and their spread, `office-writer`'s wakes beyond their spread, and the first 10 s slice loses up to 25.8 % of its CPU (`audio-player`). The direct reading does not remove the move where the direct wake is the start-up run itself (`audio-player`'s 56 ms). Read from 2 s before the exec, no repeat's stream moves by more than 0.22 % of its wakes (`game-client`) or 0.10 % of its CPU.
+
+The background values, by `effect_extra.py`'s bound (the outside-cause wakes' run over the run a value sums; their count over the runs a count-based mean averages; the larger) and recomputed (`census_bg910.py`: each repeat's values read again with the outside-cause wakes' segments taken out, their time left to the program's other threads or idle), under the rule as written and with the inherited put back. Half-widths are the pooled records'.
+
+| entry | value | k | wakes | outside (direct) | outside run share | half-width | bound | bound, inherited put back | recomputed | recomputed, inherited put back |
+|---|---|---|---|---|---|---|---|---|---|---|
+| package-upgrade | run between blocks · block per run · CPU total | 9 | 132088 | 0 | 0 | ±3.10 · ±5.97 · ±3.78 % | 0 | 0 | 0 | 0 |
+| module build | 56 member steps; make's dispatch · tail run · tail block · carried CPU total | 26 | 931467 | 0 | 0 | ±0.67–4.13 %; ±0.72 · ±1.82 · ±8.35 · ±1.46 % | 0 | 0 | 0 | 0 |
+| file-indexer | run between blocks | 18 | 378343 | 43105 (1167) | 15.615 % | ±1.12 % | 15.6 % **beyond** | 0.31 % | −4.77 % **beyond** | +0.29 % |
+| file-indexer | block per run | 18 | | | | ±3.58 % | 11.4 % **beyond** | 0.31 % | +156.5 % **beyond** | +0.47 % |
+| file-indexer | CPU total | 18 | | | | ±0.28 % | 15.6 % **beyond** | 0.019 % | −15.62 % **beyond** | −0.019 % |
+| file-indexer, session by package | run · block · CPU total | 18 | 378343 | 1640 (33) | 0.030 % | ±1.12 · ±3.58 · ±0.28 % | 0.43 · 0.43 · 0.030 % | 0.009 · 0.009 · 0.001 % | +0.41 · −0.07 · −0.030 % | +0.008 · +0.004 · −0.001 % |
+| cpu-batch (`python3`) | run · block · CPU total | 6 | 120 | 0 | 0 | ±27.3 · ±10.8 · ±4.04 % | 0 | 0 | 0 | 0 |
+| video-transcoder | run · block · CPU total | 5 | 3711965 | 10 (6) | 0.000 % | ±1.79 · ±36.1 · ±2.64 % | 0.000 % | 0.000 % | 0.000 % | 0.000 % |
+| cpu-batch (`kdenlive_render`) | run · block · CPU total | 30 | 256908 | 0 | 0 | ±0.77 · ±13.1 · ±0.80 % | 0 | 0 | 0 | 0 |
+| incremental-backup | run between blocks | 28 | 2359824 | 70929 (213) | 3.506 % | ±4.38 % | 3.51 % | 0.009 % | −0.52 % | +0.009 % |
+| incremental-backup | block per run | 28 | | | | ±6.19 % | 3.01 % | 0.009 % | +1,906.6 % **beyond** | +0.30 % |
+| incremental-backup | CPU total | 28 | | | | ±0.56 % | 3.51 % **beyond** | 0.000 % | −3.51 % **beyond** | −0.000 % |
+| incremental-backup, session by package | run · block · CPU total | 28 | 2359824 | 15 (15) | 0.000 % | ±4.38 · ±6.19 · ±0.56 % | ≤ 0.001 % | ≤ 0.001 % | +0.001 · +0.001 · −0.000 % | the same |
+
+The inherited wakes carry almost all the outside-cause run: in the Tracker index 110,705 ms against the direct wakes' 136 ms, in the Déjà Dup backup 162,613 ms against 16 ms. The bound for a block mean counts the runs removed only, and recomputing shows how far it understates when the removed runs' time is large against the blocks': 11.4 % against +156.5 %, 3.0 % against +1,906.6 %. A removed run's time becomes the program's idle time, which widens the block it falls in.
+
+### The inherited runs
+
+Here the chain rule does hand single rows to programs' own work, in the form of the `kdenlive_render` case:
+
+- the Tracker index, in each of the 18 repeats: one `gvfsd-fuse` row reaches 1,195–1,336 wakes over 5.93–5.99 s, through 15 threads and 964–1,224 hops — the extractor's `single` thread, the miner, its pool and `tracker-extract`;
+- the Déjà Dup backup: one `gvfsd` D-Bus worker row reaches 51,389 wakes over 100.4 s through 29 threads in repeat 8, the whole backup (`gpg` 19,839, `deja-dup` 18,732, `duplicity` 12,742), and 16,448 over 60.0 s in repeat 29;
+- in kept classes, with no effect on a value: one Xvfb row (`stand-in`) reaches 8,266 wakes over 16.2 s, the whole export, in the Kdenlive export's repeat 1; one `systemd-resolved` row (desktop) 52,358 over 106 s in the Déjà Dup backup's repeat 1;
+- the launch phases: one `bash` row reaches 1,295 and 1,303 wakes (`chat-client` repeats 2 and 4, 0.75–0.79 s, 16 threads, 1,250 of them `V8Worker`), 521 and 331 (`game-client` repeats 1 and 3, Steam's `setup.sh`), 190 (`mail-client` repeat 5); these are the cut-off start of the first item above. One `hv_kvp_daemon` row reaches 349 wakes in 9 ms through Steam's threads in `game-client`'s repeat 5, an interrupt-context naming handed on, 0.11 % of that repeat's wakes, and stays when the launch is read from before its exec.
+
+The idle and steady components hold no inherited outside-cause wake.
+
+### Verdict
+
+Under census_core's rule as written, 1.02 % of the 11,876,597 traced wakes trace outside the observed desktop, and values move beyond their half-width in three places: `renderer-hidden`'s `HangWatcher` (0.083 % against ±0.00 %), three launch streams (`audio-player`'s CPU −6.76 %, `chat-client`'s CPU −9.55 % and wakes −5.32 % over the repeats, `office-writer`'s wakes −3.01 % against their spread), and the Tracker index's and the Déjà Dup backup's batch values (the index's CPU total −15.6 %, its block per run +157 % and its run between blocks −4.8 %; the backup's block per run +1,907 % and CPU total −3.5 %). In each the trace shows the removal would be wrong: `HangWatcher`'s are its own fixed timer's wakes; the launch streams' are the launched process's own start-up, traced to the harness because the phase's start cuts off the fork that began it; the batch values' are the jobs' own work, handed by the chain rule from the desktop services of the session the harness opens for the user. Read with the launches from before their exec and the session's services by their package, 0.035 % of the wakes trace outside (4,190), no launch stream moves by more than 0.22 % of a repeat's wakes or 0.10 % of its CPU, no batch value by more than 0.41 %, and no component value beyond its half-width but `HangWatcher`'s (the largest other the idle `kdenlive`'s run mean, −1.28 % against ±4.45 %); with only the wakes whose own row names the outside cause removed, no batch value moves beyond 0.47 %. The values stand as carried. Guidebook sentence: *The 9.10 campaigns' wakes were traced to their causes as 9.9 D27 traced the session's (`_dev/research/jioh/php-fpm-census/`): the upgrade, the module build, the training run, the transcode and the Kdenlive export hold no outside-cause wake but 10 of `multipathd`'s; the rest the rule would take out are runner processes named by interrupt context, the launched applications' own start-up cut off at the exec, and the Tracker index's and the Déjà Dup backup's own work reached through the desktop services of the session the harness opens for them; read so, no carried value moves beyond its half-width but `HangWatcher`'s timer, by 0.08 %, and the values stand as carried.*
+
+### Not checked
+
+- The launch reading from before the exec and the session-by-package reading are this section's, not D27's rule as census_core implements it. Why the launched process blocks in D right after its fork, and why the subshell's row ends the block, is not read against the kernel's source.
+- The session services are matched to their packages by executable name, not by the packages' file lists.
+- 412 wakes by `kdenlive` and its `QDBusConnection` thread, the application that starts the export, are unknown and kept; Kdenlive is not in the desktop manifest. Taken out, their run share (0.94 %) would exceed the export's CPU total's ±0.80 %; their count share is 0.16 %.
+- census_core keeps each wake's cause once traced, and a chain cut at its 25-hop limit is kept as `unknown: chain too deep` along its whole length: read in the census's order the module build is 95.84 % such unknowns, traced in time order (`census_bg910.py --warm`) every wake its own. The census's 31,471 `page-load` wakes deeper than 25 hops (above) are not re-read this way.
+- The recomputation leaves a removed run's time idle or to the program's other threads; it does not re-time the work after it. The earlier `steamcmd_block` bound (above, "≤ 0.24 % of the runs" against ±9.67 %) counts the runs removed only, the form this section finds can understate; it is not recomputed here, SteamCMD's records not having been downloaded again.
+- `gdbus` threads of desktop services stay unknown; as desktop or unknown they are kept either way.
+
+### Scripts
+
+| script | what it does |
+|---|---|
+| `chain_roots.py` | census_core's tracing with each wake's way to its cause (direct, chain, relay, D-continuation) and root row kept; the check against census_core; the root groups |
+| `effect_split.py` | `effect.py` with the shift under direct-only removal beside the rule's |
+| `tally910.py` | the desktop sections' tracer with the scripted peers by their pid files, and the per-component tally with the split |
+| `census_idle910.py` | `video-editor`'s idle repeats |
+| `census_hidden910.py` | `renderer-hidden`'s steady repeats, per renderer |
+| `census_launch910.py` | the ten launch phases, checked wake by wake against `dataset/launch`, with the reading from before the exec |
+| `effect_launch910.py` | the launch streams' shifts per repeat and over the repeats |
+| `census_bg910.py` | the seven background campaigns as `background/analyze.py` reads them, the values recomputed without the outside-cause wakes; `--session-by-package`, `--warm` |
+| `effect_bg910.py` | the background check, counts by cause, class totals, bounds and recomputed shifts, the largest runs |
