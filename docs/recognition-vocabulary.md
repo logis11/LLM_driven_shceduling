@@ -1,5 +1,5 @@
 # Recognition Vocabulary
-> Status: normative · Created 2026-08-28 · Updated 2026-10-20
+> Status: normative · Created 2026-08-28 · Updated 2026-10-21
 
 The shared vocabulary of the recognition signal — the one contract that the recognizer's output schema, the validator's menu, the driver table, and the Layer-1 grader all agree on. Ratified 2026-08-28 (인지오 · 인경민 · 박이안 — pending team review of this doc).
 
@@ -99,7 +99,7 @@ Two classes, tickets split `batch_share : (1 − batch_share)`, equal tickets pe
 
 ### FIFO
 
-No fields: `"params": {}`. Run in arrival order until each task blocks or exits. The cap still applies.
+No fields: `"params": {}`. Run in arrival order until each task blocks or exits. The cap still applies, and it is the one exception to non-preemption: a batch-class task that reaches the cap while a non-batch task is runnable is preempted.
 
 ### Provenance of the boot default
 
@@ -169,6 +169,7 @@ Adding or removing a mode, promoting an annotation to a graded attribute, changi
 
 ## 5. Changelog
 
+- **2026-10-21 — the cap under FIFO (jioh).** No value changed. §2's FIFO paragraph states that the cap preempts a batch-class task at the cap while a non-batch task is runnable, the one exception to FIFO's non-preemption — what "the cap still applies" and the batch class's "identical across algorithms" (the 2026-09-09 batch-class memo) together imply, and what the simulator does since stage V (`simulator/memo/memo_261021.md` Part C item 1).
 - **2026-10-20 — the cap's shipped counterparts (jioh).** No value changed. §2's `batch_bandwidth_cap` paragraph: `linux-sched-bwc`'s ceiling throttles a group once its quota is spent within the period, whether or not another task wants the CPU — not work-conserving, which the cap is; the work-conserving half is grounded by a new entry, `linux-cgroup-v2` (`cpu.weight`), and the combination is stated as ours. Both read from the kernel documentation's `.rst` sources on 2026-10-20.
 - **2026-10-17 — two groundings restated to their passages (jioh 9.16).** No value changed. §2's `batch_bandwidth_cap` paragraph: the shipped counterpart is a per-group CPU bandwidth ceiling, a quota per period on a cgroup, in place of a per-class one — `linux-sched-bwc` allocates a task group up to its quota of microseconds per period. §2's provenance table, LOTTERY `batch_share`: `waldspurger-osdi94` gives shares proportional to tickets in expectation, in place of "proportional to tickets". Found by the 9.16 claim audit (`_dev/research/jioh/task-9.16-exit-audits/claims/outside-findings.md`).
 - **2026-10-17 — the `render` gloss (jioh 9.15).** No graded value, label or file changed. §1's `render` row: 'an offline 3D/graphics render' → 'an offline render — a 3D scene or a video project rendered to a file', still distinct from `transcode`'s conversion of existing media. Every render segment binds Kdenlive's export of a video project (`kdenlive_render`, the `melt-7` it runs doing the work; 9.10 D10, D105), no 3D scene. §4's extension rule lists no gloss change among the three-owner decisions; the Phase 9 final memo (`docs/memos/2026-10-17-workload-dataset-rebuild.md`) tells 인경민 and 박이안. The prompt 9.12's latency measurement ran with (`dataset/tools/meas/llm/prompt.json`) keeps the former gloss, as measured.
