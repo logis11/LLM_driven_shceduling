@@ -56,6 +56,8 @@ Switching the implementation either way is a two-line change in `deliver()` (bot
 
 ## Answer — from jioh, 2026-10-10 (relayed by kyungmin)
 
+> **Indexed in `../memo/memo_261021.md` Part B**, the single entry point for everything addressed to 인지오.
+
 - **Deadline class.** Chain stages 2–16 are in EDF's deadline class. The current code stays as it is.
 - **Inheritance is intended.** A stage inherits the waker's deadline unchanged: the head's tick + one period. Frames are scored from the head's tick to the tail's end, so ordering the stages by that deadline is the natural choice.
 - **Dataset change pending.** jioh is reworking the dataset. In that rework, `c1-gaming` loses the compositor, and `c2-p2b`'s clamscan is replaced by Ubuntu unattended-upgrade. The EDF numbers above must be re-measured after the rebuild.

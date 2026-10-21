@@ -20,7 +20,7 @@ spawn-table entry, not only a top-level `arrive` id, and holds a wake that lands
 birth. Without it the rebuilt build's compile files do not load at all (§4 item 13). Not in the
 `steps/` ladder, so `src/sim == steps/sim_<last>` now holds only up to V. Negative control
 120/120 byte-identical to the pre-W binary on the local build; positive control on two fixtures
-built by the dataset's own `_object_job`/`_tree_job`. Status: `../memo/memo_261020.md` Part G.
+built by the dataset's own `_object_job`/`_tree_job`. Status: `../memo/memo_261021.md` Part E.
 
 **Ported 2026-10-20 (V — `batch_bandwidth_cap`):** the executor now applies the cap as a
 work-conserving ceiling on the behavioural batch class (RQ0 conformance item (d)). The accounting
@@ -219,11 +219,13 @@ independent of the `sim_r` comparison.
    birth instead of dropping it — `fork_cap` is a multiple of six while the trees are 8 and 10
    members, so the cap splits a job and a job's root can wake a member not yet forked; dropping
    it deadlocks the job (measured: 6 of 13 and 10 of 19 tasks never end). Details and the
-   negative/positive controls: `../memo/memo_261020.md` Part G.
+   negative/positive controls: `../memo/memo_261021.md` Part E.
    **Invisible on the local build** — the 2026-09-04 build predates the structure and its
    `c1-compile` has zero child WAKE targets, so this and the rebuild have to land together.
 
 ### Deferred (cannot be settled from code alone)
+
+> **Indexed in `../memo/memo_261021.md` Part B**, the single entry point for everything addressed to 인지오.
 
 - Gaps 3 and 4 are also the behaviour of the reference `sim_r`. Whether the code is
   wrong, or `metrics.md §11` describes the harness's *mock* rather than a hard

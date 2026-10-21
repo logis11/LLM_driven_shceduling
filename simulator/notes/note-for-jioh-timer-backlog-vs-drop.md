@@ -91,6 +91,8 @@ to name the logic-tick layer explicitly.
 
 ## Open items for jioh
 
+> **Indexed in `../memo/memo_261021.md` Part B**, the single entry point for everything addressed to 인지오.
+
 - [x] ~~Confirm backlog stays; or decide Proposal B is worth the invariant change.~~
       **Answered 2026-10-07 — backlog does not stay.** See below.
 - [x] ~~Consider softening `simulator-guide.md:127/129` "like a real game engine"~~ — moot: the
