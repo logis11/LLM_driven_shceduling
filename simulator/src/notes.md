@@ -15,6 +15,14 @@ the frozen menu), **stage T** (children traced under their spawn_table id) and *
 (config-switch semantics: MLFQ cold start, same-algorithm entries, drain), matching the
 one-rung-at-a-time ladder in `../steps/`.
 
+**2026-10-23 (Y — conformance (b), the TIMER skip rule):** a TIMER reached after ticks have passed
+consumes the latest at once and skips the earlier ones, each a missed job with no work and a
+`deadline` line `met: false` written after the late job's own (the 2026-10-07 memo; metrics §6.2).
+It replaces K's backlog. `src/sim == steps/sim_y`: 200/200 on the 2026-09-04 build, 129/129 on the
+rebuilt one. On the 2026-09-04 build the harness's guard messages go from 73,271 to 22, all of them
+input left unconsumed at the run's end; `mock-media`, re-derived for the skip rule, now matches
+line for line but for same-µs order. Detail: `../steps/README.md`, the y rows.
+
 **2026-10-23 (X — conformance (a), with Q2):** a `ready` line at every completion of a blocking
 primitive, at zero wait when it did not block — a WAIT met from a mailbox, a TIMER in backlog, tick 0
 in the arrival step — and RUNs joined without a block are one occupancy: `boundary()` steps the
@@ -56,7 +64,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -o sim sim.cpp
 ```
 `sim.cpp` depends on `mini_json.hpp` (in this directory).
 
-## 2. Stages implemented (A–X)
+## 2. Stages implemented (A–Y)
 
 | stage | feature |
 |---|---|
@@ -76,6 +84,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -o sim sim.cpp
 | V | `batch_bandwidth_cap` enforced — conformance (d). Token bucket (D10: rate = cap, depth = one slice), `park`, the cap's own timer, one-way state transitions through `set_st` (fixes §4 item 1) |
 | W | the loader resolves a `WAKE` target that names a **spawn-table entry**, not only a top-level `arrive` id — conformance item (i), see §4 item 13 (2026-10-21) |
 | X | a `ready` line per completed blocking primitive, zero-wait ones included; RUN→RUN in one occupancy (`boundary()`, `x_run_cont`); a lone slice expiry keeps the lane with no `run_end` (Q2); a RUN ending at the µs of another decision is settled by its own Lane event — conformance (a) (2026-10-23; fixes §4 items 4 and 10) |
+| Y | TIMER skip rule — conformance (b): the latest passed tick consumed at once, the earlier ones skipped, each a `deadline` line `met: false` (2026-10-23; replaces K's backlog) |
 
 ## 3. Verification performed
 
@@ -264,13 +273,14 @@ independent of the `sim_r` comparison.
 The contract skeleton — the 7 non-negotiables, the 8 instructions, the 8 trace
 events, the config schedule, determinism, and the whole-file-rejecting loader — is
 satisfied and byte-identical to the ladder's final rung across every coreset
-workload — through X (`steps/sim_x`, 2026-10-23).
+workload — through Y (`steps/sim_y`, 2026-10-23).
 
 `batch_bandwidth_cap` (V) and EDF/lottery (S) are done. What is open, as of 2026-10-23, is the
-`simulator-conformance` statement of `harness/experiments/rq0-gate.yaml`: **(a), (c), (d), (f), (i)
-met; (b) the TIMER skip rule, (e) the strict idle class, (g) `WAIT children:<id>`, (h) the
-invocation contract still owed.** (a) is met on the local build; the gate spec's own sentence
-still reads "(c), (d), (f) and (i)" — its edit is 인지오's, with a harness changelog entry. The RQ0 run does not start until
+`simulator-conformance` statement of `harness/experiments/rq0-gate.yaml`: **(a), (b), (c), (d), (f),
+(i) met; (e) the strict idle class, (g) `WAIT children:<id>`, (h) the invocation contract still
+owed.** The gate spec's own sentence still reads "(c), (d), (f) and (i)" — its edit is 인지오's,
+with a harness changelog entry; so are the five normative passages that still state the backlog
+rule (`../memo/memo_261023.md` Part G). The RQ0 run does not start until
 all eight are shown. Beside them: TIMER `t0` (§4 item 3) still needs 인지오's ruling, and the
 remaining invocation plumbing is (h). The regression baselines all stand on the stale 2026-09-04
 24-file build while the dataset is rebuilt to 51 files plus 78 variants — re-baselining is the

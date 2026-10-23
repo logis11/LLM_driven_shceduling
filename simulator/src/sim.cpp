@@ -17,13 +17,17 @@
 //   T children traced under their spawn_table id · U config-switch semantics (cold/same/drain)
 //   V batch_bandwidth_cap enforced (token bucket, D10) · W spawn-table WAKE targets
 //   X a ready line per completed primitive, RUN→RUN in one occupancy, a lone slice expiry kept
+//   Y TIMER skips missed ticks (the skip rule, 9.11 D3) in place of K's backlog
 //
 // Design notes worth carrying:
 //   · gen (F): a preempted Lane reservation cannot be removed from a priority_queue, so
 //     it is stamped with the task's generation and voided on mismatch when it fires.
 //   · SLEEP vs TIMER (J/K): SLEEP is relative (now+N); TIMER is an absolute grid
-//     (t0 + k·P) so a slow scheduler cannot make the workload lighter by dropping frames —
-//     missed ticks pile into a backlog and are consumed at once.
+//     (t0 + k·P), drift-free. K consumed missed ticks one by one, back to back; Y skips them
+//     (conformance (b); the 2026-10-07 skip-rule memo): a TIMER reached after ticks have
+//     passed consumes the latest at once and skips the earlier ones, each a missed job with no
+//     work and a deadline line met:false. The offered load is unchanged and every skipped tick
+//     is counted, so the damage is measured, not hidden. A chain skips at its head only.
 //   · channels (M): an external wake with no waiter is not lost — it goes to a mailbox.
 //     Losing it would shrink a starved task's demand and hide the harm being measured.
 //   · FORK (N): tasks are born at runtime, so tasks_ is a std::deque — a vector realloc
@@ -888,9 +892,14 @@ class Sim : public Trace, public Clock, public TaskView {
             t.job_open = false;
           }
           if (t.timer_next < 0) t.timer_next = now_;      // D4: t0 = first TIMER execution
-          if (now_ >= t.timer_next) {                     // backlog → consume the tick at once
-            t.job_tick = t.timer_next; t.job_period = P; t.job_open = true;
-            t.timer_next += P; ++t.pc;
+          if (now_ >= t.timer_next) {                     // passed → consume the latest tick at once
+            // Y: m, the last tick at or before now; every unconsumed tick before it is skipped —
+            // its job runs no work and misses, its deadline line written now, after the late
+            // job's own above (metrics §6.2)
+            const i64 m = t.timer_next + (now_ - t.timer_next) / P * P;
+            for (i64 k = t.timer_next; k < m; k += P) ev_deadline(id, k + P, false, k + P - now_);
+            t.job_tick = m; t.job_period = P; t.job_open = true;
+            t.timer_next = m + P; ++t.pc;
             ready_line(id, "timer_tick");                 // X: completed without blocking
             break;
           }
