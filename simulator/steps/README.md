@@ -39,6 +39,8 @@ make lines      # 단계별 코드 줄수
 | **t** | 자식 trace id = 파일의 `spawn_table` id (q 의 버그 수정) | 773 (+1) | coreset 24파일 중 자식 없는 20개는 sim_s 와 바이트 동일. 자식 있는 4개(c1-compile, c3-workday, c4-compile, c6-dual)는 `task`/`parent` 문자열 말고 diff 0, spawn 된 id 전부가 파일 테이블에 있다 |
 | **u** | 교체 의미론: MLFQ cold start(U1) / 같은 알고리즘 엔트리는 홀더 불간섭·큐 순서 유지(U2) / drain(U3) | 801 (+28) | harness `mock-switch` 손 유도 trace 의 `config_applied` 4개 시각 일치(t 는 2번이 10600, 기대 12000). 스케줄 없음·boot 1엔트리 48/48 sim_t 와 바이트 동일. 9엔트리 4알고리즘 스케줄: u 24/24 종료·재현·index 전부 순서대로, t 는 23/24 assert 로 죽는다 |
 | **v** | `batch_bandwidth_cap` 집행 (conformance (d)): 토큰 버킷(D10) + park + cap 자기 타이머, 상태 전이 외길 `set_st` | 922 (+121) | **음성 대조**: cap 이 전부 null 이면 24/24 바이트 동일 — 스케줄 없음, 그리고 4엔트리 교체 스케줄 둘 다. **양성**: 손 워크로드에서 MLFQ cap 0.05→5.2 %, 0.2→17.0 %, 0.5→30.0 %(=천장 위, 비구속) / LOTTERY 0.05→4.42 % / FIFO 0.05 는 비선점 홀더를 끊어 주기 태스크를 0→99 job 으로 올린다 |
+| **w** | spawn_table 엔트리를 가리키는 WAKE (conformance (i)): 엔트리마다 슬롯, target = -slot-1, 탄생 전에 온 wake 는 쥐었다가 탄생 때 넘김 | 966 (+44) | **음성 대조**: 2026-09-04 빌드엔 자식 WAKE target 이 0개 → `sim_v` 와 바이트 동일. **양성**: 데이터셋 자신의 `_object_job`/`_tree_job` 으로 만든 fix-object(6명 job 2개, fork_cap 8) 13 도착/13 종료, fix-tree(8명·10명 conftest job, fork_cap 12) 19/19 — `sim_v` 는 둘 다 감사 원문 메시지로 거부 |
+| **x** | 끝난 블록 primitive 마다 ready 한 줄(우편함 WAIT·backlog TIMER·tick 0 포함), RUN→RUN 은 점유 하나(`boundary()`, `x_run_cont`), 혼자 남은 홀더의 슬라이스 만료는 run_end/run_start 짝 없음(Q2), 경계는 RUN 의 Lane 이벤트 한 곳에서 (conformance (a)) | 995 (+29) | harness 손 fixture 줄 단위: mock-office **일치**(W 는 8줄 차이), cap 을 끄면 mock-switch·mock-guards **일치** (fixture 가 cap 을 모델링하지 않는다). 로컬 corpus 128 run: 레인 위반 717,297 → **0**, guard 187,733(115 run) → 73,271(38 run) — 남은 것은 (b) 와 입력 잔량뿐 |
 
 큰 델타 다섯(h, n, r, s, v)은 쪼갤 수 없는 단위다 — MLFQ 다섯 규칙, FORK 의 생애주기, 두 번째 입력,
 그리고 **부류**: EDF 와 LOTTERY 는 같은 실행기 부류(B2 주기 / B1 batch)를 읽으므로 따로 얹으면
@@ -196,7 +198,7 @@ v 의 검증 (전부 이번 세션 실측):
 | 빚(`allow_` 최솟값)의 상한 | cap 0.05 **−1 µs**, mock-switch −353 µs, cap 0.5 −10,000 µs = **버킷 깊이 하나** (설계가 말한 "grant 하나") |
 | 천장 — 손 워크로드(주기 1 + hog 1, 둘 다 늘 runnable) | MLFQ cap 0.05 → 5.23 %, 0.2 → 17.0 %, 0.5 → 30.0 %(=cap 없을 때와 같다, 천장이 비구속) / LOTTERY 0.05 → 4.42 % |
 | FIFO — 비선점 홀더를 cap 이 끊는가 | 주기 태스크가 0 job → **99 job**. cap 이 없으면 hog 가 100 % 를 쥐고 안 놓는다 |
-| `src/sim` == `steps/sim_v` (`meta.sim` 만 정규화) | coreset 24 × 스케줄 4 = 96/96, 손 워크로드 18/18 |
+| `src/sim` == `steps/sim_v` (`meta.sim` 만 정규화) | coreset 24 × 스케줄 4 = 96/96, 손 워크로드 18/18 (V 시점) |
 
 ⚠️ 두 번 밟은 함정, 둘 다 **규모를 보고** 잡았다:
 1. `drain_in` 이 빚(`allow_<0`)을 그대로 나눠 59 µs 같은 지평선을 냈다 → 길이 0 점유 → MLFQ 가
@@ -205,6 +207,40 @@ v 의 검증 (전부 이번 세션 실측):
 2. 레인이 비어 있을 때의 `cap_gate` 는 볼 홀더가 없어 타이머를 못 건다 → dispatch 직후에 다시
    걸어야 한다. 안 걸면 홀더가 이벤트 없이 한참 달려 빚이 **−255,706 µs** 까지 갔다 (고친 뒤 −1).
    ⇒ "종료했다"가 "맞게 돌았다"가 아니다. 빚의 최솟값을 안 찍었으면 2번은 못 봤다.
+
+w 의 검증 (2026-10-23 실측). W 는 `src/sim.cpp` 에 먼저 들어갔고(2026-10-21) 사다리 칸은 뒤에 왔다 —
+인지오의 답(memo_261021 H3)이 "칸을 둔다"였다. 그래서 검증 방향이 거꾸로다: `sim_w` 를 `src/sim` 에 맞춘다.
+
+| 무엇 | 결과 |
+|---|---|
+| `src/sim` == `steps/sim_w` (`meta.sim` 만 정규화) | coreset-single 24 × 스케줄 4 + coreset-native 24 × 스케줄 없음 + fix-object·fix-tree × 4 = **128/128** |
+| fix-object / fix-tree | `sim_w`: 13/13, 19/19 종료 · `sim_v`: 둘 다 `WAKE target 이 최상위 태스크가 아니다` 로 거부 |
+
+x 의 검증 (2026-10-23 실측, 로컬 2026-09-04 빌드). 대조 대상은 이전 바이너리가 아니라 **계약**이다 — (a) 는 모든
+MLFQ trace 를 바꾸므로 바이트 동일은 음성 대조가 될 수 없다. 그래서 세 가지로 본다: harness 손 fixture 와 줄 단위,
+일정과 무관한 보존 법칙, harness 자신의 guard (`primitives.compute`).
+
+| 무엇 | W | X |
+|---|---|---|
+| 128 run (single 24 × 스케줄 4 + native 24 + fix-object·fix-tree × 4) 종료 | 128/128 | 128/128, 두 번 돌려 **128/128 바이트 동일** |
+| 레인 lint (홀더 둘·주인 없는 run_end·task_end 뒤 줄) | **717,297** 위반 | **0** |
+| 완료 태스크의 배달 CPU = RUN 수요 | — (lint 에 가림) | 0 위반 |
+| harness guard 메시지 | 187,733 (115 run) | 73,271 (38 run) |
+| `ready(timer_tick)` 와 `deadline` 줄 수의 대응 | 43/128 | 128/128 |
+| `run_start` 총수 | 8,159,330 | 5,781,489 (−29 %, 자기 자신에게 넘기던 짝이 사라짐) |
+| `src/sim` == `steps/sim_x` (`meta.sim` 정규화) | — | 128/128 |
+
+남은 guard 73,271 의 내역 (전수): `ready(timer_tick) … consumes tick k, not after tick k` 68,154 와 `deadline` 불일치
+5,095 — **(b) TIMER skip 규칙**의 몫이다(harness 는 줄 하나가 그 시각 이하의 가장 늦은 tick 을 소비한다고 읽는데, 지금은 밀린
+tick 을 같은 순간에 하나씩 소비한다). 입력 wake 개수 22 — 22/22 가 **"ready(wake) 줄 + 끝날 때 우편함 잔량 = run file 의
+입력 wake 수"** 로 정확히 보존된다(진단 빌드로 잔량을 찍어 확인). 잃어버린 줄은 0, 굶은 태스크가 끝까지 못 소비한 입력이다.
+
+⚠️ memo_261010 Part C 가 양성 대조로 제안한 "`x_run_cont` 수 = 옛 `ready(arrive)` 수" 는 **성립하지 않는다**
+(`c1-gaming` boot: 52,547 vs 35,809). 일정 자체가 바뀌기 때문이다 — 홀더가 레인을 쥐고 있는 동안 wake 가 우편함에
+더 쌓여 블록 없이 넘는 경계가 늘어난다. 그 등식은 일정 불변을 가정한 추정이었다. 위의 보존 법칙으로 대신한다.
+
+⚠️ 덤으로 잡은 결함 (B 부터): EXIT 으로 끝난 segment-bound 태스크가 depart 에서 `task_end` 를 또 썼다(66 run). harness 는
+뒤의 depart 로 덮어써 **끝낸 태스크를 미완료**로 센다. lint 가 처음 잡았다 — W 까지는 RUN→RUN 위반 수십만 개에 묻혀 있었다.
 
 ### §7 통합 게이트
 

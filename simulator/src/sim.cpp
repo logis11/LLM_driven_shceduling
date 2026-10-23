@@ -16,6 +16,7 @@
 //   S EDF + LOTTERY via a TaskView seam (executor-owned task classes)
 //   T children traced under their spawn_table id · U config-switch semantics (cold/same/drain)
 //   V batch_bandwidth_cap enforced (token bucket, D10) · W spawn-table WAKE targets
+//   X a ready line per completed primitive, RUN→RUN in one occupancy, a lone slice expiry kept
 //
 // Design notes worth carrying:
 //   · gen (F): a preempted Lane reservation cannot be removed from a priority_queue, so
@@ -63,6 +64,19 @@
 //     birth, not dropped: fork_cap is a multiple of six, so an eight- or ten-member job is
 //     split by the cap and the root can wake a member not yet forked (c7-compile). Dropping
 //     it would block that member forever and deadlock the job.
+//   · one occupancy (X; conformance (a), metrics §11 item 1, trace-clarifications memo §4; Q2
+//     decided 2026-10-16): RUNs joined without a block are one occupancy — one run_start, one
+//     run_end. A RUN boundary is not a decision point: boundary() steps the holder on its lane,
+//     with no requeue and no pick, and writes x_run_cont. Every blocking primitive that
+//     completes writes its ready line at that instant, a WAIT met from a mailbox and a TIMER in
+//     backlog included — inside the occupancy when the holder passes it, at the arrival when the
+//     arrival step does. A slice that expires while the policy picks the same holder again is
+//     no switch either: no run_end/run_start pair. A FORK that finds a slot writes no line — the
+//     fork-slot wait is the block, and there was none. Whatever ends a RUN at the very µs of
+//     another decision (a preemption, a cap park, a config apply, a policy timer) leaves the
+//     boundary to the RUN's own Lane event, so the boundary is settled in one place.
+//     Fixed beside it: a segment-bound task that EXITs before its depart wrote a second
+//     task_end at the depart, and the harness read the later one — a completed task as not.
 //   · policy-timer epoch (S, fixes R): a policy timer used to survive a config apply, so each
 //     MLFQ start() added one more boost chain, and the chains kept each other alive past the
 //     arm() stop rule — c1-compile under the mock-switch schedule never terminated. The switch
@@ -597,6 +611,7 @@ class Sim : public Trace, public Clock, public TaskView {
   std::uint64_t pol_epoch_ = 0;             // +1 per config apply; carried in PolicyTimer's gen
   i64 batch_slice_ = Params{}.timeslice_us; // B1's threshold = the running config's slice
   int running_ = -1;
+  int lane_prev_ = -1;                      // X/Q2: the holder whose slice just ended, until dispatch
   i64 lane_start_ = 0, now_ = 0;
   bool check_gen_ = true;
 
@@ -664,16 +679,15 @@ class Sim : public Trace, public Clock, public TaskView {
     if (allow_ > 0) { arm_cap_timer(); return; }   // still in credit — nothing to park
     // The bucket is empty. A batch holder comes off the lane first: when the stretch opened
     // mid-occupancy its horizon was set with no ceiling, and the debt would keep growing
-    if (running_ >= 0 && batch(running_)) {
+    if (running_ >= 0 && batch(running_) && !run_ends_now()) {   // X: else its boundary first
       const int v = running_;
       release();
       ev("run_end", v, "reason", "preempt");
-      if (T(v).run_left == 0) advance(v);          // coincided with a RUN boundary
-      else { set_st(v, State::Ready); park(v); }
+      set_st(v, State::Ready); park(v);
     }
     for (std::size_t k = 0; k < runnable_.size(); ++k) {
       const int id = runnable_[k];
-      if (batch(id) && !is_parked(id)) park(id);
+      if (id != running_ && batch(id) && !is_parked(id)) park(id);
     }
     arm_cap_timer();
   }
@@ -761,11 +775,9 @@ class Sim : public Trace, public Clock, public TaskView {
                 (long long)now_, idx, c.algorithm.c_str(), c.provenance.c_str());
 
     const bool cold = c.algorithm != algo_;
-    int holder = running_;                    // a holder here means out of FIFO, or same algorithm
-    if (holder >= 0 && cold) {                // rule a: freshly dispatched by the new algorithm
-      release();
-      if (T(holder).run_left == 0) { advance(holder); holder = -1; }
-    }
+    const int holder = running_;              // a holder here means out of FIFO, or same algorithm
+    if (holder >= 0 && cold) release();       // rule a: freshly dispatched by the new algorithm. A
+                                              // RUN ending now is re-armed at 0 µs below (X)
     std::vector<int> waiting = pol_->handoff();
     if (cold) std::sort(waiting.begin(), waiting.end());   // D5; U2 keeps the queue order
     ++pol_epoch_;                                // voids every policy timer armed so far
@@ -788,17 +800,13 @@ class Sim : public Trace, public Clock, public TaskView {
 
   void on_policy_timer(const Event& e) {
     if (e.gen != pol_epoch_) return;   // armed under an earlier config — void (header, stage S)
-    int holder = running_;
-    if (holder >= 0) {
-      release();
-      if (T(holder).run_left == 0) { advance(holder); holder = -1; }   // coincided with the boundary
-    }
+    const int holder = running_;
+    if (holder >= 0) release();
     pol_->on_timer(e.tag);
     if (holder < 0) return;
-    if (pol_->horizon(holder) == 0) { ev("run_end", holder, "reason", "preempt");
-                                      yield_lane(holder, Yield::SliceEnd); }
-    else { running_ = holder; set_st(holder, State::Running);           // no switch → nothing traced
-           lane_start_ = now_; arm_lane(holder); }
+    if (T(holder).run_left > 0 && pol_->horizon(holder) == 0) slice_over(holder);
+    else { running_ = holder; set_st(holder, State::Running);           // no switch → nothing traced;
+           lane_start_ = now_; arm_lane(holder); }                       // a RUN ending now: 0 µs (X)
   }
 
   // Lane accounting lives here alone — this is where "demand is preserved across preemption" is
@@ -811,22 +819,52 @@ class Sim : public Trace, public Clock, public TaskView {
     running_ = -1;
   }
 
-  void advance(int id) {   // one RUN's demand satisfied — look at the next instruction
+  // X: one RUN's demand is delivered (release() settled it) and the holder steps on. Reaching
+  // the next RUN without a block continues the occupancy: no run_end, no requeue, no pick
+  void boundary(int id) {
     ++T(id).pc;
     step(id);
-    if (T(id).st == State::Done) ev("run_end", id, "reason", "exit");
-    else if (T(id).st == State::Blocked) ev("run_end", id, "reason", "block",
-                                            "blocked_on", blocked_on(T(id)));
-    if (T(id).st == State::Ready) enqueue(id, "arrive");
-    else { settled(id); pol_->on_yield(id, T(id).st == State::Done ? Yield::Ended : Yield::Blocked); }
+    if (T(id).st != State::Ready) {
+      if (T(id).st == State::Done) ev("run_end", id, "reason", "exit");
+      else ev("run_end", id, "reason", "block", "blocked_on", blocked_on(T(id)));
+      settled(id); pol_->on_yield(id, T(id).st == State::Done ? Yield::Ended : Yield::Blocked);
+      return;
+    }
+    note("x_run_cont", id);
+    running_ = id; set_st(id, State::Running); lane_start_ = now_;
+    // Drain: a waiting switch applies as the current RUN ends, the holder freshly dispatched by
+    // the incoming algorithm (rule a), as a switch out of FIFO treats it
+    while (!pending_.empty()) { const int idx = pending_.front(); pending_.pop_front(); apply_config(idx); }
+    const i64 h = pol_->horizon(id);
+    if (h != kNoHorizon && h <= 0) { release(); slice_over(id); return; }   // slice spent here, or
+                                                                             // shrunk below it (U2)
+    ++T(id).gen; arm_lane(id);   // voids a Lane a rule-a apply armed above
+    // The step may have woken, spawned or re-dated someone (EDF: the holder's own next job)
+    for (std::size_t k = 0; k < runnable_.size(); ++k) {
+      const int c = runnable_[k];
+      if (c != id && !is_parked(c) && pol_->preempts(c, id)) { maybe_preempt(c); return; }
+    }
   }
+
+  // Q2 (decided 2026-10-16): the holder's slice is over. It goes back to the ready set and
+  // dispatch() writes run_end only if the policy picks someone else — after a drain waiting on
+  // this slice end has applied, so the incoming algorithm is the one that picks (mock-switch
+  // at 12000: the hog's slice ends, FIFO applies, the hog keeps the lane with no run_end)
+  void slice_over(int id) {
+    yield_lane(id, Yield::SliceEnd);
+    lane_prev_ = id;
+  }
+
+  bool run_ends_now() const { return T2(running_).run_left == now_ - lane_start_; }
 
   void maybe_preempt(int challenger) {
     if (running_ < 0 || !pol_->preempts(challenger, running_)) return;
+    if (run_ends_now()) return;   // X: the RUN's Lane event, queued at this µs, settles the
+                                  // boundary first, and the boundary judges this challenger again
     const int v = running_;
     release();
     ev("run_end", v, "reason", "preempt");
-    if (T(v).run_left == 0) advance(v); else yield_lane(v, Yield::Preempted);
+    yield_lane(v, Yield::Preempted);
   }
 
   // Advances the program only; the ready set, the lane and the queueing are the policy's or
@@ -852,7 +890,9 @@ class Sim : public Trace, public Clock, public TaskView {
           if (t.timer_next < 0) t.timer_next = now_;      // D4: t0 = first TIMER execution
           if (now_ >= t.timer_next) {                     // backlog → consume the tick at once
             t.job_tick = t.timer_next; t.job_period = P; t.job_open = true;
-            t.timer_next += P; ++t.pc; break;
+            t.timer_next += P; ++t.pc;
+            ready_line(id, "timer_tick");                 // X: completed without blocking
+            break;
           }
           const i64 due = t.timer_next;                   // ahead of the grid — block until next tick
           t.job_tick = due; t.job_period = P; t.job_open = true;
@@ -864,9 +904,10 @@ class Sim : public Trace, public Clock, public TaskView {
         case Op::WAIT: {
           const int c = t.prog[t.pc].chan;
           if (chan_pending_[(std::size_t)c] > 0) { --chan_pending_[(std::size_t)c];
-                                                   t.chain_dl = -1; ++t.pc; break; }
+                                                   t.chain_dl = -1; ++t.pc;
+                                                   ready_line(id, "wake"); break; }   // X
           if (t.mailbox > 0) { --t.mailbox; t.chain_dl = t.mail_dl.front(); t.mail_dl.pop_front();
-                               ++t.pc; break; }
+                               ++t.pc; ready_line(id, "wake"); break; }            // X
           set_st(id, State::Blocked); t.blocked_by = 'w'; t.wait_chan = c; t.burst = 0;
           chan_waiters_[(std::size_t)c].push_back(id);
           return;
@@ -893,8 +934,27 @@ class Sim : public Trace, public Clock, public TaskView {
     }
   }
 
-  void enqueue(int id, const char* cause) {
-    set_st(id, State::Ready); pol_->on_ready(id); ev("ready", id, "cause", cause);
+  // X: the ready line of a primitive that completed without blocking. During a task's arrival
+  // step its lines are held, so that its ready(arrive) comes first, as the mocks write it
+  std::vector<const char*>* held_ = nullptr;
+  int held_id_ = -1;
+  void ready_line(int id, const char* cause) {
+    if (id == held_id_) held_->push_back(cause); else ev("ready", id, "cause", cause);
+  }
+  // The arrival step (metrics §11 items 4–5): the leading instructions run without the lane.
+  // A task that reaches a RUN gets ready(arrive), then the zero-wait lines of what it passed —
+  // its tick 0, a WAIT met by a wake stored before it arrived
+  void arrival_step(int id) {
+    std::vector<const char*> held;
+    std::vector<const char*>* const outer = held_;
+    const int outer_id = held_id_;          // a FORK in the step runs a child's arrival step
+    held_ = &held; held_id_ = id;
+    step(id);
+    held_ = outer; held_id_ = outer_id;
+    const bool ready = T(id).st == State::Ready;
+    if (ready) ev("ready", id, "cause", "arrive");
+    for (const char* c : held) ev("ready", id, "cause", c);
+    if (ready) { pol_->on_ready(id); maybe_preempt(id); } else settled(id);
   }
   static const char* cause_of(const Task& t) {
     switch (t.blocked_by) { case 's': return "sleep_end"; case 't': return "timer_tick";
@@ -911,8 +971,7 @@ class Sim : public Trace, public Clock, public TaskView {
 
   void on_arrive(int id) {
     ev("task_arrive", id, "source", "file");
-    step(id);
-    if (T(id).st == State::Ready) { enqueue(id, "arrive"); maybe_preempt(id); } else settled(id);
+    arrival_step(id);
   }
 
   void spawn(int parent_id) {
@@ -938,8 +997,7 @@ class Sim : public Trace, public Clock, public TaskView {
       }
     }
     ev("task_arrive", id, "source", "spawn", "parent", T(parent_id).sid.c_str());
-    step(id);
-    if (T(id).st == State::Ready) { enqueue(id, "arrive"); maybe_preempt(id); } else settled(id);
+    arrival_step(id);
   }
 
   // Termination in one place. EXIT or depart, a parent's slot must come back exactly once —
@@ -993,10 +1051,10 @@ class Sim : public Trace, public Clock, public TaskView {
 
   void on_unblock(int id) {                     // shared by external wake and SLEEP/TIMER expiry
     if (T(id).st != State::Blocked) return;     // D2: with no waiter the letter is dropped
-    const char* c = cause_of(T(id));
-    ++T(id).pc;                                 // the blocking instruction is over
+    ev("ready", id, "cause", cause_of(T(id)));  // X: the primitive is over — its line first, then
+    ++T(id).pc;                                 // the zero-wait lines of what the step passes
     step(id);
-    if (T(id).st == State::Ready) { enqueue(id, c); maybe_preempt(id); } else settled(id);
+    if (T(id).st == State::Ready) { pol_->on_ready(id); maybe_preempt(id); } else settled(id);
   }
 
   void on_lane(const Event& e) {
@@ -1004,8 +1062,8 @@ class Sim : public Trace, public Clock, public TaskView {
     if (check_gen_ && e.gen != T(e.task).gen) return;   // voided reservation
     const int id = e.task;
     release();
-    if (T(id).run_left == 0) advance(id);              // RUN demand satisfied
-    else { ev("run_end", id, "reason", "preempt"); yield_lane(id, Yield::SliceEnd); }
+    if (T(id).run_left == 0) boundary(id);             // RUN demand satisfied
+    else slice_over(id);
   }
 
   void arm_lane(int id) {
@@ -1015,13 +1073,16 @@ class Sim : public Trace, public Clock, public TaskView {
   }
 
   void dispatch() {
-    if (running_ >= 0) return;
+    if (running_ >= 0) { assert(lane_prev_ < 0); return; }
     while (!pending_.empty()) {                // U3: the lane is free — the drain is over
       const int idx = pending_.front(); pending_.pop_front();
       apply_config(idx);
     }
     cap_gate();                               // V: filter before the policy picks
     const int id = pol_->pick();
+    const int prev = lane_prev_;              // Q2: a slice just ended — a switch only if the
+    lane_prev_ = -1;                          // policy picks someone else
+    if (prev >= 0 && id != prev) ev("run_end", prev, "reason", "preempt");
     if (id < 0) return;
     running_ = id;
     set_st(id, State::Running);
@@ -1029,10 +1090,11 @@ class Sim : public Trace, public Clock, public TaskView {
     arm_lane(id);
     arm_cap_timer();        // V: armed once the holder is known — the gate call before the
                             // pick had no holder to look at
-    ev("run_start", id);
+    if (id != prev) ev("run_start", id);
   }
 
   void on_depart(int id) {
+    if (T(id).st == State::Done) return;   // X: a task that exited before its depart has ended once
     if (running_ == id) { ev("run_end", id, "reason", "depart"); release(); }
     if (T(id).wait_chan >= 0) {
       auto& w = chan_waiters_[(std::size_t)T(id).wait_chan];
