@@ -1,0 +1,784 @@
+{
+ "meta": {
+  "id": "fix-tree"
+ },
+ "ground_truth": {},
+ "events": [
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "build",
+   "name": "make",
+   "program": [
+    {
+     "op": "RUN",
+     "us": 500
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "RUN",
+     "us": 500
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "EXIT"
+    }
+   ],
+   "spawn_table": [
+    {
+     "id": "build.j1.sh",
+     "name": "sh",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "RUN",
+       "us": 669
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.sh"
+      },
+      {
+       "op": "RUN",
+       "us": 149
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.csh"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.dirname"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.gcc"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.cc1"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.rm"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.tsh1"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.tsh2"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j1.csh",
+     "name": "sh",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 641
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.dirname"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 2168
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.gcc"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 71
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.rm"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 215
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.tsh1"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 1
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.tsh2"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 121
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.sh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.csh"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j1.dirname",
+     "name": "dirname",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.dirname"
+      },
+      {
+       "op": "RUN",
+       "us": 666
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.dirname"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j1.gcc",
+     "name": "x86_64-linux-gn",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.gcc"
+      },
+      {
+       "op": "RUN",
+       "us": 1238
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.cc1"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.gcc"
+      },
+      {
+       "op": "RUN",
+       "us": 225
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.gcc"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j1.cc1",
+     "name": "cc1",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.cc1"
+      },
+      {
+       "op": "RUN",
+       "us": 148847
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.gcc"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.cc1"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j1.rm",
+     "name": "rm",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.rm"
+      },
+      {
+       "op": "RUN",
+       "us": 698
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.rm"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j1.tsh1",
+     "name": "sh",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.tsh1"
+      },
+      {
+       "op": "RUN",
+       "us": 1993
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.tsh1"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j1.tsh2",
+     "name": "sh",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.tsh2"
+      },
+      {
+       "op": "RUN",
+       "us": 286
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.tsh2"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.sh",
+     "name": "sh",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "RUN",
+       "us": 605
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.sh"
+      },
+      {
+       "op": "RUN",
+       "us": 107
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.csh"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.dirname"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.gcc"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.cc1"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.as"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.rm"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.rm2"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.tsh1"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.tsh2"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.csh",
+     "name": "sh",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 620
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.dirname"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 2179
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.gcc"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 76
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.rm"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 51
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.rm2"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 171
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.tsh1"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 19
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.tsh2"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.csh"
+      },
+      {
+       "op": "RUN",
+       "us": 126
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.sh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.csh"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.dirname",
+     "name": "dirname",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.dirname"
+      },
+      {
+       "op": "RUN",
+       "us": 652
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.dirname"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.gcc",
+     "name": "x86_64-linux-gn",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.gcc"
+      },
+      {
+       "op": "RUN",
+       "us": 1212
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.cc1"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.gcc"
+      },
+      {
+       "op": "RUN",
+       "us": 144
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.as"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.gcc"
+      },
+      {
+       "op": "RUN",
+       "us": 247
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.gcc"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.cc1",
+     "name": "cc1",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.cc1"
+      },
+      {
+       "op": "RUN",
+       "us": 19882
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.gcc"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.cc1"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.as",
+     "name": "as",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.as"
+      },
+      {
+       "op": "RUN",
+       "us": 1904
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.gcc"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.as"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.rm",
+     "name": "rm",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.rm"
+      },
+      {
+       "op": "RUN",
+       "us": 599
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.rm"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.rm2",
+     "name": "rm",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.rm2"
+      },
+      {
+       "op": "RUN",
+       "us": 2159
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.rm2"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.tsh1",
+     "name": "sh",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.tsh1"
+      },
+      {
+       "op": "RUN",
+       "us": 124
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.tsh1"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.tsh2",
+     "name": "sh",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.tsh2"
+      },
+      {
+       "op": "RUN",
+       "us": 172
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.csh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.tsh2"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    }
+   ],
+   "fork_cap": 12
+  }
+ ]
+}

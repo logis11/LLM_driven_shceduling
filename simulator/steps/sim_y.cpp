@@ -1025,7 +1025,7 @@ class Sim : public Trace, public Clock, public TaskView {
         case Op::WAKE: deliver(id, t.prog[t.pc].target); ++t.pc; break;
         case Op::FORK:
           if (t.spawn_next >= t.spawn_table.size()) { ++t.pc; break; }   // 테이블 소진
-          if (t.fork_cap > 0 && t.live_children >= t.fork_cap) {
+          if (t.live_children >= t.fork_cap) {   // cap >= 1 은 로더가 보장
             set_st(id, State::Blocked); t.blocked_by = 'f'; t.wait_chan = -1; // 슬롯 대기
             return;                                                      // ★ pc 그대로
           }
@@ -1313,7 +1313,10 @@ static void load_workload(const std::string& path, Sim& s) {
           cs.slot = spawn.at(cs.sid);           // W: 형제의 WAKE 가 이 슬롯을 거쳐 해소된다
           tab.push_back(std::move(cs));
         }
-        s.set_spawn(id, std::move(tab), (int)e.at("fork_cap").as_int("fork_cap"));
+        if (!e.has("fork_cap")) die("fork_cap 없는 spawn_table: " + e.at("id").as_str("id"));
+        const i64 cap = e.at("fork_cap").as_int("fork_cap");   // 테이블이 있으면 필수 (H2):
+        if (cap < 1) die("fork_cap 은 1 이상: " + e.at("id").as_str("id"));  // 무제한 빌드는 없다
+        s.set_spawn(id, std::move(tab), (int)cap);
       }
     } else if (op == "wake") {
       s.wake(e.at("t").as_int("t"), s.channel(e.at("channel").as_str("channel")));

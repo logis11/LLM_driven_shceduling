@@ -1,0 +1,514 @@
+{
+ "meta": {
+  "id": "fix-object"
+ },
+ "ground_truth": {},
+ "events": [
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "build",
+   "name": "make",
+   "program": [
+    {
+     "op": "RUN",
+     "us": 500
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "RUN",
+     "us": 500
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "FORK"
+    },
+    {
+     "op": "EXIT"
+    }
+   ],
+   "spawn_table": [
+    {
+     "id": "build.j1.sh",
+     "name": "sh",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "RUN",
+       "us": 786
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.gcc"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.sh"
+      },
+      {
+       "op": "RUN",
+       "us": 107
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.fixdep"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.sh"
+      },
+      {
+       "op": "RUN",
+       "us": 105
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.rm"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.sh"
+      },
+      {
+       "op": "RUN",
+       "us": 150
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.gcc"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.cc1"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.as"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.fixdep"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.rm"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j1.gcc",
+     "name": "gcc",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.gcc"
+      },
+      {
+       "op": "RUN",
+       "us": 1795
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.cc1"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.gcc"
+      },
+      {
+       "op": "RUN",
+       "us": 156
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.as"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.gcc"
+      },
+      {
+       "op": "RUN",
+       "us": 394
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.sh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.gcc"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j1.cc1",
+     "name": "cc1",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.cc1"
+      },
+      {
+       "op": "RUN",
+       "us": 440132
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.gcc"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.cc1"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j1.as",
+     "name": "as",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.as"
+      },
+      {
+       "op": "RUN",
+       "us": 3338
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.gcc"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.as"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j1.fixdep",
+     "name": "fixdep",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.fixdep"
+      },
+      {
+       "op": "RUN",
+       "us": 5656
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.sh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.fixdep"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j1.rm",
+     "name": "rm",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.rm"
+      },
+      {
+       "op": "RUN",
+       "us": 1013
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j1.sh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j1.rm"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.sh",
+     "name": "sh",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "RUN",
+       "us": 811
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.gcc"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.sh"
+      },
+      {
+       "op": "RUN",
+       "us": 129
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.fixdep"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.sh"
+      },
+      {
+       "op": "RUN",
+       "us": 88
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.rm"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.sh"
+      },
+      {
+       "op": "RUN",
+       "us": 145
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.gcc"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.cc1"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.as"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.fixdep"
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.rm"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.gcc",
+     "name": "gcc",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.gcc"
+      },
+      {
+       "op": "RUN",
+       "us": 1796
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.cc1"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.gcc"
+      },
+      {
+       "op": "RUN",
+       "us": 151
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.as"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.gcc"
+      },
+      {
+       "op": "RUN",
+       "us": 307
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.sh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.gcc"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.cc1",
+     "name": "cc1",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.cc1"
+      },
+      {
+       "op": "RUN",
+       "us": 199127
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.gcc"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.cc1"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.as",
+     "name": "as",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.as"
+      },
+      {
+       "op": "RUN",
+       "us": 2571
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.gcc"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.as"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.fixdep",
+     "name": "fixdep",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.fixdep"
+      },
+      {
+       "op": "RUN",
+       "us": 5775
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.sh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.fixdep"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    },
+    {
+     "id": "build.j2.rm",
+     "name": "rm",
+     "declared_class": "normal",
+     "program": [
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.rm"
+      },
+      {
+       "op": "RUN",
+       "us": 1035
+      },
+      {
+       "op": "WAKE",
+       "target": "build.j2.sh"
+      },
+      {
+       "op": "WAIT",
+       "channel": "job:build.j2.rm"
+      },
+      {
+       "op": "EXIT"
+      }
+     ]
+    }
+   ],
+   "fork_cap": 8
+  }
+ ]
+}

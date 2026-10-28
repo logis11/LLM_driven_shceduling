@@ -15,6 +15,21 @@ the frozen menu), **stage T** (children traced under their spawn_table id) and *
 (config-switch semantics: MLFQ cold start, same-algorithm entries, drain), matching the
 one-rung-at-a-time ladder in `../steps/`.
 
+**2026-10-28 (Z — conformance (e), the strict idle class):** the loader reads `declared_class` (an
+optional field — absent means `normal`, so the hand fixtures and the 2026-09-04 build carry no idle
+task), and an idle task runs only when no non-idle task is runnable, a waking non-idle task
+preempting a running idle one at once, under every algorithm (the 2026-10-08 declared-class memo §2).
+A second band alongside V's cap: `idle_gate()` holds every runnable idle task out of the policy's
+ready set while any non-idle task is runnable, giving them back — ordered by the algorithm — only
+when none is. Ladder rung `steps/sim_z.cpp`; `src/sim == steps/sim_z`. Verified on the rebuilt build:
+the no-idle files stay **byte-identical to `sim_y`** (`has_idle_` false → the band is a strict no-op,
+so V/W/X/Y do not regress — checked on 7 files × {no schedule, mock-switch}); the 7 files that carry
+an idle task (`c1-backup`, `c1-indexing`, `c2-p1b`, `c2-p2a-idle`, `c2-p3b`, `c7-backup`,
+`c7-indexing`) all terminate with reruns byte-identical, and a trace replay finds **0 violations** of
+"an idle task is Running while a non-idle task is Ready" — holding under MLFQ, FIFO, EDF and LOTTERY
+(single-algorithm schedules) with 0 lane-lint violations. No starvation safety net (the memo's §2).
+Detail: `../steps/README.md`, the z rows.
+
 **2026-10-23 (Y — conformance (b), the TIMER skip rule):** a TIMER reached after ticks have passed
 consumes the latest at once and skips the earlier ones, each a missed job with no work and a
 `deadline` line `met: false` written after the late job's own (the 2026-10-07 memo; metrics §6.2).
@@ -64,7 +79,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -o sim sim.cpp
 ```
 `sim.cpp` depends on `mini_json.hpp` (in this directory).
 
-## 2. Stages implemented (A–Y)
+## 2. Stages implemented (A–Z)
 
 | stage | feature |
 |---|---|
@@ -85,6 +100,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -o sim sim.cpp
 | W | the loader resolves a `WAKE` target that names a **spawn-table entry**, not only a top-level `arrive` id — conformance item (i), see §4 item 13 (2026-10-21) |
 | X | a `ready` line per completed blocking primitive, zero-wait ones included; RUN→RUN in one occupancy (`boundary()`, `x_run_cont`); a lone slice expiry keeps the lane with no `run_end` (Q2); a RUN ending at the µs of another decision is settled by its own Lane event — conformance (a) (2026-10-23; fixes §4 items 4 and 10) |
 | Y | TIMER skip rule — conformance (b): the latest passed tick consumed at once, the earlier ones skipped, each a `deadline` line `met: false` (2026-10-23; replaces K's backlog) |
+| Z | `declared_class` idle — conformance (e): an idle task runs only when no non-idle task is runnable, preempted at once when one wakes, under every algorithm; `idle_gate()`, a band alongside V's cap; the field is optional (absent = normal) so a file with no idle task is a strict no-op (2026-10-28) |
 
 ## 3. Verification performed
 
@@ -189,7 +205,11 @@ independent of the `sim_r` comparison.
 6. **Loader does not re-check linter invariants** — id uniqueness, `spawn_table`
    present iff FORK, program ends in EXIT or has a `depart`, unbounded LOOP only in
    segment-bound tasks. These are linter invariants the JSON Schema does not enforce;
-   the loader trusts the canonical (machine-generated) file.
+   the loader trusts the canonical (machine-generated) file. **Narrowed 2026-10-24:** an
+   `arrive` with a `spawn_table` and no `fork_cap`, or a `fork_cap` below 1, is refused by
+   name (`../memo/memo_261021.md` H2: a build with no parallelism cap is not a shape the
+   contract has). Before, a missing cap died on the generic missing-key message and a cap of 0
+   ran unbounded. The rebuild's 13 tables all carry 48.
 7. **No output-path / gzip / invocation handling** — data-contracts §11 wants the
    trace gzipped when the output path ends in `.gz`; the code writes JSONL to stdout
    only. `meta.sim` is hardcoded (`"src/sim"`) rather than a version string. The
@@ -273,15 +293,15 @@ independent of the `sim_r` comparison.
 The contract skeleton — the 7 non-negotiables, the 8 instructions, the 8 trace
 events, the config schedule, determinism, and the whole-file-rejecting loader — is
 satisfied and byte-identical to the ladder's final rung across every coreset
-workload — through Y (`steps/sim_y`, 2026-10-23).
+workload — through Z (`steps/sim_z`, 2026-10-28).
 
-`batch_bandwidth_cap` (V) and EDF/lottery (S) are done. What is open, as of 2026-10-23, is the
-`simulator-conformance` statement of `harness/experiments/rq0-gate.yaml`: **(a), (b), (c), (d), (f),
-(i) met; (e) the strict idle class, (g) `WAIT children:<id>`, (h) the invocation contract still
-owed.** The gate spec's own sentence still reads "(c), (d), (f) and (i)" — its edit is 인지오's,
-with a harness changelog entry; so are the five normative passages that still state the backlog
-rule (`../memo/memo_261023.md` Part G). The RQ0 run does not start until
-all eight are shown. Beside them: TIMER `t0` (§4 item 3) still needs 인지오's ruling, and the
-remaining invocation plumbing is (h). The regression baselines all stand on the stale 2026-09-04
-24-file build while the dataset is rebuilt to 51 files plus 78 variants — re-baselining is the
-precondition for (e) and for checking W on real files, and it is 인지오's to run.
+`batch_bandwidth_cap` (V) and EDF/lottery (S) are done. What is open, as of 2026-10-28, is the
+`simulator-conformance` statement of `harness/experiments/rq0-gate.yaml`: **(a), (b), (c), (d), (e),
+(f), (i) met; (g) `WAIT children:<id>` and (h) the invocation contract still owed.** The gate spec's
+own sentence still reads "(c), (d), (f) and (i)" — its edit is 인지오's, with a harness changelog
+entry; so are the five normative passages that still state the backlog rule (`../memo/memo_261023.md`
+Part G) and, now, (e)'s own line. The RQ0 run does not start until all eight are shown. Beside them:
+TIMER `t0` (§4 item 3) still needs 인지오's ruling, and the remaining invocation plumbing is (h). (e)
+was verified on the rebuilt build directly (the idle band is a no-op on the stale 24-file build,
+which carries no `declared_class`); the regression baselines still stand on that 2026-09-04 build
+while the dataset is rebuilt to 51 files plus 78 variants, and re-baselining remains 인지오's to run.

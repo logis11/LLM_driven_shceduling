@@ -18,6 +18,7 @@
 //   V batch_bandwidth_cap enforced (token bucket, D10) · W spawn-table WAKE targets
 //   X a ready line per completed primitive, RUN→RUN in one occupancy, a lone slice expiry kept
 //   Y TIMER skips missed ticks (the skip rule, 9.11 D3) in place of K's backlog
+//   Z declared_class idle — a strict scheduling band below the normal class (conformance (e))
 //
 // Design notes worth carrying:
 //   · gen (F): a preempted Lane reservation cannot be removed from a priority_queue, so
@@ -81,6 +82,15 @@
 //     boundary to the RUN's own Lane event, so the boundary is settled in one place.
 //     Fixed beside it: a segment-bound task that EXITs before its depart wrote a second
 //     task_end at the depart, and the harness read the later one — a completed task as not.
+//   · declared_class idle (Z; conformance (e), the 2026-10-08 declared-class memo §2): a task
+//     whose declared class is `idle` runs only when no task of another class is runnable, and a
+//     waking non-idle task preempts a running idle one at once — below whatever the algorithm
+//     decides, the same under all four. It is a second band alongside V's cap: idle_gate() holds
+//     every runnable idle task out of the policy's ready set while any non-idle task is runnable
+//     (preempting an idle holder), and gives them back — to run among themselves, ordered by the
+//     algorithm — only when none is. The field is optional in the loader (absent = normal), so a
+//     file with no idle task carries has_idle_ = false and the band is a strict no-op: V/W/X/Y
+//     stay byte-identical. No starvation safety net (the memo's §2; the harness's 30 s guard).
 //   · policy-timer epoch (S, fixes R): a policy timer used to survive a config apply, so each
 //     MLFQ start() added one more boost chain, and the chains kept each other alive past the
 //     arm() stop rule — c1-compile under the mock-switch schedule never terminated. The switch
@@ -100,6 +110,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <unistd.h>   // (h): dup2 for the gzip pipe of --out-trace
 
 using i64 = std::int64_t;
 
@@ -109,6 +120,7 @@ struct Instr { Op op; i64 us = 0; i64 period_us = 0; int jump = -1; i64 count = 
 
 // One entry of a FORK spawn table — a child spec straight from the file (id/name/program)
 struct ChildSpec { std::string sid, name; std::vector<Instr> prog; bool periodic = false;
+                   bool idle = false;   // Z: declared_class of this spawn-table entry
                    int slot = -1; };   // W: this entry's deferred-WAKE slot (-1 = never a target)
 
 // Ready vs Running: the scheduler *picks from* the Ready set
@@ -133,6 +145,7 @@ struct Task {
   char blocked_by = 'w';      // why last blocked: w=wait s=sleep t=timer f=fork_slot
   std::uint64_t gen = 0;      // bumped each time the lane is released = reservation void
   bool periodic = false;      // B2 class — fixed at load, never changes during the run
+  bool idle = false;          // Z (e) — declared_class idle; a strict band below the normal class
   i64 burst = 0;              // B1 — CPU received since the last voluntary block
   i64 chain_dl = -1;          // deadline inherited by a TIMER-less chain stage (-1 = none)
   std::deque<i64> mail_dl;    // the deadline each mailboxed WAKE carried (pairs with mailbox)
@@ -519,7 +532,9 @@ class Sim : public Trace, public Clock, public TaskView {
   // For forward references: a WAKE target may name a task not yet added. The loader reads
   // every arrive to build the name→index table *before* resolving any program
   void set_prog(int id, std::vector<Instr> prog) { T(id).prog = std::move(prog); }
+  void set_idle(int id, bool v) { T(id).idle = v; if (v) has_idle_ = true; }   // Z (e)
   void set_spawn(int id, std::vector<ChildSpec> tab, int cap) {
+    for (const ChildSpec& c : tab) if (c.idle) has_idle_ = true;   // Z: a child may be idle
     T(id).spawn_table = std::move(tab); T(id).fork_cap = cap;
   }
   void report() const {   // emergence-time summary — FORK children only
@@ -586,6 +601,7 @@ class Sim : public Trace, public Clock, public TaskView {
         case Kind::ConfigApply: on_config_apply(e.tag); break;
         case Kind::CapRefill:   break;   // V: waking up is the work — cap_gate below judges
       }
+      idle_gate();             // Z: the idle band, above the cap
       cap_gate();              // V: park/admit is judged even while the lane is held
       dispatch();
       capped_ = capped_now();  // V: the verdict for the next interval; no time passed here
@@ -628,6 +644,9 @@ class Sim : public Trace, public Clock, public TaskView {
   bool capped_ = false;          // was [cap_mark_, now_] capped (what accrual and spend read)
   std::vector<int> runnable_;    // Ready+Running — the population "is a non-batch task runnable"
   std::vector<int> parked_;      // batch tasks held out of the policy's ready set, in park order
+  // Z (e): the idle band, alongside the cap. has_idle_ false → idle_gate() is a strict no-op
+  bool has_idle_ = false;        // any task or spawn-table entry declares the idle class
+  std::vector<int> idle_parked_; // idle tasks held out while a non-idle task is runnable
   std::uint64_t cap_epoch_ = 0;  // generation of the CapRefill reservation
   i64 cap_timer_at_ = -1;        // the cap timer now armed (so it is not armed twice)
 
@@ -645,6 +664,8 @@ class Sim : public Trace, public Clock, public TaskView {
     else {
       runnable_.erase(std::remove(runnable_.begin(), runnable_.end(), id), runnable_.end());
       parked_.erase(std::remove(parked_.begin(), parked_.end(), id), parked_.end());
+      idle_parked_.erase(std::remove(idle_parked_.begin(), idle_parked_.end(), id),
+                         idle_parked_.end());   // Z: off the idle band too, wherever it sat
     }
   }
 
@@ -674,6 +695,49 @@ class Sim : public Trace, public Clock, public TaskView {
     }
   }
 
+  // ── Z (e): the idle band ────────────────────────────────────────────────────
+  bool is_idle_parked(int id) const {
+    return std::find(idle_parked_.begin(), idle_parked_.end(), id) != idle_parked_.end();
+  }
+  bool any_nonidle_runnable() const {      // "no task of another class is runnable" (memo §2)
+    for (int id : runnable_) if (!T2(id).idle) return true;
+    return false;
+  }
+  // The idle rule, below whatever the algorithm decides, the same under all four. While any
+  // non-idle task is runnable every idle task is held out of the policy's ready set, a running
+  // idle holder preempted; when none is, they are given back and the algorithm orders them.
+  // A strict no-op when the file carries no idle class. Idempotent; called at every decision point
+  void idle_gate() {
+    if (!has_idle_) return;
+    if (any_nonidle_runnable()) {
+      // an idle holder comes off the lane first — a waking non-idle task preempts it at once
+      if (running_ >= 0 && T(running_).idle && !run_ends_now()) {   // else its boundary first (X)
+        const int v = running_;
+        release();
+        ev("run_end", v, "reason", "preempt");
+        set_st(v, State::Ready); idle_park(v);
+      }
+      for (std::size_t k = 0; k < runnable_.size(); ++k) {
+        const int id = runnable_[k];
+        if (id != running_ && T(id).idle && !is_idle_parked(id) && !is_parked(id)) idle_park(id);
+      }
+    } else {
+      idle_unpark_all();
+    }
+  }
+  void idle_park(int id) {
+    pol_->on_yield(id, Yield::Blocked);   // "remove from the ready set" in all four policies
+    idle_parked_.push_back(id);
+    note("x_idle_park", id);
+  }
+  void idle_unpark_all() {
+    if (idle_parked_.empty()) return;
+    const std::vector<int> back = idle_parked_;    // park order — deterministic
+    idle_parked_.clear();
+    for (int id : back) { pol_->on_ready(id); note("x_idle_run", id); }
+    for (int id : back) maybe_preempt(id);         // the algorithm orders them among themselves
+  }
+
   // Empty bucket → hold every runnable batch task out of the policy's ready set; full bucket or
   // no ceiling → give them back. Called at every decision point, so pick() never sees a task it
   // may not run and the verdict is never late. Idempotent
@@ -691,7 +755,7 @@ class Sim : public Trace, public Clock, public TaskView {
     }
     for (std::size_t k = 0; k < runnable_.size(); ++k) {
       const int id = runnable_[k];
-      if (id != running_ && batch(id) && !is_parked(id)) park(id);
+      if (id != running_ && batch(id) && !is_parked(id) && !is_idle_parked(id)) park(id);  // Z
     }
     arm_cap_timer();
   }
@@ -924,7 +988,7 @@ class Sim : public Trace, public Clock, public TaskView {
         case Op::WAKE: deliver(id, t.prog[t.pc].target); ++t.pc; break;
         case Op::FORK:
           if (t.spawn_next >= t.spawn_table.size()) { ++t.pc; break; }   // table exhausted
-          if (t.fork_cap > 0 && t.live_children >= t.fork_cap) {
+          if (t.live_children >= t.fork_cap) {   // cap >= 1, the loader checks
             set_st(id, State::Blocked); t.blocked_by = 'f'; t.wait_chan = -1;  // wait for a slot
             return;                                                       // pc stays put
           }
@@ -990,6 +1054,7 @@ class Sim : public Trace, public Clock, public TaskView {
     c.sid = par.spawn_table[par.spawn_next].sid;   // the file's id (stage T)
     c.prog = par.spawn_table[par.spawn_next].prog;
     c.periodic = par.spawn_table[par.spawn_next].periodic;
+    c.idle = par.spawn_table[par.spawn_next].idle;   // Z (e)
     c.parent = parent_id;
     const int slot = par.spawn_table[par.spawn_next].slot;   // W: read before the push_back
     ++par.spawn_next; ++par.live_children;
@@ -1087,6 +1152,7 @@ class Sim : public Trace, public Clock, public TaskView {
       const int idx = pending_.front(); pending_.pop_front();
       apply_config(idx);
     }
+    idle_gate();                              // Z: the idle band, above the cap
     cap_gate();                               // V: filter before the policy picks
     const int id = pol_->pick();
     const int prev = lane_prev_;              // Q2: a slice just ended — a switch only if the
@@ -1164,6 +1230,16 @@ static void compile_prog(const Json& a, Sim& s, const IdMap& ids, const IdMap& s
   }
 }
 
+// Z (e): declared_class. Optional in the loader — absent means the normal class, so a file
+// predating the field (the hand fixtures, the 2026-09-04 build) carries no idle task and the
+// idle band is a strict no-op. The closed set is {normal, idle}; anything else is a file error
+static bool decl_idle(const Json& e) {
+  if (!e.has("declared_class")) return false;
+  const std::string& c = e.at("declared_class").as_str("declared_class");
+  if (c != "normal" && c != "idle") die("declared_class must be normal or idle: " + c);
+  return c == "idle";
+}
+
 static void load_workload(const std::string& path, Sim& s) {
   const Json j = load_json(path);
   s.set_meta(j.at("meta").at("id").as_str("meta.id"), "fixed");
@@ -1196,16 +1272,21 @@ static void load_workload(const std::string& path, Sim& s) {
       std::vector<Instr> prog;
       compile_prog(e.at("program"), s, ids, spawn, prog);
       s.set_prog(id, std::move(prog));
+      s.set_idle(id, decl_idle(e));                  // Z (e)
       if (e.has("spawn_table")) {
         std::vector<ChildSpec> tab;
         for (const Json& c : e.at("spawn_table").arr) {
           std::vector<Instr> cp;
           compile_prog(c.at("program"), s, ids, spawn, cp);
           ChildSpec cs{c.at("id").as_str("id"), c.at("name").as_str("name"), std::move(cp)};
+          cs.idle = decl_idle(c);               // Z (e): a spawn-table entry's declared class
           cs.slot = spawn.at(cs.sid);           // W: the slot its siblings' WAKEs resolve through
           tab.push_back(std::move(cs));
         }
-        s.set_spawn(id, std::move(tab), (int)e.at("fork_cap").as_int("fork_cap"));
+        if (!e.has("fork_cap")) die("spawn_table with no fork_cap: " + e.at("id").as_str("id"));
+        const i64 cap = e.at("fork_cap").as_int("fork_cap");   // required with a table (H2):
+        if (cap < 1) die("fork_cap must be >= 1: " + e.at("id").as_str("id"));  // no unbounded build
+        s.set_spawn(id, std::move(tab), (int)cap);
       }
     } else if (op == "wake") {
       s.wake(e.at("t").as_int("t"), s.channel(e.at("channel").as_str("channel")));
@@ -1263,6 +1344,18 @@ static void load_schedule(const std::string& path, Sim& s) {
   s.set_schedule(std::move(out));
 }
 
+// (h) invocation contract (data-contracts §11, contract 10; the 2026-09-11 invocation memo):
+// --workload / --schedule / --out-trace, every flag required, no positional argument, the trace
+// written to that file (gzip when the path ends in `.gz`), standard output otherwise ignored,
+// exit 0 only once it is written. This is main()-level plumbing: the trace content is unchanged,
+// so it is not a ladder stage. The positional form (./sim workload [schedule], trace on stdout) is
+// kept for the steps ladder and hand runs — a strict "reject positional" is deferred (RQ0 does not
+// need it; the runner always calls with the flags).
+static std::string arg_after(int argc, char** argv, const char* flag) {
+  for (int i = 1; i + 1 < argc; ++i) if (std::strcmp(argv[i], flag) == 0) return argv[i + 1];
+  return std::string();
+}
+
 int main(int argc, char** argv) {
   Sim sim;
   Fifo fifo;
@@ -1274,11 +1367,43 @@ int main(int argc, char** argv) {
   sim.register_policy("FIFO", fifo);
   sim.register_policy("EDF", edf);
   sim.register_policy("LOTTERY", lottery);
-  if (argc < 2) die("usage: ./sim <workload.json> [<config-schedule.json>]");
-  load_workload(argv[1], sim);
+
+  bool flags = false;
+  for (int i = 1; i < argc; ++i) if (std::strncmp(argv[i], "--", 2) == 0) { flags = true; break; }
+
+  std::string wl, sched, out;
+  FILE* gzpipe = nullptr;
+  if (flags) {                                      // (h): the invocation contract
+    wl = arg_after(argc, argv, "--workload");
+    sched = arg_after(argc, argv, "--schedule");
+    out = arg_after(argc, argv, "--out-trace");
+    if (wl.empty() || out.empty()) die("usage: --workload W --schedule S --out-trace T");
+    const bool gz = out.size() > 3 && out.compare(out.size() - 3, 3, ".gz") == 0;
+    if (gz) {                                       // pipe the trace through gzip -c > out
+      const std::string cmd = "exec gzip -c > '" + out + "'";   // absolute path from the harness
+      gzpipe = popen(cmd.c_str(), "w");
+      if (!gzpipe || dup2(fileno(gzpipe), fileno(stdout)) < 0) die("cannot open --out-trace (gzip)");
+    } else if (!std::freopen(out.c_str(), "w", stdout)) {
+      die("cannot open --out-trace: " + out);
+    }
+  } else {                                          // positional — the ladder and hand runs
+    if (argc < 2) die("usage: ./sim <workload.json> [<config-schedule.json>]"
+                      "   (or --workload W --schedule S --out-trace T)");
+    wl = argv[1];
+    if (argc > 2) sched = argv[2];
+  }
+
+  load_workload(wl, sim);
   lottery.seed(fnv1a(sim.workload_id()));   // before a schedule file's workload_id overwrites it
-  if (argc > 2) load_schedule(argv[2], sim);
+  if (!sched.empty()) load_schedule(sched, sim);
   Params p;                     // the boot default when there is no schedule (OSTEP §8 whole)
   sim.run(p);
   sim.report();
+  if (std::fflush(stdout) != 0) die("cannot write --out-trace");       // exit 0 only once written
+  if (gzpipe) {
+    // stdout was dup2'd onto the gzip pipe's write end; close it so gzip sees EOF, then reap it
+    std::fclose(stdout);
+    if (pclose(gzpipe) != 0) die("gzip failed for --out-trace");
+  }
+  return 0;
 }

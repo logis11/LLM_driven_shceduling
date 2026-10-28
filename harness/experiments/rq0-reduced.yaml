@@ -1,0 +1,114 @@
+# REDUCED RQ0 — generated 2026-10-28 for a same-day, memory-safe run (not the pre-registered gate).
+# vs rq0-gate.yaml: seed_count 100->2, boot-default sweep + variant sets dropped, c6-dual
+# excluded from reporting (its records ~14.5M rows OOM WSL). Judging set and criterion unchanged.
+experiment: rq0-reduced
+conditions:
+- fixed
+- random
+- oracle
+telemetry:
+- focus
+seed_count: 2
+boot_defaults:
+  primary: ostep
+  alternatives: []
+files:
+  judging:
+  - c2-p1a
+  - c2-p2a
+  - c2-p2b
+  - c2-p3a
+  - c1-compile
+  - c1-ml-train
+  - c1-render
+  - c1-transcode
+  - c7-browsing
+  - c7-office
+  - c7-dev
+  - c7-photo
+  - c7-meeting
+  - c7-gaming
+  - c7-video-edit
+  - c7-compile
+  - c7-ml-train
+  - c7-render
+  - c7-transcode
+  reporting:
+  - c1-browsing
+  - c1-office
+  - c1-mail
+  - c1-dev
+  - c1-photo
+  - c1-meeting
+  - c1-media
+  - c1-video-edit
+  - c1-gaming
+  - c1-idle
+  - c7-idle
+  - c1-indexing
+  - c7-indexing
+  - c2-p1b
+  - c1-backup
+  - c7-backup
+  - c2-p3b
+  - c7-mail
+  - c7-media
+  - c3-creation
+  - c3-evening
+  - c3-workday
+  - c4-compile
+  - c4-gaming
+  - c4-office
+  - c5-t4
+  - c5-t5
+  - c6-alias
+  - c6-fold
+  - c6-spoof
+  - c2-p2a-idle
+layer1_exclusions:
+- c1-indexing
+- c6-alias
+- c6-fold
+- c6-spoof
+- c7-backup
+- c7-ml-train
+- c7-render
+- c7-transcode
+guard_exemptions: []
+reporting_lines:
+- type: floor_band
+  latency_floors_us:
+  - 500
+  - 1000
+  - 2000
+  - 5000
+- type: g_band
+  gaps:
+  - 0.25
+  - 0.33
+  - 0.5
+  - 0.67
+- type: exclusion_accuracy
+- type: layer1_headline
+- type: random_beats_oracle
+pins:
+  scoring_spec:
+    path: harness/scoring/scoring-spec.yaml
+    sha256: f7d1df4cfd974951ae9fad035e0a494108c49f05d1d0e0f9943990f02fc182ff
+  guard_spec:
+    path: harness/guards/guard-spec.yaml
+    sha256: c2dad06fb02466c0fb4bb3036d5899971ec3bfe9417d2026dc52a9a8553408ca
+    version: '1.2'
+  driver_table:
+    path: daemon/driver-table/prior.yaml
+    sha256: e1155a72d7458a40778b19c5a9a18062de8efeb8b1663340435da3e9b800f617
+  dataset:
+    path: dataset/build.manifest.json
+    sha256: 8e1eb7530b32378e3c5c76e449bf367b4962b9138b62dc7404c6df4b8d525837
+criterion:
+  type: k_of_n_gap
+  k: 10
+  g: 0.5
+  reference: oracle
+  compared: random
+  seed_statistic: mean

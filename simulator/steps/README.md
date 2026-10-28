@@ -41,7 +41,8 @@ make lines      # 단계별 코드 줄수
 | **v** | `batch_bandwidth_cap` 집행 (conformance (d)): 토큰 버킷(D10) + park + cap 자기 타이머, 상태 전이 외길 `set_st` | 922 (+121) | **음성 대조**: cap 이 전부 null 이면 24/24 바이트 동일 — 스케줄 없음, 그리고 4엔트리 교체 스케줄 둘 다. **양성**: 손 워크로드에서 MLFQ cap 0.05→5.2 %, 0.2→17.0 %, 0.5→30.0 %(=천장 위, 비구속) / LOTTERY 0.05→4.42 % / FIFO 0.05 는 비선점 홀더를 끊어 주기 태스크를 0→99 job 으로 올린다 |
 | **w** | spawn_table 엔트리를 가리키는 WAKE (conformance (i)): 엔트리마다 슬롯, target = -slot-1, 탄생 전에 온 wake 는 쥐었다가 탄생 때 넘김 | 966 (+44) | **음성 대조**: 2026-09-04 빌드엔 자식 WAKE target 이 0개 → `sim_v` 와 바이트 동일. **양성**: 데이터셋 자신의 `_object_job`/`_tree_job` 으로 만든 fix-object(6명 job 2개, fork_cap 8) 13 도착/13 종료, fix-tree(8명·10명 conftest job, fork_cap 12) 19/19 — `sim_v` 는 둘 다 감사 원문 메시지로 거부 |
 | **x** | 끝난 블록 primitive 마다 ready 한 줄(우편함 WAIT·backlog TIMER·tick 0 포함), RUN→RUN 은 점유 하나(`boundary()`, `x_run_cont`), 혼자 남은 홀더의 슬라이스 만료는 run_end/run_start 짝 없음(Q2), 경계는 RUN 의 Lane 이벤트 한 곳에서 (conformance (a)) | 995 (+29) | harness 손 fixture 줄 단위: mock-office **일치**(W 는 8줄 차이), cap 을 끄면 mock-switch·mock-guards **일치** (fixture 가 cap 을 모델링하지 않는다). 로컬 corpus 128 run: 레인 위반 717,297 → **0**, guard 187,733(115 run) → 73,271(38 run) — 남은 것은 (b) 와 입력 잔량뿐 |
-| **y** | TIMER skip 규칙 (conformance (b); 9.11 D3): 지난 틱이 여럿이면 마지막 틱 m 만 즉시 소비, 앞의 틱은 일 없이 건너뛰고 틱마다 `deadline` met:false 한 줄 (늦은 job 줄 뒤에). K 의 backlog 를 갈아낸다 | 997 (+2) | 손 fixture: 같은 µs 순서를 빼고 cap 을 끄면 **6 개 중 5 개 일치** — mock-media 가 X 의 17줄 차이에서 **일치**로 (양성 대조). 로컬 2026-09-04 빌드 128 run: guard 73,271 → **22** (남은 22 는 전부 입력 잔량, 22/22 보존) |
+| **y** | TIMER skip 규칙 (conformance (b); 9.11 D3): 지난 틱이 여럿이면 마지막 틱 m 만 즉시 소비, 앞의 틱은 일 없이 건너뛰고 틱마다 `deadline` met:false 한 줄 (늦은 job 줄 뒤에). K 의 backlog 를 갈아낸다 | 1000 (+5) | 손 fixture: 같은 µs 순서를 빼고 cap 을 끄면 **6 개 중 5 개 일치** — mock-media 가 X 의 17줄 차이에서 **일치**로 (양성 대조). 로컬 2026-09-04 빌드 128 run: guard 73,271 → **22** (남은 22 는 전부 입력 잔량, 22/22 보존) |
+| **z** | `declared_class` idle (conformance (e); 2026-10-08 declared-class 메모 §2): idle 태스크는 non-idle 이 runnable 이면 못 뛴다, non-idle 이 깨면 즉시 선점, 네 알고리즘 공통. `idle_gate()` 가 V 의 cap 옆 두 번째 밴드 — idle 을 정책 ready set 에서 빼고, 아무도 없을 때만 돌려준다. 필드는 옵션(없으면 normal) → idle 없는 파일은 `has_idle_` false 로 **엄격한 no-op** | 1053 (+53) | **음성 대조**: idle 태스크 없는 파일은 `sim_y` 와 바이트 동일(V/W/X/Y 불변). **양성**: idle 7파일 전수 종료·재현, trace 재생으로 "idle 이 Running 인데 non-idle 이 Ready" **위반 0** (MLFQ/FIFO/EDF/LOTTERY), 레인 lint 위반 0 |
 
 큰 델타 다섯(h, n, r, s, v)은 쪼갤 수 없는 단위다 — MLFQ 다섯 규칙, FORK 의 생애주기, 두 번째 입력,
 그리고 **부류**: EDF 와 LOTTERY 는 같은 실행기 부류(B2 주기 / B1 batch)를 읽으므로 따로 얹으면
@@ -245,6 +246,8 @@ tick 을 같은 순간에 하나씩 소비한다). 입력 wake 개수 22 — 22/
 
 y 의 검증 (2026-10-23 실측).
 
+y 에 로더 검사 하나 (2026-10-24, memo_261021 H2): `spawn_table` 이 있는데 `fork_cap` 이 없거나 1 미만이면 이름을 대고 거부한다. 전에는 cap 이 없으면 일반 키-없음 메시지로 죽고, 0 이면 무제한으로 돌았다. 997 → 1000 줄.
+
 | 무엇 | X | Y |
 |---|---|---|
 | 손 fixture, 같은 µs 순서 무시·cap null | 6 개 중 4 개 일치 (mock-media 17줄, mock-p1a 8줄) | **5 개 일치** (mock-p1a 8줄 — MLFQ allotment 해석, (b) 와 무관) |
@@ -257,6 +260,22 @@ y 의 검증 (2026-10-23 실측).
 리빌드의 `deadline` 대조 7 건은 Y 가 아니라 **연속 TIMER**(TIMER 바로 뒤 TIMER, 일 0 인 job) 때문이다 —
 c6-fold `call` 5 쌍, c3-evening `music`·`video` 1 쌍씩, 정확히 7. 시뮬레이터는 정의대로 "다음 TIMER 에 닿는 순간"을 완료로
 쓰고, harness 는 반복의 끝을 `run_end` 나 다음 `ready` 에서 읽는데 CPU 를 안 쓴 반복에는 둘 다 없다. 인지오 질문.
+
+z 의 검증 (2026-10-28 실측, 리빌드 빌드). 대조는 **계약과 보존**이다 — idle 태스크가 있는 파일은
+이전 바이너리에 짝이 없다(그 빌드엔 `declared_class` 가 없다). 그래서 세 가지로 본다: idle 없는 파일의
+`sim_y` 바이트 동일(no-op 보장), idle 규칙의 trace 재생, 레인 lint.
+
+| 무엇 | 결과 |
+|---|---|
+| **음성 대조** — idle 태스크 없는 파일은 `sim_y` 와 바이트 동일 (`has_idle_` false → 밴드가 no-op) | 7파일(c1-idle·c7-idle·c1-photo·c7-photo·c1-media·c5-t4·c6-alias) × {스케줄 없음, mock-switch} = 14/14 |
+| **idle 규칙** — trace 재생: idle 이 Running 인데 non-idle 이 Ready 인 순간 | idle 7파일(c1-backup·c1-indexing·c2-p1b·c2-p2a-idle·c2-p3b·c7-backup·c7-indexing) 전수 **위반 0** |
+| 네 알고리즘 — c2-p2a-idle 을 MLFQ(boot)·FIFO·EDF·LOTTERY 단일 스케줄로 | 전부 종료·재현 바이트 동일, idle 규칙 위반 0, 레인 lint(홀더 둘·주인 없는 run_end·task_end 뒤 줄) 0 |
+| `src/sim` == `steps/sim_z` (`meta.sim` 정규화) | idle·non-idle 파일, 스케줄 없음 + 4알고리즘 전부 동일 |
+| ASAN/UBSAN | sim_z 를 `-fsanitize=address,undefined` 로 빌드해 idle 파일을 돌려도 무오류 |
+
+idle 밴드는 cap 밴드와 **분리된 park 리스트**다(`idle_parked_`). 두 밴드가 같은 태스크를 두 번 쥐지 않도록
+서로의 park 집합을 배타로 둔다(`cap_gate` 는 `is_idle_parked` 를, `idle_gate` 는 `is_parked` 를 건너뛴다).
+idle_gate 가 바깥(엄격한) 밴드라 매 결정 지점에서 먼저 돈다.
 
 ### §7 통합 게이트
 
