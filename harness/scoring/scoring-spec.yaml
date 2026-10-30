@@ -53,10 +53,14 @@
 # - c1-media, the C5 ladder and c1-meeting: the periodic tasks alone or beside
 #   light company; the measured players' and call's jobs miss only their own
 #   overruns (the call in about 5 % of its cycles) under any row.
-# - c7-media: the video job's worst cycle is 16.0 ms of run against a 33.3 ms
-#   period and the longest wait the boot MLFQ imposes on it is one 20 ms Q1
-#   slice after a rare demotion, 32 ms in all; the music job's 2.4 ms against
-#   49.6 ms never comes near. A 1.3 ms margin, a knife edge stated.
+# - c7-media: the boot MLFQ demotes the video job in 0.88 of its boost
+#   intervals (its 12.1 ms of CPU per 100 ms passing the slice) and neither job
+#   misses under fixed on the reference simulator (2026-10-31, RQ0 gate spec's
+#   c7-media note): the compiled file's worst video cycle is 7.28 ms of run
+#   against a 33.3 ms period, and the longest wait after a demotion is one 20 ms
+#   Q1 slice. The measured table's worst cycle, 16.0 ms, would pass the period
+#   by that wait (36 ms in all), a limit stated; the music job's 2.4 ms against
+#   49.6 ms never comes near.
 # - c2-p2a's download: the measured SteamCMD's whole program is batch class over
 #   74 % of its CPU, but the part the file gives it under EDF (about 1 s), where
 #   the chain takes 0.95 of the lane, is its launch phase of short runs, not
@@ -76,13 +80,12 @@
 #   reached after ticks passed consuming the latest and skipping the rest) the
 #   term reads the policies' ordering above a floor of about 0.31 missed under
 #   every policy.
-# c7-meeting is not on this list any more: the measured call's cycle run
-# consumes the boot slice in about one cycle in twenty (4.9 % from the measured
-# table, 5.5 % in the compiled file), so in about 4 of 10 boost intervals
-# (arithmetic: 1 − 0.95¹⁰, the cycles taken as independent, ten to a 100 ms
-# boost) the call is demoted and waits behind the upgrade until the next boost
-# (9.16 D1); the tie with fixed that held on the old 2.5 ms and 6.67 ms bursts
-# is gone.
+# c7-meeting is not on this list any more: the measured call's 23.9 ms of CPU
+# per 100 ms boost interval passes the boot slice, so under fixed the reference
+# simulator demotes it in 0.97 of its boost intervals and it misses 0.20 of its
+# jobs (2026-10-31, RQ0 gate spec's c7-meeting note), against its own overruns,
+# about 5 %, under either EDF row; the tie with fixed that held on the old
+# 2.5 ms and 6.67 ms bursts is gone.
 # The audio : video weighting 1.0 : 0.5 on the media files is a stated
 # assumption (an audio dropout is heard at once; a dropped frame at 60 Hz
 # often is not).

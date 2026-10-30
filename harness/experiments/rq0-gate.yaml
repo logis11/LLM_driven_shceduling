@@ -27,17 +27,20 @@ seed_count: 100
 
 # The primary is the values OSTEP chapter 8's worked examples use — three queues and
 # a 10 ms top slice (Example 1), doubling per level (Figure 8.6), a 100 ms boost
-# (Figure 8.4) (recognition-vocabulary §2, 2026-09-11; 9.11 D8). It sits on the
-# measured call's demotion edge: about one in twenty of the call's audio-frame
-# cycles consume a 10 ms slice — 4.9 % from the measured table, 5.5 % in the
-# compiled meeting files (9.14; restated 9.16 D1). Each alternative is the same
+# (Figure 8.4) (recognition-vocabulary §2, 2026-09-11; 9.11 D8). A task is demoted
+# when its CPU at a level since its last boost or demotion reaches the slice (OSTEP
+# §8.4's Rule 4; the simulator guide §5 rule 4), so a periodic task's demotion edge
+# is its CPU per 100 ms boost interval: at the primary the measured call is demoted
+# in 0.98 of its boost intervals and the video player in 0.89, no chain task of the
+# gaming base (the reference simulator, 2026-10-31;
+# _dev/research/jioh/2026-10-31-demotion-edges/). Each alternative is the same
 # configuration with only the top slice changed; the reason for each point is on
 # the sensitivity line below (statement `boot-default-sweep`).
 boot_defaults:
   primary: ostep
-  alternatives: [ostep-slice-500us, ostep-slice-700us, ostep-slice-900us, ostep-slice-1200us,
-                 ostep-slice-2000us, ostep-slice-3000us, ostep-slice-5000us, ostep-slice-14000us,
-                 ostep-slice-20000us, ostep-slice-100000us]
+  alternatives: [ostep-slice-500us, ostep-slice-700us, ostep-slice-1200us, ostep-slice-2000us,
+                 ostep-slice-5000us, ostep-slice-7000us, ostep-slice-12000us, ostep-slice-20000us,
+                 ostep-slice-30000us, ostep-slice-100000us]
 
 # Judging (19): a file judges when it is one side of a label-varying pair and its
 # scored term registers the rows' difference by design (7.7, 2026-09-10; RQ0
@@ -110,26 +113,27 @@ guard_exemptions:
 reporting_lines:
   # decision 12 as amended 2026-09-12: the fixed run re-run under each alternative,
   # the gaps recomputed against each, the verdict count printed per boot default.
-  # The ten points of 2026-10-09 (9.14 decision 9): five backbone points the dataset
-  # does not inform and five threshold points placed either side of the steps the
-  # rebuilt judging files have — the chain's slack per frame and its stages'
-  # demotion edges, the video player's cycle range, the call's demotion edge.
+  # The ten points (9.14 decision 9; the threshold points re-picked 2026-10-31): five
+  # backbone points the dataset does not inform and five threshold points placed
+  # either side of the demotion edges the rebuilt files' periodic tasks have, each
+  # task's CPU per 100 ms boost interval — the music player's, the chain tasks', the
+  # video player's, the call's (statement `boot-default-sweep`).
   - type: sensitivity
-    boot_defaults: [ostep-slice-500us, ostep-slice-700us, ostep-slice-900us, ostep-slice-1200us,
-                    ostep-slice-2000us, ostep-slice-3000us, ostep-slice-5000us, ostep-slice-14000us,
-                    ostep-slice-20000us, ostep-slice-100000us]
+    boot_defaults: [ostep-slice-500us, ostep-slice-700us, ostep-slice-1200us, ostep-slice-2000us,
+                    ostep-slice-5000us, ostep-slice-7000us, ostep-slice-12000us, ostep-slice-20000us,
+                    ostep-slice-30000us, ostep-slice-100000us]
     reasons:
-      ostep: "the primary: the values OSTEP chapter 8's worked examples use, a 10 ms top slice (recognition-vocabulary §2); it sits on the measured call's demotion edge, about one in twenty of its audio-frame cycles consuming the slice (4.9 % from the measured table, 5.5 % in the compiled meeting files; 9.16 D1)"
-      ostep-slice-500us: "backbone: the config schema's lower bound on the top slice"
-      ostep-slice-700us: "backbone: Linux's base slice at one CPU, 0.70 ms since v6.15 (linux-sched-fair) — design, the one-CPU value for the simulator's one lane, the runner running 2.1 ms at its 4 CPUs (9.11 D25); also below the C2 gaming pair's 834 µs chain slack per frame (its chain 15 833 µs of 16 667, the Steam client taking about 250 µs of the slack on average), so a boosted intruder's slice fits inside a frame"
-      ostep-slice-900us: "threshold: above the C2 gaming pair's 834 µs chain slack, below the gaming base's 1 668 µs (its chain 14 999 µs); demotes the gaming base's nine chain stages at 992 to 1 436 µs"
-      ostep-slice-1200us: "threshold: above the 1 ms post-boost point (arithmetic on the boost: 1 % of the 100 ms interval) and the gaming base's cluster of stages at 992 to 1 191 µs, below its longest stage, 1 436 µs; demotes four C2 stages (1 220 to 2 131 µs)"
-      ostep-slice-2000us: "backbone: illumos TS's top-level quantum (illumos-ts); also above every gaming-base stage and the C2 pair's 1 733 µs stage, below its 2 099 and 2 131 µs stages"
-      ostep-slice-3000us: "threshold: above every chain stage (the longest 2 131 µs); inside the video player's cycle range (its deciles 2.8 to 5.4 ms; 2.3 and 7.5 ms its 1st and 99.9th percentiles), demoting about eight in ten of its cycles"
-      ostep-slice-5000us: "threshold: between the video player's median cycle (4.0 ms) and its upper decile (5.4 ms); the 2026-09 reason, the 6 667 µs compositor burst, left with the compositor task (9.9)"
-      ostep-slice-14000us: "threshold: above the call's 12.2 ms 99th-percentile cycle (its ninth decile 7.4 ms), below the measured tables' maxima, the call's 18.9 ms and the video player's 16.0 ms, so the call is demoted in about 0.04 % of its cycles and the player almost never (added 2026-10-09)"
-      ostep-slice-20000us: "backbone: sched_ext's default slice, 20 ms (linux-sched-ext); above every periodic task's longest cycle, so no periodic task is ever demoted"
-      ostep-slice-100000us: "backbone: the config schema's upper bound on the top slice"
+      ostep: "the primary: the values OSTEP chapter 8's worked examples use, a 10 ms top slice (recognition-vocabulary §2); above every gaming-base chain task's demotion edge (8.6 ms the most), below the video player's (12.1 ms): the call demoted in 0.98 of its boost intervals, the video player in 0.89, three c2-p2a chain tasks in at least half of theirs"
+      ostep-slice-500us: "backbone: the config schema's lower bound on the top slice; the call and the video player demoted in every boost interval, every chain task in at least half of its, the music player in 0.86"
+      ostep-slice-700us: "backbone: Linux's base slice at one CPU, 0.70 ms since v6.15 (linux-sched-fair) — design, the one-CPU value for the simulator's one lane, the runner running 2.1 ms at its 4 CPUs (9.11 D25); on the music player's demotion edge (0.71 ms; demoted in 0.49 of its boost intervals); also below the C2 gaming pair's 834 µs chain slack per frame (its chain 15 833 µs of 16 667, the Steam client taking about 250 µs of the slack on average), so a boosted intruder's slice fits inside a frame"
+      ostep-slice-1200us: "threshold: above the music player's demotion edge (demoted in 0.01 of its boost intervals), below every chain task's (1.6 ms the least): every chain task of both gaming files demoted in at least half of its boost intervals, the call and the video player in all"
+      ostep-slice-2000us: "backbone: illumos TS's top-level quantum (illumos-ts); inside the chain tasks' range: 16 of the gaming base's 17 chain tasks and 13 of c2-p2a's demoted in at least half of their boost intervals"
+      ostep-slice-5000us: "threshold: mid the chain tasks' range: 10 of the gaming base's 17 chain tasks and 9 of c2-p2a's demoted in at least half of their boost intervals"
+      ostep-slice-7000us: "threshold: near the top of the gaming base's range (8.6 ms): 3 of its chain tasks and 4 of c2-p2a's demoted in at least half of their boost intervals (added 2026-10-31)"
+      ostep-slice-12000us: "threshold: on the video player's demotion edge (12.1 ms; demoted in 0.50 of its boost intervals), above every gaming-base chain task's: 2 of c2-p2a's chain tasks demoted in at least half of their boost intervals, the call in 0.93 (added 2026-10-31)"
+      ostep-slice-20000us: "backbone: sched_ext's default slice, 20 ms (linux-sched-ext); between the video player's demotion edge and the call's: the call demoted in 0.62 of its boost intervals, the video player and every gaming-base chain task never, two c2-p2a chain tasks in fewer than half of theirs"
+      ostep-slice-30000us: "threshold: above the call's demotion edge (23.9 ms; demoted in 0.24 of its boost intervals), the one periodic task still demoted (added 2026-10-31)"
+      ostep-slice-100000us: "backbone: the config schema's upper bound on the top slice; no periodic task demoted"
   # 8.1 decision 4: the verdict count recomputed under a band of latency floors at scoring time
   - {type: floor_band, latency_floors_us: [500, 1000, 2000, 5000]}
   # 8.8 decision 4: the verdict count recomputed under a band of g at scoring time
@@ -239,13 +243,13 @@ reporting_lines:
     workload: c7-meeting
     text: >
       Judging since 2026-10-09 (9.14 decision 2): the measured call is one task
-      with a job per 10 ms audio frame whose cycle run consumes the boot slice in
-      about one cycle in twenty (4.9 % from the measured table, 5.5 % in the
-      compiled file), so in about 4 of 10 boost intervals (arithmetic: 1 − 0.95¹⁰,
-      the cycles taken as independent, ten to a 100 ms boost) the call is demoted
-      and waits behind the upgrade's slice until the next boost (9.16 D1), while
-      under either EDF row it is deadline class and misses only its own overruns,
-      about 5 %. The tie
+      with a job per 10 ms audio frame and 23.9 ms of CPU per 100 ms boost
+      interval (on its base, c1-meeting), past the boot slice, so under fixed the
+      reference simulator demotes it in 0.97 of its boost intervals and it misses
+      0.20 of its jobs (2026-10-31; _dev/research/jioh/2026-10-31-demotion-edges/),
+      while under either EDF row it is deadline class and misses only its own
+      overruns, about 5 % (about one cycle in twenty runs past its period: 4.9 %
+      from the measured table, 5.5 % in the compiled file; 9.16 D1). The tie
       with fixed that made it reporting-only in 8.8 held on the old 2.5 ms and
       6.67 ms bursts and is gone; the cap axis is inert and the gap reads EDF
       against the drawn algorithm, as on c7-gaming. The call's own overruns set a floor under its
@@ -253,12 +257,17 @@ reporting_lines:
   - type: note
     workload: c7-media
     text: >
-      Reporting-only (9.14 decision 2): on the measured tables the video player's
-      worst cycle is 16.0 ms of run against a 33.3 ms period and the longest wait
-      the boot MLFQ can impose on it is one 20 ms Q1 slice after a rare demotion,
-      32 ms in all; the music player's 2.4 ms against 49.6 ms never comes near.
-      No headroom against fixed and none between the two EDF rows, on a 1.3 ms
-      margin stated here.
+      Reporting-only (9.14 decision 2): the video player's 12.1 ms of CPU per
+      100 ms boost interval (on its base, c1-media) passes the boot slice, so under
+      fixed the reference simulator demotes it in 0.88 of its boost intervals, and
+      neither player misses a job (2026-10-31;
+      _dev/research/jioh/2026-10-31-demotion-edges/): the compiled file's worst
+      video cycle is 7.28 ms of run against a 33.3 ms period, and the longest wait
+      the boot MLFQ can impose on it after a demotion is one 20 ms Q1 slice. The
+      measured table's worst cycle, 16.0 ms, would pass the period by that wait
+      (36 ms in all); the music player's 2.4 ms against 49.6 ms never comes near.
+      No headroom against fixed and none between the two EDF rows on the compiled
+      file.
   - type: note
     workload: c7-mail
     text: >
@@ -417,17 +426,21 @@ statements:
       run. The oracle and random runs stay on the primary and on the pinned driver
       table. The sweep is a backbone the dataset does not inform — the config
       schema's two bounds and three shipped defaults — plus threshold points placed
-      either side of the steps the rebuilt judging files' periodic tasks have (9.14
-      decision 9): the chain's slack per frame (834 µs in the C2 pair, 1 668 µs in
-      the gaming base), its stages' demotion edges (the base's longest 1 436 µs, the
-      pair's 2 131 µs), the video player's cycle range (its deciles 2.8 to 5.4 ms,
-      2.3 and 7.5 ms its 1st and 99.9th percentiles, 16.0 ms the measured table's
-      maximum) and the call's demotion edge (about one in twenty of its cycles
-      above 10 ms, its ninth decile 7.4 ms, its 99th percentile 12.2 ms, the
-      measured table's maximum 18.9 ms; 9.16 D1). A slice
-      below a stage's run demotes that stage; a slice shorter than the slack lets
-      a boosted intruder's slice fit inside a frame. Every point's reason is on
-      the sensitivity line. If the verdict count changes across the sweep, the
+      either side of the demotion edges the rebuilt files' periodic tasks have (9.14
+      decision 9; re-picked 2026-10-31). A task is demoted from the top queue in a
+      boost interval when its CPU there since the boost reaches the slice (OSTEP
+      §8.4's Rule 4, the allotment kept across bursts; the simulator guide §5 rule
+      4), so a periodic task's demotion edge is its CPU per 100 ms boost interval:
+      the music player's 0.71 ms, the frame chain's 17 tasks (16 members and the
+      wineserver) 1.7 to 8.6 ms in the gaming base and 1.6 to 12.7 ms in the C2
+      pair, the video player's 12.1 ms, the call's 23.9 ms (the reference
+      simulator's traces at a 100 ms slice; the share of boost intervals holding a
+      demotion at 17 top slices from 0.5 to 100 ms,
+      _dev/research/jioh/2026-10-31-demotion-edges/). A slice below a task's edge
+      demotes it in most of its boost intervals; a slice shorter than the chain's
+      slack per frame (834 µs in the C2 pair, 1 668 µs in the gaming base) lets a
+      boosted intruder's slice fit inside a frame. Every point's reason is on the
+      sensitivity line. If the verdict count changes across the sweep, the
       verdict is reported as a range over the boot default.
   - id: sensitivity-lines
     text: >
@@ -511,10 +524,10 @@ statements:
       for a true row, its C7 counterpart for a false row, plus any C2 or C3 segment
       labelled with that row.
 
-# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-30, the input_latency and guard spec 1.3 entries; 2026-10-17, the 9.16 entries; 2026-10-17 and 2026-10-16, the 9.15 entries;
+# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-31, the demotion-edge entry; 2026-10-30, the timer_latency, input_latency and guard spec 1.3 entries; 2026-10-17, the 9.16 entries; 2026-10-17 and 2026-10-16, the 9.15 entries;
 # 2026-10-15 and 2026-10-14, the 9.23 entries; 2026-10-12, the 9.20 entry; 2026-10-11, the 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
-  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 205add6473446f68344dcda9b8c95505923f9326e61ef4384ae7b6c80e94bbc6}
+  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 84b997ad467f98b5e9cc62ecbb74097607efb41c6fc2a65b1401ff672e78e8c2}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.3", sha256: 7029308eb8eae4068dfd8114daf089889320daa290267827ae12ed74f0b3a482}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: e1155a72d7458a40778b19c5a9a18062de8efeb8b1663340435da3e9b800f617}
   dataset:      {path: dataset/build.manifest.json, sha256: 8e1eb7530b32378e3c5c76e449bf367b4962b9138b62dc7404c6df4b8d525837}
