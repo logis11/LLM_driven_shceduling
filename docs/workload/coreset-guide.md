@@ -1,6 +1,6 @@
 # Coreset 안내 — 51개 workload를 하나씩 뜯어보기
 
-> Status: draft · Created 2026-09-08 · Updated 2026-10-30
+> Status: draft · Created 2026-09-08 · Updated 2026-10-31
 
 이 문서는 **공부용 문서**예요. dataset이 무엇이고, 어떻게 만들어지고, 51개 coreset 파일 각각이 무슨 상황을 담고 있으며 어떤 숫자를 갖고 있는지를 OS/시스템 지식이 거의 없는 사람 기준으로 풀어 써요. 설계의 규범적 근거는 building-plan(`docs/workload/building-plan.md`), archetype의 규범적 정의는 archetype-plan(`docs/workload/archetype-plan.md`), 실행 semantics는 interpretation contract(`docs/simulator/interpretation-contract.md`)에 있어요. 이 문서는 그 셋을 읽을 수 있게 만드는 다리이고, 숫자는 `dataset/build.manifest.json`이 hash로 고정한 `coreset-single`의 51개 파일(2026-10-16에 re-bless된 build)과 그 manifest의 `demand` 기록, 그리고 timeline과 `dataset/archetypes.yaml`에서 직접 읽은 값이에요.
 
@@ -1136,7 +1136,7 @@ recognizer: interactive counterpart는 0 s에 base의 이름들 + `unattended-up
 
 **`c7-idle`.** 네 session task는 idle session의 측정 상태 그대로이고, upgrade가 그 안에 일으키는 일은 싣지 않아요. 부팅된 데스크톱에서 관찰한 것 — PID 1과 system bus의 추가 일, PID 1의 daemon-reexec가 generator를 돌리는 것, apt의 PackageKit hook이 `packagekitd`를 시작하는 것 — 은 전부 빠져 있어요(recipe 주석).
 
-**측정에서 알아둘 것.** `c7-meeting`은 2026-10-09부터 판정 파일이에요: 측정된 통화는 10 ms audio frame마다 job 하나인 task 하나이고, 그 cycle run이 약 다섯 번에 한 번 boot slice를 다 써서 강등되면 upgrade의 slice 뒤에서 다음 boost까지 기다려요. EDF row에서는 deadline class라 자기 overrun(약 5 %)만 놓쳐요. `c7-media`는 reporting-only예요: 측정된 표에서 video player의 최악 cycle은 33.3 ms 주기에 run 16.0 ms이고, boot MLFQ가 걸 수 있는 가장 긴 대기는 드문 강등 뒤의 Q1 slice 20 ms 하나라 합해서 32 ms예요. fixed 대비로도 두 EDF row 사이에서도 headroom이 없고, 그 margin 1.3 ms가 knife edge로 적혀 있어요(RQ0 gate spec의 note).
+**측정에서 알아둘 것.** `c7-meeting`은 2026-10-09부터 판정 파일이에요: 측정된 통화는 10 ms audio frame마다 job 하나인 task 하나이고, 100 ms boost 구간마다 CPU를 평균 23.9 ms 써요. 한 level에서 쓴 CPU는 burst를 넘어 boost까지 쌓이므로(OSTEP §8.4의 Rule 4), fixed에서는 boost 구간의 97 %에서 강등되고 job의 20 %를 놓쳐요(reference simulator, 2026-10-31). EDF row에서는 deadline class라 자기 overrun(약 5 %)만 놓쳐요. `c7-media`는 reporting-only예요: fixed에서 video player는 boost 구간의 88 %에서 강등되지만 어느 player도 job을 놓치지 않아요. compile된 파일의 최악 video cycle은 33.3 ms 주기에 run 7.28 ms이고, 강등 뒤 가장 긴 대기는 Q1 slice 20 ms 하나예요. 측정된 표의 최악 cycle 16.0 ms라면 그 대기를 더해 36 ms가 되어 주기를 넘어요. fixed 대비로도 두 EDF row 사이에서도 compile된 파일에서는 headroom이 없어요(RQ0 gate spec의 note).
 
 ---
 

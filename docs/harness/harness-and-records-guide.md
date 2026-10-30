@@ -1,6 +1,6 @@
 # Harness와 records 이해하기 — trace에서 논문의 숫자까지
 
-> Status: draft · Created 2026-09-08 · Updated 2026-10-30
+> Status: draft · Created 2026-09-08 · Updated 2026-10-31
 
 이 문서는 **공부용 문서**예요. Phase 5(primitive metrics and the records pipeline)를 직접 수행하기 위해, harness가 무엇을 읽고 무엇을 쓰는지, `records`의 row 하나가 무슨 뜻인지, 그리고 그 위에 어떤 score가 올라가는지를 OS/시스템 지식이 거의 없는 사람 기준으로 바닥부터 풀어 쓴 거예요. 규범적(normative)인 정의는 `docs/harness/metrics.md`(metrics doc)가 갖고, 이 문서는 그 문서를 읽을 수 있게 만드는 다리예요. 둘이 다르면 metrics doc이 맞아요.
 
@@ -1250,10 +1250,10 @@ RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 jud
 |---|---|
 | C2의 normal-class 쪽 4개(`c2-p1a`, `c2-p2a`, `c2-p2b`, `c2-p3a`) | judging |
 | C1 batch base 4개(`c1-compile`, `c1-ml-train`, `c1-render`, `c1-transcode`) | judging — row의 share가 job까지 닿아요 |
-| C7 counterpart 11개(`browsing`, `office`, `dev`, `photo`, `meeting`, `gaming`, `video-edit`, `compile`, `ml-train`, `render`, `transcode`) | judging. EDF를 쓰는 judging 파일(`c2-p2a`, `c2-p2b`, `c7-gaming`, `c7-meeting`)에서는 두 row가 scored term에서 설계상 비겨요 — EDF가 deadline class인 chain이나 call을 cap과 상관없이 먼저 돌리니까 — 그래서 gap은 EDF 대 random이 뽑은 algorithm, 즉 mode recognition을 읽어요. `c7-meeting`은 2026-10-09부터 judging이에요. 측정된 call의 cycle이 boot slice(10 ms)를 스무 번에 한 번꼴로(측정된 table에서 4.9 %, compile된 파일에서 5.5 %) 다 써서, 100 ms boost 간격 열 번 중 약 네 번은 call이 demotion되어 다음 boost까지 upgrade 뒤에서 기다려요(1 − 0.95¹⁰, cycle을 서로 독립으로, boost 간격 하나에 cycle 열 개로 본 계산). 그래서 예전의 짧은 burst에서 `fixed`와 비기던 일이 없어졌어요 |
+| C7 counterpart 11개(`browsing`, `office`, `dev`, `photo`, `meeting`, `gaming`, `video-edit`, `compile`, `ml-train`, `render`, `transcode`) | judging. EDF를 쓰는 judging 파일(`c2-p2a`, `c2-p2b`, `c7-gaming`, `c7-meeting`)에서는 두 row가 scored term에서 설계상 비겨요 — EDF가 deadline class인 chain이나 call을 cap과 상관없이 먼저 돌리니까 — 그래서 gap은 EDF 대 random이 뽑은 algorithm, 즉 mode recognition을 읽어요. `c7-meeting`은 2026-10-09부터 judging이에요. 측정된 call은 100 ms boost 간격마다 CPU를 평균 23.9 ms 쓰고, 한 level에서 쓴 CPU는 burst를 넘어 boost까지 쌓여요(OSTEP §8.4의 Rule 4). 그래서 `fixed`에서 boost 간격의 97 %에서 demotion되고 job의 20 %를 놓쳐요(reference simulator, 2026-10-31). 그래서 예전의 짧은 burst에서 `fixed`와 비기던 일이 없어졌어요 |
 | idle class job을 가진 6개(`c1-indexing`, `c7-indexing`, `c2-p1b`: Tracker의 indexer; `c1-backup`, `c7-backup`, `c2-p3b`: Déjà Dup의 backup) | 보고만. executor는 idle task를 다른 class의 task가 runnable하지 않을 때만 돌리고(모든 algorithm에서), cap은 work-conserving이라 어떤 row도 background job에 닿지 않아요 |
 | `c7-mail` | 보고만. counterpart의 keystroke 창은 `c1-mail`의 것을 잘라 온 것인데, `c1-mail`의 keystroke 35개는 45.9–53.1초에 있어서 2–24.385초 창에 하나도 없어요. 그래서 term이 mailer 자신의 wake를 읽고, keystroke latency는 못 읽어요 |
-| `c7-media` | 보고만. 측정된 table로는 `fixed`와도, 두 row 사이에서도 headroom이 없어요. video의 최악 cycle이 16.0 ms(주기 33.3 ms)이고 boot MLFQ가 줄 수 있는 가장 긴 대기까지 합쳐도 32 ms라, 여유 1.3 ms예요 |
+| `c7-media` | 보고만. compile된 파일에서는 `fixed`와도, 두 row 사이에서도 headroom이 없어요. `fixed`에서 video player는 boost 간격의 88 %에서 demotion되지만 어느 player도 job을 놓치지 않아요(reference simulator, 2026-10-31). compile된 파일의 최악 video cycle은 7.28 ms(주기 33.3 ms)예요. 측정된 table의 최악 cycle 16.0 ms라면 demotion 뒤 가장 긴 대기(Q1 slice 20 ms)까지 합쳐 36 ms라 주기를 넘어요 |
 | C1 interactive·periodic base 8개(`browsing`, `office`, `mail`, `dev`, `photo`, `meeting`, `media`, `video-edit`)와 `c1-gaming` | 보고만. foreground 뒤에 아무것도 없어 row가 움직일 게 없어요. strongest name table(`strongest_name_table` condition)이 만점을 받을 것으로 기대되는 C1 calibration 파일들이에요(C1 16개 전부에 해당). `c1-gaming`은 chain이 의자의 0.9를 쓰는 파일로 별도 보고 line(note)이 있고, pair가 없어서 judging이 아니에요 |
 | `c1-idle`, `c7-idle` | 보고만. 성능 metric 없음(scoring spec에 entry가 없어요) |
 | C3 (3), C4 (3), C5 (2: `c5-t4`, `c5-t5`), C6 (4: `c6-alias`, `c6-dual`, `c6-fold`, `c6-spoof`) | 보고만. RQ0 gate spec은 이들을 Layer 2 aggregation에서 빼요. C5는 `c1-media`의 player를 tier 4·5 이름으로 바꾼 것이라 성능 숫자가 `c1-media`와 같아야 하고, 다르면 bug 신호예요. C6은 recognition의 해상도 한계: `c6-dual`은 `ambiguous`, 나머지 셋은 미리 약속된 miss가 있어요 |
@@ -1435,7 +1435,7 @@ verdict는 primary boot default에서 한 번만 계산해요. 그 판정이 우
 
 | line | 무엇을 다시 세나 | 비용 |
 |---|---|---|
-| `sensitivity` | boot default를 sweep의 10개 지점(top slice 0.5, 0.7, 0.9, 1.2, 2, 3, 5, 14, 20, 100 ms)으로 바꿔 `fixed`를 다시 돌리고, gap을 다시 계산한 뒤 통과 개수. 지점마다 이유가 spec에 적혀 있어요(config schema의 두 경계와 배포된 scheduler들의 기본값, 그리고 judging 파일의 주기 task가 갖는 계단 — chain의 frame당 여유, stage의 demotion 경계, video player의 cycle 범위, call의 demotion 경계 — 양쪽) | `fixed` run 10개 × listed 파일 51개 |
+| `sensitivity` | boot default를 sweep의 10개 지점(top slice 0.5, 0.7, 1.2, 2, 5, 7, 12, 20, 30, 100 ms)으로 바꿔 `fixed`를 다시 돌리고, gap을 다시 계산한 뒤 통과 개수. 지점마다 이유가 spec에 적혀 있어요(config schema의 두 경계와 배포된 scheduler들의 기본값, 그리고 다시 지은 파일의 주기 task가 갖는 demotion 경계, 곧 100 ms boost 구간당 CPU — music player, frame chain의 task, video player, 통화 — 양쪽) | `fixed` run 10개 × listed 파일 51개 |
 | `floor_band` | latency floor를 0.5 / 1 / 2 / 5 ms로 바꿔 채점을 다시 하고 통과 개수 | 재채점만 |
 | `g_band` | g를 0.25 / 0.33 / 0.5 / 0.67로 바꿔 통과 개수 | 재계산만 |
 | `seed_standard_error` | 파일마다 random 점수의 seed 평균의 표준오차 — N이 산 정밀도 | 계산만 |

@@ -1,5 +1,5 @@
 # Recognition Vocabulary
-> Status: normative · Created 2026-08-28 · Updated 2026-10-30
+> Status: normative · Created 2026-08-28 · Updated 2026-10-31
 
 The shared vocabulary of the recognition signal — the one contract that the recognizer's output schema, the validator's menu, the driver table, and the Layer-1 grader all agree on. Ratified 2026-08-28 (인지오 · 인경민 · 박이안 — pending team review of this doc).
 
@@ -119,7 +119,7 @@ The seven default values above are the **boot default configuration** and the `f
 
 **Same-granularity rule.** EDF's residual slice and LOTTERY's slice equal the MLFQ slice. The rule is this project's, not a source's: dispatch tenure is held equal across the four algorithms so that a difference between two driver-table rows is the policy and the cap, never the quantum one algorithm was handed. Neither slice takes a value from a source: Liu and Layland's EDF is preemptive and priority-driven with no quantum (`liu-jacm73`), and no second source is introduced for LOTTERY. Per-algorithm tenure is the calibrated table's to tune.
 
-**Sensitivity check (pre-registered in the RQ0 gate spec, `harness/experiments/rq0-gate.yaml`, 2026-09-12; reworked on the rebuilt dataset 2026-10-09).** Because the floor is the values of one chapter's worked examples, the `fixed` condition is re-run under a sweep of ten alternative boot defaults — this configuration with only the top slice changed, at 0.5, 0.7, 0.9, 1.2, 2, 3, 5, 14, 20 and 100 ms, each point with its reason in the spec — and every judging file's gaps are recomputed against each. If the verdict count changes across the sweep, the verdict is reported as a range over the boot default rather than a point. Only the `fixed` run's slice varies: the `oracle` and `random` runs stay on the primary and the pinned driver table, whose EDF and LOTTERY slices keep the boot value by the same-granularity rule.
+**Sensitivity check (pre-registered in the RQ0 gate spec, `harness/experiments/rq0-gate.yaml`, 2026-09-12; reworked on the rebuilt dataset 2026-10-09).** Because the floor is the values of one chapter's worked examples, the `fixed` condition is re-run under a sweep of ten alternative boot defaults — this configuration with only the top slice changed, at 0.5, 0.7, 1.2, 2, 5, 7, 12, 20, 30 and 100 ms, each point with its reason in the spec — and every judging file's gaps are recomputed against each. If the verdict count changes across the sweep, the verdict is reported as a range over the boot default rather than a point. Only the `fixed` run's slice varies: the `oracle` and `random` runs stay on the primary and the pinned driver table, whose EDF and LOTTERY slices keep the boot value by the same-granularity rule.
 
 ### Validation rules
 
@@ -169,6 +169,7 @@ Adding or removing a mode, promoting an annotation to a graded attribute, changi
 
 ## 5. Changelog
 
+- **2026-10-31 — the sweep's points (jioh).** No value changed. §2's sensitivity check lists the sweep's ten points as the RQ0 gate spec re-picked them at the demotion edges per boost interval: 0.5, 0.7, 1.2, 2, 5, 7, 12, 20, 30 and 100 ms (`harness/CHANGELOG.md`, 2026-10-31).
 - **2026-10-30 — the allotment counted across bursts (jioh).** No value changed. §2's allotment paragraph: a level's allotment is its slice, counted across a task's bursts at that level and kept when it blocks or is preempted, as the simulator guide §5's rule 4 states it from OSTEP §8.4's Rule 4 (`simulator/memo/memo_261023.md` Part H3), in place of "demotes on one fully consumed slice".
 - **2026-10-21 — the cap under FIFO (jioh).** No value changed. §2's FIFO paragraph states that the cap preempts a batch-class task at the cap while a non-batch task is runnable, the one exception to FIFO's non-preemption — what "the cap still applies" and the batch class's "identical across algorithms" (the 2026-09-09 batch-class memo) together imply, and what the simulator does since stage V (`simulator/memo/memo_261021.md` Part C item 1).
 - **2026-10-20 — the cap's shipped counterparts (jioh).** No value changed. §2's `batch_bandwidth_cap` paragraph: `linux-sched-bwc`'s ceiling throttles a group once its quota is spent within the period, whether or not another task wants the CPU — not work-conserving, which the cap is; the work-conserving half is grounded by a new entry, `linux-cgroup-v2` (`cpu.weight`), and the combination is stated as ours. Both read from the kernel documentation's `.rst` sources on 2026-10-20.

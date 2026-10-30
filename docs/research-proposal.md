@@ -1,5 +1,5 @@
 # A Semantic Recognition Layer for Operating Systems
-> Status: draft — for team review · Created 2026-08-15 · Updated 2026-10-17
+> Status: draft — for team review · Created 2026-08-15 · Updated 2026-10-31
 
 **Removing hardcoded semantic knowledge from the OS, validated on CPU scheduling**
 
@@ -558,7 +558,7 @@ This can happen for a concrete reason worth watching for: if the per-class heuri
 
 **Both `random` and `oracle` can be run before any LLM integration exists.** The ground truth is already written in the workload file; random is one line of code. This is the cheapest possible early kill check, and it should be the first experiment we run. If the gap is narrow, we redesign workloads or deliberately weaken the executor's self-correction before investing in prompt engineering.
 
-*Pre-registered 2026-09-12, re-pinned 2026-10-09:* the criterion is committed as data in `harness/experiments/rq0-gate.yaml`, the RQ0 gate spec — at least 10 of 19 judging files must show a gap of at least 0.5 between perfect and random recognition (13 of 25 until the re-pin of 2026-10-09, sub-task 9.14, the consumer rework), `random` over 100 seeds, with the boot-default sweep at ten alternatives (the top slice at 0.5, 0.7, 0.9, 1.2, 2, 3, 5, 14, 20 and 100 ms), the latency-floor and threshold sensitivity lines, the sensitivity lines over the rebuilt files' variants, the failure procedure (configuration search before any workload change), and the grounding of every number written beside it. The harness's RQ0 gate evaluator reads that file and nothing else.
+*Pre-registered 2026-09-12, re-pinned 2026-10-09:* the criterion is committed as data in `harness/experiments/rq0-gate.yaml`, the RQ0 gate spec — at least 10 of 19 judging files must show a gap of at least 0.5 between perfect and random recognition (13 of 25 until the re-pin of 2026-10-09, sub-task 9.14, the consumer rework), `random` over 100 seeds, with the boot-default sweep at ten alternatives (the top slice at 0.5, 0.7, 1.2, 2, 5, 7, 12, 20, 30 and 100 ms, the threshold points re-picked 2026-10-31 at the demotion edges per boost interval), the latency-floor and threshold sensitivity lines, the sensitivity lines over the rebuilt files' variants, the failure procedure (configuration search before any workload change), and the grounding of every number written beside it. The harness's RQ0 gate evaluator reads that file and nothing else.
 
 Phase 1 runs on the full ratified vocabulary — sixteen modes plus `background_wanted`. The attribute is not optional there: the RQ0 judging set is built from label-varying pairs — the C2 pairs' normal-class halves (`c2-p1a`, `c2-p2a`, `c2-p2b`, `c2-p3a`), the four batch C1 bases whose job the row's share reaches, and eleven C7 counterparts (`files.judging`) — most of whose two sides differ in `background_wanted`, so a modes-only gate could not express its own judging set.
 

@@ -1,6 +1,6 @@
 # 2026-10-30의 변동 사항 — simulator 쪽에서 볼 것
 
-> Status: memo · Created 2026-10-30 · Updated 2026-10-30
+> Status: memo · Created 2026-10-30 · Updated 2026-10-31
 > From 인지오 to 인경민.
 
 ## 0. 이 문서
@@ -56,3 +56,13 @@ trace 형식은 바뀌지 않았어요. 바뀐 것은 harness가 trace를 읽는
   - 100 ms당 CPU 기준의 경계: chain stage 1.7–8.6 ms, video player 약 12 ms, 통화 약 24 ms.
   - primary 10 ms에서: 통화는 boost 구간의 96%에서 강등돼요(예전 읽기로는 43%). video player는 89%예요(예전 읽기로는 거의 0).
   - 결정(2026-10-30): threshold 지점을 새 경계에 맞춰 다시 골라요. backbone 지점(500 µs, 700 µs, 2 ms, 20 ms, 100 ms)은 값을 그대로 두고 설명만 고쳐요. 고르기 전에 simulator trace로 산술을 확인할 거라, 그때 simulator run을 부탁할 수 있어요.
+
+## 정정 (2026-10-31)
+
+§5의 강등 경계 항목이 끝났어요. 그 결과로 §3과 §5의 문장을 고쳐요.
+
+- **§5의 경계 숫자.** 인지오가 reference simulator(`8dab1176`)의 trace로 산술을 확인했어요(`_dev/research/jioh/2026-10-31-demotion-edges/`).
+  - 100 ms당 CPU 기준의 경계는 이래요. music player 0.71 ms, gaming chain의 task 1.7–8.6 ms(C2 pair는 1.6–12.7 ms), video player 12.1 ms, 통화 23.9 ms.
+  - primary 10 ms에서 통화는 boost 구간의 98%에서 강등되고, video player는 89%에서 강등돼요.
+- **§5의 sweep 지점.** threshold 지점은 900 µs, 3 ms, 14 ms 대신 7 ms, 12 ms, 30 ms가 됐어요. 1.2 ms와 5 ms는 그대로예요. backbone 지점은 값을 그대로 두고 설명만 고쳤어요. `harness/boot-defaults/`의 파일도 그에 맞춰 바뀌었어요. 경민이 할 일은 없어요.
+- **§3의 pin.** scoring spec은 `84b997ad…`예요. scoring spec의 `c7-media`·`c7-meeting` 설명만 바뀌었고, term은 그대로예요.

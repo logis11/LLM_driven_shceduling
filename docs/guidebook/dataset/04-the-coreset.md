@@ -1,6 +1,6 @@
 # 4권 · 51개의 coreset: 파일마다 어떤 질문에 답하나
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-30
+> Status: draft · Created 2026-10-14 · Updated 2026-10-31
 
 **core set의 파일 하나하나는 무슨 상황을 적고, 어떤 label을 달고, 어떤 질문에 답하나.**
 
@@ -237,8 +237,8 @@ core set 51개가 모두 같은 무게로 쓰이는 것은 아닙니다. 가장 
 
 - idle class 작업을 담은 여섯 파일(`c1-indexing`, `c7-indexing`, `c2-p1b`, `c1-backup`, `c7-backup`, `c2-p3b`)은 보고 파일이 되었습니다. 이 파일들의 background 작업(Tracker indexer, Déjà Dup backup)은 스스로 idle scheduling class를 선언하는 프로그램이고, 실행기는 idle task를 다른 task가 하나도 runnable하지 않을 때만 돌립니다. 그래서 어떤 row의 몫이나 상한도 그 작업에 닿지 않습니다(RQ0 gate spec의 statement `idle-class-files`).
 - `c7-mail`은 보고 파일이 되었습니다. 이 파일은 `c1-mail`의 앞 26.385 s를 잘라 쓰는데, `c1-mail`의 keystroke 35개가 모두 45.9 s와 53.1 s 사이에 있어 잘린 구간에 keystroke가 하나도 없습니다(9.14 decision 2의 2026-10-09 수정).
-- `c7-media`는 보고 파일로 남았습니다. 측정된 player의 최악 cycle이 16.0 ms로 33.3 ms 주기 안에 있고, boot MLFQ가 줄 수 있는 최장 대기를 더해도 32 ms라 headroom이 없습니다(1.3 ms 여유).
-- 반대로 `c7-meeting`은 다시 들어왔습니다. 측정된 통화의 10 ms 오디오 cycle이 약 스무 번에 한 번 boot slice를 다 써서, 100 ms boost 구간 열에 넷쯤에서 통화가 강등되므로(산술: 1 − 0.95¹⁰, cycle을 서로 독립으로 보고 boost 구간 하나에 cycle 열) 예전의 동률이 깨졌습니다(9.16 D1, `c7-meeting`을 판정 파일로 두고 9.14의 "약 다섯 번에 한 번"을 이 수치로 다시 적은 결정).
+- `c7-media`는 보고 파일로 남았습니다. boot MLFQ는 영상 player를 boost 구간의 88 %에서 강등하지만, 고정 설정 아래에서 어느 player도 마감을 놓치지 않아 headroom이 없습니다(reference simulator, 2026-10-31). compile된 파일의 최악 영상 cycle은 7.28 ms입니다. 측정된 표의 최악 cycle 16.0 ms라면, 강등 뒤 20 ms Q1 slice 한 번을 기다릴 때 36 ms가 되어 33.3 ms 주기를 넘습니다.
+- 반대로 `c7-meeting`은 다시 들어왔습니다. 측정된 통화는 100 ms boost 구간마다 CPU를 평균 23.9 ms 쓰고, 한 level에서 쓴 CPU는 burst를 넘어 boost까지 쌓입니다(OSTEP §8.4의 Rule 4). 그래서 10 ms slice의 고정 설정 아래에서 boost 구간의 97 %에서 강등되고 작업의 20 %가 마감을 놓치므로(reference simulator, 2026-10-31), 예전의 동률이 깨졌습니다. 9.16 D1(`c7-meeting`을 판정 파일로 두고 9.14의 "약 다섯 번에 한 번"을 고친 결정)은 이것을 "약 스무 cycle에 한 번 boot slice를 다 쓴다"로 적었는데, burst 하나를 slice와 견준 읽기여서 2026-10-31에 boost 구간당 CPU로 다시 적었습니다.
 
 - **idle class** — 프로그램이 스스로 "다른 일이 없을 때만 나를 돌려라"라고 선언하는 Linux의 scheduling policy(`SCHED_IDLE`)입니다. 이 dataset에서는 모든 task 기록에 `declared_class`(`normal` 또는 `idle`)로 실립니다.
 
@@ -1719,11 +1719,11 @@ photo, video-edit, render, transcode, backup은 GIMP와 Kdenlive라 keystroke가
 
 **`c7-photo`.** unsharp mask가 13.1925 s로 옮겨졌습니다. keystroke 흐름이 없으므로 term은 GIMP의 `timer_latency` P99입니다. 판정 파일이고 venue variant 둘이 붙습니다.
 
-**`c7-meeting`.** 통화 task(`voice`, `chrome`)와 upgrade 둘입니다. 9.14 decision 2가 이 파일을 다시 판정에 넣었습니다. 기록된 이유는 "the measured call's cycle runs consume the boot slice in about a fifth of its cycles, so the tie with the boot default that moved it out in 8.8 no longer holds"였습니다. "about a fifth"는 `cycle_run`의 분위 표(p1부터 p99.9까지 열 점)를 십분위로 읽은 값이어서, 9.16 D1(2026-10-17, `c7-meeting`을 판정 파일로 두고 이유를 맞는 수치로 다시 적은 결정)이 이유를 다시 적었습니다. 측정된 통화의 cycle은 약 스무 번에 한 번(측정된 표에서 4.9 %, compile된 파일에서 5.5 %) boot MLFQ의 10 ms slice를 다 쓰고, 그래서 100 ms boost 구간 열에 넷쯤(산술: 1 − 0.95¹⁰, cycle을 독립으로 보고 boost 하나에 cycle 열)에서 통화가 강등되어 다음 boost까지 upgrade의 slice 뒤에서 기다립니다. 그래서 boot 기본 설정과의 동률이 깨졌습니다. 다만 RQ0 gate spec의 note는 "the cap axis is inert and the gap reads EDF against the drawn algorithm"이라고 적습니다. EDF는 deadline class인 통화를 상한과 상관없이 먼저 돌리므로, 이 파일의 gap은 attribute row의 차이(상한)가 아니라 mode recognition(EDF냐 아니냐)을 읽습니다. venue variant 둘과 trace-replay variant 하나가 붙습니다.
+**`c7-meeting`.** 통화 task(`voice`, `chrome`)와 upgrade 둘입니다. 9.14 decision 2가 이 파일을 다시 판정에 넣었습니다. 기록된 이유는 "the measured call's cycle runs consume the boot slice in about a fifth of its cycles, so the tie with the boot default that moved it out in 8.8 no longer holds"였습니다. "about a fifth"는 `cycle_run`의 분위 표(p1부터 p99.9까지 열 점)를 십분위로 읽은 값이어서, 9.16 D1(2026-10-17, `c7-meeting`을 판정 파일로 두고 이유를 맞는 수치로 다시 적은 결정)이 이유를 다시 적었습니다. 9.16 D1은 측정된 통화의 cycle이 약 스무 번에 한 번(측정된 표에서 4.9 %, compile된 파일에서 5.5 %) 10 ms slice를 다 쓴다고 적었습니다. 이것은 burst 하나를 slice와 견준 읽기입니다. 한 level에서 쓴 CPU는 burst를 넘어 boost까지 쌓이므로(OSTEP §8.4의 Rule 4), 2026-10-31에 이유를 boost 구간당 CPU로 다시 적었습니다. 통화는 100 ms boost 구간마다 CPU를 평균 23.9 ms 써서, 고정 설정 아래에서 boost 구간의 97 %에서 강등되고 작업의 20 %가 마감을 놓칩니다(reference simulator). 그래서 boot 기본 설정과의 동률이 깨졌습니다. 다만 RQ0 gate spec의 note는 "the cap axis is inert and the gap reads EDF against the drawn algorithm"이라고 적습니다. EDF는 deadline class인 통화를 상한과 상관없이 먼저 돌리므로, 이 파일의 gap은 attribute row의 차이(상한)가 아니라 mode recognition(EDF냐 아니냐)을 읽습니다. venue variant 둘과 trace-replay variant 하나가 붙습니다.
 
 **`c7-gaming`.** chain과 Steam client가 26.385 s에 떠납니다. 판정 파일이고, 9.14 decision 2와 RQ0 gate spec note는 `c7-meeting`과 같은 이유로 "the gap reads EDF against the drawn algorithm"이라고 적습니다. venue 둘, chain scale 둘, corner 둘의 variant가 붙습니다(11장).
 
-**`c7-media`.** 판정 파일이 아닙니다. 9.14 decision 2의 이유는 "a 32 ms worst case against a 33.3 ms period, a 1.3 ms margin stated"입니다. 영상 player의 최악 cycle 16.0 ms에 boot MLFQ가 강등 뒤에 줄 수 있는 20 ms Q1 slice 한 번을 더해도 32 ms라 33.3 ms 주기를 넘지 않으므로, 어떤 row에서도 headroom이 없다는 계산입니다.
+**`c7-media`.** 판정 파일이 아닙니다. 9.14 decision 2의 이유는 "a 32 ms worst case against a 33.3 ms period, a 1.3 ms margin stated"였습니다. 영상 player의 최악 cycle 16.0 ms에 boot MLFQ가 강등 뒤에 줄 수 있는 20 ms Q1 slice 한 번을 더한 값인데, 이 합은 36 ms라 33.3 ms 주기를 넘습니다(2026-10-31에 바로잡음). 지금의 이유는 compile된 파일에서 나옵니다. 그 최악 영상 cycle은 7.28 ms이고, reference simulator에서 고정 설정 아래 영상 player는 boost 구간의 88 %에서 강등되지만 어느 player도 마감을 놓치지 않습니다. 그래서 어떤 row에서도 headroom이 없습니다.
 
 **`c7-video-edit`.** preview render가 13.1925 s로 옮겨졌습니다. term은 Kdenlive의 `timer_latency` P99입니다. 판정 파일이고 venue variant 둘이 붙습니다.
 

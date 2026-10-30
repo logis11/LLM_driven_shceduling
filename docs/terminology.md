@@ -1,5 +1,5 @@
 # Terminology
-> Status: normative · Created 2026-08-23 · Updated 2026-10-30
+> Status: normative · Created 2026-08-23 · Updated 2026-10-31
 
 Terms this project uses for its own parts. Operating systems vocabulary —
 MLFQ, EDF, preemption, turnaround time — is in Appendix A of
@@ -264,7 +264,7 @@ runner reads its generic part as the run matrix.
 `harness/experiments/rq0-gate.yaml`, committed 2026-09-12, reworked on the
 rebuilt dataset on 2026-10-09 (9.14) and re-pinned since: 19 judging files,
 K = 10, g = 0.5, N = 100, the boot-default sweep of ten alternative top slices
-(0.5, 0.7, 0.9, 1.2, 2, 3, 5, 14, 20 and 100 ms), the executor assumptions, the
+(0.5, 0.7, 1.2, 2, 5, 7, 12, 20, 30 and 100 ms), the executor assumptions, the
 failure procedure, and the grounding of every number beside it.
 
 **RQ0 gate evaluator** — the harness module (`harness/tools/harness/evaluator.py`)
