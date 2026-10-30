@@ -1673,7 +1673,7 @@ placement 기록의 모양은 set마다 이렇게 다릅니다(9.21 D1의 "Shape
 | 필드 | 뜻 |
 |---|---|
 | `entity` | 점수를 매길 대상. compile된 workload의 task id(예: `editor`, `game.chain.1`), 또는 lane/schedule |
-| `metric` | 어떤 관측값(primitive)을 쓰나. `input_latency`(키 입력이 온 순간부터 그 처리가 시작되기까지 걸린 시간), `ready_wait`(깨어난 뒤 실제로 CPU를 받기까지 기다린 시간), `job`(주기적 작업 한 번), `turnaround`(도착부터 끝까지), `cpu_delivered`(받은 CPU 양) 등 |
+| `metric` | 어떤 관측값(primitive)을 쓰나. `input_latency`(키 입력이 온 순간부터 그 처리가 시작되기까지 걸린 시간), `timer_latency`(프로그램 자신의 timer wake가 온 순간부터 그 처리가 시작되기까지 걸린 시간), `ready_wait`(깨어난 뒤 실제로 CPU를 받기까지 기다린 시간), `job`(주기적 작업 한 번), `turnaround`(도착부터 끝까지), `cpu_delivered`(받은 CPU 양) 등 |
 | `cause` | `ready_wait`의 원인 필터. `wake`이면 잠에서 깨어난 뒤의 대기 |
 | `channel` | 그 wake가 끝낸 WAIT의 종류. `input`(키 입력)이나 `timer`(task 자신의 timer 성분) |
 | `window` | 시간 필터. 없으면 파일 전체, 있으면 ground truth의 segment 하나여야 함(lint가 확인) |
@@ -1683,12 +1683,12 @@ placement 기록의 모양은 set마다 이렇게 다릅니다(9.21 D1의 "Shape
 
 파일 하나의 점수는 term들의 정규화된 몫의 가중합입니다. 몫은 `(fixed − condition) / (fixed − oracle)`입니다. `fixed`는 상황을 전혀 읽지 않고 기본 설정을 쓰는 조건, `oracle`은 정답 label을 알고 그에 맞는 설정을 쓰는 조건, `condition`은 시험하는 recognizer입니다. 몫이 1이면 oracle만큼 잘한 것, 0이면 아무것도 안 한 것과 같은 것입니다.
 
-C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡니다(`scoring-spec.yaml` 117–180행). 표의 `input` P99는 `input_latency`입니다.
+C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡니다(`scoring-spec.yaml` 120–183행). 표의 `input` P99는 `input_latency`입니다.
 
 | C1 entry | terms |
 |---|---|
 | `c1-office`, `c1-browsing`, `c1-dev`, `c1-mail` | 전경 task의 `input_latency`, P99, weight 1.0 |
-| `c1-video-edit`, `c1-photo` | 편집기의 `ready_wait`, `channel: timer`, P99, 1.0 |
+| `c1-video-edit`, `c1-photo` | 편집기의 `timer_latency`, P99, 1.0 |
 | `c1-compile` | `editor` `input` P99 1.0 + `build` turnaround 1.0 |
 | `c1-ml-train` | `editor` `input` P99 1.0 + `hog` turnaround 0.5 |
 | `c1-indexing` | `editor` `input` P99 1.0 + `hog` turnaround 1.0 |
@@ -1700,7 +1700,7 @@ C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡
 | `c1-meeting` | `voice` miss rate 1.0 |
 | `c1-idle` | entry 없음 ("no performance metric") |
 
-`kdenlive`와 GIMP 편집기의 term이 `channel: timer`인 이유도 header에 있습니다. 두 프로그램의 측정된 작업 구간은 마우스로 하는 동작이라 키 입력 스트림이 없고, 그래서 그 프로그램 자신의 timer 성분의 대기를 읽습니다.
+`kdenlive`와 GIMP 편집기의 term이 `timer_latency`인 이유도 header에 있습니다. 두 프로그램의 측정된 작업 구간은 마우스로 하는 동작이라 키 입력 스트림이 없고, 그래서 그 프로그램 자신의 timer 성분의 wake가 온 순간부터 처리되기 시작할 때까지를 읽습니다.
 
 ## 13.2 왜 entry가 아니라 규칙인가
 
@@ -1712,7 +1712,7 @@ C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡
 
 ## 13.3 규칙 전문과 단계
 
-`scoring-spec.yaml` header의 해당 단락입니다(87–103행; 이어지는 104–113행의 batch term 문장은 13.12에서 봅니다).
+`scoring-spec.yaml` header의 해당 단락입니다(90–106행; 이어지는 107–116행의 batch term 문장은 13.12에서 봅니다).
 
 > The generated layer (9.21, decisions 1–3) has no entries here. A generated file's terms are derived when the harness runs, by one rule over the C1 entries below (harness/tools/harness/scoring.py, `with_generated`), as a variant's are derived from its base's: for each placement the set's manifest records — a mode's C1 task set under one id suffix (`-s0`, `-s1`, …) — the `c1-<mode>` entry's terms, the entity's task id carrying the suffix (the chain head `game.chain.1` becomes `game-s0.chain.1`, the compiler forming a member's id from its task's), the latency and periodic terms windowed to the segments the placement is labelled in (no window when they span the file), the batch terms unwindowed. A placement labelled in no segment carries no term (the distractor grid's arriving set: the score reads the labelled situation, the arrival's effect on it is in the labelled set's terms); a placement the generator gave no input window (a segment of 4 s or less) drops its `input_latency` terms alone, since they would read no row; an idle placement carries none, as c1-idle has no entry. The rule's expansion is linted against the compiled generated files (scoring_lint, `lint_generated`) as these entries are against the core set.
 

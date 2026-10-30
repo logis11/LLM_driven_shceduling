@@ -344,7 +344,7 @@ run file에는 wake마다 `wake` event
 
 `c1-office`의 `writer`: input 2–58 s → keystroke wake 270개(첫 keystroke 2.059 s) + timer wake 205개, RUN 합 1.36 s.
 
-측정된 keystroke stream은 네 앱에만 있어요(`dataset/stimulus/`): Writer와 VS Code는 SWELL-KW의 Word stream, Thunderbird는 Outlook stream, Chrome은 Internet Explorer stream. Kdenlive와 GIMP는 keystroke stream이 없어요 — 측정된 driven phase는 pointer로 움직이는 operation이고, 그게 앱 자신의 timer component로 실려요. 그래서 이 둘이 묶인 파일 열세 개(`c1-video-edit`, `c1-render`, `c1-transcode`, `c1-backup`, `c1-photo`, `c2-p3a`, `c2-p3b`, `c3-creation`, `c7-video-edit`, `c7-render`, `c7-transcode`, `c7-backup`, `c7-photo`)의 interaction term 열네 개는 `channel: timer`로 앱 자신의 wake가 기다린 시간을 읽어요(9.14). keystroke stream이 있는 앱의 interaction term은 `input_latency`로, keystroke마다 그 keystroke가 온 순간부터 앱이 그것을 처리하기 시작할 때까지를 읽어요(2026-10-30). 아래의 "input P99"가 이것이에요. input window가 없는 측정 task는 timer component만 있어요(`c1-office`의 `browser`).
+측정된 keystroke stream은 네 앱에만 있어요(`dataset/stimulus/`): Writer와 VS Code는 SWELL-KW의 Word stream, Thunderbird는 Outlook stream, Chrome은 Internet Explorer stream. Kdenlive와 GIMP는 keystroke stream이 없어요 — 측정된 driven phase는 pointer로 움직이는 operation이고, 그게 앱 자신의 timer component로 실려요. 그래서 이 둘이 묶인 파일 열세 개(`c1-video-edit`, `c1-render`, `c1-transcode`, `c1-backup`, `c1-photo`, `c2-p3a`, `c2-p3b`, `c3-creation`, `c7-video-edit`, `c7-render`, `c7-transcode`, `c7-backup`, `c7-photo`)의 interaction term 열네 개는 앱 자신의 timer wake를 읽어요(9.14): 2026-10-30부터 `timer_latency`로, wake마다 그 wake가 온 순간부터 앱이 그것을 처리하기 시작할 때까지예요. keystroke stream이 있는 앱의 interaction term은 `input_latency`로, keystroke마다 그 keystroke가 온 순간부터 앱이 그것을 처리하기 시작할 때까지를 읽어요(2026-10-30). 아래의 "input P99"가 이것이에요. input window가 없는 측정 task는 timer component만 있어요(`c1-office`의 `browser`).
 
 ### 5.3 finite job의 compile (batch loop)
 
@@ -1180,7 +1180,7 @@ core set 밖의 파생도 있어요: `build/coreset-single/`의 sensitivity vari
 
 **행동에 관한 것**
 - 측정된 interactive task는 keystroke보다 자기 timer component로 훨씬 많이 깨요(`c1-dev`의 editor: keystroke 186개, timer wake 6,456개). input window가 없는 task도 timer component로 계속 깨요: `c1-office`의 `browser`, `c4-compile`의 `injected-browser`, `c3-creation`의 240초 이후 `kdenlive`.
-- Kdenlive와 GIMP에는 keystroke stream이 없어요. 그래서 그 앱의 interaction term은 `channel: timer`예요(13개 파일, term 14개).
+- Kdenlive와 GIMP에는 keystroke stream이 없어요. 그래서 그 앱의 interaction term은 `timer_latency`예요(13개 파일, term 14개).
 - `c1-idle`·`c7-idle`의 `pipewire`와 `dbus-daemon`은 측정된 wake 빈도가 너무 낮아서 파일 안에서 한 번도 안 깨요 — program이 `WAIT` 하나예요.
 - C2에서 파일보다 오래 사는 job은 셋이에요: `c2-p1a`의 training(남은 39.435 s에 1,389.885 s의 일), `c2-p2a`·`c2-p2a-idle`의 download(남은 26.385 s에 727.170 s), `c2-p3b`의 backup(idle class라 266 s 안에 못 끝남). 이 셋은 progress(`cpu_delivered / demand`)가 batch 쪽 metric이에요. C7 counterpart의 job도 파일 안에서 못 끝나요: 파일 길이가 job의 CPU 총량과 같고 foreground가 lane을 나눠 쓰니까요 — 그래서 segment 내내 살아 있고, term은 없어요. 나머지 batch job은 파일 안에서 어떤 policy에서도 끝나도록 길이가 잡혀 있어요(C1의 batch base, `c3-workday`, `c3-creation`, `c6-dual`).
 - `c3-evening`의 chain은 lane_share 1.45라 혼자서도 frame을 못 맞춰요. 건너뛴 tick(놓친 job)이 설계상 생겨요.

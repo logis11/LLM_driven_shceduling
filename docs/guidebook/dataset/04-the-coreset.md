@@ -508,7 +508,8 @@ C3(transition arc 그룹)와 C4(distractor injection 그룹)와 C5(familiarity l
 
 - **term** — 채점 항목 하나입니다. 어느 task(entity)의 어떤 지표(metric)를 어떤 집계(aggregate)로 볼지, 그리고 가중치(weight)를 적습니다. 파일의 점수는 term들의 정규화된 몫 `(fixed − condition)/(fixed − oracle)`의 가중합입니다. 여기서 `fixed`는 recognition 없이 boot 기본 설정(MLFQ)만 쓰는 조건입니다.
 - **`input_latency` P99** — keystroke 하나가 온 순간부터 task가 그 keystroke를 처리하기 시작할 때까지 걸린 시간의 99번째 백분위입니다. keystroke 흐름이 있는 task의 term이고, 파일 안에서 끝내 처리되지 못한 keystroke는 task의 끝(또는 파일 끝)까지의 시간을 하한으로 넣습니다. 뒤의 장에서 "P99(input)"이 이것입니다.
-- **`ready_wait` P99** — task가 깨어나 실행 가능해진 뒤 실제로 CPU를 받기까지 기다린 시간의 99번째 백분위입니다. 웹 서비스의 tail latency와 같은 생각입니다. `channel: timer`면 application 스스로의 timer wake만 봅니다.
+- **`timer_latency` P99** — keystroke 흐름이 없는 application(GIMP, Kdenlive, `c7-mail`의 mailer)의 term입니다. 그 application 스스로의 timer wake 하나가 온 순간부터 처리되기 시작할 때까지의 시간을, `input_latency`와 같은 규칙으로 잽니다. 뒤의 장에서 "P99(timer)"가 이것입니다.
+- **`ready_wait` P99** — task가 깨어나 실행 가능해진 뒤 실제로 CPU를 받기까지 기다린 시간의 99번째 백분위입니다. 웹 서비스의 tail latency와 같은 생각입니다.
 - **`job` miss rate** — 주기적으로 일하는 task(영상 프레임, 오디오 프레임, 게임 frame chain)가 마감을 놓친 비율입니다.
 - **turnaround** — batch job이 도착해서 끝나기까지 걸린 시간입니다. 파일 안에서 job이 끝날 때만 씁니다.
 - **progress(`cpu_delivered`)** — 파일 안에서 job이 받은 CPU 양입니다. job이 파일 안에서 끝나지 않을 때 씁니다.
@@ -553,7 +554,7 @@ C1(calibration 그룹)에는 두 번째 역할도 있습니다. C1의 task set 1
 
 ## 4.4 C1의 채점과 RQ0에서의 역할
 
-scoring spec의 C1(calibration 그룹) term은 mode 부류에 따라 정해진 틀을 따릅니다(Phase 7 spec decision 9). interactive-only mode(`browsing`, `office`, `mail`, `dev`, `photo`, `video-edit`)는 foreground task의 P99 하나, weight 1.0입니다. keystroke 흐름이 있는 편집기(`code`, `soffice.bin`, Chrome, Thunderbird)는 `input_latency`, keystroke 흐름이 없는 GIMP와 Kdenlive는 `channel: timer`입니다. periodic mode(`media`, `meeting`)는 소비자 task의 `job` miss rate이고, `media`는 음악 1.0, 영상 0.5의 가중치입니다. `gaming`은 chain head(`game.chain.1`)의 `job` miss rate입니다. batch-beside-editor mode(`compile`, `ml-train`, `render`, `transcode`, `indexing`, `backup`)는 편집기의 P99에 job의 turnaround를 더합니다. 가중치는 compile 1.0, ml-train·render·transcode 0.5, indexing 1.0, backup 0.25입니다. `c1-idle`은 term이 없습니다.
+scoring spec의 C1(calibration 그룹) term은 mode 부류에 따라 정해진 틀을 따릅니다(Phase 7 spec decision 9). interactive-only mode(`browsing`, `office`, `mail`, `dev`, `photo`, `video-edit`)는 foreground task의 P99 하나, weight 1.0입니다. keystroke 흐름이 있는 편집기(`code`, `soffice.bin`, Chrome, Thunderbird)는 `input_latency`, keystroke 흐름이 없는 GIMP와 Kdenlive는 `timer_latency`입니다. periodic mode(`media`, `meeting`)는 소비자 task의 `job` miss rate이고, `media`는 음악 1.0, 영상 0.5의 가중치입니다. `gaming`은 chain head(`game.chain.1`)의 `job` miss rate입니다. batch-beside-editor mode(`compile`, `ml-train`, `render`, `transcode`, `indexing`, `backup`)는 편집기의 P99에 job의 turnaround를 더합니다. 가중치는 compile 1.0, ml-train·render·transcode 0.5, indexing 1.0, backup 0.25입니다. `c1-idle`은 term이 없습니다.
 
 > **왜 이렇게 정했나.** scoring spec 주석은 batch 가중치를 "ml-train/render/transcode 0.5 from the C2 and C3 progress terms, backup 0.25 from c2-p3b"라고 적습니다. 새 base가 그 mode의 기존 instance가 이미 가진 가중치를 물려받아, 기존 `true` row의 상한이 하나도 바뀌지 않게 하려는 것입니다(Phase 7 archive decision 10). `c1-indexing`의 turnaround 1.0은 "a stated assumption — a user waiting on a reindex as c1-compile's user waits on a build"입니다.
 
@@ -657,7 +658,7 @@ segment 0–60 s `photo`, `true`, `[S6]`. input 2–58 s가 적혀 있지만 이
 
 **compile된 모양.** arrive 1개, wake 511개(모두 timer), 76,363 byte, utilization 0.0442.
 
-**채점에서의 결과.** keystroke wake가 없으므로 scoring spec은 이 파일의 term을 `channel: timer`로 둡니다. 9.14 D2(재구축된 파일 위의 scoring spec, 2026-10-09)가 "fourteen of the scored editors have no input-channel wake at all — every file of the video editor … and of the image editor"를 찾고, 이 열네 term을 timer channel로 읽게 했습니다. 이 term이 재는 것은 keystroke의 echo가 아니라 application 자신의 반응성입니다.
+**채점에서의 결과.** keystroke wake가 없으므로 scoring spec은 이 파일의 term을 application 자신의 timer wake로 둡니다(2026-10-30부터 `timer_latency`). 9.14 D2(재구축된 파일 위의 scoring spec, 2026-10-09)가 "fourteen of the scored editors have no input-channel wake at all — every file of the video editor … and of the image editor"를 찾고, 이 열네 term을 timer channel로 읽게 했습니다. 이 term이 재는 것은 keystroke의 echo가 아니라 application 자신의 반응성입니다.
 
 **짝과 파생.** `c7-photo`. **정한 결정.** Phase 7 spec decision 8, `c3-creation` segment 0에서 gimp만 들어 올림(seed 109). 9.10 D20이 unsharp mask를 30 s에 두었습니다.
 
@@ -1712,11 +1713,11 @@ photo, video-edit, render, transcode, backup은 GIMP와 Kdenlive라 keystroke가
 
 **`c7-office`.** base의 task 넷(writer, browser, renderer ×4, mail)이 모두 26.385 s에 떠납니다. operation이 없습니다. 판정 파일이고 venue 둘, corner 둘의 variant가 붙습니다.
 
-**`c7-mail`.** 이 파일만 keystroke가 하나도 없습니다. `c1-mail`의 keystroke 35개가 모두 45.9–53.1 s에 있기 때문입니다. 그래서 9.14 decision 2의 2026-10-09 수정이 이 파일을 판정에서 뺐습니다. 기록된 이유는 "its only term cannot read keystroke latency; it is reporting-only with its term read on the mailer's own wakes"입니다. scoring spec도 이 파일만 `base`를 선언하지 않고 `channel: timer`의 term을 따로 둡니다("no `base`, the terms differ"). 기각된 안도 적혀 있습니다. 파일을 다시 자르는 것(dataset 변경이고 compiler에 없는 replay offset 연산이 필요)과, 두 파일 모두를 mailer 자신의 wake로 읽는 것입니다. 결과로 mail mode의 attribute 짝은 측정되지 않습니다.
+**`c7-mail`.** 이 파일만 keystroke가 하나도 없습니다. `c1-mail`의 keystroke 35개가 모두 45.9–53.1 s에 있기 때문입니다. 그래서 9.14 decision 2의 2026-10-09 수정이 이 파일을 판정에서 뺐습니다. 기록된 이유는 "its only term cannot read keystroke latency; it is reporting-only with its term read on the mailer's own wakes"입니다. scoring spec도 이 파일만 `base`를 선언하지 않고 mailer의 timer wake를 읽는 term(`timer_latency`)을 따로 둡니다("no `base`, the terms differ"). 기각된 안도 적혀 있습니다. 파일을 다시 자르는 것(dataset 변경이고 compiler에 없는 replay offset 연산이 필요)과, 두 파일 모두를 mailer 자신의 wake로 읽는 것입니다. 결과로 mail mode의 attribute 짝은 측정되지 않습니다.
 
 **`c7-dev`.** 2장의 worked example입니다. 판정 파일이고 venue 둘, corner 둘, replay 하나가 붙습니다.
 
-**`c7-photo`.** unsharp mask가 13.1925 s로 옮겨졌습니다. keystroke 흐름이 없으므로 term은 GIMP의 timer channel P99입니다. 판정 파일이고 venue variant 둘이 붙습니다.
+**`c7-photo`.** unsharp mask가 13.1925 s로 옮겨졌습니다. keystroke 흐름이 없으므로 term은 GIMP의 `timer_latency` P99입니다. 판정 파일이고 venue variant 둘이 붙습니다.
 
 **`c7-meeting`.** 통화 task(`voice`, `chrome`)와 upgrade 둘입니다. 9.14 decision 2가 이 파일을 다시 판정에 넣었습니다. 기록된 이유는 "the measured call's cycle runs consume the boot slice in about a fifth of its cycles, so the tie with the boot default that moved it out in 8.8 no longer holds"였습니다. "about a fifth"는 `cycle_run`의 분위 표(p1부터 p99.9까지 열 점)를 십분위로 읽은 값이어서, 9.16 D1(2026-10-17, `c7-meeting`을 판정 파일로 두고 이유를 맞는 수치로 다시 적은 결정)이 이유를 다시 적었습니다. 측정된 통화의 cycle은 약 스무 번에 한 번(측정된 표에서 4.9 %, compile된 파일에서 5.5 %) boot MLFQ의 10 ms slice를 다 쓰고, 그래서 100 ms boost 구간 열에 넷쯤(산술: 1 − 0.95¹⁰, cycle을 독립으로 보고 boost 하나에 cycle 열)에서 통화가 강등되어 다음 boost까지 upgrade의 slice 뒤에서 기다립니다. 그래서 boot 기본 설정과의 동률이 깨졌습니다. 다만 RQ0 gate spec의 note는 "the cap axis is inert and the gap reads EDF against the drawn algorithm"이라고 적습니다. EDF는 deadline class인 통화를 상한과 상관없이 먼저 돌리므로, 이 파일의 gap은 attribute row의 차이(상한)가 아니라 mode recognition(EDF냐 아니냐)을 읽습니다. venue variant 둘과 trace-replay variant 하나가 붙습니다.
 
@@ -1724,7 +1725,7 @@ photo, video-edit, render, transcode, backup은 GIMP와 Kdenlive라 keystroke가
 
 **`c7-media`.** 판정 파일이 아닙니다. 9.14 decision 2의 이유는 "a 32 ms worst case against a 33.3 ms period, a 1.3 ms margin stated"입니다. 영상 player의 최악 cycle 16.0 ms에 boot MLFQ가 강등 뒤에 줄 수 있는 20 ms Q1 slice 한 번을 더해도 32 ms라 33.3 ms 주기를 넘지 않으므로, 어떤 row에서도 headroom이 없다는 계산입니다.
 
-**`c7-video-edit`.** preview render가 13.1925 s로 옮겨졌습니다. term은 Kdenlive의 timer channel P99입니다. 판정 파일이고 venue variant 둘이 붙습니다.
+**`c7-video-edit`.** preview render가 13.1925 s로 옮겨졌습니다. term은 Kdenlive의 `timer_latency` P99입니다. 판정 파일이고 venue variant 둘이 붙습니다.
 
 **`c7-idle`.** 세션 process 넷이 upgrade 옆에 남습니다. focus가 없고 scoring 항목도 없습니다. 이 파일에는 세 결정이 얽혀 있습니다.
 
@@ -2280,6 +2281,7 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 | headroom | 한 workload에서 얻을 수 있는 개선의 여지 |
 | term | 채점 항목 하나. entity, metric, aggregate, weight |
 | `input_latency` P99 | keystroke가 온 순간부터 그 처리가 시작되기까지 걸린 시간의 99번째 백분위 |
+| `timer_latency` P99 | application 자신의 timer wake가 온 순간부터 그 처리가 시작되기까지 걸린 시간의 99번째 백분위 |
 | `ready_wait` P99 | 깨어난 task가 CPU를 받기까지 기다린 시간의 99번째 백분위 |
 | `job` miss rate | 주기 task가 마감을 놓친 비율 |
 | turnaround / progress | batch job이 끝나기까지 걸린 시간 / 파일 안에서 받은 CPU |

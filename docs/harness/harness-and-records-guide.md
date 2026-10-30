@@ -361,7 +361,7 @@ records는 long format이에요. 이유는 셋.
 | `hogs` | `switch_window`, `boost_window` | 그 순간에 센 hog(CPU만 먹는 task)의 수 H (7.10) |
 | `pre_committed_miss` | recognizer row | 이 query를 덮는 segment에 `pre_committed_miss` 표시가 있으면 1, 없으면 0. headline accuracy는 1인 row를 빼고 계산해요(8장; 8.4에 추가) |
 | `skipped` | `job` | 1이면 harness가 읽는 TIMER skip 규칙으로 건너뛴 tick의 row — 일이 하나도 없었으니 `value`는 빈칸이고 miss로 세요. 소비된 tick의 row는 0 (11장; 9.14에 추가) |
-| `censored` | `input_latency` | 1이면 task가 window 안에서 끝내 처리하지 못한 keystroke의 row — `value`는 keystroke부터 task의 끝과 `T_end` 중 이른 쪽까지의 하한이에요. 처리된 keystroke의 row는 0 (7.11; 2026-10-30에 추가) |
+| `censored` | `input_latency`, `timer_latency` | 1이면 task가 window 안에서 끝내 처리하지 못한 wake(keystroke, 또는 timer wake)의 row — `value`는 wake부터 task의 끝과 `T_end` 중 이른 쪽까지의 하한이에요. 처리된 wake의 row는 0 (7.11, 7.12; 2026-10-30에 추가) |
 
 ### 6.3 `entity`는 어디서 나온 말인가
 
@@ -448,7 +448,7 @@ entity=editor, metric=ready_wait, t=250, value=10, cause=wake, channel=input
 
 **특수 규칙:** `ready`가 그 task의 **자기 occupancy 안**에 떨어지면(즉 `run_start`와 `run_end` 사이에) `value = 0`. 이건 "block되지 않고 즉시 완료된 blocking primitive"의 경우예요. 11장에서 실제로 봐요. `ready` line 뒤에 그 task의 다음 `ready` line이 `run_start` 없이 더 늦은 시각에 와도 `value = 0`이에요. 두 line 사이에 `RUN`이 없었으니 task는 곧바로 다음 blocking primitive로 간 거예요(TIMER 바로 뒤의 TIMER처럼).
 
-**왜 하나의 generic primitive인가.** response time(등장 후 첫 실행까지), timer dispatch delay(tick 후 실행까지), starvation(가장 오래 기다린 시간)은 전부 이 row들의 filter와 aggregate예요. interaction latency(keystroke 반응)는 따로 primitive `input_latency`가 있어요(7.11). `ready_wait`는 `ready` line, 곧 task가 그 `WAIT`에 닿은 순간부터 재서, task가 program에서 밀려 있는 동안 큐에 쌓인 keystroke를 대기 0으로 읽어요. `input_latency`는 keystroke가 온 순간부터 재요.
+**왜 하나의 generic primitive인가.** response time(등장 후 첫 실행까지), timer dispatch delay(tick 후 실행까지), starvation(가장 오래 기다린 시간)은 전부 이 row들의 filter와 aggregate예요. interaction latency(keystroke 반응)는 따로 primitive `input_latency`가 있고(7.11), keystroke stream이 없는 앱의 반응은 자기 timer wake에서부터 재는 `timer_latency`가 있어요(7.12). `ready_wait`는 `ready` line, 곧 task가 그 `WAIT`에 닿은 순간부터 재서, task가 program에서 밀려 있는 동안 큐에 쌓인 wake를 대기 0으로 읽어요. 두 primitive는 wake가 온 순간부터 재요.
 
 | 이름 | records에서 |
 |---|---|
@@ -652,7 +652,7 @@ entity=schedule, metric=switch_window, t=40600, value=12500, algorithm=MLFQ, ind
 
 **`boost_window` (8.10에 추가).** MLFQ로 들어간 interval 안에서 boost가 일어날 때마다 같은 규칙으로 창을 하나씩 더 재요: 그 순간 H를 세고, 마지막 hog가 그 순간부터 `W_single`을 받으면 닫혀요. boost timer는 그 interval에서 MLFQ entry가 적용될 때마다 다시 시작해요 — switch의 `t_apply`에서, 그리고 그 뒤 params나 cap만 바뀐 같은 algorithm의 entry가 적용될 때마다요(13장 가정 5번; 같은 algorithm의 entry에서 다시 시작하는 건 2026-10-17, 9.15부터). 그래서 boost 시점은 가장 최근에 적용된 entry의 적용 시각 + k × 그 entry의 `boost_interval_us`(k ≥ 1)이고, 다음 entry가 적용되기 전까지예요. 창의 `W_single`도 그 entry의 params로 계산하고, row의 `index`는 그 boost 시점이 놓인 grid의 entry예요. 다음 boost나 interval의 끝에서는 guard 없이 잘라요(boost 창이 다음 boost까지 가는 건 정상이니까). row는 `switch_window`와 같은 column에 `metric`만 `boost_window`. `mock-switch`에서는 boost가 20000마다라 60600과 80600에 row가 하나씩이고, 60600의 창은 editor가 3000밖에 못 받은 채 다음 boost에서 잘려 20000, 80600의 창은 hog 하나가 끊김 없이 6000을 받아 6000이에요.
 
-이 row들 위에서 나오는 숫자(metrics doc의 aggregate 절): switch window `[t, t + value]` 안에 있는 editor의 keystroke `ready_wait`(`cause=wake`, `channel=input`) 평균에서 같은 config interval의 어느 창에도 안 든 row의 평균을 뺀 **초과분**(switch 변형), 그리고 같은 계산을 boost window들로 한 것(boost 변형). 둘이 비슷하면 "switch는 boost 한 번 값이었다", 더 크면 이전 algorithm에서 넘어온 몫. 그리고 전체 시간 중 switch window 안에 든 비율. `mock-switch`에서는 switch 변형이 0 µs(창 안의 keystroke가 editor의 burst 중에 와서 대기 0으로 완료), boost 변형이 600 µs, 비율이 0.125예요. **score에 weight로 들어가지 않고 옆에 보고만 해요.**
+이 row들 위에서 나오는 숫자(metrics doc의 aggregate 절): switch window `[t, t + value]` 안에 keystroke가 온 editor의 `input_latency` 평균에서 같은 config interval의 어느 창에도 안 든 row의 평균을 뺀 **초과분**(switch 변형; scoring spec이 그 task를 읽는 metric으로 재요 — keystroke stream이 없는 앱이면 `timer_latency`, censored row는 하한 그대로), 그리고 같은 계산을 boost window들로 한 것(boost 변형). 둘이 비슷하면 "switch는 boost 한 번 값이었다", 더 크면 이전 algorithm에서 넘어온 몫. 그리고 전체 시간 중 switch window 안에 든 비율. `mock-switch`에서는 switch 변형이 4100 µs(창 안의 keystroke가 46000에 editor의 burst 중에 와서 쌓였다가 50100에 처리되기 시작), boost 변형이 600 µs, 비율이 0.125예요. **score에 weight로 들어가지 않고 옆에 보고만 해요.**
 
 fixture `mock-switch`(`harness/tools/tests/fixtures/mock-switch/worked.md`)가 이걸 처음부터 끝까지 손으로 계산한 예예요. memo의 처음 정의는 창을 `W_single × H`의 **벽시계** 길이로 그었어요. 이 fixture로는 [40600, 52600]이라, hog의 하강(49100)은 덮지만 editor의 하강(53100)은 못 덮어요. 창 안에서 다른 task가 의자를 쓰면 hog의 하강이 그만큼 늦어지기 때문이에요. 그래서 창을 위처럼 hog가 실제로 받은 CPU로 재도록 고쳤고(memo 7절), 지금은 창이 53100에 닫혀 둘 다 덮어요. 정의가 현실과 맞는지 감시하는 도구가 `harness/tools/check_mlfq_levels.py`예요: simulator가 `x_mlfq_level`(demotion/boost마다 한 줄)을 내면, harness는 `x_` 규칙대로 무시하지만 이 도구는 읽어서 "각 switch의 창이 hog들의 마지막 demotion을 덮었나"를 보고해요. 체계적으로 못 덮으면 그게 정의를 다시 고치거나 closed set에 field를 추가하자고 제안할 근거예요.
 
@@ -688,12 +688,21 @@ entity=writer, metric=input_latency, t=15000, value=3000, censored=0
 
 aggregate(`censored_count` 포함)는 14.1에 있어요.
 
-### 7.12 한 줄 요약표
+### 7.12 `timer_latency` — 앱 자신의 timer wake 하나가 처리되기 시작할 때까지 (2026-10-30에 추가)
+
+keystroke stream이 없는 앱(Kdenlive, GIMP, `c7-mail`의 mailer)의 반응은 그 앱 자신의 timer wake로 재요. 측정된 program의 timer component가 run file에서 그 task의 timer channel로 오는 wake event가 되고(9.5), simulator는 keystroke처럼 그 wake를 큐에 쌓아요. 그래서 7.11과 같은 일이 생겨요. 앱이 밀려 있으면 `ready_wait`는 쌓인 wake를 대기 0으로 읽어요.
+
+**규칙:** 7.11의 규칙을 timer channel에 그대로 써요. run file의 timer wake event 하나마다 그 target task에 row 하나, `t`는 wake 시각. task의 k번째 timer `ready(cause=wake)` line이 k번째 timer wake가 완료한 `WAIT`이고, `value`는 그 처리의 시작에서 wake 시각을 뺀 것이에요. 끝내 처리되지 못한 timer wake는 task의 끝과 `T_end` 중 이른 쪽까지의 하한으로 `censored=1`이에요. 다시 지은 판정 파일 가운데 이 term을 가진 일곱 개를 `fixed`로 돌리면, timer channel의 `ready_wait` P99는 여섯 파일에서 0이고 wake부터 처리 시작까지의 P99는 0.6초에서 46.1초예요(`harness/CHANGELOG.md`, 2026-10-30).
+
+aggregate는 `input_latency`와 같고 `over_threshold`만 없어요. `T_interaction`은 keystroke의 임계값이니까요(14.1).
+
+### 7.13 한 줄 요약표
 
 | metric | 한국어로 | entity | 몇 row | trace의 어디서 | run file에서 |
 |---|---|---|---|---|---|
 | `ready_wait` | 줄 선 시간 | task | `ready`마다 | `ready` → 다음 `run_start` | — |
 | `input_latency` | keystroke가 처리되기 시작할 때까지 (처리 못 한 것은 하한, `censored=1`) | task | keystroke마다 | k번째 input `ready` line의 처리 시작; task의 끝 | input wake event |
+| `timer_latency` | 앱 자신의 timer wake가 처리되기 시작할 때까지 (처리 못 한 것은 하한, `censored=1`) | task | timer wake마다 | k번째 timer `ready` line의 처리 시작; task의 끝 | timer wake event |
 | `job` | 주기 작업 하나 걸린 시간 (건너뛴 tick은 값 없이 `skipped=1`) | chain head | tick마다 | `ready(timer_tick)` + run line + tail의 iteration | chain topology |
 | `cpu_delivered` | 앉은 시간 합 | task | task당 1 | 모든 `run_start`~`run_end`, `T_end`에서 clip | `T_end` |
 | `demand` | 원래 필요한 시간 | task | task당 1 | — | RUN 총합 |
@@ -1167,6 +1176,8 @@ primitive마다 고정된 aggregate 목록이 있어요.
 
 **`input_latency`**: count, `censored_count`(`censored=1`인 row 수), mean, P50, P95, P99, max, `over_threshold`. censored row는 하한 값 그대로 들어가요.
 
+**`timer_latency`**: `input_latency`와 같고 `over_threshold`만 없어요.
+
 `over_threshold`는 "interaction-latency 임계값을 넘은 row의 비율"이에요. 임계값은 상수 `T_interaction` 하나, 100,000 µs(0.1초)이고 design 값이에요. Miller(1968)가 keystroke에서 화면 echo까지 0.1–0.2초를 넘지 말라고 한 guideline 범위의 엄한 쪽 끝을 골랐고(`miller-fjcc68`), Deber et al.(2015)이 측정한 지연 감지 threshold로 교차 확인했어요(`deber-chi15`). 지각 threshold를 잰 값이 아니라 guideline에서 고른 값이에요. 이 상수는 keystroke마다의 `input_latency` row를 읽으려고 정한 값이에요. Miller의 지연처럼 키를 누른 순간부터 재니까요. 비율 자체는 harness가 어느 filter에서나 내요(metrics doc의 constants 절). "P95가 47 ms였다"보다 "keystroke의 8%가 임계값을 넘었다"가 파일 간 비교가 쉽고 사람에게 전달이 잘 돼요. 하지만 percentile도 같이 봐요. 비율은 "아슬아슬하게 맞춤"과 "여유 있게 맞춤"을 구분 못 하니까.
 
 **`job`**: count, miss rate (`value > period_us`인 비율), latency P50, P99. 건너뛴 tick(`skipped=1`)은 count와 miss rate에는 miss로 들어가고 latency percentile에서는 빠져요(값이 없으니까).
@@ -1253,7 +1264,7 @@ RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 jud
 
 채점되는 aggregate는 넷이에요: `input_latency`와 `ready_wait`는 **P99**, `job`은 **miss rate**, 그리고 batch job은 둘 중 하나 — 파일 안에서 끝나는 job은 **turnaround**, 어떤 row에서도 파일 안에 못 끝나는 job은 **progress**(`cpu_delivered / demand`). term은 row에 따라 움직이는 양을 읽어야 하니까요(9.14). 나머지 aggregate는 옆에 보고만 해요.
 
-interaction latency term은 keystroke stream이 있는 task면 `input_latency`예요(24개, 2026-10-30부터). video editor(Kdenlive)와 image editor(GIMP)의 14개 term은 `timer`예요. 두 앱의 측정된 driven phase는 mouse로 하는 조작이라 keystroke stream이 없고, 그래서 그 term은 앱 자신의 timer component wake의 대기 — keystroke echo가 아니라 앱의 반응성 — 를 읽어요. `T_interaction` threshold line(14.1)은 `input_latency`만 읽어요. 아래 표의 `(input)`은 `input_latency` term이에요.
+interaction latency term은 keystroke stream이 있는 task면 `input_latency`예요(24개, 2026-10-30부터). video editor(Kdenlive)와 image editor(GIMP)의 14개 term과 `c7-mail`의 mailer term은 `timer_latency`예요(2026-10-30부터). 두 앱의 측정된 driven phase는 mouse로 하는 조작이라 keystroke stream이 없고, 그래서 그 term은 앱 자신의 timer component wake가 온 순간부터 처리되기 시작할 때까지 — keystroke echo가 아니라 앱의 반응성 — 를 읽어요(7.12). `T_interaction` threshold line(14.1)은 `input_latency`만 읽어요. 아래 표의 `(input)`은 `input_latency` term, `(timer)`는 `timer_latency` term이에요.
 
 | 파일 | term (entity · aggregate · weight) |
 |---|---|
