@@ -20,8 +20,12 @@
 {"event":"ready","t":71000,"task":"editor","cause":"wake"}
 {"event":"run_end","t":74000,"task":"hog","reason":"preempt"}
 {"event":"run_start","t":74000,"task":"editor"}
-{"event":"run_end","t":77000,"task":"editor","reason":"block","blocked_on":"wait"}
-{"event":"run_start","t":77000,"task":"hog"}
+{"event":"run_end","t":76000,"task":"editor","reason":"preempt"}
+{"event":"run_start","t":76000,"task":"hog"}
+{"event":"run_end","t":84000,"task":"hog","reason":"preempt"}
+{"event":"run_start","t":84000,"task":"editor"}
+{"event":"run_end","t":85000,"task":"editor","reason":"block","blocked_on":"wait"}
+{"event":"run_start","t":85000,"task":"hog"}
 {"event":"task_end","t":120000,"task":"editor","reason":"depart"}
 {"event":"run_end","t":145000,"task":"hog","reason":"exit"}
 {"event":"task_end","t":145000,"task":"hog","reason":"exit"}
