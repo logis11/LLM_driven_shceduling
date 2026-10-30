@@ -7,7 +7,8 @@ time order, refusing the file with a line number on the first violation.
 
 `read_run_file` reads the run-file view of a workload (data-contracts §4) for
 the facts a trace does not carry (metrics doc §3): `T_end`, chain topology,
-per-task demand, and the channel of each task's WAITs in program order.
+per-task demand, the channel of each task's WAITs in program order and its
+program's first instruction, and the times of each task's input wake events.
 
 `read_config_schedule` reads the daemon's config schedule (data-contracts §7)
 for the one fact neither of the other two carries: the params of each applied
@@ -171,6 +172,7 @@ class TaskInfo:
     period_us: Optional[int]       # the TIMER period, when the program has one
     wake_targets: List[str] = field(default_factory=list)
     waits: list = field(default_factory=list, repr=False)   # channel kinds of its WAITs; a LOOP is (count, body)
+    first_op: Optional[str] = None  # its program's first instruction, read for a WAIT-first arrival (§11 item 5)
 
     def wait_channels(self) -> Iterator[str]:
         """The channel kind of each WAIT the task completes, in program order."""
@@ -183,7 +185,7 @@ class RunFile:
     t_end: int
     tasks: Dict[str, TaskInfo]
     chains: List[List[str]]        # each from a TIMER head to its tail
-    input_wakes: Dict[str, int]    # exogenous wake events on an input channel, per target task
+    input_wakes: Dict[str, List[int]]   # times of the exogenous wake events on an input channel, per target task, ascending
 
 
 def channel_kind(channel) -> str:
@@ -249,7 +251,8 @@ def _task_info(tid, name, program, arrive=None, depart=None):
     targets = [op["target"] for op in _walk(program) if op.get("op") == "WAKE"]
     return TaskInfo(id=tid, name=name, arrive=arrive, depart=depart,
                     demand=_run_total(program), period_us=period,
-                    wake_targets=targets, waits=_wait_plan(program))
+                    wake_targets=targets, waits=_wait_plan(program),
+                    first_op=program[0].get("op") if program else None)
 
 
 def read_run_file(path) -> RunFile:
@@ -258,7 +261,7 @@ def read_run_file(path) -> RunFile:
     if "events" not in doc:
         raise RunFileError("run file has no 'events'")
     tasks: Dict[str, TaskInfo] = {}
-    input_wakes: Dict[str, int] = {}
+    input_wakes: Dict[str, List[int]] = {}
     pinned = [0]
     for ev in doc["events"]:
         op = ev.get("op")
@@ -279,9 +282,11 @@ def read_run_file(path) -> RunFile:
         elif op == "wake":
             pinned.append(int(ev["t"]))
             if channel_kind(ev["channel"]) == "input":
-                input_wakes[ev["target"]] = input_wakes.get(ev["target"], 0) + 1
+                input_wakes.setdefault(ev["target"], []).append(int(ev["t"]))
         else:
             raise RunFileError(f"unknown event op {op!r}")
+    for times in input_wakes.values():
+        times.sort()
     chains = []
     for tid, info in tasks.items():
         if info.period_us is None:

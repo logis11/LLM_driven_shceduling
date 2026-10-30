@@ -13,9 +13,10 @@ so its row carries that WAIT's channel kind from the run file (`input`, `timer`,
 
 Alongside the rows it returns the guard messages the metrics doc names: more
 tail iterations than consumed head ticks per chain, the `deadline` cross-check on
-single-stage chains, stimulus counts — `input`-channel wake lines against the
-run file's input wake events — a wake line past the last WAIT of its task's
-program, and the schedule cross-check (an applied entry the schedule does not
+single-stage chains, the stimulus guard — more `input`-channel wake lines than
+the run file's input wake events, or a task ending blocked on an input WAIT
+while an input wake sent to it before then went unconsumed — a wake line past
+the last WAIT of its task's program, and the schedule cross-check (an applied entry the schedule does not
 carry, or carries with another algorithm; a switch into MLFQ with no schedule
 given).
 """
@@ -56,6 +57,7 @@ class _TaskState:
     iter_open: Optional[int] = None                             # start t of the open iteration
     iter_ends: List[int] = field(default_factory=list)          # completion t per iteration
     deadlines: List[dict] = field(default_factory=list)
+    blocked_wait: bool = False      # blocked on a WAIT: its arrival step or a run_end(block, wait), no line since
 
 
 @dataclass
@@ -118,7 +120,21 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
         st = state(ev["task"])
         if kind == "task_arrive":
             st.arrive_t = t
+            info = run.tasks.get(ev["task"])
+            st.blocked_wait = info is not None and info.first_op == "WAIT"
         elif kind == "ready":
+            if st.running_since is None and st.pending_ready and st.pending_ready[-1][0] < t:
+                # no run_start since the task's last ready lines, now past: no RUN lay
+                # between them and this one, so the task went on to its next blocking
+                # primitive at once. Each waited for nothing (§6.1), and an iteration
+                # opened there ended there (§6.2: a TIMER directly after the TIMER)
+                for (rt, cause, channel) in st.pending_ready:
+                    if rt <= t_end:
+                        rows.append(_ready_row(ev["task"], rt, 0, cause, channel))
+                st.pending_ready = []
+                if st.iter_open is not None:
+                    close_iteration(st, st.iter_open)
+            st.blocked_wait = False
             channel = None
             if ev["cause"] == "wake":
                 channel = next(st.waits, None)
@@ -142,6 +158,7 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                     rows.append(_ready_row(ev["task"], rt, t - rt, cause, channel))
             st.pending_ready = []
             st.running_since = t
+            st.blocked_wait = False
         elif kind == "run_end":
             if st.running_since is not None:
                 start = st.running_since
@@ -149,6 +166,7 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                     st.cpu += min(t, t_end) - start
                     st.occupancy.append((start, min(t, t_end)))
                 st.running_since = None
+            st.blocked_wait = ev["reason"] == "block" and ev.get("blocked_on") == "wait"
             if t <= t_end:
                 st.run_ends.append((t, ev["reason"]))
             if ev["reason"] == "preempt" and t <= t_end:
@@ -349,12 +367,26 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                                       f"slack={dl['slack_us']}) disagrees with the job row "
                                       f"(completion {completion}, value {completion - tick})")
 
-    # ---- stimulus guard, and wake lines the run file has no WAIT for
-    for tid, n in run.input_wakes.items():
-        seen = tasks[tid].input_ready if tid in tasks else 0
-        if seen != n:
-            guards.append(f"task {tid}: {seen} input ready(wake) line(s) for {n} input wake "
-                          "event(s) in the run file")
+    # ---- stimulus guard (§8), and wake lines the run file has no WAIT for. A task that
+    # ends with input it has not reached, behind its program, is no guard; one that ends
+    # blocked on an input WAIT while an input wake sent to it before then went unconsumed
+    # lost that wake
+    for tid, times in run.input_wakes.items():
+        st = tasks.get(tid)
+        if st is None:
+            guards.append(f"task {tid}: {len(times)} input wake event(s) in the run file and "
+                          "no line in the trace")
+            continue
+        if st.input_ready > len(times):
+            guards.append(f"task {tid}: {st.input_ready} input ready(wake) line(s) for "
+                          f"{len(times)} input wake event(s) in the run file")
+        if st.blocked_wait and st.running_since is None and not st.pending_ready:
+            end = min(st.end[0], t_end) if st.end is not None else t_end
+            sent = bisect.bisect_left(times, end)
+            if sent > st.input_ready and next(st.waits, None) == "input":
+                guards.append(f"task {tid}: blocked on an input WAIT at its end (t={end}) with "
+                              f"{sent - st.input_ready} input wake event(s) sent before then "
+                              "unconsumed")
     for tid in order:
         extra = tasks[tid].unmatched
         if extra:

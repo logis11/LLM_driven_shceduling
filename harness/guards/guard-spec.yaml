@@ -76,9 +76,11 @@
 #
 # tick_count — structural. The primitives' own consistency checks (metrics doc
 #   §6.2 guard: a chain tail completes no more iterations inside the window than
-#   its head consumed ticks there; the `deadline` cross-check; the stimulus count
-#   against the run file's wake events; config_applied lines against the
-#   schedule): their messages, returned by the records build, are this guard's
+#   its head consumed ticks there; the `deadline` cross-check; the stimulus check,
+#   which fails a task with more input-channel wake lines than the run file's input
+#   wake events or one ending blocked on an input WAIT while an input wake sent to
+#   it before its end went unconsumed, a lost wake — a task ending with input it
+#   has not reached is no message; config_applied lines against the schedule): their messages, returned by the records build, are this guard's
 #   input. Any message is a fail. A run whose messages were not recorded fails:
 #   the check was not run. A tail short of the head's count is not a message: an
 #   iteration still running at T_end is not completed within the window (metrics
@@ -120,9 +122,10 @@
 # provenance-share grounding and P1 flag, the grounding-kind labels, the pair guard's reading of
 # configuration sequences, the retired `fixed_identical` flag, and the two name-table conditions
 # in place of `whitelist` (9.12 D6). 1.2 (2026-10-17, sub-task 9.16) reads the chain check of
-# `tick_count` by the window rule (9.16 D3). Pinned anew by the RQ0 gate spec; a change after it
-# is a new version and a changelog entry.
-version: "1.2"
+# `tick_count` by the window rule (9.16 D3). 1.3 (2026-10-30) reads the stimulus check of
+# `tick_count` as a lost wake, not a count (simulator/memo/memo_261023.md Part H2). Pinned anew by
+# the RQ0 gate spec; a change after it is a new version and a changelog entry.
+version: "1.3"
 
 guards:
   - id: provenance_share
@@ -189,7 +192,9 @@ guards:
     applies_to: all
     grounding: >
       Structural: the primitives' consistency messages (metrics doc §6.2 guard, the
-      stimulus count, the deadline cross-check, config_applied against the schedule)
+      stimulus check of metrics doc §8 — more input wake lines than input wake events,
+      or a task ending blocked on an input WAIT with an input wake sent to it
+      unconsumed — the deadline cross-check, config_applied against the schedule)
       returned by the records build; any message fails the run. The chain check fails
       only on more tail completions than consumed head ticks inside the window: an
       iteration still running at T_end is not completed (metrics doc §4; 9.16 D3), so

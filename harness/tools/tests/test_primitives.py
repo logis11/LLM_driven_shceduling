@@ -7,13 +7,16 @@ from harness.primitives import compute
 from harness.reader import ConfigSchedule, RunFile, ScheduleEntry, TaskInfo
 
 
-def task(id, name="x", arrive=0, depart=None, demand=None, period=None, targets=(), waits=()):
+def task(id, name="x", arrive=0, depart=None, demand=None, period=None, targets=(), waits=(),
+         first_op=None):
     """`waits`: the channel kinds of the task's WAITs in program order."""
     return TaskInfo(id=id, name=name, arrive=arrive, depart=depart, demand=demand,
-                    period_us=period, wake_targets=list(targets), waits=list(waits))
+                    period_us=period, wake_targets=list(targets), waits=list(waits),
+                    first_op=first_op)
 
 
 def runfile(t_end, tasks, chains=(), input_wakes=None):
+    """`input_wakes`: per task, the times of its input wake events, ascending."""
     return RunFile(workload_id="w", t_end=t_end,
                    tasks={t.id: t for t in tasks}, chains=[list(c) for c in chains],
                    input_wakes=input_wakes or {})
@@ -211,8 +214,10 @@ def test_config_interval_ignores_entries_at_or_after_t_end():
                                                         (40, 60, "held", "EDF", 1)]
 
 
-def test_stimulus_count_guard_against_run_file_wakes():
-    run = runfile(100, [task("e", waits=["input", "input"])], input_wakes={"e": 2})
+def test_stimulus_guard_a_task_blocked_on_input_with_a_wake_sent_lost_it():
+    """A task that ends blocked on an input WAIT while an input wake sent to it before
+    then went unconsumed lost that wake (metrics doc §8)."""
+    run = runfile(100, [task("e", waits=["input", "input"])], input_wakes={"e": [10, 50]})
     events = [
         {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
         {"event": "ready", "t": 0, "task": "e", "cause": "arrive"},
@@ -221,10 +226,53 @@ def test_stimulus_count_guard_against_run_file_wakes():
         {"event": "ready", "t": 10, "task": "e", "cause": "wake"},
         {"event": "run_start", "t": 10, "task": "e"},
         {"event": "run_end", "t": 12, "task": "e", "reason": "block", "blocked_on": "wait"},
-        # the second keystroke never produced a ready line
+        # blocked on its second input WAIT from 12; the keystroke at 50 never produced a ready line
     ]
     r = compute(run, events)
-    assert any(g.startswith("task e:") and "input" in g for g in r.guards)
+    assert r.guards == ["task e: blocked on an input WAIT at its end (t=100) with 1 input wake "
+                        "event(s) sent before then unconsumed"]
+
+
+def test_stimulus_guard_a_task_behind_its_program_at_its_end_is_no_guard():
+    """A task that ends with keystrokes it has not reached — still running the RUN before its
+    next input WAIT, or ready behind another task — is no guard: the shortfall is the
+    schedule's, not a lost wake."""
+    run = runfile(100, [task("e", depart=100, waits=["input", "input", "input"])],
+                  input_wakes={"e": [10, 20, 30]})
+    running = [
+        {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
+        {"event": "ready", "t": 0, "task": "e", "cause": "arrive"},
+        {"event": "run_start", "t": 0, "task": "e"},
+        {"event": "run_end", "t": 5, "task": "e", "reason": "block", "blocked_on": "wait"},
+        {"event": "ready", "t": 10, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 10, "task": "e"},
+        {"event": "run_end", "t": 100, "task": "e", "reason": "depart"},     # its RUN outlasts the segment
+        {"event": "task_end", "t": 100, "task": "e", "reason": "depart"},
+    ]
+    assert compute(run, running).guards == []
+    ready = running[:4] + [
+        {"event": "ready", "t": 10, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 10, "task": "e"},
+        {"event": "run_end", "t": 40, "task": "e", "reason": "preempt"},     # ready from 40 to its depart
+        {"event": "task_end", "t": 100, "task": "e", "reason": "depart"},
+    ]
+    assert compute(run, ready).guards == []
+
+
+def test_stimulus_guard_more_input_lines_than_wakes():
+    run = runfile(1000, [task("e", waits=["input", "input"])], input_wakes={"e": [100]})
+    guards = compute(run, _wake_events((100, 110), (200, 210))).guards
+    assert guards == ["task e: 2 input ready(wake) line(s) for 1 input wake event(s) in the run file"]
+
+
+def test_stimulus_guard_a_wait_first_task_never_woken():
+    """A task whose first instruction is a WAIT blocks in its arrival step (metrics doc §11
+    item 5); still blocked at its end with a keystroke sent, it lost it."""
+    run = runfile(100, [task("e", waits=["input"], first_op="WAIT")], input_wakes={"e": [10]})
+    events = [{"event": "task_arrive", "t": 0, "task": "e", "source": "file"}]
+    assert compute(run, events).guards == [
+        "task e: blocked on an input WAIT at its end (t=100) with 1 input wake event(s) sent "
+        "before then unconsumed"]
 
 
 def _wake_events(*wakes):
@@ -257,7 +305,7 @@ def test_wake_rows_carry_the_channel_of_the_wait_they_complete():
     row carries that WAIT's channel kind — a keystroke `input`, a measured timer
     wake `timer` — whether the line waited or fell inside an occupancy."""
     run = runfile(1000, [task("e", waits=["input", "timer", "timer", "input"])],
-                  input_wakes={"e": 2})
+                  input_wakes={"e": [100, 400]})
     events = _wake_events((100, 130), (135, None), (300, 320), (400, 450))
     r = compute(run, events)
     assert [(x["t"], x["value"], x["cause"], x.get("channel"))
@@ -276,18 +324,18 @@ def test_stimulus_guard_counts_the_input_channel_only():
     keystroke among two timer wakes is no guard, and a keystroke lost among
     timer wakes still is."""
     events = _wake_events((100, 110), (200, 210), (300, 310))
-    run = runfile(1000, [task("e", waits=["timer", "input", "timer"])], input_wakes={"e": 1})
+    run = runfile(1000, [task("e", waits=["timer", "input", "timer"])], input_wakes={"e": [200]})
     assert compute(run, events).guards == []
     run = runfile(1000, [task("e", waits=["timer", "input", "timer", "input"])],
-                  input_wakes={"e": 2})
+                  input_wakes={"e": [200, 400]})
     guards = compute(run, events).guards
-    assert len(guards) == 1 and guards[0].startswith("task e: 1 ") and "input" in guards[0]
+    assert len(guards) == 1 and "blocked on an input WAIT" in guards[0] and "with 1 input" in guards[0]
 
 
 def test_wake_line_past_the_programs_last_wait_is_a_guard():
     """A ready(wake) line with no WAIT left to complete has no channel: the trace
     and the run file disagree, and the row is written without one."""
-    run = runfile(1000, [task("e", waits=["input"])], input_wakes={"e": 1})
+    run = runfile(1000, [task("e", waits=["input"])], input_wakes={"e": [100]})
     r = compute(run, _wake_events((100, 110), (200, 210)))
     assert [(x["t"], x.get("channel")) for x in rows_of(r, "ready_wait", "e")] == [
         (0, None), (100, "input"), (200, None)]
@@ -552,6 +600,34 @@ def test_t0_is_the_first_timer_tick_line_at_the_arrival_not_the_first_dispatch()
     assert [(j["t"], j["value"]) for j in rows_of(r, "job", "v")] == [(0, 50), (100, 10)]
     assert [(w["cause"], w["value"]) for w in rows_of(r, "ready_wait", "v") if w["t"] == 0] == \
         [("arrive", 40), ("timer_tick", 40)]                                      # both wait for the dispatch
+    assert r.guards == []
+
+
+def test_an_iteration_with_no_run_ends_when_its_tick_is_consumed():
+    """A TIMER directly after the TIMER: the task consumes the tick and reaches its next
+    TIMER at once, with no occupancy. The job completes at the consumption, and its ready
+    line, followed by the next one with no run_start between, is a zero wait (metrics doc
+    §6.1, §6.2) — the simulator's deadline line at that instant agrees."""
+    run = runfile(1000, [task("v", period=100)], chains=[["v"]])
+    events = [
+        {"event": "task_arrive", "t": 0, "task": "v", "source": "file"},
+        {"event": "deadline", "t": 0, "task": "v", "due": 100, "met": True, "slack_us": 100},
+        {"event": "ready", "t": 0, "task": "v", "cause": "timer_tick"},           # job 0: no work
+        {"event": "ready", "t": 100, "task": "v", "cause": "timer_tick"},         # job 1
+        {"event": "run_start", "t": 130, "task": "v"},
+        {"event": "deadline", "t": 140, "task": "v", "due": 200, "met": True, "slack_us": 60},
+        {"event": "run_end", "t": 140, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "ready", "t": 200, "task": "v", "cause": "timer_tick"},         # job 2: no work
+        {"event": "deadline", "t": 200, "task": "v", "due": 300, "met": True, "slack_us": 100},
+        {"event": "ready", "t": 300, "task": "v", "cause": "timer_tick"},         # job 3
+        {"event": "run_start", "t": 300, "task": "v"},
+        {"event": "deadline", "t": 310, "task": "v", "due": 400, "met": True, "slack_us": 90},
+        {"event": "run_end", "t": 310, "task": "v", "reason": "block", "blocked_on": "timer"},
+    ]
+    r = compute(run, events)
+    assert [(j["t"], j["value"]) for j in rows_of(r, "job", "v")] == [(0, 0), (100, 40), (200, 0), (300, 10)]
+    assert [(w["t"], w["value"]) for w in rows_of(r, "ready_wait", "v")] == [
+        (0, 0), (100, 30), (200, 0), (300, 0)]
     assert r.guards == []
 
 

@@ -167,9 +167,9 @@ def test_demand_is_finite_run_total_or_absent(fixture_dir):
     assert p1a.tasks["hog"].demand == 90000
 
 
-def test_wake_events_are_counted_per_target(fixture_dir):
+def test_input_wake_times_are_read_per_target(fixture_dir):
     run = read_run_file(fixture_dir("mock-p1a") / "run.json")
-    assert run.input_wakes == {"editor": 4}
+    assert run.input_wakes == {"editor": [8000, 30000, 54500, 71000]}
 
 
 def test_input_wakes_count_the_input_channel_only(tmp_path):
@@ -188,7 +188,9 @@ def test_input_wakes_count_the_input_channel_only(tmp_path):
         {"op": "wake", "t": 40, "channel": "input:e", "target": "e"},
         {"op": "wake", "t": 50, "channel": "timer:d", "target": "d"},
     ]}))
-    assert read_run_file(p).input_wakes == {"e": 2}
+    run = read_run_file(p)
+    assert run.input_wakes == {"e": [10, 40]}
+    assert run.tasks["e"].first_op == "WAIT"
 
 
 def test_wait_channels_follow_program_order_through_loops(tmp_path):
