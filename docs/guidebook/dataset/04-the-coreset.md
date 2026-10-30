@@ -507,7 +507,8 @@ C3(transition arc 그룹)와 C4(distractor injection 그룹)와 C5(familiarity l
 파일마다 무엇을 채점하는지는 scoring spec(`harness/scoring/scoring-spec.yaml`)이 정합니다. 2026-10-14 tree에서 이 파일은 core set 51개 중 49개 파일에 term 75개를 둡니다(`c1-idle`과 `c7-idle`은 성능 지표가 없어서 항목이 없습니다). 뒤의 그룹 장마다 그 그룹의 term을 한 문단으로 적으므로, 여기서 말을 정리해 둡니다.
 
 - **term** — 채점 항목 하나입니다. 어느 task(entity)의 어떤 지표(metric)를 어떤 집계(aggregate)로 볼지, 그리고 가중치(weight)를 적습니다. 파일의 점수는 term들의 정규화된 몫 `(fixed − condition)/(fixed − oracle)`의 가중합입니다. 여기서 `fixed`는 recognition 없이 boot 기본 설정(MLFQ)만 쓰는 조건입니다.
-- **`ready_wait` P99** — task가 깨어나 실행 가능해진 뒤 실제로 CPU를 받기까지 기다린 시간의 99번째 백분위입니다. 웹 서비스의 tail latency와 같은 생각입니다. `channel: input`이면 keystroke로 깨어난 경우만, `channel: timer`면 application 스스로의 timer wake만 봅니다.
+- **`input_latency` P99** — keystroke 하나가 온 순간부터 task가 그 keystroke를 처리하기 시작할 때까지 걸린 시간의 99번째 백분위입니다. keystroke 흐름이 있는 task의 term이고, 파일 안에서 끝내 처리되지 못한 keystroke는 task의 끝(또는 파일 끝)까지의 시간을 하한으로 넣습니다. 뒤의 장에서 "P99(input)"이 이것입니다.
+- **`ready_wait` P99** — task가 깨어나 실행 가능해진 뒤 실제로 CPU를 받기까지 기다린 시간의 99번째 백분위입니다. 웹 서비스의 tail latency와 같은 생각입니다. `channel: timer`면 application 스스로의 timer wake만 봅니다.
 - **`job` miss rate** — 주기적으로 일하는 task(영상 프레임, 오디오 프레임, 게임 frame chain)가 마감을 놓친 비율입니다.
 - **turnaround** — batch job이 도착해서 끝나기까지 걸린 시간입니다. 파일 안에서 job이 끝날 때만 씁니다.
 - **progress(`cpu_delivered`)** — 파일 안에서 job이 받은 CPU 양입니다. job이 파일 안에서 끝나지 않을 때 씁니다.
@@ -552,7 +553,7 @@ C1(calibration 그룹)에는 두 번째 역할도 있습니다. C1의 task set 1
 
 ## 4.4 C1의 채점과 RQ0에서의 역할
 
-scoring spec의 C1(calibration 그룹) term은 mode 부류에 따라 정해진 틀을 따릅니다(Phase 7 spec decision 9). interactive-only mode(`browsing`, `office`, `mail`, `dev`, `photo`, `video-edit`)는 foreground task의 `ready_wait` P99 하나, weight 1.0입니다. keystroke 흐름이 있는 편집기(`code`, `soffice.bin`, Chrome, Thunderbird)는 `channel: input`, keystroke 흐름이 없는 GIMP와 Kdenlive는 `channel: timer`입니다. periodic mode(`media`, `meeting`)는 소비자 task의 `job` miss rate이고, `media`는 음악 1.0, 영상 0.5의 가중치입니다. `gaming`은 chain head(`game.chain.1`)의 `job` miss rate입니다. batch-beside-editor mode(`compile`, `ml-train`, `render`, `transcode`, `indexing`, `backup`)는 편집기의 P99에 job의 turnaround를 더합니다. 가중치는 compile 1.0, ml-train·render·transcode 0.5, indexing 1.0, backup 0.25입니다. `c1-idle`은 term이 없습니다.
+scoring spec의 C1(calibration 그룹) term은 mode 부류에 따라 정해진 틀을 따릅니다(Phase 7 spec decision 9). interactive-only mode(`browsing`, `office`, `mail`, `dev`, `photo`, `video-edit`)는 foreground task의 P99 하나, weight 1.0입니다. keystroke 흐름이 있는 편집기(`code`, `soffice.bin`, Chrome, Thunderbird)는 `input_latency`, keystroke 흐름이 없는 GIMP와 Kdenlive는 `channel: timer`입니다. periodic mode(`media`, `meeting`)는 소비자 task의 `job` miss rate이고, `media`는 음악 1.0, 영상 0.5의 가중치입니다. `gaming`은 chain head(`game.chain.1`)의 `job` miss rate입니다. batch-beside-editor mode(`compile`, `ml-train`, `render`, `transcode`, `indexing`, `backup`)는 편집기의 P99에 job의 turnaround를 더합니다. 가중치는 compile 1.0, ml-train·render·transcode 0.5, indexing 1.0, backup 0.25입니다. `c1-idle`은 term이 없습니다.
 
 > **왜 이렇게 정했나.** scoring spec 주석은 batch 가중치를 "ml-train/render/transcode 0.5 from the C2 and C3 progress terms, backup 0.25 from c2-p3b"라고 적습니다. 새 base가 그 mode의 기존 instance가 이미 가진 가중치를 물려받아, 기존 `true` row의 상한이 하나도 바뀌지 않게 하려는 것입니다(Phase 7 archive decision 10). `c1-indexing`의 turnaround 1.0은 "a stated assumption — a user waiting on a reindex as c1-compile's user waits on a build"입니다.
 
@@ -984,7 +985,7 @@ input은 editor 2–97.435 s, focus는 editor 0–99.435 s. `meta.demand`는 적
 - 9.10 D80(P1(training run 대 indexer 쌍)의 segment 1은 두 파일 모두 index의 CPU 총량만큼이라는 결정, 2026-10-03). 이유: 예전의 120 s segment 1에서는 index가 약 110 s까지 끝나서, `c2-p1b`의 `false` label이 원치 않는 작업 없이 약 70 s를 버티게 됩니다. 쌍의 diff는 하나여야 하므로 두 파일의 segment 1 길이는 같아야 하고, 그 길이는 짧은 쪽 job(index, 39.435 s)이 정합니다.
 - 9.10 D86(P1(training run 대 indexer 쌍)의 segment 1은 index의 CPU 총량을 지키고 `c2-p1a`는 training 전체를 묶는다는 결정, 2026-10-03). changelog는 이 결정이 9.10 D17의 "no `total_work` describes part of a job"은 지키지만 "lengths follow the job"은 `c2-p1a`에서 지키지 않는다고 명시합니다. training 길이에 맞추면 `c2-p1b`의 `false`가 약 1,335 s 동안 원치 않는 작업 없이 서 있게 되기 때문입니다. 그래서 이 파일에는 끝난 training job이 없고, 9.14는 이 job에 turnaround 대신 progress term을 주었습니다.
 
-**채점.** 편집기 `ready_wait` P99(input, window 60–99.435 s, 1.0)와 training의 progress(0.5). RQ0 판정 파일이고, 민감도 variant가 일곱 개 붙습니다(venue 둘, seg1 둘, corner 둘, replay 하나; 11장). `c2-p2a`와 `c2-p2b`는 chain 둘이 더해져 여덟 개씩입니다.
+**채점.** 편집기 `input_latency` P99(window 60–99.435 s, 1.0)와 training의 progress(0.5). RQ0 판정 파일이고, 민감도 variant가 일곱 개 붙습니다(venue 둘, seg1 둘, corner 둘, replay 하나; 11장). `c2-p2a`와 `c2-p2b`는 chain 둘이 더해져 여덟 개씩입니다.
 
 ### `c2-p1b` — 로그인 때 저절로 돈 첫 index
 
@@ -1222,7 +1223,7 @@ mail segment가 tier 3인 이유는 grid의 규칙 때문입니다. `make`는 `d
 - 9.10 D15, D131: renderer 수 7 → 4.
 - 9.10 D168: compile과 mail segment에 S1(office), S2(web browsing)를 더함. writer와 Chrome이 계속 보이기 때문입니다.
 
-**채점.** browser, writer, mailer의 `ready_wait` P99(input, 각 1.0)와 build progress(0.5).
+**채점.** browser, writer, mailer의 `input_latency` P99(각 1.0)와 build progress(0.5).
 
 ## 6.5 `c3-evening` — 저녁
 
@@ -2278,6 +2279,7 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 | `layer1_exclusions` | Layer 1에서 빠지는 파일 여덟(pre-committed miss annotation에서 유도). 채점자가 빼는 것은 annotation이 붙은 segment의 query point |
 | headroom | 한 workload에서 얻을 수 있는 개선의 여지 |
 | term | 채점 항목 하나. entity, metric, aggregate, weight |
+| `input_latency` P99 | keystroke가 온 순간부터 그 처리가 시작되기까지 걸린 시간의 99번째 백분위 |
 | `ready_wait` P99 | 깨어난 task가 CPU를 받기까지 기다린 시간의 99번째 백분위 |
 | `job` miss rate | 주기 task가 마감을 놓친 비율 |
 | turnaround / progress | batch job이 끝나기까지 걸린 시간 / 파일 안에서 받은 CPU |

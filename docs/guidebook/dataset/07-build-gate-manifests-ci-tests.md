@@ -1,6 +1,6 @@
 # 7권 · Build gate, manifest, CI, tests: 같은 바이트를 보장하는 장치
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-21
+> Status: draft · Created 2026-10-14 · Updated 2026-10-30
 
 **아무도 commit하지 않는 `build/`가 어떻게 모두에게 같은 파일임이 보장되고, 무엇이 그것을 지키나.**
 
@@ -546,12 +546,12 @@ bless의 절차를 순서대로 쓰면 이렇습니다.
 
 ## 3.3 Pin: 실험 사양이 manifest를 고정하는 것
 
-`pin`은 "다른 파일이 이 파일의 SHA-256을 적어 두고, 실행 전에 그 값이 지금의 바이트와 같은지 확인하는 것"을 뜻합니다. dataset 바깥에서 dataset을 pin하는 파일은 지금 하나입니다. RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)입니다. 이 파일은 RQ0 실험의 사전 등록을 harness가 실행할 수 있는 데이터로 적은 것으로, 조건, seed 수, 판정 파일 목록, 판정 기준, 보고 항목과 함께 맨 아래에 `pins` block을 가집니다. 2026-10-17의 block은 이렇습니다(9.16의 2026-10-17 re-pin: scoring spec, guard spec, driver table은 harness 항목, dataset과 variants는 data rebuild 항목).
+`pin`은 "다른 파일이 이 파일의 SHA-256을 적어 두고, 실행 전에 그 값이 지금의 바이트와 같은지 확인하는 것"을 뜻합니다. dataset 바깥에서 dataset을 pin하는 파일은 지금 하나입니다. RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)입니다. 이 파일은 RQ0 실험의 사전 등록을 harness가 실행할 수 있는 데이터로 적은 것으로, 조건, seed 수, 판정 파일 목록, 판정 기준, 보고 항목과 함께 맨 아래에 `pins` block을 가집니다. 지금의 block은 이렇습니다(scoring spec과 guard spec은 2026-10-30의 harness 항목, driver table은 9.16의 2026-10-17 harness 항목, dataset과 variants는 9.16의 2026-10-17 data rebuild 항목의 re-pin).
 
 ```yaml
 pins:
-  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: f7d1df4cfd974951ae9fad035e0a494108c49f05d1d0e0f9943990f02fc182ff}
-  guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.2", sha256: c2dad06fb02466c0fb4bb3036d5899971ec3bfe9417d2026dc52a9a8553408ca}
+  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 1c738540e3c592d231c2a4071df7cb7fc11a4c9ab9f5c623421e5e90242949e2}
+  guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.3", sha256: 7029308eb8eae4068dfd8114daf089889320daa290267827ae12ed74f0b3a482}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: e1155a72d7458a40778b19c5a9a18062de8efeb8b1663340435da3e9b800f617}
   dataset:      {path: dataset/build.manifest.json, sha256: 8e1eb7530b32378e3c5c76e449bf367b4962b9138b62dc7404c6df4b8d525837}
   variants:
@@ -653,7 +653,7 @@ RQ0 gate spec의 dataset과 variants pin이 지금까지 어떻게 움직였는�
 | 2026-10-17 | 9.15 (인지오의 답 세 가지를 묶은 두 번째 rebuild) | `0f0af422…` | `cdc14319…` | library에서 측정 entry 열넷의 trace 문장과 `video-editor`의 idle probe 문장. core artifact와 variant는 `meta`의 library hash에서만 움직임 |
 | 2026-10-17 | 9.16 (출구 감사가 찾은 data 수정의 rebuild) | `8e1eb753…` | `8e2948b1…` | library의 문장과 꼬리표, compile timeline의 `parallelism_cap` 꼬리표 `design` → `convention`, `c2-p3a`·`c3-creation`·`c3-evening`·`c6-dual`의 주석. 모든 artifact가 `meta`에서만 움직임(library hash, 그리고 timeline 바이트가 바뀐 core 8개와 variant 12개는 `derived_from`도). 그 앞의 harness 항목에서 scoring spec(`f7d1df4c…`), guard spec 1.2(`c2dad06f…`), driver table(`e1155a72…`) re-pin |
 
-이 기간에 scoring spec pin은 `5d8a3243…`(9.14) → `1f7e9e30…`(9.18, 주석만) → `9cd9a155…`(9.20) → `0ff71b1f…`(9.21, 머리글의 규칙 문장) → `2ad757b6…`(9.23 D10, 머리글 문장) → `f7d1df4c…`(9.16, `c2-p3b`의 backup을 turnaround로 채점하는 term과 `c7-meeting`의 이유 문장)으로 움직였습니다. guard spec은 9.14의 1.1(`24ccb875…`)에서 9.16의 1.2(`c2dad06f…`, `tick_count`의 chain 검사를 window 규칙으로)가 되었습니다. driver table은 9.14의 `6e271dd0…`에서 9.15의 2026-10-16 re-pin으로 `0fba4b3c…`가 되었고(compile row의 LOTTERY 설명 문장, 값은 그대로), 9.16에서 `e1155a72…`가 되었습니다(문장만, 값은 그대로).
+이 기간에 scoring spec pin은 `5d8a3243…`(9.14) → `1f7e9e30…`(9.18, 주석만) → `9cd9a155…`(9.20) → `0ff71b1f…`(9.21, 머리글의 규칙 문장) → `2ad757b6…`(9.23 D10, 머리글 문장) → `f7d1df4c…`(9.16, `c2-p3b`의 backup을 turnaround로 채점하는 term과 `c7-meeting`의 이유 문장)으로 움직였습니다. guard spec은 9.14의 1.1(`24ccb875…`)에서 9.16의 1.2(`c2dad06f…`, `tick_count`의 chain 검사를 window 규칙으로)가 되었습니다. driver table은 9.14의 `6e271dd0…`에서 9.15의 2026-10-16 re-pin으로 `0fba4b3c…`가 되었고(compile row의 LOTTERY 설명 문장, 값은 그대로), 9.16에서 `e1155a72…`가 되었습니다(문장만, 값은 그대로). 그 뒤 2026-10-30에 scoring spec은 `1c738540…`(키 입력 term 24개가 `input_latency`를 읽음), guard spec은 1.3(`7029308e…`, `tick_count`의 stimulus 검사가 잃어버린 wake를 읽음)이 되었고, dataset과 variants pin은 그대로입니다.
 
 generated manifest의 hash도 같은 방식으로 기록되어 있습니다(각 sub-task changelog와 `harness/CHANGELOG.md`). 어떤 실험도 이것을 pin하지 않습니다. sub-task마다의 이 값들은 9.16(최종 audit)의 TODO 줄에 재현 대상으로 넘겨졌고, 9.16은 중간 pin을 이름 짓는 이 항목들을 집에서 한 번 돌린 dataset gate와 최종 build의 CI run으로 닫았습니다. 각 중간 pin은 최종 상태의 pin으로 대체되었습니다(9.16 spec decision 3; 9.16 기록 `_dev/research/jioh/task-9.16-exit-audits/handed/checks.md`의 마지막 표).
 

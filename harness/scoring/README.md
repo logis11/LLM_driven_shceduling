@@ -9,11 +9,11 @@
 ```yaml
 c1-compile:
   terms:
-    - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
-    - {entity: build,  metric: turnaround,              aggregate: turnaround, direction: lower, weight: 1.0}
+    - {entity: editor, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
+    - {entity: build,  metric: turnaround,    aggregate: turnaround, direction: lower, weight: 1.0}
 ```
 
-The editor's wake latency at the 99th percentile, lower is better, weight one; the build's makespan, lower is better, weight one. A `window` on a term restricts it to part of the file, which the C2 pairs use to score only the segment where the two files differ. The patterns by mode class, and the weights' reasoning, are in the file's own header comments and in the Phase 6 and Phase 7 specs under `_dev/docs/spec/jioh/`.
+The editor's keystroke latency at the 99th percentile — each keystroke from its wake event to the start of its service — lower is better, weight one; the build's makespan, lower is better, weight one. A `window` on a term restricts it to part of the file, which the C2 pairs use to score only the segment where the two files differ. The patterns by mode class, and the weights' reasoning, are in the file's own header comments and in the Phase 6 and Phase 7 specs under `_dev/docs/spec/jioh/`.
 
 A derived file declares `base:` and repeats its base's terms verbatim; a counterpart whose label flips the base's `background_wanted` to false drops the batch terms, because unwanted work carries no term.
 

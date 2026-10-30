@@ -155,7 +155,7 @@ task가 blocked에서 ready로 바뀐 순간. `cause`는 왜 깨어났나.
 | `timer_tick` | `TIMER`의 tick이 와서 |
 | `fork_slot` | `FORK`가 slot이 없어 막혀 있다가 자리가 나서 |
 
-이 line이 따로 있는 이유가 중요해요. "keystroke가 온 시각"은 run file에 적혀 있지만, "editor가 그 keystroke를 받을 수 있게 된 시각"은 다를 수 있어요. editor가 이전 burst를 아직 처리 중이면 keystroke는 큐에 쌓여요. harness가 그 순간을 simulator의 semantics를 다시 구현해서 알아내면 안 되니까, simulator가 직접 적어주는 거예요.
+이 line이 따로 있는 이유가 중요해요. "keystroke가 온 시각"은 run file에 적혀 있지만, "editor가 그 keystroke를 받을 수 있게 된 시각"은 다를 수 있어요. editor가 이전 burst를 아직 처리 중이면 keystroke는 큐에 쌓여요. harness가 그 순간을 simulator의 semantics를 다시 구현해서 알아내면 안 되니까, simulator가 직접 적어주는 거예요. keystroke 반응은 두 시각을 다 써요: run file의 keystroke 시각부터, trace가 적은 그 keystroke의 처리 시작까지(7.11의 `input_latency`).
 
 Phase 5에서 인경민에게 요청한 규칙 하나가 이 line에 걸려 있어요. **blocking primitive(`WAIT`, `TIMER`, `SLEEP`, fork-slot 대기)가 완료될 때마다 `ready` line을 내라. 실제로는 block되지 않고 즉시 완료됐더라도.** 즉 `ready`는 "task가 runnable해졌다"가 아니라 "blocking primitive 하나가 완료됐다"는 뜻이에요. 왜 필요한지는 11장과 13장에서 나와요.
 
@@ -252,7 +252,7 @@ run file 쪽에서는 editor(`code`)의 depart가 99435000이라 `T_end`도 9943
 
 ### 4.4 channel — 깨운 게 keystroke였나
 
-측정된 program은 keystroke만 기다리지 않아요. `WAIT`마다 channel이 있고(`input:editor`, `timer:editor`, `chain:game.chain.2`, `job:build.j1.gcc`, `children:build`), harness는 각 task의 `WAIT`를 program 순서대로 읽어 그 channel의 **종류**(colon 앞의 이름: `input`, `timer`, `chain`, `job`, `children`)를 알아둬요. trace의 `ready(cause=wake)` line은 어느 channel이었는지 안 적으니, 그 line이 완료한 `WAIT`의 channel 종류를 run file에서 읽어 row의 `channel` column에 실어요(6.2). keystroke는 `input`이고, 측정된 timer wake, chain stage의 hand-off, compile job member끼리의 hand-off, orchestrator가 자식을 기다리는 것은 각각 `timer`, `chain`, `job`, `children`이에요. 또 task마다 `input` channel의 wake event 수(keystroke 수)를 세어 trace의 keystroke row 수와 맞춰봐요(guard 입력).
+측정된 program은 keystroke만 기다리지 않아요. `WAIT`마다 channel이 있고(`input:editor`, `timer:editor`, `chain:game.chain.2`, `job:build.j1.gcc`, `children:build`), harness는 각 task의 `WAIT`를 program 순서대로 읽어 그 channel의 **종류**(colon 앞의 이름: `input`, `timer`, `chain`, `job`, `children`)를 알아둬요. trace의 `ready(cause=wake)` line은 어느 channel이었는지 안 적으니, 그 line이 완료한 `WAIT`의 channel 종류를 run file에서 읽어 row의 `channel` column에 실어요(6.2). keystroke는 `input`이고, 측정된 timer wake, chain stage의 hand-off, compile job member끼리의 hand-off, orchestrator가 자식을 기다리는 것은 각각 `timer`, `chain`, `job`, `children`이에요. `input` channel의 wake event 하나가 keystroke 하나이고, 그 시각이 keystroke마다의 반응 시간(7.11의 `input_latency`)의 출발점이에요. 또 task마다 그 wake event를 trace의 input `ready` line과 맞춰봐요(guard 입력): input line이 input wake event보다 많은 task, 또는 자기에게 온 input wake를 소비하지 못한 채 input `WAIT`에 막혀 끝난 task는 메시지예요. program에서 아직 닿지 못한 keystroke를 남기고 끝난 task는 메시지가 아니에요.
 
 네 가지 다 "scheduler가 바꿀 수 없는 것"이에요. `T_end`는 사용자가 정한 시간, chain topology와 channel은 프로그램의 구조, demand는 일의 양. scheduler가 바꾸는 건 "언제"뿐이고, "언제"는 trace가 갖고 있어요.
 
@@ -318,7 +318,7 @@ records는 long format이에요. 이유는 셋.
 2. 손으로 계산한 expected value가 그대로 CSV fixture가 돼요. review에서 diff로 보고, CI에서 byte 비교해요.
 3. row 하나가 self-contained라서 실험 matrix 전체를 그냥 이어 붙일 수 있어요.
 
-### 6.2 column 25개
+### 6.2 column 26개
 
 세 묶음이에요. column의 순서와 뜻은 `harness/tools/harness/records.py`의 `COLUMNS`와 `harness/records/schema/records.schema.json`이 정해요.
 
@@ -344,7 +344,7 @@ records는 long format이에요. 이유는 셋.
 | `t` | **언제**의 일인가 (anchor time, µs) |
 | `value` | **얼마**였나 |
 
-**attribute 13개** — metric에 따라 채워지는 부가 정보. 해당 없으면 빈칸.
+**attribute 14개** — metric에 따라 채워지는 부가 정보. 해당 없으면 빈칸.
 
 | column | 어느 metric이 채우나 | 뜻 |
 |---|---|---|
@@ -361,6 +361,7 @@ records는 long format이에요. 이유는 셋.
 | `hogs` | `switch_window`, `boost_window` | 그 순간에 센 hog(CPU만 먹는 task)의 수 H (7.10) |
 | `pre_committed_miss` | recognizer row | 이 query를 덮는 segment에 `pre_committed_miss` 표시가 있으면 1, 없으면 0. headline accuracy는 1인 row를 빼고 계산해요(8장; 8.4에 추가) |
 | `skipped` | `job` | 1이면 harness가 읽는 TIMER skip 규칙으로 건너뛴 tick의 row — 일이 하나도 없었으니 `value`는 빈칸이고 miss로 세요. 소비된 tick의 row는 0 (11장; 9.14에 추가) |
+| `censored` | `input_latency` | 1이면 task가 window 안에서 끝내 처리하지 못한 keystroke의 row — `value`는 keystroke부터 task의 끝과 `T_end` 중 이른 쪽까지의 하한이에요. 처리된 keystroke의 row는 0 (7.11; 2026-10-30에 추가) |
 
 ### 6.3 `entity`는 어디서 나온 말인가
 
@@ -445,13 +446,13 @@ entity=editor, metric=ready_wait, t=250, value=10, cause=wake, channel=input
 
 **규칙:** `ready` line 하나마다 row 하나. `t`는 `ready`의 시각, `value`는 그 task의 다음 `run_start`까지의 시간. `cause`를 row에 싣고, `cause=wake`면 그 wake가 완료한 `WAIT`의 channel 종류(4.4)도 실어요.
 
-**특수 규칙:** `ready`가 그 task의 **자기 occupancy 안**에 떨어지면(즉 `run_start`와 `run_end` 사이에) `value = 0`. 이건 "block되지 않고 즉시 완료된 blocking primitive"의 경우예요. 11장에서 실제로 봐요.
+**특수 규칙:** `ready`가 그 task의 **자기 occupancy 안**에 떨어지면(즉 `run_start`와 `run_end` 사이에) `value = 0`. 이건 "block되지 않고 즉시 완료된 blocking primitive"의 경우예요. 11장에서 실제로 봐요. `ready` line 뒤에 그 task의 다음 `ready` line이 `run_start` 없이 더 늦은 시각에 와도 `value = 0`이에요. 두 line 사이에 `RUN`이 없었으니 task는 곧바로 다음 blocking primitive로 간 거예요(TIMER 바로 뒤의 TIMER처럼).
 
-**왜 하나의 generic primitive인가.** interaction latency(keystroke 대기), response time(등장 후 첫 실행까지), timer dispatch delay(tick 후 실행까지), starvation(가장 오래 기다린 시간)은 전부 이 row들의 filter와 aggregate예요.
+**왜 하나의 generic primitive인가.** response time(등장 후 첫 실행까지), timer dispatch delay(tick 후 실행까지), starvation(가장 오래 기다린 시간)은 전부 이 row들의 filter와 aggregate예요. interaction latency(keystroke 반응)는 따로 primitive `input_latency`가 있어요(7.11). `ready_wait`는 `ready` line, 곧 task가 그 `WAIT`에 닿은 순간부터 재서, task가 program에서 밀려 있는 동안 큐에 쌓인 keystroke를 대기 0으로 읽어요. `input_latency`는 keystroke가 온 순간부터 재요.
 
 | 이름 | records에서 |
 |---|---|
-| interaction latency | `cause=wake`이고 `channel=input`인 row들 (keystroke만; 4.4) |
+| interaction latency | `ready_wait`의 filter가 아니에요. keystroke마다 하나인 `input_latency` row들 (7.11) |
 | response time | `cause=arrive`인 row |
 | timer dispatch delay | `cause=timer_tick`인 row들 |
 | starvation | task별 `ready_wait`의 최대값 (어떤 cause든) |
@@ -462,7 +463,7 @@ starvation이 "`ready`부터"이지 "arrive부터"가 아닌 이유: 스스로 �
 
 **"16.7 ms마다 frame 하나 그려야 하는 프로그램이, 각 frame을 tick 후 얼마 만에 끝냈나."**
 
-동영상 player(task `video`, 이름 `mpv`)가 `LOOP { TIMER(16667) → RUN(6667) }`라고 해요. tick은 `t₀ + k·period`에 놓이고, `t₀`는 task가 처음 TIMER를 실행한 시각이에요 — 주기 task의 첫 명령은 TIMER이고 그건 등장하는 순간에 실행되니, `t₀`는 등장 시각이에요(metrics doc의 simulator 가정 4번). tick k에 시작한 일을 job k라고 불러요. job k는 **tick k가 소비될 때 시작**하고, **task가 다음 TIMER에 도달할 때 끝나요.** 마감은 다음 tick이에요.
+동영상 player(task `video`, 이름 `mpv`)가 `LOOP { TIMER(16667) → RUN(6667) }`라고 해요. tick은 `t₀ + k·period`에 놓이고, `t₀`는 task가 처음 TIMER를 실행한 시각이에요 — 주기 task의 첫 명령은 TIMER이고 그건 등장하는 순간에 실행되니, `t₀`는 등장 시각이에요(metrics doc의 simulator 가정 4번). tick k에 시작한 일을 job k라고 불러요. job k는 **tick k가 소비될 때 시작**하고, **task가 다음 TIMER에 도달할 때 끝나요.** 마감은 다음 tick이에요. iteration에 `RUN`이 없으면(TIMER 바로 뒤에 TIMER) task는 곧바로 다음 TIMER에 닿으니, 그 job은 tick이 소비되는 순간 끝나고 value는 0이에요(occupancy 없이).
 
 ```
 t=0.0   ready      video  cause=timer_tick   ← tick 0
@@ -655,11 +656,44 @@ entity=schedule, metric=switch_window, t=40600, value=12500, algorithm=MLFQ, ind
 
 fixture `mock-switch`(`harness/tools/tests/fixtures/mock-switch/worked.md`)가 이걸 처음부터 끝까지 손으로 계산한 예예요. memo의 처음 정의는 창을 `W_single × H`의 **벽시계** 길이로 그었어요. 이 fixture로는 [40600, 52600]이라, hog의 하강(49100)은 덮지만 editor의 하강(53100)은 못 덮어요. 창 안에서 다른 task가 의자를 쓰면 hog의 하강이 그만큼 늦어지기 때문이에요. 그래서 창을 위처럼 hog가 실제로 받은 CPU로 재도록 고쳤고(memo 7절), 지금은 창이 53100에 닫혀 둘 다 덮어요. 정의가 현실과 맞는지 감시하는 도구가 `harness/tools/check_mlfq_levels.py`예요: simulator가 `x_mlfq_level`(demotion/boost마다 한 줄)을 내면, harness는 `x_` 규칙대로 무시하지만 이 도구는 읽어서 "각 switch의 창이 hog들의 마지막 demotion을 덮었나"를 보고해요. 체계적으로 못 덮으면 그게 정의를 다시 고치거나 closed set에 field를 추가하자고 제안할 근거예요.
 
-### 7.11 한 줄 요약표
+### 7.11 `input_latency` — keystroke 하나가 처리되기 시작할 때까지 (2026-10-30에 추가)
+
+**"키를 누른 순간부터, task가 그 키를 처리하기 시작할 때까지 얼마나 걸렸나."**
+
+`ready_wait`와 출발점이 달라요. `ready_wait`는 `ready` line, 곧 task가 그 `WAIT`에 닿은 순간부터 재고, `input_latency`는 run file에 적힌 keystroke의 시각(input wake event)부터 재요. 둘이 갈리는 건 keystroke가 큐에 쌓일 때예요. fixture `mock-office`(`harness/tools/tests/fixtures/mock-office/worked.md`)의 writer는 10000의 keystroke로 깨어나 `RUN(8000)`을 하는 동안 15000과 16000에 keystroke 둘을 더 받아요.
+
+```
+t=10000  ready      writer  cause=wake    ← keystroke 1. 바로 앉아 RUN 8000
+         (15000, 16000)                   ← keystroke 2, 3. writer가 burst 중이라 큐에 쌓임. line 없음
+t=18000  ready      writer  cause=wake    ← RUN 끝. 다음 WAIT이 keystroke 2로 바로 완료(occupancy 안). RUN 3000
+t=21000  ready      writer  cause=wake    ← 다음 WAIT이 keystroke 3으로 바로 완료. RUN 5000
+t=26000  run_end    writer  reason=block
+```
+
+| keystroke | 그 keystroke가 완료한 `WAIT` | `ready_wait` | `input_latency` |
+|---|---|---|---|
+| 10000 | `ready` 10000, `run_start` 10000 | 0 | 0 |
+| 15000 | `ready` 18000, occupancy 안 | 0 | 3000 |
+| 16000 | `ready` 21000, occupancy 안 | 0 | 5000 |
+
+`ready_wait`로는 세 keystroke가 다 대기 0이지만, 15000에 누른 키는 18000에야 처리되기 시작해요. `T_interaction`의 근거(Miller)도 키를 누른 순간부터 재요(14.1).
+
+```
+entity=writer, metric=input_latency, t=15000, value=3000, censored=0
+```
+
+**규칙:** run file의 input wake event 하나(keystroke 하나)마다 그 target task에 row 하나. `t`는 keystroke의 시각. task의 k번째 input `ready(cause=wake)` line이 k번째 keystroke가 완료한 `WAIT`이에요(wake는 깊이를 갖고 쌓이니까요; 13장 가정 2번). `value`는 그 처리의 시작 — 그 line의 다음 `run_start`, 또는 line이 occupancy 안이거나 대기 0(7.1)이면 line 자신의 시각 — 에서 keystroke의 시각을 뺀 것이고, `censored=0`이에요.
+
+**처리되지 못한 keystroke.** task가 window 안에서 끝내 처리하지 못한 keystroke — depart할 때 아직 큐에 있었거나, 그 line이 `T_end`에 아직 의자를 기다리고 있던 것 — 도 row가 있어요. `value`는 task의 끝과 `T_end` 중 이른 쪽에서 keystroke 시각을 뺀 하한이고, `censored=1`이에요. task가 끝나는 순간이나 그 뒤에 온 keystroke는 row가 없어요. 처리된 keystroke의 line이 keystroke 시각보다 앞서면 guard예요. 다시 지은 `c2-p1a`에서 editor의 60초–`T_end` term은 `fixed`에서 13.1초(keystroke 188개 중 81개 censored), `oracle`에서 8.6초(40개)였고, 같은 창의 `ready_wait`는 0과 0.02 ms였어요(`harness/CHANGELOG.md`, 2026-10-30).
+
+aggregate(`censored_count` 포함)는 14.1에 있어요.
+
+### 7.12 한 줄 요약표
 
 | metric | 한국어로 | entity | 몇 row | trace의 어디서 | run file에서 |
 |---|---|---|---|---|---|
 | `ready_wait` | 줄 선 시간 | task | `ready`마다 | `ready` → 다음 `run_start` | — |
+| `input_latency` | keystroke가 처리되기 시작할 때까지 (처리 못 한 것은 하한, `censored=1`) | task | keystroke마다 | k번째 input `ready` line의 처리 시작; task의 끝 | input wake event |
 | `job` | 주기 작업 하나 걸린 시간 (건너뛴 tick은 값 없이 `skipped=1`) | chain head | tick마다 | `ready(timer_tick)` + run line + tail의 iteration | chain topology |
 | `cpu_delivered` | 앉은 시간 합 | task | task당 1 | 모든 `run_start`~`run_end`, `T_end`에서 clip | `T_end` |
 | `demand` | 원래 필요한 시간 | task | task당 1 | — | RUN 총합 |
@@ -779,17 +813,17 @@ Phase 5의 sub-task 5.1에서 실제로 하게 될 일이에요. 여기서는 �
 - `T_end` = 100000 (가장 늦은 pinned 시각, editor의 depart. `ground_truth`의 마지막 `t_end`와 같아요)
 - chain topology: TIMER를 가진 task가 없으니 chain 없음
 - demand: `editor` = 3000 + 4000 + 2000 = 9000, `hog` = 80000
-- channel: editor의 `WAIT` 셋이 모두 `input`, `input` wake event 세 개(keystroke 셋)
+- channel: editor의 `WAIT` 셋이 모두 `input`, `input` wake event 세 개(keystroke 셋: 10000, 22000, 45000 — `input_latency` row의 `t`)
 
 미리 보이는 것: `hog`는 40000에 와서 80000짜리 일을 해야 하는데 window가 60000밖에 안 남았어요. 못 끝나요. editor 혼자면 그것도 못 끝났을 거예요. 실제 `c2-p1a`와 같은 구조예요.
 
 ### 10.2 config schedule (이 trace를 만든 조건)
 
-condition `llm_vocab`, prior table. boot 설정이 0에, recognizer의 답이 40000 + latency 450 = 40450에 적용돼요. algorithm은 그대로 MLFQ이고 cap만 바뀌는 entry라서 찍힌 시각에 바로 적용되고(drain 없음, 앞에서 drain 중인 switch도 없음), hog의 queue level과 받은 slice는 그대로예요. MLFQ의 boost timer는 이 시각에서 다시 시작해요(13장 가정 5번). algorithm이 바뀌는 entry는, FIFO에서 나가는 것이 아니면, task가 의자에 앉아 있을 때 의자가 빌 때까지 기다렸다가 적용돼요(drain; data-contracts 문서의 config schedule 절, 13장 가정 6번).
+condition `llm_vocab`, prior table. boot 설정이 0에, recognizer의 답이 40000 + latency 450 = 40450에 적용돼요. algorithm은 그대로 MLFQ이고 cap만 바뀌는 entry라서 찍힌 시각에 바로 적용되고(drain 없음, 앞에서 drain 중인 switch도 없음), hog의 queue level과 그 level에서 쓴 allotment는 그대로예요. MLFQ의 boost timer는 이 시각에서 다시 시작해요(13장 가정 5번). algorithm이 바뀌는 entry는, FIFO에서 나가는 것이 아니면, task가 의자에 앉아 있을 때 의자가 빌 때까지 기다렸다가 적용돼요(drain; data-contracts 문서의 config schedule 절, 13장 가정 6번).
 
 ### 10.3 trace
 
-scheduler는 아무 legal한 것이어도 돼요. 이 mock은 MLFQ(queue 3개, slice 2000, growth 2)를 simulator guide의 규칙대로 돌려요(boot default는 2026-09-11부터 OSTEP 예시의 10 ms slice예요; 이 mock의 2 ms는 계산을 짧게 하려고 고른 legal config예요): slice를 다 쓰면 한 칸 내려가고, block하면 그 자리에 머물고, 더 높은 queue로 깨어나면 즉시 preempt, 같거나 낮은 queue면 slice 경계까지 기다려요. 시각은 µs.
+scheduler는 아무 legal한 것이어도 돼요. 이 mock은 MLFQ(queue 3개, slice 2000, growth 2)를 simulator guide의 규칙대로 돌려요(boot default는 2026-09-11부터 OSTEP 예시의 10 ms slice예요; 이 mock의 2 ms는 계산을 짧게 하려고 고른 legal config예요): 한 level에서 쓴 CPU를 burst에 걸쳐 세어 그 level의 slice만큼(allotment) 다 쓰면 한 칸 내려가고 새 level에서 allotment를 새로 받아요. block하거나 preempt돼도 level은 그대로이고 쓴 몫도 남아요. 더 높은 queue로 깨어나면 즉시 preempt, 같거나 낮은 queue면 slice 경계까지 기다려요. 시각은 µs.
 
 ```jsonl
 {"event":"meta","workload_id":"mock-c2-p1a","condition":"llm_vocab","sim":"mock@0","schedule_entries":2}
@@ -820,8 +854,8 @@ scheduler는 아무 legal한 것이어도 돼요. 이 mock은 MLFQ(queue 3개, s
 | 시각 | 일어난 일 |
 |---|---|
 | 0 | boot 설정 적용. editor 등장. 첫 명령이 `WAIT`라 등장하는 step에서 바로 block — `ready` line도, 의자에 앉는 일도 없음 |
-| 10000 | keystroke 1. 의자가 비어 있어 바로 앉음. 3000 일함 — Q0 slice 2000을 다 써서 12000에 Q1로 내려감. 13000에 block, Q1에 머묾 |
-| 22000 | keystroke 2. 바로 앉음. 4000 일함 — Q1 slice 4000을 26000에 다 쓰고 Q2로. block |
+| 10000 | keystroke 1. 의자가 비어 있어 바로 앉음. 3000 일함 — Q0 allotment 2000을 12000에 다 써서 Q1로 내려감. 13000에 block, Q1에 머묾(Q1에서 1000 씀) |
+| 22000 | keystroke 2. 바로 앉음. 4000 일함 — Q1 allotment 4000 중 남은 3000을 25000에 다 쓰고 Q2로. 26000에 block |
 | 40000 | hog 등장, Q0에 바로 앉음. 80000짜리 일 시작 |
 | 40450 | recognizer의 답(ml-train, wanted) 적용. `unmodified`. 같은 algorithm이라 hog는 그대로 |
 | 42000 | hog의 Q0 slice 다 써서 Q1 |
@@ -845,6 +879,14 @@ identity column은 모든 row가 같아요. `workload_id=mock-c2-p1a`, `conditio
 | t=22000 editor wake | 22000 | 0 | `editor, ready_wait, 22000, 0, cause=wake, channel=input` |
 | t=40000 hog arrive | 40000 | 0 | `hog, ready_wait, 40000, 0, cause=arrive` |
 | t=45000 editor wake | 46000 | 1000 | `editor, ready_wait, 45000, 1000, cause=wake, channel=input` |
+
+**`input_latency`** — keystroke 3개 → row 3개(7.11). 이 trace에서는 keystroke가 큐에 쌓이지 않아서 k번째 input `ready` line이 k번째 keystroke와 같은 시각이고, 값이 `ready_wait`와 같아요.
+
+| keystroke | 완료한 `WAIT`의 처리 시작 | value | row |
+|---|---|---|---|
+| 10000 | `run_start` 10000 | 0 | `editor, input_latency, 10000, 0, censored=0` |
+| 22000 | `run_start` 22000 | 0 | `editor, input_latency, 22000, 0, censored=0` |
+| 45000 | `run_start` 46000 | 1000 | `editor, input_latency, 45000, 1000, censored=0` |
 
 **`job`** — TIMER task 없음. row 없음.
 
@@ -895,38 +937,41 @@ task 전체에 대한 값의 `t`는 `T_end`로 적었어요. `completed=1`이면
 ### 10.5 완성된 expected CSV
 
 ```
-workload_id,condition,table,seed,boot_default,telemetry,sim,source_sha256,entity,metric,t,value,cause,channel,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss,skipped
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,ready_wait,10000,0,wake,input,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,ready_wait,22000,0,wake,input,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,ready_wait,40000,0,arrive,,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,ready_wait,45000,1000,wake,input,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,arrival,100000,0,,,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,cpu_delivered,100000,9000,,,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,completed,100000,0,,,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,demand,100000,9000,,,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,preempt_count,100000,0,,,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,arrival,100000,40000,,,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,cpu_delivered,100000,58000,,,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,completed,100000,0,,,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,demand,100000,80000,,,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,preempt_count,100000,1,,,,,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,schedule,config_interval,0,40450,,,fallback,MLFQ,0,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,schedule,config_interval,40450,59550,,,unmodified,MLFQ,1,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,lane,busy,100000,67000,,,,,,,,,,,,,
+workload_id,condition,table,seed,boot_default,telemetry,sim,source_sha256,entity,metric,t,value,cause,channel,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss,skipped,censored
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,ready_wait,10000,0,wake,input,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,ready_wait,22000,0,wake,input,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,ready_wait,40000,0,arrive,,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,ready_wait,45000,1000,wake,input,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,input_latency,10000,0,,,,,,,,,,,,,,0
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,input_latency,22000,0,,,,,,,,,,,,,,0
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,input_latency,45000,1000,,,,,,,,,,,,,,0
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,arrival,100000,0,,,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,cpu_delivered,100000,9000,,,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,completed,100000,0,,,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,demand,100000,9000,,,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,editor,preempt_count,100000,0,,,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,arrival,100000,40000,,,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,cpu_delivered,100000,58000,,,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,completed,100000,0,,,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,demand,100000,80000,,,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,hog,preempt_count,100000,1,,,,,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,schedule,config_interval,0,40450,,,fallback,MLFQ,0,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,schedule,config_interval,40450,59550,,,unmodified,MLFQ,1,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,,focus,mock@0,<sha>,lane,busy,100000,67000,,,,,,,,,,,,,,
 ```
 
-row의 순서는 정해져 있어요: `entity`, `metric`, `t`(숫자), `cause`, `channel` 순. 위 표는 계산 순서대로 적은 것이라 정렬 전이에요. `<sha>` 자리에는 실제 fixture에서 trace 파일의 sha256이 그대로 들어가고, 나머지 attribute column(recognizer row의 것, `hogs`, `job`의 `period_us`와 `skipped`)은 여기서 전부 빈칸이에요. 이 trace와 run file을 harness의 `records.build`에 넣으면 정렬된 같은 17개 row가 나와요.
+row의 순서는 정해져 있어요: `entity`, `metric`, `t`(숫자), `cause`, `channel` 순. 위 표는 계산 순서대로 적은 것이라 정렬 전이에요. `<sha>` 자리에는 실제 fixture에서 trace 파일의 sha256이 그대로 들어가고, 나머지 attribute column(recognizer row의 것, `hogs`, `job`의 `period_us`와 `skipped`)은 여기서 전부 빈칸이고, `censored`는 `input_latency` row에만 0으로 차요. 이 trace와 run file을 harness의 `records.build`에 넣으면 정렬된 같은 20개 row가 나와요.
 
 ### 10.6 이 records에서 읽히는 것
 
 scoring이 아니라 "이 row들로 뭘 말할 수 있나"의 맛보기.
 
-- editor의 keystroke 대기: `cause=wake`, `channel=input` row 3개, value [0, 0, 1000]. 최대 1 ms. 100 ms 임계값을 넘은 건 0개.
+- editor의 keystroke 반응: `input_latency` row 3개, value [0, 0, 1000], censored 0개. 최대 1 ms. 100 ms 임계값을 넘은 건 0개.
 - hog의 progress: 58000 / 80000 = 72.5%.
 - fallback으로 돈 비율: 40450 / 100000 = 40.45%. 이 파일에서는 당연해요. training run이 40000에 와야 recognizer가 뭔가 할 수 있으니까.
 - utilisation: 67000 / 100000 = 67%.
 
-여기서 "editor가 interactive task다", "hog가 batch다"를 harness는 몰라요. scoring이 `c2-p1a`의 scoring spec을 읽고 "editor의 `ready_wait(cause=wake, channel=input)`를 보라"고 정해요.
+여기서 "editor가 interactive task다", "hog가 batch다"를 harness는 몰라요. scoring이 `c2-p1a`의 scoring spec을 읽고 "editor의 `input_latency`를 보라"고 정해요.
 
 ---
 
@@ -1120,7 +1165,9 @@ primitive마다 고정된 aggregate 목록이 있어요.
 
 **`ready_wait`**: count, mean, P50, P95, P99, max, `over_threshold`.
 
-`over_threshold`는 "interaction-latency 임계값을 넘은 row의 비율"이에요. 임계값은 상수 `T_interaction` 하나, 100,000 µs(0.1초)이고 design 값이에요. Miller(1968)가 keystroke에서 화면 echo까지 0.1–0.2초를 넘지 말라고 한 guideline 범위의 엄한 쪽 끝을 골랐고(`miller-fjcc68`), Deber et al.(2015)이 측정한 지연 감지 threshold로 교차 확인했어요(`deber-chi15`). 지각 threshold를 잰 값이 아니라 guideline에서 고른 값이에요. 이 상수는 keystroke row(`cause=wake`, `channel=input`)를 읽으려고 정한 값이에요. 비율 자체는 harness가 어느 filter에서나 내요(metrics doc의 constants 절). "P95가 47 ms였다"보다 "keystroke의 8%가 임계값을 넘었다"가 파일 간 비교가 쉽고 사람에게 전달이 잘 돼요. 하지만 percentile도 같이 봐요. 비율은 "아슬아슬하게 맞춤"과 "여유 있게 맞춤"을 구분 못 하니까.
+**`input_latency`**: count, `censored_count`(`censored=1`인 row 수), mean, P50, P95, P99, max, `over_threshold`. censored row는 하한 값 그대로 들어가요.
+
+`over_threshold`는 "interaction-latency 임계값을 넘은 row의 비율"이에요. 임계값은 상수 `T_interaction` 하나, 100,000 µs(0.1초)이고 design 값이에요. Miller(1968)가 keystroke에서 화면 echo까지 0.1–0.2초를 넘지 말라고 한 guideline 범위의 엄한 쪽 끝을 골랐고(`miller-fjcc68`), Deber et al.(2015)이 측정한 지연 감지 threshold로 교차 확인했어요(`deber-chi15`). 지각 threshold를 잰 값이 아니라 guideline에서 고른 값이에요. 이 상수는 keystroke마다의 `input_latency` row를 읽으려고 정한 값이에요. Miller의 지연처럼 키를 누른 순간부터 재니까요. 비율 자체는 harness가 어느 filter에서나 내요(metrics doc의 constants 절). "P95가 47 ms였다"보다 "keystroke의 8%가 임계값을 넘었다"가 파일 간 비교가 쉽고 사람에게 전달이 잘 돼요. 하지만 percentile도 같이 봐요. 비율은 "아슬아슬하게 맞춤"과 "여유 있게 맞춤"을 구분 못 하니까.
 
 **`job`**: count, miss rate (`value > period_us`인 비율), latency P50, P99. 건너뛴 tick(`skipped=1`)은 count와 miss rate에는 miss로 들어가고 latency percentile에서는 빠져요(값이 없으니까).
 
@@ -1144,7 +1191,7 @@ normalised = (fixed − condition) / (fixed − oracle)
 
 값 1이면 oracle만큼 좋고, 0이면 fixed와 같고, 음수면 fixed보다 나빠요. 음수는 그대로 보여요. 잘라내지 않아요.
 
-숫자 예시. `c2-p1a`에서 editor의 `ready_wait` P95가 fixed 40 ms, oracle 8 ms, llm_vocab 12 ms라면:
+숫자 예시. `c2-p1a`에서 editor의 `input_latency` P95가 fixed 40 ms, oracle 8 ms, llm_vocab 12 ms라면:
 
 ```
 (40 − 12) / (40 − 8) = 28 / 32 = 0.875
@@ -1162,16 +1209,16 @@ floor를 절대값으로 두는 이유: 독자가 숫자를 보고 직접 확인
 
 ### 14.4 score — weight를 곱하기
 
-normalised aggregate에 파일별 weight를 곱해 합친 게 score예요. weight는 연구 판단이라 code가 아니라 committed data file(**scoring spec**, `harness/scoring/scoring-spec.yaml`)에 있어요. Phase 6에서 확정됐고, 2026-10-09(9.14)에 다시 지은 dataset 위에서 고쳐졌어요. 실제 파일의 한 조각:
+normalised aggregate에 파일별 weight를 곱해 합친 게 score예요. weight는 연구 판단이라 code가 아니라 committed data file(**scoring spec**, `harness/scoring/scoring-spec.yaml`)에 있어요. Phase 6에서 확정됐고, 2026-10-09(9.14)에 다시 지은 dataset 위에서 고쳐졌고, 2026-10-30에 keystroke term이 `input_latency`로 바뀌었어요. 실제 파일의 한 조각:
 
 ```yaml
   c2-p1a:
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, window: {start_us: 60000000, end_us: 99435000}, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, window: {start_us: 60000000, end_us: 99435000}, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: hog, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
   c2-p1b:
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, window: {start_us: 60000000, end_us: 99435000}, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, window: {start_us: 60000000, end_us: 99435000}, aggregate: p99, direction: lower, weight: 1.0}
 ```
 
 term 하나 = entity(누구), metric(어느 primitive), cause·channel·window(어느 row만), aggregate(어떤 통계), direction(aggregate가 정함), weight. 옆의 lint가 entity가 compiled workload에 실제로 있는 task인지, metric/aggregate 짝이 허용된 것인지, window가 그 파일의 ground-truth segment인지, 파생 파일이 base와 같은지(label을 unwanted로 뒤집은 C7 counterpart는 base에서 batch term만 뺀 것과 같은지)를 CI에서 검사해요.
@@ -1204,9 +1251,9 @@ RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 jud
 
 ### 15.2 파일별 term
 
-채점되는 aggregate는 넷이에요: `ready_wait`는 **P99**, `job`은 **miss rate**, 그리고 batch job은 둘 중 하나 — 파일 안에서 끝나는 job은 **turnaround**, 어떤 row에서도 파일 안에 못 끝나는 job은 **progress**(`cpu_delivered / demand`). term은 row에 따라 움직이는 양을 읽어야 하니까요(9.14). 나머지 aggregate는 옆에 보고만 해요.
+채점되는 aggregate는 넷이에요: `input_latency`와 `ready_wait`는 **P99**, `job`은 **miss rate**, 그리고 batch job은 둘 중 하나 — 파일 안에서 끝나는 job은 **turnaround**, 어떤 row에서도 파일 안에 못 끝나는 job은 **progress**(`cpu_delivered / demand`). term은 row에 따라 움직이는 양을 읽어야 하니까요(9.14). 나머지 aggregate는 옆에 보고만 해요.
 
-interaction latency term은 2026-10-09부터 모두 `channel`을 적어요. keystroke stream이 있는 task는 `input`이고, video editor(Kdenlive)와 image editor(GIMP)의 14개 term은 `timer`예요. 두 앱의 측정된 driven phase는 mouse로 하는 조작이라 keystroke stream이 없고, 그래서 그 term은 앱 자신의 timer component wake의 대기 — keystroke echo가 아니라 앱의 반응성 — 를 읽어요. `T_interaction` threshold line(14.1)은 `input`만 읽어요.
+interaction latency term은 keystroke stream이 있는 task면 `input_latency`예요(24개, 2026-10-30부터). video editor(Kdenlive)와 image editor(GIMP)의 14개 term은 `timer`예요. 두 앱의 측정된 driven phase는 mouse로 하는 조작이라 keystroke stream이 없고, 그래서 그 term은 앱 자신의 timer component wake의 대기 — keystroke echo가 아니라 앱의 반응성 — 를 읽어요. `T_interaction` threshold line(14.1)은 `input_latency`만 읽어요. 아래 표의 `(input)`은 `input_latency` term이에요.
 
 | 파일 | term (entity · aggregate · weight) |
 |---|---|
@@ -1260,7 +1307,7 @@ generated layer의 파일 1,562개 — `transition-grid` 480, `return-grid` 720,
 - 그 mode의 `c1-<mode>` entry의 term을 가져와요. entity의 task id에 suffix `-s<k>`가 붙어요(chain head `game.chain.1`은 `game-s0.chain.1`).
 - latency·주기 term은 그 placement에 label이 붙은 segment들로 창을 걸어요(파일 전체면 창 없음). batch term은 창이 없어요.
 - label이 붙은 segment가 없는 placement(distractor grid에서 끼어드는 쪽)는 term이 없어요. score는 label이 붙은 상황을 읽고, 끼어든 것의 영향은 그 상황의 term에 나타나요.
-- input 창이 없는 placement(4초 이하 segment)는 `channel: input` term만 빼요 — 읽을 keystroke row가 없으니까요. idle placement는 `c1-idle`처럼 term이 없어요.
+- input 창이 없는 placement(4초 이하 segment)는 `input_latency` term만 빼요 — 읽을 keystroke row가 없으니까요. idle placement는 `c1-idle`처럼 term이 없어요.
 
 batch term은 C1 entry의 turnaround 그대로예요. generated 파일의 job은 살아 있어야 하는 구간에 맞춘 크기라, C1 파일에 없던 동료 옆에서 어떤 row에서는 끝나고 어떤 row에서는 못 끝날 수 있어요. 파일 안에서 못 끝난 row는 censored bound(파일 끝 − 등장)로 채점돼요 — 끝난 어떤 값보다도 나쁘고, 그런 row 둘은 비겨요. idle class placement(indexing, backup)는 job이 모든 row에서 같은 시각에 끝나니 no headroom이 기대돼요.
 
@@ -1270,7 +1317,7 @@ experiment spec은 generated 파일을 이름으로 나열하지 않고, pin한 
 
 ## 16. guard — score와 별개로 항상 확인하는 것
 
-score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요. guard 여덟 개의 목록, threshold, 그리고 그 threshold를 왜 그렇게 잡았는지(grounding)는 **guard spec**(`harness/guards/guard-spec.yaml`, 8.3에서 만들었고 2026-10-17부터 version 1.2)이 데이터로 갖고, 코드(`harness/tools/harness/guards.py`)는 guard마다 이름 붙은 함수 하나예요. 결과는 run마다 guard 하나에 row 하나인 `guards` 파일(pass / fail / not_applicable, 잰 값, 적용된 threshold, 짝 run, fail이면 이유)로 나와요. 입력이 없어서 못 잰 guard는 fail이에요(통과시킨 게 아니니까). `not_applicable`은 guard의 범위가 그 run을 애초에 안 보는 경우만이에요(예: `fixed`에는 recognition이 없으니 provenance 비율을 안 봐요).
+score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요. guard 여덟 개의 목록, threshold, 그리고 그 threshold를 왜 그렇게 잡았는지(grounding)는 **guard spec**(`harness/guards/guard-spec.yaml`, 8.3에서 만들었고 2026-10-30부터 version 1.3)이 데이터로 갖고, 코드(`harness/tools/harness/guards.py`)는 guard마다 이름 붙은 함수 하나예요. 결과는 run마다 guard 하나에 row 하나인 `guards` 파일(pass / fail / not_applicable, 잰 값, 적용된 threshold, 짝 run, fail이면 이유)로 나와요. 입력이 없어서 못 잰 guard는 fail이에요(통과시킨 게 아니니까). `not_applicable`은 guard의 범위가 그 run을 애초에 안 보는 경우만이에요(예: `fixed`에는 recognition이 없으니 provenance 비율을 안 봐요).
 
 | guard | 무엇을 재나 | threshold | 왜 |
 |---|---|---|---|
@@ -1279,7 +1326,7 @@ score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요. gu
 | starvation floor | task별 `ready_wait` max(cause 무관, 파일 전체, idle class task 포함; `fixed`를 포함한 모든 condition) | 30 000 000 µs(30초) 이하 (design) | sched_ext의 watchdog이 최대이자 기본값으로 강제하는 한계(`kernel/sched/ext.c`, v6.17)를 이 연구가 가는 배포 경로의 타당성 한계로 빌려 왔어요. 어떤 task가 이보다 오래 기다린 run은 실제 sched_ext 배포라면 계속 돌 수 없는 configuration을 그린 거예요. executor에는 starvation 안전망이 없어요 |
 | determinism | trace 파일의 SHA-256 vs 같은 run을 한 번 더 돌린 trace의 SHA-256 | byte-identical | 같은 입력 두 번 → 같은 trace. 두 번째 실행을 언제 어떻게 만드는지는 runner(8.6)의 일 |
 | utilisation sanity | `busy / T_end` | 1.0 이하, 그리고 scoring spec에 term이 있는 파일이면 0 초과 | 물리적으로 말이 되나; 파싱은 됐는데 비어 있는 trace를 잡음 |
-| tick count | primitives가 records를 만들면서 낸 consistency 메시지(window 안에서 tail이 끝낸 iteration 수가 head가 소비한 tick 수 이하, keystroke row 수, `deadline` 교차검사, `config_applied`와 schedule의 일치) | 메시지 0개 | records가 trace·run file과 맞나 — head가 보낸 적 없는 wake로 끝난 frame, 빠진 keystroke row 같은 것. chain 검사는 tail이 모자란 것은 잡지 않아서, 중간에 사라진 chain wake는 이 guard로 안 잡혀요 |
+| tick count | primitives가 records를 만들면서 낸 consistency 메시지(window 안에서 tail이 끝낸 iteration 수가 head가 소비한 tick 수 이하, stimulus 검사, `deadline` 교차검사, `config_applied`와 schedule의 일치) | 메시지 0개 | records가 trace·run file과 맞나 — head가 보낸 적 없는 wake로 끝난 frame, 잃어버린 keystroke 같은 것. stimulus 검사는 input `ready` line이 run file의 input wake event보다 많은 task, 또는 자기에게 온 input wake를 소비하지 못한 채 input `WAIT`에 막혀 끝난 task를 잡고, program에서 아직 닿지 못한 keystroke를 남기고 끝난 task는 잡지 않아요(guard spec 1.3). chain 검사는 tail이 모자란 것은 잡지 않아서, 중간에 사라진 chain wake는 이 guard로 안 잡혀요 |
 | `validation` = `provenance` | recognition log의 `validation` 순서 = config schedule의 `provenance` 순서(boot 제외), 위치별 비교 | 불일치 0개 | log와 schedule이 서로 맞나 |
 | C2 pair | C2 pair(P1 `c2-p1a`/`c2-p1b`, P2 `c2-p2a`/`c2-p2b`, P3 `c2-p3a`/`c2-p3b`) 두 run의 config schedule. 정답이 다른 segment의 시작에 걸려 있던 configuration과 그 segment 안에 찍힌 entry 전부를 (algorithm, params, cap)으로 entry마다 비교. 짝은 같은 condition·seed·boot default의 다른 파일 | `oracle`과 recognition 조건(`shipped_catalogue`, `strongest_name_table`, `llm_vocab`, `llm_algo`, `llm_full`)에서 두 sequence가 같으면 fail. `fixed`와 `random`은 not_applicable. trace는 비교하지 않고, `fixed`에서 두 파일이 같아야 한다는 요구도 없어요 | 두 sequence가 같으면 recognizer의 답이 wanted/unwanted 사이에서 한 번도 안 바뀌었다는 뜻이라, gap 0을 recognition 결과로 읽으면 안 됨(table이나 recognizer의 결함). trace는 pair마다 background job이 다른 측정된 프로그램이라 configuration과 상관없이 달라서 비교할 의미가 없어요. `oracle`에서는 설계상 다르니 plumbing 확인이에요 |
 
@@ -1351,8 +1398,8 @@ Phase 8 전체를 관통하는 원칙 하나: **evaluator가 적용하는 판단
 
 ### 19.1 spec에 무엇이 있나
 
-- **generic part** — 어떤 실험에나 필요한 것: condition 목록, telemetry 모양 목록(RQ0는 `focus` 하나), seed 수 N, boot default(primary와 alternatives), judging 파일·reporting 파일·sensitivity line이 읽는 variant 파일(그리고 generated set에서 축으로 고른 파일, 15.5), `pre_committed_miss`에서 **유도된** Layer-1 exclusion(lint가 실제 annotation과 맞는지 확인해요 — 손으로 고를 수 없어요), guard 예외(이유 필수), typed reporting line, 그리고 **pin** — scoring spec·guard spec(version 1.2)·driver table·dataset manifest·variants manifest의 SHA-256(generated 파일을 고르는 spec이면 그 manifest마다 하나 더).
-- **statements** — 숫자의 근거를 적은 글. evaluator가 보고서에 그대로 옮겨 적어요. RQ0 gate spec에는 열다섯 개가 있어요: 판정 set의 규칙, idle class 파일 여섯이 보고만 하는 이유, executor 가정(인경민의 2026-10-01 simulator 상태 memo와 9.11 결정 위에 둔 committed assumption. 그중 두 가지에 대한 인경민의 정식 답은 2026-10-08 memo로 요청), simulator conformance(RQ0 run 전에 simulator가 hand fixture에서 보여야 할 아홉 항목 (a)–(i). (h)는 2026-10-17에 더해진 것으로, simulator가 runner가 부르는 대로 invocation contract에 따라 실행되는 것 — workload와 config schedule을 `--workload`·`--schedule`로, trace 경로를 `--out-trace`로 받고 trace를 그 파일에 쓰는 것(18장). (i)는 2026-10-21에 더해진 것으로, spawn table의 자식을 가리키는 WAKE가 그 자식에게 닿고, 자식이 태어나기 전에 온 wake는 보관했다가 태어날 때 넘기는 것. reference simulator는 (a)–(f)와 (i)를 하고, (g)와 (h)가 남아 있어요), g·K·N의 근거, random condition의 정의, prior table의 중복 구조, boot-default sweep의 설계, sensitivity line들, 다시 측정할 조건, Layer-1 구간의 caveat, 실패 절차, held-out-rows 사전등록.
+- **generic part** — 어떤 실험에나 필요한 것: condition 목록, telemetry 모양 목록(RQ0는 `focus` 하나), seed 수 N, boot default(primary와 alternatives), judging 파일·reporting 파일·sensitivity line이 읽는 variant 파일(그리고 generated set에서 축으로 고른 파일, 15.5), `pre_committed_miss`에서 **유도된** Layer-1 exclusion(lint가 실제 annotation과 맞는지 확인해요 — 손으로 고를 수 없어요), guard 예외(이유 필수), typed reporting line, 그리고 **pin** — scoring spec·guard spec(version 1.3)·driver table·dataset manifest·variants manifest의 SHA-256(generated 파일을 고르는 spec이면 그 manifest마다 하나 더).
+- **statements** — 숫자의 근거를 적은 글. evaluator가 보고서에 그대로 옮겨 적어요. RQ0 gate spec에는 열다섯 개가 있어요: 판정 set의 규칙, idle class 파일 여섯이 보고만 하는 이유, executor 가정(인경민의 2026-10-01 simulator 상태 memo와 9.11 결정 위에 둔 committed assumption. 그중 두 가지에 대한 인경민의 정식 답은 2026-10-08 memo로 요청), simulator conformance(RQ0 run 전에 simulator가 hand fixture에서 보여야 할 아홉 항목 (a)–(i). (h)는 2026-10-17에 더해진 것으로, simulator가 runner가 부르는 대로 invocation contract에 따라 실행되는 것 — workload와 config schedule을 `--workload`·`--schedule`로, trace 경로를 `--out-trace`로 받고 trace를 그 파일에 쓰는 것(18장). (i)는 2026-10-21에 더해진 것으로, spawn table의 자식을 가리키는 WAKE가 그 자식에게 닿고, 자식이 태어나기 전에 온 wake는 보관했다가 태어날 때 넘기는 것. reference simulator는 (a)–(f)와 (i)를 하고 — (a) 가운데 빈 slot에 바로 들어간 FORK의 대기 0 line은 아직이에요 — (g)와 (h)가 남아 있어요), g·K·N의 근거, random condition의 정의, prior table의 중복 구조, boot-default sweep의 설계, sensitivity line들, 다시 측정할 조건, Layer-1 구간의 caveat, 실패 절차, held-out-rows 사전등록.
 - **criterion** — 실험별 판정 규칙. RQ0는 `k_of_n_gap`: judging 파일 19개 중 **K = 10개 이상**이 gap **g = 0.5 이상**이면 pass.
 
 ### 19.2 gap 하나 손으로
@@ -1386,7 +1433,7 @@ verdict는 primary boot default에서 한 번만 계산해요. 그 판정이 우
 | `note` | 파일 하나에 묶인 미리 쓴 문장(`c7-gaming`, `c7-meeting`의 읽는 법, `c1-gaming`의 별도 line, `c7-media`, `c7-mail`이 보고만 하는 이유) | — |
 | `variant_set` (8개) | 다시 지은 judging 파일 묶음을 primary boot default로 돌려 통과 개수를 다시 세요. variant 파일은 판정에 안 들어가요. `venue-x0.8`·`venue-x1.25`(19개 파일): 측정된 `RUN`을 chain 빼고 전부 1/1.25배·1.25배. 측정된 두 venue 효과 — training run의 huge page 비율 ×1.144와 tracing overhead ×1.02–1.16 — 를 담는 design bracket이고, 다른 CPU model은 담지 않아요. 다른 CPU는 프로그램마다 제 배율로 속도를 바꾸는데(Xeon Platinum 8573C는 EPYC 7763 대비 `cc1`을 0.72배, `fixdep`을 0.50배 시간에 돌렸어요) 공통 배율 하나로는 그걸 재현할 수 없어요. `chain-x1.2`·`chain-x1.4`(3개): 게임 chain의 `RUN`만 1.2배·1.4배. `seg1-30s`·`seg1-120s`(C2 4개): 첫 segment 60초를 30초·120초로. `corner-low`·`corner-high`(11개): 안정성 규칙의 예외로 실어 온 값들을 구간의 아래·위 끝으로 | variant 파일 78개(`trace_replay`의 4개 포함) × (`fixed` 1 + `oracle` 1 + `random` 100) |
 | `trace_replay` | judging 파일 넷(`c7-dev`, `c7-browsing`, `c7-meeting`, `c2-p1a`)을 compile된 stream 대신 측정된 repeat 하나의 stream으로 다시 지어 돌려요. stream의 종류는 entry를 따라 셋이에요: wake 순서(`wakes`: `code-editor`, `web-browser`, `renderer-hidden`), run과 그 뒤의 block(`runs`: `package-upgrade`, `cpu-batch`의 `python3`), cycle(`cycles`: `video-call`). 네 파일 모두 batch job의 run을 측정된 것으로 바꿔요(`c7-dev`·`c7-browsing`·`c7-meeting`은 upgrade, `c2-p1a`는 `python3`), `c7-meeting`은 통화의 cycle도요. 두 build에서 gap이 g의 같은 쪽에 있고 그 차이가 g band의 간격보다 작으면 일치 | 그 78개에 포함 |
-| `input_wake_count` | judging 파일의 interaction latency term마다 P99가 기대는 keystroke 수(26초짜리 counterpart는 약 100개, `c3-workday`의 browser는 7개라 P99가 상위 한두 개의 대기예요) | 계산만 |
+| `input_wake_count` | judging 파일의 interaction latency term마다 P99가 기대는 관측 수 — `input_latency` term이면 keystroke 수(26초짜리 counterpart는 약 100개, `c3-workday`의 browser는 7개라 P99가 상위 한두 개의 값이에요) | 계산만 |
 | `longest_wait` | run마다 가장 긴 `ready_wait`를 30초 floor와 비교. 15초를 넘은 run이 하나라도 있으면 판정을 읽기 전에 executor의 안전망 문제를 인경민과 다시 열어요 | 계산만 |
 | `bounding_pair` | `c2-p2a`(download를 측정된 그대로 full standing으로)와 `c2-p2a-idle`(같은 download를 idle class로)의 판정을 각각 보고하고 그 차이를 적어요. 실제 desktop은 nice 10인 download를 그 사이에서 다뤄요 | 계산만 |
 | `flip_cost` | (RQ0 gate spec은 안 씀) recognizing run마다 configuration이 바뀐 횟수(`change_count`), 그중 config-incorrect로 채점된 query의 것(`wrong_change_count`), 그 틀린 MLFQ 전환들의 per-switch excess 합(`wrong_switch_excess_sum`)을 파일 점수 옆에 찍어요. hold-time plan의 no-rule measurement(그 plan의 step 1) — hold time도 hysteresis도 없이 flip이 얼마나 일어나고 얼마나 비싼지 재는 일 — 이 읽는 line이에요 | 계산만 |

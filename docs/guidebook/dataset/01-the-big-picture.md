@@ -253,7 +253,7 @@ scheduler는 한 task에게 lane을 무한정 주지 않습니다. 한 번에 �
 
 task는 lane을 잡으면 일하고, 일이 끝나면 무언가를 기다리며 쉽니다. 한 번 lane을 잡고 연속으로 일하는 덩어리를 burst라고 하고, 기다리느라 실행할 수 없는 상태를 block되었다고 합니다. 기다리던 것이 오면 task는 다시 실행 준비 상태가 되어 run queue에 들어갑니다. 이것을 **wake**라고 합니다.
 
-> **용어.** `wake`는 block되어 있던 task가 기다리던 사건(키 입력, timer, 다른 task의 신호)을 받아 다시 실행 준비 상태가 되는 것입니다. 깨어났다고 바로 실행되는 것은 아닙니다. run queue에 들어가 scheduler의 선택을 기다립니다. 깨어난 순간부터 실제로 lane을 잡기까지의 기다림이 이 실험이 재는 대표적인 지연(`ready_wait`)입니다.
+> **용어.** `wake`는 block되어 있던 task가 기다리던 사건(키 입력, timer, 다른 task의 신호)을 받아 다시 실행 준비 상태가 되는 것입니다. 깨어났다고 바로 실행되는 것은 아닙니다. run queue에 들어가 scheduler의 선택을 기다립니다. 깨어난 순간부터 실제로 lane을 잡기까지의 기다림이 `ready_wait`입니다. 키 입력의 반응은 키가 온 순간부터 그 키의 처리가 시작될 때까지(`input_latency`)로 잽니다.
 
 task의 행동은 크게 세 모양으로 나뉩니다. 이 구분은 데이터셋 곳곳에 나옵니다.
 
@@ -1323,18 +1323,17 @@ harness는 데이터셋의 세 부분을 읽습니다.
 ```yaml
 c1-office:
   terms:
-    - {entity: writer, metric: ready_wait, cause: wake, channel: input,
-       aggregate: p99, direction: lower, weight: 1.0}
+    - {entity: writer, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
 ```
 
-읽으면 이렇습니다. task `writer`(LibreOffice)가 키 입력(`channel: input`)으로 깨어난 뒤 lane을 잡기까지 기다린 시간(`ready_wait`)의 99번째 percentile을 보고, 낮을수록 좋으며, 가중치 1입니다. 여기서 `entity`는 workload의 task **id**입니다. 그래서 timeline의 task id를 바꾸면 채점 spec이 깨집니다. 파일 하나의 점수는 항목마다 (fixed − condition) / (fixed − oracle)로 정규화한 몫의 가중합입니다(1.5).
+읽으면 이렇습니다. task `writer`(LibreOffice)에 온 키 입력 하나하나가 처리되기 시작할 때까지 걸린 시간(`input_latency`, 키가 온 순간부터)의 99번째 percentile을 보고, 낮을수록 좋으며, 가중치 1입니다. 여기서 `entity`는 workload의 task **id**입니다. 그래서 timeline의 task id를 바꾸면 채점 spec이 깨집니다. 파일 하나의 점수는 항목마다 (fixed − condition) / (fixed − oracle)로 정규화한 몫의 가중합입니다(1.5).
 
 채점 spec과 데이터셋 사이에는 몇 가지 약속이 있습니다(채점 spec의 머리 주석).
 
 - core set 파일 51개 가운데 49개에 항목이 있습니다. `c1-idle`과 `c7-idle`은 성능 지표가 없어서 항목이 없습니다(tree에서 센 값).
 - 파생 파일은 `base`를 밝히고 원본의 항목을 그대로 반복합니다. lint가 이것을 `dataset/timelines/coreset`과 대조합니다.
 - **원치 않는 작업에는 항목이 없습니다**(attribute coverage를 채운 Phase 7의 spec 결정 10). label이 `background_wanted: false`로 뒤집힌 counterpart는 원본의 항목에서 batch 항목(turnaround, progress)을 뺀 것을 씁니다.
-- generated layer의 파일에는 항목이 없습니다. harness가 실행할 때 규칙 하나로 만듭니다. generated manifest의 `placements`가 "이 파일의 어느 구간에 어느 mode의 C1 calibration group task 묶음이 어떤 id 꼬리(`-s0`, `-s1`)로 놓였는가"를 적고, harness는 그 mode의 `c1-<mode>` 항목을 가져와 entity에 꼬리를 붙이고 그 구간으로 창을 좁힙니다(9.21 결정 1–3). 키 입력 창이 없는 놓임(4초 이하 구간)은 `channel: input` 항목만 뺍니다.
+- generated layer의 파일에는 항목이 없습니다. harness가 실행할 때 규칙 하나로 만듭니다. generated manifest의 `placements`가 "이 파일의 어느 구간에 어느 mode의 C1 calibration group task 묶음이 어떤 id 꼬리(`-s0`, `-s1`)로 놓였는가"를 적고, harness는 그 mode의 `c1-<mode>` 항목을 가져와 entity에 꼬리를 붙이고 그 구간으로 창을 좁힙니다(9.21 결정 1–3). 키 입력 창이 없는 놓임(4초 이하 구간)은 `input_latency` 항목만 뺍니다.
 
 **manifest.** harness는 manifest도 읽습니다. RQ0 gate spec은 core manifest와 variants manifest를 hash로 고정하고(7.5), 앞으로의 experiment spec은 generated manifest의 `grid` 축(쌍, 꼴, tier, tuning·measurement 구분 등)으로 파일을 골라 `pins.generated`로 고정할 수 있습니다(9.21 결정 5–6). generated 파일의 축은 records에 열로 들어가지 않고, 필요할 때 manifest와 join합니다.
 

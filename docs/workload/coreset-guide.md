@@ -47,7 +47,7 @@
 **core set과 generated layer.** 이 문서가 다루는 51개 파일이 core set이에요(`dataset/timelines/coreset/`, compile 결과는 `dataset/build/coreset-single/`). 그 옆에 generated layer가 있어요. `dataset/tools/generate.py`가 `dataset/grids.yaml`을 읽고 C1(16개의 single-situation 파일)의 task set을 이어 붙이거나 이름을 바꿔서 다섯 set을 만들어요: transition grid 480개, return grid 720개, flap-stress set 24개, distractor grid 272개, familiarity ladder 66개, 모두 1,562개. 같은 compiler로 `build/<set>-single/`에 compile되고, set마다 manifest(`dataset/build.<set>.manifest.json`)가 하나씩 있어요. 전부 design이라 데스크톱에서 그런 상황이 얼마나 자주 오는지는 주장하지 않아요. C3, C4, C5의 rate 주장(전환을 얼마나 빨리 정확히 따라가나, 끼어든 process에 얼마나 흔들리나, 낯선 이름을 얼마나 읽나)은 이 set 위에서 돌고, core set의 손으로 쓴 C3–C5 파일은 그런 상황이 존재한다는 사례예요(9장).
 
 generated 파일은 이렇게 소비돼요.
-- scoring spec(`harness/scoring/scoring-spec.yaml`)에 자기 entry가 없어요. harness가 돌 때 규칙 하나로 term을 만들어요(`harness/tools/harness/scoring.py`의 `with_generated`, 규칙 원문은 scoring spec의 header): manifest가 기록한 placement마다(어떤 mode의 C1 task set을 id 접미사 `-s0`, `-s1`, …을 붙여 놓은 것) 그 mode의 `c1-<mode>` entry의 term을 가져와 entity id에 접미사를 붙이고(chain 멤버는 `.chain.<n>` 앞에 붙어 `game-s0.chain.1`), latency·periodic term은 그 placement가 label된 segment로 window를 걸어요. label된 segment가 없는 placement(distractor grid에서 도착하는 set)는 term이 없고, input window가 없는 placement는 `channel: input` term만 빠지고, idle placement는 `c1-idle`처럼 term이 없어요. batch term은 C1 entry의 turnaround인데, job이 끝나지 못한 row에서는 censored bound(파일 끝 − 도착)로 채점돼요.
+- scoring spec(`harness/scoring/scoring-spec.yaml`)에 자기 entry가 없어요. harness가 돌 때 규칙 하나로 term을 만들어요(`harness/tools/harness/scoring.py`의 `with_generated`, 규칙 원문은 scoring spec의 header): manifest가 기록한 placement마다(어떤 mode의 C1 task set을 id 접미사 `-s0`, `-s1`, …을 붙여 놓은 것) 그 mode의 `c1-<mode>` entry의 term을 가져와 entity id에 접미사를 붙이고(chain 멤버는 `.chain.<n>` 앞에 붙어 `game-s0.chain.1`), latency·periodic term은 그 placement가 label된 segment로 window를 걸어요. label된 segment가 없는 placement(distractor grid에서 도착하는 set)는 term이 없고, input window가 없는 placement는 `input_latency` term만 빠지고, idle placement는 `c1-idle`처럼 term이 없어요. batch term은 C1 entry의 turnaround인데, job이 끝나지 못한 row에서는 censored bound(파일 끝 − 도착)로 채점돼요.
 - experiment spec은 pin된 manifest에서 grid 축으로 파일을 골라요: `files.select`, manifest마다 `pins.generated` pin 하나. 축은 records의 column이 아니라 `workload_id`로 manifest와 join해서 읽고(`harness/tools/harness/manifests.py`), 고른 파일은 spec의 reporting 목록에만 들어가요.
 
 자세한 것은 `dataset/README.md`(tree와 명령)와 `docs/harness/harness-and-records-guide.md`(harness 쪽)에 있어요.
@@ -344,7 +344,7 @@ run file에는 wake마다 `wake` event
 
 `c1-office`의 `writer`: input 2–58 s → keystroke wake 270개(첫 keystroke 2.059 s) + timer wake 205개, RUN 합 1.36 s.
 
-측정된 keystroke stream은 네 앱에만 있어요(`dataset/stimulus/`): Writer와 VS Code는 SWELL-KW의 Word stream, Thunderbird는 Outlook stream, Chrome은 Internet Explorer stream. Kdenlive와 GIMP는 keystroke stream이 없어요 — 측정된 driven phase는 pointer로 움직이는 operation이고, 그게 앱 자신의 timer component로 실려요. 그래서 이 둘이 묶인 파일 열세 개(`c1-video-edit`, `c1-render`, `c1-transcode`, `c1-backup`, `c1-photo`, `c2-p3a`, `c2-p3b`, `c3-creation`, `c7-video-edit`, `c7-render`, `c7-transcode`, `c7-backup`, `c7-photo`)의 interaction term 열네 개는 `channel: timer`로 앱 자신의 wake가 기다린 시간을 읽어요(9.14). input window가 없는 측정 task는 timer component만 있어요(`c1-office`의 `browser`).
+측정된 keystroke stream은 네 앱에만 있어요(`dataset/stimulus/`): Writer와 VS Code는 SWELL-KW의 Word stream, Thunderbird는 Outlook stream, Chrome은 Internet Explorer stream. Kdenlive와 GIMP는 keystroke stream이 없어요 — 측정된 driven phase는 pointer로 움직이는 operation이고, 그게 앱 자신의 timer component로 실려요. 그래서 이 둘이 묶인 파일 열세 개(`c1-video-edit`, `c1-render`, `c1-transcode`, `c1-backup`, `c1-photo`, `c2-p3a`, `c2-p3b`, `c3-creation`, `c7-video-edit`, `c7-render`, `c7-transcode`, `c7-backup`, `c7-photo`)의 interaction term 열네 개는 `channel: timer`로 앱 자신의 wake가 기다린 시간을 읽어요(9.14). keystroke stream이 있는 앱의 interaction term은 `input_latency`로, keystroke마다 그 keystroke가 온 순간부터 앱이 그것을 처리하기 시작할 때까지를 읽어요(2026-10-30). 아래의 "input P99"가 이것이에요. input window가 없는 측정 task는 timer component만 있어요(`c1-office`의 `browser`).
 
 ### 5.3 finite job의 compile (batch loop)
 
@@ -627,7 +627,7 @@ core set 51개(`dataset/build.manifest.json`의 `demand`):
 
 recognizer: 0 s `chrome ×5, soffice.bin ×1, thunderbird-bin ×1`, focus `soffice.bin` → 정답 office/wanted. 60 s 빈 집합(terminal).
 
-harness: writer의 `ready_wait(cause = wake)`, `channel: input`의 P99 하나. 경쟁 상대는 browser·renderer·mail의 작은 wake뿐이라 대부분 0에 가까울 거예요. utilization 0.027. reporting-only. `harness/tools/tests/fixtures/mock-office`가 이 파일의 축소판이에요(input window 안의 editor, burst 중간에 queued된 keystroke, 한 번도 안 깨는 unfocused task).
+harness: writer의 `input_latency` P99 하나. 경쟁 상대는 browser·renderer·mail의 작은 wake뿐이라 대부분 0에 가까울 거예요. utilization 0.027. reporting-only. `harness/tools/tests/fixtures/mock-office`가 이 파일의 축소판이에요(input window 안의 editor, burst 중간에 queued된 keystroke, 한 번도 안 깨는 unfocused task).
 
 #### `c1-browsing` — 웹 브라우징
 
@@ -971,7 +971,7 @@ harness: chain의 miss rate. 관심은 30초의 query에서 recognizer가 여전
 
 recognizer: 0 s(c1-office와 같음) → 30 s `+7z` → 60 s `7z`(finite라 남음).
 
-harness: writer의 input P99. 이 파일은 성능 차이도 조금 있어요. 7z가 30초부터 6 s짜리 RUN 하나로 lane을 잡으니 writer의 `ready_wait`가 원본보다 나빠질 수 있어요. C1 원본과의 delta로 봐요. utilization 0.127.
+harness: writer의 input P99. 이 파일은 성능 차이도 조금 있어요. 7z가 30초부터 6 s짜리 RUN 하나로 lane을 잡으니 writer의 `input_latency`가 원본보다 나빠질 수 있어요. C1 원본과의 delta로 봐요. utilization 0.127.
 
 #### `c4-compile` — 빌드 중 Chrome 열림
 

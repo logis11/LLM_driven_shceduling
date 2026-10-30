@@ -20,6 +20,6 @@ The runner writes one aggregates file per experiment at `runs/<experiment>/aggre
 
 ## Conventions worth knowing
 
-- Percentiles follow the convention in `docs/harness/metrics.md` §8; a censored turnaround, a job still running at the observation window's end, is aggregated by the censored rule there.
+- Percentiles follow the convention in `docs/harness/metrics.md` §8; a censored turnaround, a job still running at the observation window's end, is aggregated by the censored rule there, and a censored keystroke, one its task never served inside the window, enters its `input_latency` aggregates at its lower bound and is counted in `censored_count`.
 - The recognition aggregates, accuracy and its kin, are not in this file; they are the grades file's.
 - `tools/tests/fixtures/mock-scores/` holds hand-written records with their expected aggregates, and `make lint` validates the expectation against this schema.

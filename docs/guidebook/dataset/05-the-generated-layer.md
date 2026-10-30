@@ -1,6 +1,6 @@
 # 5권 · Generated layer: 열여섯 task set으로 만든 1,562개 파일
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-20
+> Status: draft · Created 2026-10-14 · Updated 2026-10-30
 
 **왜 손으로 쓴 core set 옆에 생성한 층이 있고, 그 파일들은 어떤 규칙으로 만들어지며 어떻게 점수를 받나.**
 
@@ -1673,7 +1673,7 @@ placement 기록의 모양은 set마다 이렇게 다릅니다(9.21 D1의 "Shape
 | 필드 | 뜻 |
 |---|---|
 | `entity` | 점수를 매길 대상. compile된 workload의 task id(예: `editor`, `game.chain.1`), 또는 lane/schedule |
-| `metric` | 어떤 관측값(primitive)을 쓰나. `ready_wait`(깨어난 뒤 실제로 CPU를 받기까지 기다린 시간), `job`(주기적 작업 한 번), `turnaround`(도착부터 끝까지), `cpu_delivered`(받은 CPU 양) 등 |
+| `metric` | 어떤 관측값(primitive)을 쓰나. `input_latency`(키 입력이 온 순간부터 그 처리가 시작되기까지 걸린 시간), `ready_wait`(깨어난 뒤 실제로 CPU를 받기까지 기다린 시간), `job`(주기적 작업 한 번), `turnaround`(도착부터 끝까지), `cpu_delivered`(받은 CPU 양) 등 |
 | `cause` | `ready_wait`의 원인 필터. `wake`이면 잠에서 깨어난 뒤의 대기 |
 | `channel` | 그 wake가 끝낸 WAIT의 종류. `input`(키 입력)이나 `timer`(task 자신의 timer 성분) |
 | `window` | 시간 필터. 없으면 파일 전체, 있으면 ground truth의 segment 하나여야 함(lint가 확인) |
@@ -1683,11 +1683,11 @@ placement 기록의 모양은 set마다 이렇게 다릅니다(9.21 D1의 "Shape
 
 파일 하나의 점수는 term들의 정규화된 몫의 가중합입니다. 몫은 `(fixed − condition) / (fixed − oracle)`입니다. `fixed`는 상황을 전혀 읽지 않고 기본 설정을 쓰는 조건, `oracle`은 정답 label을 알고 그에 맞는 설정을 쓰는 조건, `condition`은 시험하는 recognizer입니다. 몫이 1이면 oracle만큼 잘한 것, 0이면 아무것도 안 한 것과 같은 것입니다.
 
-C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡니다(`scoring-spec.yaml` 103–165행).
+C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡니다(`scoring-spec.yaml` 117–180행). 표의 `input` P99는 `input_latency`입니다.
 
 | C1 entry | terms |
 |---|---|
-| `c1-office`, `c1-browsing`, `c1-dev`, `c1-mail` | 전경 task의 `ready_wait`, `channel: input`, P99, weight 1.0 |
+| `c1-office`, `c1-browsing`, `c1-dev`, `c1-mail` | 전경 task의 `input_latency`, P99, weight 1.0 |
 | `c1-video-edit`, `c1-photo` | 편집기의 `ready_wait`, `channel: timer`, P99, 1.0 |
 | `c1-compile` | `editor` `input` P99 1.0 + `build` turnaround 1.0 |
 | `c1-ml-train` | `editor` `input` P99 1.0 + `hog` turnaround 0.5 |
@@ -1708,13 +1708,13 @@ C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡
 
 > No generated file has an entry in the scoring spec. Its terms are derived when the harness runs, the way `with_variants` derives a variant's from its base's (9.14 decision 12): for each placement in the file — a mode's C1 task set under one id suffix — the `c1-<mode>` entry's terms, their entities carrying the placement's suffix, their latency and periodic terms windowed to the segments the placement is labelled in, their batch terms unwindowed. The rule's statement lives in the scoring spec's text, so it is pinned with the spec.
 
-1,562개 entry를 손으로 쓰거나 기계로 써서 scoring spec에 넣을 수도 있었습니다. 그 대신 규칙을 택한 근거로 기록이 드는 것은 선례입니다. 9.14 decision 12(2026-10-09)가 sensitivity variant 78개에 같은 방식을 썼습니다. variant는 entry 없이 base 파일의 term을 실행 시점에 물려받습니다(`with_variants`). generated 파일도 C1 entry를 실행 시점에 물려받습니다(`with_generated`). 규칙의 문장은 scoring spec의 header 주석에 있으므로, scoring spec을 pin하면 규칙도 함께 pin됩니다. 실제로 9.21은 이 header 문장을 고쳤고, 그래서 scoring spec이 다시 frozen되어 hash `0ff71b1f…`가 되었고, RQ0 gate spec의 scoring-spec pin이 그 값으로 따라 움직였습니다(9.21 D6). 9.23 D3이 같은 header에 batch term의 censored 경우(13.12)를 더했을 때도 같은 일이 일어나 hash가 `2ad757b6…`가 되었고(9.23 D10), 출구 감사 9.16이 `c2-p3b`의 backup term을 turnaround로 바꾸고(9.16 D4) `c7-meeting`의 이유 문장을 고쳐(9.16 D1) 지금의 hash는 `f7d1df4c…`입니다.
+1,562개 entry를 손으로 쓰거나 기계로 써서 scoring spec에 넣을 수도 있었습니다. 그 대신 규칙을 택한 근거로 기록이 드는 것은 선례입니다. 9.14 decision 12(2026-10-09)가 sensitivity variant 78개에 같은 방식을 썼습니다. variant는 entry 없이 base 파일의 term을 실행 시점에 물려받습니다(`with_variants`). generated 파일도 C1 entry를 실행 시점에 물려받습니다(`with_generated`). 규칙의 문장은 scoring spec의 header 주석에 있으므로, scoring spec을 pin하면 규칙도 함께 pin됩니다. 실제로 9.21은 이 header 문장을 고쳤고, 그래서 scoring spec이 다시 frozen되어 hash `0ff71b1f…`가 되었고, RQ0 gate spec의 scoring-spec pin이 그 값으로 따라 움직였습니다(9.21 D6). 9.23 D3이 같은 header에 batch term의 censored 경우(13.12)를 더했을 때도 같은 일이 일어나 hash가 `2ad757b6…`가 되었고(9.23 D10), 출구 감사 9.16이 `c2-p3b`의 backup term을 turnaround로 바꾸고(9.16 D4) `c7-meeting`의 이유 문장을 고쳐(9.16 D1) hash가 `f7d1df4c…`가 되었고, 2026-10-30에 키 입력 term 24개가 `input_latency`를 읽게 되면서(그 header 문장도 함께) 지금의 hash는 `1c738540…`입니다.
 
 ## 13.3 규칙 전문과 단계
 
-`scoring-spec.yaml` header의 해당 단락입니다(73–89행; 이어지는 90–98행의 batch term 문장은 13.12에서 봅니다).
+`scoring-spec.yaml` header의 해당 단락입니다(87–103행; 이어지는 104–113행의 batch term 문장은 13.12에서 봅니다).
 
-> The generated layer (9.21, decisions 1–3) has no entries here. A generated file's terms are derived when the harness runs, by one rule over the C1 entries below (harness/tools/harness/scoring.py, `with_generated`), as a variant's are derived from its base's: for each placement the set's manifest records — a mode's C1 task set under one id suffix (`-s0`, `-s1`, …) — the `c1-<mode>` entry's terms, the entity's task id carrying the suffix (the chain head `game.chain.1` becomes `game-s0.chain.1`, the compiler forming a member's id from its task's), the latency and periodic terms windowed to the segments the placement is labelled in (no window when they span the file), the batch terms unwindowed. A placement labelled in no segment carries no term (the distractor grid's arriving set: the score reads the labelled situation, the arrival's effect on it is in the labelled set's terms); a placement the generator gave no input window (a segment of 4 s or less) drops its `channel: input` terms alone, since they would read no row; an idle placement carries none, as c1-idle has no entry. The rule's expansion is linted against the compiled generated files (scoring_lint, `lint_generated`) as these entries are against the core set.
+> The generated layer (9.21, decisions 1–3) has no entries here. A generated file's terms are derived when the harness runs, by one rule over the C1 entries below (harness/tools/harness/scoring.py, `with_generated`), as a variant's are derived from its base's: for each placement the set's manifest records — a mode's C1 task set under one id suffix (`-s0`, `-s1`, …) — the `c1-<mode>` entry's terms, the entity's task id carrying the suffix (the chain head `game.chain.1` becomes `game-s0.chain.1`, the compiler forming a member's id from its task's), the latency and periodic terms windowed to the segments the placement is labelled in (no window when they span the file), the batch terms unwindowed. A placement labelled in no segment carries no term (the distractor grid's arriving set: the score reads the labelled situation, the arrival's effect on it is in the labelled set's terms); a placement the generator gave no input window (a segment of 4 s or less) drops its `input_latency` terms alone, since they would read no row; an idle placement carries none, as c1-idle has no entry. The rule's expansion is linted against the compiled generated files (scoring_lint, `lint_generated`) as these entries are against the core set.
 
 `harness/tools/harness/scoring.py`의 `generated_entries(spec, manifest, only=None)`가 이것을 구현합니다. 파일 하나에 대해 하는 일을 단계로 적으면 이렇습니다.
 
@@ -1724,7 +1724,7 @@ C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡
    - `c1-<mode>` entry가 없거나(`idle`) label을 맡은 segment가 없으면(distractor의 B) 건너뜁니다.
    - label segment 목록이 연속인지 확인합니다(규칙은 창 하나만 만들기 때문).
    - 창 = 첫 label segment의 시작부터 마지막 label segment의 끝까지. 그것이 0부터 파일 끝까지라면 "whole"입니다.
-   - C1 entry의 term마다: `metric`이 `ready_wait`이고 `channel`이 `input`인데 placement의 `input`이 `false`이면 건너뜁니다. 아니면 term을 복사하고, `entity`에 suffix를 붙이고(`suffixed`), batch metric(`turnaround`, `cpu_delivered`)이 아니고 whole도 아니면 `window`를 붙입니다.
+   - C1 entry의 term마다: `metric`이 `input_latency`인데 placement의 `input`이 `false`이면 건너뜁니다. 아니면 term을 복사하고, `entity`에 suffix를 붙이고(`suffixed`), batch metric(`turnaround`, `cpu_delivered`)이 아니고 whole도 아니면 `window`를 붙입니다.
 4. term이 하나라도 있으면 그 파일의 entry가 됩니다. 없으면 entry가 없고, 점수 계산에서 빠집니다(9.21 spec의 invariant: "a file whose placements all carry none has no scoring entry and the scorer skips it").
 
 `with_generated`는 이 entry들을 scoring spec 사본에 더합니다. 이미 entry가 있는 generated 파일이 있으면 오류입니다("a generated file is scored by the rule and cannot also have an entry").
@@ -1749,7 +1749,7 @@ C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡
 
 > Where the generator placed no input window (a segment of `no_input_below` or less, 9.19 decision 3), the placement's `channel: input` terms are dropped, since they would read no row; its timer-channel terms and its periodic job terms stay. The rule adds no judgement of its own — it follows the fact the generator already decided.
 
-키 입력이 없는 구간에서 키 입력 대기의 P99를 구하면 읽을 행이 없습니다. harness는 "filter가 행을 하나도 고르지 못하면" 점수 계산을 멈추게 되어 있으므로(`docs/harness/metrics.md` §9: "A term whose filter selects no rows stops the scorer"), 그런 term은 미리 빼야 합니다. 규칙은 generator가 이미 내린 사실(`input: false`)을 따를 뿐 새로운 판단을 더하지 않는다고 decision이 스스로 말합니다.
+키 입력 term은 2026-10-30부터 `input_latency`이고, 규칙은 그 term을 뺍니다. 키 입력이 없는 구간에서 그 P99를 구하면 읽을 행이 없습니다. harness는 "filter가 행을 하나도 고르지 못하면" 점수 계산을 멈추게 되어 있으므로(`docs/harness/metrics.md` §9: "A term whose filter selects no rows stops the scorer"), 그런 term은 미리 빼야 합니다. 규칙은 generator가 이미 내린 사실(`input: false`)을 따를 뿐 새로운 판단을 더하지 않는다고 decision이 스스로 말합니다.
 
 9.21 D5가 실제 set에서의 결과를 적습니다. "the return grid's 2 s middle and the flap-stress set's 2 s alternations carry no keystroke term for an interactive B; modes without a keystroke stream (D1's list) never carry one, as their C1 entries never did". `kdenlive`·GIMP 계열(`video-edit`, `photo`, `render`, `transcode`, `backup`)의 편집기 term은 `channel: timer`이므로 키 입력 창이 없어도 남습니다.
 
@@ -1774,9 +1774,9 @@ C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡
 이 권을 쓰면서 `generated_entries`를 몇 파일에 돌린 결과입니다(필드는 줄였습니다).
 
 **`tr-compile-to-office-departs`** — term 셋.
-- `editor-s0`, `ready_wait`, `channel: input`, P99, 1.0, 창 0–60 s
+- `editor-s0`, `input_latency`, P99, 1.0, 창 0–60 s
 - `build-s0`, `turnaround`, 1.0, 창 없음
-- `writer-s1`, `ready_wait`, `channel: input`, P99, 1.0, 창 60–120 s
+- `writer-s1`, `input_latency`, P99, 1.0, 창 60–120 s
 
 **`tr-gaming-to-media-focus`** — term 셋.
 - `game-s0.chain.1`, `job`, `miss_rate`, 1.0, 창 0–60 s (A는 120 s까지 살지만 label은 첫 segment뿐이라 창도 거기까지)
@@ -1784,7 +1784,7 @@ C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡
 - `video-s1`, `miss_rate`, 0.5, 창 60–120 s
 
 **`dx-dev-with-compile`** — term 하나.
-- `editor-s0`, `ready_wait`, `channel: input`, P99, 1.0, 창 없음 (A가 파일 전체)
+- `editor-s0`, `input_latency`, P99, 1.0, 창 없음 (A가 파일 전체)
 
 **`rt-ml-train-to-browsing-2s`** — term 넷.
 - `editor-s0` P99 창 0–60 s, `hog-s0` turnaround, `editor-s2` P99 창 62–122 s, `hog-s2` turnaround. 가운데 `browser-s1`의 키 입력 term은 빠짐.
@@ -2168,6 +2168,7 @@ generated layer를 설명해야 하는 문서들의 고쳐 쓰기는 9.15에서 
 | cpufreq governor | CPU 동작 주파수를 부하에 따라 바꾸는 kernel 정책 (9.2) |
 | cache-hot | 최근에 돌아서 CPU cache에 그 task의 데이터가 남아 있는 상태 (9.2) |
 | MLFQ (multi-level feedback queue) | task를 우선순위가 다른 여러 줄에 세우고 행동에 따라 줄을 옮기는 scheduling 방식 (13.11) |
+| `input_latency` | 키 입력이 온 순간부터 task가 그 처리를 시작하기까지 걸린 시간 (13.1) |
 | `ready_wait` | task가 깨어나 실행 준비가 된 뒤 실제로 CPU를 받기까지 기다린 시간 (13.1) |
 | turnaround | 작업이 도착해서 끝날 때까지 걸린 시간 (2.3, 13.1) |
 | miss rate | 주기적 작업이 마감 안에 끝나지 못한 비율 (13.1) |

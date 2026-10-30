@@ -46,7 +46,7 @@ Not trace pairs, and not hand-written: each holds a compiled `workload.json` bui
 - **Anchor `t`** for window-level rows (`arrival`, `cpu_delivered`, `demand`, `preempt_count`, `busy`, and `completed` when its value is 0) is `T_end`; an `arrival` row's value is the task's `task_arrive` time. `completed` with value 1 and `turnaround` are anchored at the `task_end` time.
 - **`T_end`** is the largest pinned time in the run file: arrivals, departs, and wake events.
 - **`demand`** rows exist only for programs whose RUN total is finite. A program with an unbounded LOOP has no `demand` row.
-- **Window edges:** a consumed tick's `job` row is emitted only if its completion is at or before `T_end`, a skipped tick's only if the consumption that skipped it is; a `ready_wait` row only if its `run_start` is. Occupancy still open at `T_end` is clipped there.
+- **Window edges:** a consumed tick's `job` row is emitted only if its completion is at or before `T_end`, a skipped tick's only if the consumption that skipped it is; a `ready_wait` row only if its `run_start` is; an `input_latency` row for every keystroke before its task's end, `censored` 1 at the task's end or `T_end` when its service has not started by then. Occupancy still open at `T_end` is clipped there.
 - **Identity for mocks:** `sim` is `mock@0`; `source_sha256` is the SHA-256 of `trace.jsonl` as committed, so editing a trace means regenerating the hash.
 - **`deadline` lines** in a trace are never the source of a `job` row. They are a cross-check for single-stage TIMER tasks and are expected to disagree for chains.
 

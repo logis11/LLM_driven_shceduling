@@ -536,7 +536,7 @@ WAIT input:writer, RUN 3117, WAIT input:writer, RUN 10152, ...
 
 892,899 / 893,285 / 893,671 / 894,057 μs의 네 wake가 386 μs 간격으로 붙어 있는 것이 보입니다. gap 표의 짧은 쪽(245–386 μs)이 바로 이 몰아 깨기입니다. 또 2,059,422 μs에 input wake가 두 번 같은 시각에 있습니다. 우리가 추출한 SWELL-KW stream에서 timestamp가 15.6 ms 격자에 떨어져, 같은 시각으로 기록된 key가 있기 때문입니다(9.5 D12: "7 % zero gaps"). 이 격자는 stream에 대한 우리의 읽기이고, 읽은 SWELL-KW 자료는 timestamp의 해상도를 말하지 않습니다.
 
-simulator는 이 task를 이렇게 실행합니다. 0.30초에 timer wake가 오면 runnable이 되어 248 μs를 쓰고, 다음 WAIT에서 멈춥니다. 2.06초에 key가 오면 3,117 μs를 쓰려 하는데, 그때 browser나 mail이 CPU를 쓰고 있으면 기다리게 됩니다. 이 기다림(ready wait)이 이 연구가 재는 지연입니다. 실제로 core set의 scoring spec은 `c1-office`의 항목으로 `{entity: writer, metric: ready_wait, cause: wake, channel: input, aggregate: p99, …}`를 둡니다(`harness/scoring/scoring-spec.yaml`). key 입력으로 깨어난 writer가 CPU를 기다린 시간의 99번째 percentile을 점수로 삼는다는 뜻입니다.
+simulator는 이 task를 이렇게 실행합니다. 0.30초에 timer wake가 오면 runnable이 되어 248 μs를 쓰고, 다음 WAIT에서 멈춥니다. 2.06초에 key가 오면 3,117 μs를 쓰려 하는데, 그때 browser나 mail이 CPU를 쓰고 있거나 writer가 앞의 일을 아직 하고 있으면 기다리게 됩니다. key가 온 순간부터 그 key의 처리가 시작되기까지의 이 기다림이 이 연구가 재는 지연입니다. 실제로 core set의 scoring spec은 `c1-office`의 항목으로 `{entity: writer, metric: input_latency, aggregate: p99, …}`를 둡니다(`harness/scoring/scoring-spec.yaml`). writer에 온 key 입력 하나하나가 처리되기 시작할 때까지 걸린 시간의 99번째 percentile을 점수로 삼는다는 뜻입니다.
 
 ### 5단계: 숫자의 뒷이야기
 
