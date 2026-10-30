@@ -4,7 +4,9 @@
 `records.read_csv` returns) and yields aggregate rows: one per
 (entity, metric, aggregate, cause, channel, window, index) with a value. The
 `ready_wait` aggregates come per cause and, for cause `wake`, per channel kind
-as well (§8), so interaction latency can read the input channel alone. Every trace
+as well (§8). Interaction latency is `input_latency`'s, one row per keystroke
+from its wake event (§6.12), with the count of its censored rows beside the
+statistics. Every trace
 aggregate §8 lists is here whether a scoring term weights it or not, so the
 scorer, the guards, and the report read one file (`harness/aggregates/schema/`).
 The recognition aggregates are the grader's (sub-task 8.4), not this module's.
@@ -102,7 +104,7 @@ def compute_aggregates(rows, windows=None, interactive=()):
     windows = windows or {}
     identity = run_identity(rows)
     df = pd.DataFrame(rows)
-    for col in ("cause", "channel", "provenance", "algorithm", "index", "period_us", "skipped"):
+    for col in ("cause", "channel", "provenance", "algorithm", "index", "period_us", "skipped", "censored"):
         if col not in df.columns:
             df[col] = np.nan
     out = []
@@ -145,6 +147,24 @@ def compute_aggregates(rows, windows=None, interactive=()):
                 emit(entity, "ready_wait", "max", max(vals), **kw)
                 over = sum(1 for v in vals if v > T_INTERACTION_US)
                 emit(entity, "ready_wait", "over_threshold", Fraction(over, len(vals)), **kw)
+
+    # --- input_latency: per entity, per window; a censored row's value is its lower bound (§6.12)
+    il = df[df["metric"] == "input_latency"]
+    for entity, g in il.groupby("entity", sort=True):
+        for window in windows_for(entity, "input_latency"):
+            sel = g[[_in_window(int(t), window) for t in g["t"]]]
+            if sel.empty:
+                continue
+            vals = sel["value"].astype(int).tolist()
+            kw = dict(window=window)
+            emit(entity, "input_latency", "count", len(vals), **kw)
+            emit(entity, "input_latency", "censored_count", int((sel["censored"].fillna(0).astype(int) == 1).sum()), **kw)
+            emit(entity, "input_latency", "mean", Fraction(sum(vals), len(vals)), **kw)
+            for p, name in ((50, "p50"), (95, "p95"), (99, "p99")):
+                emit(entity, "input_latency", name, percentile(vals, p), **kw)
+            emit(entity, "input_latency", "max", max(vals), **kw)
+            over = sum(1 for v in vals if v > T_INTERACTION_US)
+            emit(entity, "input_latency", "over_threshold", Fraction(over, len(vals)), **kw)
 
     # --- job: per entity, per window. A skipped tick (metrics doc §6.2, the TIMER skip
     # rule) is a job row with no completion: it counts, it is missed, it has no latency.

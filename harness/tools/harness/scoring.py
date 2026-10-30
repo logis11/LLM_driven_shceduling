@@ -28,7 +28,7 @@ placement's id suffix on the entity, the latency and periodic terms windowed to
 the segments the placement is labelled in (no window when they span the file),
 the batch terms unwindowed; a placement labelled in no segment carries none
 (the distractor grid's B); a placement without an input window drops its
-`channel: input` terms alone; an idle placement carries none, as `c1-idle` has
+`input_latency` terms alone; an idle placement carries none, as `c1-idle` has
 no entry. `lint_generated` checks the derived entries against the compiled
 generated files as `lint_spec` checks the authored ones.
 """
@@ -53,6 +53,7 @@ BATCH_METRICS = {"turnaround", "cpu_delivered"}
 # every other aggregate of metrics doc §8 is reported beside the score.
 LEGAL = {
     ("ready_wait", "p99"): "lower",
+    ("input_latency", "p99"): "lower",
     ("job", "miss_rate"): "lower",
     ("cpu_delivered", "progress"): "higher",
     ("turnaround", "turnaround"): "lower",
@@ -296,11 +297,12 @@ def windows_from_spec(spec, workload_id):
 
 
 def interactive_from_spec(spec, workload_id):
-    """The entities of the workload's `ready_wait` terms — the interactive tasks the excess aggregates measure."""
+    """The entities of the workload's `input_latency` and `ready_wait` terms — the interactive tasks the excess
+    aggregates measure."""
     entry = spec["files"].get(workload_id)
     if not entry:
         return ()
-    return tuple(dict.fromkeys(t["entity"] for t in entry["terms"] if t["metric"] == "ready_wait"))
+    return tuple(dict.fromkeys(t["entity"] for t in entry["terms"] if t["metric"] in ("input_latency", "ready_wait")))
 
 
 def suffixed(entity, k):
@@ -317,7 +319,7 @@ def generated_entries(spec, manifest, only=None):
     ids in `only`. Per placement the manifest records: the `c1-<mode>` entry's terms, the entity suffixed `-s<k>`,
     the latency and periodic terms windowed to the placement's labelled segments (no window when they span the
     file), the batch terms unwindowed; nothing from a placement labelled in no segment, from one whose mode has no
-    entry (idle), nor the `channel: input` terms of one without an input window. A file deriving no term has no
+    entry (idle), nor the `input_latency` terms of one without an input window. A file deriving no term has no
     entry. A manifest without placements predates the record and is an error."""
     out = {}
     demand = manifest.get("demand") or {}
@@ -343,7 +345,7 @@ def generated_entries(spec, manifest, only=None):
             start, end = segments[labelled[0]][0], segments[labelled[-1]][1]
             whole = start == 0 and end == t_end
             for term in entry.get("terms") or []:
-                if term["metric"] == "ready_wait" and term.get("channel") == "input" and not placement["input"]:
+                if term["metric"] == "input_latency" and not placement["input"]:
                     continue                                   # decision 3: no keystroke to read
                 t = {k: v for k, v in term.items() if k != "window"}
                 t["entity"] = suffixed(term["entity"], placement["suffix"])

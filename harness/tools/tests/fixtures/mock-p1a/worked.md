@@ -48,6 +48,8 @@ Keystrokes on `input:editor`: 8000, 30000, 54500, 71000. `T_end` = 120000. The h
 | `editor` 54500 `wake` | `run_start` 56000 | 1500 |
 | `editor` 71000 `wake` | `run_start` 74000 | 3000 |
 
+**`input_latency`** — one per keystroke at its wake event, value = the start of the service of the WAIT it completes − its wake time (metrics doc §6.12; added 2026-10-30). No keystroke queues, so each equals its `ready_wait`: 8000 → 0, 30000 → 0, 54500 → 1500, 71000 → 3000, each `censored` 0.
+
 **Lifetime**
 
 | task | `arrival` | occupancy (clipped) | `cpu_delivered` | `demand` | `completed` | `preempt_count` |
@@ -69,4 +71,4 @@ No `turnaround` rows. Progress for the hog, computed later by scoring: 65000 / 9
 
 No `switch_window` row: entries 1 and 2 change params, not the algorithm.
 
-Total 19 rows.
+Total 23 rows.

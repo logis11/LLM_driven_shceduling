@@ -69,6 +69,8 @@ The trace carries the applied instants; the schedule carries the params. `W_sing
 | `editor` 62000 `wake` | `run_start` 62600 | 600 |
 | `editor` 90000 `wake` | `run_start` 90000 | 0 |
 
+**`input_latency`** — one per keystroke at its wake event, value = the start of the service of the WAIT it completes − its wake time (metrics doc §6.12; added 2026-10-30): 20000 → `run_start` 42600, 22600; 46000 → served at 50100 inside the occupancy, 4100, where its `ready_wait` reads 0; 62000 → `run_start` 62600, 600; 90000 → 0; each `censored` 0.
+
 **Lifetime**
 
 | task | `arrival` | occupancy (clipped) | `cpu_delivered` | `demand` | `completed` | `preempt_count` |
@@ -106,7 +108,7 @@ The FIFO row's hog count is the memo's known bias in the other direction: both t
 
 **`busy`** — 12000 + 77500 + 500 = 90000.
 
-Total 30 rows.
+Total 34 rows.
 
 ## The aggregates, by hand (metrics doc §8)
 

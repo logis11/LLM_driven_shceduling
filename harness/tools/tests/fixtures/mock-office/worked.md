@@ -37,6 +37,16 @@ Keystrokes on `input:writer`: 10000, 15000, 16000. `T_end` = 60000 (the departs)
 
 Three `cause=wake` rows for three keystrokes: the queued ones are counted, at zero wait. Each completes the writer's next `WAIT input:writer`, so the rows carry `channel=input`. No `arrive` row: neither task has a `ready` line at its arrival.
 
+**`input_latency`** — one per keystroke at its wake event, value = the start of the service of the WAIT it completes − its wake time (metrics doc §6.12; added 2026-10-30).
+
+| keystroke | serves the WAIT completed at | value | `censored` |
+|---|---|---|---|
+| 10000 | `ready` 10000, `run_start` 10000 | 0 | 0 |
+| 15000 | `ready` 18000 inside the occupancy | 3000 | 0 |
+| 16000 | `ready` 21000 inside the occupancy | 5000 | 0 |
+
+The queued keystrokes wait 3000 and 5000 here, where their `ready_wait` rows read 0.
+
 **Lifetime**
 
 | task | `arrival` | occupancy | `cpu_delivered` | `demand` | `completed` | `preempt_count` |
@@ -50,4 +60,4 @@ No `turnaround` rows (nothing completed).
 
 **`busy`** — 16000 at `T_end`.
 
-Total 15 rows.
+Total 18 rows.

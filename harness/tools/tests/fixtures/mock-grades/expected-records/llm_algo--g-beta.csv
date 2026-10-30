@@ -1,6 +1,6 @@
-workload_id,condition,table,seed,boot_default,telemetry,sim,source_sha256,entity,metric,t,value,cause,channel,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss,skipped
-g-beta,llm_algo,calibrated,,,names,,c0f534dc2fb239d218348b92e2d7f91785c765b6491b9d05ceb1c9d25cd554e9,recognizer,algo_choice_correct,0,0,,,,,,,MLFQ,EDF,unmodified,5,,0,
-g-beta,llm_algo,calibrated,,,names,,c0f534dc2fb239d218348b92e2d7f91785c765b6491b9d05ceb1c9d25cd554e9,recognizer,attr_correct,0,1,,,,,,,true,true,unmodified,5,,0,
-g-beta,llm_algo,calibrated,,,names,,c0f534dc2fb239d218348b92e2d7f91785c765b6491b9d05ceb1c9d25cd554e9,recognizer,config_correct,0,1,,,,,,,,,unmodified,5,,0,
-g-beta,llm_algo,calibrated,,,names,,c0f534dc2fb239d218348b92e2d7f91785c765b6491b9d05ceb1c9d25cd554e9,recognizer,latency_us,0,520000,,,,,,,,,unmodified,5,,0,
-g-beta,llm_algo,calibrated,,,names,,c0f534dc2fb239d218348b92e2d7f91785c765b6491b9d05ceb1c9d25cd554e9,recognizer,mode_correct,0,1,,,,,,,media,media,unmodified,5,,0,
+workload_id,condition,table,seed,boot_default,telemetry,sim,source_sha256,entity,metric,t,value,cause,channel,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss,skipped,censored
+g-beta,llm_algo,calibrated,,,names,,c0f534dc2fb239d218348b92e2d7f91785c765b6491b9d05ceb1c9d25cd554e9,recognizer,algo_choice_correct,0,0,,,,,,,MLFQ,EDF,unmodified,5,,0,,
+g-beta,llm_algo,calibrated,,,names,,c0f534dc2fb239d218348b92e2d7f91785c765b6491b9d05ceb1c9d25cd554e9,recognizer,attr_correct,0,1,,,,,,,true,true,unmodified,5,,0,,
+g-beta,llm_algo,calibrated,,,names,,c0f534dc2fb239d218348b92e2d7f91785c765b6491b9d05ceb1c9d25cd554e9,recognizer,config_correct,0,1,,,,,,,,,unmodified,5,,0,,
+g-beta,llm_algo,calibrated,,,names,,c0f534dc2fb239d218348b92e2d7f91785c765b6491b9d05ceb1c9d25cd554e9,recognizer,latency_us,0,520000,,,,,,,,,unmodified,5,,0,,
+g-beta,llm_algo,calibrated,,,names,,c0f534dc2fb239d218348b92e2d7f91785c765b6491b9d05ceb1c9d25cd554e9,recognizer,mode_correct,0,1,,,,,,,media,media,unmodified,5,,0,,

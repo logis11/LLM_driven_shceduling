@@ -54,9 +54,11 @@ The daemon queries at every pinned set change: 0 (`code`), 50000 (`python3`), 10
 | 2700000 | keystroke 2; RUN 4000; blocks at 2704000. |
 | 3000000 | `T_end`. `editor` departs. |
 
-## Records (27 rows)
+## Records (29 rows)
 
 **`ready_wait`**: `hog` 50000/arrive → 0; `batch` 100000/arrive → `run_start` 2050000 → **1950000**; `editor` 2600000/wake → 0; `editor` 2700000/wake → 0.
+
+**`input_latency`** (one per keystroke at its wake event, value = the start of the service of the WAIT it completes − its wake time (metrics doc §6.12; added 2026-10-30)): `editor` 2600000 → 0, 2700000 → 0, each `censored` 0.
 
 **Lifetime**: `editor` [2600000,2604000] [2700000,2704000] → `arrival` 0, `cpu_delivered` 8000, `demand` 8000, `completed` 0 (depart), `preempt_count` 0. `hog` [50000,2050000] → `arrival` 50000, 2000000 / 2000000, `completed` 1 at 2050000, `turnaround` 2000000. `batch` [2050000,2550000] → `arrival` 100000, 500000 / 500000, `completed` 1 at 2550000, `turnaround` 2450000. No preemptions under FIFO.
 

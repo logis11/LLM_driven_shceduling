@@ -315,3 +315,27 @@ def test_flip_aggregates_on_mock_switch(fixture_dir, tmp_path):
     out = {r["aggregate"]: r["value"] for r in agg.flip_aggregates(aggregates, read_config_schedule(tmp_path / "one.json"), log, grades)}
     assert out["change_count"] == "0.000000000000"
     assert agg.flip_aggregates([], schedule, log, grades) == []
+
+
+def test_input_latency_aggregates_and_the_censored_mark():
+    """input_latency aggregates carry the count of censored keystrokes beside the statistics
+    (metrics doc §8, §6.12), and a term whose window holds one is marked censored (§9)."""
+    ident = {"workload_id": "w", "condition": "", "table": "", "seed": "", "boot_default": "",
+             "telemetry": "focus", "sim": "s", "source_sha256": "0" * 64}
+
+    def rows(condition, values):
+        base = [dict(ident, condition=condition, table="" if condition == "fixed" else "prior",
+                     entity="lane", metric="busy", t=1000, value=500)]
+        return base + [dict(ident, condition=condition, table="" if condition == "fixed" else "prior",
+                            entity="e", metric="input_latency", t=10 * k, value=v, censored=c)
+                       for k, (v, c) in enumerate(values)]
+
+    fixed = agg.compute_aggregates(rows("fixed", [(9000, 0), (40000, 1)]))
+    got = {(r["aggregate"]): r["value"] for r in fixed if r["metric"] == "input_latency"}
+    assert got["count"] == agg.fmt(2) and got["censored_count"] == agg.fmt(1) and got["max"] == agg.fmt(40000)
+    oracle = agg.compute_aggregates(rows("oracle", [(1000, 0), (2000, 0)]))
+    spec = {"files": {"w": {"terms": [{"entity": "e", "metric": "input_latency", "aggregate": "p99",
+                                       "direction": "lower", "weight": 1.0}]}}}
+    terms, files = scorer.score(fixed + oracle, spec)
+    marks = {t["condition"]: t["censored"] for t in terms}
+    assert marks == {"fixed": 1, "oracle": 0}

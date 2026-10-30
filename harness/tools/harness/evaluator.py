@@ -583,22 +583,23 @@ def line_bounding_pair(rs, params, ctx):
 
 
 def line_input_wake_count(rs, params, ctx):
-    """9.14 decision 10: per judging file and interaction-latency term, the number
-    of wakes the P99 rests on — the `ready_wait` count aggregate of the term's
-    entity, cause and channel inside its window, read on the fixed run under the
-    primary boot default."""
+    """9.14 decision 10: per judging file and latency term, the number of
+    observations the P99 rests on — the count aggregate of the term's entity and
+    metric (with a `ready_wait` term's cause and channel) inside its window, read on
+    the fixed run under the primary boot default: an `input_latency` term's
+    keystrokes, a `ready_wait` term's wakes."""
     spec = scoring.load_spec(ctx["scoring_spec_path"])
     rows = []
     for wid in rs.judging:
         for t in (spec["files"].get(wid) or {}).get("terms") or []:
-            if t["metric"] != "ready_wait":
+            if t["metric"] not in ("input_latency", "ready_wait"):
                 continue
             w = t.get("window") or {}
             start, end = str(w.get("start_us", "")), str(w.get("end_us", ""))
             value = next((r["value"] for r in rs.agg_rows
                           if r["workload_id"] == wid and r["condition"] == "fixed" and r["boot_default"] == ""
                           and r["telemetry"] == rs.telemetry
-                          and r["entity"] == t["entity"] and r["metric"] == "ready_wait"
+                          and r["entity"] == t["entity"] and r["metric"] == t["metric"]
                           and r["aggregate"] == "count" and r["cause"] == t.get("cause", "")
                           and r["channel"] == t.get("channel", "")
                           and str(r["window_start_us"]) == start and str(r["window_end_us"]) == end), None)

@@ -65,6 +65,7 @@
       "type": "string",
       "enum": [
         "ready_wait",
+        "input_latency",
         "job",
         "cpu_delivered",
         "turnaround"

@@ -4,15 +4,17 @@
 #
 # One term: entity (a task id from the compiled workload, or lane/schedule),
 # metric (the primitive), cause (ready_wait filter), channel (the kind of the
-# WAIT a wake completed — since 2026-10-09 every interaction-latency term names
-# one: `input` where the task has a keystroke stream, so operations' and
-# timers' wakes do not read as keystrokes; `timer` on the fourteen terms of the
-# video editor (kdenlive) and the image editor (GIMP), whose measured driven
-# phases are mouse-driven operations carried as the applications' own timer
-# components (9.5) — no keystroke stream exists for them, so their foreground
-# term reads the wait of their own wakes, the application's responsiveness
-# rather than a keystroke's echo, as it did before the channel was named; the
-# T_interaction threshold line (metrics doc §10) reads the input channel alone),
+# WAIT a wake completed, a ready_wait filter). An interaction-latency term is
+# `input_latency` where the task has a keystroke stream: one row per keystroke,
+# from its wake event to the start of its service, a keystroke the task never
+# served censored at its end (metrics doc §6.12; since 2026-10-30, in place of
+# `ready_wait` filtered to channel `input`). The fourteen terms of the video
+# editor (kdenlive) and the image editor (GIMP) are `ready_wait` with channel
+# `timer`: their measured driven phases are mouse-driven operations carried as
+# the applications' own timer components (9.5) — no keystroke stream exists for
+# them, so their foreground term reads the wait of their own wakes, the
+# application's responsiveness rather than a keystroke's echo. The
+# T_interaction threshold line (metrics doc §10) reads `input_latency`,
 # window (a filter on t; absent = the whole file; present, it is a ground-truth
 # segment of the file, which the lint checks), aggregate, direction (fixed by
 # the aggregate), weight. A file's score = the weighted sum of its terms'
@@ -95,7 +97,7 @@
 # labelled in no segment carries no term (the distractor grid's arriving set:
 # the score reads the labelled situation, the arrival's effect on it is in the
 # labelled set's terms); a placement the generator gave no input window
-# (a segment of 4 s or less) drops its `channel: input` terms alone, since they
+# (a segment of 4 s or less) drops its `input_latency` terms alone, since they
 # would read no row; an idle placement carries none, as c1-idle has no entry.
 # The rule's expansion is linted against the compiled generated files
 # (scoring_lint, `lint_generated`) as these entries are against the core set.
@@ -115,13 +117,13 @@ files:
   # ---- C1 — single-situation calibration
   c1-office:
     terms:
-      - {entity: writer, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: writer, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c1-browsing:
     terms:
-      - {entity: browser, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: browser, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c1-compile:
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: build, metric: turnaround, aggregate: turnaround, direction: lower, weight: 1.0}
   c1-gaming:
     # the chain alone since 9.9 retired the compositor task; game.chain.1 is the head of the 17-member chain
@@ -143,7 +145,7 @@ files:
   # user waits on a build — and makes the indexing/true cap derived, not assumed.
   c1-dev:
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c1-video-edit:
     terms:
       - {entity: editor, metric: ready_wait, cause: wake, channel: timer, aggregate: p99, direction: lower, weight: 1.0}
@@ -152,13 +154,13 @@ files:
       - {entity: photo-editor, metric: ready_wait, cause: wake, channel: timer, aggregate: p99, direction: lower, weight: 1.0}
   c1-mail:
     terms:
-      - {entity: mailer, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: mailer, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c1-meeting:
     terms:
       - {entity: voice, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
   c1-ml-train:
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: hog, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
   c1-render:
     terms:
@@ -170,7 +172,7 @@ files:
       - {entity: batch, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
   c1-indexing:
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: hog, metric: turnaround, aggregate: turnaround, direction: lower, weight: 1.0}
   c1-backup:
     terms:
@@ -186,11 +188,11 @@ files:
   # every row and score their turnaround (9.14 decision 6; 9.16 D4).
   c2-p1a:
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, window: {start_us: 60000000, end_us: 99435000}, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, window: {start_us: 60000000, end_us: 99435000}, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: hog, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
   c2-p1b:
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, window: {start_us: 60000000, end_us: 99435000}, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, window: {start_us: 60000000, end_us: 99435000}, aggregate: p99, direction: lower, weight: 1.0}
   c2-p2a:
     # The measured SteamCMD's (9.7) whole program is batch class over 74 % of its CPU; under EDF the
     # deadline-class chain takes 0.95 of the lane, and the part the file gives the download (about 1 s)
@@ -227,13 +229,13 @@ files:
   # ---- C3 — transition arcs. Per-task terms; focus and task lifetimes window them.
   c3-workday:
     terms:
-      - {entity: browser, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
-      - {entity: writer, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
-      - {entity: mailer, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: browser, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: writer, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: mailer, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: build, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
   c3-evening:
     terms:
-      - {entity: browser, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: browser, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: game.chain.1, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
       - {entity: music, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
       - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
@@ -247,11 +249,11 @@ files:
   c4-office:
     base: c1-office
     terms:
-      - {entity: writer, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: writer, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c4-compile:
     base: c1-compile
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: build, metric: turnaround, aggregate: turnaround, direction: lower, weight: 1.0}
   c4-gaming:
     base: c1-gaming
@@ -280,15 +282,15 @@ files:
   c6-spoof:
     base: c1-browsing
     terms:
-      - {entity: browser, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: browser, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c6-fold:
     base: c1-browsing
     terms:
-      - {entity: browser, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: browser, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c6-dual:
     terms:
       - {entity: game.chain.1, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
 
   # ---- C7 — attribute counterparts (Phase 7 spec decision 10): the C1 base's
   # terms, minus the batch term where the label flips it to unwanted. The
@@ -299,11 +301,11 @@ files:
   c7-browsing:
     base: c1-browsing
     terms:
-      - {entity: browser, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: browser, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c7-office:
     base: c1-office
     terms:
-      - {entity: writer, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: writer, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c7-mail:
     # the counterpart's keystroke window, 2 s to 24.385 s, is a slice of c1-mail's 2–58 s window — the
     # same stimulus offset, so the same keystrokes over the slice (9.18) — and c1-mail's 35 fall between
@@ -315,7 +317,7 @@ files:
   c7-dev:
     base: c1-dev
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c7-photo:
     base: c1-photo
     terms:
@@ -340,11 +342,11 @@ files:
   c7-compile:
     base: c1-compile
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c7-ml-train:
     base: c1-ml-train
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c7-render:
     base: c1-render
     terms:
@@ -356,7 +358,7 @@ files:
   c7-indexing:
     base: c1-indexing
     terms:
-      - {entity: editor, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c7-backup:
     base: c1-backup
     terms:

@@ -60,13 +60,13 @@ def test_scored_aggregates_are_the_locked_ones(spec):
 def test_c2_weights_and_windows(spec):
     for wid, (start, end) in C2_WINDOWS.items():
         for t in terms(spec, wid):
-            if t["metric"] in ("ready_wait", "job"):
+            if t["metric"] in ("input_latency", "ready_wait", "job"):
                 assert t["window"] == {"start_us": start, "end_us": end}, (wid, t)
                 assert t["weight"] == 1.0
             else:
                 assert "window" not in t, (wid, t)
-    assert one(spec, "c2-p1a", "editor", "ready_wait")["cause"] == "wake"
-    assert one(spec, "c2-p1a", "editor", "ready_wait")["channel"] == "input"
+    assert one(spec, "c2-p1a", "editor", "input_latency")["aggregate"] == "p99"   # the keystrokes, from their wake events
+    assert "channel" not in one(spec, "c2-p1a", "editor", "input_latency")
     assert one(spec, "c2-p1a", "hog", "cpu_delivered")["weight"] == 0.5
     assert [t["entity"] for t in terms(spec, "c2-p1b")] == ["editor"]
     assert one(spec, "c2-p2a", "game.chain.1", "job")["aggregate"] == "miss_rate"
@@ -79,25 +79,25 @@ def test_c2_weights_and_windows(spec):
 
 
 def test_c1_terms(spec):
-    assert [(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c1-office")] == [("writer", "ready_wait", 1.0)]
-    assert [(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c1-browsing")] == [("browser", "ready_wait", 1.0)]
-    assert one(spec, "c1-compile", "editor", "ready_wait")["weight"] == 1.0
+    assert [(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c1-office")] == [("writer", "input_latency", 1.0)]
+    assert [(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c1-browsing")] == [("browser", "input_latency", 1.0)]
+    assert one(spec, "c1-compile", "editor", "input_latency")["weight"] == 1.0
     assert one(spec, "c1-compile", "build", "turnaround")["weight"] == 1.0
     assert one(spec, "c1-media", "music", "job")["weight"] == 1.0
     assert one(spec, "c1-media", "video", "job")["weight"] == 0.5
     assert [(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c1-gaming")] == [("game.chain.1", "job", 1.0)]
     assert [(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c1-meeting")] == [("voice", "job", 1.0)]
-    assert one(spec, "c1-office", "writer", "ready_wait")["channel"] == "input"
+    assert one(spec, "c1-office", "writer", "input_latency")["aggregate"] == "p99"
     for wid in ("c1-office", "c1-browsing", "c1-compile", "c1-media", "c1-gaming"):
         assert all("window" not in t for t in terms(spec, wid))
 
 
 def test_c3_terms(spec):
     assert {(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c3-workday")} == {
-        ("browser", "ready_wait", 1.0), ("writer", "ready_wait", 1.0), ("mailer", "ready_wait", 1.0),
+        ("browser", "input_latency", 1.0), ("writer", "input_latency", 1.0), ("mailer", "input_latency", 1.0),
         ("build", "cpu_delivered", 0.5)}
     assert {(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c3-evening")} == {
-        ("browser", "ready_wait", 1.0), ("game.chain.1", "job", 1.0),
+        ("browser", "input_latency", 1.0), ("game.chain.1", "job", 1.0),
         ("music", "job", 1.0), ("video", "job", 0.5)}
     assert {(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c3-creation")} == {
         ("photo-editor", "ready_wait", 1.0), ("video-editor", "ready_wait", 1.0),
@@ -136,7 +136,7 @@ def test_c7_batch_counterparts_drop_only_the_batch_term(spec):
 
 def test_c6_dual_scores_its_two_foregrounds(spec):
     assert {(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c6-dual")} == {
-        ("game.chain.1", "job", 1.0), ("editor", "ready_wait", 1.0)}
+        ("game.chain.1", "job", 1.0), ("editor", "input_latency", 1.0)}
 
 
 # ------------------------------------------------------------------ the lint
@@ -384,9 +384,9 @@ def _generated_manifest():
 
 
 _C1 = {
-    "c1-office": {"terms": [{"entity": "writer", "metric": "ready_wait", "cause": "wake", "channel": "input",
+    "c1-office": {"terms": [{"entity": "writer", "metric": "input_latency",
                              "aggregate": "p99", "direction": "lower", "weight": 1.0}]},
-    "c1-compile": {"terms": [{"entity": "editor", "metric": "ready_wait", "cause": "wake", "channel": "input",
+    "c1-compile": {"terms": [{"entity": "editor", "metric": "input_latency",
                               "aggregate": "p99", "direction": "lower", "weight": 1.0},
                              {"entity": "build", "metric": "turnaround", "aggregate": "turnaround", "direction": "lower",
                               "weight": 1.0}]},
@@ -417,7 +417,7 @@ def test_the_generated_rule_derives_each_placements_c1_terms_suffixed_and_window
     assert [(t["entity"], t.get("window")) for t in tr] == [
         ("editor-s0", {"start_us": 0, "end_us": 60 * S}), ("build-s0", None),
         ("writer-s1", {"start_us": 60 * S, "end_us": 120 * S})]
-    assert tr[0]["channel"] == "input" and tr[0]["weight"] == 1.0 and tr[1]["metric"] == "turnaround"
+    assert tr[0]["metric"] == "input_latency" and tr[0]["weight"] == 1.0 and tr[1]["metric"] == "turnaround"
     assert entries["dx-office-with-compile"]["terms"] == [dict(_C1["c1-office"]["terms"][0], entity="writer-s0")]
     rt = entries["rt-video-edit-to-office-2s"]["terms"]
     assert [(t["entity"], t["channel"], t["window"]) for t in rt] == [
@@ -427,7 +427,7 @@ def test_the_generated_rule_derives_each_placements_c1_terms_suffixed_and_window
     out = with_generated(spec, _generated_manifest(), only={"tr-compile-to-office-departs", "fl-idle-t5-all"})
     assert set(out["files"]) == set(_C1) | {"tr-compile-to-office-departs"}
     assert windows_from_spec(out, "tr-compile-to-office-departs") == {
-        ("editor-s0", "ready_wait"): [(0, 60 * S)], ("writer-s1", "ready_wait"): [(60 * S, 120 * S)]}
+        ("editor-s0", "input_latency"): [(0, 60 * S)], ("writer-s1", "input_latency"): [(60 * S, 120 * S)]}
     assert spec["files"].keys() == set(_C1)                       # a copy
     with pytest.raises(ValueError, match="cannot also have an entry"):
         with_generated({"files": dict(_C1, **{"dx-office-with-compile": {"terms": []}})}, _generated_manifest())
@@ -457,7 +457,7 @@ def test_the_committed_spec_derives_terms_for_the_toy_set_and_lints_clean_on_the
     toy = manifests.load(REPO / "harness" / "tools" / "tests" / "fixtures" / "mock-experiment" / "build.toy-grid.manifest.json")
     entries = generated_entries(spec, toy)
     assert [(t["entity"], t["metric"], t.get("window")) for t in entries["tg-a"]["terms"]] == [
-        ("editor-s0", "ready_wait", {"start_us": 0, "end_us": 50_000}),
+        ("editor-s0", "input_latency", {"start_us": 0, "end_us": 50_000}),
         ("hog-s1", "turnaround", None)]                           # ml-train's keystroke term dropped: no input window
     ladder = REPO / "dataset" / "build.familiarity-ladder.manifest.json"
     if not (REPO / "dataset" / "build" / "familiarity-ladder-single").is_dir():

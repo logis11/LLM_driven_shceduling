@@ -1,6 +1,6 @@
-workload_id,condition,table,seed,boot_default,telemetry,sim,source_sha256,entity,metric,t,value,cause,channel,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss,skipped
-g-epsilon,llm_algo,calibrated,,,names,,cf18095c5634321afec8c9e5972666d9dca5dcd4827b52b5cebb92b46d1034b9,recognizer,algo_choice_correct,0,1,,,,,,,MLFQ,MLFQ,unmodified,,,0,
-g-epsilon,llm_algo,calibrated,,,names,,cf18095c5634321afec8c9e5972666d9dca5dcd4827b52b5cebb92b46d1034b9,recognizer,attr_correct,0,1,,,,,,,false,false,unmodified,,,0,
-g-epsilon,llm_algo,calibrated,,,names,,cf18095c5634321afec8c9e5972666d9dca5dcd4827b52b5cebb92b46d1034b9,recognizer,config_correct,0,1,,,,,,,,,unmodified,,,0,
-g-epsilon,llm_algo,calibrated,,,names,,cf18095c5634321afec8c9e5972666d9dca5dcd4827b52b5cebb92b46d1034b9,recognizer,latency_us,0,520000,,,,,,,,,unmodified,,,0,
-g-epsilon,llm_algo,calibrated,,,names,,cf18095c5634321afec8c9e5972666d9dca5dcd4827b52b5cebb92b46d1034b9,recognizer,mode_correct,0,1,,,,,,,indexing,indexing,unmodified,,,0,
+workload_id,condition,table,seed,boot_default,telemetry,sim,source_sha256,entity,metric,t,value,cause,channel,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss,skipped,censored
+g-epsilon,llm_algo,calibrated,,,names,,cf18095c5634321afec8c9e5972666d9dca5dcd4827b52b5cebb92b46d1034b9,recognizer,algo_choice_correct,0,1,,,,,,,MLFQ,MLFQ,unmodified,,,0,,
+g-epsilon,llm_algo,calibrated,,,names,,cf18095c5634321afec8c9e5972666d9dca5dcd4827b52b5cebb92b46d1034b9,recognizer,attr_correct,0,1,,,,,,,false,false,unmodified,,,0,,
+g-epsilon,llm_algo,calibrated,,,names,,cf18095c5634321afec8c9e5972666d9dca5dcd4827b52b5cebb92b46d1034b9,recognizer,config_correct,0,1,,,,,,,,,unmodified,,,0,,
+g-epsilon,llm_algo,calibrated,,,names,,cf18095c5634321afec8c9e5972666d9dca5dcd4827b52b5cebb92b46d1034b9,recognizer,latency_us,0,520000,,,,,,,,,unmodified,,,0,,
+g-epsilon,llm_algo,calibrated,,,names,,cf18095c5634321afec8c9e5972666d9dca5dcd4827b52b5cebb92b46d1034b9,recognizer,mode_correct,0,1,,,,,,,indexing,indexing,unmodified,,,0,,

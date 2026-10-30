@@ -705,3 +705,52 @@ def test_the_hog_test_and_the_cpu_since_reading_match_their_scans_on_time_ordere
             for need in (1, 7, 30, 10_000):
                 assert _time_of_cpu_since(occupancy, t_apply, need) == cpu_since_scan(occupancy, t_apply, need), \
                     (occupancy, t_apply, need)
+
+
+# ------------------------------------------------------------ input_latency
+# docs/harness/metrics.md §6.12 — one row per keystroke at its wake event, to the start of
+# the service of the WAIT it completes; a keystroke its task never serves is censored
+
+def test_input_latency_runs_from_the_keystroke_through_its_queueing():
+    """Keystrokes queued while the task is mid-burst: their ready lines fall inside the
+    occupancy and wait 0, their input_latency rows count the queueing."""
+    run = runfile(1000, [task("e", waits=["input", "input", "input"])], input_wakes={"e": [100, 150, 160]})
+    events = [
+        {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
+        {"event": "ready", "t": 100, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 120, "task": "e"},
+        {"event": "ready", "t": 200, "task": "e", "cause": "wake"},       # keystroke 150, queued
+        {"event": "ready", "t": 230, "task": "e", "cause": "wake"},       # keystroke 160, queued
+        {"event": "run_end", "t": 260, "task": "e", "reason": "block", "blocked_on": "wait"},
+    ]
+    r = compute(run, events)
+    assert [(x["t"], x["value"]) for x in rows_of(r, "ready_wait", "e")] == [(100, 20), (200, 0), (230, 0)]
+    assert [(x["t"], x["value"], x["censored"]) for x in rows_of(r, "input_latency", "e")] == [
+        (100, 20, 0), (150, 50, 0), (160, 70, 0)]
+    assert r.guards == []
+
+
+def test_input_latency_censors_a_keystroke_never_served():
+    """A keystroke the task never reaches before its depart is censored at the depart; one
+    whose line is still waiting for the lane at T_end is censored at T_end."""
+    run = runfile(1000, [task("e", depart=500, waits=["input", "input"])], input_wakes={"e": [100, 300]})
+    events = [
+        {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
+        {"event": "ready", "t": 100, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 100, "task": "e"},
+        {"event": "run_end", "t": 500, "task": "e", "reason": "depart"},   # still in the first keystroke's RUN
+        {"event": "task_end", "t": 500, "task": "e", "reason": "depart"},
+    ]
+    r = compute(run, events)
+    assert [(x["t"], x["value"], x["censored"]) for x in rows_of(r, "input_latency", "e")] == [
+        (100, 0, 0), (300, 200, 1)]
+    assert r.guards == []
+    run = runfile(1000, [task("e", waits=["input"])], input_wakes={"e": [900]})
+    events = [
+        {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
+        {"event": "ready", "t": 900, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 1200, "task": "e"},                    # past T_end
+        {"event": "run_end", "t": 1300, "task": "e", "reason": "block", "blocked_on": "wait"},
+    ]
+    r = compute(run, events)
+    assert [(x["t"], x["value"], x["censored"]) for x in rows_of(r, "input_latency", "e")] == [(900, 100, 1)]
