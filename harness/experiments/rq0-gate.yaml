@@ -360,9 +360,9 @@ statements:
       contracts §11, contract 10); (i) a WAKE naming a spawn-table entry reaching
       that child, a wake sent before the child's birth held and taken at its
       birth (the interpretation contract's WAKE(target) row; data contracts
-      §14, 2026-10-21; the 2026-10-10 dataset audit's blocker 1). (c), (d), (f)
-      and (i) the simulator does today; the others its owner holds as owed. The
-      run does not start until each is shown.
+      §14, 2026-10-21; the 2026-10-10 dataset audit's blocker 1). (a) save a FORK
+      taking a free slot, (b), (c), (d), (e), (f) and (i) the simulator does today;
+      the others its owner holds as owed. The run does not start until each is shown.
   - id: g-grounding
     text: >
       g = 0.5 reads: recognition accounts for at least half of the achievable

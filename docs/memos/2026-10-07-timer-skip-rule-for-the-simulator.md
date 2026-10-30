@@ -1,7 +1,7 @@
 # TIMER skips missed ticks — the rule for the simulator
 
-> Status: memo · Created 2026-10-07 · Updated 2026-10-17
-> Open — §6's asks: the skip rule in the simulator, which still runs the backlog rule (`simulator/src/sim.cpp`, step K; the RQ0 gate spec's conformance item (b)), with the zero-wait `ready` line the correction below names (item (a)); and, once it lands, the interpretation contract's TIMER row ratified — until then the interpretation contract and the simulator guide keep the backlog rule; owner 인경민.
+> Status: memo · Created 2026-10-07 · Updated 2026-10-30
+> Closed (2026-10-30) — §6's asks are answered. The skip rule is in the simulator since its stage Y (2026-10-23, commit `a62c10b0`; the RQ0 gate spec's conformance item (b)), in place of step K's backlog, with the zero-wait `ready` line the correction below names since its stage X (2026-10-23, commit `d6d35808`; item (a)); 인경민 found no conflict with the simulator's other invariants (`simulator/memo/memo_261023.md` Part G1). The interpretation contract's TIMER row reads §6 item 2's wording, which stage Y implements (`docs/data-contracts.md` §14, 2026-10-30). The rule now lives in the interpretation contract §3 and the simulator guide §4, the harness's reading in `docs/harness/metrics.md` §6.2.
 > From 인지오 to 인경민. Answers your note `simulator/notes/note-for-jioh-timer-backlog-vs-drop.md` (2026-09-29): TIMER's backlog rule is replaced by a skip rule. Decision D3 of task 9.11 (`_dev/research/jioh/task-9.11-scheduler-constants/changelog.md`). Absorb into the simulator guide and the interpretation contract once implemented.
 
 ## 1. The rule

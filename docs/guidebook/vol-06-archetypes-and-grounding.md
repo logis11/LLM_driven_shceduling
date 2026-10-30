@@ -256,28 +256,24 @@ pattern:
 
 ### TIMER
 
-> `TIMER(period)` — "absolute periodic wake: runnable at t₀+k·period regardless of when the previous iteration finished — drift-free (rt-app `timer{ref,period}`). Late iterations accumulate as backlog; they are not silently skipped"
+> `TIMER(period)` — "absolute periodic wake on the grid t₀ + k·period, drift-free. Reached after one or more ticks have passed, the task consumes the last passed tick at once and skips the earlier ones, each a missed job with no work"
 
-**절대적인** 주기 깨어남. 이전 반복이 언제 끝났든 상관없이 t₀ + k·period 시각에 실행 가능해진다. 어긋남이 쌓이지 않는다. 늦어진 반복은 backlog로 쌓이고 조용히 건너뛰어지지 않는다.
+눈금 t₀ + k·period에 맞춘 **절대적인** 주기 깨어남. 어긋남이 쌓이지 않는다. 눈금이 하나 이상 지나간 뒤에 닿으면 지나간 마지막 눈금을 바로 처리하고 그 앞의 것은 건너뛰며, 건너뛴 것은 각각 일 없이 놓친 job이 된다.
 
 t₀는 처음 시작한 시각이고 k는 0, 1, 2, 3으로 늘어나는 정수입니다. 그러니까 period가 50밀리초이면 깨어나는 시각은 0, 50, 100, 150밀리초로 **처음부터 정해진 눈금**입니다. 앞 반복이 늦게 끝났다고 다음 눈금이 밀리지 않습니다.
 
-**backlog**는 1권에서 본 대로 처리하지 못하고 밀린 일이 쌓인 상태입니다. 위 문장대로라면 눈금이 이미 지나갔는데 아직 앞 일을 하고 있을 때, 지나간 눈금은 버려지지 않고 밀린 일로 남았다가 하나씩 처리됩니다.
+2026-10-30 전까지 계약 문서의 TIMER 줄은 다르게 적었습니다. "Late iterations accumulate as backlog; they are not silently skipped." **backlog**는 1권에서 본 대로 처리하지 못하고 밀린 일이 쌓인 상태입니다. 그 문장대로라면 눈금이 이미 지나갔는데 아직 앞 일을 하고 있을 때, 지나간 눈금은 버려지지 않고 밀린 일로 남았다가 하나씩 처리됩니다.
 
-> **이 연구에서는.** 위에 옮긴 TIMER 줄의 마지막 문장("Late iterations accumulate as backlog")은 지금 계약 문서에 적힌 그대로이지만, 이 연구가 정한 TIMER의 규칙은 그와 다릅니다. 2026-10-07에 정한 **skip rule**이고, 규칙을 적어 시뮬레이터 쪽에 보낸 문서가 `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`입니다. task가 TIMER에 닿았을 때 다음 눈금이 아직 오지 않았으면 그 눈금까지 기다리는 것은 같습니다. 눈금이 하나 이상 지나간 뒤에 닿았으면, 지나간 눈금 가운데 가장 최근 것 하나를 그 자리에서 바로 처리하고 그 앞의 것은 건너뜁니다. 건너뛴 눈금마다 일을 하나도 하지 않은 job이 하나씩 생기고, 그 job은 마감을 놓친 것으로 셉니다. 바로 처리한 눈금의 일은 다음 눈금이 마감입니다.
+> **이 연구에서는.** 위에 옮긴 TIMER 줄은 2026-10-07에 정한 **skip rule**입니다. 규칙을 적어 시뮬레이터 쪽에 보낸 문서가 `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`이고, 계약 문서의 TIMER 줄은 2026-10-30에 그 memo가 적어둔 문장으로 바뀌었습니다(`docs/data-contracts.md` §14). task가 TIMER에 닿았을 때 다음 눈금이 아직 오지 않았으면 그 눈금까지 기다리는 것은 같습니다. 눈금이 하나 이상 지나간 뒤에 닿았으면, 지나간 눈금 가운데 가장 최근 것 하나를 그 자리에서 바로 처리하고 그 앞의 것은 건너뜁니다. 건너뛴 눈금마다 일을 하나도 하지 않은 job이 하나씩 생기고, 그 job은 마감을 놓친 것으로 셉니다. 바로 처리한 눈금의 일은 다음 눈금이 마감입니다.
 >
 > 건너뛰기는 task가 TIMER에 닿을 때만 일어납니다. 그래서 이미 시작한 RUN은 늦더라도 끝까지 하고, 게임의 frame 사슬은 첫 task에서만 건너뛰어서 첫 task가 시작한 frame은 사슬의 모든 단계를 지나갑니다. 눈금의 수, 즉 task가 내놓는 요구는 그대로입니다. 일이 밀리면 실제로 만드는 frame의 수가 줄고, 줄어든 만큼이 놓친 job으로 기록에 남습니다.
 >
-> 이 연구의 측정 도구(harness)는 이미 이 규칙으로 기록을 읽습니다. 계약 문서의 TIMER 줄은 시뮬레이터가 이 규칙을 구현하면 그 memo가 적어둔 이 문장으로 확정됩니다.
->
-> > "absolute periodic wake on the grid t₀ + k·period, drift-free. Reached after one or more ticks have passed, the task consumes the last passed tick at once and skips the earlier ones, each a missed job with no work."
->
-> 눈금 t₀ + k·period에 맞춘 절대적인 주기 깨어남. 어긋남이 쌓이지 않는다. 눈금이 하나 이상 지나간 뒤에 닿으면 지나간 마지막 눈금을 바로 처리하고 그 앞의 것은 건너뛰며, 건너뛴 것은 각각 일 없이 놓친 job이 된다.
+> 이 연구의 측정 도구(harness)도 이 규칙으로 기록을 읽습니다.
 
 초당 60번 도는 task로 두 문장을 나란히 놓아 보겠습니다. 주기는 16,667마이크로초이고 눈금은 0, 16,667, 33,334, 50,001, …입니다. 눈금 0에 시작한 frame이 오래 밀려서 40,000마이크로초에야 끝나고, 그때 task가 TIMER에 닿았습니다. 그 사이 16,667과 33,334의 눈금이 지나갔습니다.
 
 ```text
-                     계약의 지금 문장 (backlog)          skip rule
+                     예전 문장 (backlog)                 skip rule
    ───────────────   ─────────────────────────────      ─────────────────────────────
    눈금 0의 frame     40,000에 끝남. 마감 16,667을 놓침    같음
    눈금 16,667        40,000에 바로 처리, frame 하나       건너뜀. 일 없이 놓친 job 하나
@@ -286,7 +282,7 @@ t₀는 처음 시작한 시각이고 k는 0, 1, 2, 3으로 늘어나는 정수�
 
 쌓는 쪽에서는 늦어진 만큼이 뒤의 frame마다 이어지고, 일이 계속 넘치면 끝내 따라잡지 못합니다. 건너뛰는 쪽에서는 지금 눈금의 frame으로 곧바로 박자에 돌아옵니다.
 
-> **미실행.** 참조 시뮬레이터(`simulator/src/sim.cpp`)는 아직 계약의 지금 문장대로 돕니다. 밀린 눈금을 건너뛰지 않고 하나씩 바로 처리합니다. 계약 문서의 TIMER 줄과 시뮬레이터 안내서(`docs/simulator/simulator-guide.md`)가 backlog 문장을 그대로 두는 것은 그래서이고, 구현되면 둘을 고칩니다. RQ0 gate spec은 이 규칙을 RQ0을 돌리기 전에 시뮬레이터가 손으로 계산한 작은 예제로 보여야 할 일 가운데 하나로 적어두고, 데이터셋을 다시 지은 결과를 정리해 보낸 문서(`docs/memos/2026-10-17-workload-dataset-rebuild.md`)가 2026-10-17에 그 구현을 다시 요청했습니다. 그보다 먼저 필요한 것이 하나 있습니다. 기다리지 않고 지나간 TIMER에도 기록에 `ready` 줄을 남기는 것입니다. 측정 도구는 처리한 눈금을 그 줄로 세고, 두 처리 사이의 눈금을 건너뛴 것으로 세기 때문입니다.
+> **코드로.** 참조 시뮬레이터(`simulator/src/sim.cpp`)는 2026-10-23부터 이 규칙대로 돕니다(그 시뮬레이터의 stage Y). RQ0 gate spec이 RQ0을 돌리기 전에 시뮬레이터가 손으로 계산한 작은 예제로 보여야 할 일 가운데 하나로 적어둔 항목 (b)입니다. 이 규칙이 기대는 것, 기다리지 않고 지나간 TIMER에도 기록에 `ready` 줄을 남기는 것(항목 (a))도 같은 날 stage X로 들어왔습니다. 측정 도구는 처리한 눈금을 그 줄로 세고, 두 처리 사이의 눈금을 건너뛴 것으로 세기 때문입니다.
 
 ### WAIT
 
@@ -495,7 +491,7 @@ TIMER가 아니라 SLEEP인 이유는 기본 설치된 daemon들이 어긋남 �
 - 이 방식의 선례는 rt-app입니다. sleep과 timer의 구분까지 그대로 따르지만, rt-app에서 숫자는 하나도 가져오지 않습니다.
 - 주기 작업은 반드시 TIMER로 적습니다. SLEEP으로 적으면 나쁜 설정 아래에서 요구량이 조용히 줄어듭니다. 40퍼센트짜리 영상 재생이 매번 5밀리초 늦으면 30.8퍼센트짜리가 되고 실패 기록은 남지 않습니다.
 - 그 착시는 한 방향으로만 치우쳐서 "잘못 알아도 손해가 적다"는 거짓 결론을 만듭니다. 그래서 TIMER가 여섯 번째 primitive로 들어왔습니다.
-- 이 연구의 TIMER는 2026-10-07에 정한 skip rule을 따릅니다. 눈금이 지나간 뒤에 닿으면 가장 최근 눈금 하나를 바로 처리하고 그 앞의 것은 건너뛰며, 건너뛴 눈금마다 일 없이 마감을 놓친 job이 하나씩 남습니다. 측정 도구는 이미 이 규칙으로 기록을 읽고, 참조 시뮬레이터와 계약 문서는 구현될 때까지 쌓는 쪽(backlog) 그대로입니다.
+- 이 연구의 TIMER는 2026-10-07에 정한 skip rule을 따릅니다. 눈금이 지나간 뒤에 닿으면 가장 최근 눈금 하나를 바로 처리하고 그 앞의 것은 건너뛰며, 건너뛴 눈금마다 일 없이 마감을 놓친 job이 하나씩 남습니다. 계약 문서와 측정 도구, 참조 시뮬레이터가 모두 이 규칙을 따릅니다.
 - interbench도 절대 시각의 눈금을 쓰고 놓친 주기를 건너뜁니다. 다른 점은 늦은 주기에 아무 일도 하지 않는다는 것 하나입니다.
 - 주기가 없는 것이 성격인 daemon은 일부러 SLEEP으로 적습니다. 기준은 실제 프로그램이 절대 시각의 박자를 지키려 하는가입니다.
 
@@ -3993,7 +3989,7 @@ tasks:
 | **EXIT** | 이 task를 끝낸다 |
 | **channel** | WAIT가 기다리는 대상의 이름. `input`, `upstream`, `children`처럼 깨워주는 쪽이 있는 것과, `disk`, `io`, `net`처럼 정해진 길이의 멈춤으로 바뀌는 것이 있다 |
 | **backlog** | 처리하지 못하고 밀린 일이 쌓인 상태 |
-| **skip rule** | 이 연구가 정한 TIMER의 규칙(2026-10-07). 눈금이 하나 이상 지나간 뒤에 TIMER에 닿으면 가장 최근 눈금 하나를 바로 처리하고 그 앞의 것은 건너뛴다. 건너뛴 눈금은 일 없이 마감을 놓친 job이다. 참조 시뮬레이터는 아직 구현하지 않았다 |
+| **skip rule** | 이 연구가 정한 TIMER의 규칙(2026-10-07). 눈금이 하나 이상 지나간 뒤에 TIMER에 닿으면 가장 최근 눈금 하나를 바로 처리하고 그 앞의 것은 건너뛴다. 건너뛴 눈금은 일 없이 마감을 놓친 job이다. 계약 문서의 TIMER 줄이고, 참조 시뮬레이터는 2026-10-23부터 이대로 돈다 |
 | **spawn table** | 부모가 만들 자식들의 프로그램을 미리 적어둔 순서 있는 목록 |
 | **loop** | 반복. 제어 흐름일 뿐 primitive가 아니다 |
 

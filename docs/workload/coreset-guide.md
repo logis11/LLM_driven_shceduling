@@ -1,6 +1,6 @@
 # Coreset 안내 — 51개 workload를 하나씩 뜯어보기
 
-> Status: draft · Created 2026-09-08 · Updated 2026-10-17
+> Status: draft · Created 2026-09-08 · Updated 2026-10-30
 
 이 문서는 **공부용 문서**예요. dataset이 무엇이고, 어떻게 만들어지고, 51개 coreset 파일 각각이 무슨 상황을 담고 있으며 어떤 숫자를 갖고 있는지를 OS/시스템 지식이 거의 없는 사람 기준으로 풀어 써요. 설계의 규범적 근거는 building-plan(`docs/workload/building-plan.md`), archetype의 규범적 정의는 archetype-plan(`docs/workload/archetype-plan.md`), 실행 semantics는 interpretation contract(`docs/simulator/interpretation-contract.md`)에 있어요. 이 문서는 그 셋을 읽을 수 있게 만드는 다리이고, 숫자는 `dataset/build.manifest.json`이 hash로 고정한 `coreset-single`의 51개 파일(2026-10-16에 re-bless된 build)과 그 manifest의 `demand` 기록, 그리고 timeline과 `dataset/archetypes.yaml`에서 직접 읽은 값이에요.
 
@@ -123,14 +123,14 @@ archetype의 program은 여섯 명령으로 써요. simulator 입장의 뜻과 �
 |---|---|---|
 | `RUN(N)` | N µs만큼 lane time을 소비. 중간에 preempt되면 남은 양이 보존됨 | 앉아서 N만큼 일함. 끌려나면 다음에 마저 함 |
 | `SLEEP(N)` | 지금부터 N µs 뒤에 runnable. 상대 시간 | N만큼 잠 |
-| `TIMER(P)` | t₀ + k·P의 절대 격자에서 다음 tick까지 block. **지나간 tick은 backlog로 쌓여 즉시 완료** | P마다 울리는 알람. 못 들은 알람은 밀려서 연달아 울림 |
+| `TIMER(P)` | t₀ + k·P의 절대 격자에서 다음 tick까지 block. **tick이 지난 뒤에 닿으면 지나간 마지막 tick을 바로 소비하고 그 앞의 tick은 건너뜀** — 건너뛴 tick마다 일 없이 놓친 job 하나 | P마다 울리는 알람. 못 들은 알람은 건너뛰고 마지막으로 울린 것 하나에 바로 응답 |
 | `WAIT(channel)` | 그 channel에 wake가 올 때까지 block | 부를 때까지 기다림 |
 | `WAKE(target)` | target task를 runnable로 | 옆 손님을 깨움 |
 | `FORK` | spawn table의 다음 자식을 만듦. 살아 있는 자식이 cap이면 block | 동행을 부름. 자리가 없으면 기다림 |
 | `EXIT` | 자기 자신을 끝냄 | 집에 감 |
 | `LOOP` | 제어 흐름. body를 N번 또는 무한 반복 | (명령 아님) |
 
-**`TIMER`와 `SLEEP`의 차이**가 중요해요. `SLEEP(16667)` loop는 늦게 깨어날수록 다음 것도 밀려요. 부하가 걸리면 demand가 스스로 줄어들어서, scheduler가 못할 때 정확히 그 신호가 사라져요. `TIMER(16667)`은 격자가 고정이라 늦으면 밀린 tick이 쌓여요. 진짜 60 fps 게임처럼 "따라잡으려고 몸부림"쳐요. 그래서 주기적인 것은 전부 TIMER예요.
+**`TIMER`와 `SLEEP`의 차이**가 중요해요. `SLEEP(16667)` loop는 늦게 깨어날수록 다음 것도 밀려요. 부하가 걸리면 demand가 스스로 줄어들어서, scheduler가 못할 때 정확히 그 신호가 사라져요. `TIMER(16667)`은 격자가 고정이라 늦어도 다음 tick의 시각이 밀리지 않아요. 늦게 닿으면 지나간 마지막 tick의 job을 바로 시작하고 그 앞의 tick은 건너뛰어, 건너뛴 tick마다 놓친 job으로 세요(skip 규칙, `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`). 그래서 주기적인 것은 전부 TIMER예요.
 
 TIMER — 주기와 deadline이 있는 periodic job — 를 쓰는 건 playback과 call entry(4.2절)와 game chain의 head뿐이에요. TIMER의 t₀는 task가 그 TIMER를 처음 실행한 시각이에요. dataset lint가 TIMER를 가진 program은 실행 순서상 TIMER로 시작하도록 강제하고(LOOP의 body 첫머리 포함), reference simulator(`simulator/src/sim.cpp`)는 task가 도착하는 순간 그 program을 RUN이나 막히는 명령에 닿을 때까지 진행시켜요. 그래서 첫 TIMER는 lane을 받기 전, 도착하는 순간 실행되고, t₀는 그 task의 도착 시각이에요. lane이 바빠도 그래요(10장 `c3-evening`).
 
@@ -363,7 +363,7 @@ batch loop는 `total_work`를 다 쓸 때까지 run과 block을 뽑아 펼쳐요
 
 `c1-compile`: object job 2,908개 × 멤버 여섯 = spawn table 17,448 entry, `fork_cap` 48.
 
-job의 멤버들은 서로를 `WAKE`해요(spawn된 자식이 자식을 깨움). format이 허용하는 쓰임이고 canonical lint가 모든 spawned WAKE target이 resolve되는지 검사해요. reference simulator의 loader는 아직 spawn-table 자식을 target으로 하는 WAKE를 거부해요(12장).
+job의 멤버들은 서로를 `WAKE`해요(spawn된 자식이 자식을 깨움). format이 허용하는 쓰임이고 canonical lint가 모든 spawned WAKE target이 resolve되는지 검사해요. reference simulator의 loader는 2026-10-21부터(stage W) spawn-table 자식을 target으로 하는 WAKE를 받고, 자식이 태어나기 전에 온 wake는 쥐고 있다가 태어날 때 넘겨요.
 
 ### 5.5 chain constructor와 lane scaling
 
@@ -919,7 +919,7 @@ focus: browser 0–60, 게임 60–300, video 300–420.
 
 recognizer (4): 0 s `chrome ×5` → 60 s `FAudio_AudioCli, Task worker thr ×4, Troy.exe ×7, dxvk-cs, dxvk-submit, element-desktop, steam, winepulse_mainl, winepulse_timer, wineserver`(focus `Troy.exe`) → 300 s `mpv ×2` → 420 s 빈 집합.
 
-harness: 게임 segment의 chain은 lane_share 1.45라 **설계상 frame을 계속 놓쳐요.** backlog 규칙이 실제로 작동하는 파일. utilization은 파일 평균 0.9006이지만 게임 segment 안은 1.5062. 세 segment의 primary metric이 다 달라요(browser latency → frame miss → media job). 참고로 `game.chain.1`은 60초에, `video`와 `music`은 300초에 등장하는 TIMER task예요. TIMER의 t₀는 task가 TIMER를 처음 실행한 시각이고, lint가 TIMER를 첫 명령으로 강제하니 그 task의 도착 시각이에요(3장). lane이 바빠도 그래요: schedule 없이 돌리면 `video`는 300,000,000 µs에 도착해 300,010,000에야 lane을 처음 받지만, 첫 job의 deadline은 300,033,348 = 도착 + 33,348이에요. harness는 t₀를 그 task의 첫 `ready(cause = timer_tick)` line의 시각으로 읽어요. reference simulator는 도착할 때 막힘 없이 소비된 첫 TIMER에 그 line을 아직 내지 않아서(12장), 같은 run(schedule 없이)에서 지금 harness가 읽는 t₀는 도착보다 `game.chain.1`은 한 주기(60,016,667), `video`는 열한 주기(300,366,828), `music`은 아홉 주기(300,446,715) 늦어요. 몇 주기 늦는지는 각 task가 처음 막히는 때에 달려서 설정마다 달라지고, 적어도 한 주기 늦다는 것만 모든 run에서 같아요.
+harness: 게임 segment의 chain은 lane_share 1.45라 **설계상 frame을 계속 놓쳐요.** skip 규칙이 실제로 작동하는 파일. utilization은 파일 평균 0.9006이지만 게임 segment 안은 1.5062. 세 segment의 primary metric이 다 달라요(browser latency → frame miss → media job). 참고로 `game.chain.1`은 60초에, `video`와 `music`은 300초에 등장하는 TIMER task예요. TIMER의 t₀는 task가 TIMER를 처음 실행한 시각이고, lint가 TIMER를 첫 명령으로 강제하니 그 task의 도착 시각이에요(3장). lane이 바빠도 그래요: schedule 없이 돌리면 `video`는 300,000,000 µs에 도착해 300,010,000에야 lane을 처음 받지만, 첫 job의 deadline은 300,033,348 = 도착 + 33,348이에요. harness는 t₀를 그 task의 첫 `ready(cause = timer_tick)` line의 시각으로 읽어요. reference simulator는 2026-10-23부터(stage X) 도착할 때 막힘 없이 소비된 첫 TIMER에도 그 line을 도착 시각에 내서, harness가 읽는 t₀가 도착이에요.
 
 #### `c3-creation` — 창작
 
@@ -1183,7 +1183,7 @@ core set 밖의 파생도 있어요: `build/coreset-single/`의 sensitivity vari
 - Kdenlive와 GIMP에는 keystroke stream이 없어요. 그래서 그 앱의 interaction term은 `channel: timer`예요(13개 파일, term 14개).
 - `c1-idle`·`c7-idle`의 `pipewire`와 `dbus-daemon`은 측정된 wake 빈도가 너무 낮아서 파일 안에서 한 번도 안 깨요 — program이 `WAIT` 하나예요.
 - C2에서 파일보다 오래 사는 job은 셋이에요: `c2-p1a`의 training(남은 39.435 s에 1,389.885 s의 일), `c2-p2a`·`c2-p2a-idle`의 download(남은 26.385 s에 727.170 s), `c2-p3b`의 backup(idle class라 266 s 안에 못 끝남). 이 셋은 progress(`cpu_delivered / demand`)가 batch 쪽 metric이에요. C7 counterpart의 job도 파일 안에서 못 끝나요: 파일 길이가 job의 CPU 총량과 같고 foreground가 lane을 나눠 쓰니까요 — 그래서 segment 내내 살아 있고, term은 없어요. 나머지 batch job은 파일 안에서 어떤 policy에서도 끝나도록 길이가 잡혀 있어요(C1의 batch base, `c3-workday`, `c3-creation`, `c6-dual`).
-- `c3-evening`의 chain은 lane_share 1.45라 혼자서도 frame을 못 맞춰요. backlog가 설계상 발생.
+- `c3-evening`의 chain은 lane_share 1.45라 혼자서도 frame을 못 맞춰요. 건너뛴 tick(놓친 job)이 설계상 생겨요.
 - `c2-p3` pair는 둘 다 `background_wanted: true`. 구분 축은 mode와 `initiated`.
 - "행동이 같은" pair는 없어요. P1의 두 job은 행동도 class도 다르고(10장), P2의 두 job은 같은 normal class지만 행동이 달라요: download는 측정된 SteamCMD가 727 s의 CPU를 계속 쓰는 것, upgrade는 단명 process 916개의 사슬이 26.385 s를 쓰는 것.
 - `c6-alias`의 이름(`baloo_file`, `tracker-miner-f`)은 실제로는 indexer인데 player처럼 행동해요. 의도된 오도.
@@ -1197,9 +1197,7 @@ core set 밖의 파생도 있어요: `build/coreset-single/`의 sensitivity vari
 - focus만 바뀌는 query point는 `c6-dual`의 17개뿐이에요.
 
 **reference simulator가 아직 못 하는 것**
-- loader가 spawn-table 자식을 target으로 하는 WAKE를 거부해요(`simulator/src/sim.cpp`: "WAKE target is not a top-level task"). object job의 멤버가 서로 깨우니, build가 있는 core 파일 다섯(`c1-compile`, `c7-compile`, `c3-workday`, `c4-compile`, `c6-dual`)을 아직 읽지 못해요. dataset은 이 쓰임을 지키고(canonical lint가 spawned WAKE target이 resolve되는지 검사), 고칠 곳은 simulator예요.
 - orchestrator가 spawn한 자식이 모두 끝났을 때 `WAIT children:<id>`를 완료하지 않아요(3장). `c1-compile`의 build turnaround term(판정, weight 1.0)이 읽히려면 필요해요.
-- 막을 수 있는 명령(`TIMER`, `WAIT`, `FORK`)이 막히지 않고 끝나도 zero-wait `ready` line을 내지 않아요. 그 자리의 line은 `ready(cause = arrive)`예요(`docs/harness/metrics.md` §11 item 1이 simulator에 남은 일로 적어 둔 것). 도착할 때 소비되는 첫 TIMER도 그래서, harness가 첫 `ready(cause = timer_tick)` line으로 읽는 t₀가 도착보다 주기의 정수배만큼 늦어요(10장 `c3-evening`).
 
 **결정된 것과 남은 것**
 - **pre_committed_miss**(2026-09-10): 이름·행동으로는 label에 닿을 수 없는 segment에 붙는 annotation. core set에서 여덟 파일이에요: attribute 쪽 `c1-indexing`, `c7-ml-train`, `c7-render`, `c7-transcode`, `c7-backup`; C6의 `c6-alias`(전체), `c6-fold`(30 s부터의 meeting segment), `c6-spoof`(20 s부터). coverage grid가 이걸 읽어 cell을 "채워졌지만 recognition-limited"로 표시하고, RQ0 gate spec의 `layer1_exclusions`가 이 여덟을 recognition 정확도에서 빼요(lint가 compiled 파일에서 같은 목록을 끌어내 검사해요). 그중 셋(`c7-ml-train`, `c7-render`, `c7-transcode`)은 scheduling 판정에는 들어가요 — gate에 필요한 건 label이지 알아볼 수 있음이 아니니까요.

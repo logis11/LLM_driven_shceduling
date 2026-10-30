@@ -1,7 +1,7 @@
 # The declared scheduling class — a field in the workload, a rule in the executor
 
-> Status: memo · Created 2026-10-08 · Updated 2026-10-17
-> Open — §4's items 1 and 4: the idle rule of §2 in the executor, which the simulator does not implement yet (its loader reads no `declared_class`; the RQ0 gate spec's conformance item (e)), and the status memo's §6 answers 1 and 2 confirmed as the reply the RQ0 gate spec's statement `executor-assumptions` asks for; owner 인경민. Items 2 and 3 are answered (§1's 2026-10-09 line; `docs/data-contracts.md` §14, 2026-10-09).
+> Status: memo · Created 2026-10-08 · Updated 2026-10-30
+> Open — §4's item 4: the status memo's §6 answers 1 and 2 confirmed as the reply the RQ0 gate spec's statement `executor-assumptions` asks for; owner 인경민. §4's item 1, the idle rule of §2 in the executor (the RQ0 gate spec's conformance item (e)), is in the simulator since its stage Z (2026-10-28, commit `8dab1176`): its loader reads `declared_class` (`simulator/src/notes.md`, the Z entry). Items 2 and 3 are answered (§1's 2026-10-09 line; `docs/data-contracts.md` §14, 2026-10-09).
 > From 인지오 to 인경민 and 박이안. Decisions D4–D6, D16, D18, D19, D26 and D34 of task 9.11 (`_dev/research/jioh/task-9.11-scheduler-constants/changelog.md`). Archetype entries gain a field that the workload and the run file carry, a change to three frozen contracts — the archetype, the workload and the run file, four if the visible projection shows it (§3) — that needs the three of us (`docs/data-contracts.md` §13). The heads-up memo of 2026-09-13 said your programs' input and output formats were outside the rebuild; this field is the exception.
 
 ## 1. The field

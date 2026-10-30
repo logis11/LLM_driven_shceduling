@@ -1100,7 +1100,7 @@ PID는 process id, 즉 OS가 실행 중인 프로세스마다 붙이는 번호�
 - MLFQ의 boost 간격은 10초까지 늘릴 수 있지만 없앨 수는 없습니다.
 - 어떤 task든 30초 넘게 기다린 실행은 측정 도구의 `starvation_floor` guard에 걸립니다. 30초는 Linux sched_ext의 watchdog이 기본으로 쓰는 한도이자 허용하는 최대치를 빌려 온 설계값입니다. 실제로 배포된다면 그 이상 기다리게 하는 설정은 계속 돌 수 없기 때문입니다. 첫 관문 실험의 판정이 읽는 실행에서 이 guard가 걸리면 그 판정은 무효가 됩니다.
 
-**설정에 있는 상한은 하나뿐입니다.** batch class의 대역폭 상한이고, driver table의 줄이 값을 정합니다(`llm_full` 조건에서만 모델이 정하되, 비우거나 0.05~0.95). 실행부가 집행해야 하는 값이지만, 시뮬레이터는 아직 이 값을 읽지 않습니다. class마다 따로 붙는 상한을 실행부가 설정과 상관없이 지킨다는 것은 사실이 아닙니다.
+**설정에 있는 상한은 하나뿐입니다.** batch class의 대역폭 상한이고, driver table의 줄이 값을 정합니다(`llm_full` 조건에서만 모델이 정하되, 비우거나 0.05~0.95). 실행부가 집행하는 값이고, 시뮬레이터는 2026-10-20부터 이 값을 읽어 집행합니다. class마다 따로 붙는 상한을 실행부가 설정과 상관없이 지킨다는 것은 사실이 아닙니다.
 
 ## 4.3 검증기가 하는 일
 
@@ -3775,7 +3775,7 @@ RQ4는 **지연**을 잽니다. 이유 토큰을 포함한 왕복 시간이고, 
 | **proposal** | 인식기의 완전한 출력. reasoning, situation, system 블록, subsystems 블록 |
 | **reasoning** | 왜 그렇게 판단했는지. 필수이고 맨 앞에 온다. 어느 소비자에게도 넘어가지 않는다 |
 | **situation** | 상황을 한 문장으로 적은 것. 로그와 실패 분석용 |
-| **config** | scheduler가 실제로 돌아가는 대상. 알고리즘 + 파라미터 + batch class의 대역폭 상한(driver table의 줄이 정하고, 실행부가 집행해야 하지만 아직 구현되지 않음) |
+| **config** | scheduler가 실제로 돌아가는 대상. 알고리즘 + 파라미터 + batch class의 대역폭 상한(driver table의 줄이 정하고, 실행부가 집행함) |
 | **provenance** | 적용된 설정이 어떻게 만들어졌는지. `unmodified` / `clamped` / `held` / `fallback` |
 | **configuration age** | 설정이 근거로 삼은 관찰이 얼마나 오래된 것인가. telemetry를 찍은 순간부터 실제 적용까지 |
 | **ground truth** | workload 파일에 적힌 진짜 상황. oracle 조건과 Layer 1 채점기만 본다 |
@@ -3791,7 +3791,7 @@ RQ4는 **지연**을 잽니다. 이유 토큰을 포함한 왕복 시간이고, 
 | **slow loop / fast loop** | 초 단위로 도는 인식 고리와 마이크로초 단위로 도는 scheduling 고리. 이 분리가 깨지면 연구가 성립하지 않는다 |
 | **t_observe / t_return / t_apply** | telemetry를 찍은 순간, 답이 도착한 순간, 새 설정이 실제로 활성화된 순간 |
 | **drain** | 알고리즘을 바꾸는 설정이 lane이 빌 때까지 기다렸다가 적용되는 것. 실행 중인 task의 time slice나 지금의 실행(RUN)이 끝나거나, 그 task가 preemption으로 밀려나거나 떠나면 lane이 빈다. MLFQ, EDF, LOTTERY에서 다른 알고리즘으로 바꿀 때 생기고, 그동안 도착한 설정은 그 뒤에서 함께 기다린다. lane이 비어 있으면 곧바로 적용된다 |
-| **batch_bandwidth_cap** | batch class가 차지할 수 있는 CPU 비율의 상한. 설정에 있는 유일한 상한이고, driver table의 줄이 값을 정한다. 실행부가 집행해야 하지만 시뮬레이터는 아직 읽지 않는다 |
+| **batch_bandwidth_cap** | batch class가 차지할 수 있는 CPU 비율의 상한. 설정에 있는 유일한 상한이고, driver table의 줄이 값을 정한다. 실행부가 집행한다(시뮬레이터는 2026-10-20부터) |
 
 ## 실험의 어휘
 

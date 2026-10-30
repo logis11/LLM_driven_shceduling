@@ -1,6 +1,6 @@
 # Harness와 records 이해하기 — trace에서 논문의 숫자까지
 
-> Status: draft · Created 2026-09-08 · Updated 2026-10-17
+> Status: draft · Created 2026-09-08 · Updated 2026-10-30
 
 이 문서는 **공부용 문서**예요. Phase 5(primitive metrics and the records pipeline)를 직접 수행하기 위해, harness가 무엇을 읽고 무엇을 쓰는지, `records`의 row 하나가 무슨 뜻인지, 그리고 그 위에 어떤 score가 올라가는지를 OS/시스템 지식이 거의 없는 사람 기준으로 바닥부터 풀어 쓴 거예요. 규범적(normative)인 정의는 `docs/harness/metrics.md`(metrics doc)가 갖고, 이 문서는 그 문서를 읽을 수 있게 만드는 다리예요. 둘이 다르면 metrics doc이 맞아요.
 
@@ -934,7 +934,7 @@ scoring이 아니라 "이 row들로 뭘 말할 수 있나"의 맛보기.
 
 fixture `mock-media`(`harness/tools/tests/fixtures/mock-media/`)는 `c1-media`를 축소하고 batch 하나를 끼운 것이에요. 이 mock의 목적은 둘이에요. **TIMER skip 규칙을 harness가 어떻게 읽는지**, 그리고 그 읽기가 왜 **"`ready` line이 즉시 완료된 blocking primitive에서도 나와야 한다"**는 규칙에 기대는지.
 
-규칙부터. TIMER task가 자기 TIMER에 도달했을 때 grid의 tick이 이미 여러 개 지나 있으면, **가장 최근에 지난 tick 하나를 바로 소비하고**(그 job은 지금 시작하고 마감은 다음 tick) **그보다 앞의 소비 안 된 tick은 전부 건너뛰어요.** 건너뛴 tick은 일을 하나도 안 한 job이고, miss예요. chain이면 head에서만 건너뛰어요(2026-10-07 memo, `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`). harness는 2026-10-09부터 trace를 이 규칙으로 읽어요(metrics doc의 `job` 절). reference simulator는 아직 예전 backlog 규칙(지난 tick을 하나도 안 버리고 차례로 전부 실행)을 돌리고, skip 규칙은 RQ0 gate spec의 simulator-conformance 항목 (b)로 owed예요. 그러니 이 장은 harness가 읽는 규칙이고, simulator가 아직 돌리지 않는 규칙이에요.
+규칙부터. TIMER task가 자기 TIMER에 도달했을 때 grid의 tick이 이미 여러 개 지나 있으면, **가장 최근에 지난 tick 하나를 바로 소비하고**(그 job은 지금 시작하고 마감은 다음 tick) **그보다 앞의 소비 안 된 tick은 전부 건너뛰어요.** 건너뛴 tick은 일을 하나도 안 한 job이고, miss예요. chain이면 head에서만 건너뛰어요(2026-10-07 memo, `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`). harness는 2026-10-09부터 trace를 이 규칙으로 읽어요(metrics doc의 `job` 절). reference simulator는 2026-10-23부터(stage Y) 이 규칙을 돌려요. RQ0 gate spec의 simulator-conformance 항목 (b)예요.
 
 | task | 이름 | 등장 | 퇴장 | program |
 |---|---|---|---|---|
@@ -983,7 +983,7 @@ scheduler는 FIFO(block할 때까지 돌고 preempt 없음)예요. oracle의 답
 - tick 4의 job(frame 4)은 76667에 시작해서 83334에 끝나요. 마감은 다음 tick인 83335라 1 µs 차로 met. 83334에 TIMER에 도달하면 tick 5까지 1 µs가 남아 진짜로 block해요.
 - 83334에 `music`이 앉고(tick 1의 50000부터 줄 서 있었어요), 83335의 tick 5에 `video`가 runnable해져도 FIFO라 85834까지 기다렸다가 frame 5를 그려요(92501, met).
 
-**`ready` line이 즉시 완료된 TIMER에서 나오지 않았다면** 76667의 line이 없어요. 그러면 70000부터 83334까지는 `run_start` 하나, `run_end` 하나뿐인 13334 µs짜리 occupancy 하나이고, frame 2와 frame 4의 경계가 trace에 안 보여요. harness는 그 trace를 "frame 2가 83334에 끝났고 tick 3과 4를 둘 다 건너뛰었다"로 읽게 돼요 — miss가 하나 늘고, `deadline` 교차검사가 두 군데서 어긋나요. 정확히 늦은 frame들에서만 생기는 일이에요. 그래서 이 규칙을 인경민에게 요청했어요(metrics doc의 simulator 가정 1번). reference simulator는 아직 이 zero-wait line을 안 내요 — RQ0 gate spec의 simulator-conformance 항목 (a)로 owed예요 — 그리고 harness의 skip 읽기는 그 line에 기대고 있어요.
+**`ready` line이 즉시 완료된 TIMER에서 나오지 않았다면** 76667의 line이 없어요. 그러면 70000부터 83334까지는 `run_start` 하나, `run_end` 하나뿐인 13334 µs짜리 occupancy 하나이고, frame 2와 frame 4의 경계가 trace에 안 보여요. harness는 그 trace를 "frame 2가 83334에 끝났고 tick 3과 4를 둘 다 건너뛰었다"로 읽게 돼요 — miss가 하나 늘고, `deadline` 교차검사가 두 군데서 어긋나요. 정확히 늦은 frame들에서만 생기는 일이에요. 그래서 이 규칙을 인경민에게 요청했어요(metrics doc의 simulator 가정 1번). reference simulator는 2026-10-23부터(stage X) 이 zero-wait line을 내요 — RQ0 gate spec의 simulator-conformance 항목 (a)예요 — 그리고 harness의 skip 읽기는 그 line에 기대고 있어요.
 
 ### 11.2 records
 
@@ -1352,7 +1352,7 @@ Phase 8 전체를 관통하는 원칙 하나: **evaluator가 적용하는 판단
 ### 19.1 spec에 무엇이 있나
 
 - **generic part** — 어떤 실험에나 필요한 것: condition 목록, telemetry 모양 목록(RQ0는 `focus` 하나), seed 수 N, boot default(primary와 alternatives), judging 파일·reporting 파일·sensitivity line이 읽는 variant 파일(그리고 generated set에서 축으로 고른 파일, 15.5), `pre_committed_miss`에서 **유도된** Layer-1 exclusion(lint가 실제 annotation과 맞는지 확인해요 — 손으로 고를 수 없어요), guard 예외(이유 필수), typed reporting line, 그리고 **pin** — scoring spec·guard spec(version 1.2)·driver table·dataset manifest·variants manifest의 SHA-256(generated 파일을 고르는 spec이면 그 manifest마다 하나 더).
-- **statements** — 숫자의 근거를 적은 글. evaluator가 보고서에 그대로 옮겨 적어요. RQ0 gate spec에는 열다섯 개가 있어요: 판정 set의 규칙, idle class 파일 여섯이 보고만 하는 이유, executor 가정(인경민의 2026-10-01 simulator 상태 memo와 9.11 결정 위에 둔 committed assumption. 그중 두 가지에 대한 인경민의 정식 답은 2026-10-08 memo로 요청), simulator conformance(RQ0 run 전에 simulator가 hand fixture에서 보여야 할 여덟 항목 (a)–(h). (h)는 2026-10-17에 더해진 것으로, simulator가 runner가 부르는 대로 invocation contract에 따라 실행되는 것 — workload와 config schedule을 `--workload`·`--schedule`로, trace 경로를 `--out-trace`로 받고 trace를 그 파일에 쓰는 것(18장)), g·K·N의 근거, random condition의 정의, prior table의 중복 구조, boot-default sweep의 설계, sensitivity line들, 다시 측정할 조건, Layer-1 구간의 caveat, 실패 절차, held-out-rows 사전등록.
+- **statements** — 숫자의 근거를 적은 글. evaluator가 보고서에 그대로 옮겨 적어요. RQ0 gate spec에는 열다섯 개가 있어요: 판정 set의 규칙, idle class 파일 여섯이 보고만 하는 이유, executor 가정(인경민의 2026-10-01 simulator 상태 memo와 9.11 결정 위에 둔 committed assumption. 그중 두 가지에 대한 인경민의 정식 답은 2026-10-08 memo로 요청), simulator conformance(RQ0 run 전에 simulator가 hand fixture에서 보여야 할 아홉 항목 (a)–(i). (h)는 2026-10-17에 더해진 것으로, simulator가 runner가 부르는 대로 invocation contract에 따라 실행되는 것 — workload와 config schedule을 `--workload`·`--schedule`로, trace 경로를 `--out-trace`로 받고 trace를 그 파일에 쓰는 것(18장). (i)는 2026-10-21에 더해진 것으로, spawn table의 자식을 가리키는 WAKE가 그 자식에게 닿고, 자식이 태어나기 전에 온 wake는 보관했다가 태어날 때 넘기는 것. reference simulator는 (a)–(f)와 (i)를 하고, (g)와 (h)가 남아 있어요), g·K·N의 근거, random condition의 정의, prior table의 중복 구조, boot-default sweep의 설계, sensitivity line들, 다시 측정할 조건, Layer-1 구간의 caveat, 실패 절차, held-out-rows 사전등록.
 - **criterion** — 실험별 판정 규칙. RQ0는 `k_of_n_gap`: judging 파일 19개 중 **K = 10개 이상**이 gap **g = 0.5 이상**이면 pass.
 
 ### 19.2 gap 하나 손으로
@@ -1451,7 +1451,7 @@ Phase 5 때의 tree 그림은 오래됐어요. 지금은 폴더마다 README가 
 | **preempt** | scheduler가 running task를 강제로 내리는 것 |
 | **tick** | `TIMER`의 주기적 알람. t₀ + k·period, t₀는 task가 첫 TIMER를 실행한 시각(= 등장 시각) |
 | **job** | tick 하나에 대응하는 주기 작업 하나 (frame 하나) |
-| **skip (TIMER)** | TIMER에 도달했을 때 이미 지난 tick이 여럿이면 가장 최근 것 하나만 바로 소비하고 그 앞의 소비 안 된 tick은 건너뛰는 것. 건너뛴 tick마다 `skipped=1`인 `job` row(값 없음, miss). harness가 읽는 규칙이고, reference simulator는 아직 예전 backlog 규칙(지난 tick을 전부 차례로 실행)을 돌려요 |
+| **skip (TIMER)** | TIMER에 도달했을 때 이미 지난 tick이 여럿이면 가장 최근 것 하나만 바로 소비하고 그 앞의 소비 안 된 tick은 건너뛰는 것. 건너뛴 tick마다 `skipped=1`인 `job` row(값 없음, miss). harness가 읽는 규칙이고, reference simulator도 2026-10-23부터(stage Y) 이 규칙을 돌려요 |
 | **chain** | TIMER를 가진 head에서 WAKE를 따라 이어지는 task들. 게임의 frame pipeline |
 | **head / tail** | chain의 첫 task(TIMER 있음) / 마지막 task |
 | **exogenous / endogenous** | scheduler가 바꿀 수 없는 시각(keystroke, 등장, depart) / scheduler에 달린 시각(spawn, exit, 모든 실행 시각) |

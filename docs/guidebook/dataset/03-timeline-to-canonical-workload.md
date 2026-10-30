@@ -1,6 +1,6 @@
 # 3권 · Timeline에서 canonical workload로: 포맷과 compiler
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-20
+> Status: draft · Created 2026-10-14 · Updated 2026-10-30
 
 **사람이 쓴 timeline 파일 하나가 어떤 규칙으로 simulator가 읽는 workload JSON이 되나.**
 
@@ -1195,7 +1195,7 @@ contract는 primitive를 여섯 개라고 셉니다(`FORK`와 `EXIT`를 한 줄�
 
 **TIMER의 늦은 tick 처리.** TIMER의 격자에서 task가 늦게 도착하면(앞 frame이 오래 걸려 다음 TIMER에 늦게 닿으면) 무슨 일이 일어날까요. 규칙은 **skip 규칙**입니다. 늦게 TIMER에 닿으면 지금 시각 이전의 마지막 tick m을 즉시 소비해 그 frame을 실행하고(마감은 tick m + 1), m보다 앞의 소비되지 않은 tick들은 일 없이 건너뛰며 각각을 마감을 놓친 job으로 셉니다. 2026-10-07에 인지오가 9.11 D3으로 정했고, `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`가 규칙(§1), 60 fps 격자의 예시(§2), 근거(§4)를 적습니다. 그 전의 규칙은 backlog였습니다. 밀린 tick을 하나씩 다 실행하는 것입니다. D3은 근거로 interbench, ROS 2 executor, Lipari와 Palopoli의 주기 thread, rt-app의 기본 모드, 그리고 TIMER task가 대표하는 프로그램들(mpv는 늦은 영상 frame을 버림, GStreamer video sink는 5 ms 넘게 늦은 frame을 버림)을 듭니다. 2026-10-08의 정정(9.11 D17, memo 끝의 정정 절)은 memo의 "none replays them"이라는 문장을 고쳐, 출처들이 공유하는 것은 "by default each skips"이고 늦은 job이 어느 tick의 것인지는 출처마다 다르며, memo의 선택(지나간 마지막 tick을 즉시 실행)은 video playback에서는 GStreamer sink의 것이고 audio와 게임 TIMER task에 대해서는 design이라고 적습니다.
 
-이 규칙은 simulator의 해석 규칙이지 파일의 모양이 아닙니다. canonical 파일의 `TIMER` 명령어는 규칙이 바뀌기 전과 후에 똑같습니다. harness의 `job` 지표는 이 규칙으로 읽습니다(`docs/harness/metrics.md` §6.2). reference simulator의 TIMER(`simulator/src/sim.cpp`의 step K, "TIMER+backlog")는 아직 backlog 규칙으로 돌고, 2026-10-17의 final memo(`docs/memos/2026-10-17-workload-dataset-rebuild.md` §6.2)가 인경민에게 skip 규칙의 구현을 RQ0 gate spec의 simulator 적합성 항목 (b)로 부탁했습니다(16.2절의 4). 구현될 때까지 schema와 contract의 TIMER 설명 문장도 backlog를 그대로 말합니다(16.1절).
+이 규칙은 simulator의 해석 규칙이지 파일의 모양이 아닙니다. canonical 파일의 `TIMER` 명령어는 규칙이 바뀌기 전과 후에 똑같습니다. harness의 `job` 지표는 이 규칙으로 읽습니다(`docs/harness/metrics.md` §6.2). reference simulator의 TIMER(`simulator/src/sim.cpp`)는 2026-10-23부터 이 규칙으로 돕니다. 인경민의 stage Y이고, 그 전의 step K("TIMER+backlog")를 대신합니다. 2026-10-17의 final memo(`docs/memos/2026-10-17-workload-dataset-rebuild.md` §6.2)가 RQ0 gate spec의 simulator 적합성 항목 (b)로 부탁한 것입니다(16.2절의 4). contract의 TIMER 행은 2026-10-30에 이 규칙으로 고쳐졌고, schema의 TIMER 설명 문장은 아직 backlog를 말합니다(16.1절).
 
 `EDF` — Earliest Deadline First, 마감이 가장 이른 job부터 CPU를 주는 scheduling 알고리즘입니다. 이 연구의 scheduler가 고를 수 있는 넷 중 하나입니다. `job`(harness 지표) — 주기적 task의 한 주기 분량의 일입니다. harness는 job마다 마감을 지켰는지 셉니다.
 
@@ -2164,7 +2164,7 @@ Phase 2가 끝났을 때 core set은 24개 파일이었고(`_dev/TODO.md`의 2.4
 
 scheduler 쪽 상수를 조사한 9.11은 simulator 담당 인경민과 projection 담당 박이안에게 두 memo를 보냈습니다.
 
-- **2026-10-07, TIMER skip 규칙.** TIMER의 늦은 tick을 backlog로 몰아 실행하는 대신 지나간 마지막 tick만 실행하고 나머지는 놓친 job으로 셉니다(7.6절). canonical 파일의 모양은 바뀌지 않습니다. contract와 schema의 TIMER 설명 문장이 아직 backlog를 말합니다(16장).
+- **2026-10-07, TIMER skip 규칙.** TIMER의 늦은 tick을 backlog로 몰아 실행하는 대신 지나간 마지막 tick만 실행하고 나머지는 놓친 job으로 셉니다(7.6절). canonical 파일의 모양은 바뀌지 않습니다. reference simulator는 2026-10-23부터 이 규칙을 돌리고, contract의 TIMER 행은 2026-10-30에 고쳐졌으며, schema의 TIMER 설명 문장은 아직 backlog를 말합니다(16장).
 - **2026-10-08, declared scheduling class.** task가 바인딩한 entry의 class를 싣는 field를 제안했고, 두 사람이 동의해 9.13이 `declared_class`로 넣었습니다(3.7절). memo는 이것이 세 동결 계약(archetype, workload, run file)과 projection을 바꾸는 변경이라서 세 사람의 동의가 필요하다고 적습니다.
 
 ## 15.7 9.13(2026-10-09): 재건의 build
@@ -2216,15 +2216,13 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 
 ## 16.1 문서가 tree와 다르게 말하는 곳
 
-**TIMER의 늦은 tick.** 다음 세 곳은 늦은 tick을 backlog로 몰아 실행한다고 적습니다.
+**TIMER의 늦은 tick.** workload schema의 TIMER 설명은 아직 늦은 tick을 backlog로 몰아 실행한다고 적습니다.
 
 | 위치 | 문서가 말하는 것 | 지금의 진실과 근거 |
 |---|---|---|
-| interpretation contract §3 TIMER 행 | "Late iterations accumulate as backlog; they are not silently skipped" | skip 규칙. memo 2026-10-07. memo §6이 인경민에게 이 행을 "absolute periodic wake on the grid t₀ + k·period, drift-free. Reached after one or more ticks have passed, the task consumes the last passed tick at once and skips the earlier ones, each a missed job with no work"로 비준해 달라고 요청함. |
-| workload schema의 TIMER 설명 | "late iterations accumulate as backlog (contract §3)" | 위와 같음 |
-| `docs/data-contracts.md` §4 예제 B | "missed ticks pile up as backlog" | 위와 같음 |
+| workload schema의 TIMER 설명 | "late iterations accumulate as backlog (contract §3)" | skip 규칙. memo 2026-10-07; interpretation contract §3의 TIMER 행(2026-10-30) |
 
-이 셋은 9.15가 일부러 남겼습니다. harness는 skip 규칙을 읽고(`docs/harness/metrics.md` §6.2), reference simulator는 아직 backlog 규칙을 돌립니다(`simulator/src/sim.cpp`). simulator의 동작과 TIMER의 뜻을 적은 문장은 인경민의 simulator가 skip 규칙을 구현할 때 함께 고치기로 하고 `_dev/TODO.md`의 Phase 10 TIMER 줄로 넘겼습니다(9.15 spec 결정 9). 그 구현은 2026-10-17의 final memo가 RQ0 gate spec의 simulator 적합성 항목 (b)로 부탁했습니다(16.2절의 4). canonical 파일의 `TIMER` 명령어는 어느 규칙에서나 같습니다(7.6절).
+9.15는 이 문장과 interpretation contract §3의 TIMER 행, `docs/data-contracts.md` §4 예제 B의 backlog 문장을 일부러 남겼습니다. simulator의 동작과 TIMER의 뜻을 적은 문장은 인경민의 simulator가 skip 규칙을 구현할 때 함께 고치기로 하고 `_dev/TODO.md`의 Phase 10 TIMER 줄로 넘겼습니다(9.15 spec 결정 9). 그 구현은 2026-10-17의 final memo가 RQ0 gate spec의 simulator 적합성 항목 (b)로 부탁했고, 인경민이 2026-10-23에 넣었습니다(16.2절의 4). canonical 파일의 `TIMER` 명령어는 어느 규칙에서나 같습니다(7.6절).
 
 **`docs/memos/2026-10-08-declared-scheduling-class.md` §1.** 이름이 class를 정하지 않는다는 예로 `c5-t3`을 듭니다. 그 파일은 2026-10-12에 `c6-alias`로 옮겨졌습니다(9.20). memo는 날짜가 박힌 기록이라 고쳐 쓰지 않고, 9.15가 memo 끝에 정정 절을 덧붙입니다.
 
@@ -2239,6 +2237,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 - 코드 안의 문서: `wlc/__init__.py`의 spec 경로, `wlc/deriver.py`의 docstring 예제, `wlc/timeline.py`의 다섯 번째 track `operations` — 2026-10-16(9.15). `wlc/compiler.py` module docstring의 chain 구성원 수, `wlc/timeline.py` `_load_operations` docstring의 9.10 D20 규칙, `wlc/variants.py` module docstring의 replay stream 세 종류 — 2026-10-17(9.15).
 - task 2.4 결정 4의 "warns"와 deriver의 거절: 결정문이 잘못 적은 말이고, 거절하는 이유는 2026-10-16의 archive가 적습니다(5.4절).
 - 9.18 D6의 키 입력 수: 9.23 D7이 바로잡았습니다(11.4절).
+- interpretation contract §3의 TIMER 행("Late iterations accumulate as backlog; they are not silently skipped")과 `docs/data-contracts.md` §4 예제 B("missed ticks pile up as backlog"): memo 2026-10-07 §6의 문장과 skip 규칙으로 — 2026-10-30(`docs/data-contracts.md` §14).
 
 ## 16.2 기록이 아직 정하지 않은 곳
 
@@ -2248,7 +2247,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 
 **3. 파일보다 오래 사는 job의 demand — 닫힘.** 잘라 내지 않고, 문서들이 offered demand라고 문장으로 범위를 밝힙니다(12.4절).
 
-**4. TIMER skip 규칙 — 규칙은 정해졌고 simulator의 구현을 기다림.** 규칙은 2026-10-07에 인지오가 9.11 D3으로 정했습니다. 늦게 TIMER에 닿은 task는 지나간 마지막 tick을 즉시 소비하고 그 앞의 tick을 건너뛰며, 건너뛴 tick 하나하나가 일 없이 마감을 놓친 job입니다(memo 2026-10-07 §1, 7.6절). harness는 이미 이 규칙으로 읽습니다(`docs/harness/metrics.md` §6.2). 9.14의 결정 1이 소비자 쪽을 모두 이 규칙에 맞춰 쓰고, 인경민의 구현을 "a named Phase 10 prerequisite"로 두었습니다. 열린 것은 reference simulator의 구현입니다. `simulator/src/sim.cpp`의 TIMER(step K, "TIMER+backlog")는 아직 밀린 tick을 하나씩 다 실행합니다. 2026-10-17의 final memo(`docs/memos/2026-10-17-workload-dataset-rebuild.md` §6.2)가 인경민에게 이것을 RQ0 gate spec의 simulator 적합성 항목 (b)로 부탁했고, 예를 하나 듭니다. 60 fps(주기 16,667 µs)의 task가 40,000 µs에야 TIMER에 닿으면, 지금 코드는 지나간 16,667과 33,334의 tick을 하나씩 다 처리해 frame 둘을 연달아 만들고, skip 규칙은 33,334의 tick만 처리하고 16,667의 tick을 `met: false`인 `deadline` 줄 하나로 남깁니다. 구현될 때까지 interpretation contract와 simulator guide는 backlog 문장을 그대로 두고, 구현되면 contract §3의 TIMER 행이 memo §6이 적어 둔 문장(16.1절의 표)으로 확정됩니다(memo 첫머리). canonical 파일은 이 규칙에 따라 바뀌지 않습니다. 인경민의 구현 대기, 미실행.
+**4. TIMER skip 규칙 — 닫힘.** 규칙은 2026-10-07에 인지오가 9.11 D3으로 정했습니다. 늦게 TIMER에 닿은 task는 지나간 마지막 tick을 즉시 소비하고 그 앞의 tick을 건너뛰며, 건너뛴 tick 하나하나가 일 없이 마감을 놓친 job입니다(memo 2026-10-07 §1, 7.6절). harness는 이 규칙으로 읽습니다(`docs/harness/metrics.md` §6.2). 9.14의 결정 1이 소비자 쪽을 모두 이 규칙에 맞춰 쓰고, 인경민의 구현을 "a named Phase 10 prerequisite"로 두었습니다. 2026-10-17의 final memo(`docs/memos/2026-10-17-workload-dataset-rebuild.md` §6.2)가 인경민에게 그 구현을 RQ0 gate spec의 simulator 적합성 항목 (b)로 부탁했고, 인경민이 2026-10-23에 simulator의 stage Y로 넣었습니다(커밋 `a62c10b0`; `simulator/memo/memo_261023.md` Part G). step K("TIMER+backlog")의 backlog를 대신합니다. interpretation contract §3의 TIMER 행은 2026-10-30에 memo §6이 적어 둔 문장, "absolute periodic wake on the grid t₀ + k·period, drift-free. Reached after one or more ticks have passed, the task consumes the last passed tick at once and skips the earlier ones, each a missed job with no work"로 확정되었습니다(`docs/data-contracts.md` §14). canonical 파일은 이 규칙에 따라 바뀌지 않습니다.
 
 **5. 닿지 않는 compiler 경로 — 닫힘.** 2026-10-16에 인지오가 지우기로 정했고, 그 자리에 맞는 경로가 없는 entry를 거절하는 분기가 들어왔습니다(9.5절).
 
@@ -2256,7 +2255,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 
 **7. Python 버전과 결정성 — 닫힘.** 2026-10-16에 인지오가 Python 3.12로 정했고, 직접 의존성은 9.23 D15가 정확한 version으로 고정했습니다. 다른 Python version에서 같은 byte가 나오는지는 확인하지 않았습니다(10.6절).
 
-**8. 종료 감사 — 닫힘.** 이 권이 설명한 compile 경로의 재현(artifact, report, variant가 timeline에서 다시 만들어지는가)과 묶인 값의 출처가 정말 그 값을 받치는지는 9.16(종료 감사)이 2026-10-17에 확인했습니다. 재현은 9.15의 마지막 판(`2b080333`)에서 집의 dataset gate(372 s)와 dataset run 39014790007이, 9.16이 고친 data로 다시 build한 판(`17f28d7f`)에서 dataset run 39030123144가 통과했습니다. 그 재build에서 모든 artifact의 byte는 `meta`에서만 바뀌었고 compile된 workload(task, event, ground truth)는 어디서도 바뀌지 않았으며, RQ0 gate spec이 dataset을 `8e1eb753…`, variant를 `8e2948b1…`로 다시 pin했습니다(`_dev/research/jioh/task-9.16-exit-audits/README.md`, `logs/D.md`). 출처 쪽의 결과는 14.4절에 적었습니다. simulator가 구현해야 확인되는 문장은 RQ0 gate spec의 simulator 적합성 항목별로 같은 폴더의 `compiled/uncheckable-by-item.md`에 모였고, 각 항목이 구현될 때 인경민이 돌릴 확인입니다. 위의 2(`children:<id>` channel, 항목 (g))와 4(TIMER skip 규칙, 항목 (b))는 그대로 열려 있습니다.
+**8. 종료 감사 — 닫힘.** 이 권이 설명한 compile 경로의 재현(artifact, report, variant가 timeline에서 다시 만들어지는가)과 묶인 값의 출처가 정말 그 값을 받치는지는 9.16(종료 감사)이 2026-10-17에 확인했습니다. 재현은 9.15의 마지막 판(`2b080333`)에서 집의 dataset gate(372 s)와 dataset run 39014790007이, 9.16이 고친 data로 다시 build한 판(`17f28d7f`)에서 dataset run 39030123144가 통과했습니다. 그 재build에서 모든 artifact의 byte는 `meta`에서만 바뀌었고 compile된 workload(task, event, ground truth)는 어디서도 바뀌지 않았으며, RQ0 gate spec이 dataset을 `8e1eb753…`, variant를 `8e2948b1…`로 다시 pin했습니다(`_dev/research/jioh/task-9.16-exit-audits/README.md`, `logs/D.md`). 출처 쪽의 결과는 14.4절에 적었습니다. simulator가 구현해야 확인되는 문장은 RQ0 gate spec의 simulator 적합성 항목별로 같은 폴더의 `compiled/uncheckable-by-item.md`에 모였고, 각 항목이 구현될 때 인경민이 돌릴 확인입니다. 위의 2(`children:<id>` channel, 항목 (g))는 그대로 열려 있고, 4(TIMER skip 규칙, 항목 (b))는 2026-10-23에 구현되었습니다. (b)에 기대는 문장의 확인은 기록에 아직 없습니다.
 
 ---
 

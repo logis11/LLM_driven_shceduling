@@ -1,5 +1,5 @@
 # Terminology
-> Status: normative · Created 2026-08-23 · Updated 2026-10-17
+> Status: normative · Created 2026-08-23 · Updated 2026-10-30
 
 Terms this project uses for its own parts. Operating systems vocabulary —
 MLFQ, EDF, preemption, turnaround time — is in Appendix A of
@@ -116,7 +116,7 @@ parameters and the batch class's bandwidth cap (`batch_bandwidth_cap`, null or
 0.05–0.95: the driver table row's under every condition that reads the table,
 the model's own under `llm_full`, and the boot default's `null` under `fixed`,
 which reads no table, as in every schedule's boot and `fallback` entries),
-which the executor is to enforce (not yet implemented). Which parameters exist
+which the executor enforces (the reference simulator since 2026-10-20). Which parameters exist
 depends on which algorithm was chosen, so validation branches on the algorithm
 rather than checking a flat field list.
 

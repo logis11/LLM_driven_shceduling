@@ -1,6 +1,6 @@
 # 2권 · Archetype library: 프로그램 한 종류를 scheduler의 눈으로 적기
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-20
+> Status: draft · Created 2026-10-14 · Updated 2026-10-30
 
 **`archetypes.yaml`의 29개 항목은 각각 무엇을 어떻게 흉내 내고, 그 숫자들은 어디서 왔나.**
 
@@ -136,7 +136,7 @@ TIMER task가 격자 시각을 하나 이상 놓친 뒤에 TIMER에 닿으면 **
 
 > **왜 이렇게 정했나 — TIMER가 늦었을 때의 규칙(9.11 D3, D17).** 9.11 slice(scheduler 쪽 상수와 근거를 맡은 slice)의 D3(2026-10-07)에서 인지오가 그 전의 backlog 규칙(밀린 격자를 하나씩 다 실행)을 skip 규칙으로 바꾸었고, `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`가 simulator 담당 인경민에게 규칙(§1)과 근거(§4)를 적어 보냈습니다. 기록된 근거는 9.11이 읽은 주기 작업 framework와 프로그램이 기본값으로 밀린 주기를 다시 돌리지 않는다는 것입니다. interbench, ROS 2 executor, Lipari와 Palopoli의 soft real-time 주기 thread(그들의 Listing 2)는 늦은 주기를 건너뛰고, rt-app의 기본 모드는 timer를 늦은 시각에 다시 맞춥니다. 2026-10-08의 D17은 memo의 "none replays them"을 정정했습니다. rt-app의 'absolute' 모드와 fixed-timestep game loop의 simulation 단계는 밀린 주기를 따라잡고, 출처들은 늦게 도는 job이 어느 격자의 것인지에서 갈린다는 것입니다. D17은 영상 재생과, 오디오와 게임의 TIMER task를 나누어 적었습니다. 이 library의 항목에 대어 읽으면 이렇습니다. 지나간 마지막 격자를 즉시 실행하는 선택은 영상 재생(`video-player`)에서는 GStreamer video sink의 동작입니다. sink는 5 ms 넘게 늦은 frame을 버리고, 지금 시각이 든 frame을 바로 그립니다. audio의 주기를 가진 `audio-player`와 `video-call`(통화의 주기는 audio worker의 10 ms frame, 9.5 D75), 그리고 game chain의 머리에 대해서는 design입니다. Chromium의 fake audio worker는 늦은 callback 하나를 가장 이른 밀린 격자의 시각으로 돌리고(이 규칙이 고르는 가장 최근의 격자가 아님) 지금 다음의 격자로 건너뛰며(`fake_audio_worker.cc`), Vulkan의 FIFO 모드는 늦은 일이 어느 격자의 것인지 말하지 않습니다. harness의 `job` 지표는 이 규칙으로 읽습니다(`docs/harness/metrics.md` §6.2).
 
-> **열린 자리 — simulator의 구현.** reference simulator의 TIMER(`simulator/src/sim.cpp`의 step K, "TIMER+backlog")는 2026-10-17 현재 아직 backlog 규칙으로 돕니다. interpretation-contract §3의 TIMER 행도 그때까지 "Late iterations accumulate as backlog; they are not silently skipped"(늦은 반복은 밀린 일로 쌓인다)를 그대로 둡니다. 2026-10-17의 final memo(`docs/memos/2026-10-17-workload-dataset-rebuild.md` §6.2)는 인경민에게 skip 규칙의 구현을 RQ0 gate spec의 statement `simulator-conformance` 항목 (b)로 부탁했습니다. RQ0 문지기 실험은 simulator가 손으로 만든 fixture에서 이 항목을 보이기 전에는 돌지 않습니다. 구현은 인경민의 몫이고, 미실행입니다.
+> **코드로.** reference simulator의 TIMER(`simulator/src/sim.cpp`)는 2026-10-23부터 skip 규칙으로 돕니다. 인경민의 stage Y이고(커밋 `a62c10b0`; `simulator/memo/memo_261023.md` Part G), 그 전의 step K("TIMER+backlog")를 대신합니다. 2026-10-17의 final memo(`docs/memos/2026-10-17-workload-dataset-rebuild.md` §6.2)가 RQ0 gate spec의 statement `simulator-conformance` 항목 (b)로 부탁한 것입니다. interpretation-contract §3의 TIMER 행은 2026-10-30에 2026-10-07 memo §6이 제안한 문장으로 바뀌었습니다(`docs/data-contracts.md` §14). "absolute periodic wake on the grid t₀ + k·period, drift-free. Reached after one or more ticks have passed, the task consumes the last passed tick at once and skips the earlier ones, each a missed job with no work."
 
 ## 1.6 declared_class: normal과 idle
 

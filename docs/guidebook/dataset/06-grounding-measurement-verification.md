@@ -1,6 +1,6 @@
 # 6권 · 근거, 측정, 검증: 숫자 하나가 믿을 수 있게 되는 길
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-21
+> Status: draft · Created 2026-10-14 · Updated 2026-10-30
 
 **데이터셋의 숫자와 구조는 어떤 기준으로 근거를 얻고, 우리가 직접 잰 것은 어떻게 재고 확인했으며, 틀린 것은 어떻게 찾아내 고쳤나.**
 
@@ -1710,7 +1710,7 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 
 **어떻게 끝났나.** 9.16은 2026-10-18에 끝났고(TODO의 9.16 줄 `[x]`, 커밋 `8951bb65`), 같은 날 Phase 9가 `[done]`이 되었습니다(커밋 `272d1019`, "the workload dataset rebuilt, the exit audits clean").
 
-> **열린 자리.** decision 6에 따라 해결된 것으로 본 진술들은 simulator를 기다립니다. 9.16 기록의 `compiled/uncheckable-by-item.md`가 그것을 RQ0 gate spec의 `simulator-conformance` 항목별로 적습니다. (b) TIMER skip 규칙(tick이 지나간 뒤 닿은 TIMER가 가장 최근 tick을 쓰고 나머지를 건너뜀)에는 `c3-evening`의 chain term이, (d) `batch_bandwidth_cap`을 행동상 batch class의 work-conserving 상한으로 읽고 적용하는 것에는 짝 검토의 cap 문장들이, (e) 엄격한 idle class(다른 class의 task가 runnable이 아닐 때만 돌고, 그런 task가 깨면 바로 밀려남)에는 idle class 파일 여섯의 "headroom 없음" 같은 진술이, (g) `WAIT children:<id>`가 spawn한 child가 모두 끝나면 완료되는 것에는 `c1-compile`과 `c4-compile`의 build turnaround가 기댑니다. 이 목록이 인경민이 각 항목이 들어왔을 때 돌릴 확인입니다. (d)는 2026-10-20에 인경민이 simulator stage V에 구현했습니다(커밋 `1074b14d`; 상한을 재는 window는 인경민의 decision D10, rate가 cap이고 깊이가 slice 하나인 token bucket; `simulator/memo/memo_261020.md` Part F). 짝 검토의 cap 문장들에 대한 확인은 아직 돌지 않았습니다. (g)의 확인에는 최종 memo §6.1이 요구하는 loader 수정(spawn된 child를 대상으로 하는 WAKE)도 필요합니다. (a) blocking primitive가 끝날 때마다의 ready 줄과 (h) runner가 부르는 호출 계약대로의 simulator 실행은 특정 진술에 기대지 않지만, (b), (e), (g)처럼 simulator 담당이 아직 갚을 것으로 두고 있습니다. 각 항목이 보여지기 전에는 RQ0 run이 시작되지 않습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
+> **열린 자리.** decision 6에 따라 해결된 것으로 본 진술들은 simulator를 기다립니다. 9.16 기록의 `compiled/uncheckable-by-item.md`가 그것을 RQ0 gate spec의 `simulator-conformance` 항목별로 적습니다. (b) TIMER skip 규칙(tick이 지나간 뒤 닿은 TIMER가 가장 최근 tick을 쓰고 나머지를 건너뜀)에는 `c3-evening`의 chain term이, (d) `batch_bandwidth_cap`을 행동상 batch class의 work-conserving 상한으로 읽고 적용하는 것에는 짝 검토의 cap 문장들이, (e) 엄격한 idle class(다른 class의 task가 runnable이 아닐 때만 돌고, 그런 task가 깨면 바로 밀려남)에는 idle class 파일 여섯의 "headroom 없음" 같은 진술이, (g) `WAIT children:<id>`가 spawn한 child가 모두 끝나면 완료되는 것에는 `c1-compile`과 `c4-compile`의 build turnaround가 기댑니다. 이 목록이 인경민이 각 항목이 들어왔을 때 돌릴 확인입니다. (d)는 2026-10-20에 인경민이 simulator stage V에 구현했습니다(커밋 `1074b14d`; 상한을 재는 window는 인경민의 decision D10, rate가 cap이고 깊이가 slice 하나인 token bucket; `simulator/memo/memo_261020.md` Part F). (b)는 2026-10-23에 stage Y로(커밋 `a62c10b0`; `simulator/memo/memo_261023.md` Part G), (e)는 2026-10-28에 stage Z로(커밋 `8dab1176`; `simulator/src/notes.md`의 Z 항목) 들어왔습니다. 짝 검토의 cap 문장들, `c3-evening`의 chain term, idle class 파일 여섯의 진술에 대한 확인은 기록에 아직 없습니다. (g)의 확인에 필요한 loader 수정(최종 memo §6.1, spawn된 child를 대상으로 하는 WAKE)은 2026-10-21에 stage W로 들어왔습니다. (a) blocking primitive가 끝날 때마다의 ready 줄과 (h) runner가 부르는 호출 계약대로의 simulator 실행은 특정 진술에 기대지 않습니다. (a)는 2026-10-23에 stage X로 들어왔고(커밋 `d6d35808`; 같은 memo Part B), (h)는 (g)처럼 simulator 담당이 아직 갚을 것으로 두고 있습니다. 각 항목이 보여지기 전에는 RQ0 run이 시작되지 않습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
 
 ## 14.3 기록이 스스로 밝힌 한계
 
