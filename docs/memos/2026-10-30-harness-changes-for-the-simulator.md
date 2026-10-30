@@ -66,3 +66,4 @@ trace 형식은 바뀌지 않았어요. 바뀐 것은 harness가 trace를 읽는
   - primary 10 ms에서 통화는 boost 구간의 98%에서 강등되고, video player는 89%에서 강등돼요.
 - **§5의 sweep 지점.** threshold 지점은 900 µs, 3 ms, 14 ms 대신 7 ms, 12 ms, 30 ms가 됐어요. 1.2 ms와 5 ms는 그대로예요. backbone 지점은 값을 그대로 두고 설명만 고쳤어요. `harness/boot-defaults/`의 파일도 그에 맞춰 바뀌었어요. 경민이 할 일은 없어요.
 - **§3의 pin.** scoring spec은 `84b997ad…`예요. scoring spec의 `c7-media`·`c7-meeting` 설명만 바뀌었고, term은 그대로예요.
+- **§3의 "driver table의 pin은 그대로".** driver table도 `36267c38…`로 다시 pin됐어요. MLFQ 문장이 OSTEP §8.4의 Rule 4, 곧 burst를 넘어 쌓이는 allotment를 인용하도록 바뀌었고, 값은 그대로예요.
