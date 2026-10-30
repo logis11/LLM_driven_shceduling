@@ -524,12 +524,12 @@ statements:
       for a true row, its C7 counterpart for a false row, plus any C2 or C3 segment
       labelled with that row.
 
-# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-31, the demotion-edge entry; 2026-10-30, the timer_latency, input_latency and guard spec 1.3 entries; 2026-10-17, the 9.16 entries; 2026-10-17 and 2026-10-16, the 9.15 entries;
+# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-31, the demotion-edge and driver-table entries; 2026-10-30, the timer_latency, input_latency and guard spec 1.3 entries; 2026-10-17, the 9.16 entries; 2026-10-17 and 2026-10-16, the 9.15 entries;
 # 2026-10-15 and 2026-10-14, the 9.23 entries; 2026-10-12, the 9.20 entry; 2026-10-11, the 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
   scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 84b997ad467f98b5e9cc62ecbb74097607efb41c6fc2a65b1401ff672e78e8c2}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.3", sha256: 7029308eb8eae4068dfd8114daf089889320daa290267827ae12ed74f0b3a482}
-  driver_table: {path: daemon/driver-table/prior.yaml, sha256: e1155a72d7458a40778b19c5a9a18062de8efeb8b1663340435da3e9b800f617}
+  driver_table: {path: daemon/driver-table/prior.yaml, sha256: 36267c38cd3782a821427caa8a64f403c3fffc0133300d1c9d768ab719c67f09}
   dataset:      {path: dataset/build.manifest.json, sha256: 8e1eb7530b32378e3c5c76e449bf367b4962b9138b62dc7404c6df4b8d525837}
   variants:
     all: {path: dataset/build.variants.manifest.json, sha256: 8e2948b18812a546375ccd1f67d61604ee06c51d87060b8a1a48f5aa6cd0f1a4}

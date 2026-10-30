@@ -37,11 +37,14 @@
 #   three queues, doubling, a 100 ms boost; the same 10 ms for EDF's residual slice and LOTTERY's
 #   quantum by the same-granularity rule, design); no held reference names a different value for a
 #   situation, so the rows differ by algorithm and cap only.
-# - The editors the rows protect are measured programs (9.5). A keystroke costs the office writer
-#   and the mail client about 5 ms of CPU and the browser about 4 ms, so those block inside one
-#   10 ms slice and stay on top under MLFQ (rule 4b); a keystroke costs VS Code about 78 ms, several
-#   slices, so MLFQ demotes it within the keystroke (rule 4a) and the 100 ms boost is what returns
-#   it. The wake-to-run wait the scoring measures is protected whenever the editor is in Q0 at the
+# - The editors the rows protect are measured programs (9.5). MLFQ counts a task's allotment at a
+#   level across its bursts until a demotion or the boost (OSTEP §8.4, Rule 4). A keystroke costs the
+#   office writer and the mail client about 5 ms of CPU and the browser about 4 ms, so they mostly
+#   stay on top: under fixed the reference simulator demotes them in 0.04 to 0.06 of their 100 ms
+#   boost intervals (c7-office, c1-mail, c7-browsing; _dev/research/jioh/2026-10-31-demotion-edges/).
+#   A keystroke costs VS Code about 78 ms, several slices, so MLFQ demotes it within the keystroke
+#   (0.35 of its boost intervals on c7-dev) and the 100 ms boost is what returns it (Rule 5). The
+#   wake-to-run wait the scoring measures is protected whenever the editor is in Q0 at the
 #   wake; a demoted editor's keystroke waits behind whatever holds Q0 or Q1. The video editor
 #   (Kdenlive) and the image editor (GIMP) carry no keystroke stream — their measured driven phases
 #   are mouse-driven operations on their own timer components — so their foreground term reads the
@@ -62,7 +65,7 @@ rows:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "MLFQ serves the interactive job first and sinks CPU-bound work by observed behaviour without prior knowledge (OSTEP ch. 8, rules 1–5); the browser's keystroke work is far below one slice, so it stays on top (rule 4b); boot params, whose provenance is recognition-vocabulary §2."
+        justification: "MLFQ serves the interactive job first and sinks CPU-bound work by observed behaviour without prior knowledge (OSTEP ch. 8, rules 1–5); the browser's keystroke work is far below one slice, so it mostly stays on top (Rule 4: demoted in 0.06 of its boost intervals under fixed on c7-browsing); boot params, whose provenance is recognition-vocabulary §2."
         sources: [ostep]
   - mode: browsing
     background_wanted: false
@@ -74,7 +77,7 @@ rows:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "Unwanted CPU-bound work is what MLFQ's demotion rule sinks (OSTEP ch. 8, rule 4a); the cap bounds what the bottom queue can still take while the browser is runnable; boot params."
+        justification: "Unwanted CPU-bound work is what MLFQ's demotion rule sinks (OSTEP ch. 8, Rule 4); the cap bounds what the bottom queue can still take while the browser is runnable; boot params."
         sources: [ostep]
 
   # ------------------------------------------------------------ office
@@ -88,7 +91,7 @@ rows:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "A keystroke costs the writer about 5 ms (9.5), so it blocks before its slice ends and stays on top under MLFQ (OSTEP ch. 8, rule 4b), which is the property the writer needs; boot params."
+        justification: "A keystroke costs the writer about 5 ms (9.5), so it mostly stays on top under MLFQ (OSTEP §8.4, Rule 4: demoted in 0.05 of its boost intervals under fixed on c7-office), which is the property the writer needs; boot params."
         sources: [ostep]
   - mode: office
     background_wanted: false
@@ -114,7 +117,7 @@ rows:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "Interactive-first by observed behaviour (OSTEP ch. 8); a keystroke costs the mail client about 5 ms (9.5), inside one slice, so it stays in the top queue; boot params."
+        justification: "Interactive-first by observed behaviour (OSTEP ch. 8); a keystroke costs the mail client about 5 ms (9.5), so it mostly stays in the top queue (OSTEP §8.4, Rule 4: demoted in 0.04 of its boost intervals under fixed on c1-mail); boot params."
         sources: [ostep]
   - mode: mail
     background_wanted: false
@@ -140,7 +143,7 @@ rows:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "Interactive-first by observed behaviour (OSTEP ch. 8). A keystroke costs VS Code about 78 ms (9.5), so MLFQ demotes it within the keystroke (rule 4a) and the 100 ms boost returns it (rule 5); the wake-to-run wait the term scores is protected while the editor sits in Q0, and with nothing CPU-bound beside it the queue below is empty; boot params."
+        justification: "Interactive-first by observed behaviour (OSTEP ch. 8). A keystroke costs VS Code about 78 ms (9.5), so MLFQ demotes it within the keystroke (Rule 4) and the 100 ms boost returns it (Rule 5); the wake-to-run wait the term scores is protected while the editor sits in Q0, and with nothing CPU-bound beside it the queue below is empty; boot params."
         sources: [ostep]
   - mode: dev
     background_wanted: false
@@ -166,7 +169,7 @@ rows:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "An editor whose bursts outlast a slice is demoted and boosted back every 100 ms under MLFQ's rules (OSTEP ch. 8, rules 4a and 5), which keeps it responsive against CPU-bound work; boot params."
+        justification: "An editor whose bursts outlast a slice is demoted and boosted back every 100 ms under MLFQ's rules (OSTEP ch. 8, Rules 4 and 5), which keeps it responsive against CPU-bound work; boot params."
         sources: [ostep]
   - mode: photo
     background_wanted: false
@@ -198,7 +201,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: EDF
-    justification: "A live video call with an unwanted job behind it (c7-meeting's unattended upgrade): EDF serves the call's frames before the residual job whatever the cap, so the cap is inert on the scored term and the two meeting rows tie on it; against the boot MLFQ, which demotes the call's long cycles into the upgrade's queue, the EDF rows have headroom (pair review)."
+    justification: "A live video call with an unwanted job behind it (c7-meeting's unattended upgrade): EDF serves the call's frames before the residual job whatever the cap, so the cap is inert on the scored term and the two meeting rows tie on it; against the boot MLFQ, which demotes the call in 0.97 of its boost intervals and under which it misses 0.20 of its jobs (the RQ0 gate spec's c7-meeting note), the EDF rows have headroom (pair review)."
     sources: [liu-jacm73]
     entries:
       EDF:
@@ -250,7 +253,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: EDF
-    justification: "Playback with an unwanted job behind it (c7-media's unattended upgrade): EDF keeps both players' ticks before the residual job whatever the cap, so the cap is inert on the scored terms and the two media rows tie on them; the boot MLFQ keeps them too on the measured tables (a 32 ms worst case against a 33.3 ms period), so the file is expected no headroom against fixed as well (scoring spec)."
+    justification: "Playback with an unwanted job behind it (c7-media's unattended upgrade): EDF keeps both players' ticks before the residual job whatever the cap, so the cap is inert on the scored terms and the two media rows tie on them; the boot MLFQ keeps them too on the compiled file (its worst video cycle 7.28 ms against a 33.3 ms period; under fixed the reference simulator demotes the video player in 0.88 of its boost intervals and neither player misses, the RQ0 gate spec's c7-media note), so the file is expected no headroom against fixed as well (scoring spec)."
     sources: [liu-jacm73]
     entries:
       EDF:
@@ -270,7 +273,7 @@ rows:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "Interactive-first by observed behaviour, with long edit bursts demoted and boosted back every 100 ms (OSTEP ch. 8, rules 4a and 5); boot params."
+        justification: "Interactive-first by observed behaviour, with long edit bursts demoted and boosted back every 100 ms (OSTEP ch. 8, Rules 4 and 5); boot params."
         sources: [ostep]
   - mode: video-edit
     background_wanted: false
@@ -308,7 +311,7 @@ rows:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "MLFQ demotes each CPU-bound compiler child within a few slices (OSTEP ch. 8, rule 4a) and the floor cap bounds the whole class while the editor is runnable; boot params."
+        justification: "MLFQ demotes each CPU-bound compiler child within a few slices (OSTEP ch. 8, Rule 4) and the floor cap bounds the whole class while the editor is runnable; boot params."
         sources: [ostep]
 
   # ------------------------------------------------------------ ml-train
