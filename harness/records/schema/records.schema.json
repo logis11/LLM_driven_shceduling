@@ -2,7 +2,7 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "records.schema.json",
  "title": "Records row",
- "description": "One row of the harness's records file (docs/harness/metrics.md §5; `boot_default` added 2026-09-11, sub-task 8.2; `channel` added 2026-09-26; the `arrival` metric added 2026-10-17, 9.15; the `input_latency` metric and `censored` added 2026-10-30): one raw observation with its run identity and the attributes its metric carries. CSV cells that are empty are absent here; integer columns are integers.",
+ "description": "One row of the harness's records file (docs/harness/metrics.md §5; `boot_default` added 2026-09-11, sub-task 8.2; `channel` added 2026-09-26; the `arrival` metric added 2026-10-17, 9.15; the `input_latency` metric and `censored` added 2026-10-30, the `timer_latency` metric the same day): one raw observation with its run identity and the attributes its metric carries. CSV cells that are empty are absent here; integer columns are integers.",
  "type": "object",
  "required": [
   "workload_id",
@@ -70,6 +70,7 @@
    "enum": [
     "ready_wait",
     "input_latency",
+    "timer_latency",
     "job",
     "cpu_delivered",
     "demand",
@@ -169,7 +170,7 @@
    ]
   },
   "censored": {
-   "description": "input_latency rows only: 1 when the task never served the keystroke inside the window, so `value` is the lower bound from the keystroke to the task's end or T_end, whichever is first; 0 on a served keystroke's row (added 2026-10-30; metrics doc §6.12)",
+   "description": "input_latency and timer_latency rows only: 1 when the task never served the wake (a keystroke, or a timer wake) inside the window, so `value` is the lower bound from the wake to the task's end or T_end, whichever is first; 0 on a served wake's row (added 2026-10-30; metrics doc §6.12, §6.13)",
    "type": "integer",
    "enum": [
     0,
@@ -195,7 +196,10 @@
    "then": {
     "properties": {
      "metric": {
-      "const": "input_latency"
+      "enum": [
+       "input_latency",
+       "timer_latency"
+      ]
      }
     }
    }
@@ -204,7 +208,10 @@
    "if": {
     "properties": {
      "metric": {
-      "const": "input_latency"
+      "enum": [
+       "input_latency",
+       "timer_latency"
+      ]
      }
     },
     "required": [

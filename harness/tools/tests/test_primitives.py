@@ -15,11 +15,11 @@ def task(id, name="x", arrive=0, depart=None, demand=None, period=None, targets=
                     first_op=first_op)
 
 
-def runfile(t_end, tasks, chains=(), input_wakes=None):
-    """`input_wakes`: per task, the times of its input wake events, ascending."""
+def runfile(t_end, tasks, chains=(), input_wakes=None, timer_wakes=None):
+    """`input_wakes`, `timer_wakes`: per task, the times of its input or timer wake events, ascending."""
     return RunFile(workload_id="w", t_end=t_end,
                    tasks={t.id: t for t in tasks}, chains=[list(c) for c in chains],
-                   input_wakes=input_wakes or {})
+                   input_wakes=input_wakes or {}, timer_wakes=timer_wakes or {})
 
 
 def schedule(*entries):
@@ -754,3 +754,33 @@ def test_input_latency_censors_a_keystroke_never_served():
     ]
     r = compute(run, events)
     assert [(x["t"], x["value"], x["censored"]) for x in rows_of(r, "input_latency", "e")] == [(900, 100, 1)]
+
+
+# ------------------------------------------------------------ timer_latency
+# docs/harness/metrics.md §6.13 — the same rule on a timer channel: one row per timer wake
+# at its wake event, the k-th timer line serving the k-th timer wake, beside the keystrokes
+
+def test_timer_latency_pairs_timer_wakes_with_timer_lines_beside_the_keystrokes():
+    """Timer and input wakes queued mid-burst pair with their own channel's lines in order;
+    a timer wake still queued at the depart is censored there."""
+    run = runfile(1000, [task("e", depart=500, waits=["timer", "input", "timer", "timer", "timer"])],
+                  input_wakes={"e": [120]}, timer_wakes={"e": [100, 150, 400, 480]})
+    events = [
+        {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
+        {"event": "ready", "t": 100, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 110, "task": "e"},
+        {"event": "ready", "t": 200, "task": "e", "cause": "wake"},       # keystroke 120, queued
+        {"event": "ready", "t": 210, "task": "e", "cause": "wake"},       # timer wake 150, queued
+        {"event": "run_end", "t": 300, "task": "e", "reason": "block", "blocked_on": "wait"},
+        {"event": "ready", "t": 400, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 450, "task": "e"},
+        {"event": "run_end", "t": 500, "task": "e", "reason": "depart"},   # timer wake 480 never reached
+        {"event": "task_end", "t": 500, "task": "e", "reason": "depart"},
+    ]
+    r = compute(run, events)
+    assert [(x["t"], x["value"], x["channel"]) for x in rows_of(r, "ready_wait", "e")] == [
+        (100, 10, "timer"), (200, 0, "input"), (210, 0, "timer"), (400, 50, "timer")]
+    assert [(x["t"], x["value"], x["censored"]) for x in rows_of(r, "timer_latency", "e")] == [
+        (100, 10, 0), (150, 60, 0), (400, 50, 0), (480, 20, 1)]
+    assert [(x["t"], x["value"], x["censored"]) for x in rows_of(r, "input_latency", "e")] == [(120, 80, 0)]
+    assert r.guards == []

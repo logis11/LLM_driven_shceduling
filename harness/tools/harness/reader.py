@@ -186,6 +186,7 @@ class RunFile:
     tasks: Dict[str, TaskInfo]
     chains: List[List[str]]        # each from a TIMER head to its tail
     input_wakes: Dict[str, List[int]]   # times of the exogenous wake events on an input channel, per target task, ascending
+    timer_wakes: Dict[str, List[int]] = field(default_factory=dict)   # the same on a timer channel
 
 
 def channel_kind(channel) -> str:
@@ -262,6 +263,7 @@ def read_run_file(path) -> RunFile:
         raise RunFileError("run file has no 'events'")
     tasks: Dict[str, TaskInfo] = {}
     input_wakes: Dict[str, List[int]] = {}
+    timer_wakes: Dict[str, List[int]] = {}
     pinned = [0]
     for ev in doc["events"]:
         op = ev.get("op")
@@ -281,11 +283,12 @@ def read_run_file(path) -> RunFile:
                 tasks[cid] = _task_info(cid, child["name"], child["program"])
         elif op == "wake":
             pinned.append(int(ev["t"]))
-            if channel_kind(ev["channel"]) == "input":
-                input_wakes.setdefault(ev["target"], []).append(int(ev["t"]))
+            kind = channel_kind(ev["channel"])
+            if kind in ("input", "timer"):
+                (input_wakes if kind == "input" else timer_wakes).setdefault(ev["target"], []).append(int(ev["t"]))
         else:
             raise RunFileError(f"unknown event op {op!r}")
-    for times in input_wakes.values():
+    for times in (*input_wakes.values(), *timer_wakes.values()):
         times.sort()
     chains = []
     for tid, info in tasks.items():
@@ -301,7 +304,7 @@ def read_run_file(path) -> RunFile:
             cur = tasks[nxt]
         chains.append(chain)
     return RunFile(workload_id=doc.get("workload_id", ""), t_end=max(pinned),
-                   tasks=tasks, chains=chains, input_wakes=input_wakes)
+                   tasks=tasks, chains=chains, input_wakes=input_wakes, timer_wakes=timer_wakes)
 
 
 # ---------------------------------------------------------- config schedule

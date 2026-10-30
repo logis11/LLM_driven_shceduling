@@ -135,17 +135,18 @@ def test_percentile_is_numpy_linear_and_exact():
 
 
 def test_excess_aggregates_on_mock_switch(fixture_dir):
-    """Metrics doc §8 on mock-switch's worked values: the switch window [40600, 53100] holds the
-    50100 wake (0: keystroke 2 reached the editor at 46000 while it was ready in Q1 mid-burst,
-    preempted behind the hog, so it was queued and its next WAIT completed at 50100 with zero wait),
-    the boost windows [60600, 80600] and [80600, 86600] hold the 62000 wake (600), the rest of the
-    MLFQ interval holds the 90000 wake (0): excess 0 (switch), 600 (boost)."""
+    """Metrics doc §8 on mock-switch's worked values, on the editor's input_latency rows by their
+    keystrokes: the switch window [40600, 53100] holds keystroke 2 (46000 → 4100: it reached the
+    editor while it was ready in Q1 mid-burst, preempted behind the hog, so it queued and the WAIT
+    it serves completed at 50100), the boost windows [60600, 80600] and [80600, 86600] hold the
+    62000 keystroke (600), the rest of the MLFQ interval the 90000 one (0): excess 4100 (switch),
+    600 (boost)."""
     d = fixture_dir("mock-switch")
     rows, _ = records.build(d / "run.json", d / "trace.jsonl", table="calibrated",
                             schedule_path=d / "config-schedule.json")
     out = {(r["aggregate"], r["index"]): r["value"]
-           for r in agg.compute_aggregates(rows, interactive=("editor",)) if r["metric"] == "switch_window"}
-    assert out[("excess_switch", "3")] == "0.000000000000"
+           for r in agg.compute_aggregates(rows, interactive={"editor": "input_latency"}) if r["metric"] == "switch_window"}
+    assert out[("excess_switch", "3")] == "4100.000000000000"
     assert out[("excess_boost", "3")] == "600.000000000000"
     assert out[("share_inside_switch_windows", "")] == "0.125000000000"
 
@@ -210,22 +211,27 @@ def test_wake_aggregates_split_by_channel():
     assert not any(k[1] and k[0] != "wake" for k in out)                  # the split is on wake only
 
 
-def test_excess_reads_the_input_channel_only():
-    """Metrics doc §8's per-switch excess is interaction latency: with the switch
-    window [10000, 15000] holding a keystroke (400) and a timer wake (9000), and the
-    rest of the interval a keystroke (100) and a timer wake (7000), the excess is
-    400 − 100 = 300; over every wake it would be 4700 − 3550 = 1150."""
+def test_excess_reads_the_terms_latency_metric():
+    """Metrics doc §8's per-switch excess reads the rows of the metric the interactive
+    task's term reads, placed by their wakes: the switch window [10000, 15000] holds a
+    keystroke (400) and a timer wake (9000), the rest of the interval a keystroke (100)
+    and a timer wake (7000) — 300 on input_latency, 2000 on timer_latency. The ready_wait
+    rows beside them, all zero, are not read."""
     extra = [dict(entity="schedule", metric="config_interval", t=0, value=10000,
                   provenance="unmodified", algorithm="FIFO", index=0),
              dict(entity="schedule", metric="config_interval", t=10000, value=90000,
                   provenance="unmodified", algorithm="MLFQ", index=1),
              dict(entity="schedule", metric="switch_window", t=10000, value=5000,
                   algorithm="MLFQ", index=1, hogs=1)]
-    rows = _wake_records("llm_full", [(12000, 400, "input"), (13000, 9000, "timer"),
-                                      (50000, 100, "input"), (60000, 7000, "timer")], extra=extra)
-    out = {(r["aggregate"], r["index"]): r["value"]
-           for r in agg.compute_aggregates(rows, interactive=("editor",)) if r["metric"] == "switch_window"}
-    assert out[("excess_switch", "1")] == "300.000000000000"
+    extra += [dict(entity="editor", metric=m, t=t, value=v, censored=0)
+              for m, t, v in (("input_latency", 12000, 400), ("timer_latency", 13000, 9000),
+                              ("input_latency", 50000, 100), ("timer_latency", 60000, 7000))]
+    rows = _wake_records("llm_full", [(12000, 0, "input"), (13000, 0, "timer"),
+                                      (50000, 0, "input"), (60000, 0, "timer")], extra=extra)
+    for metric, excess in (("input_latency", "300.000000000000"), ("timer_latency", "2000.000000000000")):
+        out = {(r["aggregate"], r["index"]): r["value"]
+               for r in agg.compute_aggregates(rows, interactive={"editor": metric}) if r["metric"] == "switch_window"}
+        assert out[("excess_switch", "1")] == excess
 
 
 def test_a_channel_term_scores_the_channel_aggregate():
@@ -271,20 +277,17 @@ def test_flip_aggregates_on_mock_switch(fixture_dir, tmp_path):
     """9.21 decision 7 on mock-switch's schedule (boot MLFQ; entry 1 MLFQ with a shorter slice; entry 2 FIFO; entry
     3 MLFQ): three configuration changes; with a log of three queries graded correct, wrong, wrong, two of them
     wrong, and the wrong switch into MLFQ (entry 3) contributing its excess; the wrong FIFO entry contributes nothing
-    (no window into FIFO). The fixture's own switch excess for entry 3 is 0 µs (worked.md, "The aggregates, by hand"), so the entry-3
-    `excess_switch` row's value is replaced by a 250 µs stand-in: the stand-in is what makes the contribution
-    visible — 250 µs when entry 3 is wrong, 0 when every query is correct."""
+    (no window into FIFO). Entry 3's switch excess is the fixture's 4100 µs (worked.md, "The aggregates, by hand"):
+    4100 µs when entry 3 is wrong, 0 when every query is correct."""
     import json
     from harness.reader import read_config_schedule, read_recognition_log
     d = fixture_dir("mock-switch")
     rows, _ = records.build(d / "run.json", d / "trace.jsonl", table="calibrated",
                             schedule_path=d / "config-schedule.json")
-    aggregates = agg.compute_aggregates(rows, interactive=("editor",))
-    stand_in = "250.000000000000"
-    entry3 = [i for i, r in enumerate(aggregates) if r["metric"] == "switch_window"
+    aggregates = agg.compute_aggregates(rows, interactive={"editor": "input_latency"})
+    entry3 = [r for r in aggregates if r["metric"] == "switch_window"
               and r["aggregate"] == "excess_switch" and r["index"] == "3"]
-    assert len(entry3) == 1 and aggregates[entry3[0]]["value"] == "0.000000000000"
-    aggregates[entry3[0]] = dict(aggregates[entry3[0]], value=stand_in)
+    assert len(entry3) == 1 and entry3[0]["value"] == "4100.000000000000"
     schedule = read_config_schedule(d / "config-schedule.json")
     queries = [{"t_set_change": t, "telemetry": {"t_us": t, "processes": []}, "validation": "unmodified",
                 "latency_us": 100, "proposal": {"system": {"mode": "dev", "background_wanted": True}}}
@@ -296,7 +299,7 @@ def test_flip_aggregates_on_mock_switch(fixture_dir, tmp_path):
               {"metric": "config_correct", "t": 40500, "value": 0}, {"metric": "mode_correct", "t": 40500, "value": 1}]
     out = {r["aggregate"]: r["value"] for r in agg.flip_aggregates(aggregates, schedule, log, grades)}
     assert out == {"change_count": "3.000000000000", "wrong_change_count": "2.000000000000",
-                   "wrong_switch_excess_sum": stand_in}
+                   "wrong_switch_excess_sum": "4100.000000000000"}
     flip_rows = agg.flip_aggregates(aggregates, schedule, log, grades)
     assert all(r["entity"] == "schedule" and r["metric"] == "config_interval" and r["index"] == "" for r in flip_rows)
     assert {r["workload_id"] for r in flip_rows} == {"mock-switch"} and all(r["condition"] == "llm_algo" for r in flip_rows)

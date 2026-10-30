@@ -10,10 +10,11 @@ the incoming entry's params from it by `index`.
 A `ready(cause = wake)` line completes the task's next WAIT in program order,
 so its row carries that WAIT's channel kind from the run file (`input`, `timer`,
 `chain`, …; metrics doc §6.1). Each keystroke — an input wake event of the run
-file — also gets an `input_latency` row (§6.12): the k-th input-channel line
-completes the WAIT the k-th keystroke serves, wakes queuing with depth, and the
-row runs from the keystroke's wake event to the start of that service; a
-keystroke its task never serves by its end is censored there.
+file — also gets an `input_latency` row (§6.12), and each wake event on a
+timer channel a `timer_latency` row (§6.13): the k-th line on that channel
+completes the WAIT the k-th wake serves, wakes queuing with depth, and the row
+runs from the wake event to the start of that service; a wake its task never
+serves by its end is censored there.
 
 Alongside the rows it returns the guard messages the metrics doc names: more
 tail iterations than consumed head ticks per chain, the `deadline` cross-check on
@@ -62,7 +63,7 @@ class _TaskState:
     iter_ends: List[int] = field(default_factory=list)          # completion t per iteration
     deadlines: List[dict] = field(default_factory=list)
     blocked_wait: bool = False      # blocked on a WAIT: its arrival step or a run_end(block, wait), no line since
-    input_served: List[int] = field(default_factory=list)       # service start per input-channel ready line, in order
+    served: Dict[str, List[int]] = field(default_factory=lambda: {"input": [], "timer": []})   # service start per input- and timer-channel ready line, in order
 
 
 @dataclass
@@ -136,8 +137,8 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                 for (rt, cause, channel) in st.pending_ready:
                     if rt <= t_end:
                         rows.append(_ready_row(ev["task"], rt, 0, cause, channel))
-                        if channel == "input":
-                            st.input_served.append(rt)
+                        if channel in st.served:
+                            st.served[channel].append(rt)
                 st.pending_ready = []
                 if st.iter_open is not None:
                     close_iteration(st, st.iter_open)
@@ -152,8 +153,8 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
             if st.running_since is not None:              # inside own occupancy
                 if t <= t_end:
                     rows.append(_ready_row(ev["task"], t, 0, ev["cause"], channel))
-                    if channel == "input":
-                        st.input_served.append(t)
+                    if channel in st.served:
+                        st.served[channel].append(t)
             else:
                 st.pending_ready.append((t, ev["cause"], channel))
             if ev["cause"] == "timer_tick":
@@ -165,8 +166,8 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
             if t <= t_end:
                 for (rt, cause, channel) in st.pending_ready:
                     rows.append(_ready_row(ev["task"], rt, t - rt, cause, channel))
-                    if channel == "input":
-                        st.input_served.append(t)
+                    if channel in st.served:
+                        st.served[channel].append(t)
             st.pending_ready = []
             st.running_since = t
             st.blocked_wait = False
@@ -378,22 +379,25 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                                       f"slack={dl['slack_us']}) disagrees with the job row "
                                       f"(completion {completion}, value {completion - tick})")
 
-    # ---- input_latency (§6.12): one row per keystroke, at its wake event. The k-th input
-    # line served the k-th keystroke (wakes queue with depth, §11 item 2); a keystroke
-    # served by no line inside the window is censored at its task's end or T_end
-    for tid, times in run.input_wakes.items():
-        st = tasks.get(tid)
-        served = st.input_served if st is not None else []
-        end = min(st.end[0], t_end) if st is not None and st.end is not None else t_end
-        for k, wt in enumerate(times):
-            if k < len(served):
-                if served[k] < wt:
-                    guards.append(f"task {tid}: input line {k} served at t={served[k]}, before its "
-                                  f"keystroke at t={wt}")
-                    continue
-                rows.append(_row(tid, "input_latency", wt, served[k] - wt, censored=0))
-            elif wt < end:
-                rows.append(_row(tid, "input_latency", wt, end - wt, censored=1))
+    # ---- input_latency (§6.12) and timer_latency (§6.13): one row per wake event on an input
+    # channel (a keystroke) or a timer channel, at the wake. The k-th line on that channel served
+    # the k-th wake (wakes queue with depth, §11 item 2); a wake served by no line inside the
+    # window is censored at its task's end or T_end
+    for kind, metric, wakes, noun in (("input", "input_latency", run.input_wakes, "keystroke"),
+                                      ("timer", "timer_latency", run.timer_wakes, "timer wake")):
+        for tid, times in wakes.items():
+            st = tasks.get(tid)
+            served = st.served[kind] if st is not None else []
+            end = min(st.end[0], t_end) if st is not None and st.end is not None else t_end
+            for k, wt in enumerate(times):
+                if k < len(served):
+                    if served[k] < wt:
+                        guards.append(f"task {tid}: {kind} line {k} served at t={served[k]}, before its "
+                                      f"{noun} at t={wt}")
+                        continue
+                    rows.append(_row(tid, metric, wt, served[k] - wt, censored=0))
+                elif wt < end:
+                    rows.append(_row(tid, metric, wt, end - wt, censored=1))
 
     # ---- stimulus guard (§8), and wake lines the run file has no WAIT for. A task that
     # ends with input it has not reached, behind its program, is no guard; one that ends

@@ -587,12 +587,12 @@ def line_input_wake_count(rs, params, ctx):
     observations the P99 rests on — the count aggregate of the term's entity and
     metric (with a `ready_wait` term's cause and channel) inside its window, read on
     the fixed run under the primary boot default: an `input_latency` term's
-    keystrokes, a `ready_wait` term's wakes."""
+    keystrokes, a `timer_latency` term's timer wakes, a `ready_wait` term's wakes."""
     spec = scoring.load_spec(ctx["scoring_spec_path"])
     rows = []
     for wid in rs.judging:
         for t in (spec["files"].get(wid) or {}).get("terms") or []:
-            if t["metric"] not in ("input_latency", "ready_wait"):
+            if t["metric"] not in ("input_latency", "timer_latency", "ready_wait"):
                 continue
             w = t.get("window") or {}
             start, end = str(w.get("start_us", "")), str(w.get("end_us", ""))

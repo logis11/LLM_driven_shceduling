@@ -5,7 +5,8 @@
 (entity, metric, aggregate, cause, channel, window, index) with a value. The
 `ready_wait` aggregates come per cause and, for cause `wake`, per channel kind
 as well (§8). Interaction latency is `input_latency`'s, one row per keystroke
-from its wake event (§6.12), with the count of its censored rows beside the
+from its wake event (§6.12), and an application's own timer wakes'
+`timer_latency`'s (§6.13), each with the count of its censored rows beside the
 statistics. Every trace
 aggregate §8 lists is here whether a scoring term weights it or not, so the
 scorer, the guards, and the report read one file (`harness/aggregates/schema/`).
@@ -17,13 +18,14 @@ anchor `t` lies in the closed interval, as the observation window keeps
 observations "at or before" `T_end`.
 
 The per-switch excess and its boost variant (§8) need the interactive task the
-scoring spec names for the file — the caller passes `interactive`, the entities
-of the file's `ready_wait` terms — and the `boost_window` rows the primitives
-emit (§6.10, sub-task 8.10). Its wake rows are the input channel's. Inside a
-switch window (or the boost windows of that config interval) means the wake
-row's `t` lies in it; "the rest of that config
-interval outside any window" is the interval's wake rows in neither. A variant
-is written only when both sides have rows.
+scoring spec names for the file — the caller passes `interactive`, each entity
+of the file's latency terms with the metric its term reads, `input_latency` or
+`timer_latency` — and the `boost_window` rows the primitives emit (§6.10,
+sub-task 8.10). Its rows are that metric's, a censored one at its lower bound.
+Inside a switch window (or the boost windows of that config interval) means the
+row's `t`, its wake, lies in it; "the rest of that config interval outside any
+window" is the interval's rows in neither. A variant is written only when both
+sides have rows.
 
 The flip aggregates (9.21 spec, decision 7; the hold-time plan's step 1) are
 three more rows over the config schedule, computed by `flip_aggregates` from
@@ -98,10 +100,11 @@ def _in_window(t, window):
     return (start is None or t >= start) and (end is None or t <= end)
 
 
-def compute_aggregates(rows, windows=None, interactive=()):
+def compute_aggregates(rows, windows=None, interactive=None):
     """Aggregate rows for one run. `windows`: {(entity, metric): [(start_us, end_us), …]};
-    `interactive`: the entities whose wake waits the per-switch excess aggregates measure."""
+    `interactive`: {entity: latency metric}, whose rows the per-switch excess aggregates measure."""
     windows = windows or {}
+    interactive = interactive or {}
     identity = run_identity(rows)
     df = pd.DataFrame(rows)
     for col in ("cause", "channel", "provenance", "algorithm", "index", "period_us", "skipped", "censored"):
@@ -148,23 +151,26 @@ def compute_aggregates(rows, windows=None, interactive=()):
                 over = sum(1 for v in vals if v > T_INTERACTION_US)
                 emit(entity, "ready_wait", "over_threshold", Fraction(over, len(vals)), **kw)
 
-    # --- input_latency: per entity, per window; a censored row's value is its lower bound (§6.12)
-    il = df[df["metric"] == "input_latency"]
-    for entity, g in il.groupby("entity", sort=True):
-        for window in windows_for(entity, "input_latency"):
-            sel = g[[_in_window(int(t), window) for t in g["t"]]]
-            if sel.empty:
-                continue
-            vals = sel["value"].astype(int).tolist()
-            kw = dict(window=window)
-            emit(entity, "input_latency", "count", len(vals), **kw)
-            emit(entity, "input_latency", "censored_count", int((sel["censored"].fillna(0).astype(int) == 1).sum()), **kw)
-            emit(entity, "input_latency", "mean", Fraction(sum(vals), len(vals)), **kw)
-            for p, name in ((50, "p50"), (95, "p95"), (99, "p99")):
-                emit(entity, "input_latency", name, percentile(vals, p), **kw)
-            emit(entity, "input_latency", "max", max(vals), **kw)
-            over = sum(1 for v in vals if v > T_INTERACTION_US)
-            emit(entity, "input_latency", "over_threshold", Fraction(over, len(vals)), **kw)
+    # --- input_latency and timer_latency: per entity, per window; a censored row's value is its
+    # lower bound (§6.12, §6.13). The interaction threshold is a keystroke's (§10)
+    for metric in ("input_latency", "timer_latency"):
+        il = df[df["metric"] == metric]
+        for entity, g in il.groupby("entity", sort=True):
+            for window in windows_for(entity, metric):
+                sel = g[[_in_window(int(t), window) for t in g["t"]]]
+                if sel.empty:
+                    continue
+                vals = sel["value"].astype(int).tolist()
+                kw = dict(window=window)
+                emit(entity, metric, "count", len(vals), **kw)
+                emit(entity, metric, "censored_count", int((sel["censored"].fillna(0).astype(int) == 1).sum()), **kw)
+                emit(entity, metric, "mean", Fraction(sum(vals), len(vals)), **kw)
+                for p, name in ((50, "p50"), (95, "p95"), (99, "p99")):
+                    emit(entity, metric, name, percentile(vals, p), **kw)
+                emit(entity, metric, "max", max(vals), **kw)
+                if metric == "input_latency":
+                    over = sum(1 for v in vals if v > T_INTERACTION_US)
+                    emit(entity, metric, "over_threshold", Fraction(over, len(vals)), **kw)
 
     # --- job: per entity, per window. A skipped tick (metrics doc §6.2, the TIMER skip
     # rule) is a job row with no completion: it counts, it is missed, it has no latency.
@@ -238,7 +244,6 @@ def compute_aggregates(rows, windows=None, interactive=()):
         emit("schedule", "switch_window", "share_inside_switch_windows", Fraction(inside, t_end))
         bw = df[df["metric"] == "boost_window"]
         ci = df[df["metric"] == "config_interval"]
-        wakes = rw[(rw["cause"] == "wake") & (rw["channel"] == "input")]
         for _, s_row in sw[sw["algorithm"] == "MLFQ"].iterrows():
             t_s, v_s, idx = int(s_row["t"]), int(s_row["value"]), int(s_row["index"])
             interval = ci[ci["index"].astype("Int64") == idx]
@@ -246,8 +251,8 @@ def compute_aggregates(rows, windows=None, interactive=()):
                 continue
             t_i_end = int(interval["t"].iloc[0]) + int(interval["value"].iloc[0])
             boosts = [(int(t), int(t) + int(v)) for t, v in zip(bw["t"], bw["value"]) if t_s <= int(t) <= t_i_end]
-            for entity in interactive:
-                g = wakes[wakes["entity"] == entity]
+            for entity, metric in interactive.items():
+                g = df[(df["metric"] == metric) & (df["entity"] == entity)]
                 pts = [(int(t), int(v)) for t, v in zip(g["t"], g["value"]) if t_s <= int(t) <= t_i_end]
                 in_switch = [v for t, v in pts if t <= t_s + v_s]
                 in_boost = [v for t, v in pts if any(a <= t <= b for a, b in boosts)]

@@ -112,10 +112,10 @@ Total 34 rows.
 
 ## The aggregates, by hand (metrics doc §8)
 
-The interactive task is `editor` (the one the scoring spec names). Wake rows: 20000 → 22600, 50100 → 0 (keystroke 2, queued at 46000 while the editor was mid-burst), 62000 → 600, 90000 → 0.
+The interactive task is `editor` (the one the scoring spec names), read on its term's metric, `input_latency`, each row placed by its keystroke: 20000 → 22600, 46000 → 4100 (keystroke 2, queued while the editor was mid-burst; the WAIT it serves completed at 50100), 62000 → 600, 90000 → 0.
 
-- **Switch window** for entry 3: [40600, 53100]. Inside: the 50100 row (0). Boost grid from `t_apply`: 60600, 80600 (100600 is past `T_end`). Each boost window by the same rule: at 60600 two hogs (first `run_end` after: `editor` 64600 `preempt`, `hog` 62600 `preempt`); the hog has its 6000 at 68600, the editor only 3000 by the next boost, so the window is clipped there → [60600, 80600]; at 80600 the hog (first `run_end` after: 90000 `preempt`) runs uninterrupted → [80600, 86600]. Inside the boost windows: the 62000 row (600). Rest of the MLFQ interval outside any window: the 90000 row (0).
-- **Per-switch excess, switch variant**: 0 − 0 = **0 µs**. **Boost variant**: 600 − 0 = **600 µs**. The switch window's one keystroke reached the editor mid-burst and paired with zero wait, so the switch variant carries nothing; the boost variant carries the 600 µs the 62000 keystroke waited for the hog's Q0 slice to end.
+- **Switch window** for entry 3: [40600, 53100]. Inside: the 46000 row (4100). Boost grid from `t_apply`: 60600, 80600 (100600 is past `T_end`). Each boost window by the same rule: at 60600 two hogs (first `run_end` after: `editor` 64600 `preempt`, `hog` 62600 `preempt`); the hog has its 6000 at 68600, the editor only 3000 by the next boost, so the window is clipped there → [60600, 80600]; at 80600 the hog (first `run_end` after: 90000 `preempt`) runs uninterrupted → [80600, 86600]. Inside the boost windows: the 62000 row (600). Rest of the MLFQ interval outside any window: the 90000 row (0).
+- **Per-switch excess, switch variant**: 4100 − 0 = **4100 µs**. **Boost variant**: 600 − 0 = **600 µs**. The switch variant carries the 4100 µs keystroke 2 waited from its wake to its service, queued while the editor, mid-burst, sat preempted behind the hog; the boost variant carries the 600 µs the 62000 keystroke waited for the hog's Q0 slice to end.
 - **Share of the window inside switch windows**: 12500 / 100000 = **0.125**.
 - The 20000 row (22600) falls in the FIFO interval and belongs to no window: that is FIFO's own cost, carried by the P99 term, not by these aggregates.
 

@@ -450,7 +450,7 @@ statements:
       under dataset/replay/, each stating its landing). A verdict count that moves under any line makes the verdict
       a range over that axis. The input-wake-count line prints, per judging file
       and latency term, the number of observations its P99 rests on — an
-      input_latency term's keystrokes, a timer-channel ready_wait term's wakes: a
+      input_latency term's keystrokes, a timer_latency term's timer wakes: a
       26 s counterpart holds 49 to 101 keystrokes and c3-workday's browser seven,
       so a P99 there is the top one or two latencies. The comparison across conditions
       is on one file's wakes; across the pair, a counterpart's keystroke window is
@@ -514,7 +514,7 @@ statements:
 # SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-30, the input_latency and guard spec 1.3 entries; 2026-10-17, the 9.16 entries; 2026-10-17 and 2026-10-16, the 9.15 entries;
 # 2026-10-15 and 2026-10-14, the 9.23 entries; 2026-10-12, the 9.20 entry; 2026-10-11, the 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
-  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 1c738540e3c592d231c2a4071df7cb7fc11a4c9ab9f5c623421e5e90242949e2}
+  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 205add6473446f68344dcda9b8c95505923f9326e61ef4384ae7b6c80e94bbc6}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.3", sha256: 7029308eb8eae4068dfd8114daf089889320daa290267827ae12ed74f0b3a482}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: e1155a72d7458a40778b19c5a9a18062de8efeb8b1663340435da3e9b800f617}
   dataset:      {path: dataset/build.manifest.json, sha256: 8e1eb7530b32378e3c5c76e449bf367b4962b9138b62dc7404c6df4b8d525837}

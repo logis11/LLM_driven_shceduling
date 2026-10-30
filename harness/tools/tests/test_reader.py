@@ -190,6 +190,7 @@ def test_input_wakes_count_the_input_channel_only(tmp_path):
     ]}))
     run = read_run_file(p)
     assert run.input_wakes == {"e": [10, 40]}
+    assert run.timer_wakes == {"e": [20, 30], "d": [50]}     # timer_latency's wake events (metrics doc §6.13)
     assert run.tasks["e"].first_op == "WAIT"
 
 

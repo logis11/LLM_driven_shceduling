@@ -62,6 +62,7 @@
       "enum": [
         "ready_wait",
         "input_latency",
+        "timer_latency",
         "job",
         "cpu_delivered",
         "completed",
