@@ -35,7 +35,7 @@ def test_a_replay_variant_reports_what_each_task_replayed(repo_root, tmp_path, m
     build_dir = repo_root / "dataset" / "build" / "coreset-single"
     if not (build_dir / "c7-dev.workload.json").exists():
         pytest.skip("needs the compiled coreset")
-    grid = [[k * 1_000_000, 100, 0] for k in range(30)]
+    grid = [[k * 1_000_000, 100, 0, 0] for k in range(30)]
     runs = [[k * 10_000, 5_000, 5_000] for k in range(6000)]   # 30 s of CPU in 5 ms runs
     monkeypatch.setitem(compiler._REPLAY, "fx-editor", _doc("code-editor", "wakes", 30_000_000, [grid]))
     monkeypatch.setitem(compiler._REPLAY, "fx-upgrade", _doc("package-upgrade", "runs", 0, [runs], source="meas-ci:background:2026-10-01"))

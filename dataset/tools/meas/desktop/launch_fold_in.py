@@ -6,7 +6,8 @@ launch_fold_in.py <artifacts-root> --source <tag> [--cpu-model "EPYC 7763"] [--o
 
 For each launch subject's entry, dataset/launch/launch-<entry>.json.gz: per pooled repeat, the run id, the phase's
 length and its streams — the whole tree's, or for `renderer-hidden` each measured renderer's (D133) — each wake
-[t_us from the phase's start, run_us, thread] with the thread an index into the repeat's comm list. Every same-machine
+[t_us from the phase's start, run_us, thread, channel] with the thread an index into the repeat's comm list and the
+channel 0 for a timer-caused wake, 1 for any other (timer wakes by origin, 2026-10-31, decision 6). Every same-machine
 repeat obtained is pooled (pool.py's find_runs). The file is written byte-stable (gzip without a timestamp, sorted
 keys), so --check exits 1 when a file differs from what the landings give. Each entry's params gain, as their first
 param, `launch: {stream: launch-<entry>, sampling: per-task, source: <tag>}` — the line rewritten in place if present;
@@ -30,6 +31,9 @@ ENTRY = {"soffice": "office-writer", "thunderbird-send": "mail-client", "kdenliv
          "chrome": "web-browser", "chrome-hidden": "renderer-hidden", "webrtc": "video-call"}
 
 
+CHANNEL_CODE = {"timer": 0, "event": 1}   # a wake's fourth column, its channel (decision 6)
+
+
 def streams_of(D, subject):
     """(phase_us, [stream, …], comms) from one landing's launch.summary.json and launch.events.tsv.gz."""
     summary = json.load(open(os.path.join(D, "launch.summary.json")))
@@ -37,15 +41,16 @@ def streams_of(D, subject):
              if subject == "chrome-hidden" else ["tree"])
     comms, index, by = [], {}, {n: [] for n in names}
     with gzip.open(os.path.join(D, "launch.events.tsv.gz"), "rt") as handle:
-        next(handle)
+        if "\tchannel" not in next(handle):
+            raise SystemExit(f"{D}: launch.events.tsv.gz carries no channel; run launch.py analyze on the landing")
         for line in handle:
-            stream, t_us, run_us, _tid, _pid, comm, _role = line.rstrip("\n").split("\t")
+            stream, t_us, run_us, _tid, _pid, comm, _role, channel = line.rstrip("\n").split("\t")
             if stream not in by:
                 continue
             if comm not in index:
                 index[comm] = len(comms)
                 comms.append(comm)
-            by[stream].append([int(t_us), int(run_us), index[comm]])
+            by[stream].append([int(t_us), int(run_us), index[comm], CHANNEL_CODE[channel]])
     for s in by.values():
         s.sort()
     return round(summary["phase_s"] * 1e6), [by[n] for n in names], comms

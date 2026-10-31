@@ -89,8 +89,8 @@ def thread_count(t):
     return str(lo) if lo == hi else f"[{lo}, {hi}]"
 
 
-def component(comm, t, tab, indent="        "):
-    return [f"{indent}- comm: {json.dumps(comm)}",
+def component(comm, t, tab, indent="        ", event=False):
+    return [f"{indent}- comm: {json.dumps(comm)}"] + ([f"{indent}  channel: event"] if event else []) + [
             f"{indent}  threads: {thread_count(t['threads'])}",
             f"{indent}  wakes_per_s: {statistics.fmean(t['wakes_per_s']):.5g}",
             f"{indent}  gap: {yaml_table(tab['gap_ms']['table'], TAG)}",
@@ -169,7 +169,13 @@ def midnight_split(prog, e, comp):
 
 # where each between-sessions component was decided: pid 1's run mean by D29 on D28's placement, re-read by D48 once
 # sysstat's collector is the desktop's again (D47); the system bus by D48
-SPREAD_DECIDED = {"pid1/systemd": "D28, D29, D48", "system-bus/dbus-daemon": "D48"}
+SPREAD_DECIDED = {"pid1/systemd": "D28, D29, D48", "system-bus/dbus-daemon": "D48",
+                  # timer wakes by origin (2026-10-31): the class follows its component into its event part (decision
+                  # 14); WirePlumber's main loop's timer part, taken after its values were seen failing (decision 16)
+                  "pid1/systemd [event]": "D28, D29, D48; its event part, the timer wakes by origin's decision 14",
+                  "system-bus/dbus-daemon [event]": "D48; its event part, the timer wakes by origin's decision 14",
+                  "wireplumber/gmain": "its timer part, the timer wakes by origin's decision 16, the class taken after "
+                                       "its values were seen failing, 9.8 D28"}
 
 
 def stability_text(prog, e, stab, k, within):
@@ -209,8 +215,12 @@ def stability_text(prog, e, stab, k, within):
                  f"extended it ({SPREAD_DECIDED[comp]}): {'; '.join(parts)}. Within one run (the long-phase probes 36, 41 and 44, "
                  f"a window of the phase every 60 s) they move by {w[0]}, {w[1]} and {w[2]} of their mean, against "
                  f"{w[3]}, {w[4]} and {w[5]} across the repeats (half the range over the mean): the spread lies in "
-                 f"part within a run. It wakes {min(n)}–{max(n)} times a phase and is the entry's whole activity once "
-                 f"the wakes owed to outside causes are out (D27). ")
+                 f"part within a run. It wakes {min(n)}–{max(n)} times a phase and "
+                 + ("is the entry's whole activity" if len(e["components"]["selected"]) == 1 else
+                    # timer wakes by origin, decision 10: a component's two parts each carried
+                    f"holds {within[f'{prog} {comp}']['weight']['share_of_entry_wakes'] * 100:.1f} % of the entry's wakes")
+                 + " once the wakes owed to outside causes are out (D27). ")
+        text += midnight_split(prog, e, comp)
     return text
 
 
@@ -250,16 +260,29 @@ def entry(prog, e, run, within):
     comp = e["components"]
     k = len(e["repeats"])
     out = [f"  {IDS[prog]}:", "    category_source: meas", "    declared_class: normal", "    pattern:", "      program:",
-           "        - loop:                    # measured timer components merged at compile time, each wake on the task's timer channel (9.5 D9, D16, D74)",
+           "        - loop:                    # measured components merged at compile time, each wake on the task's timer or event channel by its origin (9.5 D9, D16, D74; timer wakes by origin, decision 4)",
            "            - WAIT: timer", "            - RUN: event", "    params:", "      components:"]
-    for comm in comp["selected"]:
+    suffix = " [event]"   # campaign/analyze.py's EVENT_SUFFIX: a component's event part (timer wakes by origin, decision 10)
+    timer = [c for c in comp["selected"] if not c.endswith(suffix)]
+    event = [c for c in comp["selected"] if c.endswith(suffix)]
+    for comm in timer:
         out += component(comm, e["threads"][comm], e["tables"][comm])
-    if comp["residual"]:
+    if comp["residual"] or comp.get("residual_event"):
         raise SystemExit(f"{prog}: a residual component — the generator writes none")
-    n_sel = len(comp["selected"])
-    out.append(f"        # {n_sel} component{'s' if n_sel > 1 else ''} cover{'' if n_sel > 1 else 's'} "
-               f"{comp['covered_share'] * 100:.2f} % of {comp['total_wakes_per_s']:.3f} wakes/s (9.5 D16, target 95 %); no residual — every other wake "
-               f"sporadic (modeling_notes)")
+    n_sel = len(timer)
+    if n_sel:
+        out.append(f"        # {n_sel} component{'s' if n_sel > 1 else ''} cover{'' if n_sel > 1 else 's'} "
+                   f"{comp['covered_share'] * 100:.2f} % of {comp['total_wakes_per_s']:.3f} timer-caused wakes/s (9.5 D16, target 95 %); no residual — every other wake "
+                   f"sporadic (modeling_notes)")
+    else:
+        out.append("        # no timer-caused component: the timer-caused wakes sporadic (modeling_notes)")
+    for comm in event:
+        out += component(comm[:-len(suffix)], e["threads"][comm], e["tables"][comm], event=True)
+    if event:
+        ev = comp["event"]
+        out.append(f"        # {len(event)} component{'s' if len(event) > 1 else ''} cover{'' if len(event) > 1 else 's'} "
+                   f"{(ev['covered_share'] or 0) * 100:.2f} % of {ev['total_wakes_per_s']:.3f} wakes/s of other origins, queued on the "
+                   f"event channel (9.5 D16 per channel); no residual — every other wake sporadic (modeling_notes)")
     out += ["    lifetime: segment-bound", "    binding_params: []", "    scalable: []", "    validation_stats:",
             "      referee: meas-ci"]
     runs = sorted(set(v for v in run["run_id"].values() if v))
@@ -309,11 +332,12 @@ def entry(prog, e, run, within):
     spor = comp.get("sporadic") or []
     cron = {r for r, n in zip(e["repeats"], e["cron_event"]["count"]) if n}
     if spor:
+        named = lambda c: f"`{c[:-len(' [event]')]}` (event)" if c.endswith(" [event]") else f"`{c}`"
         notes += " Sporadic wakes, not carried as components (9.5 D43): " + "; ".join(
-            f"`{c}` in {len(s['repeats'])} of {k} repeats ({', '.join(str(x) for x in s['repeats'])}"
+            f"{named(c)} in {len(s['repeats'])} of {k} repeats ({', '.join(str(x) for x in s['repeats'])}"
             + (", the repeats that met the cron session" if set(s["repeats"]) == cron else "")
             + f"), {s['wakes_per_s']} wakes/s over the pool"
-            for s in spor for c in s["comms"]) + "."
+            for s in spor for c in s.get("comms", [s["comm"]])) + "."
     if IDS[prog] in CONTROL:   # the untraced control's reading (its record's `notes`)
         notes += " " + CONTROL[IDS[prog]]
     out += ["    modeling_notes: >-", "      " + notes]

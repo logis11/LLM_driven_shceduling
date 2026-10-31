@@ -474,6 +474,37 @@ def test_values_at_the_window_limit_are_reported_not_held_open():
     assert not crit["op gimp wakes/s"].get("limited")
 
 
+def test_the_rules_exceptions_mark_each_class_by_its_values_prefix():
+    # timer wakes by origin (2026-10-31), decisions 14 and 15: an event part carried in part within one run (9.8 D21's
+    # extension of D57) or as a sparse component (9.8 D27); a run mean following the runner's speed (9.8 D17); D57 as
+    # before; each carried once it has five repeats, the rest of the list untouched
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    names = ["idle utility/libuv-worker wakes/s", "idle gpu/VizCompositorTh [event] wakes/s",
+             "idle gpu/VizCompositorTh wakes/s", "idle residual [event] run mean (ms)", "idle residual run mean (ms)"]
+    crit = {n: {"passes": False, "k": 44} for n in names}
+    pool.mark_carried("code", crit)
+    assert crit["idle utility/libuv-worker wakes/s"] == {"passes": False, "k": 44, "session_spread": True, "carried": True}
+    assert crit["idle gpu/VizCompositorTh [event] wakes/s"] == {"passes": False, "k": 44, "session_spread": True,
+                                                               "in_run": True, "carried": True}
+    assert crit["idle residual [event] run mean (ms)"]["in_run"] is True
+    assert crit["idle gpu/VizCompositorTh wakes/s"] == {"passes": False, "k": 44}   # the timer part: no class
+    assert crit["idle residual run mean (ms)"] == {"passes": False, "k": 44}
+    crit = {"idle BgIOThr~Pool [event] run mean (ms)": {"passes": False, "k": 4}}
+    pool.mark_carried("thunderbird-send", crit)
+    assert crit["idle BgIOThr~Pool [event] run mean (ms)"] == {"passes": False, "k": 4, "sparse": True, "carried": False}
+    crit = {n: {"passes": False, "k": 20} for n in ("driven kdenlive run mean (ms)", "driven kdenlive [event] run mean (ms)",
+                                                    "driven kdenlive gap mean (ms)")}
+    pool.mark_carried("kdenlive", crit)
+    assert [n for n, c in crit.items() if c.get("excepted")] == ["driven kdenlive run mean (ms)"]
+
+
 def test_timehist_rows_with_and_without_the_state_column(tmp_path):
     p = tmp_path / "perf.idle.timehist.txt"
     p.write_text("           time    cpu  task name                       wait time  sch delay   run time  state\n"
@@ -727,16 +758,17 @@ def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
     web = s["web-browser"]
     assert "38 repeats" in web and "the per-input means and the page-load operation's values" in web
     # D84: its renderers carried, the SWELL-KW per-input mean sits outside the rule at the recording's last window
-    assert ("outside the rule: the per-input run mean under SWELL-KW 4.274 ms ±5.90 % (the rule needs 52 repeats); "
-            "the other 38 hold within it, the widest ±3.37 %") in web
+    assert "the per-input run mean under SWELL-KW 4.274 ms ±5.90 % (the rule needs 52 repeats)" in web
+    assert "the other 59 hold within it, the widest ±4.82 %" in web
     mail = s["mail-client"]
     assert "8 repeats" in mail and "the per-input means and the send operation's values" in mail
     # D79: the keys-only re-measure's eight windows; its 136M mean now holds the rule
     assert "SWELL-KW 6.052 ms ±10.41 % (the rule needs 27 repeats)" in mail
     assert "136M" not in mail.split("outside the rule:")[1].split("hold within it")[0]
-    # D90: the pool's two spellings folded into `StreamTrans`; D94: the WebExtensions process's threads apart
-    assert "the operation's `StreamTrans` wake rate 55.53 wakes/s ±6.51 % (the rule needs 12 repeats)" in mail
-    assert "the other 30 hold within it, the widest ±5.38 %" in mail   # SwComposite's run mean, by the 1 µs floor
+    # D90: the pool's two spellings folded into `StreamTrans`; D94: the WebExtensions process's threads apart; the timer
+    # wakes by origin's decision 10: its wakes the event channel's
+    assert "the operation's `StreamTrans [event]` wake rate 55.25 wakes/s ±6.49 % (the rule needs 12 repeats)" in mail
+    assert "the other 39 hold within it, the widest ±6.07 %" in mail
     for aid in ("office-writer", "image-editor", "video-editor", "video-player", "audio-player", "video-call"):
         assert "window limit" not in s[aid].lower() and "(D99)" not in s[aid], aid
 
@@ -748,10 +780,36 @@ def test_code_s_idle_phase_from_200_s_carries_libuv_worker_under_d57_again(fold_
     code = scopes["code-editor"]
     assert "The idle phase is read from 200 s past its start, past the launch work in it (D83)" in code
     assert ("A component whose rate varies between sessions, its three values carried together (D57): "
-            "`utility/libuv-worker` wake rate 5.382 wakes/s ±5.63 % (3.133–7.327 wakes/s)") in code
+            "`utility/libuv-worker` wake rate 5.376 wakes/s ±5.63 % (3.133–7.316 wakes/s)") in code
     assert "within one run its wake rate ±10.6 % (5.41–6.71 a second over 700 s windows slid along the D52 probe" in code
     others = [aid for aid, scope in scopes.items() if aid != "code-editor"]
     assert all("rate varies between sessions" not in scopes[a] and "(D83)" not in scopes[a] for a in others)
+
+
+def test_the_split_parts_carried_under_a_class_state_both_spreads_their_count_and_the_order(fold_95):
+    # timer wakes by origin (2026-10-31), decisions 14 and 15: each part the split leaves outside the rule is carried
+    # under the class its evidence meets, its scope stating both spreads, its wakes a phase, and that the class came
+    # after the value was seen failing (9.8 D28)
+    s = _scopes(fold_95)
+    code = s["code-editor"]
+    assert ("Event parts whose spread lies in part within one run, carried as D57's are (D57 as 9.8 D21 extends it; "
+            "timer wakes by origin, decision 14)") in code
+    assert ("`gpu/VizCompositorTh [event]` wake rate 0.0356 wakes/s ±9.81 % (0.01714–0.06143 wakes/s)") in code
+    assert ("within one run its wake rate ±26.1 % (0.024–0.041 a second, the same windows), across the repeats its wake "
+            "rate ±56.4 %; 12–43 wakes a phase") in code
+    web = s["web-browser"]
+    assert ("A sparse event part, one that wakes a few times a phase, its three values carried together (9.8 D27; timer "
+            "wakes by origin, decision 14): `utility/ThreadPoolForeg [event]` wake rate 0.0094 wakes/s ±11.95 %") in web
+    assert "across the repeats its wake rate ±63.6 %; 2–9 wakes a phase" in web
+    for aid in ("code-editor", "web-browser", "mail-client"):
+        assert "Each class was taken after its values were seen failing, once the wakes were split by origin (9.8 D28)." in s[aid], aid
+    video = s["video-editor"]
+    assert ("A run mean whose spread follows the runner's speed, carried with its half-width and range (9.8 D17; timer "
+            "wakes by origin, decision 15): `kdenlive` run mean 2.611 ms ±5.35 % (2.157–3.115 ms); across the 20 repeats "
+            "the driven phase's other components' run means move with it (correlation +0.80 to +0.94)") in video
+    assert "the class taken after the value was seen failing (9.8 D28)" in video
+    for aid in ("office-writer", "image-editor", "video-player", "audio-player", "video-call"):
+        assert "decision 14" not in s[aid] and "decision 15" not in s[aid], aid
 
 
 # 9.5 D79: mail-client from two campaigns — the idle phase's values from the 43-repeat campaign, the phases with or after
@@ -886,6 +944,7 @@ def test_web_browser_s_scope_states_the_value_its_two_builds_differ_in(repo_root
         preps = ph.get("repeats") or e["repeats"]
         comps = [(c, ph["threads"][c]) for c in ph["components"]["selected"] if ph["threads"][c]["gap_ms"]["q"]]
         comps += [("residual", ph["components"]["residual"])] if ph["components"]["residual"] else []
+        comps += [("residual [event]", ph["components"]["residual_event"])] if ph["components"].get("residual_event") else []
         for c, t in comps:
             read(f"{p} {c} wakes/s", preps, t["wakes_per_s"])
             read(f"{p} {c} gap mean", preps, t["gap_ms"]["repeat_mean"])
@@ -894,15 +953,15 @@ def test_web_browser_s_scope_states_the_value_its_two_builds_differ_in(repo_root
         read(f"{p} input_run", e["phases"][p].get("repeats") or e["repeats"],
              e["phases"][p]["per_input"]["window"]["run_ms_minus_idle"]["repeat_mean"])
     read("operation duration", e["phases"]["op"].get("repeats") or e["repeats"], e["phases"]["op"]["operation"]["duration_ms"]["repeat_mean"])
-    assert len(z) == 60
-    viz, a, b = z.pop("op gpu/VizCompositorTh run mean")
-    assert round(viz, 2) == -2.31 and sum(x < min(a) for x in b) == 8 and len(b) == 9
-    assert round(max(abs(v[0]) for v in z.values()), 2) == 1.80
+    assert len(z) == 102
+    viz, a, b = z.pop("op gpu/VizCompositorTh [event] run mean")
+    assert round(viz, 2) == -2.62 and sum(x < min(a) for x in b) == 9 and len(b) == 9
+    assert round(max(abs(v[0]) for v in z.values()), 2) == 1.54
     assert ("Build bound (D69): the 38 repeats pool two builds, Google's repository serving only its current version. "
-            "Against the 152 repeats' own spread, 59 of the 60 carried values agree between the builds within 1.80 "
-            "standard deviations; the page load's `gpu/VizCompositorTh` run mean does not: 0.382 ms under 153 against "
-            "0.455 ms under 152 (−16.0 %, −2.31 standard deviations, 8 of the 9 repeats below every 152 repeat). The "
-            "carried 0.438 ms pools both, the 152 repeats' mean 4.0 % above it (D93).") in _scopes(fold_95)["web-browser"]
+            "Against the 152 repeats' own spread, 101 of the 102 carried values agree between the builds within 1.54 "
+            "standard deviations; the page load's `gpu/VizCompositorTh [event]` run mean does not: 0.430 ms under 153 "
+            "against 0.519 ms under 152 (−17.0 %, −2.62 standard deviations, 9 of the 9 repeats below every 152 repeat). "
+            "The carried 0.499 ms pools both, the 152 repeats' mean 4.0 % above it (D93).") in _scopes(fold_95)["web-browser"]
 
 
 def test_every_typing_scope_states_its_stimulus_check_read_per_repeat(fold_95):

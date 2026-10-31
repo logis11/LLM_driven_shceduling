@@ -100,6 +100,13 @@ SESSION_SPREAD = {"chrome-hidden": ("Chrome_ChildIOT",
 # sessions from D21 to D26.
 SPARSE = {"chrome-hidden": ("residual",), "chrome-visible": ("residual",)}
 
+# timer wakes by origin (2026-10-31), decision 14: an event part that fails the rule, by the class its evidence meets —
+# 9.5 D57 extended as D21 extends it, to the Steam client's six failing event parts, whose spread within one run of the
+# shown-phase probe (600 s windows every 60 s; _dev/research/jioh/2026-10-31-wake-origins/within_event_desktop.py) is
+# ±32–88 % against ±20–90 % across the repeats; carried as SESSION_SPREAD's are, flagged `in_run`
+SESSION_SPREAD_IN_RUN = {"steam": ("steam [event]", "steamwebhelper [event]", "CJobMgr::m_Work [event]",
+                                   "Compositor [event]", "Chrome_ChildIOT [event]", "residual [event]")}
+
 # results only: (a, b, what) — the two comparisons the slice reports (method §6 item 2)
 COMPARISONS = {"chrome-hidden": [], "chrome-visible": [("steady-timer", "steady-notimer", "timer against no timer")],
                "element": [("idle", "traffic", "idle against scripted traffic (D11; feeds no archetype)")],
@@ -158,7 +165,7 @@ def find_runs(root, cpu_model, modes=POOLED_MODES):
     return keyed, gated, other, probes
 
 
-def renderer_residual(rest, comms, spans, by_rep, cov):
+def renderer_residual(rest, comms, spans, by_rep, cov, name="residual"):
     """The residual of ONE renderer (changelog D19). `select_components` merges the residual comms' wake times over
     everything it is given, which for a renderer entry is every measured renderer at once: its rate came out N times
     a renderer's and its gaps interleaved N processes, where the selected components are one renderer's with the
@@ -188,7 +195,7 @@ def renderer_residual(rest, comms, spans, by_rep, cov):
                 "gap_ms": _cp.summary(gaps_by_rep), "run_ms": _cp.summary(runs_by_rep), "per_renderer": True}
     if not all(n >= 2 for n in (sum(len(ts) for c in rest for ts in (comms[c]["t_in_by_pid"].get(k) or {}).values())
                                 for k in reps)):
-        cov.setdefault("sporadic", []).append({"comm": "residual", "comms": rest,
+        cov.setdefault("sporadic", []).append({"comm": name, "comms": rest,
                                                "repeats": [k for k, w in zip(reps, rate_by_rep) if w]})
         return None
     return residual
@@ -277,6 +284,9 @@ def pool_app(app, reps):
                                                   {k: [(ph["t0"], ph["t0"] + ph["span_s"])] for k, ph in by_rep.items()})
         if app in analyze.RENDERER_APPS and residual:
             residual = renderer_residual(residual["comms"], comms, spans, by_rep, cov)
+        if app in analyze.RENDERER_APPS and cov.get("residual_event"):   # decision 10: the event channel's, the same way
+            cov["residual_event"] = renderer_residual(cov["residual_event"]["comms"], comms, spans, by_rep, cov,
+                                                      "residual" + _cp.EVENT_SUFFIX)
         entry["phases"][name] = {
             "repeats": sorted(by_rep, key=repeat_order),
             "span_s": [by_rep[k]["span_s"] for k in sorted(by_rep, key=repeat_order)],
@@ -341,8 +351,9 @@ def criterion(app, entry):
     ph = entry["phases"].get(phase)
     if ph:
         comps = [(c, ph["threads"][c]) for c in ph["components"]["selected"] if c in ph["threads"]]
-        residual = ph["components"].get("residual")
-        for comm, c in comps + ([("residual", residual)] if residual else []):
+        residuals = [(name, ph["components"].get(key)) for name, key in
+                     (("residual", "residual"), ("residual" + _cp.EVENT_SUFFIX, "residual_event"))]
+        for comm, c in comps + [(n, r) for n, r in residuals if r]:
             for field, label in LIST_FIELDS:
                 if field == "wakes_per_s":
                     vals = c.get("wakes_per_s") or []
@@ -350,14 +361,16 @@ def criterion(app, entry):
                         continue
                     c_ = {**stability(vals, None, MIN_REPEATS, keep_zero=True), "needed": _cp.repeats_needed(vals)}
                 else:
-                    table = (c if comm == "residual" else (ph.get("tables") or {}).get(comm) or {}).get(field)
+                    table = (c if comm.startswith("residual") else (ph.get("tables") or {}).get(comm) or {}).get(field)
                     if not table:
                         continue
                     sums, counts = _cp.table_pairs(table)
                     c_ = {**ratio_stability(sums, counts, ABS_FLOOR_MS, MIN_REPEATS),
                           "needed": ratio_repeats_needed(sums, counts, ABS_FLOOR_MS, MIN_REPEATS)}
                 c_["excepted"] = field == "run_ms" and app in EXCEPTED_RUN_MEANS          # D17
-                c_["session_spread"] = comm in SESSION_SPREAD.get(app, ())                 # D21
+                c_["session_spread"] = comm in SESSION_SPREAD.get(app, ()) or comm in SESSION_SPREAD_IN_RUN.get(app, ())   # D21
+                if comm in SESSION_SPREAD_IN_RUN.get(app, ()):
+                    c_["in_run"] = True                                                     # decision 14
                 c_["sparse"] = comm in SPARSE.get(app, ())                                 # D27
                 c_["carried"] = c_["passes"] or ((c_["excepted"] or c_["session_spread"] or c_["sparse"])
                                                  and c_["k"] >= MIN_REPEATS)

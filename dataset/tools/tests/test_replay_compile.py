@@ -47,21 +47,31 @@ def _program(canonical, iid):
 
 
 EDITOR = [{"id": "w", "name": "code", "archetype": "code-editor", "arrive": "0s", "depart": "20s"}]
-GRID = [[k * 1_000_000, 1000 + k, 0] for k in range(20)]   # a wake a second over 20 s
+GRID = [[k * 1_000_000, 1000 + k, 0, 0] for k in range(20)]   # a timer wake a second over 20 s
+
+
+def test_each_replayed_wake_takes_its_own_channel(tmp_path, repo_root, monkeypatch):
+    # timer wakes by origin (2026-10-31, decision 6): a wake whose chain starts elsewhere than a timer is queued on the
+    # event channel
+    mixed = [[k * 1_000_000, 1000 + k, 0, k % 2] for k in range(20)]
+    lib = _lib(tmp_path, repo_root, monkeypatch, ["code-editor"], _doc("code-editor", "wakes", 20_000_000, [mixed]))
+    canonical, _ = _compile(tmp_path, lib, EDITOR)
+    assert _wakes(canonical, "w", "timer") == [t for t, _, _, c in mixed if c == 0]
+    assert _wakes(canonical, "w", "event") == [t for t, _, _, c in mixed if c == 1]
 
 
 def test_a_measured_entry_replays_the_stream_in_place_of_its_components(tmp_path, repo_root, monkeypatch):
     # the stream spans exactly the task's lifetime, so the window is the whole of it
     lib = _lib(tmp_path, repo_root, monkeypatch, ["code-editor"], _doc("code-editor", "wakes", 20_000_000, [GRID]))
     canonical, report = _compile(tmp_path, lib, EDITOR)
-    assert _wakes(canonical, "w", "timer") == [t for t, _, _ in GRID]
+    assert _wakes(canonical, "w", "timer") == [t for t, *_ in GRID]
     runs = [s["us"] for s in _program(canonical, "w") if s["op"] == "RUN"]
-    assert runs == [r for _, r, _ in GRID] and report["per_task"]["w"] == sum(runs)
+    assert runs == [r for _, r, *_ in GRID] and report["per_task"]["w"] == sum(runs)
     assert report["replay"]["w"] == {"stream": "fx-replay", "offset_us": 0}
 
 
 def test_the_window_is_a_seeded_contiguous_slice_of_a_longer_stream(tmp_path, repo_root, monkeypatch):
-    long = [[k * 1_000_000, 1, 0] for k in range(40)]   # 40 s of a wake a second; the task lives 20 s
+    long = [[k * 1_000_000, 1, 0, 0] for k in range(40)]   # 40 s of a wake a second; the task lives 20 s
     lib = _lib(tmp_path, repo_root, monkeypatch, ["code-editor"], _doc("code-editor", "wakes", 40_000_000, [long]))
     firsts = {}
     for seed in (7, 8, 9):
@@ -83,42 +93,42 @@ def test_the_keystroke_replay_stays_as_compiled_over_the_replayed_stream(tmp_pat
     lib = _lib(tmp_path, repo_root, monkeypatch, ["code-editor"], _doc("code-editor", "wakes", 20_000_000, [GRID]))
     replayed, _ = _compile(tmp_path, lib, EDITOR, focus=focus)
     assert _wakes(replayed, "w", "input") == _wakes(plain, "w", "input") != []
-    assert _wakes(replayed, "w", "timer") == [t for t, _, _ in GRID]
+    assert _wakes(replayed, "w", "timer") == [t for t, *_ in GRID]
 
 
 BROWSER = [{"id": "b", "name": "chrome", "archetype": "web-browser", "arrive": "0s", "depart": "20s"}]
 
 
 def test_an_operation_keeps_its_precedence_over_the_replay(tmp_path, repo_root, monkeypatch):
-    fine = [[k * 100_000, 10, 0] for k in range(200)]   # a wake every 100 ms
+    fine = [[k * 100_000, 10, 0, 0] for k in range(200)]   # a wake every 100 ms
     lib = _lib(tmp_path, repo_root, monkeypatch, ["web-browser"], _doc("web-browser", "wakes", 20_000_000, [fine]))
     canonical, report = _compile(tmp_path, lib, BROWSER, operations=[{"at": "5s", "name": "page-load", "task": "b"}])
     op = report["operations"]["b"][0]
     lo, hi = op["at_us"], op["at_us"] + op["duration_us"]
     timer = set(_wakes(canonical, "b", "timer"))
-    grid = {t for t, _, _ in fine}
+    grid = {t for t, *_ in fine}
     assert {t for t in grid if not lo <= t < hi} <= timer           # the stream outside the window
     assert not {t for t in grid if lo <= t < hi} & timer             # dropped inside it
     assert any(lo <= t < hi for t in timer)                          # the operation's components run there
 
 
 def test_a_task_started_mid_file_replays_the_stream_and_no_launch_phase(tmp_path, repo_root, monkeypatch):
-    grid = [[k * 1_000_000, 5, 0] for k in range(18)]
+    grid = [[k * 1_000_000, 5, 0, 0] for k in range(18)]
     lib = _lib(tmp_path, repo_root, monkeypatch, ["web-browser"], _doc("web-browser", "wakes", 18_000_000, [grid]))
     assert "launch" in lib.entry("web-browser")["params"]
     canonical, _ = _compile(tmp_path, lib, [dict(BROWSER[0], arrive="2s")])
-    assert _wakes(canonical, "b", "timer") == [2_000_000 + t for t, _, _ in grid]
+    assert _wakes(canonical, "b", "timer") == [2_000_000 + t for t, *_ in grid]
 
 
 def test_a_task_group_takes_distinct_streams_of_the_repeat(tmp_path, repo_root, monkeypatch):
-    a = [[k * 1_000_000, 7, 0] for k in range(20)]
-    b = [[k * 1_000_000 + 500_000, 8, 0] for k in range(20)]
+    a = [[k * 1_000_000, 7, 0, 0] for k in range(20)]
+    b = [[k * 1_000_000 + 500_000, 8, 0, 0] for k in range(20)]
     lib = _lib(tmp_path, repo_root, monkeypatch, ["renderer-hidden"],
                _doc("renderer-hidden", "wakes", 20_000_000, [a, b]))
     canonical, _ = _compile(tmp_path, lib, [{"id": "r", "name": "chrome", "archetype": "renderer-hidden",
                                              "arrive": "0s", "depart": "20s", "count": 2}])
     got = sorted([_wakes(canonical, "r.1", "timer"), _wakes(canonical, "r.2", "timer")])
-    assert got == sorted([[t for t, _, _ in a], [t for t, _, _ in b]])
+    assert got == sorted([[t for t, *_ in a], [t for t, *_ in b]])
 
 
 CALL = [{"id": "v", "name": "chrome", "archetype": "video-call", "arrive": "0s", "depart": "20s"}]
@@ -174,7 +184,7 @@ def test_a_batch_stream_applies_to_the_program_it_names_alone(tmp_path, repo_roo
 
 
 def test_a_stream_shorter_than_its_task_fails_the_build(tmp_path, repo_root, monkeypatch):
-    short = [[k * 1_000_000, 1, 0] for k in range(10)]
+    short = [[k * 1_000_000, 1, 0, 0] for k in range(10)]
     lib = _lib(tmp_path, repo_root, monkeypatch, ["code-editor"], _doc("code-editor", "wakes", 10_000_000, [short]))
     with pytest.raises(ValueError, match=r"code-editor.*fx-replay.*10000000.*20000000"):
         _compile(tmp_path, lib, EDITOR)

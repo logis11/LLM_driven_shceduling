@@ -10,8 +10,9 @@ pooled repeat — the landing's — over the carried phase, as the kind of strea
 
   wakes   code-editor, web-browser, renderer-hidden: the tree's merged wakes (campaign/analyze.py's rule — a timehist
           row is a wake when a wakeup row for its thread precedes it, else a resume folded into the wake before), each
-          [t_us from the read's start, run_us, thread], the thread an index into the repeat's component list (role/comm,
-          9.5 D67); code's idle phase read from 200 s past its start (9.5 D83); the hidden renderers as
+          [t_us from the read's start, run_us, thread, channel], the thread an index into the repeat's component list
+          (role/comm, 9.5 D67), the channel 0 where the wake's chain starts at a timer, 1 otherwise (campaign/analyze.py's
+          chain walk; timer wakes by origin, 2026-10-31, decision 6); code's idle phase read from 200 s past its start (9.5 D83); the hidden renderers as
           desktop/analyze.py reads them — the renderer processes that are a page's and present for the whole phase,
           the control tab dropped — one stream per renderer, plain comm names;
   cycles  video-call: the play phase's cycles as campaign/pool.py's cycle_windows cuts them (9.5 D75) — a cycle starts
@@ -39,9 +40,10 @@ if TOOLS not in sys.path:
 from meas.background import analyze as background  # noqa: E402
 from meas.build import shapes  # noqa: E402
 from meas.campaign import pool  # noqa: E402
-from meas.campaign.analyze import component_name, load_all_wakeups, load_rows, merge_resumes, pid_roles  # noqa: E402
+from meas.campaign.analyze import (component_name, load_all_wakeups, load_origins, load_rows, merge_resumes,  # noqa: E402
+                                   pid_roles, wake_channel, with_origins)
 from meas.desktop.analyze import KEEP_ROLE, drop_control_tab, page_renderers  # noqa: E402
-from meas.desktop.launch_fold_in import encode  # noqa: E402
+from meas.desktop.launch_fold_in import CHANNEL_CODE, encode  # noqa: E402
 
 # entry -> the one landing its stream is read from (the handoff's table of 2026-10-09). A batch stream must hold the
 # CPU its task binds — the bind is the pool's mean CPU total, so about half the repeats fall short of it — and the
@@ -90,8 +92,9 @@ def stream_name(entry, spec):
 # ---- the three stream shapes ---------------------------------------------------------------------------------------
 
 def wake_stream(rows, t0, t_end, roles=None, comms=None):
-    """[t_us, run_us, thread] per merged wake with t0 <= t_in < t_end, sorted; the thread an index into `comms`
-    (role/comm with roles, the comm alone without), which grows in place so a repeat's streams share one list."""
+    """[t_us, run_us, thread, channel] per merged wake with t0 <= t_in < t_end, sorted; the thread an index into
+    `comms` (role/comm with roles, the comm alone without), which grows in place so a repeat's streams share one list;
+    the channel the wake's (CHANNEL_CODE)."""
     comms = comms if comms is not None else []
     index = {c: i for i, c in enumerate(comms)}
     out = []
@@ -102,7 +105,7 @@ def wake_stream(rows, t0, t_end, roles=None, comms=None):
         if name not in index:
             index[name] = len(comms)
             comms.append(name)
-        out.append([round((r.t_in - t0) * 1e6), round(r.run * 1000), index[name]])
+        out.append([round((r.t_in - t0) * 1e6), round(r.run * 1000), index[name], CHANNEL_CODE[wake_channel(r)]])
     out.sort()
     return out
 
@@ -177,6 +180,7 @@ def _campaign_rows(D, spec):
     th, wk = _phase_files(D, phase)
     segments, (t0, t1), extra = load_rows(th, pids)
     rows, _merged = merge_resumes(segments, load_all_wakeups(wk, pids | set(extra)))
+    rows = with_origins(rows, load_origins(wk, pids | set(extra)))
     return rows, segments, pid_roles(D, phase), t0, t1, ends or [pids]
 
 
@@ -271,8 +275,10 @@ def summary(doc):
         return f"{n} runs, {doc['reading']['cpu_s']:.3f} s of CPU over {span:.1f} s"
     if doc["kind"] == "cycles":
         return f"{n} cycles over {span:.1f} s"
-    cpu = sum(r for s in rep["streams"] for _, r, _ in s) / 1e6
-    return f"{n} wakes in {len(rep['streams'])} stream(s) over {span:.1f} s, {n / span:.2f}/s, CPU share {cpu / span:.4f}"
+    cpu = sum(w[1] for s in rep["streams"] for w in s) / 1e6
+    event = sum(w[3] for s in rep["streams"] for w in s)
+    return (f"{n} wakes in {len(rep['streams'])} stream(s) over {span:.1f} s, {n / span:.2f}/s, CPU share {cpu / span:.4f}, "
+            f"{event} on the event channel")
 
 
 def main():

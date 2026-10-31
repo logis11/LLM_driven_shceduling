@@ -135,8 +135,8 @@ def _run_dir(d, k=1, mode="full", foreign_user=False, scale=1.0, in_unit=False):
         rows.append(_row(60.0, 3, "snapd", 410, 410, 0.3))        # user space on the measured CPU: the gate
     rows.append(_row(100.0, 0, "perf", 50, 50, 0.01, "R"))
     (d / "perf.steady.timehist.txt").write_text("".join(rows))
-    (d / "perf.steady.wakeups.txt").write_text("".join(f"{t:12.6f} [0001]  x[9]  awakened: systemd[1/1]\n" for t in wakes)
-                                               + "".join(f"{i * 5.0 - 0.5 - 0.5 * scale / 1000 - 0.001:12.6f} [0001]  x[9]  "
+    (d / "perf.steady.wakeups.txt").write_text("".join(f"{t:12.6f} [0001]  swapper/1[0]  awakened: systemd[1/1]\n" for t in wakes)
+                                               + "".join(f"{i * 5.0 - 0.5 - 0.5 * scale / 1000 - 0.001:12.6f} [0001]  swapper/1[0]  "
                                                          f"awakened: gnome-shell[520/520]\n" for i in range(1, 21)))
     return d
 
@@ -278,7 +278,7 @@ def _probe_dir(d, k, tail_rate, polled_rate=5.0, t0=1000.0, head_s=300.0, tail_s
     rows.append(_row(tail0 + tail_s, 0, "perf", 50, 50, 0.01, "R"))
     (d / "perf.idle.timehist.txt").write_text("".join(rows))
     (d / "perf.idle.wakeups.txt").write_text("".join(
-        f"{t:12.6f} [0001]  x[9]  awakened: {comm}[{tid}/{pid}]\n" for t, comm, tid, pid in wakes))
+        f"{t:12.6f} [0001]  swapper/1[0]  awakened: {comm}[{tid}/{pid}]\n" for t, comm, tid, pid in wakes))
     return d
 
 
@@ -333,7 +333,8 @@ def test_a_sparse_component_is_carried_although_it_never_woke_in_some_repeats(mo
     # zero where it never woke, its gap and run means as its tables carry them. D47, D48: no session component is sparse
     # since sysstat's collector is kept — the system bus is carried between sessions — so the class is read on a
     # constructed one
-    assert pool.SPARSE == {} and pool.SESSION_SPREAD["dbus-daemon"] == ("system-bus/dbus-daemon",)
+    assert pool.SPARSE == {} and pool.SESSION_SPREAD["dbus-daemon"] == ("system-bus/dbus-daemon",
+                                                                        "system-bus/dbus-daemon [event]")
     comm = "system-bus/dbus-daemon"
     monkeypatch.setitem(pool.SPARSE, "dbus-daemon", (comm,))
     monkeypatch.setitem(pool.SESSION_SPREAD, "dbus-daemon", ())
@@ -466,8 +467,9 @@ def test_the_audio_servers_scope_states_its_midnight_split(repo_root, tmp_path):
     finally:
         sys.argv = argv
     text = out.read_text()
+    # the timer wakes by origin (decision 16): the extra wakes are the worker's own timer's, its timer part's
     assert ("In the 4 repeats that crossed midnight UTC and met the cron session (47, 48, 49 and 51) "
-            "`wireplumber/gmain` woke 0.0110 times a second against 0.0090 in the other 20") in " ".join(text.split())
+            "`wireplumber/gmain` woke 0.0082 times a second against 0.0056 in the other 20") in " ".join(text.split())
 
 
 def test_the_within_run_figures_are_read_from_the_record_beside_the_pool(repo_root, tmp_path):
@@ -475,7 +477,7 @@ def test_the_within_run_figures_are_read_from_the_record_beside_the_pool(repo_ro
     results = repo_root / "_dev" / "research" / "jioh" / "task-9.9-daemons-session" / "campaign" / "results"
     (tmp_path / "pooled.json").write_text((results / "pooled.json").read_text())
     within = json.loads((results / "within-run.json").read_text())
-    pid1 = within["systemd pid1/systemd"]
+    pid1 = within["systemd pid1/systemd [event]"]   # the timer wakes by origin's decision 14: its event part
     pid1["across"] = {"wakes/s": 0.111, "gap mean (ms)": 0.222, "run mean (ms)": 0.333}
     for i, probe in enumerate(pid1["within"].values()):
         probe.update({"wakes/s": 0.01 * (i + 1), "gap mean (ms)": 0.02 * (i + 1), "run mean (ms)": 0.03 * (i + 1)})

@@ -109,7 +109,8 @@ def test_a_segment_without_a_wake_still_adds_its_span():
 
 
 def _rows(times_by_tid, comm="worker", pid=100):
-    return [campaign.Row(t, t, t + 0.0001, 0.1, comm, tid, pid) for tid, ts in times_by_tid.items() for t in ts]
+    # timer-caused wakes: the component's timer part (timer wakes by origin, decision 10)
+    return [campaign.Row(t, t, t + 0.0001, 0.1, comm, tid, pid, "", "timer") for tid, ts in times_by_tid.items() for t in ts]
 
 
 def test_a_components_gaps_are_taken_over_all_its_threads():

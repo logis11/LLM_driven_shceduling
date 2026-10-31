@@ -200,7 +200,14 @@ def pool_entry(name, by_rep):
 # weight are stated in each entry's scope (`within_run.py`). D48: pid 1's run mean re-read and the system bus's three
 # values carried so, once sysstat's collector is the desktop's again (D47) — the bus 16–38 wakes a phase in every
 # repeat, its wake rate ±23–28 % within one run against ±44 % across the repeats.
-SESSION_SPREAD = {"systemd": ("pid1/systemd",), "dbus-daemon": ("system-bus/dbus-daemon",)}
+SESSION_SPREAD = {"systemd": ("pid1/systemd",
+                              # timer wakes by origin (2026-10-31), decision 14: the class follows its component into
+                              # the event part, 99.4 % of its wakes
+                              "pid1/systemd [event]"),
+                  "dbus-daemon": ("system-bus/dbus-daemon", "system-bus/dbus-daemon [event]"),   # 98.3 % of its wakes
+                  # decision 16: WirePlumber's main loop's timer part, the split leaving it ±15.4–15.9 % within one run
+                  # of the probes against ±36.8 % across the repeats, 8–16 wakes a phase
+                  "pipewire": ("wireplumber/gmain",)}
 
 # D33: sparse components (the class 9.8 D27 set) — none since D47 and D48: with sysstat's collector kept, WirePlumber's
 # worker wakes 14–21 times a phase and holds the rule, and the system bus is carried between sessions (D48). The class
@@ -228,11 +235,13 @@ def criterion(pooled):
     for name, ph in pooled.items():
         comps = [(c, ph["threads"][c]) for c in ph["components"]["selected"] if c in ph["threads"]]
         residual = ph["components"].get("residual")
+        residuals = [(n, r) for n, r in (("residual", residual),   # decision 10: each channel's residual
+                                         ("residual" + _cp.EVENT_SUFFIX, ph["components"].get("residual_event"))) if r]
         if not comps and not residual:     # an entry with nothing to carry cannot pass the rule
             out[f"{name} (no components)"] = {"k": len(ph["repeats"]), "mean": None, "half_width": None, "passes": False,
                                                "carried": False}
             continue
-        for comm, c in comps + ([("residual", residual)] if residual else []):
+        for comm, c in comps + residuals:
             for field, label in LIST_FIELDS:
                 if field == "wakes_per_s":
                     vals = c.get("wakes_per_s") or []
@@ -240,10 +249,10 @@ def criterion(pooled):
                         continue
                     c_ = {**stability(vals, None, MIN_REPEATS, keep_zero=True), "needed": _cp.repeats_needed(vals)}
                 else:
-                    table = (c if comm == "residual" else (ph.get("tables") or {}).get(comm) or {}).get(field)
+                    table = (c if comm.startswith("residual") else (ph.get("tables") or {}).get(comm) or {}).get(field)
                     if not table:
                         continue
-                    sums, counts = (gap_pairs(ph, comm, table) if field == "gap_ms" and comm != "residual"
+                    sums, counts = (gap_pairs(ph, comm, table) if field == "gap_ms" and not comm.startswith("residual")
                                     else _cp.table_pairs(table))
                     c_ = {**ratio_stability(sums, counts, ABS_FLOOR_MS, MIN_REPEATS),
                           "needed": ratio_repeats_needed(sums, counts, ABS_FLOOR_MS, MIN_REPEATS)}

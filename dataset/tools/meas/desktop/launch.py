@@ -19,7 +19,8 @@ _dev/research/jioh/task-9.10-scenarios-timelines/campaign/launch/method.md).
 The tree (D135) is the launched process and every descendant by the fork rows, which carry threads as well as
 processes; for the call, Chrome's threads at the opening and their descendants. A segment is a wake by 9.6's rule
 (`build.analyze.merge_resumes`). The phase runs from the application's exec (the call: the opening) to the settle's
-end; each wake's time is taken from the phase's start.
+end; each wake's time is taken from the phase's start. Each wake carries its channel: `timer` where its wake chain
+starts at a timer interrupt, `event` otherwise (campaign/analyze.py's chain walk, the X server relaying).
 """
 
 import argparse
@@ -37,6 +38,7 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.build import analyze as _build   # noqa: E402  9.6's loaders and wake rule
 from meas.desktop.analyze import NOT_PAGE_RENDERER   # noqa: E402  9.8's page-renderer rule (D127)
+from meas.campaign.analyze import load_origins, origin_channel, origins_at   # noqa: E402  the wake chain's origin
 
 SLICE_S = 10.0
 # the launch chain the job's own command runs before the application: taskset pins, setsid detaches, bash -c runs
@@ -297,6 +299,10 @@ def analyze(D):
     span = t1 - t0
     rows = [s for s in segs if s.tid in tree and t0 <= s.t_in < t1]
     wakes, merged = _build.merge_resumes(rows, wakeups)
+    # timer wakes by origin (2026-10-31, decisions 6 and 8): each wake's channel by the origin of its wake chain, the
+    # tree as the application and the X server relaying
+    origins = origins_at(wakes, load_origins(base + ".wakeups.txt.gz", tree))
+    channel = {id(r): origin_channel(o) for r, o in zip(wakes, origins)}
     # role per process: the settle's tree listing where it holds the pid, else the last executed file, else comm
     roles, listed = {}, os.path.join(D, "launch.tree.traced.json")
     if os.path.exists(listed):
@@ -353,13 +359,15 @@ def analyze(D):
         "exits_in_phase": sum(1 for t, (te, _c) in exits.items() if t in tree and t0 <= te < t1),
         "roles": {k: {"wakes": v[0], "cpu_ms": round(v[1], 3)} for k, v in sorted(per_role.items(), key=lambda kv: -kv[1][1])},
         "outside": {k: {"rows": v[0], "run_ms": round(v[1], 3)} for k, v in sorted(outside.items(), key=lambda kv: -kv[1][1])[:12]},
-        "streams": {name: {"wakes": len(ws), "cpu_ms": round(sum(r.run for r in ws), 3),
+        "streams": {name: {"wakes": len(ws), "event_wakes": sum(channel[id(r)] == "event" for r in ws),
+                           "cpu_ms": round(sum(r.run for r in ws), 3),
                            "slices": slice_profile(ws, t0, span)} for name, ws in streams.items()},
     })
     events = []
     for name, ws in streams.items():
         for r in ws:
-            events.append((name, round((r.t_in - t0) * 1e6), round(r.run * 1000), r.tid, tid2pid.get(r.tid, r.pid), r.comm, role(r)))
+            events.append((name, round((r.t_in - t0) * 1e6), round(r.run * 1000), r.tid, tid2pid.get(r.tid, r.pid), r.comm, role(r),
+                           channel[id(r)]))
     events.sort(key=lambda e: (e[0], e[1]))
     return out, events
 
@@ -367,7 +375,7 @@ def analyze(D):
 def write(D, out, events):
     json.dump(out, open(os.path.join(D, "launch.summary.json"), "w"), indent=1, sort_keys=True)
     with gzip.open(os.path.join(D, "launch.events.tsv.gz"), "wt") as handle:
-        handle.write("stream\tt_us\trun_us\ttid\tpid\tcomm\trole\n")
+        handle.write("stream\tt_us\trun_us\ttid\tpid\tcomm\trole\tchannel\n")
         for e in events:
             handle.write("\t".join(str(x) for x in e) + "\n")
 

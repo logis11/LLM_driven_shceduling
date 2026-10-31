@@ -66,6 +66,8 @@ def lint_repo(archetypes_path, sources_path, references_md, freeze=False):
                     for field in ("comm", "gap", "run"):
                         if field not in comp:
                             errors.append(f"{where}[{i}]: missing {field!r}")
+                    if comp.get("channel", "timer") not in ("timer", "event"):   # timer wakes by origin, decision 4
+                        errors.append(f"{where}[{i}]: bad channel {comp['channel']!r}")
                     for field in ("gap", "run"):
                         if field in comp:
                             errors.extend(_check_param(f"{where}[{i}].{field}", comp[field], registry, freeze))

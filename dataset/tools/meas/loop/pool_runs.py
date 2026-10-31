@@ -437,7 +437,7 @@ def stability_lines(app, entry):
              + (f"; first batch at this spread {entry['first_batch']['count']}" if entry.get("first_batch") else "")]
     for q, c in st["quantities"].items():
         lines.append(f"   {q}: k {c['k']}, half-width {c['half_width']}, "
-                     f"{'passes' if c['passes'] else 'at the window limit, reported (D46)' if c.get('limited') else 'carried with its half-width, its spread between sessions (D57)' if c.get('session_spread') and c.get('carried', True) else 'carried with its half-width, its spread the machine (9.8 D17)' if c.get('excepted') and c.get('carried') else 'fails'}"
+                     f"{'passes' if c['passes'] else 'at the window limit, reported (D46)' if c.get('limited') else 'carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)' if c.get('in_run') and c.get('carried') else 'carried with its half-width, its spread between sessions (D57)' if c.get('session_spread') and c.get('carried', True) else 'carried with its half-width, a sparse component (9.8 D27)' if c.get('sparse') and c.get('carried') else 'carried with its half-width, its spread the machine (9.8 D17)' if c.get('excepted') and c.get('carried') else 'fails'}"
                      + (f", needed {c.get('needed') or 'over 200'}" if not c["passes"] and not c.get("carried") and "needed" in c else ""))
     return lines
 

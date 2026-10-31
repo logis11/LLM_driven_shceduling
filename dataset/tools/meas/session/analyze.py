@@ -39,7 +39,8 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 
 from meas.campaign.analyze import (   # noqa: E402  — one wake rule and one component layer for every campaign
-    ROW, TASK, Row, load_all_wakeups, load_wakeups, merge_resumes, open_text, per_thread,
+    ROW, TASK, Row, channel_named, load_all_wakeups, load_origins, load_wakeups, merge_resumes, open_text, per_thread,
+    with_origins,
 )
 from meas.desktop.analyze import phases_in, slice_profile  # noqa: E402
 from meas.distribution import circular_gaps  # noqa: E402
@@ -240,6 +241,8 @@ def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None, keep_rows=Fals
     llvm = [r for r, _ in rows_cpu if r.pid in entry_pids and r.comm.startswith("llvmpipe-")]
     mine = [r for r, _ in rows_cpu if r.pid in entry_pids and not r.comm.startswith("llvmpipe-")]
     mine, merged = merge_resumes(mine, wakeups, by_state=True)
+    if wk:   # timer wakes by origin (2026-10-31, decisions 8 and 13): each wake its chain's origin, the entries the tree
+        mine = with_origins(mine, load_origins(wk, entry_pids))
     on_cpu = {cpu for r, cpu in rows_cpu if r.pid in entry_pids}
     # D27: every wake traced to its cause; wakes caused from outside the observed desktop, and desktop jobs bound to
     # a clock time, leave the component and are stated beside it
@@ -267,7 +270,7 @@ def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None, keep_rows=Fals
         rows_all = rows
         rows, cron_events = split_cron(rows, cron_wins)        # D23: read without them, stated beside them
         rows, tally, gone = causes.split(rows)                 # D27: likewise, by cause
-        threads, samples = components(rows, ipids, span, t0)
+        threads, samples = components(channel_named(rows), ipids, span, t0)   # decision 10: each part by channel
         out["entries"][e] = {
             "instances": {i: sorted(p) for i, p in ipids.items()},
             "missing_instances": sorted(i for i, p in ipids.items() if not p),

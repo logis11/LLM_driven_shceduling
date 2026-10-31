@@ -49,9 +49,10 @@ def test_keyed_isolation_unrelated_task(fixture_path, library, tmp_path):
     assert set(new_arrivals) == set(base_arrivals) | {"extra"}
     for task_id, event in base_arrivals.items():
         assert new_arrivals[task_id] == event
-    # the added task brings wakes of its own (a measured task's timer wakes, 9.5 D74); every other task's are unchanged
+    # the added task brings wakes of its own (a measured task's own wakes, 9.5 D74, on its timer or event channel); every
+    # other task's are unchanged
     assert [w for w in wakes(extended) if w["target"] != "extra"] == wakes(base)
-    assert all(w["channel"] == "timer:extra" for w in wakes(extended) if w["target"] == "extra")
+    assert all(w["channel"] in ("timer:extra", "event:extra") for w in wakes(extended) if w["target"] == "extra")
 
 
 def test_one_entry_diff(fixture_path, library, tmp_path):

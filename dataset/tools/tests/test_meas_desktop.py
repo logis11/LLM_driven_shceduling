@@ -80,8 +80,8 @@ def test_only_renderer_processes_reach_the_components_of_a_renderer_subject(tmp_
     # one wakeup per renderer schedule-in, each at or before that row's schedule-in — the timehist time column is
     # the switch-out, so a row's t_in is time minus run. Without them the second row follows an S with no wakeup
     # since, which the wake rule folds into the first as a resume (method §5).
-    wakeups = ("   1.990000 [0001]  x[9]  awakened: chrome[201/200]\n"
-               "   2.990000 [0001]  x[9]  awakened: chrome[201/200]\n")
+    wakeups = ("   1.990000 [0001]  swapper/1[0]  awakened: chrome[201/200]\n"
+               "   2.990000 [0001]  swapper/1[0]  awakened: chrome[201/200]\n")
     d = _run_dir(tmp_path, "chrome-hidden", "steady", procs, rows, wakeups)
     ph = analyze.analyze_run_dir(str(d))["phases"]["steady"]
     assert ph["role_filter"] == "kept renderer only"
@@ -104,7 +104,10 @@ def test_every_process_reaches_the_components_of_a_non_renderer_subject(tmp_path
             "   1.000000 [0003]  element[100/100]    0.000      0.001      5.000      S\n"
             "   4.000000 [0003]  element[301/300]    0.000      0.001      9.000      S\n"
             "  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")
-    d = _run_dir(tmp_path, "element", "idle", procs, rows)
+    # timer-caused wakes (timer wakes by origin, decision 8): each component's timer part
+    wakeups = ("   0.990000 [0001]  swapper/1[0]  awakened: element[100/100]\n"
+               "   3.980000 [0001]  swapper/1[0]  awakened: element[301/300]\n")
+    d = _run_dir(tmp_path, "element", "idle", procs, rows, wakeups)
     ph = analyze.analyze_run_dir(str(d))["phases"]["idle"]
     assert ph["role_filter"] == "none"
     assert ph["threads"]["element"]["run_ms"]["sum"] == 14.0
@@ -248,7 +251,9 @@ def test_the_archetype_carries_one_renderer_not_the_sum_of_n(tmp_path):
             "   1.000000 [0003]  chrome[201/200]    0.000      0.001      2.000      S\n"
             "   2.000000 [0003]  chrome[301/300]    0.000      0.001      2.000      S\n"
             "  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")
-    d = _run_dir(tmp_path, "chrome-visible", "steady-timer", procs, rows)
+    wakeups = ("   0.990000 [0001]  swapper/1[0]  awakened: chrome[201/200]\n"   # timer-caused (decision 8)
+               "   1.990000 [0001]  swapper/1[0]  awakened: chrome[301/300]\n")
+    d = _run_dir(tmp_path, "chrome-visible", "steady-timer", procs, rows, wakeups)
     ph = analyze.analyze_run_dir(str(d))["phases"]["steady-timer"]
     assert ph["renderers_measured"] == 2
     assert ph["wakes_per_s"] == round(2 / ph["span_s"], 3)                      # the set
@@ -267,7 +272,8 @@ def test_the_hidden_subject_drops_its_control_tab(tmp_path):
     rows.append("   9.000000 [0003]  chrome[301/300]    0.000      0.001      1.000      S\n")
     rows.append("  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")
     # a wakeup at or before each schedule-in, else the wake rule folds the run of rows into one (method §5)
-    wakeups = "".join(f"   {0.99 + i:.6f} [0001]  x[9]  awakened: chrome[201/200]\n" for i in range(6))
+    wakeups = "".join(f"   {0.99 + i:.6f} [0001]  swapper/1[0]  awakened: chrome[201/200]\n" for i in range(6))
+    wakeups += "   8.990000 [0001]  swapper/1[0]  awakened: chrome[301/300]\n"
     d = _run_dir(tmp_path, "chrome-hidden", "steady", procs, "".join(rows), wakeups)
     ph = analyze.analyze_run_dir(str(d))["phases"]["steady"]
     assert ph["control_tab"]["dropped"] == 200
@@ -286,7 +292,7 @@ def test_the_slice_profile_reads_a_phase_in_ten_second_slices(tmp_path):
         rows.append(f"   {t:.6f} [0003]  element[201/200]    0.000      0.001      2.000      S\n")
     rows.append("  25.000000 [0003]  element[201/200]    0.000      0.001      4.000      S\n")   # third slice
     rows.append("  30.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")
-    wakeups = "".join(f"   {t - 0.01:.6f} [0001]  x[9]  awakened: element[201/200]\n"
+    wakeups = "".join(f"   {t - 0.01:.6f} [0001]  swapper/1[0]  awakened: element[201/200]\n"
                       for t in (1.0, 2.0, 3.0, 25.0))
     d = _run_dir(tmp_path, "element", "idle", procs, "".join(rows), wakeups)
     sl = analyze.analyze_run_dir(str(d))["phases"]["idle"]["slices"]
@@ -468,7 +474,7 @@ def test_the_steam_clients_http_burst_leaves_its_component_as_a_stated_event(tmp
             "   3.000000 [0003]  CHTTPClientThre[101/100]    0.000      0.001      0.017      S\n"
             "  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")
     # one wakeup before each schedule-in (a row's t_in is its time minus its run), so each row is a wake of its own
-    wakeups = "".join(f"   {t:.6f} [0001]  x[9]  awakened: CHTTPClientThre[101/100]\n" for t in (0.99, 1.97, 2.09, 2.99))
+    wakeups = "".join(f"   {t:.6f} [0001]  swapper/1[0]  awakened: CHTTPClientThre[101/100]\n" for t in (0.99, 1.97, 2.09, 2.99))
     for phase in ("shown", "minimised"):   # both sides of D5's comparison read the same way
         (tmp_path / phase).mkdir()
         d = _run_dir(tmp_path / phase, "steam", phase, procs, rows, wakeups)
@@ -575,9 +581,13 @@ def test_the_run_means_excepted_for_the_runner_s_speed_state_their_share_of_the_
         sys.argv = argv
     import yaml
     doc = yaml.safe_load("archetypes:\n" + out.read_text())["archetypes"]
-    assert ("`VizCompositorTh` run mean 0.0818 ms ±5.6 % (0.066–0.089 ms). Their runs hold 32.4 %, 25.3 %, 16.8 % and "
-            "5.7 % of the phase's CPU, 80.2 % together (D37).") in doc["game-client"]["validation_stats"]["scope"]
-    assert "Their runs hold" not in doc["chat-client"]["validation_stats"]["scope"]
+    # the timer wakes by origin (decision 14): the event parts' run means and the residual's join the class's list
+    assert ("`residual` run mean 0.0268 ms ±5.5 % (0.0221–0.029 ms). Their runs hold 32.4 %, 25.3 %, 16.7 %, 4.1 %, "
+            "5.7 %, 0.1 %, 0.0 % and 2.3 % of the phase's CPU, 86.6 % together (D37).") in doc["game-client"]["validation_stats"]["scope"]
+    # D17 covers every run mean of the chat client: split by origin, its `Chrome_IOThread` timer part and its event
+    # residual fall under it
+    assert ("`Chrome_IOThread` run mean 0.0488 ms ±7.7 % (0.038–0.065 ms); `residual [event]` run mean 0.0474 ms ±7.2 % "
+            "(0.0345–0.0587 ms). Their runs hold 1.0 % and 0.9 % of the phase's CPU, 1.9 % together (D37).") in doc["chat-client"]["validation_stats"]["scope"]
 
 
 def test_the_renderer_mode_reads_the_probe_past_a_skip(tmp_path):
@@ -629,7 +639,7 @@ def test_each_selected_component_carries_its_pooled_tables(tmp_path):
     rows = ("   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"
             + "".join(f"   {t:.6f} [0003]  element[100/100]    0.000      0.001      1.000      S\n" for t in (1, 2, 3, 4, 5))
             + "  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")
-    wakeups = "".join(f"   {t - 0.01:.6f} [0001]  x[9]  awakened: element[100/100]\n" for t in (1, 2, 3, 4, 5))
+    wakeups = "".join(f"   {t - 0.01:.6f} [0001]  swapper/1[0]  awakened: element[100/100]\n" for t in (1, 2, 3, 4, 5))
     reps = {}
     for k in (1, 2):
         d = tmp_path / f"r{k}"
@@ -652,7 +662,7 @@ def test_a_renderer_entry_counts_its_coverage_per_renderer(tmp_path):
     rows += "".join(f"   {t + 0.001:.6f} [0003]  {c}[{tid}/{pid}]    0.000      0.001      1.000      S\n"
                     for (tid, pid, c), ts in times.items() for t in ts)
     rows += "  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n"
-    wakeups = "".join(f"   {t - 0.01:.6f} [0001]  x[9]  awakened: {c}[{tid}/{pid}]\n"
+    wakeups = "".join(f"   {t - 0.01:.6f} [0001]  swapper/1[0]  awakened: {c}[{tid}/{pid}]\n"
                       for (tid, pid, c), ts in times.items() for t in ts)
     reps = {}
     for k in range(1, 3):
@@ -674,7 +684,7 @@ def test_a_renderer_thread_that_wakes_twice_across_the_renderers_is_carried(tmp_
     rows += "".join(f"   {t + 0.001:.6f} [0003]  {c}[{tid}/{pid}]    0.000      0.001      1.000      S\n"
                     for (tid, pid, c), ts in times.items() for t in ts)
     rows += "  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n"
-    wakeups = "".join(f"   {t - 0.01:.6f} [0001]  x[9]  awakened: {c}[{tid}/{pid}]\n"
+    wakeups = "".join(f"   {t - 0.01:.6f} [0001]  swapper/1[0]  awakened: {c}[{tid}/{pid}]\n"
                       for (tid, pid, c), ts in times.items() for t in ts)
     reps = {}
     for k in range(1, 3):
@@ -786,3 +796,22 @@ def test_the_tab_count_holds_only_when_every_repeat_has_one_count():
     e = tabs.pool({**{k: rep("4", "1") for k in range(1, 5)}, 5: rep("4", "0")})
     assert not e["stability"]["passes"] and e["stability"]["half_width"] is None and e["spare"] == ["0", "1"]
     assert "| 5 |" in "\n".join(tabs.render("chrome-tabs", e))
+
+
+def test_a_component_splits_into_its_timer_and_event_parts_by_origin(tmp_path):
+    # timer wakes by origin (2026-10-31), decisions 8, 10 and 13: Element's main thread woken from idle is its timer
+    # part; woken by another process, or by the X server answering another process, its event part
+    procs = [{"pid": 100, "comm": "element", "cmd": "/usr/bin/element-desktop"}]
+    rows = ("   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"
+            "   1.000000 [0003]  element[100/100]    0.000      0.001      1.000      S\n"
+            "   2.000000 [0003]  element[100/100]    0.000      0.001      2.000      S\n"
+            "   3.000000 [0003]  element[100/100]    0.000      0.001      3.000      S\n"
+            "  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")
+    wakeups = ("   0.990000 [0001]  swapper/1[0]  awakened: element[100/100]\n"
+               "   1.990000 [0001]  synapse[700/700]  awakened: element[100/100]\n"
+               "   2.900000 [0002]  python3[800/800]  awakened: Xvfb[60/60]\n"
+               "   2.990000 [0001]  Xvfb[60/60]  awakened: element[100/100]\n")
+    d = _run_dir(tmp_path, "element", "idle", procs, rows, wakeups)
+    th = analyze.analyze_run_dir(str(d))["phases"]["idle"]["threads"]
+    assert th["element"]["run_ms"]["sum"] == 1.0
+    assert th["element [event]"]["run_ms"]["sum"] == 5.0

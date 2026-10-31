@@ -45,7 +45,7 @@ import re
 import statistics
 
 from collections import namedtuple
-Row = namedtuple("Row", "t_in t_wake t_end run comm tid pid state", defaults=("",))  # compact: one tuple per schedule row
+Row = namedtuple("Row", "t_in t_wake t_end run comm tid pid state origin", defaults=("", ""))  # compact: one tuple per schedule row; `origin`, a wake's chain origin (`with_origins`)
 
 # comms of the measurement harness itself: the snapshot roots the tree at run.sh, whose children include these
 HARNESS_COMMS = {"bash", "sh", "sleep", "setsid", "Xvfb", "perf", "python3", "xdotool", "gzip", "sudo", "tee", "sed",
@@ -155,6 +155,104 @@ def load_all_wakeups(path, pids):
     for v in out.values():
         v.sort()
     return out
+
+
+# The origin of a wake's chain (timer wakes by origin, 2026-10-31, decision 8): the wakeup events walked in time order,
+# a wake by a thread of the application's tree takes the origin of that thread's own last wake, and so does a wake by the
+# X server, which relays; otherwise the origin is the waker's kind. `timer`: the wakeup ran in interrupt context on an
+# idle CPU (`swapper`; an hrtimer expires from hard interrupt, kernel/time/hrtimer.c `hrtimer_wakeup`); `input`: the
+# measurement's own processes — the input replay, the driver — and the driver's channels into the application
+# (decision 9); `irq`: a kernel thread; `ext`: any other process; `x`: the X server where its own wakes are not in the
+# capture; `unknown`: a tree thread not yet woken inside it; "" (on the row): a wake with no wakeup event.
+X_SERVER_COMMS = {"Xvfb", "Xorg"}
+DRIVER_COMMS = {"script-fu"}   # GIMP's Script-Fu server, through which the driver runs unsharp mask (fold_in.py's scope)
+KERNEL_COMM = re.compile(r"^(kworker|ksoftirqd|rcu|migration|irq/|kthreadd|watchdog|cpuhp|kcompactd|khugepaged|jbd2|kswapd|scsi_|nvme)")
+
+
+def load_origins(path, pids):
+    """tid -> (sorted wakeup times, their origins), for every wakee thread of the application's tree and of the X
+    server — every thread of a process the capture names Xvfb or Xorg, whether or not the snapshots hold it (Chrome's
+    and VS Code's do not): the chain walk above."""
+    lines, x_pids = [], set()
+    with open_text(path) as handle:
+        for line in handle:
+            m = WAKE.match(line)
+            if not m:
+                continue
+            t, _, waker, wakee = m.groups()
+            km = TASK.match(wakee.strip())
+            if not km:
+                continue
+            kpid = int(km.group(3)) if km.group(3) else int(km.group(2))
+            wm = TASK.match(waker.strip())
+            wcomm = wm.group(1) if wm else waker.strip()
+            wtid = int(wm.group(2)) if wm else -1
+            wpid = (int(wm.group(3)) if wm.group(3) else wtid) if wm else -1
+            if km.group(1) in X_SERVER_COMMS:
+                x_pids.add(kpid)
+            if wcomm in X_SERVER_COMMS:
+                x_pids.add(wpid)
+            lines.append((float(t), int(km.group(2)), kpid, wcomm, wtid, wpid))
+    evs = sorted((t, ktid, wcomm, wtid, wpid) for t, ktid, kpid, wcomm, wtid, wpid in lines
+                 if kpid in pids or kpid in x_pids)
+    last, out = {}, {}
+    for t, ktid, wcomm, wtid, wpid in evs:
+        if wpid in x_pids:
+            o = last.get(wtid, "x")
+        elif wcomm in HARNESS_COMMS or wcomm in DRIVER_COMMS:
+            o = "input"
+        elif wpid in pids:
+            o = last.get(wtid, "unknown")
+        elif wcomm.startswith("swapper"):
+            o = "timer"
+        elif KERNEL_COMM.match(wcomm):
+            o = "irq"
+        else:
+            o = "ext"
+        last[ktid] = o
+        ts, os_ = out.setdefault(ktid, ([], []))
+        ts.append(t); os_.append(o)
+    return out
+
+
+def origins_at(rows, origins):
+    """The origin of the wakeup event that made each wake (rows sorted by t_in, any row with `tid` and `t_in`): the
+    last event for its thread after the thread's previous wake and at or before this schedule-in, merge_resumes' own
+    window; "" where there is none."""
+    import bisect
+    prev, out = {}, []
+    for r in rows:
+        p = prev.get(r.tid); prev[r.tid] = r.t_in
+        ts, os_ = origins.get(r.tid, ((), ()))
+        hi = bisect.bisect_right(ts, r.t_in + EPS)
+        lo = bisect.bisect_right(ts, p) if p is not None else 0
+        out.append(os_[hi - 1] if hi > lo else "")
+    return out
+
+
+def with_origins(rows, origins):
+    """Each wake (merge_resumes' output) given its origin (`origins_at`)."""
+    return [r._replace(origin=o) if o else r for r, o in zip(rows, origins_at(rows, origins))]
+
+
+def origin_channel(origin):
+    """The channel a wake of this origin compiles to (decisions 4 and 8): `timer` for a timer origin, `event` for
+    every other."""
+    return "timer" if origin == "timer" else "event"
+
+
+def wake_channel(row):
+    return origin_channel(row.origin)
+
+
+# decision 10: the suffix keying a component's event part — its wakes whose chain does not start at a timer
+EVENT_SUFFIX = " [event]"
+
+
+def channel_named(rows):
+    """The rows with each event wake's comm suffixed (EVENT_SUFFIX), so a component keyed by comm splits by channel —
+    the desktop and session slices' components, which key by comm alone."""
+    return [r._replace(comm=r.comm + EVENT_SUFFIX) if wake_channel(r) == "event" else r for r in rows]
 
 
 EPS = 1e-6  # timehist prints microseconds
@@ -365,6 +463,7 @@ def _analyze(args):
         if wk_path and wake_def == "wakeup":
             by_state = report.get("app") in STATE_WAKE_APPS and any(r.state for r in segments)
             rows, merged = merge_resumes(segments, load_all_wakeups(os.path.join(D, wk_path), tree), check, by_state)
+            rows = with_origins(rows, load_origins(os.path.join(D, wk_path), tree))
             wake_def = "state" if by_state else wake_def
         else:
             rows, merged, wake_def = segments, 0, "row"

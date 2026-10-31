@@ -114,6 +114,14 @@ SPAN_1005B = {
 WITHIN_1005B = {("chrome-hidden", "Chrome_ChildIOT"): "±8.1 % (9.10 D156)",
                 ("chrome-hidden", "Compositor"): "±30.6 % (9.10 D156)",
                 ("chrome-hidden", "PerfettoTrace"): "±30.6 % (9.10 D156)"}
+# timer wakes by origin (2026-10-31), decision 14: the Steam client's event parts within one run — 600 s windows every
+# 60 s along the shown phase of the 9.8 probe (_dev/research/jioh/2026-10-31-wake-origins/within_event_desktop.py)
+WITHIN_EVENT = {("steam", "steam [event]"): "±79.3 % (0.075–0.650 a second over 600 s windows of the probe every 60 s)",
+                ("steam", "steamwebhelper [event]"): "±63.2 % (0.088–0.392 a second, the same windows)",
+                ("steam", "CJobMgr::m_Work [event]"): "±35.8 % (0.088–0.187 a second, the same windows)",
+                ("steam", "Compositor [event]"): "±32.2 % (0.033–0.065 a second, the same windows)",
+                ("steam", "Chrome_ChildIOT [event]"): "±86.9 % (0.007–0.095 a second, the same windows)",
+                ("steam", "residual [event]"): "±87.6 % (0.052–0.778 a second, the same windows)"}
 WITHIN = {("chrome-hidden", "Chrome_ChildIOT"): "±17.7 % (D24)",
           ("chrome-visible", "Chrome_ChildIOT"): "±18.6 % (D20)",
           ("chrome-visible", "ThreadPoolForeg"): "barely present in the probe (D20)",
@@ -153,18 +161,24 @@ def fmt(v, label, unit=True):
 
 
 def span(vals, label, ref):
-    """A range in the unit its mean is written in."""
+    """A range in the unit its mean is written in, both ends in it."""
     if label.startswith("gap") and ref >= 10000:
         return f"{min(vals) / 1000:.1f}–{max(vals) / 1000:.1f} s"
+    if label.startswith("gap"):
+        ms = lambda v: f"{v:.0f}" if v >= 1000 else f"{v:.4g}"
+        return f"{ms(min(vals))}–{ms(max(vals))} ms"
     return f"{fmt(min(vals), label, False)}–{fmt(max(vals), label, False)}{' wakes/s' if label == 'wakes/s' else ' ms'}"
+
+
+RESIDUAL_OF = {"residual": "residual", "residual" + _cp.EVENT_SUFFIX: "residual_event"}   # a channel's residual (decision 10)
 
 
 def values_of(ph, comm, label):
     field = {"wakes/s": "wakes_per_s", "gap mean (ms)": "gap_ms", "run mean (ms)": "run_ms"}[label]
-    src = ph["components"]["residual"] if comm == "residual" else ph["threads"][comm]
+    src = ph["components"][RESIDUAL_OF[comm]] if comm in RESIDUAL_OF else ph["threads"][comm]
     if field == "wakes_per_s":
         vals = src["wakes_per_s"]
-    elif comm == "residual":
+    elif comm in RESIDUAL_OF:
         vals = src[field]["repeat_mean"]
     else:
         vals = [x.get("mean") for x in src[field] if x]
@@ -208,8 +222,10 @@ def heavy_sentence(ph):
             f"carried. ")
 
 
-def component(comm, threads, wps, gap, run, extra=None, indent="        "):
+def component(comm, threads, wps, gap, run, extra=None, indent="        ", event=False):
     lines = [f"{indent}- comm: {json.dumps(comm)}"]
+    if event:   # timer wakes by origin, decision 4: the component's wakes queued on the task's event channel
+        lines.append(f"{indent}  channel: event")
     if extra:
         lines.append(f"{indent}  comms: [" + ", ".join(json.dumps(x) for x in extra) + "]")
     lines.append(f"{indent}  threads: {threads}")
@@ -229,8 +245,11 @@ def cpu_shares(ph, comms):
     """D37: each component's share of the phase's CPU — its runs over the phase's, pooled over the repeats, the heavy
     event's runs (D33) counted in the phase — the share of the job's time the workflow asks an excepted value to state."""
     runs = lambda t: sum(x["sum"] for x in t["run_ms"] if x)
+    # a residual's runs, from its pooled table's per-repeat means and counts (a channel's residual, decision 10)
+    pooled = lambda r: sum(m * n for m, n in zip(r["run_ms"]["repeat_mean"], r["run_ms"]["repeat_n"]) if m is not None)
     total = sum(runs(t) for t in ph["threads"].values()) + sum((ph.get("heavy_event") or {}).get("runs_ms") or [])
-    return [runs(ph["threads"][c]) / total for c in comms]
+    return [(pooled(ph["components"][RESIDUAL_OF[c]]) if c in RESIDUAL_OF else runs(ph["threads"][c])) / total
+            for c in comms]
 
 
 def exceptions(app, e, ph):
@@ -261,9 +280,12 @@ def entry(app, e):
     k = len(e["repeats"])
     renderer = app.startswith("chrome")
     out = [f"  {IDS[app]}:", "    category_source: meas", "    declared_class: normal", "    pattern:", "      program:",
-           "        - loop:                    # measured timer components merged at compile time, each wake on the task's timer channel (9.5 D9, D16, D74)",
+           "        - loop:                    # measured components merged at compile time, each wake on the task's timer or event channel by its origin (9.5 D9, D16, D74; timer wakes by origin, decision 4)",
            "            - WAIT: timer", "            - RUN: event", "    params:", "      components:"]
-    for comm in comp["selected"]:
+    suffix = _cp.EVENT_SUFFIX
+    timer = [c for c in comp["selected"] if not c.endswith(suffix)]
+    event = [c for c in comp["selected"] if c.endswith(suffix)]
+    for comm in timer:
         t = ph["threads"][comm]
         tab = ph["tables"][comm]
         out += component(comm, thread_count(t["threads"]), statistics.fmean(t["wakes_per_s"]),
@@ -273,8 +295,23 @@ def entry(app, e):
         out += component("residual", thread_count(r["threads"]), statistics.fmean(r["wakes_per_s"]),
                          r["gap_ms"], r["run_ms"], extra=r["comms"])
     unit = " per renderer" if renderer else ""
-    out.append(f"        # {len(comp['selected'])} comms cover {comp['covered_share'] * 100:.1f} % of "
-               f"{comp['total_wakes_per_s']:.3f} wakes/s{unit} (9.5 D16, target 95 %); the rest pooled as `residual`")
+    out.append(f"        # {len(timer)} comms cover {comp['covered_share'] * 100:.1f} % of "
+               f"{comp['total_wakes_per_s']:.3f} timer-caused wakes/s{unit} (9.5 D16, target 95 %); the rest pooled as `residual`")
+    # timer wakes by origin, decision 10: the event parts, each channel's coverage cut its own
+    for comm in event:
+        t = ph["threads"][comm]
+        tab = ph["tables"][comm]
+        out += component(comm[:-len(suffix)], thread_count(t["threads"]), statistics.fmean(t["wakes_per_s"]),
+                         tab["gap_ms"], tab["run_ms"], event=True)
+    re_ = comp.get("residual_event")
+    if re_ and re_["gap_ms"]["table"]:
+        out += component("residual", thread_count(re_["threads"]), statistics.fmean(re_["wakes_per_s"]),
+                         re_["gap_ms"], re_["run_ms"], extra=[c[:-len(suffix)] for c in re_["comms"]], event=True)
+    if comp.get("event") and (event or (re_ and re_["gap_ms"]["table"])):
+        ev = comp["event"]
+        out.append(f"        # {len(event)} comms cover {(ev['covered_share'] or 0) * 100:.1f} % of "
+                   f"{ev['total_wakes_per_s']:.3f} wakes/s{unit} of other origins, queued on the event channel (9.5 D16 "
+                   f"per channel); the rest pooled as its `residual`")
     out += heavy_events_block(ph, CARRIED[app])
     out += ["    lifetime: segment-bound", "    binding_params: []", "    scalable: []", "    validation_stats:",
             "      referee: meas-ci"]
@@ -325,6 +362,20 @@ def entry(app, e):
                   + (f", {sum(cpu_shares(ph, machine_comms)) * 100:.1f} % together" if len(shares) > 1 else "") + " (D37). ")
     if ph.get("heavy_event"):
         scope += heavy_sentence(ph)
+    # timer wakes by origin, decision 14: the event parts carried under a class, apart from the components' own
+    event = {c: t for c, t in session.items() if c.endswith(_cp.EVENT_SUFFIX)}
+    session = {c: t for c, t in session.items() if c not in event}
+    if event:
+        parts = []
+        for comm, texts in event.items():
+            wr = values_of(ph, comm, "wakes/s")
+            across = (max(wr) - min(wr)) / 2 / ((max(wr) + min(wr)) / 2) * 100
+            counts = [round(x * y) for x, y in zip(wr, ph["span_s"])]
+            parts.append(f"`{comm}` " + ", ".join(texts) + f"; within one run its wake rate {WITHIN_EVENT[(app, comm)]}, "
+                         f"across the repeats ±{across:.1f} %; {min(counts)}–{max(counts)} wakes a phase")
+        scope += ("Event parts whose spread lies in part within one run, their values carried together (9.5 D57 as D21 "
+                  "extends it; timer wakes by origin, decision 14): " + "; ".join(parts) + ". Each class was taken "
+                  "after its values were seen failing, once the wakes were split by origin (D28). ")
     if session:
         parts = []
         for comm, texts in session.items():
@@ -375,8 +426,10 @@ def entry(app, e):
                "the state is unattended by construction (D10).")
     spor = comp.get("sporadic") or []
     if spor:
+        named = lambda c: f"`{c[:-len(_cp.EVENT_SUFFIX)]}` (event)" if c.endswith(_cp.EVENT_SUFFIX) else f"`{c}`"
         notes += " Sporadic wakes, not carried as components (9.5 D43): " + "; ".join(
-            f"`{s['comm']}` in {len(s['repeats'])} of {k} repeats, {s['wakes_per_s']} wakes/s" for s in spor) + "."
+            f"{named(s['comm'])} in {len(s['repeats'])} of {k} repeats"
+            + (f", {s['wakes_per_s']} wakes/s" if "wakes_per_s" in s else "") for s in spor) + "."
     if app in APPROX:
         notes += " " + APPROX[app]
     if IDS[app] in CONTROL:   # the untraced control's reading (its record's `notes`)

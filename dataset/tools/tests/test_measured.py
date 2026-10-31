@@ -92,7 +92,7 @@ def test_cadence_archetype_swaps_components_in_focus(tmp_path, library):
                      [{"from": "5s", "to": "15s", "task": "px"}])
     canonical, _ = compile_timeline(Timeline(path, library), library, "single", rel_path="fx")
     wakes = [e for e in canonical["events"] if e["op"] == "wake"]
-    assert not [w for w in wakes if w["channel"] != "timer:px"]  # scripted stimulus: no input wakes
+    assert not [w for w in wakes if w["channel"] not in ("timer:px", "event:px")]  # scripted stimulus: no input wakes
     assert wakes and all(5_000_000 <= w["t"] < 15_000_000 for w in wakes)  # GIMP idles silently outside focus
 
 

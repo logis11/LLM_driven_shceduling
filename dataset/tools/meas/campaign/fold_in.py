@@ -22,7 +22,7 @@ import statistics
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from pool import build_census, stimulus_check  # noqa: E402  — D69: one definition of the build census; D81 the check
+from pool import EVENT_SUFFIX, build_census, stimulus_check  # noqa: E402  — D69: one definition of the build census; D81 the check
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from distribution import quantile_table, yaml_table  # noqa: E402
 from control_report import fold_reading  # noqa: E402  — the reading scoped to the phases the control ran
@@ -75,10 +75,10 @@ BUILD_BOUND = {
                    "within 0.78 standard deviations; `WebExtensions/IPC I/O Child`'s wake rate and gap mean, 22 wakes a "
                    "phase in every 156.0 repeat and in 33 of the 34 156.0.1 repeats, differ by 0.1 % (D94).",
     'web-browser': "Build bound (D69): the 38 repeats pool two builds, Google's repository serving only its current version. "
-                   "Against the 152 repeats' own spread, 59 of the 60 carried values agree between the builds within 1.80 "
-                   "standard deviations; the page load's `gpu/VizCompositorTh` run mean does not: 0.382 ms under 153 "
-                   "against 0.455 ms under 152 (−16.0 %, −2.31 standard deviations, 8 of the 9 repeats below every 152 "
-                   "repeat). The carried 0.438 ms pools both, the 152 repeats' mean 4.0 % above it (D93).",
+                   "Against the 152 repeats' own spread, 101 of the 102 carried values agree between the builds within "
+                   "1.54 standard deviations; the page load's `gpu/VizCompositorTh [event]` run mean does not: 0.430 ms "
+                   "under 153 against 0.519 ms under 152 (−17.0 %, −2.62 standard deviations, 9 of the 9 repeats below "
+                   "every 152 repeat). The carried 0.499 ms pools both, the 152 repeats' mean 4.0 % above it (D93).",
 }
 
 
@@ -122,15 +122,15 @@ STOPPING_STATED = {
     "office-writer": ("The repeat count is the rule's first pass (D88): simulated at the spread of the widest value, the "
                       "per-input run mean under 136M at ±4.96 % over 14 repeats, the rule's stated 95 % interval covers "
                       "the true mean in about 91–93 % of campaigns and the stopped mean leans by at most 0.2 %."),
-    "video-editor": ("The repeat count is the rule's first pass (D88): simulated at the spread of the widest value, the "
-                     "driven phase's `kdenlive` run mean at ±5.00 % over 20 repeats, the rule's stated 95 % interval covers "
-                     "the true mean in about 91 % of campaigns and the stopped mean leans by at most 0.2 %."),
+    "image-editor": ("The repeat count is the rule's first pass (D88): simulated at the spread of the widest value, the "
+                     "driven phase's `gimp` run mean at ±4.98 % over 5 repeats, the rule's stated 95 % interval covers "
+                     "the true mean in about 94–95 % of campaigns and the stopped mean leans by under 0.1 %."),
     "audio-player": ("The repeat count is the rule's first pass (D88): simulated at the spread of the widest value, the "
                      "play phase's CPU share at ±4.68 % over 31 repeats, the rule's stated 95 % interval covers the true "
                      "mean in about 92 % of campaigns and the stopped mean leans by at most 0.2 %."),
     "mail-client": ("The idle phase's repeat count is the rule's first pass (D88, D94): simulated at the spread of the "
-                    "widest value, `WebExtensions/StreamTrans`' run mean at ±4.75 % over 77 repeats, the rule's stated "
-                    "95 % interval covers the true mean in about 93–94 % of campaigns and the stopped mean leans by at "
+                    "widest value, `WebExtensions/StreamTrans`' run mean at ±4.80 % over 77 repeats, the rule's stated "
+                    "95 % interval covers the true mean in about 94 % of campaigns and the stopped mean leans by at "
                     "most 0.2 %."),
 }
 
@@ -202,7 +202,23 @@ STOP_STATED = {
 # D57's second finding: a between-sessions component's spread within one run, read on the D52 probe
 # (_dev/research/jioh/task-9.5-interactive-typing/campaign/within_libuv.py, D83)
 WITHIN = {("code-editor", "utility/libuv-worker"): "its wake rate ±10.6 % (5.41–6.71 a second over 700 s windows slid "
-                                                   "along the D52 probe from 200 s)"}
+                                                   "along the D52 probe from 200 s)",
+          # timer wakes by origin (2026-10-31), decision 14: the event parts carried under a class, read on the
+          # long-phase probes past each campaign's settle (_dev/research/jioh/2026-10-31-wake-origins/within_event.py)
+          ("code-editor", "renderer/code [event]"): "its wake rate ±31.6 % (0.039–0.074 a second over 700 s windows slid "
+                                                    "along the D52 probe from 200 s)",
+          ("code-editor", "gpu/VizCompositorTh [event]"): "its wake rate ±26.1 % (0.024–0.041 a second, the same windows)",
+          ("code-editor", "renderer/Compositor [event]"): "its wake rate ±48.7 % (0.014–0.041 a second, the same windows)",
+          ("code-editor", "gpu/Chrome_ChildIOT [event]"): "its wake rate ±29.4 % (0.017–0.031 a second, the same windows)",
+          ("code-editor", "residual [event]"): "its wake rate ±36.0 % (0.011–0.024 a second, the same windows)",
+          ("web-browser", "renderer/Compositor [event]"): "its wake rate ±66.7 % (0.007–0.033 a second over 600 s windows "
+                                                          "slid along the D50 probe from 240 s, past the campaign's 270 s "
+                                                          "settle)",
+          ("web-browser", "gpu/VizCompositorTh [event]"): "its wake rate ±57.9 % (0.007–0.025 a second, the same windows)",
+          ("web-browser", "utility/ThreadPoolForeg [event]"): "0–8 wakes in each 600 s window slid along the D50 probe "
+                                                              "from 240 s",
+          ("mail-client", "BgIOThr~Pool [event]"): "two wakes in each 600 s window slid along the long-phase probe "
+                                                   "35436084336 from 360 s, past the campaign's 390 s settle"}
 
 
 def value_name(key):
@@ -228,8 +244,11 @@ def stability_scope(aid, d):
             f"every repeat's samples — holds within {st['tolerance'] * 100:g} % or "
             f"{st['abs_floor_ms'] * 1000:g} µs over the {len(d['repeats'])} repeats obtained")
     limited = {k: c for k, c in q.items() if c.get("limited")}
-    session = {k: c for k, c in q.items() if c.get("session_spread") and c.get("carried")}
-    if not limited and not session:
+    carried = {k: c for k, c in q.items() if c.get("carried") and not c.get("limited")}
+    event = {k: c for k, c in carried.items() if k.split(" ", 1)[0] != "op" and EVENT_SUFFIX + " " in k}
+    session = {k: c for k, c in carried.items() if c.get("session_spread") and k not in event}
+    machine = {k: c for k, c in carried.items() if c.get("excepted")}
+    if not limited and not session and not event and not machine:
         return text + ". "
     text += ", except these, stated with their half-widths. "
     if limited:
@@ -242,7 +261,7 @@ def stability_scope(aid, d):
                  f"recording, {max(c['k'] for c in limited.values())} repeats, every window of it that holds input")
         if out:
             text += "; outside the rule: " + "; ".join(
-                f"{value_name(k)[0]} {held(c, value_name(k)[1])} (the rule needs {c['needed']} repeats)" for k, c in out)
+                f"{value_name(k)[0]} {held(c, value_name(k)[1])} (the rule needs {c['needed'] or 'over 200'} repeats)" for k, c in out)
         if 1 <= len(ins) <= 2:
             text += "; " + " and ".join(f"{value_name(k)[0]} {held(c, value_name(k)[1])}"
                                         for k, c in limited.items() if c["passes"])
@@ -276,7 +295,98 @@ def stability_scope(aid, d):
         many = len(comps) > 1
         text += (f"{'Components' if many else 'A component'} whose rate varies between sessions, "
                  f"{'their' if many else 'its'} three values carried together (D57): " + "; ".join(parts) + ". ")
+    if event:
+        text += event_parts_text(aid, d, event)
+    if machine:
+        text += machine_run_means_text(d, machine)
     return text
+
+
+def by_component(vals):
+    """{(phase, component): {label: c}} from a stability block's rows."""
+    comps = {}
+    for k, c in vals.items():
+        phase, rest = k.split(" ", 1)
+        label = next(lb for lb in LABEL if rest.endswith(" " + lb))
+        comps.setdefault((phase, rest[:-len(label) - 1]), {})[label] = c
+    return comps
+
+
+def part_record(ph, comm):
+    """A carried component's pooled record: its thread entry, or the phase's residual of its channel."""
+    if comm in ("residual", "residual" + EVENT_SUFFIX):
+        return ph["components"]["residual" if comm == "residual" else "residual_event"]
+    return ph["threads"][comm]
+
+
+def values_text(vals, t):
+    """A carried part's values with their half-widths and ranges, a gap of 10 s or more in seconds."""
+    per = {"wakes/s": t["wakes_per_s"], "gap mean (ms)": t["gap_ms"]["repeat_mean"], "run mean (ms)": t["run_ms"]["repeat_mean"]}
+    texts = []
+    for label in LABEL:
+        if label in vals:
+            unit = "wakes/s" if label == "wakes/s" else "ms"
+            got = [v for v in per[label] if v is not None]
+            c = vals[label]
+            if label.startswith("gap") and c["mean"] >= 10000:
+                texts.append(f"{LABEL[label]} {c['mean'] / 1000:.4g} s ±{c['half_width'] * 100:.2f} % "
+                             f"({min(got) / 1000:.4g}–{max(got) / 1000:.4g} s)")
+            else:
+                texts.append(f"{LABEL[label]} {held(c, unit)} ({min(got):.4g}–{max(got):.4g} {unit})")
+    return ", ".join(texts)
+
+
+def event_parts_text(aid, d, event):
+    """Timer wakes by origin, decision 14: the event parts carried with their half-widths, by class — 9.5 D57, D57 as
+    9.8 D21 extends it, 9.8 D27's sparse component — each with both spreads, its wakes a phase and its share."""
+    groups = {"session": [], "in_run": [], "sparse": []}
+    for (phase, comm), vals in by_component(event).items():
+        ph = d["phases"][phase]
+        t = part_record(ph, comm)
+        w = t["wakes_per_s"]
+        counts = [round(x * s) for x, s in zip(w, ph["span_s"])]
+        across = (max(w) - min(w)) / 2 / ((max(w) + min(w)) / 2) * 100
+        share = statistics.fmean(w) / statistics.fmean(ph["wakes_per_s"]) * 100
+        c = next(iter(vals.values()))
+        kind = "sparse" if c.get("sparse") else "in_run" if c.get("in_run") else "session"
+        groups[kind].append(f"`{comm}` {values_text(vals, t)}; within one run {WITHIN[(aid, comm)]}, across the repeats "
+                            f"its wake rate ±{across:.1f} %; {min(counts):,}–{max(counts):,} wakes a phase, "
+                            f"{share:.2f} % of the {phase} phase's wakes")
+    heads = {"session": ("An event part whose rate varies between sessions, its three values carried together",
+                         "Event parts whose rate varies between sessions, their three values carried together", "D57"),
+             "in_run": ("An event part whose spread lies in part within one run, carried as D57's are",
+                        "Event parts whose spread lies in part within one run, carried as D57's are", "D57 as 9.8 D21 extends it"),
+             "sparse": ("A sparse event part, one that wakes a few times a phase, its three values carried together",
+                        "Sparse event parts, ones that wake a few times a phase, their three values carried together", "9.8 D27")}
+    text = ""
+    for kind, parts in groups.items():
+        if parts:
+            one, many, cls = heads[kind]
+            text += f"{many if len(parts) > 1 else one} ({cls}; timer wakes by origin, decision 14): " + "; ".join(parts) + ". "
+    return text + "Each class was taken after its values were seen failing, once the wakes were split by origin (9.8 D28). "
+
+
+def machine_run_means_text(d, machine):
+    """Timer wakes by origin, decision 15: a run mean whose spread follows the runner's speed (9.8 D17), with its
+    half-width and range, the phase's other components' run means against it across the repeats, its CPU share."""
+    parts = []
+    for (phase, comm), vals in by_component(machine).items():
+        ph = d["phases"][phase]
+        t = ph["threads"][comm]
+        mine = t["run_ms"]["repeat_mean"]
+        others = [c for c in ph["components"]["selected"] if c != comm]
+        cors = []
+        for o in others:
+            pairs = [(a, b) for a, b in zip(mine, ph["threads"][o]["run_ms"]["repeat_mean"]) if a is not None and b is not None]
+            if len(pairs) > 2:
+                cors.append(statistics.correlation(*zip(*pairs)))
+        share = statistics.fmean(t["cpu_share"]) / statistics.fmean(ph["cpu_share"]) * 100
+        parts.append(f"`{comm}` {values_text(vals, t)}; across the {len(mine)} repeats the {phase} phase's other "
+                     f"components' run means move with it (correlation {min(cors):+.2f} to {max(cors):+.2f}); it holds "
+                     f"{share:.1f} % of the phase's CPU")
+    return (f"{'Run means' if len(parts) > 1 else 'A run mean'} whose spread follows the runner's speed, carried with "
+            f"{'their' if len(parts) > 1 else 'its'} half-width and range (9.8 D17; timer wakes by origin, decision 15): "
+            + "; ".join(parts) + "; the class taken after the value was seen failing (9.8 D28). ")
 
 
 def rng(vals, nd=4):
@@ -300,11 +410,15 @@ def component_lines(comp_name, comp, tag, indent, extra=None):
 
 
 def components_block(ph, tag, key, indent="      "):
+    """The phase's components, the timer parts then the event parts (timer wakes by origin, decision 10): an event part
+    carries `channel: event`, its residual too; each channel's coverage stated."""
     sel = ph["components"]
-    if not sel["selected"] and not sel["residual"]:
+    if not sel["selected"] and not sel["residual"] and not sel.get("residual_event"):
         return [f"{indent}# {key}: none — no wake in the {'idle' if key == 'components' else 'driven'} phase (GIMP idles silently)"]
     lines = [f"{indent}{key}:"]
-    for comm in sel["selected"]:
+    timer = [c for c in sel["selected"] if not c.endswith(EVENT_SUFFIX)]
+    event = [c for c in sel["selected"] if c.endswith(EVENT_SUFFIX)]
+    for comm in timer:
         c = ph["threads"][comm]
         if c["gap_ms"]["table"] is None:
             continue
@@ -313,7 +427,20 @@ def components_block(ph, tag, key, indent="      "):
         r = sel["residual"]
         lines += component_lines("residual", r, tag, indent + "  ",
                                  extra=[("comms", "[" + ", ".join(json.dumps(x) for x in r["comms"]) + "]")])
-    lines.append(f"{indent}  # {len(sel['selected'])} comms cover {(sel['covered_share'] or 0) * 100:.1f} % of {sel['total_wakes_per_s']:.1f} wakes/s (D16, target {sel['coverage'] * 100:.0f} %); the rest pooled as `residual`")
+    lines.append(f"{indent}  # {len(timer)} comms cover {(sel['covered_share'] or 0) * 100:.1f} % of {sel['total_wakes_per_s']:.1f} timer-caused wakes/s (D16, target {sel['coverage'] * 100:.0f} %); the rest pooled as `residual`")
+    for comm in event:
+        c = ph["threads"][comm]
+        if c["gap_ms"]["table"] is None:
+            continue
+        lines += component_lines(comm[:-len(EVENT_SUFFIX)], c, tag, indent + "  ", extra=[("channel", "event")])
+    r = sel.get("residual_event")
+    if r and r["gap_ms"]["table"]:
+        lines += component_lines("residual", r, tag, indent + "  ",
+                                 extra=[("channel", "event"),
+                                        ("comms", "[" + ", ".join(json.dumps(x[:-len(EVENT_SUFFIX)]) for x in r["comms"]) + "]")])
+    if sel.get("event") and (event or r):
+        e = sel["event"]
+        lines.append(f"{indent}  # {len(event)} comms cover {(e['covered_share'] or 0) * 100:.1f} % of {e['total_wakes_per_s']:.1f} wakes/s of other origins, queued on the event channel (D16 per channel); the rest pooled as its `residual`")
     return lines
 
 
@@ -390,7 +517,7 @@ def entry(aid, spec, d):
         out += ["        - loop:                    # one periodic job per medium cycle, its deadline the next cycle's start (D74, D75)",
                 "            - TIMER: period", "            - RUN: cycle_run"]
     else:
-        out += ["        - loop:                    # merged event stream, explicit at compile time (D9): replayed stimulus in focus windows (D18) + timer components (D16)",
+        out += ["        - loop:                    # merged event stream, explicit at compile time (D9): replayed stimulus in focus windows (D18) + components (D16), each own wake on the timer or event channel by its origin (timer wakes by origin, decision 4)",
                 "            - WAIT: input", "            - RUN: event"]
     out.append("    params:")
     ph_idle = d["phases"].get("idle") or d["phases"].get("play")
@@ -559,8 +686,10 @@ def entry(aid, spec, d):
     sporadic = [(pn, ph.get("repeats", d["repeats"]), sp) for pn, ph in d["phases"].items()
                 for sp in (ph.get("components") or {}).get("sporadic", [])]
     if sporadic:  # D43: a thread whose gap and run means do not exist in every repeat is reported, not carried
+        def part(name):   # an event part named as its component's, the channel said (decision 10)
+            return f"`{name[:-len(EVENT_SUFFIX)]}` (event)" if name.endswith(EVENT_SUFFIX) else f"`{name}`"
         notes += " Sporadic wakes, not carried as components (D43): " + "; ".join(
-            f"`{sp['comm']}`" + (f" ({', '.join(sp['comms'])})" if "comms" in sp else "")
+            part(sp['comm']) + (f" ({', '.join(x[:-len(EVENT_SUFFIX)] if x.endswith(EVENT_SUFFIX) else x for x in sp['comms'])})" if "comms" in sp else "")
             + f" in the {pn} phase, repeats {sp['repeats']} of {reps}, {sp['wakes_per_s']} wakes/s" for pn, reps, sp in sporadic) + "."
     if aid in CONTROL:
         notes += " " + CONTROL[aid]

@@ -25,7 +25,8 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 
 from meas.campaign.analyze import (   # noqa: E402  — the component layer, one definition for both halves
-    dist, load_all_wakeups, load_rows, merge_resumes, per_role, per_thread, pid_roles,
+    channel_named, dist, load_all_wakeups, load_origins, load_rows, merge_resumes, per_role, per_thread, pid_roles,
+    with_origins,
 )
 from meas.distribution import circular_gaps   # noqa: E402
 
@@ -181,6 +182,8 @@ def analyze_phase(D, phase, app, keep_rows=False):
         wk = os.path.join(D, f"perf.{phase}.wakeups.txt")
     wakeups = load_all_wakeups(wk, pids | set(extra)) if os.path.exists(wk) else {}
     segments, merged = merge_resumes(segments, wakeups)
+    if os.path.exists(wk):   # timer wakes by origin (2026-10-31, decisions 8 and 13): each wake its chain's origin
+        segments = with_origins(segments, load_origins(wk, pids | set(extra)))
 
     out = {"span_s": round(span, 3), "rows": len(segments), "resumes_merged": merged,
            "roles": per_role(segments, roles, span),
@@ -225,14 +228,15 @@ def analyze_phase(D, phase, app, keep_rows=False):
     out["slices"] = slice_profile(kept, t0, span)
     # one renderer's components, the renderers present pooled as its samples
     out["t0"] = t0   # the phase's start: the gaps wrap round [t0, t0 + span]
+    named = channel_named(kept)   # decision 10: each component's timer part and its event part
     if app in RENDERER_APPS:
         out["measured_renderer_pids"] = sorted({r.pid for r in kept})
-        out["threads"], out["_samples"] = renderer_components(kept, span, t0)
+        out["threads"], out["_samples"] = renderer_components(named, span, t0)
     else:
-        out["threads"] = per_thread(kept, span, None, t0)   # the rule's gap mean is the carried gaps'
+        out["threads"] = per_thread(named, span, None, t0)   # the rule's gap mean is the carried gaps'
         out["_samples"] = {}
         for comm in out["threads"]:
-            rs = [r for r in kept if r.comm == comm]
+            rs = [r for r in named if r.comm == comm]
             out["_samples"][comm] = {
                 "gaps": [g * 1000 for g in circular_gaps([([r.t_in for r in rs], t0, t0 + span)])],
                 "runs": [r.run for r in rs], "t_in": sorted(r.t_in for r in rs)}

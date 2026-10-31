@@ -237,6 +237,9 @@ def _heavy_events(heavy, seed, iid, t0, t1):
     return events
 
 
+KIND_ORDER = {"timer": 0, "event": 1, "input": 2}   # a same-instant tie: timer wakes first, keystrokes last
+
+
 def _component_events(components, seed, iid, t0, t1, tag):
     """9.5 D77: each component over [t0, t1) — a task's lifetime, a focus window, an operation — is a stream already
     running at t0: its first wake falls one forward-recurrence gap after t0, then gap after gap from its table."""
@@ -246,7 +249,7 @@ def _component_events(components, seed, iid, t0, t1, tag):
         t, k = t0 + sampling.sample_first_gap(comp["gap"], seed, iid, *key), 0
         while t < t1:
             run = sampling.sample(comp["run"], seed, iid, *key, k, "run")
-            events.append((t, run, "timer"))
+            events.append((t, run, comp.get("channel", "timer")))   # timer wakes by origin, decision 4
             k += 1
             t += sampling.sample(comp["gap"], seed, iid, *key, k, "gap")
     return events
@@ -262,7 +265,7 @@ def _periodic_unroll(build, seed, iid, params, t0, t1, launch=None, replay=None)
     phase_us, binned = 0, {}
     if launch:
         phase_us = launch[0]
-        for t_rel, run in launch[1]:
+        for t_rel, run, _ in launch[1]:
             if t_rel < phase_us:
                 binned[t_rel // period] = binned.get(t_rel // period, 0) + run
     works = None
@@ -294,6 +297,7 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
     seed = timeline.seed
     channel = f"input:{iid}"
     timer_channel = f"timer:{iid}"
+    event_channel = f"event:{iid}"   # timer wakes by origin (2026-10-31), decision 4: the queued non-keystroke wakes
     t0 = task["arrive"]
     t1 = task["depart"] or timeline.duration_us
     # 9.14 decision 12: under a trace replay the observed stream stands in for the components, the heavy events and
@@ -321,26 +325,27 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
     events = []
     focus_components = params.get("focus_components")
     if replay:
-        # the observed wakes from the window's offset, each a timer wake at its time from the arrival; an operation's
-        # window replaces them as it replaces the components (D137)
-        for t_rel, run, _ in replay["stream"]:
+        # the observed wakes from the window's offset, each a wake at its time from the arrival on its own channel
+        # (timer wakes by origin, decision 6); an operation's window replaces them as it replaces the components (D137)
+        for t_rel, run, _, channel_code in replay["stream"]:
             if t_rel < replay["offset"]:
                 continue
             t = t0 + (t_rel - replay["offset"])
             if t >= t1:
                 break
             if not in_operation(t):
-                events.append((t, run, "timer"))
+                events.append((t, run, "event" if channel_code else "timer"))
     else:
-        # the launch phase's replay (9.10 D136): each observed wake a timer wake at its time from the arrival; an
-        # operation's window replaces it as it replaces the components (D137)
+        # the launch phase's replay (9.10 D136): each observed wake a wake at its time from the arrival, on its own
+        # channel (timer wakes by origin, decision 6); an operation's window replaces it as it replaces the components
+        # (D137)
         if launch:
-            for t_rel, run in launch[1]:
+            for t_rel, run, kind in launch[1]:
                 t = t0 + t_rel
                 if t_rel >= launch[0] or t >= t1:
                     break
                 if not in_operation(t):
-                    events.append((t, run, "timer"))
+                    events.append((t, run, kind))
         # timer components over the lifetime past any launch phase; cadence archetypes swap inside input windows
         for ev in _component_events(params.get("components") or [], seed, iid, t_steady, t1, "idle"):
             if focus_components and any(w["from"] <= ev[0] < w["to"] for w in windows):
@@ -379,10 +384,11 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
                 run = sampling.sample(params["input_run"], seed, iid, "input", k, allow_zero=True)
                 events.append((t, run, "input"))
                 k += 1
-    events.sort(key=lambda e: (e[0], e[2] != "timer"))
+    events.sort(key=lambda e: (e[0], KIND_ORDER[e[2]]))
     wake_channel = channel
     for t, run, kind in events:
-        wake_channel = timer_channel if kind == "timer" else channel   # D74: a timer wake carries no deadline
+        # D74: a timer wake carries no deadline; an event wake is queued as a keystroke is (decision 4)
+        wake_channel = {"timer": timer_channel, "event": event_channel, "input": channel}[kind]
         wakes.append((t, iid, wake_channel))
         build.program.append({"op": "WAIT", "channel": wake_channel})
         if run:   # a zero input_run is measured, not missing: the input woke the task and cost no CPU (D48)
@@ -396,7 +402,8 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
 # ---- launch phases (9.10 D21, D133, D136–D138) -------------------------------
 #
 # An entry with a `launch` param carries its observed launch phase (dataset/launch/<stream>.json.gz): per pooled
-# repeat, the phase's length and one or more streams of wakes, each [t_us from the phase's start, run_us, thread].
+# repeat, the phase's length and one or more streams of wakes, each [t_us from the phase's start, run_us, thread,
+# channel], the channel 0 for a timer-caused wake and 1 for any other (timer wakes by origin, decision 6).
 # A task the file starts mid-file — arriving after 0 s; one at 0 s is already steady (D21) — draws one repeat by the
 # file's seed; a task group (`count`) draws one repeat and distinct streams of it, the four hidden tabs' renderers of
 # one launch (D133).
@@ -413,7 +420,8 @@ def _load_launch(name):
 
 
 def _launch_stream(task, iid, seed, params):
-    """(phase length µs, [(t_rel_us, run_us), …] sorted) for this instance; None without a launch phase."""
+    """(phase length µs, [(t_rel_us, run_us, kind), …] sorted) for this instance, kind `timer` or `event`; None without
+    a launch phase."""
     spec = params.get("launch")
     if not spec or task["arrive"] <= 0:
         return None
@@ -424,7 +432,7 @@ def _launch_stream(task, iid, seed, params):
     n = int(iid.rsplit(".", 1)[1]) - 1 if task["count"] > 1 else 0
     if n >= len(order):
         raise ValueError(f"{iid}: {task['count']} tasks draw from a launch repeat of {len(order)} streams")
-    return rep["phase_us"], [(w[0], w[1]) for w in streams[order[n]]]
+    return rep["phase_us"], [(w[0], w[1], "event" if w[3] else "timer") for w in streams[order[n]]]
 
 
 # ---- trace replay (9.14 decision 12; dataset/variants.yaml's `replay` set) ---------
@@ -432,9 +440,10 @@ def _launch_stream(task, iid, seed, params):
 # An entry whose params carry `replay: {stream, sampling: per-task, source}` compiles each of its tasks from one pooled
 # repeat's observed stream, dataset/replay/<stream>.json.gz, written by dataset/tools/meas/replay_fold_in.py from the
 # raw release: {entry, program, kind, source, …, repeats: [{repeat, run_id, phase_us, comms, streams}]}, one repeat, one
-# or more streams of [t_us, x, y] rows whose columns the `kind` fixes — `wakes` (a measured entry): [t from the phase's
-# start, run_us, thread]; `cycles` (a periodic entry): [the cycle's start, its work_us, its length_us]; `runs` (a batch
-# entry): [the run's start, run_us, the block_us after it]. A measured or periodic task takes a seeded window of the
+# or more streams of rows whose columns the `kind` fixes — `wakes` (a measured entry): [t from the phase's start,
+# run_us, thread, channel], the channel 0 timer and 1 event (timer wakes by origin, decision 6); `cycles` (a periodic
+# entry): [the cycle's start, its work_us, its length_us]; `runs` (a batch entry): [the run's start, run_us, the
+# block_us after it]. A measured or periodic task takes a seeded window of the
 # stream — a uniform offset by the file's seed over the phase's span less the task's lifetime, as the stimulus replay
 # draws its window — and a task group (`count`) distinct streams of the repeat, as the launch phases are drawn; a
 # batch task takes the job's runs from its start. A stream shorter than its task fails the build; nothing is wrapped

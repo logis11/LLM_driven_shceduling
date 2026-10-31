@@ -28,7 +28,7 @@ import sys
 from array import array
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from analyze import analyze_run, component_name, pct  # noqa: E402
+from analyze import EVENT_SUFFIX, analyze_run, component_name, pct, wake_channel  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from stability import stability, ratio_stability, ratio_repeats_needed, TOLERANCE, t975  # noqa: E402
 from distribution import circular_gaps, quantile_table  # noqa: E402
@@ -44,6 +44,8 @@ def pooled_mode(mode, control):
 
 QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
 COVERAGE = 0.95  # D16: components in descending wake rate until this share of idle wakes; the rest pooled as one residual
+# timer wakes by origin (2026-10-31, decision 10): a component's event part is keyed by its name and EVENT_SUFFIX
+# (analyze.py); D16's cut applies within each channel
 # D26: the headline per application; under D30 the playback CPU share stays on the list beside every carried table
 HEADLINE = {"soffice": "input_run", "code": "input_run", "thunderbird": "input_run", "thunderbird-send": "input_run",
             "chrome": "op_duration", "gimp": "op_duration", "kdenlive": "op_duration",
@@ -72,6 +74,23 @@ SESSION_SPREAD = {("code", "idle utility/libuv-worker"),
                   ("webrtc", "play utility/AudioProcessing "), ("webrtc", "play renderer/AudioOutputDevi run mean"),
                   ("webrtc", "play renderer/AudioInputDevic run mean"), ("webrtc", "play utility/FakeAudioInput run mean"),
                   ("webrtc", "play residual run mean")}
+# timer wakes by origin (2026-10-31), decision 14: an event part that fails the rule, by the class its evidence meets
+# (_dev/research/jioh/2026-10-31-wake-origins/within_event.py on the long-phase probes past each campaign's settle).
+# D57 extended as 9.8 D21 extends it, to an event part whose spread lies in part within one run — code's five failing
+# parts ±26–49 % within against ±42–70 % across, chrome's two ±58–67 % against ±83 %; carried as SESSION_SPREAD's
+# are, flagged `in_run` so the scope states the limitation
+SESSION_SPREAD_IN_RUN = {("code", "idle renderer/code [event]"), ("code", "idle gpu/VizCompositorTh [event]"),
+                         ("code", "idle renderer/Compositor [event]"), ("code", "idle gpu/Chrome_ChildIOT [event]"),
+                         ("code", "idle residual [event]"),
+                         ("chrome", "idle renderer/Compositor [event]"), ("chrome", "idle gpu/VizCompositorTh [event]")}
+# decision 14: 9.8 D27's sparse component, one that wakes a few times a phase and whose spread one run's windows cannot
+# place — thunderbird-send's BgIOThr~Pool event part, two wakes in every 600 s window of its probe and 2–3 a phase;
+# chrome's utility/ThreadPoolForeg event part, 2–9 a phase, windows of its probe catching none — carried with its
+# half-widths over at least MIN_REPEATS repeats, its three values together, its count stated
+SPARSE = {("thunderbird-send", "idle BgIOThr~Pool [event]"), ("chrome", "idle utility/ThreadPoolForeg [event]")}
+# decision 15: 9.8 D17's class, a run mean whose spread follows the runner's speed — kdenlive's driven-phase run means
+# move together across the repeats — carried with its half-width and range over at least MIN_REPEATS repeats
+MACHINE_RUN_MEANS = {("kdenlive", "driven kdenlive run mean")}
 # D64: a rare heavy run carried as its own stated event, not as a component's wake — chrome's MemoryInfra pass of 54–61 ms
 # at no fixed time (9 in 20 sessions × 600 s) against its regular runs of at most 11.5 ms; (app, phase) -> (comm, run floor
 # in ms, the floor being design between the two). The event's runs leave the component rows, so the residual converges.
@@ -242,6 +261,8 @@ def criterion(app, entry):
         comps = [(c, ph[p]["threads"][c]) for c in sel["selected"] if ph[p]["threads"][c]["gap_ms"]["q"] is not None]
         if sel["residual"] and sel["residual"]["gap_ms"]["q"]:
             comps.append(("residual", sel["residual"]))
+        if sel.get("residual_event") and sel["residual_event"]["gap_ms"]["q"]:
+            comps.append(("residual" + EVENT_SUFFIX, sel["residual_event"]))
         for comm, c in comps:
             add(f"{p} {comm} wakes/s", c["wakes_per_s"], None)
             add_table(f"{p} {comm} gap mean (ms)", c["gap_ms"], ABS_FLOOR_MS)
@@ -277,6 +298,26 @@ def mark_limited(app, entry, crit):
         reps = entry["phases"][p].get("repeats", entry["repeats"]) if p in entry["phases"] else None
         if reps and max(reps) >= limit:
             c["limited"] = True
+
+
+def mark_carried(app, crit):
+    """The rule's exceptions by class, each value carried with its half-width once it has MIN_REPEATS repeats: D57
+    (`session_spread`; `in_run` where its spread lies in part within one run, 9.8 D21's extension), 9.8 D27's sparse
+    component (`sparse`) and 9.8 D17's run mean following the runner's speed (`excepted`) — the last three by the timer
+    wakes by origin's decisions 14 and 15. A class names a value by its prefix: a component's three values or one."""
+    for q, c in crit.items():
+        hit = lambda classes: any(a == app and q.startswith(pre) for a, pre in classes)
+        if hit(SESSION_SPREAD) or hit(SESSION_SPREAD_IN_RUN):
+            c["session_spread"] = True
+            if hit(SESSION_SPREAD_IN_RUN):
+                c["in_run"] = True
+        elif hit(SPARSE):
+            c["sparse"] = True
+        elif hit(MACHINE_RUN_MEANS):
+            c["excepted"] = True
+        else:
+            continue
+        c["carried"] = c["k"] >= MIN_REPEATS
 
 
 def headline(app, entry):
@@ -324,6 +365,7 @@ def phase_comms(app, rows, roles, segments):
     by_comm = {}
     for row in rows:
         key = component_name(roles.get(row.pid, "main"), component_key(app, row.comm))   # D67
+        key += "" if wake_channel(row) == "timer" else EVENT_SUFFIX                     # decision 10
         by_comm.setdefault(key, []).append(row)
     comms = {}
     for comm, rs in by_comm.items():
@@ -340,6 +382,22 @@ def per_repeat_rates(c, reps, spans):
 
 
 def select_components(comms, spans, reps, segments=None):
+    """Decision 10: D16's selection within each channel — the timer parts, then the event parts — each channel with its
+    own residual (`residual`, `residual_event`) and coverage; the sporadic lists of both."""
+    timer = {c: v for c, v in comms.items() if not c.endswith(EVENT_SUFFIX)}
+    event = {c: v for c, v in comms.items() if c.endswith(EVENT_SUFFIX)}
+    chosen, residual, cov = select_channel(timer, spans, reps, segments)
+    if event:
+        e_chosen, e_residual, e_cov = select_channel(event, spans, reps, segments)
+        chosen = chosen + e_chosen
+        cov = {**cov, "sporadic": cov["sporadic"] + e_cov["sporadic"],
+               "event": {"covered_share": e_cov["covered_share"], "total_wakes_per_s": e_cov["total_wakes_per_s"],
+                         "selected": len(e_chosen)},
+               "residual_event": e_residual}
+    return chosen, residual, cov
+
+
+def select_channel(comms, spans, reps, segments=None):
     """D16: comms in descending mean wake rate until COVERAGE of the wakes; the remaining comms merged
     into one residual component whose gaps are those of their merged wake times, wrapped round each repeat's
     segments (`segments`: {repeat: [(start, end)]}, the phase or the operation's windows; default the span from 0).
@@ -377,7 +435,8 @@ def select_components(comms, spans, reps, segments=None):
         chosen.remove(c)
         sporadic.append({"comm": c, "repeats": [r for r in reps if comms[c]["wakes"].get(r, 0)], "wakes_per_s": round(rate[c], 4)})
     if residual and not all(w >= 2 for w in residual["wakes"]):
-        sporadic.append({"comm": "residual", "comms": rest, "repeats": [r for r, w in zip(reps, residual["wakes_per_s"]) if w],
+        sporadic.append({"comm": "residual" + (EVENT_SUFFIX if rest[0].endswith(EVENT_SUFFIX) else ""), "comms": rest,
+                         "repeats": [r for r, w in zip(reps, residual["wakes_per_s"]) if w],
                          "wakes_per_s": round(sum(rate[c] for c in rest), 4)})
         residual = None
     cum = sum(rate[c] for c in chosen)
@@ -525,11 +584,9 @@ def main():
             entry["phases"][phase] = ph
         crit = criterion(app, entry)
         mark_limited(app, entry, crit)
-        for q, c in crit.items():   # D57: carried with its half-width once it has the minimum repeats
-            if any(a == app and q.startswith(pre) for a, pre in SESSION_SPREAD):
-                c["session_spread"] = True
-                c["carried"] = c["k"] >= MIN_REPEATS
-        live = [c for c in crit.values() if not c.get("limited") and not c.get("session_spread")]
+        mark_carried(app, crit)
+        live = [c for c in crit.values()
+                if not c.get("limited") and not c.get("session_spread") and not c.get("sparse") and not c.get("excepted")]
         needed = [c["needed"] for c in live]
         entry["stability"] = {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS,
                               "window_limit": WINDOW_LIMIT.get(app), "quantities": crit,
@@ -538,7 +595,8 @@ def main():
         out["runs"][app] = entry
         print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {build_census(entry['version'])}; CPU {sorted(set(entry['cpu_model'].values()))})")
         st = entry["stability"]
-        fails = [q for q, c in crit.items() if not c["passes"] and not c.get("limited") and not c.get("session_spread")]
+        fails = [q for q, c in crit.items() if not c["passes"] and not c.get("limited") and not c.get("session_spread")
+                 and not c.get("sparse") and not c.get("excepted")]
         print(f"   stability: {len(crit)} quantities over {len(reps)} repeats, {len(fails)} out of tolerance; repeats needed at "
               f"this spread {st['needed'] or 'over 200'} — {'holds' if st['passes'] else 'does not hold yet'}")
         for q in fails:

@@ -4,6 +4,8 @@ import gzip
 import json
 import re
 
+import pytest
+
 from meas.desktop import launch
 
 
@@ -193,18 +195,19 @@ def test_the_fold_in_carries_each_streams_wakes_with_its_threads(tmp_path):
     json.dump({"phase_s": 12.3456789, "streams": {"tree": {}, "renderer2": {}, "renderer1": {}}},
               open(D / "launch.summary.json", "w"))
     with gzip.open(D / "launch.events.tsv.gz", "wt") as f:
-        f.write("stream\tt_us\trun_us\ttid\tpid\tcomm\trole\n"
-                "renderer1\t500\t20\t11\t11\tchrome\trenderer\n"
-                "renderer2\t100\t30\t12\t12\tchrome\trenderer\n"
-                "renderer1\t200\t10\t13\t11\tHangWatcher\trenderer\n"
-                "tree\t0\t99\t1\t1\tchrome\tchrome\n")
+        f.write("stream\tt_us\trun_us\ttid\tpid\tcomm\trole\tchannel\n"
+                "renderer1\t500\t20\t11\t11\tchrome\trenderer\ttimer\n"
+                "renderer2\t100\t30\t12\t12\tchrome\trenderer\tevent\n"
+                "renderer1\t200\t10\t13\t11\tHangWatcher\trenderer\ttimer\n"
+                "tree\t0\t99\t1\t1\tchrome\tchrome\tevent\n")
     phase, streams, comms = launch_fold_in.streams_of(str(D), "chrome-hidden")
     assert phase == 12_345_679
     assert comms == ["chrome", "HangWatcher"]
-    # the renderers in their index order, each sorted by time; the tree's stream is not a renderer's
-    assert streams == [[[200, 10, 1], [500, 20, 0]], [[100, 30, 0]]]
+    # the renderers in their index order, each sorted by time; the tree's stream is not a renderer's; the channel
+    # 0 for a timer wake, 1 for any other
+    assert streams == [[[200, 10, 1, 0], [500, 20, 0, 0]], [[100, 30, 0, 1]]]
     phase, streams, _ = launch_fold_in.streams_of(str(D), "soffice")
-    assert streams == [[[0, 99, 0]]]
+    assert streams == [[[0, 99, 0, 1]]]
     # byte-stable: the same document encodes to the same bytes
     doc = {"repeats": [{"phase_us": phase, "streams": streams}]}
     assert launch_fold_in.encode(doc) == launch_fold_in.encode(doc)
@@ -224,3 +227,39 @@ def test_the_tabs_renderers_are_the_lowest_client_ids(tmp_path):
     pages = launch.page_renderers(str(tmp_path), "traced.gate")
     assert pages == {4692, 4701, 4915}   # 9.8's page-renderer rule leaves out the WebUI and the extension
     assert sorted(pages, key=lambda q: ids[q])[:2] == [4692, 4701]
+
+
+def test_a_landing_analysed_before_the_channel_is_not_folded_in(tmp_path):
+    from meas.desktop import launch_fold_in
+    json.dump({"phase_s": 1.0, "streams": {"tree": {}}}, open(tmp_path / "launch.summary.json", "w"))
+    _gz(tmp_path / "launch.events.tsv.gz", "stream\tt_us\trun_us\ttid\tpid\tcomm\trole\ntree\t0\t99\t1\t1\tx\tx\n")
+    with pytest.raises(SystemExit, match="carries no channel"):
+        launch_fold_in.streams_of(str(tmp_path), "soffice")
+
+
+def test_each_launch_wake_takes_the_channel_of_its_chains_origin(tmp_path):
+    # timer wakes by origin (2026-10-31, decisions 6 and 8): a wake whose chain starts at a timer interrupt is the
+    # timer channel's; one the launcher's shell or the X server answering the input makes is the event channel's
+    D = tmp_path
+    _gz(D / "perf.launch.forks.txt.gz",
+        "      10.000000: sched:sched_process_fork: comm=bash pid=50 child_comm=bash child_pid=100\n"
+        "      10.004000: sched:sched_process_exec: filename=/usr/bin/soffice pid=100 old_pid=100\n"
+        "      10.200000: sched:sched_process_fork: comm=soffice.bin pid=100 child_comm=soffice.bin child_pid=102\n")
+    _gz(D / "perf.launch.timehist.txt.gz",
+        _row(10.0500, 3, "soffice", 100, 100, 1.0)                 # woken by the launcher's bash: event
+        + _row(11.0000, 3, "soffice.bin", 102, 100, 1.0)          # woken from idle: timer
+        + _row(12.0000, 3, "soffice.bin", 100, 100, 1.0)          # woken by its own thread, itself timer-woken: timer
+        + _row(13.0000, 3, "Xvfb", 7, 7, 1.0)                     # the X server, woken by xdotool
+        + _row(13.0100, 3, "soffice.bin", 102, 100, 1.0))         # woken by the X server: the input's, event
+    _gz(D / "perf.launch.wakeups.txt.gz",
+        "      10.040000 [0001]  bash[50/50]  awakened: soffice[100/100]\n"
+        "      10.990000 [0001]  swapper[0]  awakened: soffice.bin[102/100]\n"
+        "      11.990000 [0003]  soffice.bin[102/100]  awakened: soffice.bin[100/100]\n"
+        "      12.990000 [0002]  xdotool[60/60]  awakened: Xvfb[7/7]\n"
+        "      13.005000 [0003]  Xvfb[7/7]  awakened: soffice.bin[102/100]\n")
+    _edges(D, ("traced.exec", "mark", 9.9), ("traced.settle", "end", 25.0))
+    (D / "report.kv").write_text("app=launch-soffice\nrepeat=1\nmode=dry\nlaunch.traced.root=100\npin.load_cpu=3\n")
+    out, events = launch.analyze(str(D))
+    assert [(e[5], e[7]) for e in events] == [("soffice", "event"), ("soffice.bin", "timer"), ("soffice.bin", "timer"),
+                                              ("soffice.bin", "event")]
+    assert out["streams"]["tree"]["wakes"] == 4 and out["streams"]["tree"]["event_wakes"] == 2

@@ -131,8 +131,9 @@ def test_input_wakes_inside_windows(fixture_path, library):
     windows = [(w["from"], w["to"]) for w in timeline.input]
     for event in inputs:
         assert any(lo <= event["t"] < hi for lo, hi in windows)
-    # every other wake is a timer wake on the task's own timer channel (9.5 D74)
-    assert {e["channel"] for e in wake_events} <= {"input:editor", "timer:editor"}
+    # every other wake is one of the program's own, on the task's timer or event channel by its origin (9.5 D74; timer
+    # wakes by origin, decision 4)
+    assert {e["channel"] for e in wake_events} <= {"input:editor", "timer:editor", "event:editor"}
     editor = next(e for e in canonical["events"]
                   if e["op"] == "arrive" and e["id"] == "editor")
     waits = [i for i in editor["program"] if i["op"] == "WAIT"]

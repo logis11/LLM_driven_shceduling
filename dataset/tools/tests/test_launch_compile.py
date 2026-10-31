@@ -7,21 +7,21 @@ from wlc import compiler
 from wlc.linter import lint_repo
 
 SPEC = {"stream": "fx-launch", "sampling": "per-task", "source": "meas-ci:interactive:3"}
-# two repeats of a whole tree, one stream each, each wake [t_us, run_us, thread]; the last wake of the first lies past
-# its phase's end
+# two repeats of a whole tree, one stream each, each wake [t_us, run_us, thread, channel] (channel 0 timer, 1 event);
+# the last wake of the first lies past its phase's end
 DATA = {"repeats": [
     {"repeat": "1", "phase_us": 3_000_000, "streams": [
-        [[0, 400_000, 0], [500_000, 300_000, 0], [2_500_000, 1_000, 0], [3_500_000, 9_999, 0]]]},
+        [[0, 400_000, 0, 0], [500_000, 300_000, 0, 1], [2_500_000, 1_000, 0, 0], [3_500_000, 9_999, 0, 0]]]},
     {"repeat": "2", "phase_us": 3_000_000, "streams": [
-        [[0, 410_000, 0], [600_000, 290_000, 0]]]}]}
+        [[0, 410_000, 0, 0], [600_000, 290_000, 0, 1]]]}]}
 # two repeats of a renderer group: two streams each, from which a group draws distinct ones
 GROUP = {"repeats": [
     {"repeat": "1", "phase_us": 3_000_000, "streams": [
-        [[0, 400_000, 0], [500_000, 300_000, 0], [2_500_000, 1_000, 0], [3_500_000, 9_999, 0]],
-        [[100_000, 7_000, 0], [1_100_000, 8_000, 0]]]},
+        [[0, 400_000, 0, 0], [500_000, 300_000, 0, 0], [2_500_000, 1_000, 0, 0], [3_500_000, 9_999, 0, 0]],
+        [[100_000, 7_000, 0, 0], [1_100_000, 8_000, 0, 0]]]},
     {"repeat": "2", "phase_us": 3_000_000, "streams": [
-        [[0, 410_000, 0], [600_000, 290_000, 0]],
-        [[200_000, 6_000, 0]]]}]}
+        [[0, 410_000, 0, 0], [600_000, 290_000, 0, 0]],
+        [[200_000, 6_000, 0, 0]]]}]}
 
 
 def _lib(tmp_path, repo_root, monkeypatch, entries, streams=DATA):
@@ -44,8 +44,8 @@ def _compile(tmp_path, lib, tasks, focus=(), operations=(), end="20s", seed=7):
     return compile_timeline(Timeline(path, lib), lib, "single", rel_path="fx")
 
 
-def _timer_wakes(canonical, iid):
-    return sorted(e["t"] for e in canonical["events"] if e["op"] == "wake" and e["channel"] == f"timer:{iid}")
+def _timer_wakes(canonical, iid, kind="timer"):
+    return sorted(e["t"] for e in canonical["events"] if e["op"] == "wake" and e["channel"] == f"{kind}:{iid}")
 
 
 def test_a_task_started_mid_file_replays_one_repeat_then_runs_steady(tmp_path, repo_root, monkeypatch):
@@ -53,9 +53,10 @@ def test_a_task_started_mid_file_replays_one_repeat_then_runs_steady(tmp_path, r
     canonical, report = _compile(tmp_path, lib, [{"id": "w", "name": "soffice.bin", "archetype": "office-writer",
                                                   "arrive": "2s", "depart": "20s"}])
     timer = _timer_wakes(canonical, "w")
-    replay = [t for t in timer if t < 5_000_000]
-    # one repeat's first stream from the arrival, its wakes past the phase's end left out (D136)
-    assert replay in ([2_000_000, 2_500_000, 4_500_000], [2_000_000, 2_600_000])
+    replay = ([t for t in timer if t < 5_000_000], [t for t in _timer_wakes(canonical, "w", "event") if t < 5_000_000])
+    # one repeat's first stream from the arrival, its wakes past the phase's end left out (D136), each wake on its
+    # own channel (timer wakes by origin, decision 6)
+    assert replay in (([2_000_000, 4_500_000], [2_500_000]), ([2_000_000], [2_600_000]))
     # the steady components begin at the phase's end, already running
     assert any(t >= 5_000_000 for t in timer)
     arrive = next(e for e in canonical["events"] if e["op"] == "arrive")

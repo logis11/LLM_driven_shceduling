@@ -146,7 +146,7 @@
       }
     },
     "wake_event": {
-      "description": "Exogenous wake at a pinned absolute time, pre-sampled at compile time: a replayed input event (keystrokes, on `input:<task>`) or a measured entry's timer-component wake (on `timer:<task>`). The target task blocks on WAIT(channel) (contract §4).",
+      "description": "Exogenous wake at a pinned absolute time, pre-sampled at compile time: a replayed input event (keystrokes, on `input:<task>`), or a measured entry's component wake — on `timer:<task>` when its wake chain starts at a timer, on `event:<task>` when it starts at input, another thread or another process (contract §3, the WAIT row). The target task blocks on WAIT(channel) (contract §4).",
       "type": "object",
       "required": ["t", "op", "target", "channel"],
       "additionalProperties": false,
@@ -192,7 +192,7 @@
           "properties": {"op": {"const": "SLEEP"}, "us": {"$ref": "#/$defs/time_us"}}
         },
         {
-          "description": "Absolute periodic wake at t0+k·period, drift-free; late iterations accumulate as backlog (contract §3).",
+          "description": "Absolute periodic wake at t0+k·period, drift-free; reached after one or more ticks have passed, the task consumes the last passed tick at once and skips the earlier ones, each a missed job with no work (contract §3).",
           "type": "object",
           "required": ["op", "period_us"],
           "additionalProperties": false,
@@ -202,7 +202,7 @@
           }
         },
         {
-          "description": "Block until a WAKE (or exogenous wake event) on channel.",
+          "description": "Block until a WAKE (or exogenous wake event) on channel. A wake that finds no waiter is held: on `input:` and `event:` channels every one, completing the next WAITs in turn; on a `timer:` channel one, a wake arriving while one is held being dropped and its (WAIT, RUN) pair passed without work (contract §3).",
           "type": "object",
           "required": ["op", "channel"],
           "additionalProperties": false,

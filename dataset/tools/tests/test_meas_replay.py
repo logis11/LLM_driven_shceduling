@@ -9,19 +9,20 @@ from meas.campaign.analyze import Row
 
 
 def test_a_wake_stream_is_the_merged_wakes_from_the_phase_start_with_components_indexed():
-    rows = [Row(99.9, 99.8999, 99.9005, 0.5, "code", 11, 1, "S"),            # before the start: dropped
-            Row(100.5, 100.4999, 100.5015, 1.5, "code", 11, 1, "S"),
-            Row(101.25, 101.2499, 101.25025, 0.25, "Compositor", 22, 2, "S"),
-            Row(101.5, 101.4999, 101.5010, 1.0, "code", 11, 1, "S"),
-            Row(120.0, 119.9999, 120.0005, 0.5, "code", 11, 1, "S")]          # at the end: dropped
+    rows = [Row(99.9, 99.8999, 99.9005, 0.5, "code", 11, 1, "S", "timer"),            # before the start: dropped
+            Row(100.5, 100.4999, 100.5015, 1.5, "code", 11, 1, "S", "timer"),
+            Row(101.25, 101.2499, 101.25025, 0.25, "Compositor", 22, 2, "S", "x"),
+            Row(101.5, 101.4999, 101.5010, 1.0, "code", 11, 1, "S", "input"),
+            Row(120.0, 119.9999, 120.0005, 0.5, "code", 11, 1, "S", "timer")]          # at the end: dropped
     comms = []
     stream = rf.wake_stream(rows, 100.0, 120.0, {1: "main", 2: "renderer"}, comms)
-    assert stream == [[500_000, 1500, 0], [1_250_000, 250, 1], [1_500_000, 1000, 0]]
+    # each wake's channel by its chain's origin: 0 a timer's, 1 any other (timer wakes by origin, decision 6)
+    assert stream == [[500_000, 1500, 0, 0], [1_250_000, 250, 1, 1], [1_500_000, 1000, 0, 1]]
     assert comms == ["code", "renderer/Compositor"]
-    # a second stream of the repeat shares the comm index
+    # a second stream of the repeat shares the comm index; a wake with no wakeup event is no timer's
     more = rf.wake_stream([Row(102.0, 101.9999, 102.001, 1.0, "Compositor", 33, 3, "S")], 100.0, 120.0,
                           {3: "renderer"}, comms)
-    assert more == [[2_000_000, 1000, 1]] and comms == ["code", "renderer/Compositor"]
+    assert more == [[2_000_000, 1000, 1, 1]] and comms == ["code", "renderer/Compositor"]
 
 
 def test_a_cycle_stream_is_the_pools_cycles_as_start_work_and_length():
