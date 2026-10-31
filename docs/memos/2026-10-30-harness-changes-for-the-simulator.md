@@ -28,9 +28,18 @@
 
 ### TL;DR — `simulator/src/sim.cpp`에서 고치고 더할 것
 
-순서는 RQ0 run 전에 끝내야 하는 것부터예요. 자세한 규칙은 아래 2.1–2.4에 있어요.
+먼저 새 dataset build를 받고(1번), 그다음은 RQ0 run 전에 끝내야 하는 순서예요. 자세한 규칙은 아래 2.1–2.4에 있어요.
 
-1. **두 mailbox와 `wake_drop` — conformance 항목 (j), 새 일.** 바뀌는 곳은 channel을 다루는 세 군데예요.
+1. **새 dataset build 받기 — 가장 먼저.** `git pull`로 main을 받으면 이 메모, `mock-wakes` fixture, 새 manifest가 함께 와요. compile된 파일(`dataset/build/`, `dataset/generated/`)은 git에 없으니 release `dataset-build-2026-10-31`에서 받아요(371 MB, 풀면 6.8 GB).
+
+   ```
+   gh release download dataset-build-2026-10-31 --repo logis11/LLM_driven_shceduling
+   tar -xzf dataset-build-2026-10-31.tar.gz -C dataset
+   make -C dataset check PY=python3.12   # build verified (3304 files, 7 manifests)
+   ```
+
+   2026-10-31에 다시 build되면서 core set 51개 파일이 모두 바뀌었어요(`event:` channel, operation 창 시작의 큰 run). 그러니 지금 simulator의 byte-identical 회귀 기준선을 이 build(dataset manifest `27d347bc…`)로 먼저 다시 잡고 아래 일을 시작하세요. 예전 release `dataset-build-2026-10-26`은 지금 manifest와 맞지 않아요.
+2. **두 mailbox와 `wake_drop` — conformance 항목 (j), 새 일.** 바뀌는 곳은 channel을 다루는 세 군데예요.
    - **`channel()`** (channel 이름 → index): channel마다 종류를 함께 적어 두세요. 이름이 `timer:`로 시작하는지만 알면 돼요. 새 접두어 `event:`는 `input:`과 똑같이 다루니 지금 코드(`chan_pending_` 계수기, 깊이 제한 없음)를 그대로 써요. 따로 할 일이 없어요.
    - **`on_ext_wake()`** (바깥 wake가 도착할 때): `timer:` channel에서 기다리는 task가 없으면, 붙잡힌 wake가 없을 때만 붙잡아요. 이미 하나가 붙잡혀 있으면 버리고, 그 순간 `{"event":"wake_drop","t":<now>,"task":"<id>","channel":"timer:<id>"}` 한 줄을 써요. `<id>`는 channel 이름의 `:` 뒤예요. task가 아직 도착하기 전에 온 timer wake도 같은 규칙이에요. 처음 것은 붙잡고, 나머지는 그 시각에 `wake_drop`을 써요.
    - **`step()`의 `Op::WAIT`**: task의 k번째 timer `WAIT`는 그 task의 k번째 timer wake와 짝이에요.
@@ -39,11 +48,10 @@
      - 아직 안 왔으면 막혀요.
    - **주의:** 계수기 두 개(붙잡힌 수, 버려진 수)로는 짝이 어긋나요. w1이 붙잡히고 w2가 버려진 채 첫 `WAIT`에 닿을 때와, w1을 소비한 뒤 w3이 붙잡힌 채 둘째 `WAIT`(w2의 짝)에 닿을 때, 두 계수기는 똑같이 (1, 1)인데 해야 할 일은 반대(소비 / 건너뛰기)예요. 그래서 channel마다 "도착한 timer wake 하나하나의 운명(붙잡힘·버려짐·소비됨)"과 "다음 timer `WAIT`의 번호"를 두는 것이 안전해요. harness도 wake 번호로 짝을 맞춰요(`harness/tools/harness/primitives.py`의 `wake_drop` 처리와 `next_wait`).
    - **확인:** `harness/tools/tests/fixtures/mock-wakes/run.json`을 돌린 trace가 같은 폴더의 `trace.jsonl`과 line 단위로 같아야 해요. 지금까지처럼 `steps/`에 새 단계로 두고 `src/sim.cpp`로 옮기면 돼요.
-2. **빈 slot을 바로 얻은 FORK의 대기 0 `ready(cause = fork_slot)` line — 항목 (a)의 마지막 경우, Part H4.** `step()`의 `Op::FORK`에서 slot이 남아 바로 `spawn()`하는 갈래에 그 line을 더해요. 그다음 `fix-object`와 `fix-tree`의 `reference-trace.jsonl`을 다시 만들어요(2.2).
-3. **RUN 끝의 drain — Part H5.** 기다리는 config switch(U3의 `pending_`, `dispatch()`)를, occupancy 안에서 RUN이 끝나는 순간에도 slice가 끝날 때와 똑같이 적용해요. FIFO에서 나가는 switch는 지금처럼 즉시 적용해요(2.3).
-4. **`WAIT children:<id>` — 항목 (g).** 지금은 보통 channel처럼 영원히 막혀요. 그 orchestrator가 spawn한 자식이 모두 끝나면 완료되고, `WAIT`에 닿을 때 살아 있는 자식이 없으면 막히지 않고 대기 0으로 바로 완료되게 해요(2.4).
-5. **invocation contract — 항목 (h).** `main()`의 `--workload`, `--schedule`, `--out-trace`, gzip, 다 쓴 경우에만 exit 0은 이미 있어요. 남은 것은 둘이에요. trace header의 `"sim"`이 지금 `"src/sim"`으로 고정이라 runner machine 설정에 적힌 version 문자열로 바꿔야 하고, 미뤄 둔 위치 인자 거부가 있어요(2.4).
-6. **회귀 기준선.** core set, sensitivity variant, generated layer가 2026-10-31에 다시 build됐어요. 51개 파일 모두 바뀌었어요(`event:` channel, operation 창 시작의 큰 run). 기존 byte-identical 기준선은 새 build(dataset manifest `27d347bc…`)로 다시 잡아야 해요. 새 build는 release `dataset-build-2026-10-31`의 `dataset-build-2026-10-31.tar.gz`예요. 저장소 root에서 `tar -xzf dataset-build-2026-10-31.tar.gz -C dataset`로 풀고 `make -C dataset check PY=python3.12`로 확인해요.
+3. **빈 slot을 바로 얻은 FORK의 대기 0 `ready(cause = fork_slot)` line — 항목 (a)의 마지막 경우, Part H4.** `step()`의 `Op::FORK`에서 slot이 남아 바로 `spawn()`하는 갈래에 그 line을 더해요. 그다음 `fix-object`와 `fix-tree`의 `reference-trace.jsonl`을 다시 만들어요(2.2).
+4. **RUN 끝의 drain — Part H5.** 기다리는 config switch(U3의 `pending_`, `dispatch()`)를, occupancy 안에서 RUN이 끝나는 순간에도 slice가 끝날 때와 똑같이 적용해요. FIFO에서 나가는 switch는 지금처럼 즉시 적용해요(2.3).
+5. **`WAIT children:<id>` — 항목 (g).** 지금은 보통 channel처럼 영원히 막혀요. 그 orchestrator가 spawn한 자식이 모두 끝나면 완료되고, `WAIT`에 닿을 때 살아 있는 자식이 없으면 막히지 않고 대기 0으로 바로 완료되게 해요(2.4).
+6. **invocation contract — 항목 (h).** `main()`의 `--workload`, `--schedule`, `--out-trace`, gzip, 다 쓴 경우에만 exit 0은 이미 있어요. 남은 것은 둘이에요. trace header의 `"sim"`이 지금 `"src/sim"`으로 고정이라 runner machine 설정에 적힌 version 문자열로 바꿔야 하고, 미뤄 둔 위치 인자 거부가 있어요(2.4).
 
 ### 2.1 두 channel의 mailbox와 `wake_drop` (새 일)
 
