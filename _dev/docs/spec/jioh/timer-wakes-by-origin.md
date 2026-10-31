@@ -13,7 +13,7 @@ The Phase 10 item "Timer wakes that find their task behind" (`_dev/TODO.md`), de
 
 ### 1. Wakes are split by cause
 
-A wake whose cause is a toolkit timer is not queued when its task is not waiting for it; a wake whose cause is input or a message from another thread or process is queued, as a keystroke is. Grounding: the three toolkits' timers do not catch up (`qt-qtimer`, `glib-timeout`, `gecko-nsitimer`); X input events queue (`xlib-xnextevent`).
+A wake whose cause is a toolkit timer is not queued when its task is not waiting for it; a wake whose cause is input or a message from another thread or process is queued, as a keystroke is. Grounding: the three toolkits' timers do not catch up (`qt-qtimer`, `glib-timeout`, `gecko-nsitimer`); X input events queue (`xlib-xnextevent`), and so do events posted from another thread (`qt-postevent`).
 
 ### 2. The timer channel holds one pending wake, the first
 
@@ -70,3 +70,7 @@ An event part whose values do not hold the stability rule (9.5 D26, D30, D78) at
 ### 15. `video-editor`'s driven-phase main-thread timer-part run mean carried under 9.8 D17
 
 The run mean of `kdenlive`'s timer part in the driven phase, which fails the stability rule at the 20 repeats obtained, is carried with its half-width and range over at least five repeats, the tolerance not applied, under 9.8 D17's class: run times that follow the runner's speed. The entry's scope states what its spread follows — the driven phase's components' run means moving together across the repeats — its share of the phase's CPU, and that the class was decided after the value was seen failing (9.8 D28).
+
+### 16. `audio-server`'s `wireplumber/gmain` timer part carried under decision 14's rule
+
+The timer part of `wireplumber/gmain`, `audio-server`'s one component, which fails the stability rule at the 24 repeats obtained, is carried as decision 14 carries an event part: under the class its evidence meets — 9.5 D57 as 9.8 D21 extends it, its spread lying in part within one run — its three values together, the entry's scope stating both spreads, its wakes per phase and that the class was decided after the value was seen failing (9.8 D28).
