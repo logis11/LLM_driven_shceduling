@@ -1,5 +1,5 @@
 {
- "systemd pid1/systemd": {
+ "pipewire wireplumber/gmain": {
   "analysis": {
    "repeats_with_it": 24,
    "of": 24,
@@ -8,32 +8,77 @@
    ]
   },
   "weight": {
-   "share_of_entry_wakes": 1.0,
+   "share_of_entry_wakes": 0.6493,
    "wakes_per_phase": [
-    114,
-    139
+    8,
+    16
    ],
-   "wakes_per_phase_mean": 126.4
+   "wakes_per_phase_mean": 10.9
   },
   "across": {
-   "wakes/s": 0.09888024946100805,
-   "gap mean (ms)": 0.09953651090046504,
-   "run mean (ms)": 0.3000735474380976
+   "wakes/s": 0.36785699507592995,
+   "gap mean (ms)": 0.32915099008860615,
+   "run mean (ms)": 0.16196319018404906
   },
   "within": {
    "36": {
     "positions": 143,
     "clean_span_s": 10335.946,
-    "wakes/s": 0.05997378768020971,
-    "gap mean (ms)": 0.06354632923663389,
-    "run mean (ms)": 0.10731808690526838
+    "wakes/s": 0.15365329512893988,
+    "gap mean (ms)": 0.18229878850606085,
+    "run mean (ms)": 0.08230163562100376
    },
    "41": {
     "positions": 143,
     "clean_span_s": 10335.809,
-    "wakes/s": 0.09932147245819306,
-    "gap mean (ms)": 0.09809724697265619,
-    "run mean (ms)": 0.1651620714811536
+    "wakes/s": 0.1593610698365528,
+    "gap mean (ms)": 0.2689539143894336,
+    "run mean (ms)": 0.07753008192224944
+   },
+   "44": {
+    "positions": 143,
+    "clean_span_s": 10335.732,
+    "wakes/s": 0.1572580645161291,
+    "gap mean (ms)": 0.18384101511686954,
+    "run mean (ms)": 0.052382833694844845
+   }
+  }
+ },
+ "systemd pid1/systemd [event]": {
+  "analysis": {
+   "repeats_with_it": 24,
+   "of": 24,
+   "threads": [
+    1
+   ]
+  },
+  "weight": {
+   "share_of_entry_wakes": 0.9944,
+   "wakes_per_phase": [
+    114,
+    133
+   ],
+   "wakes_per_phase_mean": 125.7
+  },
+  "across": {
+   "wakes/s": 0.07557494700529974,
+   "gap mean (ms)": 0.07866107631963576,
+   "run mean (ms)": 0.29186724094248795
+  },
+  "within": {
+   "36": {
+    "positions": 143,
+    "clean_span_s": 10335.946,
+    "wakes/s": 0.06550441905583093,
+    "gap mean (ms)": 0.0690158072637,
+    "run mean (ms)": 0.18648845022084698
+   },
+   "41": {
+    "positions": 143,
+    "clean_span_s": 10335.809,
+    "wakes/s": 0.09719956498096796,
+    "gap mean (ms)": 0.09624819858959266,
+    "run mean (ms)": 0.2035404010551394
    },
    "44": {
     "positions": 143,
@@ -44,7 +89,7 @@
    }
   }
  },
- "dbus-daemon system-bus/dbus-daemon": {
+ "dbus-daemon system-bus/dbus-daemon [event]": {
   "analysis": {
    "repeats_with_it": 24,
    "of": 24,
@@ -53,32 +98,32 @@
    ]
   },
   "weight": {
-   "share_of_entry_wakes": 1.0,
+   "share_of_entry_wakes": 0.9834,
    "wakes_per_phase": [
     16,
-    38
+    36
    ],
-   "wakes_per_phase_mean": 25.1
+   "wakes_per_phase_mean": 24.7
   },
   "across": {
-   "wakes/s": 0.4378029850746269,
-   "gap mean (ms)": 0.4260682102887177,
-   "run mean (ms)": 0.41716920893934023
+   "wakes/s": 0.4047182525709984,
+   "gap mean (ms)": 0.40498509001726046,
+   "run mean (ms)": 0.421360643745428
   },
   "within": {
    "36": {
     "positions": 143,
     "clean_span_s": 10335.946,
-    "wakes/s": 0.23388943408570487,
-    "gap mean (ms)": 0.35397716802840373,
-    "run mean (ms)": 0.15948543029105228
+    "wakes/s": 0.25696316262354,
+    "gap mean (ms)": 0.37054743362652304,
+    "run mean (ms)": 0.18911611963645902
    },
    "41": {
     "positions": 143,
     "clean_span_s": 10335.809,
-    "wakes/s": 0.2584472732987585,
-    "gap mean (ms)": 0.470260843522707,
-    "run mean (ms)": 0.1363813563665731
+    "wakes/s": 0.2512550200803213,
+    "gap mean (ms)": 0.4535872646583292,
+    "run mean (ms)": 0.09795514523401974
    },
    "44": {
     "positions": 143,

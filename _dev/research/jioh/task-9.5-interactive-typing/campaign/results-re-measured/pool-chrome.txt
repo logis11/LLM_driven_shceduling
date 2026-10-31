@@ -10,8 +10,8 @@ chrome: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
    idle renderer/Compositor wakes/s: k 38, half-width 0.0062, passes
    idle renderer/Compositor gap mean (ms): k 38, half-width 0.0062, passes
    idle renderer/Compositor run mean (ms): k 38, half-width 0.0278, passes
-   idle gpu/VizCompositorTh wakes/s: k 38, half-width 0.0115, passes
-   idle gpu/VizCompositorTh gap mean (ms): k 38, half-width 0.0115, passes
+   idle gpu/VizCompositorTh wakes/s: k 38, half-width 0.0116, passes
+   idle gpu/VizCompositorTh gap mean (ms): k 38, half-width 0.0116, passes
    idle gpu/VizCompositorTh run mean (ms): k 38, half-width 0.0211, passes
    idle gpu/Chrome_ChildIOT wakes/s: k 38, half-width 0.0067, passes
    idle gpu/Chrome_ChildIOT gap mean (ms): k 38, half-width 0.0067, passes
@@ -19,51 +19,93 @@ chrome: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
    idle renderer/chrome wakes/s: k 38, half-width 0.0288, passes
    idle renderer/chrome gap mean (ms): k 38, half-width 0.0288, passes
    idle renderer/chrome run mean (ms): k 38, half-width 0.0437, passes
-   idle utility/chrome wakes/s: k 38, half-width 0.0022, passes
-   idle utility/chrome gap mean (ms): k 38, half-width 0.0022, passes
+   idle utility/chrome wakes/s: k 38, half-width 0.0021, passes
+   idle utility/chrome gap mean (ms): k 38, half-width 0.0021, passes
    idle utility/chrome run mean (ms): k 38, half-width 0.0283, passes
    idle chrome wakes/s: k 38, half-width 0.0082, passes
    idle chrome gap mean (ms): k 38, half-width 0.0082, passes
    idle chrome run mean (ms): k 38, half-width 0.0238, passes
-   idle residual wakes/s: k 38, half-width 0.0207, passes
-   idle residual gap mean (ms): k 38, half-width 0.0207, passes
-   idle residual run mean (ms): k 38, half-width 0.0224, passes
-   op Chrome_IOThread wakes/s: k 38, half-width 0.0094, passes
-   op Chrome_IOThread gap mean (ms): k 38, half-width 0.0095, passes
-   op Chrome_IOThread run mean (ms): k 38, half-width 0.0142, passes
-   op renderer/Chrome_ChildIOT wakes/s: k 38, half-width 0.0088, passes
-   op renderer/Chrome_ChildIOT gap mean (ms): k 38, half-width 0.0088, passes
-   op renderer/Chrome_ChildIOT run mean (ms): k 38, half-width 0.0083, passes
-   op renderer/ThreadPoolForeg wakes/s: k 38, half-width 0.0132, passes
-   op renderer/ThreadPoolForeg gap mean (ms): k 38, half-width 0.0133, passes
-   op renderer/ThreadPoolForeg run mean (ms): k 38, half-width 0.0161, passes
-   op chrome wakes/s: k 38, half-width 0.0077, passes
-   op chrome gap mean (ms): k 38, half-width 0.0078, passes
-   op chrome run mean (ms): k 38, half-width 0.0228, passes
-   op gpu/VizCompositorTh wakes/s: k 38, half-width 0.0043, passes
-   op gpu/VizCompositorTh gap mean (ms): k 38, half-width 0.0044, passes
-   op gpu/VizCompositorTh run mean (ms): k 38, half-width 0.0323, passes
-   op gpu/Chrome_ChildIOT wakes/s: k 38, half-width 0.006, passes
-   op gpu/Chrome_ChildIOT gap mean (ms): k 38, half-width 0.0061, passes
-   op gpu/Chrome_ChildIOT run mean (ms): k 38, half-width 0.0194, passes
-   op ThreadPoolForeg wakes/s: k 38, half-width 0.0184, passes
-   op ThreadPoolForeg gap mean (ms): k 38, half-width 0.0186, passes
-   op ThreadPoolForeg run mean (ms): k 38, half-width 0.0209, passes
-   op renderer/Compositor wakes/s: k 38, half-width 0.0098, passes
-   op renderer/Compositor gap mean (ms): k 38, half-width 0.01, passes
-   op renderer/Compositor run mean (ms): k 38, half-width 0.0124, passes
-   op renderer/chrome wakes/s: k 38, half-width 0.0134, passes
-   op renderer/chrome gap mean (ms): k 38, half-width 0.0134, passes
-   op renderer/chrome run mean (ms): k 38, half-width 0.0203, passes
-   op utility/Chrome_ChildIOT wakes/s: k 38, half-width 0.0157, passes
-   op utility/Chrome_ChildIOT gap mean (ms): k 38, half-width 0.0159, passes
-   op utility/Chrome_ChildIOT run mean (ms): k 38, half-width 0.0164, passes
-   op CompositorTileW wakes/s: k 38, half-width 0.007, passes
-   op CompositorTileW gap mean (ms): k 38, half-width 0.0071, passes
-   op CompositorTileW run mean (ms): k 38, half-width 0.0215, passes
-   op residual wakes/s: k 38, half-width 0.0144, passes
-   op residual gap mean (ms): k 38, half-width 0.0147, passes
-   op residual run mean (ms): k 38, half-width 0.0126, passes
+   idle renderer/Compositor [event] wakes/s: k 38, half-width 0.1587, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle renderer/Compositor [event] gap mean (ms): k 38, half-width 0.1587, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle renderer/Compositor [event] run mean (ms): k 38, half-width 0.0539, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle gpu/VizCompositorTh [event] wakes/s: k 38, half-width 0.1468, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle gpu/VizCompositorTh [event] gap mean (ms): k 38, half-width 0.1468, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle gpu/VizCompositorTh [event] run mean (ms): k 38, half-width 0.069, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle utility/ThreadPoolForeg [event] wakes/s: k 38, half-width 0.1195, carried with its half-width, a sparse component (9.8 D27)
+   idle utility/ThreadPoolForeg [event] gap mean (ms): k 38, half-width 0.1195, carried with its half-width, a sparse component (9.8 D27)
+   idle utility/ThreadPoolForeg [event] run mean (ms): k 38, half-width 0.0417, passes
+   idle residual wakes/s: k 38, half-width 0.0205, passes
+   idle residual gap mean (ms): k 38, half-width 0.0205, passes
+   idle residual run mean (ms): k 38, half-width 0.0222, passes
+   op Chrome_IOThread wakes/s: k 38, half-width 0.0213, passes
+   op Chrome_IOThread gap mean (ms): k 38, half-width 0.0216, passes
+   op Chrome_IOThread run mean (ms): k 38, half-width 0.0228, passes
+   op chrome wakes/s: k 38, half-width 0.021, passes
+   op chrome gap mean (ms): k 38, half-width 0.0216, passes
+   op chrome run mean (ms): k 38, half-width 0.0394, passes
+   op gpu/VizCompositorTh wakes/s: k 38, half-width 0.0164, passes
+   op gpu/VizCompositorTh gap mean (ms): k 38, half-width 0.0166, passes
+   op gpu/VizCompositorTh run mean (ms): k 38, half-width 0.0319, passes
+   op gpu/Chrome_ChildIOT wakes/s: k 38, half-width 0.0188, passes
+   op gpu/Chrome_ChildIOT gap mean (ms): k 38, half-width 0.0191, passes
+   op gpu/Chrome_ChildIOT run mean (ms): k 38, half-width 0.0254, passes
+   op CompositorTileW wakes/s: k 38, half-width 0.0185, passes
+   op CompositorTileW gap mean (ms): k 38, half-width 0.019, passes
+   op CompositorTileW run mean (ms): k 38, half-width 0.044, passes
+   op renderer/Chrome_ChildIOT wakes/s: k 38, half-width 0.0511, at the window limit, reported (D46), needed 40
+   op renderer/Chrome_ChildIOT gap mean (ms): k 38, half-width 0.0514, at the window limit, reported (D46), needed 41
+   op renderer/Chrome_ChildIOT run mean (ms): k 38, half-width 0.022, passes
+   op renderer/ThreadPoolForeg wakes/s: k 38, half-width 0.0637, at the window limit, reported (D46), needed 61
+   op renderer/ThreadPoolForeg gap mean (ms): k 38, half-width 0.0637, at the window limit, reported (D46), needed 61
+   op renderer/ThreadPoolForeg run mean (ms): k 38, half-width 0.0482, passes
+   op ThreadPoolForeg wakes/s: k 38, half-width 0.0502, at the window limit, reported (D46), needed 39
+   op ThreadPoolForeg gap mean (ms): k 38, half-width 0.0507, at the window limit, reported (D46), needed 40
+   op ThreadPoolForeg run mean (ms): k 38, half-width 0.0349, passes
+   op renderer/chrome wakes/s: k 38, half-width 0.0287, passes
+   op renderer/chrome gap mean (ms): k 38, half-width 0.0286, passes
+   op renderer/chrome run mean (ms): k 38, half-width 0.058, at the window limit, reported (D46), needed 51
+   op renderer/Compositor wakes/s: k 38, half-width 0.0302, passes
+   op renderer/Compositor gap mean (ms): k 38, half-width 0.0303, passes
+   op renderer/Compositor run mean (ms): k 38, half-width 0.0366, passes
+   op Chrome_IOThread [event] wakes/s: k 38, half-width 0.0088, passes
+   op Chrome_IOThread [event] gap mean (ms): k 38, half-width 0.0089, passes
+   op Chrome_IOThread [event] run mean (ms): k 38, half-width 0.0138, passes
+   op renderer/Chrome_ChildIOT [event] wakes/s: k 38, half-width 0.0088, passes
+   op renderer/Chrome_ChildIOT [event] gap mean (ms): k 38, half-width 0.0088, passes
+   op renderer/Chrome_ChildIOT [event] run mean (ms): k 38, half-width 0.0081, passes
+   op renderer/ThreadPoolForeg [event] wakes/s: k 38, half-width 0.0144, passes
+   op renderer/ThreadPoolForeg [event] gap mean (ms): k 38, half-width 0.0146, passes
+   op renderer/ThreadPoolForeg [event] run mean (ms): k 38, half-width 0.0169, passes
+   op chrome [event] wakes/s: k 38, half-width 0.0082, passes
+   op chrome [event] gap mean (ms): k 38, half-width 0.0083, passes
+   op chrome [event] run mean (ms): k 38, half-width 0.0186, passes
+   op ThreadPoolForeg [event] wakes/s: k 38, half-width 0.0246, passes
+   op ThreadPoolForeg [event] gap mean (ms): k 38, half-width 0.025, passes
+   op ThreadPoolForeg [event] run mean (ms): k 38, half-width 0.0256, passes
+   op renderer/Compositor [event] wakes/s: k 38, half-width 0.0099, passes
+   op renderer/Compositor [event] gap mean (ms): k 38, half-width 0.01, passes
+   op renderer/Compositor [event] run mean (ms): k 38, half-width 0.0107, passes
+   op gpu/Chrome_ChildIOT [event] wakes/s: k 38, half-width 0.0074, passes
+   op gpu/Chrome_ChildIOT [event] gap mean (ms): k 38, half-width 0.0075, passes
+   op gpu/Chrome_ChildIOT [event] run mean (ms): k 38, half-width 0.0177, passes
+   op gpu/VizCompositorTh [event] wakes/s: k 38, half-width 0.0074, passes
+   op gpu/VizCompositorTh [event] gap mean (ms): k 38, half-width 0.0073, passes
+   op gpu/VizCompositorTh [event] run mean (ms): k 38, half-width 0.0328, passes
+   op utility/Chrome_ChildIOT [event] wakes/s: k 38, half-width 0.0143, passes
+   op utility/Chrome_ChildIOT [event] gap mean (ms): k 38, half-width 0.0145, passes
+   op utility/Chrome_ChildIOT [event] run mean (ms): k 38, half-width 0.0281, passes
+   op renderer/chrome [event] wakes/s: k 38, half-width 0.0126, passes
+   op renderer/chrome [event] gap mean (ms): k 38, half-width 0.0126, passes
+   op renderer/chrome [event] run mean (ms): k 38, half-width 0.0192, passes
+   op utility/ThreadPoolForeg [event] wakes/s: k 38, half-width 0.0697, at the window limit, reported (D46), needed 72
+   op utility/ThreadPoolForeg [event] gap mean (ms): k 38, half-width 0.0705, at the window limit, reported (D46), needed 74
+   op utility/ThreadPoolForeg [event] run mean (ms): k 38, half-width 0.0194, passes
+   op residual wakes/s: k 38, half-width 0.153, at the window limit, reported (D46), needed over 200
+   op residual gap mean (ms): k 38, half-width 0.1542, at the window limit, reported (D46), needed over 200
+   op residual run mean (ms): k 38, half-width 0.0518, at the window limit, reported (D46), needed 41
+   op residual [event] wakes/s: k 38, half-width 0.0086, passes
+   op residual [event] gap mean (ms): k 38, half-width 0.0087, passes
+   op residual [event] run mean (ms): k 38, half-width 0.0119, passes
    input_run mean, SWELL-KW (ms): k 38, half-width 0.059, at the window limit, reported (D46), needed 52
    input_run mean, 136M (ms): k 38, half-width 0.0337, passes
    operation duration mean (ms): k 38, half-width 0.01, passes

@@ -14,19 +14,19 @@ Left the components by cause (D27), wakes over the pooled repeats: outside — p
 
 ## pipewire
 
-Components ['wireplumber/gmain'] cover 1.0 of 0.009 wakes/s; residual False; sporadic []
+Components ['wireplumber/gmain', 'wireplumber/gmain [event]'] cover 1.0 of 0.006 wakes/s; residual False; sporadic []
 
 Left the components by cause (D27), wakes over the pooled repeats: outside — hosted-compute-agent.service (the harness) 8657; outside — job phpsessionclean (php-common) 94; outside — job podman (podman) 8; event — job anacron (anacron) 32; event — job sysstat-daily-sample (sysstat) 8; event — job sysstat-summary (sysstat) 6; event — job motd-news (base-files) 4; event — job fstrim (util-linux) 1
 
 ## systemd
 
-Components ['pid1/systemd'] cover 1.0 of 0.07 wakes/s; residual False; sporadic []
+Components ['pid1/systemd [event]'] cover 0.0 of 0.0 wakes/s; residual False; sporadic [{'comm': 'pid1/systemd', 'repeats': [58, 60, 61, 77, 87, 88], 'wakes_per_s': 0.0004}]
 
 Left the components by cause (D27), wakes over the pooled repeats: outside — php8.3-fpm.service (php8.3-fpm) 4425; outside — systemd-networkd.service (systemd) 204; outside — job podman (podman) 26; outside — job phpsessionclean (php-common) 24; event — anacron.service (anacron) 14; event — job anacron (anacron) 12; event — job sysstat-summary (sysstat) 4; event — job man-db (man-db) 4; event — job motd-news (base-files) 2; event — job fstrim (util-linux) 1
 
 ## dbus-daemon
 
-Components ['system-bus/dbus-daemon'] cover 1.0 of 0.014 wakes/s; residual False; sporadic []
+Components ['system-bus/dbus-daemon [event]'] cover 0.0 of 0.0 wakes/s; residual False; sporadic [{'comm': 'system-bus/dbus-daemon', 'repeats': [58, 60, 77, 87, 88], 'wakes_per_s': 0.0002}]
 
 Left the components by cause (D27), wakes over the pooled repeats: outside — php8.3-fpm.service (php8.3-fpm) 4989; outside — job phpsessionclean (php-common) 149; outside — job podman (podman) 92; outside — systemd-networkd.service (systemd) 6; event — job sysstat-summary (sysstat) 22; event — anacron.service (anacron) 13; event — job anacron (anacron) 11; event — job motd-news (base-files) 10; event — job fstrim (util-linux) 7; event — job man-db (man-db) 7
 
@@ -41,13 +41,16 @@ Left the components by cause (D27), wakes over the pooled repeats: outside — p
 | gnome-shell gnome-shell/gnome-shell wakes/s | 24 | 0.0347 | ±1.5% | yes |
 | gnome-shell gnome-shell/gnome-shell gap mean (ms) | 24 | 28780.8556 | ±1.5% | yes |
 | gnome-shell gnome-shell/gnome-shell run mean (ms) | 24 | 5.6996 | ±2.8% | yes |
-| pipewire wireplumber/gmain wakes/s | 24 | 0.0093 | ±4.5% | yes |
-| pipewire wireplumber/gmain gap mean (ms) | 24 | 107462.8465 | ±4.5% | yes |
-| pipewire wireplumber/gmain run mean (ms) | 24 | 0.035 | ±2.8% | yes |
-| systemd pid1/systemd wakes/s | 24 | 0.0702 | ±1.9% | yes |
-| systemd pid1/systemd gap mean (ms) | 24 | 14238.6501 | ±1.9% | yes |
-| systemd pid1/systemd run mean (ms) | 24 | 0.171 | ±7.8% | carried (D29) |
-| dbus-daemon system-bus/dbus-daemon wakes/s | 24 | 0.014 | ±11.1% | carried (D29) |
-| dbus-daemon system-bus/dbus-daemon gap mean (ms) | 24 | 71641.8977 | ±11.1% | carried (D29) |
-| dbus-daemon system-bus/dbus-daemon run mean (ms) | 24 | 0.121 | ±10.7% | carried (D29) |
+| pipewire wireplumber/gmain wakes/s | 24 | 0.006 | ±8.1% | carried (D29) |
+| pipewire wireplumber/gmain gap mean (ms) | 24 | 165517.4877 | ±8.1% | carried (D29) |
+| pipewire wireplumber/gmain run mean (ms) | 24 | 0.0341 | ±3.2% | yes |
+| pipewire wireplumber/gmain [event] wakes/s | 24 | 0.0033 | ±3.2% | yes |
+| pipewire wireplumber/gmain [event] gap mean (ms) | 24 | 306383.4346 | ±3.2% | yes |
+| pipewire wireplumber/gmain [event] run mean (ms) | 24 | 0.0369 | ±3.5% | yes |
+| systemd pid1/systemd [event] wakes/s | 24 | 0.0698 | ±1.6% | yes |
+| systemd pid1/systemd [event] gap mean (ms) | 24 | 14318.8811 | ±1.6% | yes |
+| systemd pid1/systemd [event] run mean (ms) | 24 | 0.1652 | ±6.6% | carried (D29) |
+| dbus-daemon system-bus/dbus-daemon [event] wakes/s | 24 | 0.0137 | ±10.3% | carried (D29) |
+| dbus-daemon system-bus/dbus-daemon [event] gap mean (ms) | 24 | 72850.0241 | ±10.3% | carried (D29) |
+| dbus-daemon system-bus/dbus-daemon [event] run mean (ms) | 24 | 0.1162 | ±9.8% | carried (D29) |
 

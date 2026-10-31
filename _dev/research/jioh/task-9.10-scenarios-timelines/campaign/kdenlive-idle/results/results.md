@@ -13,3 +13,7 @@ The campaigns of `../method.md` (changelog D146, D147), on the AMD EPYC 7763: `m
 
 - **Runs.** Repeats 1–5 (37272194466; index 1 gated once, landing in 37272498504), every one valid by the launch campaign's checks (`pool_runs.py`).
 - **The launch phase** runs from the exec to the end of the 240 s settle, 240.637–240.645 s; its CPU 2,136.6–2,302.3 ms and its wakes 2,141–2,196 per repeat, the first 10 s at 219.8 ms/s on average. The 30 s phases of `meas-ci:desktop:2026-10-04b` held 2,096–2,259 ms: the launch's CPU falls almost wholly in its first seconds.
+
+## 2026-10-31 — the pooled record re-pooled by wake origin
+
+The pooled record beside this page is re-pooled from the same landings with each wake split by the origin of its wake chain, every component into its timer-caused part and the part of other origins (`_dev/docs/spec/jioh/timer-wakes-by-origin.md`, decisions 8 and 10; `_dev/research/jioh/2026-10-31-wake-origins/`). The figures above read the record before the split; the entry the library carries is the split record's.

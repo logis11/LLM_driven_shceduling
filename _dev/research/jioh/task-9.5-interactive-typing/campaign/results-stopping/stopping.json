@@ -49,7 +49,7 @@
    "widest": {
     "value": "idle renderer/chrome run mean (ms)",
     "k": 38,
-    "cv": 0.133,
+    "cv": 0.1329,
     "half_width": 0.0437
    }
   },
@@ -62,19 +62,19 @@
    "widest": {
     "value": "idle WebExtensions/StreamTrans run mean (ms)",
     "k": 77,
-    "cv": 0.2093,
-    "half_width": 0.0475
+    "cv": 0.2114,
+    "half_width": 0.048
    },
    "simulated": {
     "normal": {
-     "mean_bias": 0.0019794591943219516,
-     "coverage": 0.938,
-     "mean_k": 68.175
+     "mean_bias": 0.001929379962741796,
+     "coverage": 0.937,
+     "mean_k": 69.5235
     },
     "lognormal": {
-     "mean_bias": -0.00037515922001155034,
-     "coverage": 0.93175,
-     "mean_k": 67.79125
+     "mean_bias": -0.00036584524962235686,
+     "coverage": 0.941,
+     "mean_k": 69.344
     }
    }
   },
@@ -85,21 +85,21 @@
    "repeats": 5,
    "stopped_at_window_limit": false,
    "widest": {
-    "value": "op script-fu run mean (ms)",
+    "value": "driven gimp run mean (ms)",
     "k": 5,
-    "cv": 0.0354,
-    "half_width": 0.044
+    "cv": 0.0401,
+    "half_width": 0.0498
    },
    "simulated": {
     "normal": {
-     "mean_bias": -7.89738170738129e-05,
-     "coverage": 0.9475,
-     "mean_k": 5.39125
+     "mean_bias": -3.474772647963837e-05,
+     "coverage": 0.94775,
+     "mean_k": 5.6965
     },
     "lognormal": {
-     "mean_bias": -0.00016623281978702813,
-     "coverage": 0.94775,
-     "mean_k": 5.3945
+     "mean_bias": -4.977075315025151e-05,
+     "coverage": 0.94375,
+     "mean_k": 5.71575
     }
    }
   },
@@ -113,22 +113,22 @@
    "repeats": 20,
    "stopped_at_window_limit": false,
    "widest": {
-    "value": "driven kdenlive run mean (ms)",
+    "value": "driven kdenlive wakes/s",
     "k": 20,
-    "cv": 0.1068,
-    "half_width": 0.05,
+    "cv": 0.0793,
+    "half_width": 0.0371,
     "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine"
    },
    "simulated": {
     "normal": {
-     "mean_bias": 0.0013614543134995492,
-     "coverage": 0.9135,
-     "mean_k": 18.33575
+     "mean_bias": 0.0010912676359578987,
+     "coverage": 0.929,
+     "mean_k": 11.296
     },
     "lognormal": {
-     "mean_bias": -0.0008484728973040176,
-     "coverage": 0.914,
-     "mean_k": 18.36375
+     "mean_bias": -0.0007482988617422211,
+     "coverage": 0.92075,
+     "mean_k": 11.34725
     }
    }
   },

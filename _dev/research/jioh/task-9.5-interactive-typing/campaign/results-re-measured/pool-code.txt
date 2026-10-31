@@ -9,8 +9,8 @@ code: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
    idle gpu/VizCompositorTh wakes/s: k 44, half-width 0.0228, passes
    idle gpu/VizCompositorTh gap mean (ms): k 44, half-width 0.0228, passes
    idle gpu/VizCompositorTh run mean (ms): k 44, half-width 0.0199, passes
-   idle renderer/Compositor wakes/s: k 44, half-width 0.0137, passes
-   idle renderer/Compositor gap mean (ms): k 44, half-width 0.0137, passes
+   idle renderer/Compositor wakes/s: k 44, half-width 0.0138, passes
+   idle renderer/Compositor gap mean (ms): k 44, half-width 0.0138, passes
    idle renderer/Compositor run mean (ms): k 44, half-width 0.0248, passes
    idle gpu/Chrome_ChildIOT wakes/s: k 44, half-width 0.0219, passes
    idle gpu/Chrome_ChildIOT gap mean (ms): k 44, half-width 0.0219, passes
@@ -20,19 +20,46 @@ code: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
    idle renderer/code run mean (ms): k 44, half-width 0.0224, passes
    idle utility/code wakes/s: k 44, half-width 0.0364, passes
    idle utility/code gap mean (ms): k 44, half-width 0.0364, passes
-   idle utility/code run mean (ms): k 44, half-width 0.0229, passes
+   idle utility/code run mean (ms): k 44, half-width 0.0228, passes
    idle utility/libuv-worker wakes/s: k 44, half-width 0.0563, carried with its half-width, its spread between sessions (D57)
    idle utility/libuv-worker gap mean (ms): k 44, half-width 0.0563, carried with its half-width, its spread between sessions (D57)
-   idle utility/libuv-worker run mean (ms): k 44, half-width 0.0236, passes
-   idle renderer/ThreadPoolForeg wakes/s: k 44, half-width 0.0331, passes
-   idle renderer/ThreadPoolForeg gap mean (ms): k 44, half-width 0.0331, passes
-   idle renderer/ThreadPoolForeg run mean (ms): k 44, half-width 0.037, passes
-   idle code wakes/s: k 44, half-width 0.0019, passes
-   idle code gap mean (ms): k 44, half-width 0.0019, passes
-   idle code run mean (ms): k 44, half-width 0.0124, passes
-   idle residual wakes/s: k 44, half-width 0.0086, passes
-   idle residual gap mean (ms): k 44, half-width 0.0086, passes
-   idle residual run mean (ms): k 44, half-width 0.016, passes
+   idle utility/libuv-worker run mean (ms): k 44, half-width 0.0237, passes
+   idle renderer/ThreadPoolForeg wakes/s: k 44, half-width 0.0333, passes
+   idle renderer/ThreadPoolForeg gap mean (ms): k 44, half-width 0.0333, passes
+   idle renderer/ThreadPoolForeg run mean (ms): k 44, half-width 0.0371, passes
+   idle code wakes/s: k 44, half-width 0.0016, passes
+   idle code gap mean (ms): k 44, half-width 0.0016, passes
+   idle code run mean (ms): k 44, half-width 0.0128, passes
+   idle code [event] wakes/s: k 44, half-width 0.0202, passes
+   idle code [event] gap mean (ms): k 44, half-width 0.0202, passes
+   idle code [event] run mean (ms): k 44, half-width 0.0215, passes
+   idle libuv-worker [event] wakes/s: k 44, half-width 0.0234, passes
+   idle libuv-worker [event] gap mean (ms): k 44, half-width 0.0234, passes
+   idle libuv-worker [event] run mean (ms): k 44, half-width 0.0243, passes
+   idle renderer/code [event] wakes/s: k 44, half-width 0.0705, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle renderer/code [event] gap mean (ms): k 44, half-width 0.0705, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle renderer/code [event] run mean (ms): k 44, half-width 0.0499, passes
+   idle renderer/Chrome_ChildIOT [event] wakes/s: k 44, half-width 0.0218, passes
+   idle renderer/Chrome_ChildIOT [event] gap mean (ms): k 44, half-width 0.0218, passes
+   idle renderer/Chrome_ChildIOT [event] run mean (ms): k 44, half-width 0.0184, passes
+   idle gpu/VizCompositorTh [event] wakes/s: k 44, half-width 0.0981, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle gpu/VizCompositorTh [event] gap mean (ms): k 44, half-width 0.0981, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle gpu/VizCompositorTh [event] run mean (ms): k 44, half-width 0.1888, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle renderer/Compositor [event] wakes/s: k 44, half-width 0.1276, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle renderer/Compositor [event] gap mean (ms): k 44, half-width 0.1276, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle renderer/Compositor [event] run mean (ms): k 44, half-width 0.0723, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle gpu/Chrome_ChildIOT [event] wakes/s: k 44, half-width 0.1033, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle gpu/Chrome_ChildIOT [event] gap mean (ms): k 44, half-width 0.1033, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle gpu/Chrome_ChildIOT [event] run mean (ms): k 44, half-width 0.043, passes
+   idle Chrome_IOThread [event] wakes/s: k 44, half-width 0.0373, passes
+   idle Chrome_IOThread [event] gap mean (ms): k 44, half-width 0.0373, passes
+   idle Chrome_IOThread [event] run mean (ms): k 44, half-width 0.0322, passes
+   idle residual wakes/s: k 44, half-width 0.0089, passes
+   idle residual gap mean (ms): k 44, half-width 0.0089, passes
+   idle residual run mean (ms): k 44, half-width 0.0167, passes
+   idle residual [event] wakes/s: k 44, half-width 0.1054, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle residual [event] gap mean (ms): k 44, half-width 0.1054, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
+   idle residual [event] run mean (ms): k 44, half-width 0.1348, carried with its half-width, its spread between sessions and in part within one run (D57, 9.8 D21)
    input_run mean, SWELL-KW (ms): k 43, half-width 0.0484, passes
    input_run mean, 136M (ms): k 43, half-width 0.0301, passes
    phases ['idle', 'driven', 'driven-alt']; pooled record _dev/research/jioh/task-9.5-interactive-typing/campaign/results-re-measured/pool-code.json

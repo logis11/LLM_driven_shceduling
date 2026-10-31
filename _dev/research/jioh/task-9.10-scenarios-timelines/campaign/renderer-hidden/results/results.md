@@ -45,3 +45,7 @@ The campaign of `../method.md` (changelog D152, D155, D156), `meas-ci:desktop:20
 | steady residual wakes/s | 5 | 0.0096 | ±20.2% | no |
 | steady residual gap mean (ms) | 5 | 104348.1739 | ±20.2% | no |
 | steady residual run mean (ms) | 5 | 0.0346 | ±61.3% | no |
+
+## 2026-10-31 — the pooled record re-pooled by wake origin
+
+The pooled record beside this page is re-pooled from the same landings with each wake split by the origin of its wake chain, every component into its timer-caused part and the part of other origins (`_dev/docs/spec/jioh/timer-wakes-by-origin.md`, decisions 8, 10 and 13; `_dev/research/jioh/2026-10-31-wake-origins/`). The figures above read the record before the split; the entry the library carries is the split record's.

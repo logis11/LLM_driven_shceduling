@@ -15,22 +15,22 @@ Left out of this pool: repeat 42@36126168885 — D66: two pushes ten seconds apa
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `gpu/VizCompositorTh` | 1–1 | 16.5–25.1 | 8.12 (2.4–12.5) | 174.26 | 0.042 | 0.101 | 2.412 | 712066 |
-| `renderer/code` | 1–1 | 16.3–21.3 | 3.28 (0.4–4.4) | 208.56 | 0.045 | 1.214 | 1.597 | 601757 |
-| `renderer/Compositor` | 1–1 | 18.3–24.8 | 2.90 (2.2–5.1) | 180.09 | 0.052 | 0.200 | 0.403 | 702475 |
-| `utility/code` | 10–10 | 8.7–14.1 | 0.09 (0.1–1.8) | 340.83 | 0.022 | 0.114 | 0.310 | 352948 |
-| `gpu/Chrome_ChildIOT` | 1–1 | 14.5–21.8 | 7.69 (2.8–13.8) | 222.16 | 0.020 | 0.043 | 0.072 | 621253 |
+| `gpu/VizCompositorTh` | 1–1 | 16.4–25.1 | 8.12 (2.4–12.5) | 174.88 | 0.042 | 0.101 | 2.412 | 710970 |
+| `renderer/code` | 1–1 | 16.3–21.3 | 3.38 (0.4–4.4) | 209.53 | 0.045 | 1.215 | 1.597 | 599818 |
+| `renderer/Compositor` | 1–1 | 18.2–24.7 | 2.90 (2.2–5.1) | 180.42 | 0.052 | 0.200 | 0.403 | 701396 |
+| `utility/code` | 10–10 | 8.7–14.1 | 0.09 (0.1–1.8) | 341.41 | 0.022 | 0.115 | 0.310 | 352385 |
+| `gpu/Chrome_ChildIOT` | 1–1 | 14.5–21.8 | 7.69 (2.8–13.8) | 222.34 | 0.020 | 0.043 | 0.072 | 620373 |
 
 ### driven: CPU share 0.1423–0.4491, wakes/s 446.6–1069.1
 - processes by role (repeat 1): renderer: 1 pid(s), 349.09 wakes/s, CPU 0.0941; main: 6 pid(s), 110.05 wakes/s, CPU 0.0665; gpu: 1 pid(s), 105.81 wakes/s, CPU 0.065; utility: 5 pid(s), 239.38 wakes/s, CPU 0.0437
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `gpu/VizCompositorTh` | 1–1 | 34.8–65.3 | 10.34 (9.6–11.1) | 31.63 | 0.043 | 6.244 | 15.349 | 1237945 |
-| `renderer/code` | 1–1 | 53.1–116.8 | 3.36 (3.2–3.7) | 24.48 | 0.048 | 1.508 | 11.197 | 2106315 |
-| `code` | 6–6 | 23.9–79.9 | 1.35 (1.2–1.6) | 46.68 | 0.064 | 1.029 | 14.964 | 1070973 |
-| `utility/code` | 10–10 | 94.5–207.8 | 0.04 (0.0–0.1) | 12.73 | 0.012 | 0.230 | 3.846 | 3573932 |
-| `renderer/ThreadPoolForeg` | 3–6 | 30.7–65.9 | 0.10 (0.1–0.2) | 45.67 | 0.009 | 0.317 | 8.684 | 1145570 |
+| `code` | 6–6 | 12.5–31.5 | 5.98 (4.3–7.2) | 100.06 | 0.130 | 7.528 | 16.268 | 507731 |
+| `gpu/VizCompositorTh` | 1–1 | 31.3–51.0 | 11.09 (9.9–12.1) | 46.04 | 0.041 | 5.367 | 9.357 | 1064662 |
+| `renderer/code` | 1–1 | 46.2–88.7 | 3.70 (3.5–4.0) | 32.59 | 0.043 | 1.062 | 5.332 | 1755506 |
+| `renderer/code [event]` | 1–1 | 6.5–28.2 | 3.42 (3.0–4.0) | 80.41 | 0.128 | 7.698 | 16.225 | 350809 |
+| `gpu/VizCompositorTh [event]` | 1–1 | 3.2–14.3 | 13.32 (11.5–14.4) | 196.12 | 0.059 | 9.784 | 17.519 | 173283 |
 
 Per input ([1569, 1619, 1500, 996, 886, 626, 858, 692, 746, 738, 1395, 787, 720, 1456, 1823, 1832, 724, 621, 1344, 1648, 791, 1930, 2090, 2074, 1034, 1895, 1632, 1331, 1764, 1737, 1538, 1825, 2898, 3331, 1844, 726, 685, 738, 1271, 1928, 2064, 1135, 1472] events per repeat):
 
@@ -46,11 +46,11 @@ Per input ([1569, 1619, 1500, 996, 886, 626, 858, 692, 746, 738, 1395, 787, 720,
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `gpu/VizCompositorTh` | 1–1 | 49.7–70.2 | 10.65 (10.1–11.4) | 26.82 | 0.043 | 6.706 | 15.588 | 1654310 |
-| `renderer/code` | 1–1 | 87.6–140.4 | 3.15 (3.0–3.4) | 19.40 | 0.047 | 1.529 | 10.870 | 3178619 |
-| `code` | 6–6 | 34.5–78.0 | 1.87 (1.5–2.3) | 47.08 | 0.069 | 3.906 | 15.016 | 1504516 |
-| `utility/code` | 10–10 | 152.4–264.5 | 0.02 (0.0–0.0) | 10.66 | 0.012 | 0.215 | 3.753 | 5753672 |
-| `renderer/ThreadPoolForeg` | 3–4 | 23.0–48.4 | 0.27 (0.2–0.3) | 88.04 | 0.011 | 0.348 | 7.869 | 976045 |
+| `code` | 6–6 | 19.6–32.5 | 8.95 (7.1–11.2) | 88.93 | 0.138 | 12.600 | 16.325 | 703212 |
+| `gpu/VizCompositorTh` | 1–1 | 45.0–57.5 | 11.72 (11.1–13.1) | 42.03 | 0.041 | 5.536 | 9.522 | 1376367 |
+| `renderer/code` | 1–1 | 76.5–110.5 | 3.43 (3.3–3.7) | 24.80 | 0.042 | 1.037 | 5.190 | 2590037 |
+| `gpu/VizCompositorTh [event]` | 1–1 | 4.7–14.8 | 13.09 (12.1–14.0) | 204.42 | 0.056 | 9.614 | 17.456 | 277943 |
+| `utility/code` | 10–10 | 119.3–205.6 | 0.02 (0.0–0.0) | 10.80 | 0.012 | 0.200 | 3.876 | 4486971 |
 
 Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366, 2515, 1961, 1692, 1260, 1997, 1703, 2229, 1697, 2131, 2314, 2182, 3053, 2037, 2249, 1320, 2354, 1664, 2277, 2301, 2660, 2134, 884, 2178, 2312, 2089, 1958, 2597, 2288, 1176, 1480, 2148, 2423, 1612, 2356, 2177] events per repeat):
 
@@ -79,9 +79,9 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `StreamTrans` | 14–18 | 0.1–0.1 | 4.35 (3.3–20.6) | 30015.39 | 0.075 | 27.207 | 28.435 | 400 |
+| `StreamTrans` | 14–18 | 0.1–0.1 | 4.36 (3.3–20.6) | 30015.40 | 0.076 | 27.211 | 28.445 | 397 |
 | `WebExtensions/StreamTrans` | 9–9 | 0.0–0.1 | 29989.32 (0.1–29990.0) | 30010.41 | 0.112 | 10.058 | 10.491 | 240 |
-| `thunderbird-bin` | 1–1 | 0.3–0.5 | 0.19 (0.1–0.9) | 10000.25 | 0.032 | 0.915 | 3.577 | 1987 |
+| `thunderbird-bin` | 1–1 | 0.3–0.5 | 0.19 (0.1–0.9) | 10000.25 | 0.032 | 0.915 | 3.577 | 1985 |
 | `WebExtensions/WebExtensions` | 1–1 | 0.2–0.2 | 0.13 (0.1–0.3) | 19971.56 | 0.027 | 0.221 | 0.977 | 1025 |
 | `IndexedDB IO` | 10–10 | 0.1–0.1 | 2003.03 (2000.6–10000.4) | 30000.26 | 0.080 | 0.638 | 0.719 | 499 |
 
@@ -90,11 +90,11 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `thunderbird-bin` | 1–1 | 5.0–17.5 | 1.82 (1.2–2.2) | 138.50 | 0.079 | 1.335 | 2.160 | 60917 |
-| `Compositor` | 1–1 | 33.1–131.0 | 0.02 (0.0–0.0) | 16.13 | 0.008 | 0.012 | 0.053 | 434242 |
-| `Renderer` | 1–1 | 1.6–6.3 | 17.46 (16.5–27.8) | 208.74 | 0.043 | 0.605 | 0.944 | 21522 |
-| `Softwar~cThread` | 1–1 | 6.4–24.7 | 17.16 (17.2–17.2) | 17.24 | 0.051 | 0.072 | 0.096 | 83310 |
-| `StreamTrans` | 18–22 | 0.1–0.1 | 5.59 (2.9–21.1) | 30015.71 | 0.069 | 27.945 | 30.069 | 564 |
+| `thunderbird-bin [event]` | 1–1 | 1.7–7.6 | 2.90 (2.5–3.2) | 165.64 | 0.118 | 1.941 | 2.206 | 25742 |
+| `thunderbird-bin` | 1–1 | 3.3–9.9 | 0.91 (0.8–1.0) | 186.72 | 0.045 | 0.895 | 1.347 | 35175 |
+| `Softwar~cThread` | 1–1 | 5.8–21.7 | 17.17 (17.2–17.2) | 17.25 | 0.054 | 0.074 | 0.098 | 72401 |
+| `Compositor` | 1–1 | 30.2–117.2 | 0.02 (0.0–0.0) | 17.09 | 0.008 | 0.011 | 0.036 | 388403 |
+| `StreamTrans` | 18–22 | 0.1–0.1 | 5.59 (2.9–21.3) | 30015.83 | 0.068 | 27.745 | 29.910 | 546 |
 
 Per input ([604, 1060, 1209, 253, 572, 785, 1046, 1070] events per repeat):
 
@@ -110,11 +110,11 @@ Per input ([604, 1060, 1209, 253, 572, 785, 1046, 1070] events per repeat):
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `thunderbird-bin` | 1–2 | 22.8–30.6 | 2.59 (2.3–2.7) | 133.50 | 0.083 | 1.667 | 2.332 | 128533 |
-| `Compositor` | 1–1 | 193.7–245.8 | 0.02 (0.0–0.0) | 16.14 | 0.008 | 0.012 | 0.051 | 1039933 |
-| `Softwar~cThread` | 1–1 | 37.6–46.3 | 17.16 (17.2–17.2) | 17.24 | 0.052 | 0.072 | 0.096 | 197046 |
-| `Renderer` | 1–1 | 8.5–11.1 | 44.16 (29.9–50.2) | 199.24 | 0.042 | 0.565 | 1.066 | 47111 |
-| `WRRende~ckend#1` | 1–1 | 4.3–6.5 | 112.40 (94.7–143.9) | 449.13 | 0.261 | 0.327 | 0.412 | 25509 |
+| `thunderbird-bin [event]` | 1–2 | 11.2–15.7 | 2.79 (2.7–3.0) | 185.70 | 0.119 | 2.062 | 2.397 | 65578 |
+| `thunderbird-bin` | 1–2 | 11.6–15.2 | 6.27 (1.0–14.6) | 188.16 | 0.047 | 0.872 | 1.343 | 62955 |
+| `Softwar~cThread` | 1–1 | 31.6–38.8 | 17.17 (17.2–17.2) | 17.25 | 0.056 | 0.074 | 0.097 | 165853 |
+| `Compositor` | 1–1 | 174.4–218.4 | 0.02 (0.0–0.0) | 17.09 | 0.008 | 0.011 | 0.032 | 925265 |
+| `Renderer [event]` | 1–1 | 3.5–4.8 | 0.82 (0.8–1.8) | 591.65 | 0.057 | 0.626 | 1.178 | 19607 |
 
 Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366] events per repeat):
 
@@ -131,11 +131,11 @@ Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366] events per repeat):
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `thunderbird-bin` | 1–1 | 432.5–498.9 | 0.23 (0.2–0.3) | 2.64 | 0.132 | 1.139 | 4.864 | 281022 |
-| `Renderer` | 1–2 | 119.3–124.6 | 0.47 (0.4–0.5) | 15.70 | 0.079 | 0.263 | 1.280 | 72209 |
-| `Socket Thread` | 1–1 | 721.5–745.1 | 0.06 (0.1–0.1) | 0.73 | 0.011 | 0.038 | 0.110 | 434893 |
-| `WRRende~ckend#0` | 1–1 | 26.4–29.3 | 17.07 (17.0–17.2) | 33.61 | 0.287 | 0.566 | 1.341 | 16613 |
-| `StreamTrans` | 11–17 | 48.0–61.8 | 0.02 (0.0–0.0) | 0.79 | 0.010 | 0.439 | 0.521 | 32975 |
+| `thunderbird-bin [event]` | 1–1 | 374.7–426.6 | 0.18 (0.2–0.2) | 1.61 | 0.125 | 1.066 | 4.969 | 240019 |
+| `thunderbird-bin` | 1–1 | 57.8–74.9 | 0.70 (0.7–0.8) | 30.92 | 0.149 | 1.456 | 4.109 | 41003 |
+| `Socket Thread [event]` | 1–1 | 661.2–710.0 | 0.06 (0.1–0.1) | 0.73 | 0.011 | 0.038 | 0.116 | 409821 |
+| `Renderer [event]` | 1–2 | 50.2–57.9 | 0.60 (0.5–0.8) | 48.45 | 0.065 | 0.305 | 1.506 | 31638 |
+| `Renderer` | 1–1 | 64.9–70.7 | 0.44 (0.4–0.5) | 31.71 | 0.113 | 0.244 | 1.063 | 40571 |
 
 Stimulus sensitivity (method §3, pre-registered): per-input run, rule (b), SWELL-KW (`driven`) against 136M Keystrokes (`driven-alt`):
 
@@ -157,22 +157,22 @@ Left out of this pool: repeat 16@35712250969 — D66: window 16 measured twice �
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `gpu/VizCompositorTh` | 1–1 | 11.4–13.4 | 6.13 (0.5–12.1) | 553.44 | 0.051 | 0.198 | 0.261 | 275834 |
-| `renderer/Compositor` | 1–4 | 12.2–13.3 | 3.35 (1.2–7.2) | 370.59 | 0.049 | 0.192 | 0.255 | 290250 |
-| `renderer/chrome` | 3–4 | 6.1–8.6 | 3.59 (0.3–9.5) | 586.74 | 0.066 | 0.162 | 0.263 | 168400 |
-| `gpu/Chrome_ChildIOT` | 1–1 | 7.3–7.9 | 12.62 (9.6–14.8) | 574.67 | 0.026 | 0.048 | 0.076 | 173122 |
-| `chrome` | 1–1 | 0.8–0.8 | 354.44 (80.2–731.9) | 4004.26 | 0.107 | 0.283 | 0.742 | 18248 |
+| `gpu/VizCompositorTh` | 1–1 | 11.4–13.4 | 6.13 (0.5–12.1) | 553.46 | 0.051 | 0.198 | 0.261 | 275429 |
+| `renderer/Compositor` | 1–4 | 12.2–13.3 | 3.35 (1.2–7.3) | 370.63 | 0.049 | 0.192 | 0.255 | 289792 |
+| `renderer/chrome` | 3–4 | 6.1–8.6 | 3.59 (0.3–9.5) | 586.75 | 0.066 | 0.162 | 0.262 | 168140 |
+| `gpu/Chrome_ChildIOT` | 1–1 | 7.3–7.9 | 12.62 (9.6–15.5) | 574.69 | 0.026 | 0.048 | 0.076 | 172871 |
+| `chrome` | 1–1 | 0.8–0.8 | 354.49 (80.2–731.9) | 4004.26 | 0.107 | 0.283 | 0.742 | 18217 |
 
 ### driven: CPU share 0.0024–0.0137, wakes/s 45.6–164.6
 - processes by role (repeat 1): renderer: 3 pid(s), 26.68 wakes/s, CPU 0.0021; gpu: 1 pid(s), 21.48 wakes/s, CPU 0.0013; main: 1 pid(s), 7.05 wakes/s, CPU 0.0005; utility: 3 pid(s), 1.2 wakes/s, CPU 0.0001
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `renderer/chrome` | 3–4 | 6.9–30.4 | 2.53 (1.2–10.5) | 399.86 | 0.042 | 0.383 | 0.764 | 283676 |
-| `renderer/Compositor` | 3–4 | 13.3–35.6 | 1.08 (0.7–6.1) | 198.30 | 0.044 | 0.158 | 0.252 | 435049 |
-| `gpu/VizCompositorTh` | 1–1 | 11.8–22.4 | 9.13 (3.1–13.1) | 549.55 | 0.046 | 0.211 | 0.391 | 331282 |
-| `chrome` | 1–1 | 1.3–17.7 | 1.89 (1.7–32.7) | 235.29 | 0.088 | 0.255 | 0.411 | 128891 |
-| `renderer/ThreadPoolForeg` | 3–3 | 0.2–3.3 | 107.05 (0.1–311.6) | 1169.67 | 0.219 | 0.724 | 1.113 | 22292 |
+| `gpu/VizCompositorTh` | 1–1 | 11.5–16.4 | 13.14 (3.3–16.1) | 551.36 | 0.044 | 0.191 | 0.266 | 297033 |
+| `renderer/Compositor` | 3–4 | 12.6–16.7 | 13.31 (4.3–16.3) | 345.41 | 0.047 | 0.170 | 0.247 | 312600 |
+| `renderer/chrome [event]` | 1–3 | 0.2–15.7 | 1.30 (0.8–3.0) | 119.28 | 0.033 | 0.686 | 0.864 | 79253 |
+| `renderer/chrome` | 3–4 | 6.6–14.6 | 11.03 (1.7–16.3) | 583.66 | 0.048 | 0.169 | 0.355 | 204423 |
+| `chrome [event]` | 1–1 | 0.3–13.5 | 1.17 (0.9–1.3) | 103.57 | 0.089 | 0.294 | 0.397 | 86946 |
 
 Per input ([153, 110, 85, 185, 194, 219, 740, 271, 354, 350, 836, 953, 185, 165, 607, 277, 80, 237, 833, 1334, 1265, 194, 163, 354, 1216, 269, 297, 249, 47, 296, 573, 66, 342, 172, 53, 80, 61, 27] events per repeat):
 
@@ -188,11 +188,11 @@ Per input ([153, 110, 85, 185, 194, 219, 740, 271, 354, 350, 836, 953, 185, 165,
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `renderer/chrome` | 3–4 | 30.6–75.2 | 2.01 (1.6–3.0) | 50.09 | 0.025 | 0.608 | 1.035 | 1272728 |
-| `chrome` | 1–1 | 15.1–46.4 | 1.10 (1.0–1.2) | 94.57 | 0.068 | 0.228 | 0.389 | 743529 |
-| `renderer/Compositor` | 2–4 | 30.1–71.7 | 0.91 (0.8–1.0) | 61.24 | 0.038 | 0.121 | 0.283 | 1183921 |
-| `renderer/ThreadPoolForeg` | 3–3 | 2.5–8.3 | 118.25 (79.9–198.6) | 439.66 | 0.633 | 0.951 | 1.398 | 118722 |
-| `gpu/VizCompositorTh` | 1–1 | 19.2–39.9 | 8.10 (7.1–9.1) | 80.97 | 0.042 | 0.346 | 0.546 | 664164 |
+| `renderer/chrome [event]` | 1–3 | 8.8–34.4 | 1.23 (0.8–1.4) | 121.91 | 0.019 | 0.772 | 1.145 | 515760 |
+| `chrome [event]` | 1–1 | 11.4–38.4 | 0.81 (0.7–0.9) | 98.66 | 0.061 | 0.250 | 0.390 | 603985 |
+| `renderer/ThreadPoolForeg [event]` | 3–3 | 2.0–7.5 | 125.85 (84.7–220.2) | 397.46 | 0.675 | 0.952 | 1.418 | 104432 |
+| `renderer/Compositor [event]` | 1–2 | 13.8–48.8 | 0.56 (0.4–0.6) | 49.92 | 0.036 | 0.149 | 0.300 | 750451 |
+| `gpu/VizCompositorTh [event]` | 1–1 | 4.2–15.8 | 2.22 (1.8–2.5) | 220.99 | 0.061 | 0.488 | 0.582 | 234090 |
 
 Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366, 2515, 1961, 1692, 1260, 1997, 1703, 2229, 1697, 2131, 2314, 2182, 3053, 2037, 2249, 1320, 2354, 1664, 2277, 2301, 2660, 2134, 884, 2178, 2312, 2089, 1958, 2597, 2288, 1176, 1480] events per repeat):
 
@@ -209,11 +209,11 @@ Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366, 2515, 1961, 1692, 12
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `renderer/chrome` | 4–8 | 71.3–85.8 | 1.96 (1.4–2.3) | 33.71 | 0.053 | 4.957 | 133.302 | 82714 |
-| `renderer/ThreadPoolForeg` | 10–15 | 251.0–296.3 | 0.02 (0.0–0.0) | 4.44 | 0.007 | 0.885 | 8.626 | 288883 |
-| `chrome` | 1–1 | 237.1–262.0 | 0.66 (0.5–0.9) | 14.43 | 0.071 | 0.435 | 7.089 | 261182 |
-| `gpu/VizCompositorTh` | 1–1 | 142.3–151.5 | 4.87 (4.5–5.3) | 16.14 | 0.069 | 1.796 | 2.190 | 153204 |
-| `Chrome_IOThread` | 1–1 | 532.4–598.2 | 0.14 (0.1–0.2) | 5.33 | 0.016 | 0.038 | 0.123 | 588198 |
+| `renderer/chrome [event]` | 2–4 | 53.1–62.7 | 1.23 (0.8–1.5) | 42.02 | 0.067 | 11.135 | 138.657 | 60985 |
+| `renderer/ThreadPoolForeg [event]` | 6–10 | 227.2–269.1 | 0.02 (0.0–0.0) | 4.36 | 0.006 | 0.916 | 8.713 | 259673 |
+| `chrome [event]` | 1–1 | 162.3–183.0 | 0.78 (0.6–1.1) | 12.51 | 0.067 | 0.462 | 8.318 | 179809 |
+| `gpu/VizCompositorTh [event]` | 1–1 | 100.5–112.6 | 4.78 (4.1–5.2) | 15.97 | 0.064 | 1.834 | 2.199 | 109554 |
+| `renderer/chrome` | 4–8 | 17.2–25.0 | 10.72 (5.8–14.7) | 87.83 | 0.037 | 0.535 | 34.662 | 21729 |
 
 Stimulus sensitivity (method §3, pre-registered): per-input run, rule (b), SWELL-KW (`driven`) against 136M Keystrokes (`driven-alt`):
 
@@ -245,42 +245,69 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 
 | application | repeats | quantities | out of tolerance | repeats needed at this spread | holds |
 |---|---|---|---|---|---|
-| `code` | 44 | 29 | 2 | 41 | yes |
-| `thunderbird-send` | 8 | 84 | 37 | 98 | no |
-| `chrome` | 38 | 60 | 1 | 30 | yes |
+| `code` | 44 | 56 | 15 | 41 | yes |
+| `thunderbird-send` | 8 | 114 | 56 | 98 | no |
+| `chrome` | 38 | 102 | 21 | 30 | yes |
 | `webrtc` | 45 | 3 | 0 | 7 | yes |
 
 ### `code`
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
-| idle gpu/VizCompositorTh wakes/s | 44 | 23.119 | 7.5% | ±2.3% | 0.7% | 12 | yes |
-| idle gpu/VizCompositorTh gap mean (ms) | 44 | 43.2546 | 7.5% | ±2.3% | 0.7% | 12 | yes |
-| idle gpu/VizCompositorTh run mean (ms) | 44 | 0.2417 | 6.5% | ±2.0% | 0.5% | 10 | yes |
-| idle renderer/Compositor wakes/s | 44 | 22.8076 | 4.5% | ±1.4% | 0.5% | 6 | yes |
-| idle renderer/Compositor gap mean (ms) | 44 | 43.8451 | 4.5% | ±1.4% | 0.5% | 6 | yes |
-| idle renderer/Compositor run mean (ms) | 44 | 0.0814 | 8.2% | ±2.5% | 0.5% | 13 | yes |
-| idle gpu/Chrome_ChildIOT wakes/s | 44 | 20.1705 | 7.2% | ±2.2% | 0.7% | 11 | yes |
-| idle gpu/Chrome_ChildIOT gap mean (ms) | 44 | 49.5774 | 7.2% | ±2.2% | 0.7% | 11 | yes |
+| idle gpu/VizCompositorTh wakes/s | 44 | 23.0834 | 7.5% | ±2.3% | 0.7% | 12 | yes |
+| idle gpu/VizCompositorTh gap mean (ms) | 44 | 43.3212 | 7.5% | ±2.3% | 0.7% | 12 | yes |
+| idle gpu/VizCompositorTh run mean (ms) | 44 | 0.2417 | 6.6% | ±2.0% | 0.5% | 10 | yes |
+| idle renderer/Compositor wakes/s | 44 | 22.7725 | 4.5% | ±1.4% | 0.5% | 6 | yes |
+| idle renderer/Compositor gap mean (ms) | 44 | 43.9126 | 4.5% | ±1.4% | 0.5% | 6 | yes |
+| idle renderer/Compositor run mean (ms) | 44 | 0.0814 | 8.1% | ±2.5% | 0.5% | 13 | yes |
+| idle gpu/Chrome_ChildIOT wakes/s | 44 | 20.1419 | 7.2% | ±2.2% | 0.7% | 11 | yes |
+| idle gpu/Chrome_ChildIOT gap mean (ms) | 44 | 49.6477 | 7.2% | ±2.2% | 0.7% | 11 | yes |
 | idle gpu/Chrome_ChildIOT run mean (ms) | 44 | 0.0241 | 9.2% | ±2.8% | 0.5% | 16 | yes |
-| idle renderer/code wakes/s | 44 | 19.5375 | 5.7% | ±1.7% | 0.4% | 8 | yes |
-| idle renderer/code gap mean (ms) | 44 | 51.1836 | 5.7% | ±1.7% | 0.4% | 8 | yes |
-| idle renderer/code run mean (ms) | 44 | 0.258 | 7.4% | ±2.2% | 0.4% | 11 | yes |
-| idle utility/code wakes/s | 44 | 11.4593 | 12.0% | ±3.6% | 0.6% | 25 | yes |
-| idle utility/code gap mean (ms) | 44 | 87.2652 | 12.0% | ±3.6% | 0.6% | 25 | yes |
-| idle utility/code run mean (ms) | 44 | 0.0449 | 7.5% | ±2.3% | 0.4% | 12 | yes |
-| idle utility/libuv-worker wakes/s | 44 | 5.3816 | 18.5% | ±5.6% | 1.0% | 56 | no |
-| idle utility/libuv-worker gap mean (ms) | 44 | 185.8192 | 18.5% | ±5.6% | 1.0% | 56 | no |
+| idle renderer/code wakes/s | 44 | 19.4746 | 5.7% | ±1.7% | 0.4% | 8 | yes |
+| idle renderer/code gap mean (ms) | 44 | 51.3491 | 5.7% | ±1.7% | 0.4% | 8 | yes |
+| idle renderer/code run mean (ms) | 44 | 0.2581 | 7.4% | ±2.2% | 0.4% | 11 | yes |
+| idle utility/code wakes/s | 44 | 11.441 | 12.0% | ±3.6% | 0.6% | 25 | yes |
+| idle utility/code gap mean (ms) | 44 | 87.4047 | 12.0% | ±3.6% | 0.6% | 25 | yes |
+| idle utility/code run mean (ms) | 44 | 0.045 | 7.5% | ±2.3% | 0.4% | 12 | yes |
+| idle utility/libuv-worker wakes/s | 44 | 5.3756 | 18.5% | ±5.6% | 1.0% | 56 | no |
+| idle utility/libuv-worker gap mean (ms) | 44 | 186.0257 | 18.5% | ±5.6% | 1.0% | 56 | no |
 | idle utility/libuv-worker run mean (ms) | 44 | 0.0102 | 7.8% | ±2.4% | 0.4% | 5 | yes |
-| idle renderer/ThreadPoolForeg wakes/s | 44 | 3.4318 | 10.9% | ±3.3% | 0.5% | 21 | yes |
-| idle renderer/ThreadPoolForeg gap mean (ms) | 44 | 291.3916 | 10.9% | ±3.3% | 0.5% | 21 | yes |
-| idle renderer/ThreadPoolForeg run mean (ms) | 44 | 0.1389 | 12.2% | ±3.7% | 0.6% | 26 | yes |
-| idle code wakes/s | 44 | 3.3687 | 0.6% | ±0.2% | 0.0% | 5 | yes |
-| idle code gap mean (ms) | 44 | 296.8512 | 0.6% | ±0.2% | 0.0% | 5 | yes |
-| idle code run mean (ms) | 44 | 0.0638 | 4.1% | ±1.2% | 0.3% | 6 | yes |
-| idle residual wakes/s | 44 | 3.0944 | 2.8% | ±0.9% | 0.3% | 5 | yes |
-| idle residual gap mean (ms) | 44 | 323.1671 | 2.8% | ±0.9% | 0.3% | 5 | yes |
-| idle residual run mean (ms) | 44 | 0.0463 | 5.3% | ±1.6% | 0.4% | 7 | yes |
+| idle renderer/ThreadPoolForeg wakes/s | 44 | 3.4065 | 11.0% | ±3.3% | 0.5% | 21 | yes |
+| idle renderer/ThreadPoolForeg gap mean (ms) | 44 | 293.5551 | 11.0% | ±3.3% | 0.5% | 21 | yes |
+| idle renderer/ThreadPoolForeg run mean (ms) | 44 | 0.1398 | 12.2% | ±3.7% | 0.6% | 26 | yes |
+| idle code wakes/s | 44 | 3.2124 | 0.5% | ±0.2% | 0.0% | 5 | yes |
+| idle code gap mean (ms) | 44 | 311.2975 | 0.5% | ±0.2% | 0.0% | 5 | yes |
+| idle code run mean (ms) | 44 | 0.0648 | 4.2% | ±1.3% | 0.3% | 6 | yes |
+| idle code [event] wakes/s | 44 | 0.1563 | 6.7% | ±2.0% | 0.4% | 10 | yes |
+| idle code [event] gap mean (ms) | 44 | 6396.6958 | 6.7% | ±2.0% | 0.4% | 10 | yes |
+| idle code [event] run mean (ms) | 44 | 0.0425 | 7.0% | ±2.1% | 0.5% | 11 | yes |
+| idle libuv-worker [event] wakes/s | 44 | 0.0841 | 7.7% | ±2.3% | 0.5% | 12 | yes |
+| idle libuv-worker [event] gap mean (ms) | 44 | 11896.5199 | 7.7% | ±2.3% | 0.5% | 12 | yes |
+| idle libuv-worker [event] run mean (ms) | 44 | 0.0148 | 8.0% | ±2.4% | 0.5% | 8 | yes |
+| idle renderer/code [event] wakes/s | 44 | 0.063 | 23.2% | ±7.0% | 1.4% | 85 | no |
+| idle renderer/code [event] gap mean (ms) | 44 | 15884.523 | 23.2% | ±7.0% | 1.4% | 85 | no |
+| idle renderer/code [event] run mean (ms) | 44 | 0.2032 | 16.4% | ±5.0% | 1.0% | 44 | yes |
+| idle renderer/Chrome_ChildIOT [event] wakes/s | 44 | 0.0433 | 7.2% | ±2.2% | 0.6% | 11 | yes |
+| idle renderer/Chrome_ChildIOT [event] gap mean (ms) | 44 | 23071.2286 | 7.2% | ±2.2% | 0.6% | 11 | yes |
+| idle renderer/Chrome_ChildIOT [event] run mean (ms) | 44 | 0.0277 | 6.1% | ±1.8% | 0.4% | 9 | yes |
+| idle gpu/VizCompositorTh [event] wakes/s | 44 | 0.0356 | 32.3% | ±9.8% | 1.7% | 163 | no |
+| idle gpu/VizCompositorTh [event] gap mean (ms) | 44 | 28102.272 | 32.3% | ±9.8% | 1.7% | 163 | no |
+| idle gpu/VizCompositorTh [event] run mean (ms) | 44 | 0.2318 | 62.1% | ±18.9% | 6.2% | over 200 | no |
+| idle renderer/Compositor [event] wakes/s | 44 | 0.035 | 42.0% | ±12.8% | 3.1% | over 200 | no |
+| idle renderer/Compositor [event] gap mean (ms) | 44 | 28545.0325 | 42.0% | ±12.8% | 3.2% | over 200 | no |
+| idle renderer/Compositor [event] run mean (ms) | 44 | 0.0795 | 23.8% | ±7.2% | 1.4% | 90 | no |
+| idle gpu/Chrome_ChildIOT [event] wakes/s | 44 | 0.0286 | 34.0% | ±10.3% | 2.2% | 180 | no |
+| idle gpu/Chrome_ChildIOT [event] gap mean (ms) | 44 | 35000.1024 | 34.0% | ±10.3% | 2.3% | 180 | no |
+| idle gpu/Chrome_ChildIOT [event] run mean (ms) | 44 | 0.0254 | 14.1% | ±4.3% | 1.0% | 34 | yes |
+| idle Chrome_IOThread [event] wakes/s | 44 | 0.016 | 12.3% | ±3.7% | 1.6% | 26 | yes |
+| idle Chrome_IOThread [event] gap mean (ms) | 44 | 62474.8278 | 12.3% | ±3.7% | 1.6% | 26 | yes |
+| idle Chrome_IOThread [event] run mean (ms) | 44 | 0.0239 | 10.6% | ±3.2% | 1.2% | 20 | yes |
+| idle residual wakes/s | 44 | 2.9335 | 2.9% | ±0.9% | 0.3% | 5 | yes |
+| idle residual gap mean (ms) | 44 | 340.8862 | 2.9% | ±0.9% | 0.3% | 5 | yes |
+| idle residual run mean (ms) | 44 | 0.0473 | 5.5% | ±1.7% | 0.4% | 8 | yes |
+| idle residual [event] wakes/s | 44 | 0.0234 | 34.6% | ±10.5% | 2.6% | 187 | no |
+| idle residual [event] gap mean (ms) | 44 | 42718.5716 | 34.6% | ±10.5% | 2.7% | 187 | no |
+| idle residual [event] run mean (ms) | 44 | 0.0734 | 44.3% | ±13.5% | 3.7% | over 200 | no |
 | input_run mean, SWELL-KW (ms) | 43 | 99.2636 | 15.7% | ±4.8% | 1.2% | 41 | yes |
 | input_run mean, 136M (ms) | 43 | 103.9216 | 9.8% | ±3.0% | 0.5% | 18 | yes |
 
@@ -288,11 +315,11 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
-| idle thunderbird-bin wakes/s | 8 | 0.414 | 11.1% | ±9.3% | 2.9% | 22 | no |
-| idle thunderbird-bin gap mean (ms) | 8 | 2415.7104 | 11.1% | ±9.3% | 3.0% | 22 | no |
-| idle thunderbird-bin run mean (ms) | 8 | 0.2977 | 9.9% | ±8.3% | 2.8% | 18 | no |
-| idle gmain wakes/s | 8 | 0.25 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| idle gmain gap mean (ms) | 8 | 4000.0139 | 0.0% | ±0.0% | 0.0% | 5 | yes |
+| idle thunderbird-bin wakes/s | 8 | 0.4135 | 11.2% | ±9.4% | 2.9% | 22 | no |
+| idle thunderbird-bin gap mean (ms) | 8 | 2418.1444 | 11.2% | ±9.4% | 3.0% | 22 | no |
+| idle thunderbird-bin run mean (ms) | 8 | 0.298 | 10.0% | ±8.3% | 2.9% | 18 | no |
+| idle gmain wakes/s | 8 | 0.2498 | 0.2% | ±0.2% | 0.1% | 5 | yes |
+| idle gmain gap mean (ms) | 8 | 4003.35 | 0.2% | ±0.2% | 0.1% | 5 | yes |
 | idle gmain run mean (ms) | 8 | 0.0475 | 6.9% | ±5.8% | 1.4% | 10 | no |
 | idle IPDL Background wakes/s | 8 | 0.2379 | 5.0% | ±4.2% | 1.2% | 7 | yes |
 | idle IPDL Background gap mean (ms) | 8 | 4203.1669 | 5.0% | ±4.2% | 1.2% | 7 | yes |
@@ -303,15 +330,15 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | idle WebExtensions/WebExtensions wakes/s | 8 | 0.2135 | 8.8% | ±7.3% | 2.2% | 15 | no |
 | idle WebExtensions/WebExtensions gap mean (ms) | 8 | 4682.943 | 8.8% | ±7.3% | 2.3% | 15 | no |
 | idle WebExtensions/WebExtensions run mean (ms) | 8 | 0.1052 | 9.7% | ±8.1% | 2.5% | 18 | no |
-| idle JS Watchdog wakes/s | 8 | 0.1092 | 7.7% | ±6.5% | 2.3% | 12 | no |
-| idle JS Watchdog gap mean (ms) | 8 | 9160.3371 | 7.7% | ±6.5% | 2.2% | 12 | no |
-| idle JS Watchdog run mean (ms) | 8 | 0.0211 | 7.1% | ±5.9% | 1.5% | 11 | no |
+| idle JS Watchdog wakes/s | 8 | 0.1083 | 7.5% | ±6.3% | 2.2% | 12 | no |
+| idle JS Watchdog gap mean (ms) | 8 | 9230.8012 | 7.5% | ±6.3% | 2.1% | 12 | no |
+| idle JS Watchdog run mean (ms) | 8 | 0.021 | 7.2% | ±6.0% | 1.5% | 11 | no |
 | idle IndexedDB IO wakes/s | 8 | 0.104 | 8.3% | ±6.9% | 1.9% | 14 | no |
 | idle IndexedDB IO gap mean (ms) | 8 | 9619.2718 | 8.3% | ±6.9% | 1.9% | 14 | no |
 | idle IndexedDB IO run mean (ms) | 8 | 0.1723 | 6.5% | ±5.4% | 1.5% | 9 | no |
-| idle StreamTrans wakes/s | 8 | 0.0833 | 15.1% | ±12.6% | 3.7% | 38 | no |
-| idle StreamTrans gap mean (ms) | 8 | 12000.0415 | 15.1% | ±12.6% | 3.9% | 38 | no |
-| idle StreamTrans run mean (ms) | 8 | 5.8509 | 9.1% | ±7.6% | 2.5% | 16 | no |
+| idle StreamTrans wakes/s | 8 | 0.0827 | 15.8% | ±13.2% | 3.9% | 41 | no |
+| idle StreamTrans gap mean (ms) | 8 | 12090.722 | 15.8% | ±13.2% | 4.0% | 41 | no |
+| idle StreamTrans run mean (ms) | 8 | 5.895 | 9.2% | ±7.7% | 2.4% | 16 | no |
 | idle WebExtensions/JS Watchdog wakes/s | 8 | 0.0662 | 1.8% | ±1.5% | 0.6% | 5 | yes |
 | idle WebExtensions/JS Watchdog gap mean (ms) | 8 | 15094.3919 | 1.8% | ±1.5% | 0.6% | 5 | yes |
 | idle WebExtensions/JS Watchdog run mean (ms) | 8 | 0.0223 | 6.8% | ±5.7% | 1.9% | 10 | no |
@@ -330,45 +357,75 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | idle WebExtensions/IPC I/O Child wakes/s | 8 | 0.0367 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle WebExtensions/IPC I/O Child gap mean (ms) | 8 | 27272.8217 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle WebExtensions/IPC I/O Child run mean (ms) | 8 | 0.0256 | 4.5% | ±3.7% | 1.5% | 6 | yes |
-| idle residual wakes/s | 8 | 0.0723 | 1.7% | ±1.4% | 0.5% | 5 | yes |
-| idle residual gap mean (ms) | 8 | 13832.9009 | 1.7% | ±1.4% | 0.5% | 5 | yes |
-| idle residual run mean (ms) | 8 | 0.0443 | 6.0% | ±5.0% | 1.5% | 9 | no |
-| op Socket Thread wakes/s | 8 | 732.0448 | 1.3% | ±1.1% | 0.2% | 5 | yes |
-| op Socket Thread gap mean (ms) | 8 | 1.3662 | 1.3% | ±1.1% | 0.2% | 5 | yes |
-| op Socket Thread run mean (ms) | 8 | 0.0213 | 4.6% | ±3.8% | 1.1% | 6 | yes |
-| op Compositor wakes/s | 8 | 589.8433 | 0.9% | ±0.8% | 0.2% | 5 | yes |
-| op Compositor gap mean (ms) | 8 | 1.6952 | 0.9% | ±0.8% | 0.2% | 5 | yes |
-| op Compositor run mean (ms) | 8 | 0.014 | 5.9% | ±4.9% | 1.7% | 6 | yes |
-| op thunderbird-bin wakes/s | 8 | 473.4226 | 4.9% | ±4.0% | 1.2% | 7 | yes |
-| op thunderbird-bin gap mean (ms) | 8 | 2.1143 | 4.9% | ±4.1% | 1.3% | 7 | yes |
-| op thunderbird-bin run mean (ms) | 8 | 1.4123 | 5.7% | ±4.8% | 1.5% | 8 | yes |
-| op Renderer wakes/s | 8 | 121.4977 | 1.4% | ±1.1% | 0.4% | 5 | yes |
-| op Renderer gap mean (ms) | 8 | 8.2286 | 1.4% | ±1.2% | 0.4% | 5 | yes |
-| op Renderer run mean (ms) | 8 | 0.161 | 6.4% | ±5.4% | 1.9% | 9 | no |
-| op SwComposite wakes/s | 8 | 74.6067 | 1.9% | ±1.6% | 0.4% | 5 | yes |
-| op SwComposite gap mean (ms) | 8 | 13.3996 | 1.9% | ±1.6% | 0.4% | 5 | yes |
-| op SwComposite run mean (ms) | 8 | 0.0132 | 6.4% | ±5.4% | 1.7% | 6 | yes |
-| op Softwar~cThread wakes/s | 8 | 59.6819 | 0.3% | ±0.2% | 0.1% | 5 | yes |
-| op Softwar~cThread gap mean (ms) | 8 | 16.7553 | 0.3% | ±0.2% | 0.1% | 5 | yes |
-| op Softwar~cThread run mean (ms) | 8 | 0.0423 | 6.5% | ±5.5% | 1.8% | 10 | no |
-| op StreamTrans wakes/s | 8 | 55.5257 | 7.8% | ±6.5% | 1.9% | 12 | no |
-| op StreamTrans gap mean (ms) | 8 | 18.019 | 7.8% | ±6.5% | 1.9% | 12 | no |
-| op StreamTrans run mean (ms) | 8 | 0.1529 | 22.0% | ±18.4% | 5.5% | 78 | no |
-| op TaskCon~ller wakes/s | 8 | 42.527 | 2.3% | ±1.9% | 0.5% | 5 | yes |
-| op TaskCon~ller gap mean (ms) | 8 | 23.5215 | 2.3% | ±1.9% | 0.5% | 5 | yes |
-| op TaskCon~ller run mean (ms) | 8 | 0.181 | 3.1% | ±2.6% | 0.8% | 5 | yes |
-| op glean.dispatche wakes/s | 8 | 28.3165 | 2.9% | ±2.5% | 0.8% | 5 | yes |
-| op glean.dispatche gap mean (ms) | 8 | 35.3298 | 3.0% | ±2.5% | 0.8% | 5 | yes |
-| op glean.dispatche run mean (ms) | 8 | 0.074 | 9.8% | ±8.2% | 2.7% | 18 | no |
-| op WRRende~ckend#0 wakes/s | 8 | 27.9733 | 3.0% | ±2.5% | 0.8% | 5 | yes |
-| op WRRende~ckend#0 gap mean (ms) | 8 | 35.7658 | 3.0% | ±2.5% | 0.8% | 5 | yes |
-| op WRRende~ckend#0 run mean (ms) | 8 | 0.3555 | 13.3% | ±11.2% | 3.8% | 30 | no |
-| op Timer wakes/s | 8 | 27.7663 | 3.2% | ±2.6% | 0.6% | 5 | yes |
-| op Timer gap mean (ms) | 8 | 36.037 | 3.2% | ±2.7% | 0.6% | 5 | yes |
-| op Timer run mean (ms) | 8 | 0.0159 | 4.3% | ±3.6% | 1.0% | 5 | yes |
-| op residual wakes/s | 8 | 101.8299 | 1.8% | ±1.5% | 0.5% | 5 | yes |
-| op residual gap mean (ms) | 8 | 9.8227 | 1.8% | ±1.5% | 0.5% | 5 | yes |
-| op residual run mean (ms) | 8 | 0.2534 | 7.9% | ±6.6% | 2.1% | 13 | no |
+| idle BgIOThr~Pool [event] wakes/s | 8 | 0.0033 | 0.0% | ±0.0% | 0.0% | 5 | yes |
+| idle BgIOThr~Pool [event] gap mean (ms) | 8 | 300001.0388 | 0.0% | ±0.0% | 0.0% | 5 | yes |
+| idle BgIOThr~Pool [event] run mean (ms) | 8 | 0.0451 | 7.6% | ±6.3% | 1.9% | 12 | no |
+| idle residual wakes/s | 8 | 0.069 | 1.8% | ±1.5% | 0.6% | 5 | yes |
+| idle residual gap mean (ms) | 8 | 14501.5608 | 1.8% | ±1.5% | 0.6% | 5 | yes |
+| idle residual run mean (ms) | 8 | 0.0443 | 6.4% | ±5.3% | 1.6% | 9 | no |
+| op Compositor wakes/s | 8 | 267.0257 | 3.6% | ±3.0% | 1.2% | 5 | yes |
+| op Compositor gap mean (ms) | 8 | 3.7456 | 3.6% | ±3.0% | 1.2% | 5 | yes |
+| op Compositor run mean (ms) | 8 | 0.0143 | 4.7% | ±4.0% | 1.4% | 5 | yes |
+| op thunderbird-bin wakes/s | 8 | 69.09 | 7.9% | ±6.6% | 2.3% | 13 | no |
+| op thunderbird-bin gap mean (ms) | 8 | 14.4911 | 8.1% | ±6.8% | 2.4% | 13 | no |
+| op thunderbird-bin run mean (ms) | 8 | 0.6442 | 32.4% | ±27.1% | 11.0% | 165 | no |
+| op Renderer wakes/s | 8 | 68.3082 | 2.8% | ±2.4% | 0.7% | 5 | yes |
+| op Renderer gap mean (ms) | 8 | 14.6454 | 2.9% | ±2.4% | 0.7% | 5 | yes |
+| op Renderer run mean (ms) | 8 | 0.1356 | 7.1% | ±6.0% | 1.5% | 11 | no |
+| op SwComposite wakes/s | 8 | 43.0032 | 3.7% | ±3.1% | 0.9% | 5 | yes |
+| op SwComposite gap mean (ms) | 8 | 23.2627 | 3.8% | ±3.1% | 0.9% | 5 | yes |
+| op SwComposite run mean (ms) | 8 | 0.0113 | 7.3% | ±6.1% | 1.6% | 6 | yes |
+| op Socket Thread wakes/s | 8 | 42.2905 | 34.1% | ±28.5% | 7.7% | 181 | no |
+| op Socket Thread gap mean (ms) | 8 | 23.6988 | 34.5% | ±28.9% | 7.4% | 186 | no |
+| op Socket Thread run mean (ms) | 8 | 0.0186 | 5.5% | ±4.6% | 1.2% | 7 | yes |
+| op Softwar~cThread wakes/s | 8 | 18.8184 | 6.3% | ±5.2% | 1.8% | 9 | no |
+| op Softwar~cThread gap mean (ms) | 8 | 53.1654 | 6.3% | ±5.3% | 1.9% | 9 | no |
+| op Softwar~cThread run mean (ms) | 8 | 0.0698 | 8.0% | ±6.7% | 2.0% | 13 | no |
+| op WRRende~ckend#0 wakes/s | 8 | 17.2411 | 3.4% | ±2.9% | 1.0% | 5 | yes |
+| op WRRende~ckend#0 gap mean (ms) | 8 | 58.0364 | 3.5% | ±2.9% | 1.0% | 5 | yes |
+| op WRRende~ckend#0 run mean (ms) | 8 | 0.3023 | 10.3% | ±8.6% | 2.6% | 19 | no |
+| op WRRende~ckend#1 wakes/s | 8 | 17.1211 | 3.4% | ±2.8% | 0.9% | 5 | yes |
+| op WRRende~ckend#1 gap mean (ms) | 8 | 58.4417 | 3.4% | ±2.9% | 1.0% | 5 | yes |
+| op WRRende~ckend#1 run mean (ms) | 8 | 0.1602 | 9.3% | ±7.8% | 2.5% | 16 | no |
+| op glean.dispatche wakes/s | 8 | 17.0863 | 3.1% | ±2.6% | 0.9% | 5 | yes |
+| op glean.dispatche gap mean (ms) | 8 | 58.5569 | 3.1% | ±2.6% | 0.9% | 5 | yes |
+| op glean.dispatche run mean (ms) | 8 | 0.0588 | 6.3% | ±5.3% | 1.4% | 9 | no |
+| op WRScene~ilder#0 wakes/s | 8 | 11.2998 | 5.8% | ±4.8% | 1.4% | 8 | yes |
+| op WRScene~ilder#0 gap mean (ms) | 8 | 88.5774 | 5.9% | ±4.9% | 1.4% | 8 | yes |
+| op WRScene~ilder#0 run mean (ms) | 8 | 0.2634 | 10.9% | ±9.1% | 2.8% | 21 | no |
+| op Socket Thread [event] wakes/s | 8 | 689.7543 | 2.4% | ±2.0% | 0.6% | 5 | yes |
+| op Socket Thread [event] gap mean (ms) | 8 | 1.4498 | 2.4% | ±2.0% | 0.6% | 5 | yes |
+| op Socket Thread [event] run mean (ms) | 8 | 0.0214 | 4.4% | ±3.7% | 1.0% | 6 | yes |
+| op thunderbird-bin [event] wakes/s | 8 | 404.3326 | 4.8% | ±4.0% | 1.1% | 7 | yes |
+| op thunderbird-bin [event] gap mean (ms) | 8 | 2.4756 | 4.9% | ±4.1% | 1.1% | 7 | yes |
+| op thunderbird-bin [event] run mean (ms) | 8 | 1.5435 | 5.7% | ±4.8% | 1.5% | 8 | yes |
+| op Compositor [event] wakes/s | 8 | 322.8176 | 2.9% | ±2.4% | 0.8% | 5 | yes |
+| op Compositor [event] gap mean (ms) | 8 | 3.0967 | 2.9% | ±2.4% | 0.8% | 5 | yes |
+| op Compositor [event] run mean (ms) | 8 | 0.0137 | 7.2% | ±6.0% | 2.1% | 7 | yes |
+| op StreamTrans [event] wakes/s | 8 | 55.2474 | 7.8% | ±6.5% | 1.9% | 12 | no |
+| op StreamTrans [event] gap mean (ms) | 8 | 18.1091 | 7.8% | ±6.5% | 1.8% | 12 | no |
+| op StreamTrans [event] run mean (ms) | 8 | 0.1429 | 15.4% | ±12.9% | 4.4% | 40 | no |
+| op Renderer [event] wakes/s | 8 | 53.1896 | 5.5% | ±4.6% | 1.3% | 8 | yes |
+| op Renderer [event] gap mean (ms) | 8 | 18.7805 | 5.7% | ±4.7% | 1.3% | 8 | yes |
+| op Renderer [event] run mean (ms) | 8 | 0.1936 | 6.2% | ±5.2% | 2.1% | 9 | no |
+| op TaskCon~ller [event] wakes/s | 8 | 41.5372 | 3.5% | ±3.0% | 0.8% | 5 | yes |
+| op TaskCon~ller [event] gap mean (ms) | 8 | 24.0801 | 3.5% | ±2.9% | 0.8% | 5 | yes |
+| op TaskCon~ller [event] run mean (ms) | 8 | 0.1809 | 3.1% | ±2.6% | 0.8% | 5 | yes |
+| op Softwar~cThread [event] wakes/s | 8 | 40.8634 | 2.9% | ±2.5% | 0.8% | 5 | yes |
+| op Softwar~cThread [event] gap mean (ms) | 8 | 24.4658 | 2.9% | ±2.5% | 0.8% | 5 | yes |
+| op Softwar~cThread [event] run mean (ms) | 8 | 0.0297 | 7.1% | ±5.9% | 2.2% | 11 | no |
+| op SwComposite [event] wakes/s | 8 | 31.6035 | 6.5% | ±5.5% | 1.8% | 10 | no |
+| op SwComposite [event] gap mean (ms) | 8 | 31.6035 | 6.7% | ±5.6% | 1.9% | 10 | no |
+| op SwComposite [event] run mean (ms) | 8 | 0.0158 | 5.1% | ±4.3% | 1.5% | 6 | yes |
+| op Timer [event] wakes/s | 8 | 18.3956 | 7.6% | ±6.3% | 2.0% | 12 | no |
+| op Timer [event] gap mean (ms) | 8 | 54.377 | 7.6% | ±6.3% | 1.9% | 12 | no |
+| op Timer [event] run mean (ms) | 8 | 0.0128 | 5.8% | ±4.9% | 1.3% | 5 | yes |
+| op residual wakes/s | 8 | 26.9607 | 13.9% | ±11.6% | 4.0% | 33 | no |
+| op residual gap mean (ms) | 8 | 37.1314 | 14.0% | ±11.7% | 4.1% | 33 | no |
+| op residual run mean (ms) | 8 | 0.1141 | 32.0% | ±26.8% | 8.8% | 160 | no |
+| op residual [event] wakes/s | 8 | 79.0494 | 2.1% | ±1.8% | 0.6% | 5 | yes |
+| op residual [event] gap mean (ms) | 8 | 12.6501 | 2.1% | ±1.8% | 0.6% | 5 | yes |
+| op residual [event] run mean (ms) | 8 | 0.3012 | 8.7% | ±7.2% | 2.6% | 15 | no |
 | input_run mean, SWELL-KW (ms) | 8 | 6.0516 | 12.4% | ±10.4% | 3.3% | 27 | no |
 | input_run mean, 136M (ms) | 8 | 5.6439 | 5.7% | ±4.8% | 1.3% | 8 | yes |
 | operation duration mean (ms) | 8 | 2970.8859 | 2.5% | ±2.1% | 0.6% | 5 | yes |
@@ -377,63 +434,105 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
-| idle renderer/Compositor wakes/s | 38 | 12.7302 | 1.9% | ±0.6% | 0.1% | 5 | yes |
-| idle renderer/Compositor gap mean (ms) | 38 | 78.5532 | 1.9% | ±0.6% | 0.1% | 5 | yes |
+| idle renderer/Compositor wakes/s | 38 | 12.7101 | 1.9% | ±0.6% | 0.1% | 5 | yes |
+| idle renderer/Compositor gap mean (ms) | 38 | 78.6774 | 1.9% | ±0.6% | 0.1% | 5 | yes |
 | idle renderer/Compositor run mean (ms) | 38 | 0.0672 | 8.5% | ±2.8% | 0.7% | 14 | yes |
-| idle gpu/VizCompositorTh wakes/s | 38 | 12.0979 | 3.5% | ±1.1% | 0.3% | 5 | yes |
-| idle gpu/VizCompositorTh gap mean (ms) | 38 | 82.6587 | 3.5% | ±1.1% | 0.3% | 5 | yes |
+| idle gpu/VizCompositorTh wakes/s | 38 | 12.0802 | 3.5% | ±1.2% | 0.3% | 5 | yes |
+| idle gpu/VizCompositorTh gap mean (ms) | 38 | 82.7802 | 3.5% | ±1.2% | 0.3% | 5 | yes |
 | idle gpu/VizCompositorTh run mean (ms) | 38 | 0.0727 | 6.4% | ±2.1% | 0.5% | 9 | yes |
-| idle gpu/Chrome_ChildIOT wakes/s | 38 | 7.593 | 2.0% | ±0.7% | 0.1% | 5 | yes |
-| idle gpu/Chrome_ChildIOT gap mean (ms) | 38 | 131.6995 | 2.0% | ±0.7% | 0.1% | 5 | yes |
+| idle gpu/Chrome_ChildIOT wakes/s | 38 | 7.582 | 2.0% | ±0.7% | 0.1% | 5 | yes |
+| idle gpu/Chrome_ChildIOT gap mean (ms) | 38 | 131.8907 | 2.0% | ±0.7% | 0.1% | 5 | yes |
 | idle gpu/Chrome_ChildIOT run mean (ms) | 38 | 0.0295 | 6.0% | ±2.0% | 0.4% | 9 | yes |
-| idle renderer/chrome wakes/s | 38 | 7.3859 | 8.8% | ±2.9% | 0.5% | 15 | yes |
-| idle renderer/chrome gap mean (ms) | 38 | 135.3924 | 8.8% | ±2.9% | 0.4% | 15 | yes |
+| idle renderer/chrome wakes/s | 38 | 7.3745 | 8.8% | ±2.9% | 0.5% | 15 | yes |
+| idle renderer/chrome gap mean (ms) | 38 | 135.6018 | 8.8% | ±2.9% | 0.4% | 15 | yes |
 | idle renderer/chrome run mean (ms) | 38 | 0.0743 | 13.3% | ±4.4% | 1.2% | 30 | yes |
-| idle utility/chrome wakes/s | 38 | 0.803 | 0.7% | ±0.2% | 0.1% | 5 | yes |
-| idle utility/chrome gap mean (ms) | 38 | 1245.3614 | 0.7% | ±0.2% | 0.1% | 5 | yes |
+| idle utility/chrome wakes/s | 38 | 0.8016 | 0.7% | ±0.2% | 0.1% | 5 | yes |
+| idle utility/chrome gap mean (ms) | 38 | 1247.4737 | 0.7% | ±0.2% | 0.1% | 5 | yes |
 | idle utility/chrome run mean (ms) | 38 | 0.0783 | 8.6% | ±2.8% | 0.7% | 14 | yes |
-| idle chrome wakes/s | 38 | 0.8003 | 2.5% | ±0.8% | 0.1% | 5 | yes |
-| idle chrome gap mean (ms) | 38 | 1249.4562 | 2.5% | ±0.8% | 0.1% | 5 | yes |
-| idle chrome run mean (ms) | 38 | 0.156 | 7.2% | ±2.4% | 0.7% | 11 | yes |
-| idle residual wakes/s | 38 | 1.8038 | 6.3% | ±2.1% | 0.5% | 9 | yes |
-| idle residual gap mean (ms) | 38 | 554.3957 | 6.3% | ±2.1% | 0.5% | 9 | yes |
-| idle residual run mean (ms) | 38 | 0.0862 | 6.8% | ±2.2% | 0.4% | 10 | yes |
-| op Chrome_IOThread wakes/s | 38 | 564.5779 | 2.9% | ±0.9% | 0.2% | 5 | yes |
-| op Chrome_IOThread gap mean (ms) | 38 | 1.7724 | 2.9% | ±0.9% | 0.2% | 5 | yes |
-| op Chrome_IOThread run mean (ms) | 38 | 0.0243 | 4.3% | ±1.4% | 0.3% | 6 | yes |
-| op renderer/Chrome_ChildIOT wakes/s | 38 | 310.1619 | 2.7% | ±0.9% | 0.1% | 5 | yes |
-| op renderer/Chrome_ChildIOT gap mean (ms) | 38 | 3.2255 | 2.7% | ±0.9% | 0.2% | 5 | yes |
-| op renderer/Chrome_ChildIOT run mean (ms) | 38 | 0.0225 | 2.5% | ±0.8% | 0.1% | 5 | yes |
-| op renderer/ThreadPoolForeg wakes/s | 38 | 277.2855 | 4.0% | ±1.3% | 0.3% | 5 | yes |
-| op renderer/ThreadPoolForeg gap mean (ms) | 38 | 3.6089 | 4.1% | ±1.3% | 0.2% | 6 | yes |
-| op renderer/ThreadPoolForeg run mean (ms) | 38 | 0.3914 | 4.9% | ±1.6% | 0.4% | 7 | yes |
-| op chrome wakes/s | 38 | 250.6487 | 2.3% | ±0.8% | 0.1% | 5 | yes |
-| op chrome gap mean (ms) | 38 | 3.9916 | 2.4% | ±0.8% | 0.1% | 5 | yes |
-| op chrome run mean (ms) | 38 | 0.2987 | 6.9% | ±2.3% | 0.4% | 10 | yes |
-| op gpu/VizCompositorTh wakes/s | 38 | 146.9709 | 1.3% | ±0.4% | 0.1% | 5 | yes |
-| op gpu/VizCompositorTh gap mean (ms) | 38 | 6.805 | 1.3% | ±0.4% | 0.1% | 5 | yes |
-| op gpu/VizCompositorTh run mean (ms) | 38 | 0.4379 | 9.8% | ±3.2% | 0.6% | 18 | yes |
-| op gpu/Chrome_ChildIOT wakes/s | 38 | 143.1566 | 1.8% | ±0.6% | 0.1% | 5 | yes |
-| op gpu/Chrome_ChildIOT gap mean (ms) | 38 | 6.9886 | 1.9% | ±0.6% | 0.1% | 5 | yes |
-| op gpu/Chrome_ChildIOT run mean (ms) | 38 | 0.0297 | 5.9% | ±1.9% | 0.5% | 8 | yes |
-| op ThreadPoolForeg wakes/s | 38 | 142.7277 | 5.6% | ±1.8% | 0.4% | 8 | yes |
-| op ThreadPoolForeg gap mean (ms) | 38 | 7.0137 | 5.7% | ±1.9% | 0.4% | 8 | yes |
-| op ThreadPoolForeg run mean (ms) | 38 | 0.031 | 6.3% | ±2.1% | 0.4% | 9 | yes |
-| op renderer/Compositor wakes/s | 38 | 132.7986 | 3.0% | ±1.0% | 0.2% | 5 | yes |
-| op renderer/Compositor gap mean (ms) | 38 | 7.5354 | 3.0% | ±1.0% | 0.2% | 5 | yes |
-| op renderer/Compositor run mean (ms) | 38 | 0.0869 | 3.8% | ±1.2% | 0.3% | 5 | yes |
-| op renderer/chrome wakes/s | 38 | 79.3942 | 4.1% | ±1.3% | 0.3% | 6 | yes |
-| op renderer/chrome gap mean (ms) | 38 | 12.6042 | 4.1% | ±1.3% | 0.3% | 6 | yes |
-| op renderer/chrome run mean (ms) | 38 | 4.9108 | 6.2% | ±2.0% | 0.4% | 9 | yes |
-| op utility/Chrome_ChildIOT wakes/s | 38 | 78.9615 | 4.8% | ±1.6% | 0.3% | 7 | yes |
-| op utility/Chrome_ChildIOT gap mean (ms) | 38 | 12.6761 | 4.9% | ±1.6% | 0.4% | 7 | yes |
-| op utility/Chrome_ChildIOT run mean (ms) | 38 | 0.1628 | 5.0% | ±1.6% | 0.3% | 7 | yes |
-| op CompositorTileW wakes/s | 38 | 64.4531 | 2.1% | ±0.7% | 0.1% | 5 | yes |
-| op CompositorTileW gap mean (ms) | 38 | 15.5226 | 2.2% | ±0.7% | 0.1% | 5 | yes |
-| op CompositorTileW run mean (ms) | 38 | 0.1009 | 6.6% | ±2.1% | 0.5% | 10 | yes |
-| op residual wakes/s | 38 | 104.876 | 4.4% | ±1.4% | 0.3% | 6 | yes |
-| op residual gap mean (ms) | 38 | 9.5459 | 4.5% | ±1.5% | 0.3% | 6 | yes |
-| op residual run mean (ms) | 38 | 0.0553 | 3.8% | ±1.3% | 0.3% | 5 | yes |
+| idle chrome wakes/s | 38 | 0.799 | 2.5% | ±0.8% | 0.1% | 5 | yes |
+| idle chrome gap mean (ms) | 38 | 1251.5824 | 2.5% | ±0.8% | 0.1% | 5 | yes |
+| idle chrome run mean (ms) | 38 | 0.1561 | 7.2% | ±2.4% | 0.7% | 11 | yes |
+| idle renderer/Compositor [event] wakes/s | 38 | 0.0201 | 48.3% | ±15.9% | 2.2% | over 200 | no |
+| idle renderer/Compositor [event] gap mean (ms) | 38 | 49781.828 | 48.3% | ±15.9% | 2.3% | over 200 | no |
+| idle renderer/Compositor [event] run mean (ms) | 38 | 0.0666 | 16.4% | ±5.4% | 1.0% | 44 | no |
+| idle gpu/VizCompositorTh [event] wakes/s | 38 | 0.0178 | 44.7% | ±14.7% | 2.9% | over 200 | no |
+| idle gpu/VizCompositorTh [event] gap mean (ms) | 38 | 56296.487 | 44.7% | ±14.7% | 3.0% | over 200 | no |
+| idle gpu/VizCompositorTh [event] run mean (ms) | 38 | 0.0792 | 21.0% | ±6.9% | 1.4% | 71 | no |
+| idle utility/ThreadPoolForeg [event] wakes/s | 38 | 0.0094 | 36.4% | ±11.9% | 1.8% | over 200 | no |
+| idle utility/ThreadPoolForeg [event] gap mean (ms) | 38 | 106046.8708 | 36.4% | ±11.9% | 1.7% | over 200 | no |
+| idle utility/ThreadPoolForeg [event] run mean (ms) | 38 | 0.0541 | 12.7% | ±4.2% | 1.1% | 28 | yes |
+| idle residual wakes/s | 38 | 1.7861 | 6.2% | ±2.1% | 0.5% | 9 | yes |
+| idle residual gap mean (ms) | 38 | 559.8683 | 6.2% | ±2.1% | 0.5% | 9 | yes |
+| idle residual run mean (ms) | 38 | 0.086 | 6.8% | ±2.2% | 0.4% | 10 | yes |
+| op Chrome_IOThread wakes/s | 38 | 94.3974 | 6.5% | ±2.1% | 0.4% | 9 | yes |
+| op Chrome_IOThread gap mean (ms) | 38 | 10.606 | 6.6% | ±2.2% | 0.4% | 10 | yes |
+| op Chrome_IOThread run mean (ms) | 38 | 0.0267 | 6.9% | ±2.3% | 0.5% | 10 | yes |
+| op chrome wakes/s | 38 | 78.1579 | 6.4% | ±2.1% | 0.5% | 9 | yes |
+| op chrome gap mean (ms) | 38 | 12.8119 | 6.6% | ±2.2% | 0.5% | 10 | yes |
+| op chrome run mean (ms) | 38 | 0.1935 | 12.0% | ±3.9% | 0.9% | 25 | yes |
+| op gpu/VizCompositorTh wakes/s | 38 | 41.9019 | 5.0% | ±1.6% | 0.3% | 7 | yes |
+| op gpu/VizCompositorTh gap mean (ms) | 38 | 23.8842 | 5.1% | ±1.7% | 0.3% | 7 | yes |
+| op gpu/VizCompositorTh run mean (ms) | 38 | 0.2858 | 9.7% | ±3.2% | 0.6% | 17 | yes |
+| op gpu/Chrome_ChildIOT wakes/s | 38 | 34.8 | 5.7% | ±1.9% | 0.4% | 8 | yes |
+| op gpu/Chrome_ChildIOT gap mean (ms) | 38 | 28.7654 | 5.8% | ±1.9% | 0.4% | 8 | yes |
+| op gpu/Chrome_ChildIOT run mean (ms) | 38 | 0.0266 | 7.7% | ±2.5% | 0.6% | 12 | yes |
+| op CompositorTileW wakes/s | 38 | 31.9627 | 5.6% | ±1.8% | 0.4% | 8 | yes |
+| op CompositorTileW gap mean (ms) | 38 | 31.3303 | 5.8% | ±1.9% | 0.4% | 8 | yes |
+| op CompositorTileW run mean (ms) | 38 | 0.0499 | 13.4% | ±4.4% | 1.0% | 30 | yes |
+| op renderer/Chrome_ChildIOT wakes/s | 38 | 30.0203 | 15.5% | ±5.1% | 1.2% | 40 | no |
+| op renderer/Chrome_ChildIOT gap mean (ms) | 38 | 33.3401 | 15.7% | ±5.1% | 1.2% | 41 | no |
+| op renderer/Chrome_ChildIOT run mean (ms) | 38 | 0.0236 | 6.7% | ±2.2% | 0.5% | 10 | yes |
+| op renderer/ThreadPoolForeg wakes/s | 38 | 28.0119 | 19.4% | ±6.4% | 1.4% | 61 | no |
+| op renderer/ThreadPoolForeg gap mean (ms) | 38 | 35.6914 | 19.4% | ±6.4% | 1.5% | 61 | no |
+| op renderer/ThreadPoolForeg run mean (ms) | 38 | 0.3135 | 14.7% | ±4.8% | 1.0% | 36 | yes |
+| op ThreadPoolForeg wakes/s | 38 | 22.8745 | 15.3% | ±5.0% | 1.0% | 39 | no |
+| op ThreadPoolForeg gap mean (ms) | 38 | 43.6248 | 15.4% | ±5.1% | 1.0% | 40 | no |
+| op ThreadPoolForeg run mean (ms) | 38 | 0.0404 | 10.6% | ±3.5% | 1.1% | 20 | yes |
+| op renderer/chrome wakes/s | 38 | 20.8755 | 8.7% | ±2.9% | 0.5% | 15 | yes |
+| op renderer/chrome gap mean (ms) | 38 | 47.9795 | 8.7% | ±2.9% | 0.5% | 15 | yes |
+| op renderer/chrome run mean (ms) | 38 | 1.5131 | 17.6% | ±5.8% | 1.1% | 51 | no |
+| op renderer/Compositor wakes/s | 38 | 18.4564 | 9.2% | ±3.0% | 0.7% | 16 | yes |
+| op renderer/Compositor gap mean (ms) | 38 | 54.2512 | 9.2% | ±3.0% | 0.7% | 16 | yes |
+| op renderer/Compositor run mean (ms) | 38 | 0.0813 | 11.1% | ±3.7% | 0.8% | 22 | yes |
+| op Chrome_IOThread [event] wakes/s | 38 | 470.1805 | 2.7% | ±0.9% | 0.2% | 5 | yes |
+| op Chrome_IOThread [event] gap mean (ms) | 38 | 2.1281 | 2.7% | ±0.9% | 0.2% | 5 | yes |
+| op Chrome_IOThread [event] run mean (ms) | 38 | 0.0238 | 4.2% | ±1.4% | 0.3% | 6 | yes |
+| op renderer/Chrome_ChildIOT [event] wakes/s | 38 | 280.1416 | 2.7% | ±0.9% | 0.2% | 5 | yes |
+| op renderer/Chrome_ChildIOT [event] gap mean (ms) | 38 | 3.571 | 2.7% | ±0.9% | 0.2% | 5 | yes |
+| op renderer/Chrome_ChildIOT [event] run mean (ms) | 38 | 0.0224 | 2.5% | ±0.8% | 0.1% | 5 | yes |
+| op renderer/ThreadPoolForeg [event] wakes/s | 38 | 249.2736 | 4.4% | ±1.4% | 0.2% | 6 | yes |
+| op renderer/ThreadPoolForeg [event] gap mean (ms) | 38 | 4.0148 | 4.4% | ±1.5% | 0.3% | 6 | yes |
+| op renderer/ThreadPoolForeg [event] run mean (ms) | 38 | 0.4002 | 5.1% | ±1.7% | 0.3% | 7 | yes |
+| op chrome [event] wakes/s | 38 | 172.4908 | 2.5% | ±0.8% | 0.2% | 5 | yes |
+| op chrome [event] gap mean (ms) | 38 | 5.7981 | 2.5% | ±0.8% | 0.2% | 5 | yes |
+| op chrome [event] run mean (ms) | 38 | 0.3463 | 5.7% | ±1.9% | 0.3% | 8 | yes |
+| op ThreadPoolForeg [event] wakes/s | 38 | 119.8531 | 7.5% | ±2.5% | 0.5% | 12 | yes |
+| op ThreadPoolForeg [event] gap mean (ms) | 38 | 8.3573 | 7.6% | ±2.5% | 0.5% | 12 | yes |
+| op ThreadPoolForeg [event] run mean (ms) | 38 | 0.0292 | 7.8% | ±2.6% | 0.5% | 12 | yes |
+| op renderer/Compositor [event] wakes/s | 38 | 114.3422 | 3.0% | ±1.0% | 0.2% | 5 | yes |
+| op renderer/Compositor [event] gap mean (ms) | 38 | 8.7509 | 3.0% | ±1.0% | 0.2% | 5 | yes |
+| op renderer/Compositor [event] run mean (ms) | 38 | 0.0878 | 3.2% | ±1.1% | 0.2% | 5 | yes |
+| op gpu/Chrome_ChildIOT [event] wakes/s | 38 | 108.3567 | 2.2% | ±0.7% | 0.2% | 5 | yes |
+| op gpu/Chrome_ChildIOT [event] gap mean (ms) | 38 | 9.2314 | 2.3% | ±0.8% | 0.2% | 5 | yes |
+| op gpu/Chrome_ChildIOT [event] run mean (ms) | 38 | 0.0307 | 5.4% | ±1.8% | 0.4% | 7 | yes |
+| op gpu/VizCompositorTh [event] wakes/s | 38 | 105.069 | 2.2% | ±0.7% | 0.2% | 5 | yes |
+| op gpu/VizCompositorTh [event] gap mean (ms) | 38 | 9.5163 | 2.2% | ±0.7% | 0.2% | 5 | yes |
+| op gpu/VizCompositorTh [event] run mean (ms) | 38 | 0.4985 | 10.0% | ±3.3% | 0.6% | 18 | yes |
+| op utility/Chrome_ChildIOT [event] wakes/s | 38 | 72.9756 | 4.3% | ±1.4% | 0.3% | 6 | yes |
+| op utility/Chrome_ChildIOT [event] gap mean (ms) | 38 | 13.7152 | 4.4% | ±1.5% | 0.4% | 6 | yes |
+| op utility/Chrome_ChildIOT [event] run mean (ms) | 38 | 0.1591 | 8.6% | ±2.8% | 0.5% | 14 | yes |
+| op renderer/chrome [event] wakes/s | 38 | 58.5187 | 3.9% | ±1.3% | 0.2% | 5 | yes |
+| op renderer/chrome [event] gap mean (ms) | 38 | 17.0951 | 3.8% | ±1.3% | 0.2% | 5 | yes |
+| op renderer/chrome [event] run mean (ms) | 38 | 6.1214 | 5.8% | ±1.9% | 0.4% | 8 | yes |
+| op utility/ThreadPoolForeg [event] wakes/s | 38 | 37.2525 | 21.2% | ±7.0% | 1.4% | 72 | no |
+| op utility/ThreadPoolForeg [event] gap mean (ms) | 38 | 26.9009 | 21.4% | ±7.0% | 1.4% | 74 | no |
+| op utility/ThreadPoolForeg [event] run mean (ms) | 38 | 0.032 | 5.9% | ±1.9% | 0.4% | 8 | yes |
+| op residual wakes/s | 38 | 16.3825 | 46.6% | ±15.3% | 3.3% | over 200 | no |
+| op residual gap mean (ms) | 38 | 61.0068 | 46.9% | ±15.4% | 3.5% | over 200 | no |
+| op residual run mean (ms) | 38 | 0.1194 | 15.8% | ±5.2% | 1.2% | 41 | no |
+| op residual [event] wakes/s | 38 | 89.7174 | 2.6% | ±0.9% | 0.2% | 5 | yes |
+| op residual [event] gap mean (ms) | 38 | 11.1517 | 2.6% | ±0.9% | 0.2% | 5 | yes |
+| op residual [event] run mean (ms) | 38 | 0.0981 | 3.6% | ±1.2% | 0.2% | 5 | yes |
 | input_run mean, SWELL-KW (ms) | 38 | 4.2736 | 17.9% | ±5.9% | 2.0% | 52 | no |
 | input_run mean, 136M (ms) | 38 | 5.4147 | 10.2% | ±3.4% | 0.7% | 19 | yes |
 | operation duration mean (ms) | 38 | 489.9182 | 3.0% | ±1.0% | 0.2% | 5 | yes |
