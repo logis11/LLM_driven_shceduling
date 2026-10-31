@@ -26,6 +26,25 @@
 
 ## 2. 경민이 할 일
 
+### TL;DR — `simulator/src/sim.cpp`에서 고치고 더할 것
+
+순서는 RQ0 run 전에 끝내야 하는 것부터예요. 자세한 규칙은 아래 2.1–2.4에 있어요.
+
+1. **두 mailbox와 `wake_drop` — conformance 항목 (j), 새 일.** 바뀌는 곳은 channel을 다루는 세 군데예요.
+   - **`channel()`** (channel 이름 → index): channel마다 종류를 함께 적어 두세요. 이름이 `timer:`로 시작하는지만 알면 돼요. 새 접두어 `event:`는 `input:`과 똑같이 다루니 지금 코드(`chan_pending_` 계수기, 깊이 제한 없음)를 그대로 써요. 따로 할 일이 없어요.
+   - **`on_ext_wake()`** (바깥 wake가 도착할 때): `timer:` channel에서 기다리는 task가 없으면, 붙잡힌 wake가 없을 때만 붙잡아요. 이미 하나가 붙잡혀 있으면 버리고, 그 순간 `{"event":"wake_drop","t":<now>,"task":"<id>","channel":"timer:<id>"}` 한 줄을 써요. `<id>`는 channel 이름의 `:` 뒤예요. task가 아직 도착하기 전에 온 timer wake도 같은 규칙이에요. 처음 것은 붙잡고, 나머지는 그 시각에 `wake_drop`을 써요.
+   - **`step()`의 `Op::WAIT`**: task의 k번째 timer `WAIT`는 그 task의 k번째 timer wake와 짝이에요.
+     - k번째 wake가 버려진 것이면, 그 `WAIT`와 바로 뒤 `RUN`을 막힘·일·line 없이 건너뛰어요. `RUN`은 다음 명령이 `RUN`일 때만 건너뛰어요. compiler가 run이 0인 wake의 `RUN`을 생략하기 때문이에요.
+     - 붙잡힌 것이면 지금처럼 대기 0인 `ready` line을 쓰고 통과해요.
+     - 아직 안 왔으면 막혀요.
+   - **주의:** 계수기 두 개(붙잡힌 수, 버려진 수)로는 짝이 어긋나요. w1이 붙잡히고 w2가 버려진 채 첫 `WAIT`에 닿을 때와, w1을 소비한 뒤 w3이 붙잡힌 채 둘째 `WAIT`(w2의 짝)에 닿을 때, 두 계수기는 똑같이 (1, 1)인데 해야 할 일은 반대(소비 / 건너뛰기)예요. 그래서 channel마다 "도착한 timer wake 하나하나의 운명(붙잡힘·버려짐·소비됨)"과 "다음 timer `WAIT`의 번호"를 두는 것이 안전해요. harness도 wake 번호로 짝을 맞춰요(`harness/tools/harness/primitives.py`의 `wake_drop` 처리와 `next_wait`).
+   - **확인:** `harness/tools/tests/fixtures/mock-wakes/run.json`을 돌린 trace가 같은 폴더의 `trace.jsonl`과 line 단위로 같아야 해요. 지금까지처럼 `steps/`에 새 단계로 두고 `src/sim.cpp`로 옮기면 돼요.
+2. **빈 slot을 바로 얻은 FORK의 대기 0 `ready(cause = fork_slot)` line — 항목 (a)의 마지막 경우, Part H4.** `step()`의 `Op::FORK`에서 slot이 남아 바로 `spawn()`하는 갈래에 그 line을 더해요. 그다음 `fix-object`와 `fix-tree`의 `reference-trace.jsonl`을 다시 만들어요(2.2).
+3. **RUN 끝의 drain — Part H5.** 기다리는 config switch(U3의 `pending_`, `dispatch()`)를, occupancy 안에서 RUN이 끝나는 순간에도 slice가 끝날 때와 똑같이 적용해요. FIFO에서 나가는 switch는 지금처럼 즉시 적용해요(2.3).
+4. **`WAIT children:<id>` — 항목 (g).** 지금은 보통 channel처럼 영원히 막혀요. 그 orchestrator가 spawn한 자식이 모두 끝나면 완료되고, `WAIT`에 닿을 때 살아 있는 자식이 없으면 막히지 않고 대기 0으로 바로 완료되게 해요(2.4).
+5. **invocation contract — 항목 (h).** `main()`의 `--workload`, `--schedule`, `--out-trace`, gzip, 다 쓴 경우에만 exit 0은 이미 있어요. 남은 것은 둘이에요. trace header의 `"sim"`이 지금 `"src/sim"`으로 고정이라 runner machine 설정에 적힌 version 문자열로 바꿔야 하고, 미뤄 둔 위치 인자 거부가 있어요(2.4).
+6. **회귀 기준선.** core set, sensitivity variant, generated layer가 2026-10-31에 다시 build됐어요. 51개 파일 모두 바뀌었어요(`event:` channel, operation 창 시작의 큰 run). 기존 byte-identical 기준선은 새 build(dataset manifest `27d347bc…`)로 다시 잡아야 해요.
+
 ### 2.1 두 channel의 mailbox와 `wake_drop` (새 일)
 
 측정된 앱 자신의 wake가 이제 두 channel로 나뉘어 와요(§5). simulator는 channel 종류에 따라 mailbox를 다르게 다뤄야 해요.
@@ -45,7 +64,7 @@
 - **conformance.** RQ0 gate spec의 `simulator-conformance`에 항목 (j)로 들어갔어요. 내용은 위의 두 mailbox와 `wake_drop`이에요. 항목 (a), 곧 "blocking primitive가 끝날 때마다 `ready` line"에는 예외가 하나 생겼어요. 버려진 timer wake의 `WAIT`와 `RUN`은 line 없이 지나가요.
 - **(j)를 보일 hand fixture.** `harness/tools/tests/fixtures/mock-wakes/`예요. 측정된 앱 하나에 timer wake 셋이 RUN 하나 동안 와요. 첫째는 처리되고, 둘째는 붙잡혀 있다가 대기 0으로 처리되고, 셋째는 버려져요. event wake 둘은 쌓였다가 차례로 처리돼요. `run.json`을 simulator로 돌린 trace가 `trace.jsonl`과 line 단위로 같으면 (j)를 보인 거예요. 순간마다 일어나는 일과 records는 `worked.md`에 손으로 풀어 두었어요.
 - **trace 계약.** `wake_drop`은 trace의 여덟 번째 runtime event예요(`docs/data-contracts.md` §9). harness의 reader는 이 line을 이미 읽어요. 계약 변경 기록은 `docs/data-contracts.md` §14의 2026-10-31 항목에 있어요.
-- harness의 mock simulator는 `mock-simulator@3`부터 이렇게 해요(`harness/tools/tests/mocks/simulator.py`). 같은 순간에 같은 task로 오는 두 번째 timer wake를 버리고 `wake_drop`을 써요.
+- harness의 mock simulator는 `mock-simulator@3`부터 이렇게 해요(`harness/tools/tests/mocks/simulator.py`). 한 순간에 같은 task로 timer wake가 여럿 오면, 첫째는 task가 막혀 있던 `WAIT`를 완료하고, 둘째는 붙잡혀 같은 run 안에서 다음 `WAIT`를 완료하고, 셋째부터 버리고 `wake_drop`을 써요. 등장 전에 온 timer wake도 처음 하나만 붙잡아요.
 
 ### 2.2 빈 slot을 바로 얻은 FORK의 line (Part H4)
 
