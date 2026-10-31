@@ -1,7 +1,7 @@
 # Phase 9 결과 — workload dataset을 다시 만들면서 생긴 것, 바뀐 것, 없어진 것
 
-> Status: memo · Created 2026-10-17 · Updated 2026-10-30
-> 열림 — 인경민: RQ0 run 전에 남은 simulator conformance 항목 (g)·(h)를 hand fixture로 보여 주는 것과 (g)에 대한 동의(§6.2), rebuild된 core set에서 regression check와 EDF 재측정(§6.3). §6.1의 loader(spawn된 child를 target으로 하는 WAKE)는 simulator의 stage W(2026-10-21)에, §6.2의 (d)는 stage V(2026-10-20)에, (a)는 stage X, (b)는 stage Y(둘 다 2026-10-23)에, (e)는 stage Z(2026-10-28)에 들어왔어요. 박이안: recognition log에 formatted prompt를 남길지, chat template이 넣는 날짜를 고정할지 기록할지(§8.2). 셋이 같이: 제안 둘(§9). 담당 인경민, 박이안.
+> Status: memo · Created 2026-10-17 · Updated 2026-10-31
+> 열림 — 인경민: RQ0 run 전에 남은 simulator conformance 항목 (g)·(h)를 hand fixture로 보여 주는 것(§6.2; (g)에 대한 동의는 구두로, 2026-10-31 기록), rebuild된 core set에서 regression check와 EDF 재측정(§6.3). §6.1의 loader(spawn된 child를 target으로 하는 WAKE)는 simulator의 stage W(2026-10-21)에, §6.2의 (d)는 stage V(2026-10-20)에, (a)는 stage X, (b)는 stage Y(둘 다 2026-10-23)에, (e)는 stage Z(2026-10-28)에 들어왔어요. 박이안: recognition log에 formatted prompt를 남길지, chat template이 넣는 날짜를 고정할지 기록할지(§8.2). 셋이 같이: 제안 둘(§9). 담당 인경민, 박이안.
 > From 인지오 to 인경민, 박이안.
 
 ## 0. 이 문서

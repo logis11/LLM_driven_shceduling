@@ -334,8 +334,8 @@ statements:
       executor has no starvation window; the harness's starvation_floor guard
       reads 30 s, the bound sched_ext's watchdog enforces at most and by default,
       borrowed by design as the deployment path's validity bound (9.11 D7, D19).
-      인경민's formal reply to (1) and (2) is asked in the declared-class memo of
-      2026-10-08; a differing answer is a harness changelog entry before any run.
+      인경민 confirmed (1) and (2) to 인지오 verbally, the reply the declared-class
+      memo of 2026-10-08 asked (recorded 2026-10-31).
   - id: simulator-conformance
     text: >
       Every consumer this spec pins is written against the ratified contract, not
@@ -358,8 +358,8 @@ statements:
       children:<id> completes when every child it spawned has ended, and
       without blocking when none is live at the WAIT (the interpretation contract's
       WAIT(channel) row and FORK semantics; data contracts §4 Example B and
-      §14, 2026-10-16: proposed there, in force once the simulator's owner
-      agrees; this spec requires it of the run); (h) the simulator run through
+      §14, 2026-10-16: proposed there, in force since 인경민 agreed to it
+      verbally, recorded 2026-10-31; this spec requires it of the run); (h) the simulator run through
       the invocation contract as the runner invokes it — the workload and the
       config schedule as --workload and --schedule and the trace's path as
       --out-trace, with no positional argument, the trace written to that file

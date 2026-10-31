@@ -1,6 +1,6 @@
 # 1권 · 데이터셋의 큰 그림
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-30
+> Status: draft · Created 2026-10-14 · Updated 2026-10-31
 
 **이 데이터셋은 무엇이고, 연구에서 어떤 일을 맡으며, 왜 이런 모양인가.**
 
@@ -373,7 +373,7 @@ program의 RUN을 모두 더하면 19,913,142 µs, 약 19.9초입니다. 60초�
     … ] }
 ```
 
-Linux kernel build의 object 파일 하나를 만드는 일은 실제로 process 여섯 개(`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`)가 이어서 하는 일입니다. 데이터셋은 그 여섯을 "작업 하나"로 묶어 spawn table에 연속으로 적고, 작업 2,908개를 적습니다. 그래서 spawn table은 2,908 × 6 = 17,448개 항목입니다. `make`의 program은 RUN 2,908개(작업마다 한 번의 dispatch 비용)와 FORK 17,448개, 그리고 마지막의 `WAIT children:build`와 `EXIT`로 되어 있습니다. 자식들끼리는 `WAKE`와 `job:` channel로 부모-자식 순서를 지킵니다. 예를 들어 `build.j1.sh`는 일한 뒤 `build.j1.gcc`를 깨우고 자기 channel `job:build.j1.sh`에서 기다립니다. 동시에 살아 있을 수 있는 자식 수의 상한이 `fork_cap`이고, 그 값 48은 `-j8`(동시 작업 8개)에 작업당 process 여섯을 곱한 것입니다. 마지막의 `WAIT children:build`는 어떤 task도 `WAKE`로 깨우지 않습니다. executor가 `make`가 spawn한 자식이 모두 끝났을 때 이 WAIT를 끝내고, 그때 살아 있는 자식이 없으면 막지 않고 지나보낸다는 규칙이 2026-10-16에 계약(`docs/simulator/interpretation-contract.md` §3의 `WAIT(channel)` 줄과 §5의 FORK 문단)에 제안되었고, 인경민이 동의하면 효력을 갖습니다. RQ0 gate spec의 statement `simulator-conformance`는 이것을 항목 (g)로 RQ0 실행 전에 요구합니다. 2026-10-17의 simulator는 자식이 끝날 때 fork 자리만 돌려주고 이 WAIT를 끝내지 않습니다(`simulator/src/sim.cpp`의 `on_task_end`).
+Linux kernel build의 object 파일 하나를 만드는 일은 실제로 process 여섯 개(`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`)가 이어서 하는 일입니다. 데이터셋은 그 여섯을 "작업 하나"로 묶어 spawn table에 연속으로 적고, 작업 2,908개를 적습니다. 그래서 spawn table은 2,908 × 6 = 17,448개 항목입니다. `make`의 program은 RUN 2,908개(작업마다 한 번의 dispatch 비용)와 FORK 17,448개, 그리고 마지막의 `WAIT children:build`와 `EXIT`로 되어 있습니다. 자식들끼리는 `WAKE`와 `job:` channel로 부모-자식 순서를 지킵니다. 예를 들어 `build.j1.sh`는 일한 뒤 `build.j1.gcc`를 깨우고 자기 channel `job:build.j1.sh`에서 기다립니다. 동시에 살아 있을 수 있는 자식 수의 상한이 `fork_cap`이고, 그 값 48은 `-j8`(동시 작업 8개)에 작업당 process 여섯을 곱한 것입니다. 마지막의 `WAIT children:build`는 어떤 task도 `WAKE`로 깨우지 않습니다. executor가 `make`가 spawn한 자식이 모두 끝났을 때 이 WAIT를 끝내고, 그때 살아 있는 자식이 없으면 막지 않고 지나보낸다는 규칙이 2026-10-16에 계약(`docs/simulator/interpretation-contract.md` §3의 `WAIT(channel)` 줄과 §5의 FORK 문단)에 제안되었고, 인경민이 구두로 동의해 효력을 가졌습니다(2026-10-31 기록). RQ0 gate spec의 statement `simulator-conformance`는 이것을 항목 (g)로 RQ0 실행 전에 요구합니다. 2026-10-17의 simulator는 자식이 끝날 때 fork 자리만 돌려주고 이 WAIT를 끝내지 않습니다(`simulator/src/sim.cpp`의 `on_task_end`).
 
 **어떤** 자식이 생기는지와 각 자식이 **무엇을** 하는지는 compile 때 정해져 파일에 있습니다. 그러나 각 자식이 **언제** 시작하는지는 파일에 없습니다. 그것은 scheduler가 `make`와 자식들에게 CPU를 얼마나 주느냐에 따라 실행 중에 정해집니다. 이 구분이 다음 절의 주제입니다.
 

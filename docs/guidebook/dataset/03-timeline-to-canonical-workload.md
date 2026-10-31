@@ -1,6 +1,6 @@
 # 3권 · Timeline에서 canonical workload로: 포맷과 compiler
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-30
+> Status: draft · Created 2026-10-14 · Updated 2026-10-31
 
 **사람이 쓴 timeline 파일 하나가 어떤 규칙으로 simulator가 읽는 workload JSON이 되나.**
 
@@ -1215,7 +1215,7 @@ contract는 primitive를 여섯 개라고 셉니다(`FORK`와 `EXIT`를 한 줄�
 
 tree에서 세면 core set 51개 파일의 wake event는 모두 4,502,685개입니다(이 권을 쓰며 `"op":"wake"`를 세었습니다). 키 입력 channel은 그중 작은 부분입니다. 편집기 하나만 보아도 `c1-dev`에서 timer wake가 6,456개, 키 입력이 186개입니다. "편집기 program = 키 입력 기다림과 CPU 사용의 반복"이라는 README와 data-contracts의 그림은 단순화이고, 실제 측정된 편집기는 사용자가 없어도 자기 thread들의 timer로 훨씬 자주 깨어납니다.
 
-> **열린 자리.** `children:<id>` channel을 깨우는 사건은 canonical 파일에 없습니다. 이 channel의 뜻은 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 그 orchestrator가 낳은 자식이 모두 끝났을 때 완료하고, WAIT에 닿았을 때 살아 있는 자식이 없으면 막지 않고 곧바로 완료합니다(대기 0의 `ready` 줄). 데이터는 바뀌지 않습니다. 이 규칙은 interpretation contract의 §3 `WAIT(channel)` 행과 §5 FORK 문단, `docs/data-contracts.md` §4 예제 B와 §14의 2026-10-16 기록에 "proposed"로 적혀 있습니다. 동결된 계약의 변경이라 simulator 담당 인경민이 Phase 9의 final memo에 답해 동의하면 효력을 가집니다(`docs/data-contracts.md` §13의 동결 규칙). 지금의 reference simulator는 이 channel을 보통 channel로 다루어(`simulator/src/sim.cpp`의 `on_task_end`는 fork 자리만 돌려줍니다), 자식이 다 끝나도 orchestrator가 막힌 채로 남습니다. 그래서 `c1-compile`의 build turnaround를 재려면 이 구현이 먼저 있어야 하고, RQ0 gate spec은 이것을 simulator 적합성 항목 (g)로 적습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
+> **열린 자리.** `children:<id>` channel을 깨우는 사건은 canonical 파일에 없습니다. 이 channel의 뜻은 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 그 orchestrator가 낳은 자식이 모두 끝났을 때 완료하고, WAIT에 닿았을 때 살아 있는 자식이 없으면 막지 않고 곧바로 완료합니다(대기 0의 `ready` 줄). 데이터는 바뀌지 않습니다. 이 규칙은 interpretation contract의 §3 `WAIT(channel)` 행과 §5 FORK 문단, `docs/data-contracts.md` §4 예제 B와 §14의 2026-10-16 기록에 "proposed"로 적혔습니다. 동결된 계약의 변경이라 simulator 담당 인경민의 동의가 필요했고(`docs/data-contracts.md` §13의 동결 규칙), 인경민이 구두로 동의해 효력을 가졌습니다(2026-10-31 기록, `docs/data-contracts.md` §14). 지금의 reference simulator는 이 channel을 보통 channel로 다루어(`simulator/src/sim.cpp`의 `on_task_end`는 fork 자리만 돌려줍니다), 자식이 다 끝나도 orchestrator가 막힌 채로 남습니다. 그래서 `c1-compile`의 build turnaround를 재려면 이 구현이 먼저 있어야 하고, RQ0 gate spec은 이것을 simulator 적합성 항목 (g)로 적습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
 
 ## 7.8 spawn table과 `fork_cap`
 
@@ -2243,7 +2243,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 
 **1. launch stream의 고정 — 닫힘.** 9.23 D11(2026-10-15)이 `dataset/launch/*.json.gz` 10개를 manifest의 `inputs`에 더했습니다(13.5절).
 
-**2. `children:<id>` channel을 누가 깨우나 — 규칙은 정해졌고 동의를 기다림.** 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 자식이 모두 끝났을 때 완료하고, 살아 있는 자식이 없으면 곧바로 완료합니다. 이 규칙은 interpretation contract와 `docs/data-contracts.md`에 "proposed"로 적혀 있고, 동결된 계약의 변경이라 인경민이 Phase 9의 final memo에 답해 동의하면 효력을 가집니다(`docs/data-contracts.md` §13의 동결 규칙). 그때까지 reference simulator에서는 `c1-compile`의 build turnaround를 잴 수 없고, RQ0 gate spec이 그 구현을 simulator 적합성 항목 (g)로 요구합니다(7.7절). 인경민의 답 대기.
+**2. `children:<id>` channel을 누가 깨우나 — 규칙은 정해졌고 동의됨, 구현을 기다림.** 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 자식이 모두 끝났을 때 완료하고, 살아 있는 자식이 없으면 곧바로 완료합니다. 이 규칙은 interpretation contract와 `docs/data-contracts.md`에 "proposed"로 적혔고, 동결된 계약의 변경이라 인경민의 동의가 필요했습니다(`docs/data-contracts.md` §13의 동결 규칙). 인경민이 구두로 동의해 효력을 가졌습니다(2026-10-31 기록). 구현될 때까지 reference simulator에서는 `c1-compile`의 build turnaround를 잴 수 없고, RQ0 gate spec이 그 구현을 simulator 적합성 항목 (g)로 요구합니다(7.7절). 인경민의 구현 대기.
 
 **3. 파일보다 오래 사는 job의 demand — 닫힘.** 잘라 내지 않고, 문서들이 offered demand라고 문장으로 범위를 밝힙니다(12.4절).
 
