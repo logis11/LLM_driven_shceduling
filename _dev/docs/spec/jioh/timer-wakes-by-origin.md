@@ -4,7 +4,7 @@ The Phase 10 item "Timer wakes that find their task behind" (`_dev/TODO.md`), de
 
 ## Scope
 
-- The measured applications' non-keystroke wakes, today all compiled onto the task's `timer:` channel and queued in its mailbox like keystrokes.
+- Every measured task's non-keystroke wakes, today all compiled onto the task's `timer:` channel and queued in its mailbox like keystrokes: the interactive campaign's applications and the desktop and session campaigns' tasks alike (decision 13).
 - The dataset: the wakes split by origin, re-derived from the campaigns' raw wakeups files, compiled onto two channels; the core set, its variants and the generated layer rebuilt and re-blessed. The workload schema's TIMER description is restated to the skip rule with this re-bless (decided 2026-10-30).
 - The simulator's behaviour on the two channels and the trace line it writes, specified here for 인경민 to implement.
 - The harness: the latency primitive the 15 non-keystroke terms read, the records, the guard.
@@ -58,3 +58,7 @@ Every component is split into its timer-caused and its other part, each with its
 ### 12. The stimulus guard covers both channels (guard spec 1.4)
 
 On `event:` the rule keystrokes follow: no more `ready` lines than wakes, and no wake lost at a task's end. On `timer:` every wake has exactly one of a service (`ready` line) or a drop (`wake_drop` line); a wake with neither is lost, and a drop while the mailbox is empty or more services and drops than wakes fail the check.
+
+### 13. The desktop and session campaigns' tasks are split the same way
+
+The tasks the desktop and session campaigns measured — `renderer-hidden`, `chat-client`, `game-client` and the session daemons — have their wakes split by decisions 8 and 10 as the interactive applications' are, from those campaigns' raw wakeups files.
