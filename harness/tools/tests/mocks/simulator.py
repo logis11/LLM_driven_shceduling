@@ -21,7 +21,14 @@ completes that WAIT. A finite task exits after its last
 stimulus run, a segment-bound task departs at its pinned depart, spawn children
 arrive with their parent, every periodic job gets a met `deadline` line, and each
 schedule entry before the workload's end gets its `config_applied` line at its
-stamped time. Same-instant lines: config entries in list order, then arrivals
+stamped time. A timer-channel wake that comes while one is held is dropped
+(2026-10-31, timer wakes by origin, decisions 2 and 5; the interpretation
+contract's WAIT(channel) row): at one instant the first timer wake for a task
+completes the WAIT it is blocked on and the second, finding the task not
+blocked, is held, its `ready(wake)` line written after the instant's other
+lines; a third or later gets a `wake_drop` line at its time in place of a
+`ready` line, as does every timer wake sent before the task's arrival but the
+first, which is stored. Same-instant lines: config entries in list order, then arrivals
 in file order, then the rest, a run closing before a run opening.
 
 The replay copies a hand-written fixture trace after checking that it belongs
@@ -35,9 +42,9 @@ from collections import defaultdict
 
 from harness.reader import RunFileError, read_run_file
 
-SIM = "mock-simulator@2"
+SIM = "mock-simulator@3"
 _RANK = {"config_applied": 0, "task_arrive": 1, "run_end": 2, "deadline": 3,
-         "ready": 4, "run_start": 5, "task_end": 6}
+         "wake_drop": 4, "ready": 4, "run_start": 5, "task_end": 6}
 
 
 class MockSimulatorError(ValueError):
@@ -167,7 +174,7 @@ def _lines(doc, run, sched):
                 if _first_op(child["program"]) == "WAIT":
                     wait_first.add(child["id"])
         elif ev.get("op") == "wake":
-            stimuli[ev["target"]].append((int(ev["t"]), "wake"))
+            stimuli[ev["target"]].append((int(ev["t"]), "timer" if str(ev["channel"]).startswith("timer:") else "wake"))
     ticks = {}
     for chain in run.chains:
         head = run.tasks[chain[0]]
@@ -189,12 +196,17 @@ def _lines(doc, run, sched):
             arrival["source"] = "spawn"
             arrival["parent"] = parent_of[tid]
         emit(arrive_t, arrival)
-        # a wake sent before the arrival is stored for the task and taken in its arrival step
-        stored = sum(1 for t, cause in stimuli[tid] if cause == "wake" and t < arrive_t)
+        # a wake sent before the arrival is stored for the task and taken in its arrival step; on its timer
+        # channel one is stored, the first, and a later one, coming while that one is held, is dropped at its time
+        before = sorted((t, cause) for t, cause in stimuli[tid] if cause in ("wake", "timer") and t < arrive_t)
+        stored_timer = [t for t, cause in before if cause == "timer"]
+        for t in stored_timer[1:]:
+            emit(t, {"event": "wake_drop", "t": t, "task": tid, "channel": f"timer:{tid}"})
+        stored = len(before) - len(stored_timer[1:])
         groups = defaultdict(list)
         for t, cause in sorted(stimuli[tid], key=lambda s: s[0]):
             if t < arrive_t:
-                continue                   # a stored wake: no line before the task exists
+                continue                   # a stored wake: no ready line before the task exists
             if cause == "arrive":
                 if tid in wait_first and not stored:
                     continue               # blocked in its arrival step: no ready line, no run
@@ -204,8 +216,24 @@ def _lines(doc, run, sched):
         finite = info.depart is None and info.period_us is None
         instants = sorted(groups)
         for t in instants:
+            # the timer wakes at one instant: the first completes the WAIT the task is blocked on (at the
+            # arrival, a stored one does), the next finds the task not blocked and is held, its WAIT completing
+            # at once in the same run, and a later one comes while that one is held and is dropped
+            timers = 1 if t == arrive_t and stored_timer else 0
+            held = False
             for cause in groups[t]:
+                if cause == "timer":
+                    timers += 1
+                    if timers == 2:
+                        held = True
+                        continue
+                    if timers > 2:
+                        emit(t, {"event": "wake_drop", "t": t, "task": tid, "channel": f"timer:{tid}"})
+                        continue
+                    cause = "wake"
                 emit(t, {"event": "ready", "t": t, "task": tid, "cause": cause})
+            if held:
+                emit(t, {"event": "ready", "t": t, "task": tid, "cause": "wake"})
             emit(t, {"event": "run_start", "t": t, "task": tid})
             if finite and t == instants[-1]:
                 emit(t + 1, {"event": "run_end", "t": t + 1, "task": tid, "reason": "exit"})

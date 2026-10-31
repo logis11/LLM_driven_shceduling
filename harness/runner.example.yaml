@@ -9,7 +9,7 @@ daemon:
   version: mock-daemon@0                                          # hashed into every cache key
 simulator:
   command: [python3, harness/tools/tests/mocks/mock_simulator.py]
-  version: mock-simulator@2                                       # cross-checked against the trace header's `sim`
+  version: mock-simulator@3                                       # cross-checked against the trace header's `sim`
 
 build_dir: dataset/build/coreset-single      # the compiled workloads
 boot_defaults_dir: harness/boot-defaults     # <stem>.json per boot default the spec names

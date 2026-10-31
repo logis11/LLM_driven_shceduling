@@ -248,6 +248,39 @@ def test_a_wake_stored_before_the_arrival_completes_the_arrival_wait(tmp_path):
     assert [r["value"] for r in rows if r["entity"] == "head" and r["metric"] == "job"] == [201, 1, 1, 1]
 
 
+def test_a_timer_wake_coming_while_one_is_held_is_dropped(tmp_path):
+    """On a timer channel one wake is held, the first, and one coming while it is held is dropped
+    with a `wake_drop` line at its time (2026-10-31, timer wakes by origin, decisions 2 and 5; the
+    interpretation contract's WAIT(channel) row). At one instant the first of three timer wakes
+    completes the WAIT the task is blocked on, the second finds the task not blocked and is held,
+    the third is dropped; before the arrival the first timer wake is stored and the second dropped.
+    The primitives read the trace with no guard message, each dropped wake's `app_latency` row
+    running to the service of the wake held when it came."""
+    def task(tid, t, waits):
+        return {"op": "arrive", "t": t, "id": tid, "name": "kdenlive", "depart": 1000,
+                "program": [{"op": "LOOP", "count": waits, "body": [
+                    {"op": "WAIT", "channel": f"timer:{tid}"}, {"op": "RUN", "us": 5}]},
+                    {"op": "WAIT", "channel": f"timer:{tid}"}]}
+    doc = {"meta": {"id": "tiny"}, "ground_truth": [], "events": [
+        task("app", 0, 4),
+        {"op": "wake", "t": 50, "channel": "timer:late", "target": "late"},
+        {"op": "wake", "t": 60, "channel": "timer:late", "target": "late"},
+        task("late", 100, 2),
+        *({"op": "wake", "t": 300, "channel": "timer:app", "target": "app"} for _ in range(3)),
+        {"op": "wake", "t": 500, "channel": "timer:app", "target": "app"},
+    ]}
+    out, lines = _lines(tmp_path, doc, {**SCHEDULE, "schedule": SCHEDULE["schedule"][:1]})
+    assert [(l["event"], l["t"]) for l in lines if l.get("task") == "app" and l["event"] in ("ready", "wake_drop")] == [
+        ("ready", 300), ("wake_drop", 300), ("ready", 300), ("ready", 500)]
+    assert [(l["event"], l["t"]) for l in lines if l.get("task") == "late" and l["event"] in ("ready", "wake_drop")] == [
+        ("wake_drop", 60), ("ready", 100), ("ready", 100)]
+    rows, messages = build(tmp_path / "w.json", out, schedule_path=tmp_path / "s.json")
+    assert messages == []
+    latency = sorted((r["entity"], r["t"], r["value"], r["skipped"]) for r in rows if r["metric"] == "app_latency")
+    assert latency == [("app", 300, 0, 0), ("app", 300, 0, 0), ("app", 300, 0, 1), ("app", 500, 0, 0),
+                       ("late", 50, 50, 0), ("late", 60, 40, 1)]
+
+
 def test_generation_is_byte_identical_across_reruns(tmp_path):
     (tmp_path / "a").mkdir()
     (tmp_path / "b").mkdir()
@@ -317,7 +350,7 @@ def _fixture_schedule(d, tmp_path):
 
 def test_replay_returns_each_fixture_trace_byte_for_byte(tmp_path):
     pairs = sorted(p for p in FIXTURES.iterdir() if (p / "trace.jsonl").exists())
-    assert len(pairs) == 6
+    assert len(pairs) == 7
     for d in pairs:
         out = tmp_path / f"{d.name}.jsonl"
         simulator.generate(d / "run.json", _fixture_schedule(d, tmp_path), out,

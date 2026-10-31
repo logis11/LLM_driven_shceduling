@@ -18,7 +18,7 @@ a no-headroom term (the oracle's improvement below the aggregate's floor) keeps
 its weight and enters the file score as if the condition had captured all of
 it (share 1); a `turnaround` term whose task did not complete is scored on the
 censored lower bound the aggregates carry (`turnaround_censored`) and marked;
-an `input_latency` or `timer_latency` term is marked censored when its window
+an `input_latency` or `app_latency` term is marked censored when its window
 holds a wake its task never served (`censored_count` above zero, metrics doc
 §6.12, §6.13);
 a term whose aggregate is absent stops the scorer.
@@ -31,7 +31,7 @@ from .aggregates import fmt as _fmt
 LATENCY_FLOOR_US = Fraction(1000)    # metrics doc §10
 FRACTION_FLOOR = Fraction(1, 100)    # metrics doc §10
 
-TERM_AGGREGATE = {("ready_wait", "p99"): "p99", ("input_latency", "p99"): "p99", ("timer_latency", "p99"): "p99", ("job", "miss_rate"): "miss_rate",
+TERM_AGGREGATE = {("ready_wait", "p99"): "p99", ("input_latency", "p99"): "p99", ("app_latency", "p99"): "p99", ("job", "miss_rate"): "miss_rate",
                   ("cpu_delivered", "progress"): "progress", ("turnaround", "turnaround"): "turnaround"}
 FLOOR = {"p99": LATENCY_FLOOR_US, "turnaround": LATENCY_FLOOR_US,
          "miss_rate": FRACTION_FLOOR, "progress": FRACTION_FLOOR}
@@ -80,9 +80,9 @@ def _term_key(term):
 
 def _lookup(run, key, who):
     """The term's aggregate in one run; the censored bound for an unfinished turnaround; an input_latency or
-    timer_latency term marked censored when a wake in its window went unserved."""
+    app_latency term marked censored when a wake in its window went unserved."""
     if key in run:
-        if key[1] in ("input_latency", "timer_latency"):
+        if key[1] in ("input_latency", "app_latency"):
             censored = key[:2] + ("censored_count",) + key[3:]
             return run[key], run.get(censored, 0) > 0
         return run[key], False

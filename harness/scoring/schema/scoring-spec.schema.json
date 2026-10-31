@@ -29,7 +29,7 @@
       "required": ["entity", "metric", "aggregate", "direction", "weight"],
       "properties": {
         "entity": {"type": "string", "minLength": 1},
-        "metric": {"enum": ["ready_wait", "input_latency", "timer_latency", "job", "cpu_delivered", "turnaround"]},
+        "metric": {"enum": ["ready_wait", "input_latency", "app_latency", "job", "cpu_delivered", "turnaround"]},
         "cause": {"enum": ["arrive", "wake", "sleep_end", "timer_tick", "fork_slot"]},
         "channel": {"type": "string", "pattern": "^[^:]+$"},
         "window": {

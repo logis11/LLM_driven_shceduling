@@ -15,11 +15,11 @@ def task(id, name="x", arrive=0, depart=None, demand=None, period=None, targets=
                     first_op=first_op)
 
 
-def runfile(t_end, tasks, chains=(), input_wakes=None, timer_wakes=None):
-    """`input_wakes`, `timer_wakes`: per task, the times of its input or timer wake events, ascending."""
+def runfile(t_end, tasks, chains=(), input_wakes=None, timer_wakes=None, event_wakes=None):
+    """`input_wakes`, `timer_wakes`, `event_wakes`: per task, the times of its wake events on that channel, ascending."""
     return RunFile(workload_id="w", t_end=t_end,
                    tasks={t.id: t for t in tasks}, chains=[list(c) for c in chains],
-                   input_wakes=input_wakes or {}, timer_wakes=timer_wakes or {})
+                   input_wakes=input_wakes or {}, timer_wakes=timer_wakes or {}, event_wakes=event_wakes or {})
 
 
 def schedule(*entries):
@@ -756,13 +756,14 @@ def test_input_latency_censors_a_keystroke_never_served():
     assert [(x["t"], x["value"], x["censored"]) for x in rows_of(r, "input_latency", "e")] == [(900, 100, 1)]
 
 
-# ------------------------------------------------------------ timer_latency
+# ------------------------------------------------------------ app_latency
 # docs/harness/metrics.md §6.13 — the same rule on a timer channel: one row per timer wake
 # at its wake event, the k-th timer line serving the k-th timer wake, beside the keystrokes
 
-def test_timer_latency_pairs_timer_wakes_with_timer_lines_beside_the_keystrokes():
-    """Timer and input wakes queued mid-burst pair with their own channel's lines in order;
-    a timer wake still queued at the depart is censored there."""
+def test_app_latency_pairs_timer_wakes_with_timer_lines_beside_the_keystrokes():
+    """Timer and input wakes held mid-burst pair with their own channel's lines in order (the
+    timer wake at 150 finds none held, so it is held, not dropped); a timer wake still held at the
+    depart is censored there."""
     run = runfile(1000, [task("e", depart=500, waits=["timer", "input", "timer", "timer", "timer"])],
                   input_wakes={"e": [120]}, timer_wakes={"e": [100, 150, 400, 480]})
     events = [
@@ -780,7 +781,78 @@ def test_timer_latency_pairs_timer_wakes_with_timer_lines_beside_the_keystrokes(
     r = compute(run, events)
     assert [(x["t"], x["value"], x["channel"]) for x in rows_of(r, "ready_wait", "e")] == [
         (100, 10, "timer"), (200, 0, "input"), (210, 0, "timer"), (400, 50, "timer")]
-    assert [(x["t"], x["value"], x["censored"]) for x in rows_of(r, "timer_latency", "e")] == [
-        (100, 10, 0), (150, 60, 0), (400, 50, 0), (480, 20, 1)]
+    assert [(x["t"], x["value"], x["censored"], x["channel"], x["skipped"]) for x in rows_of(r, "app_latency", "e")] == [
+        (100, 10, 0, "timer", 0), (150, 60, 0, "timer", 0), (400, 50, 0, "timer", 0), (480, 20, 1, "timer", 0)]
     assert [(x["t"], x["value"], x["censored"]) for x in rows_of(r, "input_latency", "e")] == [(120, 80, 0)]
     assert r.guards == []
+
+
+# app_latency on a timer channel (2026-10-31, timer wakes by origin, decisions 2, 3, 5): one wake
+# held; one arriving while it is held is dropped — its wake_drop line names it, its WAIT is passed
+# without a line, and its row runs to the held wake's service, marked skipped
+
+def test_a_dropped_timer_wake_is_passed_and_scored_to_the_held_wakes_service():
+    run = runfile(1000, [task("e", waits=["timer", "timer", "timer", "timer"])],
+                  timer_wakes={"e": [100, 150, 160, 400]})
+    events = [
+        {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
+        {"event": "ready", "t": 100, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 110, "task": "e"},
+        {"event": "wake_drop", "t": 160, "task": "e", "channel": "timer:e"},   # 150 held
+        {"event": "ready", "t": 300, "task": "e", "cause": "wake"},           # 150, from the mailbox
+        {"event": "run_end", "t": 350, "task": "e", "reason": "block", "blocked_on": "wait"},   # 160's pair passed
+        {"event": "ready", "t": 400, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 420, "task": "e"},
+        {"event": "run_end", "t": 430, "task": "e", "reason": "block", "blocked_on": "wait"},
+    ]
+    r = compute(run, events)
+    assert [(x["t"], x["value"], x["censored"], x["skipped"]) for x in rows_of(r, "app_latency", "e")] == [
+        (100, 10, 0, 0), (150, 150, 0, 0), (160, 140, 0, 1), (400, 20, 0, 0)]
+    assert r.guards == []
+
+
+def test_event_wakes_queue_with_depth_as_keystrokes_do():
+    run = runfile(1000, [task("e", waits=["event", "event", "event"])], event_wakes={"e": [100, 120, 130]})
+    events = [
+        {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
+        {"event": "ready", "t": 100, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 100, "task": "e"},
+        {"event": "ready", "t": 200, "task": "e", "cause": "wake"},   # 120, held
+        {"event": "ready", "t": 250, "task": "e", "cause": "wake"},   # 130, held behind it
+        {"event": "run_end", "t": 300, "task": "e", "reason": "block", "blocked_on": "wait"},
+    ]
+    r = compute(run, events)
+    assert [(x["t"], x["value"], x["channel"], x["skipped"]) for x in rows_of(r, "app_latency", "e")] == [
+        (100, 0, "event", 0), (120, 80, "event", 0), (130, 120, "event", 0)]
+    assert r.guards == []
+
+
+def test_a_wake_drop_with_none_held_or_naming_no_wake_is_a_guard():
+    run = runfile(1000, [task("e", waits=["timer", "timer", "timer"])], timer_wakes={"e": [100, 150, 300]})
+    events = [
+        {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
+        {"event": "ready", "t": 100, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 110, "task": "e"},
+        {"event": "run_end", "t": 120, "task": "e", "reason": "block", "blocked_on": "wait"},
+        {"event": "wake_drop", "t": 150, "task": "e", "channel": "timer:e"},   # the task waits: nothing held
+        {"event": "wake_drop", "t": 170, "task": "e", "channel": "timer:e"},   # no timer wake at 170
+        {"event": "ready", "t": 300, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 300, "task": "e"},
+        {"event": "run_end", "t": 310, "task": "e", "reason": "block", "blocked_on": "wait"},
+    ]
+    r = compute(run, events)
+    assert any("wake_drop at t=150 with no timer wake held" in g for g in r.guards)
+    assert any("wake_drop at t=170 names no timer wake" in g for g in r.guards)
+
+
+def test_a_timer_wake_neither_served_nor_dropped_at_a_blocked_end_is_lost():
+    run = runfile(1000, [task("e", depart=900, waits=["timer", "timer"])], timer_wakes={"e": [100, 500]})
+    events = [
+        {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
+        {"event": "ready", "t": 100, "task": "e", "cause": "wake"},
+        {"event": "run_start", "t": 100, "task": "e"},
+        {"event": "run_end", "t": 110, "task": "e", "reason": "block", "blocked_on": "wait"},
+        {"event": "task_end", "t": 900, "task": "e", "reason": "depart"},   # 500 never consumed
+    ]
+    r = compute(run, events)
+    assert any("blocked on a timer WAIT at its end" in g for g in r.guards)

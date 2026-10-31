@@ -9,18 +9,23 @@ the incoming entry's params from it by `index`.
 
 A `ready(cause = wake)` line completes the task's next WAIT in program order,
 so its row carries that WAIT's channel kind from the run file (`input`, `timer`,
-`chain`, …; metrics doc §6.1). Each keystroke — an input wake event of the run
-file — also gets an `input_latency` row (§6.12), and each wake event on a
-timer channel a `timer_latency` row (§6.13): the k-th line on that channel
-completes the WAIT the k-th wake serves, wakes queuing with depth, and the row
-runs from the wake event to the start of that service; a wake its task never
-serves by its end is censored there.
+`event`, `chain`, …; metrics doc §6.1). Each keystroke — an input wake event of the run
+file — also gets an `input_latency` row (§6.12), and each wake event on an event
+or a timer channel an `app_latency` row (§6.13): on the input and event channels
+the k-th line completes the WAIT the k-th wake serves, wakes queuing with depth;
+on a timer channel one wake is held and one arriving while it is held is dropped —
+the simulator's `wake_drop` line names it, its WAIT is passed without a line, and
+its row runs to the held wake's service, marked `skipped` (2026-10-31). A row runs
+from the wake event to the start of that service; a wake its task never serves by
+its end is censored there.
 
 Alongside the rows it returns the guard messages the metrics doc names: more
 tail iterations than consumed head ticks per chain, the `deadline` cross-check on
-single-stage chains, the stimulus guard — more `input`-channel wake lines than
-the run file's input wake events, or a task ending blocked on an input WAIT
-while an input wake sent to it before then went unconsumed — a wake line past
+single-stage chains, the stimulus guard — more `input`- or `event`-channel wake lines than
+the run file's wake events on that channel, more timer-channel wake lines and
+drops than timer wake events, a `wake_drop` line naming no timer wake or none
+held, or a task ending blocked on a WAIT while a wake sent to it on that
+channel before then went unconsumed (guard spec 1.4) — a wake line past
 the last WAIT of its task's program, and the schedule cross-check (an applied entry the schedule does not
 carry, or carries with another algorithm; a switch into MLFQ with no schedule
 given).
@@ -63,7 +68,12 @@ class _TaskState:
     iter_ends: List[int] = field(default_factory=list)          # completion t per iteration
     deadlines: List[dict] = field(default_factory=list)
     blocked_wait: bool = False      # blocked on a WAIT: its arrival step or a run_end(block, wait), no line since
-    served: Dict[str, List[int]] = field(default_factory=lambda: {"input": [], "timer": []})   # service start per input- and timer-channel ready line, in order
+    served: Dict[str, List[int]] = field(default_factory=lambda: {"input": [], "timer": [], "event": []})   # service start per input-, timer- and event-channel ready line, in order
+    ready_on: Dict[str, int] = field(default_factory=lambda: {"timer": 0, "event": 0})   # ready(wake) lines on those channels
+    timer_waits: int = 0                                        # timer-channel WAITs of the program reached so far
+    dropped: set = field(default_factory=set)                   # indices of its timer wakes a wake_drop line names
+    drop_guards: List[str] = field(default_factory=list)        # wake_drop lines the run file or the held wake contradicts
+    after_end: Optional[tuple] = None                           # (kind,) of the WAIT next in program order at the end, read once
 
 
 @dataclass
@@ -112,6 +122,24 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
             return ev["cause"] == "timer_tick"
         return ev["cause"] == "wake"
 
+    def next_wait(st):
+        """The channel kind of the next WAIT the task completes with a line: a timer WAIT whose wake a wake_drop
+        line named is passed without one (2026-10-31, decision 5)."""
+        while True:
+            c = next(st.waits, None)
+            if c != "timer":
+                return c
+            j = st.timer_waits
+            st.timer_waits += 1
+            if j not in st.dropped:
+                return c
+
+    def wait_at_end(st):
+        """The channel kind of the WAIT the task would complete next, read once when the guards ask."""
+        if st.after_end is None:
+            st.after_end = (next_wait(st),)
+        return st.after_end[0]
+
     def close_iteration(st, t):
         if st.iter_open is not None:
             st.iter_ends.append(t)
@@ -145,11 +173,13 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
             st.blocked_wait = False
             channel = None
             if ev["cause"] == "wake":
-                channel = next(st.waits, None)
+                channel = next_wait(st)
                 if channel is None:
                     st.unmatched.append(t)
                 elif channel == "input":
                     st.input_ready += 1
+                elif channel in st.ready_on:
+                    st.ready_on[channel] += 1
             if st.running_since is not None:              # inside own occupancy
                 if t <= t_end:
                     rows.append(_ready_row(ev["task"], t, 0, ev["cause"], channel))
@@ -189,6 +219,23 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
             st.end = (t, ev["reason"])
         elif kind == "deadline":
             st.deadlines.append(ev)
+        elif kind == "wake_drop":
+            # decision 5: the wake is one of the run file's timer wakes of the task, dropped because one is held —
+            # a timer wake before it, not itself dropped, whose WAIT no line has completed yet. Of the task's
+            # timer wakes at that time not yet dropped, it is the first after the held one: those before it
+            # completed a WAIT or are the held wake
+            times = run.timer_wakes.get(ev["task"], [])
+            same = [j for j in range(bisect.bisect_left(times, t), bisect.bisect_right(times, t)) if j not in st.dropped]
+            if not same:
+                st.drop_guards.append(f"task {ev['task']}: wake_drop at t={t} names no timer wake of the run file")
+                continue
+            def held(j):
+                return j - sum(1 for d in st.dropped if d < j) - st.ready_on["timer"]
+            j = next((j for j in same if held(j) >= 1), None)
+            if j is None:
+                st.drop_guards.append(f"task {ev['task']}: wake_drop at t={t} with no timer wake held")
+                j = same[-1]
+            st.dropped.add(j)
 
     # open occupancy at T_end
     for st in tasks.values():
@@ -379,25 +426,45 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                                       f"slack={dl['slack_us']}) disagrees with the job row "
                                       f"(completion {completion}, value {completion - tick})")
 
-    # ---- input_latency (§6.12) and timer_latency (§6.13): one row per wake event on an input
-    # channel (a keystroke) or a timer channel, at the wake. The k-th line on that channel served
-    # the k-th wake (wakes queue with depth, §11 item 2); a wake served by no line inside the
-    # window is censored at its task's end or T_end
-    for kind, metric, wakes, noun in (("input", "input_latency", run.input_wakes, "keystroke"),
-                                      ("timer", "timer_latency", run.timer_wakes, "timer wake")):
-        for tid, times in wakes.items():
-            st = tasks.get(tid)
-            served = st.served[kind] if st is not None else []
-            end = min(st.end[0], t_end) if st is not None and st.end is not None else t_end
-            for k, wt in enumerate(times):
-                if k < len(served):
-                    if served[k] < wt:
-                        guards.append(f"task {tid}: {kind} line {k} served at t={served[k]}, before its "
-                                      f"{noun} at t={wt}")
-                        continue
-                    rows.append(_row(tid, metric, wt, served[k] - wt, censored=0))
+    # ---- input_latency (§6.12) and app_latency (§6.13): one row per wake event on an input
+    # channel (a keystroke), or on an event or a timer channel, at the wake. On the input and event
+    # channels the k-th line served the k-th wake (wakes queue with depth, §11 item 2); on a timer
+    # channel the k-th line served the k-th wake no wake_drop line names, and a dropped wake's row
+    # runs to the service of the wake held when it arrived, marked skipped (2026-10-31, decisions
+    # 2, 3, 11); a wake served by no line inside the window is censored at its task's end or T_end
+    def latency_rows(tid, kind, metric, times, noun, dropped=frozenset()):
+        st = tasks.get(tid)
+        served = st.served[kind] if st is not None else []
+        end = min(st.end[0], t_end) if st is not None and st.end is not None else t_end
+        extra = {} if kind == "input" else {"channel": kind, "skipped": 0}
+        kept = [j for j in range(len(times)) if j not in dropped]
+        service = {j: (served[k] if k < len(served) else None) for k, j in enumerate(kept)}
+        for j, wt in enumerate(times):
+            if j in dropped:
+                k = bisect.bisect_left(kept, j) - 1
+                s = service[kept[k]] if k >= 0 else None
+                if s is not None:
+                    rows.append(_row(tid, metric, wt, max(s - wt, 0), censored=0, **{**extra, "skipped": 1}))
                 elif wt < end:
-                    rows.append(_row(tid, metric, wt, end - wt, censored=1))
+                    rows.append(_row(tid, metric, wt, end - wt, censored=1, **{**extra, "skipped": 1}))
+                continue
+            s = service[j]
+            if s is not None:
+                if s < wt:
+                    guards.append(f"task {tid}: {kind} line {kept.index(j)} served at t={s}, before its "
+                                  f"{noun} at t={wt}")
+                    continue
+                rows.append(_row(tid, metric, wt, s - wt, censored=0, **extra))
+            elif wt < end:
+                rows.append(_row(tid, metric, wt, end - wt, censored=1, **extra))
+
+    for tid, times in run.input_wakes.items():
+        latency_rows(tid, "input", "input_latency", times, "keystroke")
+    for tid, times in run.event_wakes.items():
+        latency_rows(tid, "event", "app_latency", times, "event wake")
+    for tid, times in run.timer_wakes.items():
+        st = tasks.get(tid)
+        latency_rows(tid, "timer", "app_latency", times, "timer wake", st.dropped if st is not None else frozenset())
 
     # ---- stimulus guard (§8), and wake lines the run file has no WAIT for. A task that
     # ends with input it has not reached, behind its program, is no guard; one that ends
@@ -415,10 +482,33 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
         if st.blocked_wait and st.running_since is None and not st.pending_ready:
             end = min(st.end[0], t_end) if st.end is not None else t_end
             sent = bisect.bisect_left(times, end)
-            if sent > st.input_ready and next(st.waits, None) == "input":
+            if sent > st.input_ready and wait_at_end(st) == "input":
                 guards.append(f"task {tid}: blocked on an input WAIT at its end (t={end}) with "
                               f"{sent - st.input_ready} input wake event(s) sent before then "
                               "unconsumed")
+    # ---- the stimulus guard on the event and timer channels (guard spec 1.4; decision 12): an event
+    # channel as an input one; on a timer channel every wake served or dropped at most once, and a
+    # task ending blocked on a timer WAIT with a timer wake sent before then neither served nor
+    # dropped lost it
+    for kind, wakes in (("event", run.event_wakes), ("timer", run.timer_wakes)):
+        for tid, times in wakes.items():
+            st = tasks.get(tid)
+            if st is None:
+                guards.append(f"task {tid}: {len(times)} {kind} wake event(s) in the run file and no line in the trace")
+                continue
+            dropped = len(st.dropped) if kind == "timer" else 0
+            if st.ready_on[kind] + dropped > len(times):
+                guards.append(f"task {tid}: {st.ready_on[kind]} {kind} ready(wake) line(s) and {dropped} wake_drop "
+                              f"line(s) for {len(times)} {kind} wake event(s) in the run file")
+            if st.blocked_wait and st.running_since is None and not st.pending_ready:
+                end = min(st.end[0], t_end) if st.end is not None else t_end
+                # a dropped timer wake was consumed by its drop: it is not owed a ready line
+                sent = bisect.bisect_left(times, end) - (sum(1 for j in st.dropped if times[j] < end) if kind == "timer" else 0)
+                if sent > st.ready_on[kind] and wait_at_end(st) == kind:
+                    guards.append(f"task {tid}: blocked on a {kind} WAIT at its end (t={end}) with "
+                                  f"{sent - st.ready_on[kind]} {kind} wake event(s) sent before then unconsumed")
+    for tid in order:
+        guards.extend(tasks[tid].drop_guards)
     for tid in order:
         extra = tasks[tid].unmatched
         if extra:

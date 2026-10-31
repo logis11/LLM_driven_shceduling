@@ -215,7 +215,7 @@ def test_excess_reads_the_terms_latency_metric():
     """Metrics doc §8's per-switch excess reads the rows of the metric the interactive
     task's term reads, placed by their wakes: the switch window [10000, 15000] holds a
     keystroke (400) and a timer wake (9000), the rest of the interval a keystroke (100)
-    and a timer wake (7000) — 300 on input_latency, 2000 on timer_latency. The ready_wait
+    and a timer wake (7000) — 300 on input_latency, 2000 on app_latency. The ready_wait
     rows beside them, all zero, are not read."""
     extra = [dict(entity="schedule", metric="config_interval", t=0, value=10000,
                   provenance="unmodified", algorithm="FIFO", index=0),
@@ -224,11 +224,11 @@ def test_excess_reads_the_terms_latency_metric():
              dict(entity="schedule", metric="switch_window", t=10000, value=5000,
                   algorithm="MLFQ", index=1, hogs=1)]
     extra += [dict(entity="editor", metric=m, t=t, value=v, censored=0)
-              for m, t, v in (("input_latency", 12000, 400), ("timer_latency", 13000, 9000),
-                              ("input_latency", 50000, 100), ("timer_latency", 60000, 7000))]
+              for m, t, v in (("input_latency", 12000, 400), ("app_latency", 13000, 9000),
+                              ("input_latency", 50000, 100), ("app_latency", 60000, 7000))]
     rows = _wake_records("llm_full", [(12000, 0, "input"), (13000, 0, "timer"),
                                       (50000, 0, "input"), (60000, 0, "timer")], extra=extra)
-    for metric, excess in (("input_latency", "300.000000000000"), ("timer_latency", "2000.000000000000")):
+    for metric, excess in (("input_latency", "300.000000000000"), ("app_latency", "2000.000000000000")):
         out = {(r["aggregate"], r["index"]): r["value"]
                for r in agg.compute_aggregates(rows, interactive={"editor": metric}) if r["metric"] == "switch_window"}
         assert out[("excess_switch", "1")] == excess

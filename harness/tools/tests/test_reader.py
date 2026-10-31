@@ -22,6 +22,7 @@ EXPECTED_HEADER = {
     "mock-p1a": ("mock-p1a", "llm_vocab", 3),
     "mock-chain": ("mock-chain", "oracle", 2),
     "mock-switch": ("mock-switch", "llm_algo", 4),
+    "mock-wakes": ("mock-wakes", "fixed", 1),
 }
 
 
@@ -127,7 +128,7 @@ def test_reserved_task_id_in_trace_is_refused(tmp_path):
 
 EXPECTED_T_END = {"mock-office": 60000, "mock-media": 95000,
                   "mock-p1a": 120000, "mock-chain": 50000,
-    "mock-switch": 100000,
+    "mock-switch": 100000, "mock-wakes": 20000,
 }
 
 
@@ -181,16 +182,18 @@ def test_input_wakes_count_the_input_channel_only(tmp_path):
          "program": [{"op": "WAIT", "channel": "input:e"}, {"op": "WAIT", "channel": "timer:e"},
                      {"op": "WAIT", "channel": "timer:e"}, {"op": "WAIT", "channel": "input:e"}]},
         {"op": "arrive", "t": 0, "id": "d", "name": "dbus-daemon", "depart": 100,
-         "program": [{"op": "WAIT", "channel": "timer:d"}]},
+         "program": [{"op": "WAIT", "channel": "timer:d"}, {"op": "WAIT", "channel": "event:d"}]},
         {"op": "wake", "t": 10, "channel": "input:e", "target": "e"},
         {"op": "wake", "t": 20, "channel": "timer:e", "target": "e"},
         {"op": "wake", "t": 30, "channel": "timer:e", "target": "e"},
         {"op": "wake", "t": 40, "channel": "input:e", "target": "e"},
         {"op": "wake", "t": 50, "channel": "timer:d", "target": "d"},
+        {"op": "wake", "t": 60, "channel": "event:d", "target": "d"},
     ]}))
     run = read_run_file(p)
     assert run.input_wakes == {"e": [10, 40]}
-    assert run.timer_wakes == {"e": [20, 30], "d": [50]}     # timer_latency's wake events (metrics doc §6.13)
+    assert run.timer_wakes == {"e": [20, 30], "d": [50]}     # app_latency's timer-channel wake events (metrics doc §6.13)
+    assert run.event_wakes == {"d": [60]}                    # and its event-channel ones (2026-10-31, decision 4)
     assert run.tasks["e"].first_op == "WAIT"
 
 

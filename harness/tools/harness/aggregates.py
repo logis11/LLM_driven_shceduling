@@ -5,9 +5,9 @@
 (entity, metric, aggregate, cause, channel, window, index) with a value. The
 `ready_wait` aggregates come per cause and, for cause `wake`, per channel kind
 as well (§8). Interaction latency is `input_latency`'s, one row per keystroke
-from its wake event (§6.12), and an application's own timer wakes'
-`timer_latency`'s (§6.13), each with the count of its censored rows beside the
-statistics. Every trace
+from its wake event (§6.12), and an application's own timer and event wakes'
+`app_latency`'s (§6.13), each with the count of its censored rows beside the
+statistics, and `app_latency`'s with the count of its dropped timer wakes' rows. Every trace
 aggregate §8 lists is here whether a scoring term weights it or not, so the
 scorer, the guards, and the report read one file (`harness/aggregates/schema/`).
 The recognition aggregates are the grader's (sub-task 8.4), not this module's.
@@ -20,7 +20,7 @@ observations "at or before" `T_end`.
 The per-switch excess and its boost variant (§8) need the interactive task the
 scoring spec names for the file — the caller passes `interactive`, each entity
 of the file's latency terms with the metric its term reads, `input_latency` or
-`timer_latency` — and the `boost_window` rows the primitives emit (§6.10,
+`app_latency` — and the `boost_window` rows the primitives emit (§6.10,
 sub-task 8.10). Its rows are that metric's, a censored one at its lower bound.
 Inside a switch window (or the boost windows of that config interval) means the
 row's `t`, its wake, lies in it; "the rest of that config interval outside any
@@ -151,9 +151,11 @@ def compute_aggregates(rows, windows=None, interactive=None):
                 over = sum(1 for v in vals if v > T_INTERACTION_US)
                 emit(entity, "ready_wait", "over_threshold", Fraction(over, len(vals)), **kw)
 
-    # --- input_latency and timer_latency: per entity, per window; a censored row's value is its
-    # lower bound (§6.12, §6.13). The interaction threshold is a keystroke's (§10)
-    for metric in ("input_latency", "timer_latency"):
+    # --- input_latency and app_latency: per entity, per window; a censored row's value is its
+    # lower bound (§6.12, §6.13), an app_latency row of a dropped timer wake (skipped) is counted
+    # with the rest, its two channels pooled (2026-10-31, decisions 3, 7). The interaction
+    # threshold is a keystroke's (§10)
+    for metric in ("input_latency", "app_latency"):
         il = df[df["metric"] == metric]
         for entity, g in il.groupby("entity", sort=True):
             for window in windows_for(entity, metric):
@@ -164,6 +166,8 @@ def compute_aggregates(rows, windows=None, interactive=None):
                 kw = dict(window=window)
                 emit(entity, metric, "count", len(vals), **kw)
                 emit(entity, metric, "censored_count", int((sel["censored"].fillna(0).astype(int) == 1).sum()), **kw)
+                if metric == "app_latency":
+                    emit(entity, metric, "skipped_count", int((sel["skipped"].fillna(0).astype(int) == 1).sum()), **kw)
                 emit(entity, metric, "mean", Fraction(sum(vals), len(vals)), **kw)
                 for p, name in ((50, "p50"), (95, "p95"), (99, "p99")):
                     emit(entity, metric, name, percentile(vals, p), **kw)

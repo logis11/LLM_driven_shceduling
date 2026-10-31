@@ -39,6 +39,7 @@ _EVENT_FIELDS = {
     "run_end": ("t", "task", "reason"),
     "deadline": ("t", "task", "due", "met", "slack_us"),
     "config_applied": ("t", "index", "algorithm", "provenance"),
+    "wake_drop": ("t", "task", "channel"),   # a timer-channel wake arriving while one is held (2026-10-31, decision 5)
 }
 _ENUMS = {
     ("task_arrive", "source"): {"file", "spawn"},
@@ -187,6 +188,7 @@ class RunFile:
     chains: List[List[str]]        # each from a TIMER head to its tail
     input_wakes: Dict[str, List[int]]   # times of the exogenous wake events on an input channel, per target task, ascending
     timer_wakes: Dict[str, List[int]] = field(default_factory=dict)   # the same on a timer channel
+    event_wakes: Dict[str, List[int]] = field(default_factory=dict)   # the same on an event channel (decision 4)
 
 
 def channel_kind(channel) -> str:
@@ -264,6 +266,7 @@ def read_run_file(path) -> RunFile:
     tasks: Dict[str, TaskInfo] = {}
     input_wakes: Dict[str, List[int]] = {}
     timer_wakes: Dict[str, List[int]] = {}
+    event_wakes: Dict[str, List[int]] = {}
     pinned = [0]
     for ev in doc["events"]:
         op = ev.get("op")
@@ -284,11 +287,12 @@ def read_run_file(path) -> RunFile:
         elif op == "wake":
             pinned.append(int(ev["t"]))
             kind = channel_kind(ev["channel"])
-            if kind in ("input", "timer"):
-                (input_wakes if kind == "input" else timer_wakes).setdefault(ev["target"], []).append(int(ev["t"]))
+            by_kind = {"input": input_wakes, "timer": timer_wakes, "event": event_wakes}
+            if kind in by_kind:
+                by_kind[kind].setdefault(ev["target"], []).append(int(ev["t"]))
         else:
             raise RunFileError(f"unknown event op {op!r}")
-    for times in (*input_wakes.values(), *timer_wakes.values()):
+    for times in (*input_wakes.values(), *timer_wakes.values(), *event_wakes.values()):
         times.sort()
     chains = []
     for tid, info in tasks.items():
@@ -304,7 +308,8 @@ def read_run_file(path) -> RunFile:
             cur = tasks[nxt]
         chains.append(chain)
     return RunFile(workload_id=doc.get("workload_id", ""), t_end=max(pinned),
-                   tasks=tasks, chains=chains, input_wakes=input_wakes, timer_wakes=timer_wakes)
+                   tasks=tasks, chains=chains, input_wakes=input_wakes, timer_wakes=timer_wakes,
+                   event_wakes=event_wakes)
 
 
 # ---------------------------------------------------------- config schedule

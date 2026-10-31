@@ -8,7 +8,7 @@ sys.path.insert(0, str(TOOLS))
 
 REPO = TOOLS.parents[1]
 FIXTURES = pathlib.Path(__file__).parent / "fixtures"
-MOCKS = ("mock-office", "mock-media", "mock-p1a", "mock-chain", "mock-switch")
+MOCKS = ("mock-office", "mock-media", "mock-p1a", "mock-chain", "mock-switch", "mock-wakes")
 
 
 def pytest_configure(config):

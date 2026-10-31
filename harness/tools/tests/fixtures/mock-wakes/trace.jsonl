@@ -1,0 +1,14 @@
+{"event":"meta","workload_id":"mock-wakes","condition":"fixed","sim":"mock@0","schedule_entries":1}
+{"event":"config_applied","t":0,"index":0,"algorithm":"MLFQ","provenance":"fallback"}
+{"event":"task_arrive","t":0,"task":"app","source":"file"}
+{"event":"ready","t":1000,"task":"app","cause":"wake"}
+{"event":"run_start","t":1000,"task":"app"}
+{"event":"wake_drop","t":3000,"task":"app","channel":"timer:app"}
+{"event":"ready","t":5000,"task":"app","cause":"wake"}
+{"event":"ready","t":6000,"task":"app","cause":"wake"}
+{"event":"ready","t":8000,"task":"app","cause":"wake"}
+{"event":"run_end","t":9000,"task":"app","reason":"block","blocked_on":"wait"}
+{"event":"ready","t":12000,"task":"app","cause":"wake"}
+{"event":"run_start","t":12000,"task":"app"}
+{"event":"run_end","t":13000,"task":"app","reason":"block","blocked_on":"wait"}
+{"event":"task_end","t":20000,"task":"app","reason":"depart"}

@@ -1,0 +1,103 @@
+{
+ "workload_id": "mock-wakes",
+ "events": [
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "app",
+   "name": "kdenlive",
+   "declared_class": "normal",
+   "depart": 20000,
+   "program": [
+    {
+     "op": "WAIT",
+     "channel": "timer:app"
+    },
+    {
+     "op": "RUN",
+     "us": 4000
+    },
+    {
+     "op": "WAIT",
+     "channel": "timer:app"
+    },
+    {
+     "op": "RUN",
+     "us": 1000
+    },
+    {
+     "op": "WAIT",
+     "channel": "timer:app"
+    },
+    {
+     "op": "RUN",
+     "us": 1000
+    },
+    {
+     "op": "WAIT",
+     "channel": "event:app"
+    },
+    {
+     "op": "RUN",
+     "us": 2000
+    },
+    {
+     "op": "WAIT",
+     "channel": "event:app"
+    },
+    {
+     "op": "RUN",
+     "us": 1000
+    },
+    {
+     "op": "WAIT",
+     "channel": "timer:app"
+    },
+    {
+     "op": "RUN",
+     "us": 1000
+    },
+    {
+     "op": "WAIT",
+     "channel": "timer:app"
+    }
+   ]
+  },
+  {
+   "op": "wake",
+   "t": 1000,
+   "channel": "timer:app",
+   "target": "app"
+  },
+  {
+   "op": "wake",
+   "t": 2000,
+   "channel": "timer:app",
+   "target": "app"
+  },
+  {
+   "op": "wake",
+   "t": 3000,
+   "channel": "timer:app",
+   "target": "app"
+  },
+  {
+   "op": "wake",
+   "t": 4000,
+   "channel": "event:app",
+   "target": "app"
+  },
+  {
+   "op": "wake",
+   "t": 4500,
+   "channel": "event:app",
+   "target": "app"
+  },
+  {
+   "op": "wake",
+   "t": 12000,
+   "channel": "timer:app",
+   "target": "app"
+  }
+ ]
+}

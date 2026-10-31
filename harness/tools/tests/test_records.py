@@ -17,6 +17,7 @@ IDENTITY = {                      # what the trace does not carry: table, seed
     "mock-p1a": ("prior", ""),
     "mock-chain": ("prior", ""),
     "mock-switch": ("calibrated", ""),
+    "mock-wakes": ("", ""),
 }
 
 

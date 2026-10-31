@@ -54,7 +54,7 @@ BATCH_METRICS = {"turnaround", "cpu_delivered"}
 LEGAL = {
     ("ready_wait", "p99"): "lower",
     ("input_latency", "p99"): "lower",
-    ("timer_latency", "p99"): "lower",
+    ("app_latency", "p99"): "lower",
     ("job", "miss_rate"): "lower",
     ("cpu_delivered", "progress"): "higher",
     ("turnaround", "turnaround"): "lower",
@@ -298,12 +298,12 @@ def windows_from_spec(spec, workload_id):
 
 
 def interactive_from_spec(spec, workload_id):
-    """The entities of the workload's `input_latency` and `timer_latency` terms, each with the metric its
+    """The entities of the workload's `input_latency` and `app_latency` terms, each with the metric its
     first such term reads — the interactive tasks the excess aggregates measure, on that metric's rows."""
     entry = spec["files"].get(workload_id)
     out = {}
     for t in (entry or {}).get("terms") or []:
-        if t["metric"] in ("input_latency", "timer_latency"):
+        if t["metric"] in ("input_latency", "app_latency"):
             out.setdefault(t["entity"], t["metric"])
     return out
 

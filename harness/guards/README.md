@@ -4,7 +4,7 @@ A guard is a check that must pass before a run's numbers are read. It does not s
 
 Two files live here. `guard-spec.yaml` is the list of guards with their thresholds, the conditions each applies to, the C2 pairs, and a grounding for every threshold. `schema/guards.schema.json` is the shape of the guards file the checks write.
 
-**The guard spec is frozen at version 1.3** (2026-10-30, `../CHANGELOG.md`). The RQ0 gate spec pins its bytes and its version. Exemptions are never written here: they are the experiment's data, with a reason each, in the per-experiment spec.
+**The guard spec is frozen at version 1.4** (2026-10-31, `../CHANGELOG.md`). The RQ0 gate spec pins its bytes and its version. Exemptions are never written here: they are the experiment's data, with a reason each, in the per-experiment spec.
 
 ## The eight guards
 

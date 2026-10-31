@@ -9,14 +9,16 @@
 # from its wake event to the start of its service, a keystroke the task never
 # served censored at its end (metrics doc §6.12; since 2026-10-30, in place of
 # `ready_wait` filtered to channel `input`). The fourteen terms of the video
-# editor (kdenlive) and the image editor (GIMP) are `timer_latency`: their
-# measured driven phases are mouse-driven operations carried as the
-# applications' own timer components (9.5) — no keystroke stream exists for
-# them, so their foreground term reads their own wakes, the application's
-# responsiveness rather than a keystroke's echo: one row per wake on the task's
-# timer channel, from its wake event to the start of its service, censored as
-# a keystroke is (metrics doc §6.13; since 2026-10-30, in place of `ready_wait`
-# filtered to channel `timer`). The
+# editor (kdenlive) and the image editor (GIMP) and c7-mail's mailer term are
+# `app_latency`: their measured driven phases are mouse-driven operations
+# carried as the applications' own components (9.5) — no keystroke stream
+# exists for them, so their foreground term reads their own wakes, the
+# application's responsiveness rather than a keystroke's echo: one row per wake
+# on the task's timer or event channel, from its wake event to the start of its
+# service, censored as a keystroke is; a timer-channel wake dropped while one is
+# held has its row to the held wake's service (metrics doc §6.13; since
+# 2026-10-31, in place of `timer_latency`, the wakes split by the origin of
+# their chain). The
 # T_interaction threshold line (metrics doc §10) reads `input_latency`,
 # window (a filter on t; absent = the whole file; present, it is a ground-truth
 # segment of the file, which the lint checks), aggregate, direction (fixed by
@@ -154,10 +156,10 @@ files:
       - {entity: editor, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
   c1-video-edit:
     terms:
-      - {entity: editor, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}
   c1-photo:
     terms:
-      - {entity: photo-editor, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: photo-editor, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}
   c1-mail:
     terms:
       - {entity: mailer, metric: input_latency, aggregate: p99, direction: lower, weight: 1.0}
@@ -170,11 +172,11 @@ files:
       - {entity: hog, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
   c1-render:
     terms:
-      - {entity: editor, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: bulk, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
   c1-transcode:
     terms:
-      - {entity: video-editor, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: video-editor, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: batch, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
   c1-indexing:
     terms:
@@ -182,7 +184,7 @@ files:
       - {entity: hog, metric: turnaround, aggregate: turnaround, direction: lower, weight: 1.0}
   c1-backup:
     terms:
-      - {entity: editor, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: bulk, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.25}
 
   # ---- C2 — intent pairs. Latency and frame terms over the second segment,
@@ -221,7 +223,7 @@ files:
     # Kdenlive's measured export, 16.5 s of CPU in a 266 s segment, finishes under every row, so its
     # delivered CPU cannot move; its turnaround can (9.14 decision 6), at the render mode's weight.
     terms:
-      - {entity: editor, metric: timer_latency, window: {start_us: 60000000, end_us: 326000000}, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: app_latency, window: {start_us: 60000000, end_us: 326000000}, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: bulk, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
   c2-p3b:
     # the idle-class backup gets the editor's idle lane only, about 166 s of it against its 165.7 s of
@@ -229,7 +231,7 @@ files:
     # conformance item (e), the strict idle class): turnaround by the header's rule, as c1-backup's
     # (9.16 D4), expected "no headroom" (the header)
     terms:
-      - {entity: editor, metric: timer_latency, window: {start_us: 60000000, end_us: 326000000}, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: app_latency, window: {start_us: 60000000, end_us: 326000000}, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: bulk, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.25}
 
   # ---- C3 — transition arcs. Per-task terms; focus and task lifetimes window them.
@@ -247,8 +249,8 @@ files:
       - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
   c3-creation:
     terms:
-      - {entity: photo-editor, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
-      - {entity: video-editor, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: photo-editor, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: video-editor, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}
       - {entity: batch, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
 
   # ---- C4 — distractor injection: the C1 base's terms verbatim
@@ -319,7 +321,7 @@ files:
     # input term, and the file is reporting-only (9.14 decision 2 as amended 2026-10-09); no `base`,
     # the terms differ
     terms:
-      - {entity: mailer, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: mailer, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}
   c7-dev:
     base: c1-dev
     terms:
@@ -327,7 +329,7 @@ files:
   c7-photo:
     base: c1-photo
     terms:
-      - {entity: photo-editor, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: photo-editor, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}
   c7-meeting:
     base: c1-meeting
     terms:
@@ -344,7 +346,7 @@ files:
   c7-video-edit:
     base: c1-video-edit
     terms:
-      - {entity: editor, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}
   c7-compile:
     base: c1-compile
     terms:
@@ -356,11 +358,11 @@ files:
   c7-render:
     base: c1-render
     terms:
-      - {entity: editor, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}
   c7-transcode:
     base: c1-transcode
     terms:
-      - {entity: video-editor, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: video-editor, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}
   c7-indexing:
     base: c1-indexing
     terms:
@@ -368,4 +370,4 @@ files:
   c7-backup:
     base: c1-backup
     terms:
-      - {entity: editor, metric: timer_latency, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: editor, metric: app_latency, aggregate: p99, direction: lower, weight: 1.0}

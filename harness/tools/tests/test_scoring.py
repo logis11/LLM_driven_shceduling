@@ -60,7 +60,7 @@ def test_scored_aggregates_are_the_locked_ones(spec):
 def test_c2_weights_and_windows(spec):
     for wid, (start, end) in C2_WINDOWS.items():
         for t in terms(spec, wid):
-            if t["metric"] in ("input_latency", "timer_latency", "job"):
+            if t["metric"] in ("input_latency", "app_latency", "job"):
                 assert t["window"] == {"start_us": start, "end_us": end}, (wid, t)
                 assert t["weight"] == 1.0
             else:
@@ -74,7 +74,7 @@ def test_c2_weights_and_windows(spec):
     assert spec["files"]["c2-p2a-idle"]["base"] == "c2-p2a" and terms(spec, "c2-p2a-idle") == terms(spec, "c2-p2a")
     assert [t["entity"] for t in terms(spec, "c2-p2b")] == ["game.chain.1"]
     assert one(spec, "c2-p3a", "bulk", "turnaround")["weight"] == 0.5     # the measured export finishes (9.14 decision 6)
-    assert "channel" not in one(spec, "c2-p3a", "editor", "timer_latency")  # Kdenlive carries no keystroke stream: its own wakes, from their wake events
+    assert "channel" not in one(spec, "c2-p3a", "editor", "app_latency")  # Kdenlive carries no keystroke stream: its own wakes, from their wake events
     assert one(spec, "c2-p3b", "bulk", "turnaround")["weight"] == 0.25    # the backup finishes in the idle lane (9.16 D4)
 
 
@@ -100,7 +100,7 @@ def test_c3_terms(spec):
         ("browser", "input_latency", 1.0), ("game.chain.1", "job", 1.0),
         ("music", "job", 1.0), ("video", "job", 0.5)}
     assert {(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c3-creation")} == {
-        ("photo-editor", "timer_latency", 1.0), ("video-editor", "timer_latency", 1.0),
+        ("photo-editor", "app_latency", 1.0), ("video-editor", "app_latency", 1.0),
         ("batch", "cpu_delivered", 0.5)}
 
 
@@ -118,7 +118,7 @@ def test_derived_files_carry_their_base_terms_verbatim(spec):
     expected["c2-p2a-idle"] = "c2-p2a"
     assert bases == expected          # c7-mail declares no base: its cut holds no keystroke (9.14 decision 2 as amended)
     assert "base" not in spec["files"]["c7-mail"]
-    assert one(spec, "c7-mail", "mailer", "timer_latency")["aggregate"] == "p99"
+    assert one(spec, "c7-mail", "mailer", "app_latency")["aggregate"] == "p99"
     for wid, base in bases.items():
         if wid.startswith("c7-") and wid[3:] in BATCH_C7:
             continue
@@ -390,7 +390,7 @@ _C1 = {
                               "aggregate": "p99", "direction": "lower", "weight": 1.0},
                              {"entity": "build", "metric": "turnaround", "aggregate": "turnaround", "direction": "lower",
                               "weight": 1.0}]},
-    "c1-video-edit": {"terms": [{"entity": "editor", "metric": "timer_latency",
+    "c1-video-edit": {"terms": [{"entity": "editor", "metric": "app_latency",
                                  "aggregate": "p99", "direction": "lower", "weight": 1.0}]},
     "c1-media": {"terms": [{"entity": "music", "metric": "job", "aggregate": "miss_rate", "direction": "lower",
                             "weight": 1.0}]},
@@ -421,8 +421,8 @@ def test_the_generated_rule_derives_each_placements_c1_terms_suffixed_and_window
     assert entries["dx-office-with-compile"]["terms"] == [dict(_C1["c1-office"]["terms"][0], entity="writer-s0")]
     rt = entries["rt-video-edit-to-office-2s"]["terms"]
     assert [(t["entity"], t["metric"], t["window"]) for t in rt] == [
-        ("editor-s0", "timer_latency", {"start_us": 0, "end_us": 60 * S}),
-        ("editor-s2", "timer_latency", {"start_us": 62 * S, "end_us": 122 * S})]
+        ("editor-s0", "app_latency", {"start_us": 0, "end_us": 60 * S}),
+        ("editor-s2", "app_latency", {"start_us": 62 * S, "end_us": 122 * S})]
     assert entries["fl-media-t4-all"]["terms"] == [dict(_C1["c1-media"]["terms"][0], entity="music-s0")]
     out = with_generated(spec, _generated_manifest(), only={"tr-compile-to-office-departs", "fl-idle-t5-all"})
     assert set(out["files"]) == set(_C1) | {"tr-compile-to-office-departs"}
