@@ -2,6 +2,13 @@
 
 The harness tree's own record of what its committed data files and programs changed, newest first. The scoring spec (`scoring/scoring-spec.yaml`) and the guard spec (`guards/guard-spec.yaml`) are frozen here (Phase 8 spec, decision 19): a change to either after its freeze is an entry below before any run reads it, and the RQ0 gate spec (`experiments/rq0-gate.yaml`) pins the frozen bytes by hash. The metrics doc and the data contracts keep their own changelogs.
 
+## 2026-10-31 — each measured operation's largest run carried once per window; the rebuilt dataset; the RQ0 gate spec re-pinned (jioh)
+
+Decided by 인지오 (`_dev/docs/spec/jioh/timer-wakes-by-origin.md`, decisions 17 and 18; the measurement in `_dev/research/jioh/2026-10-31-wake-origins/operations.md`). After the rebuild below, `c1-photo`'s, `c7-photo`'s and `c3-creation`'s unsharp-mask windows held 0.3–0.5 ms of CPU where the measured operation holds about 2.4 s, its filter one run that the component draw no longer placed inside the window.
+
+- **Dataset**: each of the four operations carries the largest run of each measured operation (`largest_run`, `largest_run_channel`), one per operation window at its start on its channel, the operation's components pooled without those runs; `image-editor`'s three operation-phase values that this leaves short of the stability rule at its five repeats are carried with their half-widths at the venue's limit, the hosted runners having moved from kernel 6.17.0-1022-azure to 7.0.0-1017-azure (decision 18). The core set, the sensitivity variants and the generated layer rebuilt: forty core and variant files change, an operation window gaining its run's wake.
+- **Pins** (`experiments/rq0-gate.yaml`): dataset `27d347bc8079e2ac6bd81527070c283db28e0cae9adb40bd6ebf30d4ecbe6c34`; variants `de9802e787cfdb6af1568134dffc28ddf78713e57ab2e3fee41880f073ee4205`; the scoring spec, the guard spec 1.4 and the driver table unchanged.
+
 ## 2026-10-31 — a measured program's own wakes by origin: `app_latency`, guard spec 1.4, the rebuilt dataset; the RQ0 gate spec re-pinned (jioh)
 
 Decided by 인지오 (`_dev/docs/spec/jioh/timer-wakes-by-origin.md`; the data contracts §14, 2026-10-31). A measured program's own wakes compile onto `timer:<id>` where the measured wake's chain starts at a timer and onto `event:<id>` where it starts elsewhere; `timer:` holds one wake and the simulator writes `wake_drop` for a wake it drops, `event:` queues as `input:` does.
