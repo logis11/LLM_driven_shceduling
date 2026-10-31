@@ -43,7 +43,7 @@
 3. **RUN 끝의 drain — Part H5.** 기다리는 config switch(U3의 `pending_`, `dispatch()`)를, occupancy 안에서 RUN이 끝나는 순간에도 slice가 끝날 때와 똑같이 적용해요. FIFO에서 나가는 switch는 지금처럼 즉시 적용해요(2.3).
 4. **`WAIT children:<id>` — 항목 (g).** 지금은 보통 channel처럼 영원히 막혀요. 그 orchestrator가 spawn한 자식이 모두 끝나면 완료되고, `WAIT`에 닿을 때 살아 있는 자식이 없으면 막히지 않고 대기 0으로 바로 완료되게 해요(2.4).
 5. **invocation contract — 항목 (h).** `main()`의 `--workload`, `--schedule`, `--out-trace`, gzip, 다 쓴 경우에만 exit 0은 이미 있어요. 남은 것은 둘이에요. trace header의 `"sim"`이 지금 `"src/sim"`으로 고정이라 runner machine 설정에 적힌 version 문자열로 바꿔야 하고, 미뤄 둔 위치 인자 거부가 있어요(2.4).
-6. **회귀 기준선.** core set, sensitivity variant, generated layer가 2026-10-31에 다시 build됐어요. 51개 파일 모두 바뀌었어요(`event:` channel, operation 창 시작의 큰 run). 기존 byte-identical 기준선은 새 build(dataset manifest `27d347bc…`)로 다시 잡아야 해요.
+6. **회귀 기준선.** core set, sensitivity variant, generated layer가 2026-10-31에 다시 build됐어요. 51개 파일 모두 바뀌었어요(`event:` channel, operation 창 시작의 큰 run). 기존 byte-identical 기준선은 새 build(dataset manifest `27d347bc…`)로 다시 잡아야 해요. 새 build는 release `dataset-build-2026-10-31`의 `dataset-build-2026-10-31.tar.gz`예요. 저장소 root에서 `tar -xzf dataset-build-2026-10-31.tar.gz -C dataset`로 풀고 `make -C dataset check PY=python3.12`로 확인해요.
 
 ### 2.1 두 channel의 mailbox와 `wake_drop` (새 일)
 
