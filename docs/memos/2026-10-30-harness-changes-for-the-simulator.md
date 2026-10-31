@@ -24,7 +24,6 @@
 - **conformance (g)와 (h)는 그대로 남아 있어요.**
   - (g): build parent의 `WAIT children:<id>`는 자기가 spawn한 자식이 모두 끝나면 완료돼요. 그 시점에 살아 있는 자식이 없으면 block 없이 완료돼요.
   - (h): runner가 부르는 invocation contract예요. `--workload`, `--schedule`, `--out-trace` flag를 쓰고, trace header의 `sim`은 runner machine 설정의 version 문자열이어야 해요.
-- **회신 두 개.** 하나는 declared-class memo §4 item 4의 공식 회신이에요. 다른 하나는 data contracts §14가 제안한 (g)에 대한 동의예요.
 
 ## 2. simulator는 그대로인 결정
 
