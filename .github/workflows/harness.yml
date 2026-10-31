@@ -3,6 +3,7 @@ name: harness
 on:
   push:
     branches: [main]
+    paths-ignore: [.github/campaign.json]   # a campaign trigger push starts the measurement only
   pull_request:
   workflow_dispatch:    # one run on a branch proves the harness lint and suite on Linux against the blessed build (9.21)
 

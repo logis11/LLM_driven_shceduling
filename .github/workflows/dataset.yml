@@ -3,6 +3,7 @@ name: dataset
 on:
   push:
     branches: [main]
+    paths-ignore: [.github/campaign.json]   # a campaign trigger push starts the measurement only
   pull_request:
   workflow_dispatch:    # one run on a branch compiles its blessed manifests on Linux (9.18)
 
