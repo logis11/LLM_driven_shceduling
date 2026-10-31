@@ -495,6 +495,17 @@ campaigns:
       url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-2026-09-18
       assets:
         - {name: meas-interactive-six.zip, sha256: db3a1cc8042f7612e6ad7ae8f80f5620fa73650d803185c0eadce629111c810d}
+    - release: meas-ci-interactive-2026-10-31   # the GIMP repeats added on 2026-10-31 on the runners' new kernel, kept as
+      # the evidence of the venue's limit and not pooled (timer wakes by origin, decision 18)
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-interactive-2026-10-31
+      assets:
+        - {name: gated-reports.zip, sha256: e2505ca19ff3fb5ad5968d9741c9faf0b8b02d72df159b51cb2d9f1aead58f58}
+        - {name: meas-interactive-gimp-r10-full-41189590366.zip, sha256: 93100645e4ff82c59206a6bee962f5610f36db518d96f903384214ba24347684}
+        - {name: meas-interactive-gimp-r11-full-41189857228.zip, sha256: 8809fa05487f8ca1f407f750ab07e00e01ad8dde11b5bffa1eb4cf43bb3a4e39}
+        - {name: meas-interactive-gimp-r12-full-41189590366.zip, sha256: 02d045b7c50bdc4573a22a55c358cdfc17ad9f7e081dac1d1d0643f9e63c1e90}
+        - {name: meas-interactive-gimp-r13-full-41189590366.zip, sha256: a0f2996a8b0b2245a4a711865492bdb4edab80546569d09583836c09c0219864}
+        - {name: meas-interactive-gimp-r8-full-41189590366.zip, sha256: 72e2479daefaf911c1583e6ee3af13a08e26d24d286879e2395be28223931143}
+        - {name: meas-interactive-gimp-r9-full-41189590366.zip, sha256: 5044c9f4e19c4b2f341c7181003f7460c779a97e67b373593e1cd28f1b5cad22}
   meas-ci:interactive:2026-09-19:
     - release: meas-ci-2026-09-18
       url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-2026-09-18
