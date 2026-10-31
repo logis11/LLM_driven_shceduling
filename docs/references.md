@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-10-30
+> Status: normative · Created 2026-08-26 · Updated 2026-10-31
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -515,6 +515,11 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - cite: X.Org. `XNextEvent(3)`, the libX11 manual page: "The XNextEvent function copies the first event from the event queue into the specified XEvent structure and then removes it from the queue. If the event queue is empty, XNextEvent flushes the output buffer and blocks until an event is received." xorg.freedesktop.org/archive/current/doc/man/man3/XNextEvent.3.xhtml (accessed 2026-10-30; SHA-256 `36e66602cd1e0ff111f7e0dd319f4fe8ef5935600a614f5b22b78f68f6742979`).
 - role: an X client's events wait in a queue until it reads them — the keystroke's queueing in the interpretation contract's `WAIT(channel)` mailbox, against the timers above. Xlib's documented design only; clients that read X through XCB (Qt's `QXcbEventQueue`) are not covered by this page.
 - status: verified (2026-10-30; the page read)
+
+### `qt-postevent`
+- cite: The Qt Company. Qt 5.15, `QCoreApplication::postEvent()`'s documentation in `src/corelib/kernel/qcoreapplication.cpp` at qtbase tag `v5.15.13-lts-lgpl` (`:1514–1515`, `:1522–1523`, `:1529–1530`): "Adds the event event, with the object receiver as the receiver of the event, to an event queue and returns immediately." … "When control returns to the main event loop, all events that are stored in the queue will be sent using the notify() function." … "Events with equal priority will be processed in the order posted." github.com/qt/qtbase/blob/v5.15.13-lts-lgpl/src/corelib/kernel/qcoreapplication.cpp (accessed 2026-10-31; 105 543 bytes, SHA-256 `8ffba46ef260b88f71fc740908cd7ff3cb6381a5492d60317adc7a2a2ddfa40b`); the same sentences on doc.qt.io/qt-5/qcoreapplication.html ("Qt Core 5.15.19", accessed 2026-10-31).
+- role: the toolkit of `video-editor` (Kdenlive 23.08.5 on Qt 5, as `qt-qtimer` states): an event posted to an object — a message from another thread among them — waits in a queue and is delivered, in the order posted, when the receiving thread's event loop runs; a posted event that comes while the thread is busy is not dropped, against the timers above — the queueing of a non-timer wake on the interpretation contract's `event:` channel. The documented design only; which of Kdenlive's measured wakes are posted events the carried tables do not say.
+- status: verified (2026-10-31; the source read at the tag, the page read)
 
 ### `glibc`
 - cite: *GNU C Library* as Ubuntu packages it: `libc6` and `libc-bin` 2.39-0ubuntu8.8 (amd64) and `locales` 2.39-0ubuntu8.8 (all), the `noble-security` update published 2026-07-27, from Ubuntu's snapshot service at snapshot.ubuntu.com/ubuntu/20260728T000000Z/pool/main/g/glibc/, accessed 2026-10-01 (SHA-256 `libc6` 3b8d5391b6b484a4c81fd000b6064885ad967ec3cb966bc57603f3fb3ebf0ed5, `libc-bin` 64625a2e1b51e736c71f4916268c496278bbc789b1b189d1621607a33f455473, `locales` cdd2d347a357da6b9b1f2bd9e08c10a2a3a4686fad050791d30915d0ce0bb506).

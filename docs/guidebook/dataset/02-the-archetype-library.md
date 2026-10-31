@@ -1,6 +1,6 @@
 # 2권 · Archetype library: 프로그램 한 종류를 scheduler의 눈으로 적기
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-30
+> Status: draft · Created 2026-10-14 · Updated 2026-10-31
 
 **`archetypes.yaml`의 29개 항목은 각각 무엇을 어떻게 흉내 내고, 그 숫자들은 어디서 왔나.**
 
@@ -119,7 +119,7 @@ archetype의 숫자 하나를 몇 번 뽑는지는 `sampling` field가 정합니
 
 - `per-instance`: spawn table의 자식 하나마다 한 번. `make`가 띄우는 `cc1` 하나하나가 자기 CPU 양을 따로 뽑습니다.
 - `per-task`: task 하나에 한 번 뽑아 계속 씁니다. 예를 들어 video player의 `period`, game chain member의 `per_schedule_run`.
-- `per-iteration`: 반복마다 새로 뽑습니다. 단, 반복 횟수가 정해져 있어 compile 때 모두 펼칠 수 있을 때만 허용됩니다("only when bounded"). key 입력마다의 CPU, timer wake마다의 gap과 run이 여기에 해당합니다.
+- `per-iteration`: 반복마다 새로 뽑습니다. 단, 반복 횟수가 정해져 있어 compile 때 모두 펼칠 수 있을 때만 허용됩니다("only when bounded"). key 입력마다의 CPU, component의 wake마다의 gap과 run이 여기에 해당합니다.
 
 > **코드로.** `dataset/tools/wlc/sampling.py`는 모든 draw를 (seed, key…, index)의 SHA-256으로 정합니다. 전역 난수열을 쓰지 않으므로, 한 task를 고쳐도 다른 task의 draw가 밀리지 않습니다(파일 첫머리 docstring: "an edit to one task can never shift another task's draws"). `per-task` 값은 index 0으로, `per-iteration` 값은 반복 번호로 뽑힙니다(`compiler.py`의 `_draw`).
 
@@ -128,7 +128,7 @@ archetype의 숫자 하나를 몇 번 뽑는지는 `sampling` field가 정합니
 이 library를 읽다 보면 같은 "timer로 깨어남"이 두 가지로 적혀 있는 것을 보게 됩니다. 이 차이는 scheduler 실험에서 아주 중요하므로 따로 설명합니다.
 
 - **`TIMER(period)`**: 주기와 **deadline**이 있는 깨어남입니다. 다음 격자 시각이 이번 일의 기한입니다. 이 library에서 TIMER를 쓰는 항목은 넷뿐입니다. 세 개의 재생·통화 항목(`video-player`, `audio-player`, `video-call`)과 game chain의 머리(`game-task-chain`의 첫 member)입니다.
-- **`WAIT(timer)`**: 측정에서 관찰된 timer 깨어남입니다. 정해진 시각에 외부 wake 사건이 오지만, **deadline은 없습니다**. editor의 커서 깜빡임, browser의 내부 timer, daemon의 주기 점검 같은 깨어남이 여기에 해당합니다.
+- **`WAIT(timer)`**: 측정에서 관찰된 timer 깨어남입니다. 정해진 시각에 외부 wake 사건이 오지만, **deadline은 없습니다**. editor의 커서 깜빡임, browser의 내부 timer, daemon의 주기 점검 같은 깨어남이 여기에 해당합니다. 측정된 깨어남 가운데 wake 사슬이 timer가 아닌 곳(측정의 입력, 다른 process, kernel thread)에서 시작한 것은 같은 모양의 `WAIT(event)`가 됩니다. 이것도 deadline이 없습니다(2.4절).
 
 > **왜 이렇게 정했나.** 9.5 slice(interactive와 typing을 맡은 연구 slice)의 D74("`TIMER` carries a period with a deadline; a measured timer wake is a `WAIT` on the task's timer channel", 2026-09-26)가 이 구분을 정했습니다. 기록된 이유는 이렇습니다. 그 전의 fold-in(측정값을 library에 넣는 작업)은 측정된 timer wake를 모두 `TIMER`로 compile하면서, 다음 wake까지의 gap을 period로 썼습니다. 그 결과 task들이 1 μs부터 시작하는 TIMER period를 갖게 되었습니다. 그런데 TIMER를 읽는 쪽이 셋이었습니다 — interpretation-contract §3, EDF(Earliest Deadline First, 기한이 가장 이른 task를 먼저 돌리는 scheduling 정책)의 deadline class를 정하는 `docs/recognition-vocabulary.md`, harness의 `job` primitive(`docs/harness/metrics.md` §6.2) — 그리고 셋 다 TIMER를 "deadline이 있는 주기적 job"으로 읽었습니다. 근거로 `liu-jacm73`(Liu & Layland 1973)의 "each task must be completed before the next request for it occurs"를 인용합니다. 기록된 숫자로, 이 정정 전 compile된 core set에서는 `chrome` task 107개 중 106개가 TIMER를 가졌고, `c1-media`의 `video` task는 첫 period가 9 μs였습니다. 정정 후 core set의 timer wake는 531,740개의 외부 wake 사건이 되었고 160만 개의 TIMER step이 사라졌습니다.
 
@@ -255,26 +255,26 @@ input_run:
 
 | 항목 | `components` | `focus_components` | `stimulus` + `input_run` | `operations` | `heavy_events` | `launch` | `period` + `cycle_run` |
 |---|---|---|---|---|---|---|---|
-| `office-writer` | 1 | – | Word | – | – | ○ | – |
-| `code-editor` | 9 | – | Word | – | – | – | – |
-| `mail-client` | 15 | – | Outlook | `send` | – | ○ | – |
-| `web-browser` | 7 | – | IE | `page-load` | `MemoryInfra` | ○ | – |
-| `image-editor` | – | 1 | – | `unsharp-mask` | – | – | – |
-| `video-editor` | 2 | 3 | – | `preview-render` | – | ○ | – |
+| `office-writer` | 1 (1 + 0) | – | Word | – | – | ○ | – |
+| `code-editor` | 18 (9 + 9) | – | Word | – | – | – | – |
+| `mail-client` | 16 (15 + 1) | – | Outlook | `send` | – | ○ | – |
+| `web-browser` | 10 (7 + 3) | – | IE | `page-load` | `MemoryInfra` | ○ | – |
+| `image-editor` | – | 2 (1 + 1) | – | `unsharp-mask` | – | – | – |
+| `video-editor` | 2 (2 + 0) | 7 (3 + 4) | – | `preview-render` | – | ○ | – |
 | `video-player` | – | – | – | – | – | ○ | ○ |
 | `audio-player` | – | – | – | – | – | ○ | ○ |
 | `video-call` | – | – | – | – | – | ○ | ○ |
-| `renderer-hidden` | 6 | – | – | – | – | ○ | – |
-| `chat-client` | 6 | – | – | – | – | ○ | – |
-| `game-client` | 11 | – | – | – | `CHTTPClientThre` | ○ | – |
-| `compositor-shell` | 3 | – | – | – | – | – | – |
-| `audio-server` | 1 | – | – | – | – | – | – |
-| `service-manager` | 1 | – | – | – | – | – | – |
-| `message-bus` | 1 | – | – | – | – | – | – |
+| `renderer-hidden` | 6 (6 + 0) | – | – | – | – | ○ | – |
+| `chat-client` | 11 (6 + 5) | – | – | – | – | ○ | – |
+| `game-client` | 20 (11 + 9) | – | – | – | `CHTTPClientThre` | ○ | – |
+| `compositor-shell` | 3 (3 + 0) | – | – | – | – | – | – |
+| `audio-server` | 2 (1 + 1) | – | – | – | – | – | – |
+| `service-manager` | 1 (0 + 1) | – | – | – | – | – | – |
+| `message-bus` | 1 (0 + 1) | – | – | – | – | – | – |
 
-(숫자는 component 개수, residual 포함. ○는 있음. 이 표는 `archetypes.yaml`을 python으로 읽어 세었습니다.)
+(숫자는 component 개수, residual 포함. 괄호 안은 timer part + event part. ○는 있음. 이 표는 `archetypes.yaml`을 python으로 읽어 세었습니다.)
 
-### `components` — timer로 깨어나는 부분
+### `components` — 프로그램 자신의 깨어남
 
 **component**는 application의 process tree 안에서 같은 이름으로 깨어나는 thread 묶음 하나입니다. 이름은 **comm**(Linux가 thread마다 붙이는 최대 15글자의 짧은 이름. `ps`나 `top`에 보이는 그 이름)으로 정합니다. process가 여럿인 프로그램(Chrome, VS Code)에서는 process의 역할과 comm을 붙여 `gpu/VizCompositorTh`, `renderer/Compositor`처럼 씁니다(9.5 D67, 2026-09-23: "a component is identified by its process role and comm together").
 
@@ -286,9 +286,13 @@ component 하나는 다섯 값을 가집니다.
 - `gap`: 연속한 두 wake 사이 시간의 quantile table.
 - `run`: wake 한 번의 CPU 시간의 quantile table.
 
-component는 wake 비율이 큰 것부터 차례로 골라, 그 phase 전체 wake의 95 %를 덮을 때까지 싣습니다. 나머지 comm들은 **residual**이라는 component 하나로 묶습니다. residual은 `comms:` 목록에 무엇을 묶었는지 적습니다(9.5 D16, 2026-09-15: "Components kept in descending wake rate until they cover 95 % of idle wakes; the rest pooled into one residual component"). 각 항목의 components 끝에는 `# 8 comms cover 97.2 % of 112.4 wakes/s (D16, target 95 %); the rest pooled as residual` 같은 주석이 붙어 있습니다.
+comm 하나의 wake는 그 측정된 wake 사슬이 시작한 곳에 따라 두 component로 나뉩니다(2026-10-31, `_dev/docs/spec/jioh/timer-wakes-by-origin.md` 결정 8, 10). 사슬은 시간 순으로 거슬러 올라갑니다. application tree의 thread가 깨운 wake는 그 thread 자신의 마지막 wake가 시작한 곳을 물려받고, X server가 전달한 wake도 같은 식으로 따라갑니다. 사슬이 timer interrupt(유휴 CPU에서 돈 wakeup)에서 시작하면 **timer part**, 그 밖 — 측정의 입력 재생, 다른 process, kernel thread, 그 자신의 시작점이 trace에 없는 X server — 에서 시작하면 **event part**입니다. event part에는 여섯째 값 `channel: event`가 붙습니다. 측정 driver가 application에 들어가는 길(xdotool과 driver의 process, GIMP의 Script-Fu server)은 입력으로 셉니다(같은 spec의 결정 9).
 
-compiler는 component마다 gap table에서 gap을 뽑아 wake 시각을 만들고, wake마다 run table에서 run을 뽑습니다. 그리고 모든 component의 wake를 시간순으로 합쳐 task 하나의 사건 흐름으로 만듭니다. 각 timer wake는 `WAIT timer:<task id>` + `RUN`이 되고, 그 시각에 외부 `wake` 사건이 하나 생깁니다(1.5절의 deadline 없는 wake).
+channel마다 따로, component는 wake 비율이 큰 것부터 차례로 골라, 그 channel의 phase 전체 wake의 95 %를 덮을 때까지 싣습니다. 나머지 comm들은 그 channel의 **residual**이라는 component 하나로 묶습니다. residual은 `comms:` 목록에 무엇을 묶었는지 적습니다(9.5 D16, 2026-09-15: "Components kept in descending wake rate until they cover 95 % of idle wakes; the rest pooled into one residual component"). 각 channel의 components 끝에는 `# 8 comms cover 97.4 % of 111.8 timer-caused wakes/s (D16, target 95 %); the rest pooled as `residual``, `# 8 comms cover 87.3 % of 0.5 wakes/s of other origins, queued on the event channel (D16 per channel); the rest pooled as its `residual``(`code-editor`의 두 주석) 같은 주석이 붙어 있습니다.
+
+compiler는 component마다 gap table에서 gap을 뽑아 wake 시각을 만들고, wake마다 run table에서 run을 뽑습니다. 그리고 모든 component의 wake를 시간순으로 합쳐 task 하나의 사건 흐름으로 만듭니다. timer part의 wake는 `WAIT timer:<task id>` + `RUN`, event part의 wake는 `WAIT event:<task id>` + `RUN`이 되고, 그 시각에 외부 `wake` 사건이 하나 생깁니다(1.5절의 deadline 없는 wake). task가 그 channel에서 기다리고 있지 않을 때 온 wake를 simulator는 channel의 종류대로 다룹니다. `event:`의 wake는 key 입력처럼 모두 쌓고, `timer:`의 wake는 처음 하나만 붙들고 그 뒤에 온 것은 버리며 그 시각에 `wake_drop` 줄을 씁니다(`docs/simulator/interpretation-contract.md` §3의 `WAIT` 행).
+
+> **왜 이렇게 정했나.** wake를 원인으로 나눈 timer-wakes-by-origin spec의 결정 1(2026-10-31, 인지오)이 기록한 근거는 이렇습니다. 세 toolkit의 timer는 밀린 발화를 따라잡지 않고(`qt-qtimer`, `glib-timeout`, `gecko-nsitimer`), X 입력 event는 쌓이며(`xlib-xnextevent`), 다른 thread가 보낸 event도 쌓입니다(`qt-postevent`).
 
 > **왜 이렇게 정했나.** 9.5 D9(2026-09-14, "shape of the six measured archetypes: one task, merged event stream")가 이 모양을 정했습니다. 이유는 둘입니다. 하나는 관측된 연구들이 key 하나당 CPU를 그 앞 gap과 무관한 분포로 잰다는 것입니다(옛 항목의 "burst = gap의 일정 비율" 결합은 출처가 없었습니다). 다른 하나는 모든 관측이 입력 옆에 timer로 깨어나는 일을 보고한다는 것입니다("timer messages 35.1 % vs UI 20.3 % of CPU", Lorch 2003 Table 2; 커서 깜빡임, 맞춤법 검사, 자동 저장, 화면 그리기, 메일 확인 timer). task 하나는 순차 program 하나이므로, 두 종류의 wake를 compile 때 하나의 흐름으로 합칩니다. 버린 대안은 "application당 task 두 개"(이름이 하나 더 생김)와 "입력만 있는 loop"(timer wake를 버림)였습니다.
 
@@ -319,9 +323,11 @@ compiler는 timeline의 `input` 창마다, 녹화에서 창 길이만큼의 연�
 
 ### `operations` — 이름 붙은 무거운 작업
 
-`operations`는 사용자가 명시적으로 시키는 무거운 작업입니다. 지금 넷이 있습니다. `mail-client`의 `send`(첨부 파일 달린 답장 보내기), `web-browser`의 `page-load`(무거운 feed page 열기), `image-editor`의 `unsharp-mask`(사진에 선명도 필터), `video-editor`의 `preview-render`(timeline 미리보기 렌더링). 각 operation은 `duration`(시작부터 완료까지 걸린 시간의 quantile table)과 그 동안의 `components`를 가집니다.
+`operations`는 사용자가 명시적으로 시키는 무거운 작업입니다. 지금 넷이 있습니다. `mail-client`의 `send`(첨부 파일 달린 답장 보내기), `web-browser`의 `page-load`(무거운 feed page 열기), `image-editor`의 `unsharp-mask`(사진에 선명도 필터), `video-editor`의 `preview-render`(timeline 미리보기 렌더링). 각 operation은 `duration`(시작부터 완료까지 걸린 시간의 quantile table), `largest_run`(측정한 조작마다 가장 큰 run 하나의 quantile table)과 그 run이 깨는 channel `largest_run_channel`, 그리고 그 run들을 뺀 나머지 wake의 `components`를 가집니다.
 
-timeline은 operation의 이름과 시작 시각을 정합니다. compiler는 `duration` table에서 길이를 뽑고, 그 구간 동안 평소 component들을 operation의 component들로 바꿉니다. 그 구간에는 입력 wake를 만들지 않고, operation은 focus 창을 넘어서도 끝까지 갑니다(9.5 follow-ups spec decisions 8–10: "From its start the operation's components replace whatever is active … no input wakes are emitted during it").
+timeline은 operation의 이름과 시작 시각을 정합니다. compiler는 `duration` table에서 길이를 뽑고, 그 구간이 시작하는 순간 `largest_run`에서 뽑은 run 하나를 `largest_run_channel`의 wake로 싣고(timer-wakes-by-origin spec 결정 17, 2026-10-31), 그 구간 동안 평소 component들을 operation의 component들로 바꿉니다. 그 구간에는 입력 wake를 만들지 않고, operation은 focus 창을 넘어서도 끝까지 갑니다(9.5 follow-ups spec decisions 8–10: "From its start the operation's components replace whatever is active … no input wakes are emitted during it").
+
+> **왜 이렇게 정했나 — 조작마다 가장 큰 run(결정 17).** 측정한 조작 하나하나에는 가장 큰 run이 하나 있고(`_dev/research/jioh/2026-10-31-wake-origins/operations.md`), 그 run이 조작 CPU의 큰 몫을 차지합니다. unsharp mask는 조작 CPU 2,443 ms(중앙값) 가운데 2,434 ms, send는 2,234 ms 가운데 1,114 ms, page load는 336 ms 가운데 126 ms, preview render는 11,321 ms 가운데 223 ms입니다. 이 run을 component의 wake 하나로 두면, 창이 열릴 때 이미 돌던 흐름으로 뽑는 규칙(9.5 D77) 때문에 창 안에 들어갈지가 뽑기에 달립니다. 그래서 창마다 한 번 반드시 싣습니다. 측정에서 그 run은 조작 시작 뒤 중앙값 1.2 ms(unsharp mask), 113.6 ms(send), 95.3 ms(page load), 6,067.9 ms(preview render)에 왔는데, 창이 열리는 순간에 둡니다. 측정된 run의 wake는 거의 모두 입력이 시작한 것이라 네 operation 모두 `event:` channel입니다.
 
 ### `heavy_events` — 드문 무거운 run
 
@@ -329,7 +335,7 @@ timeline은 operation의 이름과 시작 시각을 정합니다. compiler는 `d
 
 ### `launch` — application이 막 켜질 때
 
-timeline이 application을 파일 중간에 시작시키면(0초가 아닌 시각에 `arrive`), 그 application은 먼저 실제로 관측된 **launch phase**(켜진 직후 바쁜 구간)를 재생합니다. `launch: {stream: launch-office-writer, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}`는 `dataset/launch/launch-office-writer.json.gz` 파일을 가리킵니다. 이 파일은 측정 repeat마다 launch phase의 길이와, 그 동안의 wake 하나하나(phase 시작으로부터의 시각, run, thread)를 담습니다. 예를 들어 `office-writer`의 launch phase는 다섯 repeat 모두 약 40.76초이고, 그 동안 838–863개의 wake가 있습니다(파일을 열어 repeat마다 센 값). compiler는 file seed로 repeat 하나를 골라 그 wake들을 그대로 재생하고, phase가 끝나면 평소의 component 흐름을 시작합니다. 0초에 이미 있는 task는 launch를 재생하지 않습니다(이미 안정 상태로 봄).
+timeline이 application을 파일 중간에 시작시키면(0초가 아닌 시각에 `arrive`), 그 application은 먼저 실제로 관측된 **launch phase**(켜진 직후 바쁜 구간)를 재생합니다. `launch: {stream: launch-office-writer, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}`는 `dataset/launch/launch-office-writer.json.gz` 파일을 가리킵니다. 이 파일은 측정 repeat마다 launch phase의 길이와, 그 동안의 wake 하나하나(phase 시작으로부터의 시각, run, thread, 그리고 측정된 wake 사슬의 시작점에 따른 channel — 0이면 timer, 1이면 event)를 담습니다. 예를 들어 `office-writer`의 launch phase는 다섯 repeat 모두 약 40.76초이고, 그 동안 838–863개의 wake가 있습니다(파일을 열어 repeat마다 센 값). compiler는 file seed로 repeat 하나를 골라 그 wake들을 각자의 channel(`timer:<id>` 또는 `event:<id>`)에 그대로 재생하고, phase가 끝나면 평소의 component 흐름을 시작합니다. 0초에 이미 있는 task는 launch를 재생하지 않습니다(이미 안정 상태로 봄).
 
 > **왜 이렇게 정했나.** 9.10 slice(scenario와 timeline을 맡은 slice)의 D21(2026-10-01)이 "an application started mid-file runs its observed launch phase first"를 정했고, D136(2026-10-04)이 그 형식을 "replay"로 정했습니다. D136이 기록한 이유: "launch work is a sequence (dry run soffice: 1.6 s CPU in its first 2 s, 887 ms of it in two runs of 427 and 459 ms)". launch는 분포가 아니라 순서가 있는 사건열이라, 표로 뽑지 않고 녹화처럼 재생합니다. 버린 대안은 "tables per 10 s slice"였습니다. 같은 결정이 "no value is a distribution, so no stability test"라고 적습니다. launch 재생에는 3장의 stability rule이 적용되지 않습니다. 지금 launch를 가진 항목은 열 개입니다(9.10 D140, 2026-10-05).
 
@@ -448,7 +454,7 @@ office-writer:
   declared_class: normal
   pattern:
     program:
-      - loop:                  # merged event stream … (D9): replayed stimulus in focus windows (D18) + timer components (D16)
+      - loop:                  # merged event stream … (D9): replayed stimulus in focus windows (D18) + components (D16), each own wake on the timer or event channel by its origin …
           - WAIT: input
           - RUN: event
   params:
@@ -459,8 +465,8 @@ office-writer:
     components:
       - comm: "soffice.bin"
         threads: 1
-        wakes_per_s: 3.4571
-        gap: {dist: quantiles, p: [245, 314, 357, 386, 110223, 600682, 600693, 600706, 600718, 600754], min: 121, max: 998153, ...}
+        wakes_per_s: 3.4476
+        gap: {dist: quantiles, p: [245, 315, 357, 386, 112729, 600682, 600694, 600706, 600719, 1040692], min: 121, max: 1202585, ...}
         run: {dist: quantiles, p: [21, 25, 25, 27, 70, 311, 339, 355, 389, 429], min: 15, max: 468, ...}
   lifetime: segment-bound
   binding_params: []
@@ -470,10 +476,10 @@ office-writer:
 한 줄씩 풀면 이렇습니다.
 
 - 이 항목은 우리 측정에서 온 행동 부류이고(`meas`), 보통 class입니다(`normal`).
-- program은 "무언가를 기다리고(`WAIT`), 깨면 일한다(`RUN`)"의 반복입니다. 주석이 말하듯 이 loop는 compile 때 두 종류의 wake(재생된 key 입력과 측정된 timer)를 합친 명시적 사건열로 펼쳐집니다.
+- program은 "무언가를 기다리고(`WAIT`), 깨면 일한다(`RUN`)"의 반복입니다. 주석이 말하듯 이 loop는 compile 때 재생된 key 입력과 component 자신의 wake(측정된 wake 사슬의 시작점에 따라 timer channel 또는 event channel)를 합친 명시적 사건열로 펼쳐집니다.
 - `input_run`: key 하나에 Writer 전체가 쓰는 CPU. 중간값 3.23 ms, 99번째 percentile 11.4 ms. 표 전체의 평균은 `sampling.mean_us`로 계산하면 4,906.7 μs, 약 4.9 ms입니다.
 - `stimulus`: SWELL-KW의 Word 녹화, key만.
-- `components`: `soffice.bin` thread 하나. 초당 3.4571번 깨어나고, gap 표가 특이합니다. p1–p25가 245–386 μs이고 p75 이상이 약 600.7 ms입니다. 즉 Writer는 약 0.6초 간격으로 깨어나는데, 깰 때 0.3–0.4 ms 간격으로 몇 번 연달아 깹니다. gap 표의 평균은 289,261 μs이고, 1초를 이 값으로 나누면 3.4571입니다(`wakes_per_s`와 정확히 일치. 9.5 D71이 "a component's gap table implies its measured wake rate"를 test로 지키게 했습니다). run은 중간값 70 μs, 최대 468 μs로 짧습니다.
+- `components`: `soffice.bin` thread 하나의 timer part 하나(event part는 없음). 초당 3.4476번 깨어나고, gap 표가 특이합니다. p1–p25가 245–386 μs이고 p75–p99가 약 600.7 ms입니다. 즉 Writer는 약 0.6초 간격으로 깨어나는데, 깰 때 0.3–0.4 ms 간격으로 몇 번 연달아 깹니다. gap 표의 평균은 290,060 μs이고, 1초를 이 값으로 나누면 3.4476입니다(`wakes_per_s`와 정확히 일치. 9.5 D71이 "a component's gap table implies its measured wake rate"를 test로 지키게 했습니다). run은 중간값 70 μs, 최대 468 μs로 짧습니다.
 - `segment-bound`, 손잡이 없음, scaling 없음.
 
 ### 2단계: timeline이 이 항목을 부른다
@@ -499,23 +505,23 @@ focus:
 
 compiler(`compiler.py`의 `_measured_unroll`)는 다음을 합니다.
 
-1. **timer wake**: `soffice.bin` component 하나에 대해, 0초부터 60초까지 "이미 돌고 있던 흐름"의 첫 gap을 뽑고, 이어서 gap을 하나씩 뽑으며 wake 시각을 만듭니다. wake마다 run을 하나 뽑습니다. 60초 × 3.4571/s ≈ 207개를 기대할 수 있습니다.
+1. **timer wake**: `soffice.bin` component 하나에 대해, 0초부터 60초까지 "이미 돌고 있던 흐름"의 첫 gap을 뽑고, 이어서 gap을 하나씩 뽑으며 wake 시각을 만듭니다. wake마다 run을 하나 뽑습니다. 60초 × 3.4476/s ≈ 207개를 기대할 수 있습니다.
 2. **input wake**: `input` 창 2–58초, 56초 길이에 대해, `swell-word-c1` 녹화에서 seed가 정한 위치부터 56초 분량의 key 시각을 잘라 옵니다. key마다 `input_run`을 뽑습니다(0이 나오면 RUN 없이 WAIT만 둡니다).
-3. 두 목록을 시간순으로 합치고, 각 wake를 `WAIT timer:writer` 또는 `WAIT input:writer`와 그 뒤의 `RUN`으로 바꿉니다. 그리고 각 wake 시각에 외부 `wake` 사건을 하나씩 만듭니다.
+3. 두 목록을 시간순으로 합치고, 각 wake를 `WAIT timer:writer` 또는 `WAIT input:writer`와 그 뒤의 `RUN`으로 바꿉니다(`office-writer`에는 event part가 없어 `WAIT event:writer`는 나오지 않습니다). 그리고 각 wake 시각에 외부 `wake` 사건을 하나씩 만듭니다.
 
 ### 4단계: 결과를 열어 본다
 
-compile된 `dataset/build/coreset-single/c1-office.workload.json`을 python으로 열어 `writer` task를 세면 이렇습니다(2026-10-14 local build).
+compile된 `dataset/build/coreset-single/c1-office.workload.json`을 python으로 열어 `writer` task를 세면 이렇습니다(2026-10-31 build).
 
-- program: `WAIT` 475개와 `RUN` 475개.
+- program: `WAIT` 476개와 `RUN` 475개(마지막 wake의 channel에서 기다리는 WAIT 하나가 끝에 붙음).
 - wake 사건: `input:writer` 270개, `timer:writer` 205개. timer wake 205개는 위의 기대치 약 207개와 맞습니다. key 270개는 56초 동안 초당 약 4.8개입니다.
-- RUN의 합: 1,358,623 μs, 약 1.36초. 60초 중 약 2.3 %입니다.
+- RUN의 합: 1,358,636 μs, 약 1.36초. 60초 중 약 2.3 %입니다.
 
 program의 앞부분은 이렇게 생겼습니다.
 
 ```
-WAIT timer:writer, RUN 248, WAIT timer:writer, RUN 357, WAIT timer:writer, RUN 152,
-WAIT timer:writer, RUN 317, WAIT timer:writer, RUN 355, WAIT timer:writer, RUN 280,
+WAIT timer:writer, RUN 248, WAIT timer:writer, RUN 357, WAIT timer:writer, RUN 153,
+WAIT timer:writer, RUN 317, WAIT timer:writer, RUN 355, WAIT timer:writer, RUN 281,
 WAIT timer:writer, RUN 21,  WAIT timer:writer, RUN 321,
 WAIT input:writer, RUN 3117, WAIT input:writer, RUN 10152, ...
 ```
@@ -524,17 +530,17 @@ WAIT input:writer, RUN 3117, WAIT input:writer, RUN 10152, ...
 
 ```
 302832 timer:writer
-892899 timer:writer
-893285 timer:writer
-893671 timer:writer
-894057 timer:writer
-1387227 timer:writer
+893063 timer:writer
+893449 timer:writer
+893835 timer:writer
+894221 timer:writer
+1388934 timer:writer
 ...
 2059422 input:writer
 2059422 input:writer
 ```
 
-892,899 / 893,285 / 893,671 / 894,057 μs의 네 wake가 386 μs 간격으로 붙어 있는 것이 보입니다. gap 표의 짧은 쪽(245–386 μs)이 바로 이 몰아 깨기입니다. 또 2,059,422 μs에 input wake가 두 번 같은 시각에 있습니다. 우리가 추출한 SWELL-KW stream에서 timestamp가 15.6 ms 격자에 떨어져, 같은 시각으로 기록된 key가 있기 때문입니다(9.5 D12: "7 % zero gaps"). 이 격자는 stream에 대한 우리의 읽기이고, 읽은 SWELL-KW 자료는 timestamp의 해상도를 말하지 않습니다.
+893,063 / 893,449 / 893,835 / 894,221 μs의 네 wake가 386 μs 간격으로 붙어 있는 것이 보입니다. gap 표의 짧은 쪽(245–386 μs)이 바로 이 몰아 깨기입니다. 또 2,059,422 μs에 input wake가 두 번 같은 시각에 있습니다. 우리가 추출한 SWELL-KW stream에서 timestamp가 15.6 ms 격자에 떨어져, 같은 시각으로 기록된 key가 있기 때문입니다(9.5 D12: "7 % zero gaps"). 이 격자는 stream에 대한 우리의 읽기이고, 읽은 SWELL-KW 자료는 timestamp의 해상도를 말하지 않습니다.
 
 simulator는 이 task를 이렇게 실행합니다. 0.30초에 timer wake가 오면 runnable이 되어 248 μs를 쓰고, 다음 WAIT에서 멈춥니다. 2.06초에 key가 오면 3,117 μs를 쓰려 하는데, 그때 browser나 mail이 CPU를 쓰고 있거나 writer가 앞의 일을 아직 하고 있으면 기다리게 됩니다. key가 온 순간부터 그 key의 처리가 시작되기까지의 이 기다림이 이 연구가 재는 지연입니다. 실제로 core set의 scoring spec은 `c1-office`의 항목으로 `{entity: writer, metric: input_latency, aggregate: p99, …}`를 둡니다(`harness/scoring/scoring-spec.yaml`). writer에 온 key 입력 하나하나가 처리되기 시작할 때까지 걸린 시간의 99번째 percentile을 점수로 삼는다는 뜻입니다.
 
@@ -620,7 +626,7 @@ measurement-overview §5가 정의를 모읍니다.
 - **wake**: thread가 마지막으로 잠든 뒤 wakeup 사건이 있었고 그다음에 오는 schedule-in. preemption 뒤의 재개는 wake가 아니며, 그 run은 앞의 wake에 합칩니다(9.5 follow-ups spec decision 4: "A resume after preemption is not a wake: its run is added to the preceding wake's run").
 - **run**: wake 한 번의 CPU 시간.
 - **gap**: 한 component의 합쳐진 wake 시각들 사이의 간격. 관측 구간을 한 바퀴 감싸서(마지막 wake에서 첫 wake까지도 하나의 gap) 계산하므로, gap 평균은 정확히 "구간 길이 / wake 수"이고, gap 표가 암시하는 비율이 측정된 비율과 같습니다(9.5 D71).
-- **component**: process 역할 하나 안의 thread comm 하나(`chat-client`와 `game-client`는 9.8 desktop slice의 규칙대로 tree의 process들을 가로지른 thread comm 하나). wake 비율 순으로 phase wake의 95 %를 덮을 때까지 싣고, 나머지는 residual로 묶습니다. 모든 repeat에서 적어도 두 번씩 깨지 않는 component는 "sporadic"으로 보고만 하고 싣지 않습니다(9.5 D43). 단 sparse component(3.5절)로 싣는 예외가 있습니다.
+- **component**: process 역할 하나 안의 thread comm 하나(`chat-client`와 `game-client`는 9.8 desktop slice의 규칙대로 tree의 process들을 가로지른 thread comm 하나). 측정된 wake 사슬의 시작점에 따라 timer part와 event part로 나누고, channel마다 wake 비율 순으로 phase wake의 95 %를 덮을 때까지 싣고, 나머지는 그 channel의 residual로 묶습니다. 모든 repeat에서 적어도 두 번씩 깨지 않는 component는 "sporadic"으로 보고만 하고 싣지 않습니다(9.5 D43). 단 sparse component(3.5절)로 싣는 예외가 있습니다.
 - **table**: p1…p99.9의 열 percentile, 표본의 min과 max, 각 구간의 평균(2.3절).
 
 ## 3.3 repeat, campaign, machine gate
@@ -739,7 +745,7 @@ program:                     # per constructed chain member
 
 **측정.** 9.8 slice의 desktop campaign `meas-ci:desktop:2026-09-20`, 12 repeat. Steam client build 1788652215(`steam-installer`)를 **로그아웃 상태**로, 창을 보이게 띄우고(Xvfb에 창을 최소화할 수 있도록 openbox window manager를 둠), 900초 settle 뒤 600초 `shown` phase를 쟀습니다. 측정 대상은 CPU 하나에 묶고, 측정 도구와 page 서버, homeserver는 다른 CPU에 두었습니다.
 
-**숫자.** 11개 component(residual 포함), phase 전체 약 299.3 wakes/s(`stats`: "shown wakes/s 298.0720–301.9440"), CPU 점유율 0.013–0.018. 큰 component는 `steamwebhelper`(70.749 wakes/s, gap 중간값 16.15 ms), `steam`(69.467/s), `IPC:CSteamEngin`(44.496/s), `CJobMgr::m_Work`(35.629/s)입니다. `steamwebhelper`의 gap은 중간값부터 p99.9까지 16.15–16.53 ms 사이에 몰려 있어, 거의 일정한 간격으로 깨어납니다. 그 간격이 무엇에서 오는지 적은 문장은 이 권을 쓰며 읽은 기록(항목의 scope, 9.8 changelog의 결정 제목들)에서 찾지 못했습니다(확인 필요). heavy event 하나: `CHTTPClientThre`의 1 ms 이상 run이 12 repeat의 7,200초 동안 62번(2.0–50.2 ms), 비율 0.008611/s로 실립니다.
+**숫자.** timer part 11개(합 297.2 wakes/s)와 event part 9개(합 2.15 wakes/s), 각각 residual 포함, phase 전체 약 299.3 wakes/s(`stats`: "shown wakes/s 298.0720–301.9440"), CPU 점유율 0.013–0.018. 큰 comm은 `steamwebhelper`(두 part 합 70.749 wakes/s, timer part의 gap 중간값 16.15 ms), `steam`(69.467/s), `IPC:CSteamEngin`(44.496/s), `CJobMgr::m_Work`(35.629/s)이고, 넷 모두 wake의 98 % 넘게가 timer part입니다. `steamwebhelper`의 gap은 중간값부터 p99.9까지 16.15–16.53 ms 사이에 몰려 있어, 거의 일정한 간격으로 깨어납니다. 그 간격이 무엇에서 오는지 적은 문장은 이 권을 쓰며 읽은 기록(항목의 scope, 9.8 changelog의 결정 제목들)에서 찾지 못했습니다(확인 필요). heavy event 하나: `CHTTPClientThre`의 1 ms 이상 run이 12 repeat의 7,200초 동안 62번(2.0–50.2 ms), 비율 0.008611/s로 실립니다.
 
 **예외.** run 평균 넷(`steamwebhelper` ±5.3 %, `steam` ±10.1 %, `IPC:CSteamEngin` ±8.8 %, `VizCompositorTh` ±5.6 %)은 "machine 따라 흩어짐" 예외로 실립니다. 이들의 run이 phase CPU의 80.2 %를 차지한다는 것도 scope에 적혀 있습니다(9.8 D37).
 
@@ -773,7 +779,7 @@ program:                     # per constructed chain member
 
 **keys only(9.5 D28, D65, D72, D79).** 처음에는 녹화의 key와 pointer 사건을 함께 재생했습니다. 그러자 click, scroll, drag가 타이핑 위치를 옮겼습니다. Writer에서는 타이핑이 76쪽 문서의 끝이 아니라 72–75쪽에 들어갔고, drag가 고른 글자를 타이핑이 덮어써 단어 수가 줄었습니다(D28). VS Code에서는 녹화의 pointer 원점이 activity bar의 검색 icon 위에 떨어져 검색 창에 글자가 들어갔습니다(D72). 그래서 넷 모두 key만 재생하도록 바꾸고, scope에 "the archetype carries typing, not document navigation"처럼 적었습니다.
 
-**TIMER와 WAIT(timer)(9.5 D74, D75).** 1.5절과 2.4절에서 설명했습니다. 여섯 application은 deadline 없는 timer wake만 갖고, 재생·통화 셋만 TIMER를 갖습니다.
+**TIMER와 WAIT(timer)(9.5 D74, D75).** 1.5절과 2.4절에서 설명했습니다. 여섯 application은 deadline 없는 wake(timer channel과 event channel의 WAIT)만 갖고, 재생·통화 셋만 TIMER를 갖습니다.
 
 **launch phase(9.10 D21, D136, D140).** `code-editor`와 `image-editor`를 뺀 일곱이 launch를 가집니다. 이 둘은 core set 어디에서도 파일 중간에 켜지지 않기 때문입니다(9.10 D21이 나열한 중간 시작. `c3-`는 C3 그룹, 즉 여러 상황을 이어 붙인 긴 arc 파일이고 `c4-`는 끼워 넣기 그룹입니다: `c3-workday`의 writer 60초와 Thunderbird 360초, `c3-evening`의 game·Steam·chat 60초와 player 둘 300초, `c3-creation`의 Kdenlive 120초, `c4-compile`의 Chrome 30초, `c4-gaming`의 chat 30초).
 
@@ -786,7 +792,7 @@ program:                     # per constructed chain member
 | 흉내 내는 것 | LibreOffice Writer(`soffice.bin`) |
 | 측정 | LibreOffice 24.2.7.2(Ubuntu 24.04 apt), 약 76쪽 생성 문서 끝에 타이핑, 14 repeat |
 | 재현하는 행동 | key마다 수 ms의 CPU; 평소에는 약 0.6초마다 몇 번 몰아서 깨어남 |
-| 핵심 숫자 | `input_run` p50 3.23 ms, 평균 4.91 ms, p99 11.4 ms, 최대 194 ms; `soffice.bin` 3.4571 wakes/s, run p50 70 μs; idle CPU 점유율 0.0005–0.0007 |
+| 핵심 숫자 | `input_run` p50 3.23 ms, 평균 4.91 ms, p99 11.4 ms, 최대 194 ms; `soffice.bin` 3.4476 wakes/s(timer part 하나), run p50 70 μs; idle CPU 점유율 0.0005–0.0007 |
 | tag | `meas-ci:interactive:2026-09-18`(값), `swell-icmi14:word-c1`(입력), `meas-ci:desktop:2026-10-04b`(launch) |
 
 `office-writer`는 2.9절에서 끝까지 따라간 항목입니다. 여기서는 그 숫자를 정한 결정을 정리합니다.
@@ -806,17 +812,17 @@ program:                     # per constructed chain member
 | 흉내 내는 것 | Visual Studio Code(`code`)와 그 TypeScript language server |
 | 측정 | VS Code 1.138.0(vendor .deb, 판 고정), TypeScript project `sindresorhus/got` v16.0.0을 열고 `source/index.ts`에 타이핑, 44 repeat |
 | 재현하는 행동 | key 하나마다 language server가 파일을 다시 검사해 수십–수백 ms의 CPU; 평소에도 compositor와 IO thread가 초당 100번 넘게 깨어남 |
-| 핵심 숫자 | `input_run` p50 79.7 ms, 평균 99.3 ms, p99 551 ms, 최대 3.04 s; component 9개(residual 포함) 합 112.4 wakes/s; idle CPU 점유율 0.0128–0.0159, driven 0.14–0.45 |
+| 핵심 숫자 | `input_run` p50 79.7 ms, 평균 99.3 ms, p99 551 ms, 최대 3.04 s; timer part 9개(residual 포함) 합 111.8 wakes/s, event part 9개(residual 포함) 합 0.49 wakes/s; idle CPU 점유율 0.0128–0.0159, driven 0.14–0.45 |
 | tag | `meas-ci:interactive:2026-09-25`, `swell-icmi14:word-c1` |
 
 VS Code는 이 library에서 key 하나가 가장 비싼 application입니다. 2.9절의 Writer가 key당 약 3 ms였다면 VS Code는 약 80 ms입니다. scope가 이유를 적습니다. key는 고정된 글자 순환으로 재생되고(D4: timing only), "so the per-key cost is the language server re-checking a file being filled with letter runs". 글자를 칠 때마다 TypeScript language server가 파일을 다시 검사하는 비용입니다.
 
-component는 Chromium 기반 구조를 그대로 보입니다. `gpu/VizCompositorTh`(23.1/s), `renderer/Compositor`(22.8/s), `gpu/Chrome_ChildIOT`(20.2/s), `renderer/code`(19.5/s), `utility/code`(11.5/s), `utility/libuv-worker`(5.38/s), `renderer/ThreadPoolForeg`(3.43/s), `code`(3.37/s), 그리고 21개 comm을 묶은 residual(3.09/s). 8개 comm이 112.4 wakes/s의 97.2 %를 덮습니다.
+timer part는 Chromium 기반 구조를 그대로 보입니다. `gpu/VizCompositorTh`(23.1/s), `renderer/Compositor`(22.8/s), `gpu/Chrome_ChildIOT`(20.1/s), `renderer/code`(19.5/s), `utility/code`(11.4/s), `utility/libuv-worker`(5.38/s), `renderer/ThreadPoolForeg`(3.41/s), `code`(3.21/s), 그리고 21개 comm을 묶은 residual(2.93/s). 8개 comm이 timer에서 시작한 111.8 wakes/s의 97.4 %를 덮습니다. event part는 `code`(0.156/s), `libuv-worker`(0.084/s), `renderer/code`(0.063/s) 등 8개 comm과 8개 comm을 묶은 residual(0.023/s)이고, 8개 comm이 그 밖에서 시작한 0.5 wakes/s의 87.3 %를 덮습니다.
 
 - **VS Code를 고른 이유와 입력.** 코드 편집용 timestamp 달린 keystroke 데이터는 없어서(9.5 D4: "No code-editing keystroke dataset with timestamps exists"), Word 녹화를 가장 가까운 stream으로 씁니다. project는 design입니다.
 - **판 고정(9.5 D69, 2026-09-23).** campaign 도중 VS Code 1.139.0이 나왔고, 그 판은 `copilot-runtime` process를 띄워 idle에서 초당 49.7번 깨어났습니다(이 판 tree 전체의 115/s 대비). 그래서 1.138.0으로 고정하고 다른 판을 설치한 job은 멈추게 했습니다. scope의 "Build bound" 문장: "whether a code editor should describe an assistant-bearing one is the archetype's own question, not this campaign's." AI 보조 기능이 붙은 editor를 대표해야 하는지는 이 측정이 답하지 않는 열린 질문이라는 뜻입니다.
 - **idle은 200초부터(9.5 D83, 2026-09-28).** VS Code는 켜진 뒤 한참 launch work를 합니다. idle phase는 시작 200초 뒤부터 읽습니다.
-- **session 사이에서 변하는 component(9.5 D57, 2026-09-20).** `utility/libuv-worker`의 비율은 한 run 안에서는 ±10.6 %만 변하는데 repeat 사이에서는 ±39.0 % 변했습니다. 기록된 이유: "Repeats tighten the estimate of such a value's mean; they do not narrow the spread, which is the application's behaviour and is what the dataset should carry." 그래서 이 component의 세 값(wake 비율 5.382/s ±5.63 %, gap 평균 185.8 ms, run 평균 0.0102 ms)은 반폭과 함께 실립니다.
+- **session 사이에서 변하는 component(9.5 D57, 2026-09-20).** `utility/libuv-worker`의 비율은 한 run 안에서는 ±10.6 %만 변하는데 repeat 사이에서는 ±39.0 % 변했습니다. 기록된 이유: "Repeats tighten the estimate of such a value's mean; they do not narrow the spread, which is the application's behaviour and is what the dataset should carry." 그래서 이 component(timer part)의 세 값(wake 비율 5.376/s ±5.63 %, gap 평균 186 ms, run 평균 0.0102 ms)은 반폭과 함께 실립니다. event part 가운데 stability rule을 지키지 못한 것(예: `renderer/code`의 event part, wake 비율 0.063/s ±7.05 %)도 같은 class로 반폭과 함께 실립니다(timer-wakes-by-origin spec 결정 14, 그 흩어짐이 한 run 안에도 있는 경우의 9.8 D21 확장).
 - **44에서 멈춤(9.5 D73, D99).** keys-only campaign은 Word 녹화의 44번째 창에서 멈췄고, 당시에는 그것이 녹화의 마지막 창으로 읽혔습니다. 나중에 녹화가 57개 창(입력 있는 창 56개)을 가진다는 것이 확인됐습니다. 9.5 D99(2026-09-29)는 campaign을 늘리지 않고, 44 repeat에서 per-input 값 둘이 stability rule을 통과한다는 것을 확인하는 쪽을 택했습니다(SWELL-KW 99.26 ms ±4.84 %, 136M 103.9 ms ±3.01 %). 버린 대안은 45–57번째 창으로 campaign을 늘리기였습니다.
 - **stimulus 민감도.** 136M 아래 1.029배(0.968–1.090), 차이 없음.
 - **긴 span 검사와 extension host 사건(9.10 D144, D154, D158).** `c6-dual`(C6 그룹의 파일로, compile을 기다리며 game을 하는 두 전경이 똑같이 활성인 상황; 사용자의 kernel build 전체를 담아 깁니다)은 2026-10-11의 9.17 D1 전까지 VS Code를 12,068초 동안 초점에 두었습니다. 9.17 D1(focus track을 들인 결정) 뒤로는 editor와 game이 688초마다 번갈아 초점을 쥐어, 지금 editor가 한 번에 초점을 쥐는 구간은 688초입니다. 두 번의 long-phase probe는 그 전의 12,068초 span을 읽었고, probe의 길이와 결과는 그대로입니다(항목의 scope는 2026-10-14의 9.23 D8로 "Read over 12,068 s, the span `c6-dual` held it focused before its focus alternated with the game every 688 s (9.17 D1)"라고 고쳐 적습니다). 두 probe에서, 600초 창마다 commit된 파일로 되돌리면 per-input run 평균이 9.5의 같은 창 repeat 대비 1.00(0.97–1.03), 추세 없음이었습니다(한 줄을 계속 늘려 친 probe의 상승은 그 줄 길이 때문이었음). 그러나 두 probe 모두에서 VS Code의 extension host(TypeScript·JSON language server를 가진 process)가 2–4개 창 동안 창당 최대 400초 CPU를 쓰다가, VS Code가 host를 갈아 끼우는 일이 있었습니다(한 session 6,100–8,500초, 다른 session 10,700–12,050초). 그 동안 per-input run 평균은 실린 값의 최대 3.9배였습니다. 결정은 "The episode is not carried"였습니다.
@@ -829,12 +835,12 @@ component는 Chromium 기반 구조를 그대로 보입니다. `gpu/VizComposito
 | 흉내 내는 것 | Mozilla Thunderbird(`thunderbird-bin`) |
 | 측정 | Thunderbird 156.0 / 156.0.1(Ubuntu 24.04 snap), 로컬 계정의 작성 창, loopback SMTP peer; idle phase 77 repeat, 입력과 `send` 8 repeat |
 | 재현하는 행동 | 평소 초당 약 2번 깨는 조용한 application; key마다 약 5 ms; `send` 하면 약 3초 동안 무거운 작업(operation 창 안에서 잰 component 비율의 합이 초당 약 2,300번. 보내기 사이의 쉬는 시간까지 포함한 op phase 전체로는 초당 750–760번) |
-| 핵심 숫자 | `input_run` p50 4.65 ms, 평균 6.05 ms; idle component 15개(합 1.99 wakes/s); `send` 길이 p50 2.897 s, 평균 2.971 s |
+| 핵심 숫자 | `input_run` p50 4.65 ms, 평균 6.05 ms; idle timer part 15개(합 1.98 wakes/s)와 event part 1개(0.0034 wakes/s); `send` 길이 p50 2.897 s, 평균 2.971 s |
 | tag | `meas-ci:interactive:2026-09-19`(idle), `meas-ci:interactive:2026-09-27`(입력과 send), `swell-icmi14:outlook-c23`, `meas-ci:desktop:2026-10-04b`(launch) |
 
 Thunderbird 항목은 두 campaign의 값을 합칩니다. idle phase는 `meas-ci:interactive:2026-09-19`의 77 repeat, 입력이 있거나 그 뒤의 phase는 `meas-ci:interactive:2026-09-27`의 8 repeat입니다(9.5 D79, D80). idle phase는 모든 repeat에서 입력 전에 돌기 때문에 이렇게 나눌 수 있습니다.
 
-idle component는 Gecko(Thunderbird의 엔진) thread 이름을 그대로 보입니다. `thunderbird-bin`(0.397/s), `gmain`(0.25/s, gap이 정확히 4.0초), `IPDL Background`, `Timer`, `WebExtensions/WebExtensions`, `JS Watchdog`(1초 gap이 많음), `IndexedDB IO`, `StreamTrans`, … 그리고 73개 comm을 묶은 residual. `send` 동안에는 `Socket Thread` 732/s, `Compositor` 590/s, `thunderbird-bin` 473/s 등 열두 component가 대신 돕니다.
+idle timer part는 Gecko(Thunderbird의 엔진) thread 이름을 그대로 보입니다. `thunderbird-bin`(0.395/s), `gmain`(0.25/s, gap이 정확히 4.0초), `IPDL Background`, `Timer`, `WebExtensions/WebExtensions`, `JS Watchdog`(1초 gap이 많음), `IndexedDB IO`, `StreamTrans`, … 그리고 73개 comm을 묶은 residual. idle event part는 `BgIOThr~Pool` 하나입니다. `send` 동안에는 `Socket Thread` 732/s(그 가운데 event part 690/s), `Compositor` 590/s(323/s), `thunderbird-bin` 473/s(404/s) 등 timer part 11개와 event part 10개가 대신 돕니다.
 
 - **`send` operation(9.5 D31, D37, D49).** 짧은 본문과 Word 문서 하나를 첨부한 답장입니다. 첨부는 `office-writer`의 setup 문서를 `.docx`로 저장한 것으로 runner에서 41,555,063 B, peer가 받는 message는 56,946,735 B입니다(Thunderbird가 base64를 72글자 줄로 나눔). 크기와 내용은 design이고, 첨부의 종류는 CpsMark+의 Outlook workload 서술("receive, browse email contents and attachments offline, including Word, Excel, and PowerPoint files … reply")에서 가져왔습니다(`cpsmark-tbench23`). peer는 harness CPU에서 도는 `aiosmtpd`, 인증·TLS 없음. 완료는 Sent 폴더에 사본이 내려앉는 순간입니다(Thunderbird 소스의 `MessageSend.sys.mjs`가 전송 알림 뒤 `_doFcc()`를 await함). 작성 창은 command line(`-compose`)이 아니라 interface 단축키로 엽니다(D37: runner에서 `-compose`가 아무것도 열지 못했음).
 - **settle 390초, idle 600초(9.5 D44, D45).** long-phase probe에서 일회성 episode는 30초 settle 뒤 약 340초까지 끝났고, 그 뒤로는 약 60초마다 `StreamTrans` episode가 되풀이됐습니다. 그래서 settle은 390초(design), idle phase는 600초(design)로 했습니다. 600초는 최악의 위치에서도 wake 비율을 5 % 안에(4.6 %) 두는 가장 짧은 길이였습니다.
@@ -851,7 +857,7 @@ idle component는 Gecko(Thunderbird의 엔진) thread 이름을 그대로 보입
 | 흉내 내는 것 | Google Chrome(`chrome`)의 process tree, 지금 쓰는 page의 renderer 포함 |
 | 측정 | Chrome 152.0.7977.82(29 repeat) / 153.0.8010.52(9 repeat), text area와 400 문단이 있는 로컬 page; 38 repeat |
 | 재현하는 행동 | 평소 초당 약 43번 깨어남; key마다 약 4 ms; `page-load` 하면 약 0.5초 동안 무거운 작업(operation 창 안의 component 비율 합 초당 약 2,300번); 가끔 50 ms짜리 메모리 점검 |
-| 핵심 숫자 | `input_run` p50 4.07 ms, 평균 4.27 ms; idle component 7개(합 43.2 wakes/s); `page-load` 길이 p50 465 ms; `MemoryInfra` heavy event 0.000351/s, run p50 54.4 ms |
+| 핵심 숫자 | `input_run` p50 4.07 ms, 평균 4.27 ms; idle timer part 7개(합 43.1 wakes/s)와 event part 3개(합 0.047 wakes/s); `page-load` 길이 p50 465 ms; `MemoryInfra` heavy event 0.000351/s, run p50 54.4 ms |
 | tag | `meas-ci:interactive:2026-09-20`, `swell-icmi14:ie-c1`, `meas-ci:desktop:2026-10-04b`(launch) |
 
 - **입력과 page(9.5 D65, D22).** Internet Explorer 녹화의 key만, page의 text box에 재생합니다. scope: "the archetype carries typing into a page field, not browsing's scrolling and clicking — the page-load operation carries browsing's heavy work". `page-load`는 local server가 내주는 scripted feed page(`feed.html`: 게시물 300개, 1600×1200 그림 30장, 200,000개 record 정렬)를 여는 것이고, 완료는 첫 paint 뒤 page title입니다. page의 종류는 PCMark 10(pp. 52–53)과 CpsMark+ §4.3.3에서, 크기는 design입니다.
@@ -870,7 +876,7 @@ idle component는 Gecko(Thunderbird의 엔진) thread 이름을 그대로 보입
 | 흉내 내는 것 | GNU Image Manipulation Program(`gimp`) |
 | 측정 | GIMP 2.10.36(apt), 4952×3288 이미지(16-bit로 열림), scripted pointer loop; 5 repeat |
 | 재현하는 행동 | 손대지 않으면 전혀 깨지 않음; 조작 중에는 초당 약 9번; `unsharp-mask` 필터는 약 2.4초 동안 CPU를 거의 다 씀 |
-| 핵심 숫자 | idle component 없음(idle wakes 0.0); `focus_components` `gimp` 8.64 wakes/s; `unsharp-mask` 길이 p50 2.358 s; op phase CPU 점유율 0.23 |
+| 핵심 숫자 | idle component 없음(idle wakes 0.0); `focus_components` `gimp` 8.64 wakes/s(timer part 2.33, event part 6.31); `unsharp-mask` 길이 p50 2.358 s; op phase CPU 점유율 0.23 |
 | tag | `meas-ci:interactive:2026-09-18` |
 
 GIMP는 idle phase에서 한 번도 깨지 않았습니다(`stats`: "idle wakes/s 0.0–0.0"). 그래서 이 항목만 `components`가 없고 `focus_components`만 있습니다. 사람의 녹화 입력이 없는 application이라(9.5 D5: GIMP와 Kdenlive는 "have no observed input in any class"), drag·click·wheel을 도는 scripted pointer loop(design)로 조작했고, 그때의 리듬이 `focus_components`입니다. key당 run 같은 것은 없습니다.
@@ -886,7 +892,7 @@ GIMP는 idle phase에서 한 번도 깨지 않았습니다(`stats`: "idle wakes/
 | 흉내 내는 것 | Kdenlive(`kdenlive`)와 그 외부 렌더 process `kdenlive_render` |
 | 측정 | Kdenlive 23.08.5(apt), 20초 1920×1080 30 fps H.264 clip 하나에 unsharp 효과, scripted pointer loop로 clip monitor 훑기; driven·op 20 repeat, idle 16 repeat |
 | 재현하는 행동 | 평소 초당 약 1.3번(1초 tick과 10초 tick); 조작 중 초당 약 210번, CPU 약 37 %; `preview-render`는 약 11.4초 동안 CPU 절반 |
-| 핵심 숫자 | idle: `kdenlive` 1.1611/s(gap 약 1.001 s), `Qt bearer threa` 0.1/s(gap 약 10.0 s); focus 합 211 wakes/s; `preview-render` 길이 p50 11.375 s |
+| 핵심 숫자 | idle: `kdenlive` 1.1521/s(gap 약 1.001 s), `Qt bearer threa` 0.1/s(gap 약 10.0 s), 둘 다 timer part; focus 합 211 wakes/s(timer part 3개 188.8, event part 4개 22.4); `preview-render` 길이 p50 11.375 s |
 | tag | `meas-ci:interactive:2026-09-18`(driven과 op), `meas-ci:interactive:2026-10-05`(idle), `meas-ci:desktop:2026-10-05`(launch) |
 
 - **llvmpipe 제외(9.5 D15, 2026-09-15).** runner에 GPU가 없어 Kdenlive는 Mesa의 software rasteriser `llvmpipe`로 그렸습니다. driven phase CPU의 93 %가 이 llvmpipe thread 넷이었습니다(약 2,240 wakes/s). 이 thread들은 "present only because the runner has no GPU"라서 값에서 뺐습니다. scope는 GPU rasterization을 모델링하지 않는다고 적습니다.
@@ -894,7 +900,7 @@ GIMP는 idle phase에서 한 번도 깨지 않았습니다(`stats`: "idle wakes/
 - **idle 재측정(9.10 D146, 2026-10-05).** `c1-transcode` 같은 파일이 Kdenlive를 오래 들고 있으므로 긴 span에서 확인하다가, Kdenlive가 켜진 뒤 한참 launch 꼬리 일을 한다는 것이 드러났습니다. idle phase를 다시 쟀습니다. 창 열린 뒤 240초 settle, 180초 phase, 16 repeat(`meas-ci:interactive:2026-10-05`). 2,790초 probe에서 180초 phase는 CPU를 1.1 %, wake를 0.7 % 안에서 수준에 맞췄습니다. launch phase도 새 settle에 맞춰 다시 녹화했습니다(`meas-ci:desktop:2026-10-05`).
 - **`c3-creation`의 span으로 다시 읽기(9.15, 2026-10-17).** D146의 2,790초는 `c3-creation`이 이 idle 상태를 붙잡는 2,851초(120초 도착 뒤 240.6초의 launch 재생이 끝나는 360.6초부터 3,212초의 떠남까지)보다 61초 짧았습니다. 인지오의 결정(2026-10-17)으로 그 span보다 긴 탐침을 하나 더 돌렸습니다. `long-probe` family의 `kdenlive` 13(run 38976976741, release `meas-ci-probes-2026-10-17`)이고, 240초 settle 뒤로 2,890초를 담습니다. 9.10 D143의 5 % 기준으로 2,851초(10초 조각으로는 2,860초) 위에서 읽으니, 모든 repeat가 받는 자리의 180초 phase는 탐침의 수준 대비 CPU −0.3 %, wake +2.9 %였고, 가장 나쁜 자리에서도 +4.5 %, +3.8 %였습니다. 180초 phase는 그대로이고 값도 바뀌지 않습니다(탐침은 repeat가 아니고 값을 바꾸지 않음). scope는 이제 D146의 2,790초 대신 이 읽기를 적습니다. "Read over 2,851 s, the span `c3-creation` holds it (2,860 s in whole 10 s slices), in one long-phase probe held 2,890 s past that settle".
 - **driven 상태의 변화(9.10 D150, D153).** 두 driven probe 모두 입력 약 20분째 main thread의 wake가 적고 긴 상태(초당 126번, 3.06 ms; 그 전 135–153번, 2.3–2.8 ms)로 들어갔고, 하나는 끝까지 그 상태였습니다. 그 상태에서 CPU는 실린 phase보다 9 % 높고 wake는 14 % 낮았습니다. 결정은 "`video-editor`'s driven span stands; the state some 20 minutes into the input is stated"였습니다.
-- **20 repeat(9.5 D88).** 가장 넓은 값인 driven `kdenlive` run 평균이 ±5.00 %(정확히는 ±4.997 %)로 기준선에 붙어 있었고, scope는 "covers the true mean in about 91 % of campaigns"를 적습니다.
+- **20 repeat(9.5 D88).** 가장 넓은 값인 driven `kdenlive` run 평균이 ±5.00 %(정확히는 ±4.997 %)로 기준선에 붙어 있었고, scope는 "covers the true mean in about 91 % of campaigns"를 적었습니다. 2026-10-31에 wake를 시작점에 따라 나눈 뒤 그 timer part의 run 평균(2.611 ms)은 20 repeat에서 ±5.35 %로 stability rule을 지키지 못해, 9.8 D17의 class(run 시간이 runner의 속도를 따름)로 반폭과 범위(2.157–3.115 ms)와 함께 실립니다(timer-wakes-by-origin spec 결정 15). scope는 driven phase의 다른 component의 run 평균이 repeat 사이에서 함께 움직인다는 것(상관 +0.80–+0.94), 그 값이 phase CPU의 88.0 %를 차지한다는 것, class를 값이 실패하는 것을 본 뒤 정했다는 것(9.8 D28)을 적습니다.
 
 ## 5.8 재생과 통화: `video-player`, `audio-player`, `video-call`
 
@@ -1251,7 +1257,7 @@ task 이름은 `dkms`이고, 자식들은 관측된 comm을 그대로 씁니다(
 | 흉내 내는 것 | Electron 기반 chat client(timeline 이름 `element-desktop`) |
 | 측정 | Element Desktop 1.12.28, runner에 설치한 Synapse 1.161.0 homeserver의 방 하나에 로그인, 메시지 없음; launch settle 20초, idle phase 600초; 18 repeat |
 | 재현하는 행동 | 초당 약 12번 깸; Matrix의 `/sync` long poll(server가 새 소식이 있을 때까지 응답을 30초까지 미루는 요청 방식)에 맞춰 대기 |
-| 핵심 숫자 | 합 12.32 wakes/s(`stats`: 11.98–12.56); component 6개: `ThreadPoolForeg` 4.23/s, `element-desktop` 3.90/s(thread 37개), `Chrome_IOThread` 1.85/s, `Chrome_ChildIOT` 1.48/s, `ThreadPoolServi` 0.38/s, residual 0.47/s; CPU 점유율 0.00088–0.00114 |
+| 핵심 숫자 | 합 12.32 wakes/s(`stats`: 11.98–12.56); timer part 6개(합 5.92/s)와 event part 5개(합 6.40/s), comm별 두 part의 합: `ThreadPoolForeg` 4.23/s, `element-desktop` 3.90/s, `Chrome_IOThread` 1.85/s(그 가운데 event part 1.64/s), `Chrome_ChildIOT` 1.48/s, `ThreadPoolServi` 0.38/s(timer part만), residual 0.48/s; CPU 점유율 0.00088–0.00114 |
 | tag | `meas-ci:desktop:2026-09-20`, `meas-ci:desktop:2026-10-04b`(launch) |
 
 > **왜 이렇게 정했나 — Element로 재고, Discord 자리에 쓴다(9.8 D7, 2026-09-20).** core set에는 원래 `discord` task들이 있었습니다. Discord는 관측할 수 없었습니다(bootstrapper, 고정되지 않는 client, login 벽, 자기 server를 둘 수 없음). 그래서 이미 `electron-comms`의 notes가 대역으로 선언했던 Element를, Matrix homeserver를 harness CPU에 두고 쟀습니다. Discord의 게임 overlay 역할은 철회했습니다. Discord 자신의 문서가 "The overlay is compatible with Windows OS only; it does not function on Mac OS or Linux"라고 말하기 때문입니다. 9.10 D23과 D24(2026-10-01)는 chat client를 idle로 보이고, task는 관측한 프로그램의 이름을 보인다고 정했습니다. 그래서 timeline의 이름은 `element-desktop`입니다.
@@ -1291,23 +1297,23 @@ task 이름은 `dkms`이고, 자식들은 관측된 comm을 그대로 씁니다(
 | 항목 | 흉내 내는 것 | timeline 이름 | component | 합 wakes/s | CPU 점유율 | tag |
 |---|---|---|---|---|---|---|
 | `compositor-shell` | GNOME Shell 46.0 + Mutter 46.2(한 process) | `gnome-shell` | `gnome-shell/JS Helper` 0.3025(thread 4), `gnome-shell/gmain` 0.24984(gap 4.0 s), `gnome-shell/gnome-shell` 0.034745(run 평균 5.7 ms) | 0.587 | 0.000196–0.000249 | `meas-ci:session:2026-09-24` |
-| `audio-server` | PipeWire 1.0.5 + WirePlumber 0.4.17 + pipewire-pulse(한 task) | `pipewire` | `wireplumber/gmain` 0.0093(gap 평균 107 s) | 0.0093 | 사실상 0 | 같음 |
-| `service-manager` | systemd 255.4: pid 1과 사용자 manager(한 task) | `systemd` | `pid1/systemd` 0.0702(gap 평균 14.2 s, run 평균 0.171 ms) | 0.070 | 0.000009–0.000018 | 같음 |
-| `message-bus` | dbus-daemon 1.14.10: system bus와 session bus(한 task) | `dbus-daemon` | `system-bus/dbus-daemon` 0.0140(gap 평균 71.6 s, run 평균 0.121 ms) | 0.014 | 0.000001–0.000003 | 같음 |
+| `audio-server` | PipeWire 1.0.5 + WirePlumber 0.4.17 + pipewire-pulse(한 task) | `pipewire` | `wireplumber/gmain` timer part 0.0060(gap 평균 165.5 s), event part 0.0033(gap 평균 306 s) | 0.0093 | 사실상 0 | 같음 |
+| `service-manager` | systemd 255.4: pid 1과 사용자 manager(한 task) | `systemd` | `pid1/systemd` event part 0.0698(gap 평균 14.3 s, run 평균 0.165 ms) | 0.070 | 0.000009–0.000018 | 같음 |
+| `message-bus` | dbus-daemon 1.14.10: system bus와 session bus(한 task) | `dbus-daemon` | `system-bus/dbus-daemon` event part 0.0137(gap 평균 72.9 s, run 평균 0.116 ms) | 0.014 | 0.000001–0.000003 | 같음 |
 
-component 이름은 `<instance>/<comm>` 꼴입니다(task 하나가 한 프로그램의 process 여럿을 담을 때 instance로 구분). residual이 없습니다. 모든 다른 wake가 sporadic이어서, 항목마다 component 한두 개가 wake의 99.97–100 %를 덮습니다.
+component 이름은 `<instance>/<comm>` 꼴입니다(task 하나가 한 프로그램의 process 여럿을 담을 때 instance로 구분). residual이 없습니다. 모든 다른 wake가 sporadic이어서, 항목마다 component 한두 개가 wake의 99.97–100 %를 덮습니다. `compositor-shell`의 셋은 timer part이고, `service-manager`와 `message-bus`의 하나는 event part이며, `audio-server`의 `wireplumber/gmain`은 timer part와 event part 둘로 나뉩니다.
 
 **`compositor-shell`.** Mutter와 shell이 한 process에 있습니다(9.9 D3: GNOME Shell 자체를 관측, KWin이나 sway로 대신하지 않음 — "9.8 D1 rejected substitution where the named program is observable"). 화면이 꺼져 있으므로 그리기는 없습니다. scope: "Mutter's frame clock is inhibited while the output is off … no source states a compositor's per-frame CPU cost on a GPU desktop." 100초 창으로 읽으면 steady 경계 직후 첫 100초가 가장 바쁩니다(`JS Helper`가 phase 비율의 1.46배, main thread run 평균 8.03 ms 대 이후 5.10–6.75 ms). class census에서 mutter의 `KMS thread`는 real-time(RR, priority 20)이었지만 이 idle session에서는 실린 component가 아닙니다.
 
-**`audio-server`.** 세 user service를 한 task로 묶었습니다(9.9 D4: 역할이 process 셋에 나뉘어 있음). 그런데 phase 동안 `pipewire`와 `pipewire-pulse`는 한 번도 깨지 않았고, WirePlumber의 `gmain`만 24 repeat 평균 0.0093/s로 깼습니다. 자정을 지난 네 repeat에서는 0.0110/s(나머지 0.0090/s)였는데, 늘어난 wake는 100 ms 간격의 짝이었고 trace가 깨운 쪽을 보여 주지 않아(빈 CPU의 timer나 interrupt) 9.9 D27의 규칙대로 남겼습니다(9.9 D38). census에서 PipeWire의 data loop thread는 RR priority 20, main thread는 nice −11이었지만, 실린 component(`wireplumber/gmain`)는 보통 class nice 0입니다.
+**`audio-server`.** 세 user service를 한 task로 묶었습니다(9.9 D4: 역할이 process 셋에 나뉘어 있음). 그런데 phase 동안 `pipewire`와 `pipewire-pulse`는 한 번도 깨지 않았고, WirePlumber의 `gmain`만 24 repeat 평균 0.0093/s로 깼습니다(timer part 0.0060/s, event part 0.0033/s). timer part는 자정을 지난 네 repeat에서 0.0082/s(나머지 0.0056/s)였는데, 늘어난 wake는 100 ms 간격의 짝이었고 trace가 깨운 쪽을 보여 주지 않아(빈 CPU의 timer나 interrupt) 9.9 D27의 규칙대로 남겼습니다(9.9 D38). census에서 PipeWire의 data loop thread는 RR priority 20, main thread는 nice −11이었지만, 실린 component(`wireplumber/gmain`)는 보통 class nice 0입니다.
 
-**`service-manager`.** pid 1과 `systemd --user`를 한 task로 묶었습니다(9.9 D7: 사용자 manager는 사용자가 로그인했을 때만 있고, `c1-idle`이 그리는 것이 바로 그 상태). 사용자 manager는 cron session을 만난 repeat에서만 깼고 그 wake는 모두 빠져, 실리는 것은 pid 1뿐입니다. phase당 114–139번 깹니다.
+**`service-manager`.** pid 1과 `systemd --user`를 한 task로 묶었습니다(9.9 D7: 사용자 manager는 사용자가 로그인했을 때만 있고, `c1-idle`이 그리는 것이 바로 그 상태). 사용자 manager는 cron session을 만난 repeat에서만 깼고 그 wake는 모두 빠져, 실리는 것은 pid 1의 event part뿐입니다. phase당 114–133번 깹니다.
 
-**`message-bus`.** system bus와 session bus를 한 task로 묶었습니다(9.9 D6). session bus는 cron repeat에서만 깨(111번) 모두 빠졌고, 실리는 것은 system bus뿐입니다. phase당 16–38번 깹니다.
+**`message-bus`.** system bus와 session bus를 한 task로 묶었습니다(9.9 D6). session bus는 cron repeat에서만 깨(111번) 모두 빠졌고, 실리는 것은 system bus의 event part뿐입니다. phase당 16–36번 깹니다.
 
-> **왜 이렇게 정했나 — session 사이에서 변하는 값(9.9 D29, D48).** `pid1/systemd`의 세 값과 `system-bus/dbus-daemon`의 세 값은 "session 사이에서 변함" 예외로 반폭과 함께 실립니다. pid 1: wake 비율 ±1.9 %, gap 평균 ±1.9 %, run 평균 ±7.8 %. system bus: 셋 다 ±11 % 안팎. long-phase probe 36, 41, 44에서 60초마다 창을 밀어 보니 한 run 안에서도 상당히 움직였습니다(pid 1 ±5.0–18.4 %, system bus ±13.6–47.0 %). scope는 "the spread lies in part within a run"이라고 적습니다. 대안이었던 repeat 추가는 bus 하나에 약 115 landing(약 230 job)이 더 필요했고, 그 값은 초당 0.014번 깨는 component의 것이라 택하지 않았습니다(9.9 D29: "~115 more landings for the bus (~230 jobs) for 0.0093, 0.075, 0.014 wakes/s").
+> **왜 이렇게 정했나 — session 사이에서 변하는 값(9.9 D29, D48).** `pid1/systemd`의 세 값과 `system-bus/dbus-daemon`의 세 값은 "session 사이에서 변함" 예외로 반폭과 함께 실립니다. pid 1: wake 비율 ±1.6 %, gap 평균 ±1.6 %, run 평균 ±6.6 %. system bus: ±10.3 %, ±10.3 %, ±9.8 %. long-phase probe 36, 41, 44에서 60초마다 창을 밀어 보니 한 run 안에서도 상당히 움직였습니다(pid 1 ±5.0–20.4 %, system bus ±9.8–45.4 %). 2026-10-31부터 `audio-server`의 `wireplumber/gmain` timer part의 세 값(wake 비율 0.0060/s ±8.1 %, gap 평균 165.5 s ±8.1 %, run 평균 0.034 ms ±3.2 %)도 같은 class로 실립니다(timer-wakes-by-origin spec 결정 16; 한 run 안에서 ±5.2–26.9 %, phase당 8–16번, class는 값이 실패하는 것을 본 뒤 정함, 9.8 D28). scope는 "the spread lies in part within a run"이라고 적습니다. 대안이었던 repeat 추가는 bus 하나에 약 115 landing(약 230 job)이 더 필요했고, 그 값은 초당 0.014번 깨는 component의 것이라 택하지 않았습니다(9.9 D29: "~115 more landings for the bus (~230 jobs) for 0.0093, 0.075, 0.014 wakes/s").
 
-> **왜 이렇게 정했나 — 바깥 wake를 거르는 규칙(9.9 D27), 그리고 측정 venue가 바깥 wake를 많이 만든다는 것.** 9.9 D27이 걸러낸 바깥 wake는 실린 wake보다 많았습니다. 예를 들어 `service-manager`의 scope는 `php8.3-fpm.service`가 phase마다 180–188번, `systemd-networkd`가 5–15번 pid 1을 깨웠다고 적고(둘 다 desktop에서는 안 돌거나 기본으로 꺼진 것), 실린 pid 1 wake는 phase당 114–139번입니다. 걸러내는 규칙은 package manifest와 trace 추적에 기대고, trace가 원인을 보여 주지 못한 wake(예: `job launched by pid 1: (install) 9 install systemd`)는 남겼습니다. 실제 사용자 desktop의 idle session과 비교한 검증은 없습니다. 그것은 진술된 한계입니다(3.7절의 "Real-desktop validation is deferred", measurement-overview §11).
+> **왜 이렇게 정했나 — 바깥 wake를 거르는 규칙(9.9 D27), 그리고 측정 venue가 바깥 wake를 많이 만든다는 것.** 9.9 D27이 걸러낸 바깥 wake는 실린 wake보다 많았습니다. 예를 들어 `service-manager`의 scope는 `php8.3-fpm.service`가 phase마다 180–188번, `systemd-networkd`가 5–15번 pid 1을 깨웠다고 적고(둘 다 desktop에서는 안 돌거나 기본으로 꺼진 것), 실린 pid 1 wake는 phase당 114–133번입니다. 걸러내는 규칙은 package manifest와 trace 추적에 기대고, trace가 원인을 보여 주지 못한 wake(예: `job launched by pid 1: (install) 9 install systemd`)는 남겼습니다. 실제 사용자 desktop의 idle session과 비교한 검증은 없습니다. 그것은 진술된 한계입니다(3.7절의 "Real-desktop validation is deferred", measurement-overview §11).
 
 # 10장 · idle class를 선언하는 세 항목
 
@@ -1444,6 +1450,7 @@ decision 2의 직접적인 결과는, 거의 모든 항목이 우리 CI 측정�
 | 2026-10-04 | `cpu-batch`의 `kdenlive_render` 들어옴(`ffmpeg` 대체); `incremental-backup` 들어옴, `file-backup` 떠남 | 9.10 D111, D125 |
 | 2026-10-05 | 열 항목에 launch phase; `video-editor` idle 다시 잼; `renderer-hidden`을 Chrome 154로 다시 잼 | 9.10 D140, D146, D156 |
 | 2026-10-09 | 모든 항목에 `declared_class`; `game-download-idle` 들어옴 | 9.13 D2, D4 |
+| 2026-10-31 | 측정된 모든 component를 측정된 wake 사슬의 시작점에 따라 timer part와 event part(`channel: event`)로 나눔, channel마다 coverage cut과 residual; launch와 trace-replay stream에 wake마다 channel | timer-wakes-by-origin spec 결정 6, 8, 10, 13 |
 
 ## 11.5 이름이 사라진 것들
 
@@ -1605,8 +1612,8 @@ batch-loop 항목의 단계 순서(7.1절), heavy event의 몰림(`CHTTPClientTh
 | scope | 측정이 정확히 무엇이었는지 적은 산문. 항목의 가장 완전한 설명(2.7) |
 | `modeling_notes` | 출처 위에 우리가 지어낸 것을 적는 산문(2.7) |
 | per-application archetype | application 하나의 process tree 전체를 task 하나로 측정한 항목(2.4) |
-| component | 같은 role/comm으로 깨는 thread 묶음 하나. `comm`, `threads`, `wakes_per_s`, `gap`, `run`(2.4) |
-| residual | 95 % 덮기 밖의 comm들을 묶은 component(2.4) |
+| component | 같은 role/comm으로 깨는 thread 묶음 하나의, 측정된 wake 사슬의 시작점에 따른 한 part(timer part 또는 event part). `comm`, `threads`, `wakes_per_s`, `gap`, `run`, event part에는 `channel: event`(2.4) |
+| residual | channel마다 95 % 덮기 밖의 comm들을 묶은 component(2.4) |
 | sporadic | 모든 repeat에서 두 번 이상 깨지 않아 싣지 않고 보고만 하는 component(3.2) |
 | `focus_components` | scripted 조작 중의 thread 리듬. `input` 창 안에서 `components`를 대신함(2.4) |
 | `stimulus` | 재생할 key 녹화(`dataset/stimulus/*.jsonl`)(2.4) |

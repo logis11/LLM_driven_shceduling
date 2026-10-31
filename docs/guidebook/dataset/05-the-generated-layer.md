@@ -1,6 +1,6 @@
 # 5권 · Generated layer: 열여섯 task set으로 만든 1,562개 파일
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-30
+> Status: draft · Created 2026-10-14 · Updated 2026-10-31
 
 **왜 손으로 쓴 core set 옆에 생성한 층이 있고, 그 파일들은 어떤 규칙으로 만들어지며 어떻게 점수를 받나.**
 
@@ -717,7 +717,7 @@ meta:
 
 compiler에는 9.10 D136(2026-10-04)의 규칙이 있습니다. "a launch phase is replayed: … a task started mid-file replays one." 파일 중간에 도착하는 task는, 그 archetype이 측정된 launch phase(프로그램을 막 띄웠을 때의 무거운 초기화 구간)를 가지고 있으면, 그 구간의 실제 wake 기록을 먼저 재생하고 끝난 뒤에야 평상시의 흐름으로 들어갑니다. 코드에서는 `wlc/compiler.py`의 `_launch_stream`이 `task["arrive"] <= 0`이면 launch를 건너뛰고, 0보다 크면 launch를 붙입니다. launch phase를 가진 archetype은 열 개이고(`dataset/launch/launch-<entry>.json.gz`), 측정된 길이는 `audio-player`·`video-player` 약 30.6 s, `office-writer` 40.8 s, `chat-client` 53.2–53.7 s, `video-call` 210.1 s, `video-editor` 240.6 s, `mail-client` 408.9 s, `web-browser` 420.6 s, `game-client` 905.8–916.7 s, `renderer-hidden` 1,051.2 s입니다(이 권을 쓰면서 각 파일의 `phase_us`를 읽음).
 
-C1 파일에서는 interactive task가 모두 0 s에 도착하므로 launch가 없습니다. generated layer에서는 두 번째 이후 placement(B, return grid의 돌아온 A, flap의 모든 교대 segment)와 distractor의 도착이 모두 파일 중간에 도착하므로 launch를 재생합니다. launch phase가 60 s보다 긴 여섯 entry(`video-call`, `video-editor`, `mail-client`, `web-browser`, `game-client`, `renderer-hidden`)는 그런 segment의 60 s 전부가 launch 구간입니다. 반대로 `code-editor`, `image-editor`, session daemon 넷(`idle`의 task들), batch archetype들은 launch phase가 없어 도착 시각과 무관하게 평상시 흐름으로 시작합니다. 크기를 비교해 보면 차이가 큽니다. `c1-office`(launch 없음)에서 `mail` task는 60 s 동안 timer wake 135번, CPU 80 ms를 씁니다. `tr-compile-to-office-departs`의 `mail-s1`(60 s 도착)은 같은 60 s 동안 timer wake 11,081번, CPU 2.97 s를 씁니다. `browser`는 176 ms 대 1.91 s입니다. 이 권을 쓰면서 두 파일의 compile 결과와 report에서 센 값입니다.
+C1 파일에서는 interactive task가 모두 0 s에 도착하므로 launch가 없습니다. generated layer에서는 두 번째 이후 placement(B, return grid의 돌아온 A, flap의 모든 교대 segment)와 distractor의 도착이 모두 파일 중간에 도착하므로 launch를 재생합니다. launch phase가 60 s보다 긴 여섯 entry(`video-call`, `video-editor`, `mail-client`, `web-browser`, `game-client`, `renderer-hidden`)는 그런 segment의 60 s 전부가 launch 구간입니다. 반대로 `code-editor`, `image-editor`, session daemon 넷(`idle`의 task들), batch archetype들은 launch phase가 없어 도착 시각과 무관하게 평상시 흐름으로 시작합니다. 크기를 비교해 보면 차이가 큽니다. `c1-office`(launch 없음)에서 `mail` task는 60 s 동안 wake 132번(모두 `timer:`), CPU 78 ms를 씁니다. `tr-compile-to-office-departs`의 `mail-s1`(60 s 도착)은 같은 60 s 동안 wake 11,081번(`timer:` 5,190, `event:` 5,891), CPU 2.97 s를 씁니다. `browser`는 176 ms 대 1.91 s입니다. 이 권을 쓰면서 두 파일의 compile 결과와 report에서 센 값입니다.
 
 이것은 규칙대로 compile된 결과이고, 9.23 D4(2026-10-14, 인지오의 결정)가 이것을 generated layer의 동작으로 정했습니다. 기록된 이유는 "the generated layer exists to answer the research questions, not to make a claim"입니다. generated layer에서 도착은 프로그램의 시작이고, 파일 중간에 도착하는 task는 측정된 launch 반복 하나를 도착 시각부터 재생하며, 평상시 흐름은 그 단계가 끝난 뒤에 시작합니다. 파일 중간의 도착은 `transition-grid` 480개 가운데 300개(task instance 630개), `return-grid` 720개 가운데 630개(1,890개), `flap-stress` 24개 전부(160개), `distractor-grid` 272개 가운데 166개(331개)에 있고, `familiarity-ladder`에는 없습니다(이 권을 고치면서 생성된 timeline에서 다시 세어 같은 수를 얻었습니다). launch 단계는 대부분 60 s segment보다 길어서(메일 409 s, 브라우저 421 s, 영상 편집기 241 s, 통화 210 s, 게임 client 906 s, 숨은 renderer 1,051 s; 워드프로세서, 채팅 client, 두 재생기는 31–54 s), 그런 segment는 응용 프로그램이 막 뜨는 모습을 그리고, 평상시의 재료는 C1 파일들입니다. core set의 C4 group(끼어드는 process) recipe(`dataset/timelines/coreset/c4.variant.yaml`)가 30 s에 끼어드는 `element-desktop`과 `chrome`에 대해 "it runs its observed launch phase first, replayed"라고 밝혀 둔 것과 같은 읽기입니다.
 
@@ -929,7 +929,7 @@ tasks:
 
 (실제 파일은 block 형식 YAML이고 키가 알파벳순으로 정렬되어 있습니다. 여기서는 읽기 쉽게 flow 형식으로 줄이고 task 안의 키 순서를 조금 바꿨습니다. 값은 같습니다.)
 
-**⑥ compile 결과.** `dataset/build/transition-grid-single/tr-compile-to-office-departs.workload.json`(4,451,924 byte)을 열어 보면 도착(`arrive`) event가 아홉 개입니다.
+**⑥ compile 결과.** `dataset/build/transition-grid-single/tr-compile-to-office-departs.workload.json`(4,452,495 byte)을 열어 보면 도착(`arrive`) event가 아홉 개입니다.
 
 | t | id | name | 떠남 | 비고 |
 |---|---|---|---|---|
@@ -940,7 +940,7 @@ tasks:
 | 60 s | `renderers-s1.1` … `.4` | `chrome` | 120 s | `count: 4`가 instance 넷으로 펼쳐짐 |
 | 60 s | `writer-s1` | `soffice.bin` | 120 s | |
 
-wake event는 30,380개입니다. `timer:<task>` channel 30,271개(task의 측정된 timer 성분이 깨우는 것), `input:<task>` channel 109개(재생된 키 입력: `editor-s0` 45, `writer-s1` 64). `ground_truth`는 두 segment, `focus`는 두 구간입니다. report의 `per_task`로 보면 `build-s0`이 51.14 s의 CPU를 쓰고(58 s 안에), 파일 전체의 정적 사용률은 0.5313입니다.
+wake event는 30,384개입니다. `timer:<task>` channel 23,068개(task의 측정된 component 가운데 wake 사슬이 timer에서 시작한 timer part와 launch 재생의 같은 wake), `event:<task>` channel 7,207개(사슬이 그 밖에서 시작한 event part와 launch 재생의 같은 wake), `input:<task>` channel 109개(재생된 키 입력: `editor-s0` 45, `writer-s1` 64). `ground_truth`는 두 segment, `focus`는 두 구간입니다. report의 `per_task`로 보면 `build-s0`이 51.14 s의 CPU를 쓰고(58 s 안에), 파일 전체의 정적 사용률은 0.5313입니다.
 
 **⑦ manifest 기록.** `dataset/build.transition-grid.manifest.json`의 `grid` 아래 이 파일의 기록입니다.
 
@@ -1056,7 +1056,7 @@ return grid는 다섯 set 가운데 처음으로 split이 있는 set입니다. 9
 
 10 s 동안의 `idle` segment는 focus가 아무에게도 없는 구간입니다. 사용자가 메일 창을 닫고 10초 동안 아무 창도 앞에 두지 않았다가 다시 메일을 연 상황입니다.
 
-**④ compile 결과.** `dataset/build/return-grid-single/rt-mail-to-idle-10s.workload.json`(3,654,059 byte)의 도착 event는 여섯 개입니다. `mailer-s0`(0 s), idle의 네 task(60 s, 70 s에 떠남), `mailer-s2`(70 s). wake는 `timer:mailer-s2` 19,939, `timer:mailer-s0` 6,235, `input:mailer-s0` 43, `input:mailer-s2` 22, `timer:shell-s1` 4, `timer:init-s1` 1입니다. report의 CPU는 `mailer-s0` 2.923 s, `mailer-s2` 5.164 s입니다. 같은 프로그램, 같은 길이인데 두 번째가 훨씬 무거운 것은 5.8에서 말한 launch 재생 때문입니다. `mailer-s2`는 70 s에, 즉 파일 중간에 도착하므로 Thunderbird의 측정된 launch 구간(408.9 s)을 재생합니다. `mailer-s0`은 0 s에 도착해 launch가 없습니다. manifest의 `demand`에서도 segment 0이 0.0487, segment 2가 0.0861로 같은 차이가 보입니다.
+**④ compile 결과.** `dataset/build/return-grid-single/rt-mail-to-idle-10s.workload.json`(3,286,566 byte)의 도착 event는 여섯 개입니다. `mailer-s0`(0 s), idle의 네 task(60 s, 70 s에 떠남), `mailer-s2`(70 s). wake는 `event:mailer-s2` 9,431, `timer:mailer-s2` 7,139, `event:mailer-s0` 5,534, `timer:mailer-s0` 1,437, `input:mailer-s0` 43, `input:mailer-s2` 22, `timer:shell-s1` 4, `event:init-s1` 1입니다. report의 CPU는 `mailer-s0` 2.324 s, `mailer-s2` 5.376 s입니다. 같은 프로그램, 같은 길이인데 두 번째가 훨씬 무거운 것은 5.8에서 말한 launch 재생 때문입니다. `mailer-s2`는 70 s에, 즉 파일 중간에 도착하므로 Thunderbird의 측정된 launch 구간(408.9 s)을 재생합니다. `mailer-s0`은 0 s에 도착해 launch가 없습니다. manifest의 `demand`에서도 segment 0이 0.0387, segment 2가 0.0896으로 같은 차이가 보입니다.
 
 **⑤ manifest 기록.**
 
@@ -1202,9 +1202,9 @@ flap-stress의 split은 return grid와 다릅니다. 쌍을 나누지 않고, **
 
 **⑤ manifest 기록.** `placements`는 아홉 개이고 `render` 쪽은 모두 `input: true`, `gaming` 쪽은 모두 `input: false`입니다. segment label의 tier는 `render`가 1, `gaming`이 3입니다(`gaming`의 chain member 이름 `dxvk-cs` 등이 tier 3).
 
-**⑥ 점수.** `render` placement마다 editor의 timer-channel 대기 P99와 export의 turnaround, `gaming` placement마다 chain 첫 member(`game-s<k>.chain.1`)의 frame 놓침 비율이 각 segment 창으로 붙습니다. 이 set 전체로는 24 파일, 248 term입니다(9.21 D10, 이 권을 쓰면서 규칙을 다시 돌려 같은 수를 얻었습니다).
+**⑥ 점수.** `render` placement마다 editor의 `app_latency` P99(timer와 event channel)와 export의 turnaround, `gaming` placement마다 chain 첫 member(`game-s<k>.chain.1`)의 frame 놓침 비율이 각 segment 창으로 붙습니다. 이 set 전체로는 24 파일, 248 term입니다(9.21 D10, 이 권을 쓰면서 규칙을 다시 돌려 같은 수를 얻었습니다).
 
-2 s 간격 파일에서는 `render`의 교대 segment도 2 s라 키 입력 창이 없지만, `render`의 C1 term은 키 입력이 아니라 timer channel이므로(13.6) 떨어지지 않습니다. `mail → gaming`의 2 s 파일에서는 `mail`의 교대 segment가 키 입력 term만 가지므로 그 term이 떨어집니다. 테스트 `test_a_placement_record_names_the_mode_the_suffix_the_labelled_segments_and_the_input_window`가 `flap-mail-to-gaming-2s`에서 첫 placement만 `input: true`이고 나머지 여덟 개가 모두 `false`임을 확인합니다.
+2 s 간격 파일에서는 `render`의 교대 segment도 2 s라 키 입력 창이 없지만, `render`의 C1 term은 키 입력이 아니라 application 자신의 wake(`app_latency`, timer와 event channel)이므로(13.6) 떨어지지 않습니다. `mail → gaming`의 2 s 파일에서는 `mail`의 교대 segment가 키 입력 term만 가지므로 그 term이 떨어집니다. 테스트 `test_a_placement_record_names_the_mode_the_suffix_the_labelled_segments_and_the_input_window`가 `flap-mail-to-gaming-2s`에서 첫 placement만 `input: true`이고 나머지 여덟 개가 모두 `false`임을 확인합니다.
 
 ## 9.7 이 set을 누가, 언제 쓰나
 
@@ -1332,7 +1332,7 @@ recognizer가 보는 것(telemetry)은 task 목록과 focus holder 이름에서 
 - segment 0: `dev`, 0–60 s, `[S11]`. segment 1: `dev`, 60–120 s, scenario `[S11]`(그 안에 살아 있는 `editor-s0`, `editor-s1`, `build-s1`이 모두 S11을 보임), attributes에 `pre_committed_miss: true`.
 - 머리 주석: "distractor-grid: the user stays in dev while compile's task set arrives at the boundary (cross-mode); the two focus holders share a name, a pre-committed miss."
 
-**④ compile 결과.** `dataset/build/distractor-grid-single/dx-dev-with-compile.workload.json`(3,158,904 byte). 도착 event 셋: `editor-s0` 0 s, `editor-s1` 60 s, `build-s1` 62 s(spawn table 636). focus 구간은 하나(`editor-s0`, 0–120 s). wake는 `timer:editor-s0` 13,602, `timer:editor-s1` 6,982, `input:editor-s0` 390입니다. `editor-s1`에는 키 입력이 하나도 없습니다. 사용자가 그 창을 한 번도 앞으로 가져오지 않았기 때문입니다. `ground_truth`의 두 번째 segment에 `pre_committed_miss: true`가 실려 있습니다.
+**④ compile 결과.** `dataset/build/distractor-grid-single/dx-dev-with-compile.workload.json`(3,162,155 byte). 도착 event 셋: `editor-s0` 0 s, `editor-s1` 60 s, `build-s1` 62 s(spawn table 636). focus 구간은 하나(`editor-s0`, 0–120 s). wake는 `timer:editor-s0` 13,545, `event:editor-s0` 70, `timer:editor-s1` 6,963, `event:editor-s1` 29, `input:editor-s0` 390입니다. `editor-s1`에는 키 입력이 하나도 없습니다. 사용자가 그 창을 한 번도 앞으로 가져오지 않았기 때문입니다. `ground_truth`의 두 번째 segment에 `pre_committed_miss: true`가 실려 있습니다.
 
 **⑤ manifest 기록.**
 
@@ -1673,9 +1673,9 @@ placement 기록의 모양은 set마다 이렇게 다릅니다(9.21 D1의 "Shape
 | 필드 | 뜻 |
 |---|---|
 | `entity` | 점수를 매길 대상. compile된 workload의 task id(예: `editor`, `game.chain.1`), 또는 lane/schedule |
-| `metric` | 어떤 관측값(primitive)을 쓰나. `input_latency`(키 입력이 온 순간부터 그 처리가 시작되기까지 걸린 시간), `timer_latency`(프로그램 자신의 timer wake가 온 순간부터 그 처리가 시작되기까지 걸린 시간), `ready_wait`(깨어난 뒤 실제로 CPU를 받기까지 기다린 시간), `job`(주기적 작업 한 번), `turnaround`(도착부터 끝까지), `cpu_delivered`(받은 CPU 양) 등 |
+| `metric` | 어떤 관측값(primitive)을 쓰나. `input_latency`(키 입력이 온 순간부터 그 처리가 시작되기까지 걸린 시간), `app_latency`(프로그램 자신의 wake — timer와 event channel — 가 온 순간부터 그 처리가 시작되기까지 걸린 시간), `ready_wait`(깨어난 뒤 실제로 CPU를 받기까지 기다린 시간), `job`(주기적 작업 한 번), `turnaround`(도착부터 끝까지), `cpu_delivered`(받은 CPU 양) 등 |
 | `cause` | `ready_wait`의 원인 필터. `wake`이면 잠에서 깨어난 뒤의 대기 |
-| `channel` | 그 wake가 끝낸 WAIT의 종류. `input`(키 입력)이나 `timer`(task 자신의 timer 성분) |
+| `channel` | 그 wake가 끝낸 WAIT의 종류. `input`(키 입력), `timer`(task 자신의 component 가운데 timer part), `event`(event part) 등 |
 | `window` | 시간 필터. 없으면 파일 전체, 있으면 ground truth의 segment 하나여야 함(lint가 확인) |
 | `aggregate` | 값을 하나로 줄이는 법. `p99`(99번째 percentile), `miss_rate`(주기 작업이 마감을 놓친 비율), `turnaround` 등 |
 | `direction` | 낮을수록 좋은지(`lower`), 높을수록 좋은지 |
@@ -1683,24 +1683,24 @@ placement 기록의 모양은 set마다 이렇게 다릅니다(9.21 D1의 "Shape
 
 파일 하나의 점수는 term들의 정규화된 몫의 가중합입니다. 몫은 `(fixed − condition) / (fixed − oracle)`입니다. `fixed`는 상황을 전혀 읽지 않고 기본 설정을 쓰는 조건, `oracle`은 정답 label을 알고 그에 맞는 설정을 쓰는 조건, `condition`은 시험하는 recognizer입니다. 몫이 1이면 oracle만큼 잘한 것, 0이면 아무것도 안 한 것과 같은 것입니다.
 
-C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡니다(`scoring-spec.yaml` 120–183행). 표의 `input` P99는 `input_latency`입니다.
+C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡니다(`scoring-spec.yaml` 120–183행). 표의 `input` P99는 `input_latency`, `app` P99는 `app_latency`입니다.
 
 | C1 entry | terms |
 |---|---|
 | `c1-office`, `c1-browsing`, `c1-dev`, `c1-mail` | 전경 task의 `input_latency`, P99, weight 1.0 |
-| `c1-video-edit`, `c1-photo` | 편집기의 `timer_latency`, P99, 1.0 |
+| `c1-video-edit`, `c1-photo` | 편집기의 `app_latency`, P99, 1.0 |
 | `c1-compile` | `editor` `input` P99 1.0 + `build` turnaround 1.0 |
 | `c1-ml-train` | `editor` `input` P99 1.0 + `hog` turnaround 0.5 |
 | `c1-indexing` | `editor` `input` P99 1.0 + `hog` turnaround 1.0 |
-| `c1-render` | `editor` `timer` P99 1.0 + `bulk` turnaround 0.5 |
-| `c1-transcode` | `video-editor` `timer` P99 1.0 + `batch` turnaround 0.5 |
-| `c1-backup` | `editor` `timer` P99 1.0 + `bulk` turnaround 0.25 |
+| `c1-render` | `editor` `app` P99 1.0 + `bulk` turnaround 0.5 |
+| `c1-transcode` | `video-editor` `app` P99 1.0 + `batch` turnaround 0.5 |
+| `c1-backup` | `editor` `app` P99 1.0 + `bulk` turnaround 0.25 |
 | `c1-gaming` | `game.chain.1`의 `job` miss rate 1.0 |
 | `c1-media` | `music` miss rate 1.0 + `video` miss rate 0.5 |
 | `c1-meeting` | `voice` miss rate 1.0 |
 | `c1-idle` | entry 없음 ("no performance metric") |
 
-`kdenlive`와 GIMP 편집기의 term이 `timer_latency`인 이유도 header에 있습니다. 두 프로그램의 측정된 작업 구간은 마우스로 하는 동작이라 키 입력 스트림이 없고, 그래서 그 프로그램 자신의 timer 성분의 wake가 온 순간부터 처리되기 시작할 때까지를 읽습니다.
+`kdenlive`와 GIMP 편집기의 term이 `app_latency`인 이유도 header에 있습니다. 두 프로그램의 측정된 작업 구간은 마우스로 하는 동작이라 키 입력 스트림이 없고, 그래서 그 프로그램 자신의 component의 wake(timer와 event channel)가 온 순간부터 처리되기 시작할 때까지를 읽습니다.
 
 ## 13.2 왜 entry가 아니라 규칙인가
 
@@ -1751,9 +1751,9 @@ C1의 열여섯 entry 가운데 이 장에서 쓰는 것들을 미리 적어 둡
 
 키 입력 term은 2026-10-30부터 `input_latency`이고, 규칙은 그 term을 뺍니다. 키 입력이 없는 구간에서 그 P99를 구하면 읽을 행이 없습니다. harness는 "filter가 행을 하나도 고르지 못하면" 점수 계산을 멈추게 되어 있으므로(`docs/harness/metrics.md` §9: "A term whose filter selects no rows stops the scorer"), 그런 term은 미리 빼야 합니다. 규칙은 generator가 이미 내린 사실(`input: false`)을 따를 뿐 새로운 판단을 더하지 않는다고 decision이 스스로 말합니다.
 
-9.21 D5가 실제 set에서의 결과를 적습니다. "the return grid's 2 s middle and the flap-stress set's 2 s alternations carry no keystroke term for an interactive B; modes without a keystroke stream (D1's list) never carry one, as their C1 entries never did". `kdenlive`·GIMP 계열(`video-edit`, `photo`, `render`, `transcode`, `backup`)의 편집기 term은 `channel: timer`이므로 키 입력 창이 없어도 남습니다.
+9.21 D5가 실제 set에서의 결과를 적습니다. "the return grid's 2 s middle and the flap-stress set's 2 s alternations carry no keystroke term for an interactive B; modes without a keystroke stream (D1's list) never carry one, as their C1 entries never did". `kdenlive`·GIMP 계열(`video-edit`, `photo`, `render`, `transcode`, `backup`)의 편집기 term은 `app_latency`이므로 키 입력 창이 없어도 남습니다.
 
-> **열린 자리.** 9.21 D1은 manifest의 `input` 값을 설명하면서 "false for a segment of `no_input_below` (4 s) or less … and for a mode whose C1 file has no keystroke stream (media, meeting, gaming, idle, video-edit, photo, render, transcode, backup)"라고 적습니다. 그러나 이 권을 쓰면서 `transition-grid` manifest를 세어 보니 `input: false`인 placement의 mode는 `gaming`, `idle`, `media`, `meeting` 넷뿐이었고, `video-edit`, `photo`, `render`, `transcode`, `backup`의 placement는 모두 `input: true`였습니다. 이 다섯 mode의 C1 파일은 `input` 창(2–58 s 등)을 가지고 있고, `input`의 값은 "generator가 창을 줬는가"(`bool(windows)`)이기 때문입니다. 그 archetype(`video-editor`, `image-editor`)에 재생할 키 입력 스트림이 없다는 것과, timeline에 `input` 창이 있다는 것은 다른 사실입니다. 점수에는 영향이 없습니다. 이 다섯 mode의 C1 term은 `channel: timer`라서 `input` 값과 무관하게 남기 때문입니다. 기록의 그 문장 하나가 tree와 다를 뿐입니다.
+> **열린 자리.** 9.21 D1은 manifest의 `input` 값을 설명하면서 "false for a segment of `no_input_below` (4 s) or less … and for a mode whose C1 file has no keystroke stream (media, meeting, gaming, idle, video-edit, photo, render, transcode, backup)"라고 적습니다. 그러나 이 권을 쓰면서 `transition-grid` manifest를 세어 보니 `input: false`인 placement의 mode는 `gaming`, `idle`, `media`, `meeting` 넷뿐이었고, `video-edit`, `photo`, `render`, `transcode`, `backup`의 placement는 모두 `input: true`였습니다. 이 다섯 mode의 C1 파일은 `input` 창(2–58 s 등)을 가지고 있고, `input`의 값은 "generator가 창을 줬는가"(`bool(windows)`)이기 때문입니다. 그 archetype(`video-editor`, `image-editor`)에 재생할 키 입력 스트림이 없다는 것과, timeline에 `input` 창이 있다는 것은 다른 사실입니다. 점수에는 영향이 없습니다. 이 다섯 mode의 C1 term은 `app_latency`라서 `input` 값과 무관하게 남기 때문입니다. 기록의 그 문장 하나가 tree와 다를 뿐입니다.
 
 ## 13.7 term이 없는 파일과 set별 개수
 
@@ -2172,4 +2172,4 @@ generated layer를 설명해야 하는 문서들의 고쳐 쓰기는 9.15에서 
 | `ready_wait` | task가 깨어나 실행 준비가 된 뒤 실제로 CPU를 받기까지 기다린 시간 (13.1) |
 | turnaround | 작업이 도착해서 끝날 때까지 걸린 시간 (2.3, 13.1) |
 | miss rate | 주기적 작업이 마감 안에 끝나지 못한 비율 (13.1) |
-| wake, WAIT channel | 잠든 task를 깨우는 사건, 그리고 task가 무엇을 기다리며 잠드는지의 이름(`input:<task>`, `timer:<task>`) (7.6, 13.1) |
+| wake, WAIT channel | 잠든 task를 깨우는 사건, 그리고 task가 무엇을 기다리며 잠드는지의 이름(`input:<task>`, `timer:<task>`, `event:<task>`) (7.6, 13.1) |

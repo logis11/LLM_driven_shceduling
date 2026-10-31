@@ -136,12 +136,13 @@ TIMER — 주기와 deadline이 있는 periodic job — 를 쓰는 건 playback�
 
 **`WAIT`의 channel**은 누가 깨우느냐로 나뉘어요.
 - `input:<task id>`: run file의 `wake` event가 깨워요(keystroke).
-- `timer:<task id>`: 역시 run file의 `wake` event가 깨워요. 측정된 앱의 thread가 스스로 깨던 것(timer component, 4.1절)을 compile 때 절대 시각의 wake로 펼친 것이고, deadline이 없어요. 주기적으로 보이지만 TIMER가 아니에요.
+- `timer:<task id>`: 역시 run file의 `wake` event가 깨워요. 측정된 앱의 thread가 스스로 깨던 것 가운데 측정된 wake 사슬이 timer interrupt에서 시작한 것(component의 timer part, 4.1절)을 compile 때 절대 시각의 wake로 펼친 것이고, deadline이 없어요. 주기적으로 보이지만 TIMER가 아니에요. task가 기다리고 있지 않을 때 온 wake는 처음 하나만 붙들고, 그사이 또 온 것은 버려요(simulator가 `wake_drop` 줄을 쓰고, 그 wake의 WAIT와 RUN은 일 없이 지나가요).
+- `event:<task id>`: 역시 run file의 `wake` event가 깨워요. 측정된 앱의 thread가 스스로 깨던 것 가운데 사슬이 그 밖 — 측정의 입력, 다른 process, kernel thread — 에서 시작한 것(component의 event part)이에요. deadline이 없고, keystroke처럼 기다리지 않을 때 온 것을 모두 쌓아요(2026-10-31, `docs/data-contracts.md` §14).
 - `chain:<task id>`: game chain의 앞 멤버가 `WAKE`로 깨워요.
 - `job:<task id>`: build의 job 하나 안에서 멤버들이 job의 부모-자식 순서대로 서로 `WAKE`해요(5.4절).
 - `children:<task id>`: orchestrator(`make`, `dkms`)가 마지막 `FORK` 뒤에 기다리는 channel. orchestrator가 spawn한 자식이 모두 끝났을 때 executor가 이 WAIT를 완료시킨다(그때 살아 있는 자식이 없으면 막지 않고 바로)는 규칙이 interpretation contract의 FORK·WAIT에 적혀 있고, 인경민이 구두로 동의해 효력이 있어요(2026-10-16 제안, 2026-10-31 기록, `docs/data-contracts.md` §14). reference simulator(`simulator/src/sim.cpp`)는 아직 구현하지 않아서 그 simulator에서는 `make`가 run 끝까지 거기서 막혀 있어요(12장).
 
-**operation.** 측정된 앱 넷은 사용자가 시킨 일 하나를 측정해서 들고 있어요: `web-browser`의 page-load(측정 길이 중앙값 약 0.47 s), `image-editor`의 unsharp mask(약 2.36 s), `video-editor`의 preview-render(약 11.4 s), `mail-client`의 send(약 2.9 s). timeline의 `operations` track이 `{at, task, name}`으로 시작 시각만 정하고, compiler가 측정된 길이표에서 길이를 뽑아 그 구간 동안 operation의 component가 task의 다른 wake를 대신하게 해요(그 구간에는 keystroke도 안 생겨요). operation은 그 task의 input window 안에서만 시작하고 window 하나에 하나예요(design). 60 s C1 base에서는 2–58 s window의 30 s(mail의 send는 40 s), 길이를 바꾸거나 자른 파일에서는 window 안의 같은 비율 자리에 놓여요(예: `c7-browsing`의 2–24.385 s window에서 13.1925 s, `c1-transcode`의 2–4,760 s window에서 2,381 s). C2와 C3의 파일은 각자의 표에 적힌 시각에 놓여요. operation은 event op가 아니라 task의 WAIT/RUN stream 안으로 compile되고, compile report(`build/coreset-single/<id>.report.json`의 `operations`)가 시각과 길이를 적어요.
+**operation.** 측정된 앱 넷은 사용자가 시킨 일 하나를 측정해서 들고 있어요: `web-browser`의 page-load(측정 길이 중앙값 약 0.47 s), `image-editor`의 unsharp mask(약 2.36 s), `video-editor`의 preview-render(약 11.4 s), `mail-client`의 send(약 2.9 s). timeline의 `operations` track이 `{at, task, name}`으로 시작 시각만 정하고, compiler가 측정된 길이표에서 길이를 뽑아 그 구간 동안 operation의 component가 task의 다른 wake를 대신하게 해요(그 구간에는 keystroke도 안 생겨요). 구간이 시작하는 순간에는 측정한 조작마다 가장 큰 run의 표에서 run 하나를 뽑아 `event:` wake로 실어요 — unsharp mask의 필터처럼 조작마다 하나씩 있던 큰 run이 창마다 반드시 들어가게요(2026-10-31, timer-wakes-by-origin spec 결정 17). operation은 그 task의 input window 안에서만 시작하고 window 하나에 하나예요(design). 60 s C1 base에서는 2–58 s window의 30 s(mail의 send는 40 s), 길이를 바꾸거나 자른 파일에서는 window 안의 같은 비율 자리에 놓여요(예: `c7-browsing`의 2–24.385 s window에서 13.1925 s, `c1-transcode`의 2–4,760 s window에서 2,381 s). C2와 C3의 파일은 각자의 표에 적힌 시각에 놓여요. operation은 event op가 아니라 task의 WAIT/RUN stream 안으로 compile되고, compile report(`build/coreset-single/<id>.report.json`의 `operations`)가 시각과 길이를 적어요.
 
 ---
 
@@ -161,14 +162,14 @@ TIMER — 주기와 deadline이 있는 periodic job — 를 쓰는 건 playback�
 | `video-editor` | Kdenlive 23.08.5, 20 s 1080p clip project, script로 clip monitor scrub | `kdenlive` | 없음 |
 
 program 모양은 `LOOP { WAIT(input) → RUN(event) }`라고 적혀 있지만, compile 결과는 측정된 것 여러 가지를 시간순 stream 하나로 합친 거예요(5.2절).
-- **timer component** (`components`): 측정 중 앱의 각 thread(comm)가 스스로 깬 빈도와, 간격·RUN의 분위수 표. task의 lifetime 내내 component마다 wake를 표에서 뽑아 `WAIT(timer:<id>)` + `RUN`으로 펼치고, run file에는 그 시각의 `wake` event가 들어가요. 예: `code-editor`는 component가 아홉 개예요(`gpu/VizCompositorTh` 초당 23.1회, `renderer/Compositor` 22.8회, …).
+- **component** (`components`): 측정 중 앱의 각 thread(comm)가 스스로 깬 빈도와, 간격·RUN의 분위수 표. comm 하나의 wake는 측정된 wake 사슬이 시작한 곳에 따라 둘로 나뉘어요: timer interrupt에서 시작한 **timer part**와, 그 밖에서 시작한 **event part**(`channel: event`). channel마다 따로 wake 빈도 순으로 95 %를 덮을 때까지 싣고 나머지는 그 channel의 `residual` 하나로 묶어요. task의 lifetime 내내 component마다 wake를 표에서 뽑아 timer part는 `WAIT(timer:<id>)` + `RUN`, event part는 `WAIT(event:<id>)` + `RUN`으로 펼치고, run file에는 그 시각의 `wake` event가 들어가요. 예: `code-editor`는 timer part가 아홉 개(`gpu/VizCompositorTh` 초당 23.1회, `renderer/Compositor` 22.8회, …), event part가 아홉 개(`code` 초당 0.16회, …)예요.
 - **keystroke** (`stimulus` + `input_run`): input window 안에서 측정된 typing 기록(SWELL-KW 연구의 실제 keystroke 시각)의 한 조각을 재생해요. keystroke마다 `WAIT(input:<id>)` + `RUN`(측정된 keystroke 처리 시간 `input_run`의 분위수 표에서).
 - **driven cadence** (`focus_components`): GIMP와 Kdenlive는 keystroke 대신 pointer로 움직이는 driven phase를 측정했고, input window 안에서는 그 component가 평소 component를 대신해요. 그래서 이 둘에게는 `input:` wake가 하나도 없어요(5.2절).
 - **operation** (`operations`): 3장.
 - **heavy event** (`heavy_events`): 드물게 오는 큰 run. 정해진 시각 없이 측정된 비율대로 떨어져요(예: `web-browser`의 `MemoryInfra`, 초당 0.00035회).
-- **launch phase** (`launch`): 파일 중간에 시작되는 task는 측정된 launch 구간 하나를 먼저 재생하고 steady stream으로 넘어가요(예: `c3-workday`의 writer와 mailer).
+- **launch phase** (`launch`): 파일 중간에 시작되는 task는 측정된 launch 구간 하나를 먼저 재생하고(wake마다 측정된 사슬의 시작점에 따라 `timer:` 또는 `event:`로) steady stream으로 넘어가요(예: `c3-workday`의 writer와 mailer).
 
-결과적으로 측정된 editor의 program은 keystroke와 RUN이 번갈아 나오는 모양이 아니에요. 대부분의 파일에서 timer wake가 keystroke보다 훨씬 많아요(`c1-dev`의 editor: keystroke 186개, timer wake 6,456개; `c1-office` 파일 전체: keystroke 270개, timer wake 3,064개). input window가 없는 task도 timer component로 계속 조금씩 깨요(`c1-office`의 `browser`: timer wake 2,678개, CPU 합 0.18 s).
+결과적으로 측정된 editor의 program은 keystroke와 RUN이 번갈아 나오는 모양이 아니에요. 대부분의 파일에서 앱 자신의 wake가 keystroke보다 훨씬 많아요(`c1-dev`의 editor: keystroke 186개, timer wake 6,443개, event wake 19개; `c1-office` 파일 전체: keystroke 270개, timer wake 3,057개, event wake 1개). input window가 없는 task도 component로 계속 조금씩 깨요(`c1-office`의 `browser`: timer wake 2,674개, event wake 1개, CPU 합 0.18 s).
 
 ### 4.2 periodic — playback과 call
 
@@ -192,7 +193,7 @@ LOOP { TIMER(period) → RUN(cycle_run) }
 | `chat-client` | Element Desktop 1.12.28, homeserver의 방 하나에 로그인, 메시지 없음 | `element-desktop` | 초당 약 12회 |
 | `game-client` | Steam desktop client, 로그아웃(계정 없음), 창이 보임 | `steam` | 초당 약 300회 |
 
-program은 `LOOP { WAIT(timer) → RUN(event) }`: timer component만 있어요(keystroke도 cadence도 없음, 사람이 없는 상태로 측정). 주기적인 heartbeat TIMER가 아니에요. `game-client`는 드문 큰 run(`CHTTPClientThre`)도 heavy event로 들고 있어요.
+program은 `LOOP { WAIT(timer) → RUN(event) }`: component만 있어요(keystroke도 cadence도 없음, 사람이 없는 상태로 측정). `renderer-hidden`은 timer part만, `chat-client`와 `game-client`는 timer part와 event part를 둘 다 가져요. 주기적인 heartbeat TIMER가 아니에요. `game-client`는 드문 큰 run(`CHTTPClientThre`)도 heavy event로 들고 있어요.
 
 Chrome을 보여주는 파일은 browser(`web-browser`) 옆에 `renderer-hidden` 넷을 둬요(`count: 4`): Firefox Linux telemetry의 탭 다섯과 창 하나(`glam`)와 Chrome에서 관찰한 탭당 renderer 하나(`meas-ci:desktop:2026-10-04`)에서 온 수예요. 실제 page의 cross-site iframe이 가져갈 renderer는 빠져 있으니 이 수는 하한이에요. 보이는 page의 renderer는 `web-browser` task 안에 있어요.
 
@@ -264,24 +265,24 @@ chain 밖의 game thread는 없어요. slide는 game이 도는 동안 system 전
 | `service-manager` | systemd 255(pid 1과 user manager를 task 하나로) | `systemd` | pid 1의 wake만(초당 약 0.07회) |
 | `message-bus` | dbus-daemon 1.14(system bus와 session bus를 task 하나로) | `dbus-daemon` | system bus의 wake만(초당 약 0.014회) |
 
-측정은 Ubuntu 24.04 데스크톱 session에서 아무도 없이 idle-delay를 지나 잠기고 화면이 꺼진 상태예요(`meas-ci:session:2026-09-24`). 각자 thread별 component의 wake 빈도와 gap/run 분위수 표만 들고 있어요. 이 넷은 idle 파일 둘(`c1-idle`, `c7-idle`)에만 묶이고, X server task는 없어요(9.9 D26: GNOME 46 Wayland session의 idle에는 `Xorg`도 `Xwayland`도 없음). 다른 파일은 데스크톱의 session process를 생략해요 — runner에서는 그것들의 active 상태를 관찰할 수 없어서예요. 손으로 쓴 모든 timeline의 header와 variant recipe가 그렇게 적어요.
+측정은 Ubuntu 24.04 데스크톱 session에서 아무도 없이 idle-delay를 지나 잠기고 화면이 꺼진 상태예요(`meas-ci:session:2026-09-24`). 각자 thread별 component의 wake 빈도와 gap/run 분위수 표만 들고 있어요. `compositor-shell`의 셋은 timer part, `service-manager`와 `message-bus`의 하나는 event part이고, `audio-server`의 `wireplumber`는 timer part와 event part로 나뉘어요. 이 넷은 idle 파일 둘(`c1-idle`, `c7-idle`)에만 묶이고, X server task는 없어요(9.9 D26: GNOME 46 Wayland session의 idle에는 `Xorg`도 `Xwayland`도 없음). 다른 파일은 데스크톱의 session process를 생략해요 — runner에서는 그것들의 active 상태를 관찰할 수 없어서예요. 손으로 쓴 모든 timeline의 header와 variant recipe가 그렇게 적어요.
 
 ### 4.8 정리표
 
 | archetype | 측정 출처 | program 모양 | lifetime | class | core set에서 쓰이는 이름 | 파일 수 |
 |---|---|---|---|---|---|---|
-| `office-writer` | `meas-ci:interactive:2026-09-18` | timer component + keystroke | segment-bound | normal | `soffice.bin` | 4 |
-| `code-editor` | `meas-ci:interactive:2026-09-25` | timer component + keystroke | segment-bound | normal | `code` | 12 |
-| `mail-client` | `meas-ci:interactive:2026-09-19`, `-09-27` | timer component + keystroke + send | segment-bound | normal | `thunderbird-bin` | 6 |
-| `web-browser` | `meas-ci:interactive:2026-09-20` | timer component + keystroke + page-load | segment-bound | normal | `chrome` | 10 |
+| `office-writer` | `meas-ci:interactive:2026-09-18` | component + keystroke | segment-bound | normal | `soffice.bin` | 4 |
+| `code-editor` | `meas-ci:interactive:2026-09-25` | component + keystroke | segment-bound | normal | `code` | 12 |
+| `mail-client` | `meas-ci:interactive:2026-09-19`, `-09-27` | component + keystroke + send | segment-bound | normal | `thunderbird-bin` | 6 |
+| `web-browser` | `meas-ci:interactive:2026-09-20` | component + keystroke + page-load | segment-bound | normal | `chrome` | 10 |
 | `image-editor` | `meas-ci:interactive:2026-09-18` | cadence + unsharp mask | segment-bound | normal | `gimp` | 3 |
-| `video-editor` | `meas-ci:interactive:2026-09-18`, `-10-05` | timer component + cadence + preview-render | segment-bound | normal | `kdenlive` | 11 |
+| `video-editor` | `meas-ci:interactive:2026-09-18`, `-10-05` | component + cadence + preview-render | segment-bound | normal | `kdenlive` | 11 |
 | `video-player` | `meas-ci:playback:2026-09-18` | TIMER 33,348 µs + cycle RUN | segment-bound | normal | `mpv` (C5·C6에서는 다른 이름) | 6 |
 | `audio-player` | `meas-ci:playback:2026-09-18` | TIMER 49,635 µs + cycle RUN | segment-bound | normal | `mpv` (C5·C6에서는 다른 이름) | 6 |
 | `video-call` | `meas-ci:playback:2026-09-20` | TIMER 10,001 µs + cycle RUN | segment-bound | normal | `chrome` | 3 |
-| `renderer-hidden` | `meas-ci:desktop:2026-10-05b` | timer component | segment-bound | normal | `chrome` | 10 |
-| `chat-client` | `meas-ci:desktop:2026-09-20` | timer component | segment-bound | normal | `element-desktop` | 2 |
-| `game-client` | `meas-ci:desktop:2026-09-20` | timer component + heavy event | segment-bound | normal | `steam` | 7 |
+| `renderer-hidden` | `meas-ci:desktop:2026-10-05b` | component | segment-bound | normal | `chrome` | 10 |
+| `chat-client` | `meas-ci:desktop:2026-09-20` | component | segment-bound | normal | `element-desktop` | 2 |
+| `game-client` | `meas-ci:desktop:2026-09-20` | component + heavy event | segment-bound | normal | `steam` | 7 |
 | `cpu-batch` | `meas-ci:background:2026-10-03`, `-10-03c` | batch loop | finite | normal | `python`, `kdenlive_render`, `chrome`(spoof) | 7 |
 | `compiler-child` | `meas-ci:build:2026-09-18` | object job 멤버(WAIT/RUN/WAKE) | spawned | normal | `sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm` | 4 |
 | `build-orchestrator` | `meas-ci:build:2026-09-18` | (RUN, FORK ×6)×N, WAIT, EXIT | finite | normal | `make` | 4 |
@@ -295,17 +296,17 @@ chain 밖의 game thread는 없어요. slide는 game이 도는 동안 system 전
 | `video-transcoder` | `meas-ci:background:2026-10-03b` | batch loop | finite | normal | `HandBrakeCLI` | 3 |
 | `incremental-backup` | `meas-ci:background:2026-10-04` | batch loop | finite | idle | `deja-dup` | 3 |
 | `game-task-chain` | `lavd-ossna24` | chain constructor: TIMER head + WAIT/RUN/WAKE 멤버 | segment-bound | normal | `Troy.exe`, `Task worker thr`, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli`, `wineserver` | 8 |
-| `compositor-shell` | `meas-ci:session:2026-09-24` | timer component | segment-bound | normal | `gnome-shell` | 2 |
-| `audio-server` | `meas-ci:session:2026-09-24` | timer component | segment-bound | normal | `pipewire` | 2 |
-| `service-manager` | `meas-ci:session:2026-09-24` | timer component | segment-bound | normal | `systemd` | 2 |
-| `message-bus` | `meas-ci:session:2026-09-24` | timer component | segment-bound | normal | `dbus-daemon` | 2 |
+| `compositor-shell` | `meas-ci:session:2026-09-24` | component | segment-bound | normal | `gnome-shell` | 2 |
+| `audio-server` | `meas-ci:session:2026-09-24` | component | segment-bound | normal | `pipewire` | 2 |
+| `service-manager` | `meas-ci:session:2026-09-24` | component | segment-bound | normal | `systemd` | 2 |
+| `message-bus` | `meas-ci:session:2026-09-24` | component | segment-bound | normal | `dbus-daemon` | 2 |
 
 **lifetime 세 종류:**
 - **segment-bound**: 사용자가 닫음. `depart` 시각이 파일에 박혀 있음. `LOOP unbounded`가 허용되는 유일한 종류.
 - **finite**: program이 `EXIT`에 도달하면 끝. 언제인지는 scheduler에 달림. `depart` 없음.
 - **spawned**: `FORK`로 태어나 `EXIT`으로 끝남.
 
-**program이 먼저 바닥나지 않아요**(9.23). segment-bound task의 program은 depart 순간에 막혀 있는 상태로 끝나요: wake로 움직이는 program은 마지막 wake 뒤에 그 wake의 channel에서 WAIT 하나를 더 해요(wake N개에 WAIT N + 1개; 측정된 interactive task는 마지막 wake가 대개 timer component라 `timer:<id>`에서). timer로 움직이는 program은 depart 이후의 다음 tick을 기다리는 TIMER로, chain 멤버는 unbounded LOOP로 끝나요. 그리고 depart가 task를 치워요. depart가 없는 task는 top-level이든 spawned든 `EXIT`로 끝나요. canonical lint가 이걸 검사해요.
+**program이 먼저 바닥나지 않아요**(9.23). segment-bound task의 program은 depart 순간에 막혀 있는 상태로 끝나요: wake로 움직이는 program은 마지막 wake 뒤에 그 wake의 channel에서 WAIT 하나를 더 해요(wake N개에 WAIT N + 1개; 측정된 task는 마지막 wake가 대개 timer part라 `timer:<id>`에서 — core set의 측정된 segment-bound task 103개 가운데 95개가 `timer:`, 5개가 `event:`, 3개가 `input:`). timer로 움직이는 program은 depart 이후의 다음 tick을 기다리는 TIMER로, chain 멤버는 unbounded LOOP로 끝나요. 그리고 depart가 task를 치워요. depart가 없는 task는 top-level이든 spawned든 `EXIT`로 끝나요. canonical lint가 이걸 검사해요.
 
 ---
 
@@ -321,30 +322,31 @@ timeline의 `meta.seed`(예: `c2-p1a`는 201)가 모든 draw를 결정해요. �
 
 sampling 단위 세 가지:
 - **per-task**: task당 한 번 draw, 모든 iteration에 재사용. 예: chain 멤버의 RUN, playback의 period.
-- **per-iteration**: iteration마다 다른 값. 예: timer component의 간격과 RUN, keystroke의 `input_run`, playback의 cycle run, batch loop의 run과 block.
+- **per-iteration**: iteration마다 다른 값. 예: component의 간격과 RUN, keystroke의 `input_run`, playback의 cycle run, batch loop의 run과 block.
 - **per-instance**: spawn table의 entry마다. 예: object job 멤버의 step CPU.
 
 ### 5.2 측정된 entry의 compile (stream 재생)
 
 ```
-for each timer component c of the entry:              # 측정된 thread 하나
+for each component c of the entry:                    # 측정된 thread 하나의 timer part 또는 event part
     t = 도착 + (이미 돌고 있던 stream의 첫 간격)
     while t < depart:
-        emit (t, RUN ~ c.run, timer)                  # input window 안에서는 focus_components가 대신
+        emit (t, RUN ~ c.run, c.channel)              # timer 또는 event; input window 안에서는 focus_components가 대신
         t += 간격 ~ c.gap
 for each input window w of this task:                 # keystroke
     offset = seed로 뽑은 stimulus stream 위의 위치    # slice_of면 base window의 offset + 앞부분 길이
     for each key event e in stream[offset, offset + w의 길이):
         emit (w.from + (e − offset), RUN ~ input_run, input)
 for each operation o of this task:
+    emit (o.at, RUN ~ o.largest_run, o.largest_run_channel)   # 결정 17: 창마다 한 번, 시작하는 순간
     [o.at, o.at + 길이 ~ o.duration) 동안 operation의 component가 다른 wake를 대신
-시간순으로 합쳐서 → WAIT(timer:<id>) 또는 WAIT(input:<id>), RUN(run), …, 마지막에 WAIT 하나 더
+시간순으로 합쳐서 → WAIT(timer:<id>), WAIT(event:<id>) 또는 WAIT(input:<id>), RUN(run), …, 마지막에 WAIT 하나 더
 run file에는 wake마다 `wake` event
 ```
 
-`c1-office`의 `writer`: input 2–58 s → keystroke wake 270개(첫 keystroke 2.059 s) + timer wake 205개, RUN 합 1.36 s.
+`c1-office`의 `writer`: input 2–58 s → keystroke wake 270개(첫 keystroke 2.059 s) + timer wake 205개(`office-writer`에는 event part가 없어요), RUN 합 1.36 s.
 
-측정된 keystroke stream은 네 앱에만 있어요(`dataset/stimulus/`): Writer와 VS Code는 SWELL-KW의 Word stream, Thunderbird는 Outlook stream, Chrome은 Internet Explorer stream. Kdenlive와 GIMP는 keystroke stream이 없어요 — 측정된 driven phase는 pointer로 움직이는 operation이고, 그게 앱 자신의 timer component로 실려요. 그래서 이 둘이 묶인 파일 열세 개(`c1-video-edit`, `c1-render`, `c1-transcode`, `c1-backup`, `c1-photo`, `c2-p3a`, `c2-p3b`, `c3-creation`, `c7-video-edit`, `c7-render`, `c7-transcode`, `c7-backup`, `c7-photo`)의 interaction term 열네 개는 앱 자신의 timer wake를 읽어요(9.14): 2026-10-30부터 `timer_latency`로, wake마다 그 wake가 온 순간부터 앱이 그것을 처리하기 시작할 때까지예요. keystroke stream이 있는 앱의 interaction term은 `input_latency`로, keystroke마다 그 keystroke가 온 순간부터 앱이 그것을 처리하기 시작할 때까지를 읽어요(2026-10-30). 아래의 "input P99"가 이것이에요. input window가 없는 측정 task는 timer component만 있어요(`c1-office`의 `browser`).
+측정된 keystroke stream은 네 앱에만 있어요(`dataset/stimulus/`): Writer와 VS Code는 SWELL-KW의 Word stream, Thunderbird는 Outlook stream, Chrome은 Internet Explorer stream. Kdenlive와 GIMP는 keystroke stream이 없어요 — 측정된 driven phase는 pointer로 움직이는 operation이고, 그게 앱 자신의 component(timer part와 event part)로 실려요. 그래서 이 둘이 묶인 파일 열세 개(`c1-video-edit`, `c1-render`, `c1-transcode`, `c1-backup`, `c1-photo`, `c2-p3a`, `c2-p3b`, `c3-creation`, `c7-video-edit`, `c7-render`, `c7-transcode`, `c7-backup`, `c7-photo`)의 interaction term 열네 개는 앱 자신의 wake를 읽어요(9.14): 2026-10-31부터 `app_latency`로, `timer:`와 `event:`의 wake마다 그 wake가 온 순간부터 앱이 그것을 처리하기 시작할 때까지예요. `timer:`에서 붙들린 wake가 있는 동안 와서 버려진 wake는 그 붙들린 wake의 처리가 시작될 때까지를 읽어요. 아래의 "app P99"가 이것이에요. keystroke stream이 있는 앱의 interaction term은 `input_latency`로, keystroke마다 그 keystroke가 온 순간부터 앱이 그것을 처리하기 시작할 때까지를 읽어요(2026-10-30). 아래의 "input P99"가 이것이에요. input window가 없는 측정 task는 component만 있어요(`c1-office`의 `browser`).
 
 ### 5.3 finite job의 compile (batch loop)
 
@@ -426,12 +428,12 @@ label이 붙은 segment 목록. core set 51개에 segment가 모두 67개예요.
 op는 딱 둘. `arrive`와 `wake`.
 
 ```jsonc
-// segment-bound 측정 task: depart 있음. timer component와 keystroke가 stream 하나 (c2-p1a)
+// segment-bound 측정 task: depart 있음. component(timer part와 event part)와 keystroke가 stream 하나 (c2-p1a)
 { "op": "arrive", "t": 0, "id": "editor", "name": "code", "declared_class": "normal", "depart": 99435000,
   "program": [ { "op": "WAIT", "channel": "timer:editor" }, { "op": "RUN", "us": 22 },
                /* … */
                { "op": "WAIT", "channel": "input:editor" }, { "op": "RUN", "us": 177008 },
-               /* … wake 11,344개 */
+               /* … wake 11,293개: timer:editor 10,740, event:editor 28, input:editor 525 */
                { "op": "WAIT", "channel": "timer:editor" } ] }
 
 // finite batch task: depart 없음 (c2-p1a)
@@ -462,9 +464,10 @@ op는 딱 둘. `arrive`와 `wake`.
                  "body": [ { "op": "TIMER", "period_us": 16667 }, { "op": "RUN", "us": 631 },
                            { "op": "WAKE", "target": "game.wineserver" } ] } ] }
 
-// 외부 자극: keystroke, 또는 timer component의 wake
+// 외부 자극: keystroke, 또는 component의 wake(timer part는 timer:, event part는 event:)
 { "op": "wake", "t": 2090485, "channel": "input:editor", "target": "editor" }
-{ "op": "wake", "t": 2469,    "channel": "timer:editor", "target": "editor" }
+{ "op": "wake", "t": 2470,    "channel": "timer:editor", "target": "editor" }
+{ "op": "wake", "t": 1827043, "channel": "event:editor", "target": "editor" }
 ```
 
 `arrive`의 `id`는 harness의 records에서 `entity`가 돼요. `name`은 recognizer가 보는 것. 같은 이름의 task가 여럿이면 id로 구분해요(`renderers.1` … `renderers.4`는 전부 `name: chrome`). 모든 task record(arrive와 spawn-table entry)는 `declared_class`를 가져요. operation은 event op가 아니에요 — task의 WAIT/RUN stream 안에 compile되고, 시각과 길이는 compile report에 있어요.
@@ -513,57 +516,57 @@ core set 51개(`dataset/build.manifest.json`의 `demand`):
 
 | 파일 | utilization | segment별 | class | 비고 |
 |---|---|---|---|---|
-| c1-backup | 0.9897 | | calibration | editor + idle-class backup |
-| c1-browsing | 0.0164 | | calibration | |
-| c1-compile | 0.9982 | | calibration | build가 파일 대부분을 채움 |
+| c1-backup | 0.9878 | | calibration | editor + idle-class backup |
+| c1-browsing | 0.0176 | | calibration | |
+| c1-compile | 0.9983 | | calibration | build가 파일 대부분을 채움 |
 | c1-dev | 0.3319 | | calibration | editor 혼자 |
 | c1-gaming | 0.9153 | | calibration | chain 0.9 + steam |
 | c1-idle | 0.0004 | | calibration | 사실상 0 |
 | c1-indexing | 0.7477 | | calibration | |
-| c1-mail | 0.0287 | | calibration | |
+| c1-mail | 0.04 | | calibration | |
 | c1-media | 0.128 | | calibration | video 0.121 + music 0.007 |
 | c1-meeting | 0.2387 | | calibration | 통화 하나 |
 | c1-ml-train | 0.9982 | | calibration | |
-| c1-office | 0.027 | | calibration | |
-| c1-photo | 0.0442 | | calibration | |
-| c1-render | 0.7339 | | calibration | |
-| c1-transcode | 0.9993 | | calibration | |
-| c1-video-edit | 0.4586 | | calibration | |
+| c1-office | 0.0269 | | calibration | |
+| c1-photo | 0.0441 | | calibration | |
+| c1-render | 0.7054 | | calibration | |
+| c1-transcode | 0.9985 | | calibration | |
+| c1-video-edit | 0.4769 | | calibration | |
 | c2-p1a | 14.505 | 0.5272 / 35.7721 | oversubscribed | caveat: training이 파일보다 오래 삶 |
 | c2-p1b | 0.9238 | 0.5272 / 1.5272 | oversubscribed | |
 | c2-p2a | 9.3829 | 0.9651 / 28.5251 | oversubscribed | caveat: download가 파일보다 오래 삶 |
 | c2-p2a-idle | 9.3829 | 0.9651 / 28.5251 | oversubscribed | 같은 caveat |
 | c2-p2b | 1.2706 | 0.9651 / 1.9651 | oversubscribed | chain 0.95 + upgrade |
-| c2-p3a | 0.4401 | 0.3893 / 0.4515 | oversubscribed | |
-| c2-p3b | 0.8975 | 0.3893 / 1.0122 | oversubscribed | |
-| c3-creation | 0.9417 | 0.0151 / 0.0169 / 1.0165 | oversubscribed | |
-| c3-evening | 0.9006 | 0.0139 / 1.5062 / 0.1327 | oversubscribed | lane_share 1.45 (게임 segment 안에서만) |
-| c3-workday | 0.888 | 0.0031 / 0.0053 / 0.9597 / 1.0251 | oversubscribed | |
+| c2-p3a | 0.4422 | 0.3915 / 0.4537 | oversubscribed | |
+| c2-p3b | 0.8997 | 0.3915 / 1.0143 | oversubscribed | |
+| c3-creation | 0.9428 | 0.0233 / 0.0176 / 1.0173 | oversubscribed | |
+| c3-evening | 0.9007 | 0.0145 / 1.5062 / 0.1327 | oversubscribed | lane_share 1.45 (게임 segment 안에서만) |
+| c3-workday | 0.8894 | 0.003 / 0.0052 / 0.9596 / 1.0638 | oversubscribed | |
 | c4-compile | 0.9994 | | calibration | c1-compile + 30–60 s의 Chrome |
 | c4-gaming | 0.9638 | | calibration | c1-gaming + chat client |
-| c4-office | 0.127 | | calibration | c1-office + 7z 6 s |
+| c4-office | 0.1269 | | calibration | c1-office + 7z 6 s |
 | c5-t4 | 0.128 | | calibration | = c1-media |
 | c5-t5 | 0.128 | | calibration | = c1-media |
 | c6-alias | 0.128 | | calibration | = c1-media |
 | c6-dual | 0.8388 | | oversubscribed | lane_share 0.6 |
-| c6-fold | 0.3144 | 0.0164 / 0.6123 | calibration | 30 s부터 통화 |
-| c6-spoof | 0.5164 | 0.0164 / 0.7664 | calibration | 20 s부터 spoof |
-| c7-backup | 1.4032 | | calibration | |
-| c7-browsing | 1.0268 | | calibration | base + upgrade 1.0 |
+| c6-fold | 0.3155 | 0.0176 / 0.6135 | calibration | 30 s부터 통화 |
+| c6-spoof | 0.5176 | 0.0176 / 0.7676 | calibration | 20 s부터 spoof |
+| c7-backup | 1.4004 | | calibration | |
+| c7-browsing | 1.0295 | | calibration | base + upgrade 1.0 |
 | c7-compile | 1.1866 | | calibration | |
 | c7-dev | 1.2129 | | calibration | |
 | c7-gaming | 1.9149 | | calibration | chain 0.9 + upgrade 1.0 |
 | c7-idle | 1.0007 | | calibration | upgrade 혼자 |
-| c7-indexing | 1.0937 | | calibration | |
-| c7-mail | 1.0545 | | calibration | |
+| c7-indexing | 1.0936 | | calibration | |
+| c7-mail | 1.0802 | | calibration | |
 | c7-media | 1.1267 | | calibration | |
 | c7-meeting | 1.24 | | calibration | |
 | c7-ml-train | 1.1405 | | calibration | |
 | c7-office | 1.0251 | | calibration | |
-| c7-photo | 1.0967 | | calibration | |
-| c7-render | 1.6189 | | calibration | |
-| c7-transcode | 1.3727 | | calibration | |
-| c7-video-edit | 1.5618 | | calibration | |
+| c7-photo | 1.0965 | | calibration | |
+| c7-render | 1.5416 | | calibration | |
+| c7-transcode | 1.3712 | | calibration | |
+| c7-video-edit | 1.5878 | | calibration | |
 
 주의: utilization은 파일 전체의 평균이에요. segment가 여럿인 파일은 segment별 값을 봐야 해요. `c2-p1b`는 0–60초가 0.53(editor 혼자)이고 60–99.435초가 1.53(indexer의 39.435 s가 그 구간에 꼭 맞게 펴짐)이에요. 흥미로운 구간은 뒤쪽.
 
@@ -593,7 +596,7 @@ core set 51개(`dataset/build.manifest.json`의 `demand`):
 
 ## 10. 51개 파일 상세
 
-각 파일에 대해: 한 문단 이야기, segment, task(compile된 실제 수치), recognizer가 보는 snapshot, harness가 볼 것. 수치는 `coreset-single`에서 읽은 값이에요. "timer wake"는 timer component의 wake, "keystroke"는 `input:` wake의 수예요. `bind`로 묶은 값 옆에는 timeline의 `source`를 괄호로 적어요.
+각 파일에 대해: 한 문단 이야기, segment, task(compile된 실제 수치), recognizer가 보는 snapshot, harness가 볼 것. 수치는 `coreset-single`에서 읽은 값이에요. "timer wake"는 component의 timer part가 낸 `timer:` wake, "event wake"는 event part가 낸 `event:` wake, "keystroke"는 `input:` wake의 수예요. `bind`로 묶은 값 옆에는 timeline의 `source`를 괄호로 적어요.
 
 시간 표기: 초. 프로그램 안 숫자: µs 또는 ms.
 
@@ -621,13 +624,13 @@ core set 51개(`dataset/build.manifest.json`의 `demand`):
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
 | writer | soffice.bin | office-writer | 0 → 60 | input 2–58 s: keystroke 270개(Word stream의 조각) + timer wake 205개, RUN 합 1.36 s |
-| browser | chrome | web-browser | 0 → 60 | input 없음: timer wake 2,678개, RUN 합 0.18 s |
+| browser | chrome | web-browser | 0 → 60 | input 없음: timer wake 2,674개 + event wake 1개, RUN 합 0.18 s |
 | renderers.1–4 | chrome | renderer-hidden | 0 → 60 | timer wake 9–14개씩 (`count: 4`; `[glam, meas-ci:desktop:2026-10-04]`) |
-| mail | thunderbird-bin | mail-client | 0 → 60 | input 없음: timer wake 135개, RUN 합 0.08 s |
+| mail | thunderbird-bin | mail-client | 0 → 60 | input 없음: timer wake 132개, RUN 합 0.08 s |
 
 recognizer: 0 s `chrome ×5, soffice.bin ×1, thunderbird-bin ×1`, focus `soffice.bin` → 정답 office/wanted. 60 s 빈 집합(terminal).
 
-harness: writer의 `input_latency` P99 하나. 경쟁 상대는 browser·renderer·mail의 작은 wake뿐이라 대부분 0에 가까울 거예요. utilization 0.027. reporting-only. `harness/tools/tests/fixtures/mock-office`가 이 파일의 축소판이에요(input window 안의 editor, burst 중간에 queued된 keystroke, 한 번도 안 깨는 unfocused task).
+harness: writer의 `input_latency` P99 하나. 경쟁 상대는 browser·renderer·mail의 작은 wake뿐이라 대부분 0에 가까울 거예요. utilization 0.0269. reporting-only. `harness/tools/tests/fixtures/mock-office`가 이 파일의 축소판이에요(input window 안의 editor, burst 중간에 queued된 keystroke, 한 번도 안 깨는 unfocused task).
 
 #### `c1-browsing` — 웹 브라우징
 
@@ -639,12 +642,12 @@ Chrome 창 하나, 탭 다섯(보이는 page 하나 + 숨은 탭 넷의 renderer
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| browser | chrome | web-browser | 0 → 60 | input 2–58 s: keystroke 123개(IE stream의 조각) + timer wake 3,679개, page-load 30 s, RUN 합 0.98 s |
+| browser | chrome | web-browser | 0 → 60 | input 2–58 s: keystroke 123개(IE stream의 조각) + timer wake 2,904개 + event wake 825개, page-load 30 s, RUN 합 1.05 s |
 | renderers.1–4 | chrome | renderer-hidden | 0 → 60 | timer wake 10–15개씩 (`count: 4`; `[glam, meas-ci:desktop:2026-10-04]`) |
 
 recognizer: 0 s `chrome ×5`, focus `chrome`. 60 s 빈 집합.
 
-harness: browser의 input P99 하나. utilization 0.0164. reporting-only.
+harness: browser의 input P99 하나. utilization 0.0176. reporting-only.
 
 #### `c1-compile` — 코드 편집 + 빌드
 
@@ -656,13 +659,13 @@ VS Code에 타이핑하면서 2초에 Linux kernel(defconfig)을 `make -j8`로 �
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| editor | code | code-editor | 0 → 1594 | input 2–1592 s: keystroke 2,544개 + timer wake 178,482개, RUN 합 275.3 s |
+| editor | code | code-editor | 0 → 1594 | input 2–1592 s: keystroke 2,544개 + timer wake 177,683개 + event wake 734개, RUN 합 275.3 s |
 | build | make | build-orchestrator | 2 → finite | object job 2,908개(`spawn_count`, `meas-ci:build:2026-09-18`), cap 8(`parallelism_cap`, `convention`) → `fork_cap` 48. dispatch RUN 2,908개 합 1.98 s |
 | build.j1.sh … build.j2908.rm | sh, gcc, cc1, as, fixdep, rm | compiler-child | spawn | 17,448개(job당 여섯; `child_name: cc1`, `meas-ci:build:2026-09-18`), CPU 합 1,313.9 s |
 
 recognizer: 0 s `code`. 2 s `as ×2908, cc1 ×2908, code, fixdep ×2908, gcc ×2908, make, rm ×2908, sh ×2908`(자식은 부모와 함께 보임). 1594 s `make`와 자식들(finite라 안 사라짐).
 
-harness: **양면** 파일. editor의 input P99(weight 1.0)와 `make`의 `turnaround`(= makespan, weight 1.0). editor latency와 makespan이 서로 당기는 trade-off가 scoring 판단 대상. utilization 0.9982. RQ0 판정 파일이에요. `make`의 turnaround는 `make`가 spawn한 자식이 모두 끝났을 때 `WAIT children:build`가 완료돼야 읽혀요(3장).
+harness: **양면** 파일. editor의 input P99(weight 1.0)와 `make`의 `turnaround`(= makespan, weight 1.0). editor latency와 makespan이 서로 당기는 trade-off가 scoring 판단 대상. utilization 0.9983. RQ0 판정 파일이에요. `make`의 turnaround는 `make`가 spawn한 자식이 모두 끝났을 때 `WAIT children:build`가 완료돼야 읽혀요(3장).
 
 #### `c1-gaming` — 게임
 
@@ -677,7 +680,7 @@ Proton 게임 하나(`Troy.exe`)의 frame chain과 Steam client. input 없음(�
 | game.chain.1 | Troy.exe | game-task-chain | 0 → 60 | head: TIMER 16667, RUN 631 µs, `game.wineserver`를 WAKE |
 | game.wineserver | wineserver | game-task-chain | 0 → 60 | RUN 341 µs, `game.chain.2`를 WAKE |
 | game.chain.2–16 | Task worker thr ×4, dxvk-cs, dxvk-submit, winepulse_mainl, winepulse_timer, FAudio_AudioCli, Troy.exe ×6 | game-task-chain | 0 → 60 | 멤버 RUN 286 µs–1.44 ms. 17개 합 14,999 µs = 0.9 × 16,667 (`lane_share: 0.9`, `design`; `member_names`, `lavd-ossna24:s16`) |
-| steam | steam | game-client | 0 → 60 | timer wake 18,062개(초당 약 301회), RUN 합 0.92 s |
+| steam | steam | game-client | 0 → 60 | timer wake 17,950개 + event wake 140개(합쳐서 초당 약 301회), RUN 합 0.92 s |
 
 recognizer: 0 s `FAudio_AudioCli, Task worker thr ×4, Troy.exe ×7, dxvk-cs, dxvk-submit, steam, winepulse_mainl, winepulse_timer, wineserver`, focus `Troy.exe`. 60 s 빈 집합.
 
@@ -711,8 +714,8 @@ harness: 두 task의 `job` miss rate(music 1.0, video 0.5 — 오디오 끊김�
 | id | name | archetype | compile 결과 |
 |---|---|---|---|
 | shell | gnome-shell | compositor-shell | timer wake 53개, RUN 합 21 ms |
-| audio-srv | pipewire | audio-server | wake 없음(측정 빈도 초당 약 0.009회라 60초 안에 안 깸) → `WAIT` 하나 |
-| init | systemd | service-manager | timer wake 6개 |
+| audio-srv | pipewire | audio-server | event wake 1개(측정 빈도 초당 약 0.009회, 그 가운데 timer part 0.006회는 60초 안에 안 깸) |
+| init | systemd | service-manager | event wake 6개(pid 1의 component는 event part 하나) |
 | bus | dbus-daemon | message-bus | wake 없음 → `WAIT` 하나 |
 
 recognizer: 0 s `dbus-daemon, gnome-shell, pipewire, systemd`, focus `null`. 60 s 빈 집합.
@@ -727,16 +730,16 @@ harness: **성능 metric 없음**(scoring spec에 entry가 없어요). utilizati
 
 | 파일 | 길이 | task set (compile 결과) | utilization | term |
 |---|---|---|---|---|
-| `c1-dev` | 60 s | `code`(code-editor) 혼자: keystroke 186 + timer wake 6,456, RUN 합 19.9 s | 0.3319 | editor input P99 |
-| `c1-video-edit` | 60 s | `kdenlive`(video-editor) 혼자: keystroke 없음, timer wake 17,232, preview-render 30 s, RUN 합 27.5 s | 0.4586 | editor timer P99 |
-| `c1-photo` | 60 s | `gimp`(image-editor) 혼자: timer wake 511, unsharp mask 30 s, RUN 합 2.65 s | 0.0442 | photo-editor timer P99 |
-| `c1-mail` | 60 s | `thunderbird-bin`(mail-client) 혼자: keystroke 35(전부 45.9–53.1 s, Outlook stream의 typing 한 덩어리) + timer wake 5,371, send 40 s, RUN 합 1.72 s | 0.0287 | mailer input P99 |
+| `c1-dev` | 60 s | `code`(code-editor) 혼자: keystroke 186 + timer wake 6,443 + event wake 19, RUN 합 19.9 s | 0.3319 | editor input P99 |
+| `c1-video-edit` | 60 s | `kdenlive`(video-editor) 혼자: keystroke 없음, timer wake 8,809 + event wake 8,566, preview-render 30 s, RUN 합 28.6 s | 0.4769 | editor app P99 |
+| `c1-photo` | 60 s | `gimp`(image-editor) 혼자: timer wake 134 + event wake 399, unsharp mask 30 s, RUN 합 2.65 s | 0.0441 | photo-editor app P99 |
+| `c1-mail` | 60 s | `thunderbird-bin`(mail-client) 혼자: keystroke 35(전부 45.9–53.1 s, Outlook stream의 typing 한 덩어리) + timer wake 2,643 + event wake 3,448, send 40 s, RUN 합 2.40 s | 0.04 | mailer input P99 |
 | `c1-meeting` | 60 s | `chrome`(video-call) 하나: 통화 전체가 task 하나, TIMER 10001 × 6,000 cycle, RUN 합 14.3 s | 0.2387 | voice job miss rate |
 | `c1-ml-train` | 1,612 s | `code` + `python`(cpu-batch `python3`, 2 s 도착, 1,389.885 s; `meas-ci:background:2026-10-03`) | 0.9982 | editor input P99 + hog turnaround 0.5 |
-| `c1-render` | 60 s | `kdenlive` + `kdenlive_render`(cpu-batch, 2 s, 16.545 s; `meas-ci:background:2026-10-03c`), preview-render 30 s; `initiated: user` | 0.7339 | editor timer P99 + bulk turnaround 0.5 |
-| `c1-transcode` | 4,762 s | `kdenlive` + `HandBrakeCLI`(video-transcoder, 2 s, 2,970.871 s; `meas-ci:background:2026-10-03b`), preview-render 2,381 s; `initiated: user` | 0.9993 | video-editor timer P99 + batch turnaround 0.5 |
+| `c1-render` | 60 s | `kdenlive` + `kdenlive_render`(cpu-batch, 2 s, 16.545 s; `meas-ci:background:2026-10-03c`), preview-render 30 s; `initiated: user` | 0.7054 | editor app P99 + bulk turnaround 0.5 |
+| `c1-transcode` | 4,762 s | `kdenlive` + `HandBrakeCLI`(video-transcoder, 2 s, 2,970.871 s; `meas-ci:background:2026-10-03b`), preview-render 2,381 s; `initiated: user` | 0.9985 | video-editor app P99 + batch turnaround 0.5 |
 | `c1-indexing` | 60 s | `code` + `tracker-miner-f`(file-indexer, idle class, 2 s, 39.435 s; `meas-ci:background:2026-10-02b`); `initiated: user`, **pre_committed_miss** | 0.7477 | editor input P99 + hog turnaround 1.0 |
-| `c1-backup` | 277 s | `kdenlive` + `deja-dup`(incremental-backup, idle class, 2 s, 165.668 s; `meas-ci:background:2026-10-04`), preview-render 138.5 s; `initiated: scheduled` | 0.9897 | editor timer P99 + bulk turnaround 0.25 |
+| `c1-backup` | 277 s | `kdenlive` + `deja-dup`(incremental-backup, idle class, 2 s, 165.668 s; `meas-ci:background:2026-10-04`), preview-render 138.5 s; `initiated: scheduled` | 0.9878 | editor app P99 + bulk turnaround 0.25 |
 
 batch 쪽 weight는 그 mode의 다른 파일이 가진 weight를 따랐어요(ml-train·render·transcode 0.5, backup 0.25). `c1-indexing`의 turnaround weight 1.0은 stated assumption이에요 — reindex를 기다리는 사용자를 build를 기다리는 `c1-compile`의 사용자처럼 봐요.
 
@@ -761,7 +764,7 @@ VS Code에 타이핑하다가 60초에 PyTorch의 기본 MNIST 예제를 CPU에�
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| editor | code | code-editor | 0 → 99.435 | input 2–97.435 s: keystroke 525개 + timer wake 10,819개, RUN 합 52.4 s |
+| editor | code | code-editor | 0 → 99.435 | input 2–97.435 s: keystroke 525개 + timer wake 10,740개 + event wake 28개, RUN 합 52.4 s |
 | hog | python | cpu-batch (`program: python3`) | 60 → finite | RUN 28 / SLEEP 27, `total_work` 1,389.885 s (`meas-ci:background:2026-10-03`; program `[pytorch-examples, meas-ci:background:2026-10-03]`) |
 
 recognizer: 0 s `code`. 60 s `code, python`. 99.435 s `python`. focus는 계속 `code`.
@@ -801,7 +804,7 @@ harness: editor의 input P99 하나(원하지 않은 일에는 term이 없어요
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
 | game.chain.1–16, game.wineserver | Troy.exe ×7, Task worker thr ×4, …, wineserver | game-task-chain | 0 → 86.385 | `lane_share: 0.95`(`design`): 멤버 RUN 225 µs–2.13 ms, 합 15,833 µs |
-| steam | steam | game-client | 0 → 86.385 | timer wake 26,010개 |
+| steam | steam | game-client | 0 → 86.385 | timer wake 25,851개 + event wake 194개 |
 | download | **steam** | game-download | 60 → finite | RUN 211,121 / SLEEP 211,120, `total_work` 727.170 s (`meas-ci:background:2026-09-19`) |
 
 recognizer: 0 s(c1-gaming과 같은 이름들, focus `Troy.exe`). 60 s `… steam ×2 …`(개수 변화가 query point). 86.385 s `steam`.
@@ -840,12 +843,12 @@ Kdenlive에서 편집하다가 60초에 Kdenlive 자신의 export(render dialog,
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| editor | kdenlive | video-editor | 0 → 326 | input 2–324 s(keystroke 없음): timer wake 73,890개, preview-render 30 s, RUN 합 126.9 s |
+| editor | kdenlive | video-editor | 0 → 326 | input 2–324 s(keystroke 없음): timer wake 59,667개 + event wake 14,165개, preview-render 30 s, RUN 합 127.6 s |
 | bulk | kdenlive_render | cpu-batch (`program: kdenlive_render`) | 60 → finite | RUN 318 / SLEEP 317, `total_work` 16.545 s (`meas-ci:background:2026-10-03c`) |
 
 recognizer: 0 s `kdenlive`. 60 s `kdenlive, kdenlive_render`. 326 s `kdenlive_render`.
 
-harness: editor의 timer P99(segment 1, weight 1.0) + bulk의 `turnaround`(weight 0.5). export는 16.5 s의 CPU라 어떤 row에서도 약 99.5 s까지 끝나서, 받은 CPU는 못 움직이고 turnaround는 움직여요. utilization 0.4401(segment 0.3893 / 0.4515). RQ0 판정 파일.
+harness: editor의 app P99(`app_latency`, segment 1, weight 1.0) + bulk의 `turnaround`(weight 0.5). export는 16.5 s의 CPU라 어떤 row에서도 약 99.5 s까지 끝나서, 받은 CPU는 못 움직이고 turnaround는 움직여요. utilization 0.4422(segment 0.3915 / 0.4537). RQ0 판정 파일.
 
 #### `c2-p3b` — 영상 편집 + 예약된 backup
 
@@ -862,7 +865,7 @@ bulk를 Déjà Dup의 예약된 주간 incremental(`incremental-backup`, 이름 
 
 recognizer: 60 s `deja-dup, kdenlive`. 326 s `deja-dup`.
 
-harness: editor의 timer P99 + bulk의 progress(weight 0.25). segment 1의 길이(60–326 s, 두 파일 공통)는 9.10이 공유 lane 위에서 정한 것이에요. idle class(9.13)에서는 backup이 editor가 비운 lane만 받아서(약 162 s) 그 안에 끝나지 못하고 progress로 채점돼요(9.14). base의 export는 약 99.5 s까지 끝나요. idle-class 파일이라 reporting-only. utilization 0.8975(segment 0.3893 / 1.0122).
+harness: editor의 app P99 + bulk의 progress(weight 0.25). segment 1의 길이(60–326 s, 두 파일 공통)는 9.10이 공유 lane 위에서 정한 것이에요. idle class(9.13)에서는 backup이 editor가 비운 lane만 받아서(약 162 s) 그 안에 끝나지 못하고 progress로 채점돼요(9.14). base의 export는 약 99.5 s까지 끝나요. idle-class 파일이라 reporting-only. utilization 0.8997(segment 0.3915 / 1.0143).
 
 ---
 
@@ -883,17 +886,17 @@ Chrome 검색 → LibreOffice 글쓰기 → kernel build → Thunderbird 메일.
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| browser | chrome | web-browser | 0 → 1545 | input 2–58 s: keystroke 7개 + timer wake 67,612개, page-load 30 s, RUN 합 4.74 s |
+| browser | chrome | web-browser | 0 → 1545 | input 2–58 s: keystroke 7개 + timer wake 66,666개 + event wake 886개, page-load 30 s, RUN 합 4.62 s |
 | renderers.1–4 | chrome | renderer-hidden | 0 → 1545 | timer wake 312–372개씩 |
-| writer | soffice.bin | office-writer | 60 → 1545 | launch phase를 재생한 뒤 steady. input 62–118 s: keystroke 139개 + timer wake 5,850개, RUN 합 3.24 s |
+| writer | soffice.bin | office-writer | 60 → 1545 | launch phase를 재생한 뒤 steady. input 62–118 s: keystroke 139개 + timer wake 5,297개 + event wake 537개, RUN 합 3.24 s |
 | build | make | build-orchestrator | 120 → finite | object job 2,908개(`meas-ci:build:2026-09-18`), cap 8(`convention`) → `fork_cap` 48; 자식 17,448개 CPU 합 1,358.0 s |
-| mailer | thunderbird-bin | mail-client | 1485 → 1545 | launch phase 재생(파일이 그 안에서 끝나요). input 1487–1543 s: keystroke 60개 + timer wake 17,789개, send 1,525 s |
+| mailer | thunderbird-bin | mail-client | 1485 → 1545 | launch phase 재생(파일이 그 안에서 끝나요). input 1487–1543 s: keystroke 60개 + timer wake 7,864개 + event wake 12,864개, send 1,525 s |
 
 focus: browser 0–60, writer 60–1485, mailer 1485–1545.
 
 recognizer (5 query point): 0 s `chrome ×5`(focus `chrome`) → 60 s `+soffice.bin`(focus `soffice.bin`) → 120 s `+make`와 자식 여섯 이름 ×2908 → 1485 s `+thunderbird-bin`(focus `thunderbird-bin`) → 1545 s `make`와 자식들(terminal).
 
-harness: browser·writer·mailer 각자의 input P99와 build의 progress(weight 0.5). compile segment는 build가 어떤 policy에서도 끝나는 가장 작은 정수 초(1,485 s)에서 끝나요. 각 segment의 foreground task(browser → writer → mailer)의 대기가 시간에 따라 어떻게 바뀌는지, 그리고 120초 이후 fork storm이 editor를 얼마나 방해하는지가 이 파일의 이야기예요. utilization 0.888(segment 0.0031 / 0.0053 / 0.9597 / 1.0251).
+harness: browser·writer·mailer 각자의 input P99와 build의 progress(weight 0.5). compile segment는 build가 어떤 policy에서도 끝나는 가장 작은 정수 초(1,485 s)에서 끝나요. 각 segment의 foreground task(browser → writer → mailer)의 대기가 시간에 따라 어떻게 바뀌는지, 그리고 120초 이후 fork storm이 editor를 얼마나 방해하는지가 이 파일의 이야기예요. utilization 0.8894(segment 0.003 / 0.0052 / 0.9596 / 1.0638).
 
 #### `c3-evening` — 저녁
 
@@ -907,11 +910,11 @@ harness: browser·writer·mailer 각자의 input P99와 build의 progress(weight
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| browser | chrome | web-browser | 0 → 60 | input 2–58 s: keystroke 77개 + timer wake 3,636개, page-load 30 s |
+| browser | chrome | web-browser | 0 → 60 | input 2–58 s: keystroke 77개 + timer wake 2,834개 + event wake 961개, page-load 30 s |
 | renderers.1–4 | chrome | renderer-hidden | 0 → 60 | timer wake 9–17개씩 |
 | game.chain.1–16, game.wineserver | Troy.exe ×7, …, wineserver | game-task-chain | 60 → 300 | **lane_share 1.45**(`design`) → 멤버 RUN 합 24,166 µs per 16.667 ms frame. 혼자서도 못 따라감. 출처에 launch data가 없어 steady로 도착 |
-| chat | element-desktop | chat-client | 60 → 300 | launch phase 재생, 메시지 없는 idle. timer wake 12,121개 |
-| steam | steam | game-client | 60 → 300 | launch phase 재생. timer wake 91,259개 |
+| chat | element-desktop | chat-client | 60 → 300 | launch phase 재생, 메시지 없는 idle. timer wake 8,417개 + event wake 3,590개 |
+| steam | steam | game-client | 60 → 300 | launch phase 재생. timer wake 82,163개 + event wake 9,096개 |
 | video | mpv | video-player | 300 → 420 | launch phase를 cycle 격자에 binning. TIMER 33348 × 3,599 cycle |
 | music | mpv | audio-player | 300 → 420 | TIMER 49635 × 2,418 cycle |
 
@@ -919,7 +922,7 @@ focus: browser 0–60, 게임 60–300, video 300–420.
 
 recognizer (4): 0 s `chrome ×5` → 60 s `FAudio_AudioCli, Task worker thr ×4, Troy.exe ×7, dxvk-cs, dxvk-submit, element-desktop, steam, winepulse_mainl, winepulse_timer, wineserver`(focus `Troy.exe`) → 300 s `mpv ×2` → 420 s 빈 집합.
 
-harness: 게임 segment의 chain은 lane_share 1.45라 **설계상 frame을 계속 놓쳐요.** skip 규칙이 실제로 작동하는 파일. utilization은 파일 평균 0.9006이지만 게임 segment 안은 1.5062. 세 segment의 primary metric이 다 달라요(browser latency → frame miss → media job). 참고로 `game.chain.1`은 60초에, `video`와 `music`은 300초에 등장하는 TIMER task예요. TIMER의 t₀는 task가 TIMER를 처음 실행한 시각이고, lint가 TIMER를 첫 명령으로 강제하니 그 task의 도착 시각이에요(3장). lane이 바빠도 그래요: schedule 없이 돌리면 `video`는 300,000,000 µs에 도착해 300,010,000에야 lane을 처음 받지만, 첫 job의 deadline은 300,033,348 = 도착 + 33,348이에요. harness는 t₀를 그 task의 첫 `ready(cause = timer_tick)` line의 시각으로 읽어요. reference simulator는 2026-10-23부터(stage X) 도착할 때 막힘 없이 소비된 첫 TIMER에도 그 line을 도착 시각에 내서, harness가 읽는 t₀가 도착이에요.
+harness: 게임 segment의 chain은 lane_share 1.45라 **설계상 frame을 계속 놓쳐요.** skip 규칙이 실제로 작동하는 파일. utilization은 파일 평균 0.9007이지만 게임 segment 안은 1.5062. 세 segment의 primary metric이 다 달라요(browser latency → frame miss → media job). 참고로 `game.chain.1`은 60초에, `video`와 `music`은 300초에 등장하는 TIMER task예요. TIMER의 t₀는 task가 TIMER를 처음 실행한 시각이고, lint가 TIMER를 첫 명령으로 강제하니 그 task의 도착 시각이에요(3장). lane이 바빠도 그래요: schedule 없이 돌리면 `video`는 300,000,000 µs에 도착해 300,010,000에야 lane을 처음 받지만, 첫 job의 deadline은 300,033,348 = 도착 + 33,348이에요. harness는 t₀를 그 task의 첫 `ready(cause = timer_tick)` line의 시각으로 읽어요. reference simulator는 2026-10-23부터(stage X) 도착할 때 막힘 없이 소비된 첫 TIMER에도 그 line을 도착 시각에 내서, harness가 읽는 t₀가 도착이에요.
 
 #### `c3-creation` — 창작
 
@@ -933,15 +936,15 @@ GIMP 사진 편집 → Kdenlive 영상 편집 → HandBrake 변환. SYSmark 30�
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| photo-editor | gimp | image-editor | 0 → 120 | input 2–118 s(keystroke 없음): timer wake 981개, unsharp mask 30 s, RUN 합 1.81 s |
-| video-editor | kdenlive | video-editor | 120 → 3212 | launch phase 재생(240 s settle까지). input 122–238 s: timer wake 34,672개, preview-render 150 s, RUN 합 52.1 s |
+| photo-editor | gimp | image-editor | 0 → 120 | input 2–118 s(keystroke 없음): timer wake 258개 + event wake 819개, unsharp mask 30 s, RUN 합 2.80 s |
+| video-editor | kdenlive | video-editor | 120 → 3212 | launch phase 재생(240 s settle까지). input 122–238 s: timer wake 23,355개 + event wake 12,045개, preview-render 150 s, RUN 합 54.5 s |
 | batch | HandBrakeCLI | video-transcoder | 240 → finite | RUN 92 / SLEEP 91, `total_work` 2,970.871 s (`meas-ci:background:2026-10-03b`) |
 
 focus: photo-editor 0–120, video-editor 120–3212.
 
 recognizer (4): 0 s `gimp` → 120 s `kdenlive` → 240 s `HandBrakeCLI, kdenlive` → 3212 s `HandBrakeCLI`.
 
-harness: 240초 이후 kdenlive는 input window가 없어요(사용자가 변환을 걸어놓고 손을 뗌; 창의 focus는 kdenlive에 남아요). transcode segment는 job이 어떤 policy에서도 끝나는 가장 작은 정수 초(3,212 s)에서 끝나요. 그 구간은 editor의 idle wake 말고는 경쟁이 없어서 cap이 거의 안 물어요. term은 두 editor의 timer P99와 batch의 progress(weight 0.5). utilization 0.9417(segment 0.0151 / 0.0169 / 1.0165). 중요한 구간은 오히려 photo → video-edit 전환에서 recognizer가 mode를 갈아타는 것.
+harness: 240초 이후 kdenlive는 input window가 없어요(사용자가 변환을 걸어놓고 손을 뗌; 창의 focus는 kdenlive에 남아요). transcode segment는 job이 어떤 policy에서도 끝나는 가장 작은 정수 초(3,212 s)에서 끝나요. 그 구간은 editor의 idle wake 말고는 경쟁이 없어서 cap이 거의 안 물어요. term은 두 editor의 app P99와 batch의 progress(weight 0.5). utilization 0.9428(segment 0.0233 / 0.0176 / 1.0173). 중요한 구간은 오히려 photo → video-edit 전환에서 recognizer가 mode를 갈아타는 것.
 
 ---
 
@@ -955,7 +958,7 @@ C1 파일의 clone에 무관한 프로그램 하나를 30초에 주입. label은
 
 | 주입된 task | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| injected-chat | element-desktop | chat-client | 30 → 60 | timer wake 9,115개, RUN 합 2.91 s |
+| injected-chat | element-desktop | chat-client | 30 → 60 | timer wake 6,640개 + event wake 2,475개, RUN 합 2.91 s |
 
 recognizer: 0 s(c1-gaming과 같음) → **30 s `+element-desktop`**(새 query point) → 60 s 빈 집합.
 
@@ -971,7 +974,7 @@ harness: chain의 miss rate. 관심은 30초의 query에서 recognizer가 여전
 
 recognizer: 0 s(c1-office와 같음) → 30 s `+7z` → 60 s `7z`(finite라 남음).
 
-harness: writer의 input P99. 이 파일은 성능 차이도 조금 있어요. 7z가 30초부터 6 s짜리 RUN 하나로 lane을 잡으니 writer의 `input_latency`가 원본보다 나빠질 수 있어요. C1 원본과의 delta로 봐요. utilization 0.127.
+harness: writer의 input P99. 이 파일은 성능 차이도 조금 있어요. 7z가 30초부터 6 s짜리 RUN 하나로 lane을 잡으니 writer의 `input_latency`가 원본보다 나빠질 수 있어요. C1 원본과의 delta로 봐요. utilization 0.1269.
 
 #### `c4-compile` — 빌드 중 Chrome 열림
 
@@ -979,8 +982,8 @@ harness: writer의 input P99. 이 파일은 성능 차이도 조금 있어요. 7
 
 | 주입된 task | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| injected-browser | chrome | web-browser | 30 → 60 | launch phase 재생 후 timer wake. 합 7,151개, RUN 합 1.69 s |
-| injected-renderers.1–4 | chrome | renderer-hidden | 30 → 60 | launch phase 재생. timer wake 365–435개씩 |
+| injected-browser | chrome | web-browser | 30 → 60 | launch phase 재생 후 component의 wake. 합 6,477개(timer 6,477, event 674), RUN 합 1.69 s |
+| injected-renderers.1–4 | chrome | renderer-hidden | 30 → 60 | launch phase 재생. wake 365–433개씩(timer 365–433, event 0–2) |
 
 recognizer: 0 s `code` → 2 s `+make`와 자식들 → **30 s `+chrome ×5`** → 60 s `chrome ×5` 빠짐 → 1594 s `make`와 자식들.
 
@@ -1055,7 +1058,7 @@ spoof가 오기 전에는 원하지 않은 일이 없으니 vocabulary의 관례
 
 recognizer: 0 s `chrome ×5` → **20 s `chrome ×6`**(개수 변화가 query point) → 60 s `chrome`(spoof는 finite).
 
-harness: 이름만으로는 여섯 번째 chrome이 다른 걸 알 수 없어요. snapshot에 chrome 하나가 늘었다는 것 말고는 아무것도 없으니까요. oracle은 20초부터 browsing/`false`를 읽고 그 row(cap 0.05)를 광부에 걸어요. 이름만 보는 recognizer는 그럴 근거가 없어서 batch를 throttle하지 못하고 browser의 latency가 나빠져요. term은 browser의 input P99. utilization 0.5164(segment 0.0164 / 0.7664). path 기반 검증은 schema 밖(names only 결정).
+harness: 이름만으로는 여섯 번째 chrome이 다른 걸 알 수 없어요. snapshot에 chrome 하나가 늘었다는 것 말고는 아무것도 없으니까요. oracle은 20초부터 browsing/`false`를 읽고 그 row(cap 0.05)를 광부에 걸어요. 이름만 보는 recognizer는 그럴 근거가 없어서 batch를 throttle하지 못하고 browser의 latency가 나빠져요. term은 browser의 input P99. utilization 0.5176(segment 0.0176 / 0.7676). path 기반 검증은 schema 밖(names only 결정).
 
 #### `c6-fold` — process 이름은 그대로인데 상황이 바뀜
 
@@ -1072,7 +1075,7 @@ harness: 이름만으로는 여섯 번째 chrome이 다른 걸 알 수 없어요
 
 recognizer: 0 s `chrome ×5` → **30 s `chrome ×6`** → 60 s 빈 집합. 30초의 개수 변화가 telemetry 규칙 1(개수 변화도 변화)에 따라 query point를 내지만, snapshot에는 통화라고 말하는 것이 없어요. 그래서 meeting segment는 pre-committed miss예요. meeting segment의 scenario tag에는 S3(화상회의) 옆에 S2(웹 브라우징)가 같이 붙어요.
 
-harness: browser의 input P99(c1-browsing의 term). utilization 0.3144(segment 0.0164 / 0.6123). "이름 집합이 같은 모양으로 남으면 상황 변화를 못 본다"는 scope boundary를 숫자로 남기는 파일.
+harness: browser의 input P99(c1-browsing의 term). utilization 0.3155(segment 0.0176 / 0.6135). "이름 집합이 같은 모양으로 남으면 상황 변화를 못 본다"는 scope boundary를 숫자로 남기는 파일.
 
 #### `c6-dual` — 둘 다 진짜 foreground
 
@@ -1085,7 +1088,7 @@ harness: browser의 input P99(c1-browsing의 term). utilization 0.3144(segment 0
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
 | game.chain.1–16, game.wineserver | Troy.exe ×7, …, wineserver | game-task-chain | 0 → 12072 | `lane_share: 0.6`(`design`): 멤버 RUN 175 µs–1.07 ms, 합 10,002 µs |
-| editor | code | code-editor | 0 → 12072 | input window 9개(686–688 s씩): keystroke 13,751개 + timer wake 1,357,541개, RUN 합 1,518.6 s |
+| editor | code | code-editor | 0 → 12072 | input window 9개(686–688 s씩): keystroke 13,751개 + timer wake 1,351,112개 + event wake 5,982개, RUN 합 1,518.6 s |
 | build | make | build-orchestrator | 10 → finite | object job 2,908개(`meas-ci:build:2026-09-18`), cap 8(`convention`) → `fork_cap` 48; 자식 CPU 합 1,361.2 s |
 
 focus는 0초의 editor부터 688 s마다 editor ↔ 게임으로 교대해요(18 interval). 688 s는 working sphere에서 전환하기 전의 평균 연속 구간 11분 28초예요(`gonzalez-chi04`). 규칙적인 교대, editor가 먼저인 것, 첫 window의 2 s 지연은 design이에요. input window는 editor가 focus를 가진 아홉 구간이에요 — 사용자는 앞에 있는 창에 타이핑해요.
@@ -1109,28 +1112,28 @@ mode마다 하나, `c7-<mode>`는 `c1-<mode>`에서 파생돼요. base가 그 mo
 
 | 파일 | base + op | 길이 | mode / attributes | utilization | term | RQ0 |
 |---|---|---|---|---|---|---|
-| `c7-browsing` | `c1-browsing` + `unattended-upgr` 0 s부터 | 26.385 s | browsing / **false**, background: package-upgrade | 1.0268 | browser input P99 | 판정 |
+| `c7-browsing` | `c1-browsing` + `unattended-upgr` 0 s부터 | 26.385 s | browsing / **false**, background: package-upgrade | 1.0295 | browser input P99 | 판정 |
 | `c7-office` | `c1-office` + upgrade | 26.385 s | office / **false**, background: package-upgrade | 1.0251 | writer input P99 | 판정 |
-| `c7-mail` | `c1-mail` + upgrade | 26.385 s | mail / **false**, background: package-upgrade | 1.0545 | mailer **timer** P99 (base 없음) | reporting |
+| `c7-mail` | `c1-mail` + upgrade | 26.385 s | mail / **false**, background: package-upgrade | 1.0802 | mailer **app** P99 (base 없음) | reporting |
 | `c7-dev` | `c1-dev` + upgrade | 26.385 s | dev / **false**, background: package-upgrade | 1.2129 | editor input P99 | 판정 |
-| `c7-photo` | `c1-photo` + upgrade | 26.385 s | photo / **false**, background: package-upgrade | 1.0967 | photo-editor timer P99 | 판정 |
+| `c7-photo` | `c1-photo` + upgrade | 26.385 s | photo / **false**, background: package-upgrade | 1.0965 | photo-editor app P99 | 판정 |
 | `c7-meeting` | `c1-meeting` + upgrade | 26.385 s | meeting / **false**, background: package-upgrade | 1.24 | voice job miss rate | 판정 |
 | `c7-gaming` | `c1-gaming` + upgrade | 26.385 s | gaming / **false**, background: package-upgrade | 1.9149 | chain miss rate | 판정 |
 | `c7-media` | `c1-media` + upgrade | 26.385 s | media / **false**, background: package-upgrade | 1.1267 | music·video miss rate | reporting |
-| `c7-video-edit` | `c1-video-edit` + upgrade | 26.385 s | video-edit / **false**, background: package-upgrade | 1.5618 | editor timer P99 | 판정 |
+| `c7-video-edit` | `c1-video-edit` + upgrade | 26.385 s | video-edit / **false**, background: package-upgrade | 1.5878 | editor app P99 | 판정 |
 | `c7-idle` | `c1-idle` + upgrade | 26.385 s | idle / **false**, background: package-upgrade | 1.0007 | — (metric 없음) | reporting |
 | `c7-compile` | `make` build → `dkms` module build, 0 s부터 | 225.458 s | compile / **false**, initiated: scheduled | 1.1866 | editor input P99 | 판정 |
-| `c7-indexing` | `c1-indexing`의 job을 0 s부터 | 39.435 s | indexing / **false**, initiated: session | 1.0937 | editor input P99 | reporting (idle class) |
+| `c7-indexing` | `c1-indexing`의 job을 0 s부터 | 39.435 s | indexing / **false**, initiated: session | 1.0936 | editor input P99 | reporting (idle class) |
 | `c7-ml-train` | job 0 s부터, label만 flip | 1,389.885 s | ml-train / **false**, initiated: scheduled, **pre_committed_miss** | 1.1405 | editor input P99 | 판정 |
-| `c7-render` | job 0 s부터, label만 flip | 16.545 s | render / **false**, initiated: scheduled, **pre_committed_miss** | 1.6189 | editor timer P99 | 판정 |
-| `c7-transcode` | job 0 s부터, label만 flip | 2,970.871 s | transcode / **false**, initiated: scheduled, **pre_committed_miss** | 1.3727 | video-editor timer P99 | 판정 |
-| `c7-backup` | job 0 s부터, label만 flip | 165.668 s | backup / **false**, initiated: scheduled, **pre_committed_miss** | 1.4032 | editor timer P99 | reporting (idle class) |
+| `c7-render` | job 0 s부터, label만 flip | 16.545 s | render / **false**, initiated: scheduled, **pre_committed_miss** | 1.5416 | editor app P99 | 판정 |
+| `c7-transcode` | job 0 s부터, label만 flip | 2,970.871 s | transcode / **false**, initiated: scheduled, **pre_committed_miss** | 1.3712 | video-editor app P99 | 판정 |
+| `c7-backup` | job 0 s부터, label만 flip | 165.668 s | backup / **false**, initiated: scheduled, **pre_committed_miss** | 1.4004 | editor app P99 | reporting (idle class) |
 
 recognizer: interactive counterpart는 0 s에 base의 이름들 + `unattended-upgr`, 26.385 s에 `unattended-upgr`만(finite라 남음). batch counterpart는 0 s에 base의 이름들(`c7-compile`은 `code`, `dkms`와 자식 `sh ×2253, rm ×1644, x86_64-linux-gn ×1557, cc1 ×1557, as ×1412, mkdir ×1125, dirname ×232, fixdep ×200`), 파일 끝에 job만.
 
 **score.** counterpart는 base의 term에서 batch term(turnaround, progress)을 뺀 것을 가져요 — unwanted work carries no term. 주입한 upgrade와 label이 뒤집힌 job에는 term이 없어서 false row의 cap이 자유롭게 작동해요. scoring lint가 `base`와 term이 같은지 검사해요. 예외 하나가 `c7-mail`이에요.
 
-**`c7-mail`.** counterpart의 input window(2–24.385 s)는 `c1-mail`의 2–58 s window의 slice라 base와 같은 stimulus offset을 쓰는데, base의 keystroke 35개(SWELL Outlook stream의 typing 한 덩어리)가 전부 45.9–53.1 s에 있어서 잘린 구간에는 하나도 없어요. 그래서 `c7-mail`은 reporting-only이고, term은 base 없이 mailer 자신의 wake(`channel: timer`)를 읽고, mail 쌍의 attribute는 측정되지 않아요.
+**`c7-mail`.** counterpart의 input window(2–24.385 s)는 `c1-mail`의 2–58 s window의 slice라 base와 같은 stimulus offset을 쓰는데, base의 keystroke 35개(SWELL Outlook stream의 typing 한 덩어리)가 전부 45.9–53.1 s에 있어서 잘린 구간에는 하나도 없어요. 그래서 `c7-mail`은 reporting-only이고, term은 base 없이 mailer 자신의 wake(`app_latency`, timer와 event channel)를 읽고, mail 쌍의 attribute는 측정되지 않아요.
 
 **demand.** 전부 recipe에 `demand: calibration`을 선언해요(design의 이름표일 뿐; 8장). interactive counterpart는 base + upgrade의 1 lane이라 대부분 1.0–1.6이고, `c7-gaming`은 1.9149(chain 0.9 + upgrade 1.0)예요.
 
@@ -1179,9 +1182,9 @@ core set 밖의 파생도 있어요: `build/coreset-single/`의 sensitivity vari
 이 문서를 쓰면서 compiled file에서 직접 확인한 것들이에요.
 
 **행동에 관한 것**
-- 측정된 interactive task는 keystroke보다 자기 timer component로 훨씬 많이 깨요(`c1-dev`의 editor: keystroke 186개, timer wake 6,456개). input window가 없는 task도 timer component로 계속 깨요: `c1-office`의 `browser`, `c4-compile`의 `injected-browser`, `c3-creation`의 240초 이후 `kdenlive`.
-- Kdenlive와 GIMP에는 keystroke stream이 없어요. 그래서 그 앱의 interaction term은 `timer_latency`예요(13개 파일, term 14개).
-- `c1-idle`·`c7-idle`의 `pipewire`와 `dbus-daemon`은 측정된 wake 빈도가 너무 낮아서 파일 안에서 한 번도 안 깨요 — program이 `WAIT` 하나예요.
+- 측정된 interactive task는 keystroke보다 자기 component로 훨씬 많이 깨요(`c1-dev`의 editor: keystroke 186개, timer wake 6,443개, event wake 19개). input window가 없는 task도 component로 계속 깨요: `c1-office`의 `browser`, `c4-compile`의 `injected-browser`, `c3-creation`의 240초 이후 `kdenlive`.
+- Kdenlive와 GIMP에는 keystroke stream이 없어요. 그래서 그 앱의 interaction term은 `app_latency`예요(13개 파일, term 14개). 측정된 사슬이 timer에서 시작한 wake와 그 밖에서 시작한 wake를 함께 읽어요.
+- `c1-idle`·`c7-idle`의 `dbus-daemon`과 `c7-idle`의 `pipewire`는 측정된 wake 빈도가 너무 낮아서 파일 안에서 한 번도 안 깨요 — program이 `WAIT` 하나예요. `c1-idle`의 `pipewire`는 event wake 한 번 깨요.
 - C2에서 파일보다 오래 사는 job은 셋이에요: `c2-p1a`의 training(남은 39.435 s에 1,389.885 s의 일), `c2-p2a`·`c2-p2a-idle`의 download(남은 26.385 s에 727.170 s), `c2-p3b`의 backup(idle class라 266 s 안에 못 끝남). 이 셋은 progress(`cpu_delivered / demand`)가 batch 쪽 metric이에요. C7 counterpart의 job도 파일 안에서 못 끝나요: 파일 길이가 job의 CPU 총량과 같고 foreground가 lane을 나눠 쓰니까요 — 그래서 segment 내내 살아 있고, term은 없어요. 나머지 batch job은 파일 안에서 어떤 policy에서도 끝나도록 길이가 잡혀 있어요(C1의 batch base, `c3-workday`, `c3-creation`, `c6-dual`).
 - `c3-evening`의 chain은 lane_share 1.45라 혼자서도 frame을 못 맞춰요. 건너뛴 tick(놓친 job)이 설계상 생겨요.
 - `c2-p3` pair는 둘 다 `background_wanted: true`. 구분 축은 mode와 `initiated`.
@@ -1224,9 +1227,9 @@ core set 밖의 파생도 있어요: `build/coreset-single/`의 sensitivity vari
 | **declared class** | program이 자기에게 거는 scheduling class. `normal` 또는 `idle`(indexer, backup, `game-download-idle`). 모든 task record에 실림 |
 | **program** | task의 script. 여섯 primitive + LOOP |
 | **primitive** | RUN, SLEEP, TIMER, WAIT, WAKE, FORK/EXIT |
-| **channel** | WAIT/WAKE가 만나는 이름. `input:<id>`, `timer:<id>`, `chain:<id>`, `job:<id>`, `children:<id>` |
-| **wake event** | run file의 외부 자극. keystroke(`input:`) 또는 timer component의 wake(`timer:`) |
-| **timer component** | 측정된 앱의 thread 하나가 스스로 깨는 빈도와 간격·RUN의 분위수 표. compile 때 `timer:` wake로 펼쳐짐. TIMER가 아님 |
+| **channel** | WAIT/WAKE가 만나는 이름. `input:<id>`, `timer:<id>`, `event:<id>`, `chain:<id>`, `job:<id>`, `children:<id>` |
+| **wake event** | run file의 외부 자극. keystroke(`input:`) 또는 component의 wake(timer part는 `timer:`, event part는 `event:`) |
+| **component** | 측정된 앱의 thread 하나가 스스로 깨는 빈도와 간격·RUN의 분위수 표. 측정된 wake 사슬이 timer interrupt에서 시작한 timer part(compile 때 `timer:` wake로 펼쳐짐)와 그 밖에서 시작한 event part(`event:` wake로 펼쳐짐)로 나뉨. TIMER가 아님 |
 | **stimulus stream** | SWELL-KW 연구의 실제 typing 기록(`dataset/stimulus/`). input window 안에서 한 조각이 재생됨 |
 | **operation** | 측정된 앱이 사용자 지시로 하는 일 하나(page-load, unsharp mask, preview-render, send). timeline의 `operations` track |
 | **input** | timeline에서 keystroke가 어느 task로 들어가나. keystroke가 생성되는 window (2026-10-11 전의 이름은 `focus`) |

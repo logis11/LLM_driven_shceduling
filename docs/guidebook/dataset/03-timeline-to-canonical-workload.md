@@ -895,17 +895,17 @@ compile 후 이 네 줄은 arrive event **일곱 개**가 됩니다. `count: 4` 
 
 | arrive id | name | program 명령어 수 | 그 task를 깨우는 wake event |
 |---|---|---|---|
-| `browser` | `chrome` | 5,357 | `timer:browser` 2,678 |
-| `mail` | `thunderbird-bin` | 271 | `timer:mail` 135 |
+| `browser` | `chrome` | 5,351 | `timer:browser` 2,674, `event:browser` 1 |
+| `mail` | `thunderbird-bin` | 265 | `timer:mail` 132 |
 | `renderers.1` | `chrome` | 25 | `timer:renderers.1` 12 |
 | `renderers.2` | `chrome` | 23 | `timer:renderers.2` 11 |
 | `renderers.3` | `chrome` | 29 | `timer:renderers.3` 14 |
 | `renderers.4` | `chrome` | 19 | `timer:renderers.4` 9 |
 | `writer` | `soffice.bin` | 951 | `timer:writer` 205, `input:writer` 270 |
 
-각 program은 `WAIT`와 `RUN`이 번갈아 나오는 목록입니다. 예를 들어 `browser`의 처음 네 명령어는 `WAIT timer:browser`, `RUN 13`, `WAIT timer:browser`, `RUN 23`입니다. "timer로 깨어날 때까지 기다렸다가 CPU를 13 µs 쓰고, 다시 기다렸다가 23 µs 쓴다"는 뜻입니다. 명령어 수가 wake 수의 두 배에 하나를 더한 값인 이유가 이것입니다. wake마다 WAIT 하나와 RUN 하나가 있고, 마지막 wake 뒤에 같은 channel의 WAIT 하나가 더 붙습니다(11.1절). 이 timer wake들은 측정한 프로그램의 thread들이 스스로 깨어나는 패턴(component)에서 뽑은 것입니다(11.1절).
+각 program은 `WAIT`와 `RUN`이 번갈아 나오는 목록입니다. 예를 들어 `browser`의 처음 네 명령어는 `WAIT timer:browser`, `RUN 13`, `WAIT timer:browser`, `RUN 23`입니다. "timer로 깨어날 때까지 기다렸다가 CPU를 13 µs 쓰고, 다시 기다렸다가 23 µs 쓴다"는 뜻입니다. 명령어 수가 wake 수의 두 배에 하나를 더한 값인 이유가 이것입니다. wake마다 WAIT 하나와 RUN 하나가 있고, 마지막 wake 뒤에 같은 channel의 WAIT 하나가 더 붙습니다(11.1절). 이 `timer:`와 `event:` wake들은 측정한 프로그램의 thread들이 스스로 깨어나는 패턴(component)에서 뽑은 것입니다(11.1절). 측정된 wake 사슬이 timer interrupt에서 시작한 wake는 `timer:<id>`로, 그 밖(측정의 입력, 다른 process, kernel thread)에서 시작한 wake는 `event:<id>`로 갑니다.
 
-`component` — 측정된 archetype의 활동을 thread 이름별로 나눈 조각입니다. 각 component는 "깨어나는 간격의 분포"와 "깨어날 때마다 쓰는 CPU의 분포"를 가집니다. 예를 들어 `code-editor`에는 `renderer/Compositor`, `utility/libuv-worker` 같은 component가 있습니다.
+`component` — 측정된 archetype의 활동을 thread 이름별로, 그리고 wake 사슬의 시작점에 따라 timer part와 event part로 나눈 조각입니다. 각 component는 "깨어나는 간격의 분포"와 "깨어날 때마다 쓰는 CPU의 분포"를 가집니다. 예를 들어 `code-editor`에는 `renderer/Compositor`, `utility/libuv-worker` 같은 component가 있습니다.
 
 ```yaml
 input:
@@ -914,7 +914,7 @@ input:
 
 **입력 창.** 2–58 s 동안 Writer에 타자를 칩니다. compile하면 이 줄은 `input:writer` channel의 wake event 270개가 됩니다. 첫 키 입력은 2,059,422 µs, 즉 2.059 s에 떨어집니다. 이 값이 어떻게 나오는지는 11.4절에서 손으로 계산합니다(미리 결과만 말하면, Word 타자 기록의 13,866,357,078 µs 지점부터 56 s를 잘라 온 것입니다).
 
-브라우저(`web-browser`)와 메일(`mail-client`)도 stimulus를 가진 archetype이지만, 입력 창이 없으므로 키 입력을 받지 않습니다. 그 둘은 timer wake로만 깨어납니다. 사용자가 다른 창에 타자를 치는 동안 뒤에서 잔잔히 돌아가는 앱의 모습입니다.
+브라우저(`web-browser`)와 메일(`mail-client`)도 stimulus를 가진 archetype이지만, 입력 창이 없으므로 키 입력을 받지 않습니다. 그 둘은 자기 component의 wake(`timer:`와 `event:`)로만 깨어납니다. 사용자가 다른 창에 타자를 치는 동안 뒤에서 잔잔히 돌아가는 앱의 모습입니다.
 
 ```yaml
 focus:
@@ -925,7 +925,7 @@ focus:
 
 `operations` key는 없습니다. `web-browser`는 `page-load` operation을 가지지만, 9.10 D20의 규칙("every focus window on a task whose entry carries an operation holds one of it")은 그 앱에 입력 창이 있을 때 operation을 두라는 것이고, 이 파일에서 브라우저는 입력 창이 없습니다.
 
-**결과 전체.** canonical 파일은 443,368 byte이고, event가 3,341개(arrive 7, wake 3,334)입니다. compile report에 따르면 일곱 task의 CPU 수요 합계는 1,617,440 µs이고, 60 s로 나눈 utilization은 0.02696입니다(manifest에는 소수 넷째 자리로 0.027). task별로는 Writer 1,358,623 µs, 브라우저 176,518 µs, 메일 80,359 µs, renderer 넷이 436·363·498·643 µs입니다. 사무 장면은 CPU를 3 %도 쓰지 않습니다. 이 파일이 "calibration"인 이유가 숫자로 보입니다.
+**결과 전체.** canonical 파일은 442,594 byte이고, event가 3,341개(arrive 7, wake 3,328)입니다. compile report에 따르면 일곱 task의 CPU 수요 합계는 1,617,440 µs이고, 60 s로 나눈 utilization은 0.02696입니다(manifest에는 소수 넷째 자리로 0.0269). task별로는 Writer 1,358,623 µs, 브라우저 176,518 µs, 메일 80,359 µs, renderer 넷이 436·363·498·643 µs입니다. 사무 장면은 CPU를 3 %도 쓰지 않습니다. 이 파일이 "calibration"인 이유가 숫자로 보입니다.
 
 ## 6.2 짝을 이루는 파일: `c2-p1a`와 `c2-p1b`
 
@@ -995,7 +995,7 @@ focus:
 
 **입력과 focus.** 2 s 여백을 두고 편집기에 타자를 치고, 편집기가 내내 앞에 있습니다. 학습 job은 창이 없으므로 focus를 쥐지 않습니다.
 
-**결과 전체.** event는 11,346개(arrive 2, wake 11,344)이고, 편집기의 program은 22,689 명령어이고, 마지막 명령어는 마지막 wake의 channel 위의 `WAIT timer:editor`입니다(11.1절). 편집기를 깨우는 wake는 `timer:editor` 10,819개와 `input:editor` 525개입니다. 편집기는 사용자의 키 입력(525개)보다 자기 thread들의 timer(10,819개)로 훨씬 자주 깨어납니다. compile report의 utilization은 14.505이고, segment별로는 0.5272와 35.7721입니다. 이 이상하게 큰 숫자의 정체는 12.4절에서 설명합니다(학습의 23분어치 CPU를 39.435 s짜리 segment에 펼쳐 계산했기 때문입니다).
+**결과 전체.** event는 11,295개(arrive 2, wake 11,293)이고, 편집기의 program은 22,587 명령어이고, 마지막 명령어는 마지막 wake의 channel 위의 `WAIT timer:editor`입니다(11.1절). 편집기를 깨우는 wake는 `timer:editor` 10,740개, `event:editor` 28개, `input:editor` 525개입니다. 편집기는 사용자의 키 입력(525개)보다 자기 thread들의 wake(10,768개, 거의 모두 측정된 사슬이 timer에서 시작한 것)로 훨씬 자주 깨어납니다. compile report의 utilization은 14.505이고, segment별로는 0.5272와 35.7721입니다. 이 이상하게 큰 숫자의 정체는 12.4절에서 설명합니다(학습의 23분어치 CPU를 39.435 s짜리 segment에 펼쳐 계산했기 때문입니다).
 
 **짝 파일 `c2-p1b`.** 5.6절에서 본 두 op가 `hog`를 `tracker-miner-f`(archetype `file-indexer`, CPU 39.435 s)로 바꾸고 두 번째 segment를 `indexing`, `background_wanted: false`, `initiated: session`으로 바꿉니다. compile하면 무엇이 같고 무엇이 다를까요. 편집기는 task id(`editor`)와 seed(201)가 같으므로 program과 wake가 바이트 단위로 같습니다(10.4절). 첫 segment의 정답도 같습니다. 다른 것은 `hog`의 이름, class(`file-indexer`는 `idle`), program(색인기의 측정표에서 뽑음), 그리고 두 번째 segment의 정답입니다. recognizer가 볼 수 있는 차이는 이름(`python` 대 `tracker-miner-f`)과 class(`normal` 대 `idle`)뿐입니다.
 
@@ -1049,19 +1049,19 @@ focus:
 
 머리는 16,667 µs(1/60 s)마다 TIMER로 깨어나 631 µs 일하고 `wineserver`를 깨웁니다. `wineserver`는 깨어나면 341 µs 일하고 다음 구성원을 깨웁니다. 그렇게 양동이 릴레이처럼 frame 하나가 열일곱 단계를 거쳐 내려갑니다. 마지막 `game.chain.16`은 1,159 µs 일하고 아무도 깨우지 않습니다. 열일곱 단계의 RUN을 모두 더하면 14,999 µs이고, 이것은 0.9 × 16,667 = 15,000.3 µs에 반올림 오차만큼 가깝습니다. `lane_share: 0.9`가 "chain이 frame마다 CPU의 90 %를 쓰도록 맞춘다"는 뜻이기 때문입니다. 이 계산은 11.9절에서 처음부터 다시 합니다.
 
-chain에는 wake **event**가 하나도 없습니다. 머리는 자기 TIMER로 깨어나고, 나머지는 앞 구성원의 `WAKE` **명령어**로 깨어납니다. 외부에서 시각을 박아 넣을 일이 없습니다. 이 파일의 wake event 18,062개는 모두 Steam client(`timer:steam`)의 것입니다.
+chain에는 wake **event**가 하나도 없습니다. 머리는 자기 TIMER로 깨어나고, 나머지는 앞 구성원의 `WAKE` **명령어**로 깨어납니다. 외부에서 시각을 박아 넣을 일이 없습니다. 이 파일의 wake event 18,090개는 모두 Steam client의 것입니다(`timer:steam` 17,950개, `event:steam` 140개).
 
 **`wineserver`라는 이름은 timeline에 없습니다.** `member_names`는 15개이고, 구성원은 17개입니다. 머리는 task의 `name`(`Troy.exe`)을, `wineserver`는 compiler가 직접 붙인 이름을 가집니다. 이것은 generated layer의 이름 바꾸기 실험에서 중요한 제약이 됩니다. `dataset/README.md`는 familiarity ladder를 설명하며 "the chain's `wineserver`, named by the compiler, keeps its name"이라고 적습니다. timeline의 이름을 바꿔도 compiler가 붙이는 이름은 그대로 남는다는 뜻입니다.
 
 **focus가 가리키는 것.** timeline의 focus는 `task: game`입니다. 그런데 canonical 파일에는 `game`이라는 id의 arrive event가 없습니다. compiler는 task 이름(`Troy.exe`)을 가진 첫 구성원, 즉 머리 `game.chain.1`을 focus의 주인으로 씁니다. 그래서 canonical `focus`는 `[{"t_end": 60000000, "t_start": 0, "task": "game.chain.1"}]`입니다(9.17 D2).
 
-**결과 전체.** event 18,080개(arrive 18, wake 18,062), artifact 2,296,348 byte, utilization 0.9153입니다. task별 수요는 chain 구성원 열일곱이 합쳐 약 54.0 s, Steam client가 0.92 s입니다(compile report의 `per_task`).
+**결과 전체.** event 18,080개(arrive 18, wake 17,950), artifact 2,299,901 byte, utilization 0.9153입니다. task별 수요는 chain 구성원 열일곱이 합쳐 약 54.0 s, Steam client가 0.92 s입니다(compile report의 `per_task`).
 
 ## 6.4 더 큰 파일에서 보이는 것
 
-**`c3-workday`.** segment 네 개(browsing 0–60 s → office 60–120 s → compile 120–1,485 s → mail 1,485–1,545 s), task 다섯 줄(브라우저, renderer × 4, Writer, `make`, Thunderbird), 입력 창 셋, focus 구간 셋, operation 둘(30 s의 page load, 1,525 s의 메일 전송)입니다. compile하면 arrive event 8개, `make`의 spawn table 17,448칸, wake event 92,827개(timer 92,621, input 206)가 됩니다. Writer는 60 s에, Thunderbird는 1,485 s에 도착하므로 둘 다 측정된 launch phase를 먼저 재생합니다(11.3절). 파일 머리 주석은 "the file ends inside Thunderbird's", 파일이 Thunderbird의 시작 구간이 끝나기 전에 끝난다고 적습니다.
+**`c3-workday`.** segment 네 개(browsing 0–60 s → office 60–120 s → compile 120–1,485 s → mail 1,485–1,545 s), task 다섯 줄(브라우저, renderer × 4, Writer, `make`, Thunderbird), 입력 창 셋, focus 구간 셋, operation 둘(30 s의 page load, 1,525 s의 메일 전송)입니다. compile하면 arrive event 8개, `make`의 spawn table 17,448칸, wake event 95,689개(timer 81,196, input 206)가 됩니다. Writer는 60 s에, Thunderbird는 1,485 s에 도착하므로 둘 다 측정된 launch phase를 먼저 재생합니다(11.3절). 파일 머리 주석은 "the file ends inside Thunderbird's", 파일이 Thunderbird의 시작 구간이 끝나기 전에 끝난다고 적습니다.
 
-**`c6-dual`.** segment 하나(0–12,072 s, `ambiguous`), task 셋(게임 chain, 편집기, `make`), 입력 창 아홉, focus 구간 열여덟입니다. compile하면 arrive event 19개(chain 17, 편집기, `make`), spawn table 17,448칸, wake event 1,371,292개, artifact 187,601,795 byte(약 188 MB)로 core set에서 가장 큰 파일입니다. wake event는 거의 모두 편집기의 것입니다. `timer:editor`가 1,357,541개, `input:editor`가 13,751개입니다(tree에서 센 값). 3시간 21분 동안 VS Code의 thread들이 스스로 깨어나는 사건 하나하나가 event로 적혀 있어서 파일이 커집니다.
+**`c6-dual`.** segment 하나(0–12,072 s, `ambiguous`), task 셋(게임 chain, 편집기, `make`), 입력 창 아홉, focus 구간 열여덟입니다. compile하면 arrive event 19개(chain 17, 편집기, `make`), spawn table 17,448칸, wake event 1,370,845개, artifact 187,542,816 byte(약 188 MB)로 core set에서 가장 큰 파일입니다. wake event는 모두 편집기의 것입니다. `timer:editor`가 1,351,112개, `event:editor`가 5,982개, `input:editor`가 13,751개입니다(tree에서 센 값). 3시간 21분 동안 VS Code의 thread들이 스스로 깨어나는 사건 하나하나가 event로 적혀 있어서 파일이 커집니다.
 
 ---
 
@@ -1157,7 +1157,7 @@ schema의 설명은 이 key가 정답이 아니라는 것을 분명히 합니다
 | `target` | 필수 | 깨울 task의 id |
 | `channel` | 필수 | 어느 channel로 깨우는가. task는 그 channel의 `WAIT`에서 깨어남 |
 
-예를 들어 `c1-dev`의 첫 wake event는 `{"channel":"timer:editor","op":"wake","t":2670,"target":"editor"}`입니다. 2,670 µs에 편집기를 timer channel로 깨운다는 뜻입니다.
+예를 들어 `c1-dev`의 첫 wake event는 `{"channel":"timer:editor","op":"wake","t":2748,"target":"editor"}`입니다. 2,748 µs에 편집기를 timer channel로 깨운다는 뜻입니다.
 
 **정렬 규칙.** compiler는 event를 `(t, op, id 또는 target)`으로 정렬합니다(`compile_timeline`의 `events.sort`). 같은 시각이면 `"arrive"`가 `"wake"`보다 알파벳 순서로 앞이므로 도착이 먼저 오고, 그다음 id 순입니다. schema는 정렬을 표현할 수 없으므로, "sorted by `t`"는 canonical lint가 검사합니다(13.2절).
 
@@ -1195,25 +1195,26 @@ contract는 primitive를 여섯 개라고 셉니다(`FORK`와 `EXIT`를 한 줄�
 
 **TIMER의 늦은 tick 처리.** TIMER의 격자에서 task가 늦게 도착하면(앞 frame이 오래 걸려 다음 TIMER에 늦게 닿으면) 무슨 일이 일어날까요. 규칙은 **skip 규칙**입니다. 늦게 TIMER에 닿으면 지금 시각 이전의 마지막 tick m을 즉시 소비해 그 frame을 실행하고(마감은 tick m + 1), m보다 앞의 소비되지 않은 tick들은 일 없이 건너뛰며 각각을 마감을 놓친 job으로 셉니다. 2026-10-07에 인지오가 9.11 D3으로 정했고, `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`가 규칙(§1), 60 fps 격자의 예시(§2), 근거(§4)를 적습니다. 그 전의 규칙은 backlog였습니다. 밀린 tick을 하나씩 다 실행하는 것입니다. D3은 근거로 interbench, ROS 2 executor, Lipari와 Palopoli의 주기 thread, rt-app의 기본 모드, 그리고 TIMER task가 대표하는 프로그램들(mpv는 늦은 영상 frame을 버림, GStreamer video sink는 5 ms 넘게 늦은 frame을 버림)을 듭니다. 2026-10-08의 정정(9.11 D17, memo 끝의 정정 절)은 memo의 "none replays them"이라는 문장을 고쳐, 출처들이 공유하는 것은 "by default each skips"이고 늦은 job이 어느 tick의 것인지는 출처마다 다르며, memo의 선택(지나간 마지막 tick을 즉시 실행)은 video playback에서는 GStreamer sink의 것이고 audio와 게임 TIMER task에 대해서는 design이라고 적습니다.
 
-이 규칙은 simulator의 해석 규칙이지 파일의 모양이 아닙니다. canonical 파일의 `TIMER` 명령어는 규칙이 바뀌기 전과 후에 똑같습니다. harness의 `job` 지표는 이 규칙으로 읽습니다(`docs/harness/metrics.md` §6.2). reference simulator의 TIMER(`simulator/src/sim.cpp`)는 2026-10-23부터 이 규칙으로 돕니다. 인경민의 stage Y이고, 그 전의 step K("TIMER+backlog")를 대신합니다. 2026-10-17의 final memo(`docs/memos/2026-10-17-workload-dataset-rebuild.md` §6.2)가 RQ0 gate spec의 simulator 적합성 항목 (b)로 부탁한 것입니다(16.2절의 4). contract의 TIMER 행은 2026-10-30에 이 규칙으로 고쳐졌고, schema의 TIMER 설명 문장은 아직 backlog를 말합니다(16.1절).
+이 규칙은 simulator의 해석 규칙이지 파일의 모양이 아닙니다. canonical 파일의 `TIMER` 명령어는 규칙이 바뀌기 전과 후에 똑같습니다. harness의 `job` 지표는 이 규칙으로 읽습니다(`docs/harness/metrics.md` §6.2). reference simulator의 TIMER(`simulator/src/sim.cpp`)는 2026-10-23부터 이 규칙으로 돕니다. 인경민의 stage Y이고, 그 전의 step K("TIMER+backlog")를 대신합니다. 2026-10-17의 final memo(`docs/memos/2026-10-17-workload-dataset-rebuild.md` §6.2)가 RQ0 gate spec의 simulator 적합성 항목 (b)로 부탁한 것입니다(16.2절의 4). contract의 TIMER 행은 2026-10-30에, schema의 TIMER 설명 문장은 2026-10-31의 re-bless와 함께 이 규칙으로 고쳐졌습니다(16.1절).
 
 `EDF` — Earliest Deadline First, 마감이 가장 이른 job부터 CPU를 주는 scheduling 알고리즘입니다. 이 연구의 scheduler가 고를 수 있는 넷 중 하나입니다. `job`(harness 지표) — 주기적 task의 한 주기 분량의 일입니다. harness는 job마다 마감을 지켰는지 셉니다.
 
 ## 7.7 channel의 이름
 
-`WAIT`와 `wake`가 쓰는 channel은 그냥 문자열입니다. simulator에게 channel은 우편함 이름일 뿐입니다. 하지만 compiler는 일정한 규칙으로 이름을 짓고, harness는 접두어로 종류를 읽습니다(`docs/harness/metrics.md` §6.1, channel 종류 `input`, `timer`, `chain`, `job`, `children`).
+`WAIT`와 `wake`가 쓰는 channel은 그냥 문자열입니다. simulator에게 channel은 우편함 이름입니다. 다만 task가 기다리고 있지 않을 때 온 wake를 붙드는 규칙은 접두어에 따라 다릅니다. `timer:`의 우편함은 처음 하나만 붙들고 그 뒤에 온 wake를 버리며(그 시각에 `wake_drop` 줄), 다른 우편함은 온 wake를 모두 차례로 쌓습니다(interpretation contract §3의 `WAIT` 행). compiler는 일정한 규칙으로 이름을 짓고, harness는 접두어로 종류를 읽습니다(`docs/harness/metrics.md` §6.1, channel 종류 `input`, `timer`, `event`, `chain`, `job`, `children`).
 
 | channel | 누가 만드나 | 누가 깨우나 | 예 |
 |---|---|---|---|
-| `timer:<task id>` | 측정된 archetype의 timer component, heavy event, launch phase | 외부 `wake` event(박힌 시각) | `timer:editor` |
+| `timer:<task id>` | 측정된 archetype의 component 가운데 timer part(측정된 wake 사슬이 timer interrupt에서 시작), heavy event, launch phase와 trace-replay stream 가운데 timer에서 시작한 wake | 외부 `wake` event(박힌 시각) | `timer:editor` |
+| `event:<task id>` | 측정된 archetype의 component 가운데 event part(사슬이 측정의 입력·다른 process·kernel thread에서 시작), launch phase와 trace-replay stream 가운데 그 밖에서 시작한 wake | 외부 `wake` event(박힌 시각) | `event:editor` |
 | `input:<task id>` | 재생한 키 입력 | 외부 `wake` event(박힌 시각) | `input:writer` |
 | `chain:<member id>` | 게임 chain의 구성원 | 앞 구성원의 `WAKE` 명령어 | `chain:game.wineserver` |
 | `job:<job member id>` | 빌드 object job의 구성원 | 같은 job의 다른 구성원의 `WAKE` | `job:build.j1.gcc` |
 | `children:<task id>` | 빌드 orchestrator가 모든 자식을 낳은 뒤 | 파일 안에는 깨우는 것이 없음. 자식이 모두 끝났을 때 executor가 완료(제안된 규칙, 아래) | `children:build` |
 
-`timer:`와 `input:`을 나눈 것은 9.5 D74의 hand-off입니다. "the harness tells an input wake from a timer wake by channel". harness는 키 입력에 대한 반응 시간을 `input:` channel의 wake event, 곧 키 입력 하나하나에서부터 잽니다(`input_latency`: 키가 온 순간부터 그 키가 끝낸 WAIT의 처리가 시작될 때까지). 사용자가 느끼는 지연은 키를 누른 뒤의 지연이기 때문입니다.
+`timer:`와 `input:`을 나눈 것은 9.5 D74의 hand-off입니다. "the harness tells an input wake from a timer wake by channel". harness는 키 입력에 대한 반응 시간을 `input:` channel의 wake event, 곧 키 입력 하나하나에서부터 잽니다(`input_latency`: 키가 온 순간부터 그 키가 끝낸 WAIT의 처리가 시작될 때까지). 사용자가 느끼는 지연은 키를 누른 뒤의 지연이기 때문입니다. `event:`는 2026-10-31에 더해졌습니다(timer-wakes-by-origin spec 결정 4, 사슬이 timer 밖에서 시작한 wake를 키 입력처럼 쌓는 channel). 키 입력 stream이 없는 task의 반응 시간은 그 task의 `timer:`와 `event:` wake event에서부터 잽니다(`app_latency`).
 
-tree에서 세면 core set 51개 파일의 wake event는 모두 4,502,685개입니다(이 권을 쓰며 `"op":"wake"`를 세었습니다). 키 입력 channel은 그중 작은 부분입니다. 편집기 하나만 보아도 `c1-dev`에서 timer wake가 6,456개, 키 입력이 186개입니다. "편집기 program = 키 입력 기다림과 CPU 사용의 반복"이라는 README와 data-contracts의 그림은 단순화이고, 실제 측정된 편집기는 사용자가 없어도 자기 thread들의 timer로 훨씬 자주 깨어납니다.
+tree에서 세면 core set 51개 파일의 wake event는 모두 4,504,773개입니다(`"op":"wake"`를 channel 접두어별로 세었습니다: `timer:` 4,146,411개, `event:` 332,617개, `input:` 25,745개). 키 입력 channel은 그중 작은 부분입니다. 편집기 하나만 보아도 `c1-dev`에서 timer wake가 6,443개, event wake가 19개, 키 입력이 186개입니다. "편집기 program = 키 입력 기다림과 CPU 사용의 반복"이라는 README와 data-contracts의 그림은 단순화이고, 실제 측정된 편집기는 사용자가 없어도 자기 thread들의 timer로 훨씬 자주 깨어납니다.
 
 > **열린 자리.** `children:<id>` channel을 깨우는 사건은 canonical 파일에 없습니다. 이 channel의 뜻은 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 그 orchestrator가 낳은 자식이 모두 끝났을 때 완료하고, WAIT에 닿았을 때 살아 있는 자식이 없으면 막지 않고 곧바로 완료합니다(대기 0의 `ready` 줄). 데이터는 바뀌지 않습니다. 이 규칙은 interpretation contract의 §3 `WAIT(channel)` 행과 §5 FORK 문단, `docs/data-contracts.md` §4 예제 B와 §14의 2026-10-16 기록에 "proposed"로 적혔습니다. 동결된 계약의 변경이라 simulator 담당 인경민의 동의가 필요했고(`docs/data-contracts.md` §13의 동결 규칙), 인경민이 구두로 동의해 효력을 가졌습니다(2026-10-31 기록, `docs/data-contracts.md` §14). 지금의 reference simulator는 이 channel을 보통 channel로 다루어(`simulator/src/sim.cpp`의 `on_task_end`는 fork 자리만 돌려줍니다), 자식이 다 끝나도 orchestrator가 막힌 채로 남습니다. 그래서 `c1-compile`의 build turnaround를 재려면 이 구현이 먼저 있어야 하고, RQ0 gate spec은 이것을 simulator 적합성 항목 (g)로 적습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
 
@@ -1396,7 +1397,7 @@ main()
 
 **artifact가 놓이는 곳.** `artifact_set` 함수는 timeline이 `dataset/timelines/` 아래 어느 디렉터리에 있는지 봅니다. `coreset/`에 있으면 set 이름이 `coreset`이고, 출력 경로는 `<set>-<mode>/<id>.workload.json`, 즉 `coreset-single/c1-office.workload.json`입니다. `dataset/timelines/` 바로 아래에 둔 파일은 `adhoc` set이 됩니다. `-single`이라는 꼬리는 compile mode의 이름입니다. mode는 지금 `single` 하나뿐이고(9.3절), 꼬리는 역사적인 이름으로 남았습니다.
 
-**demand의 출력과 기록.** `compile.py`는 파일마다 utilization을 소수 둘째 자리로 출력하고, manifest의 `demand` 기록에는 소수 넷째 자리로 반올림해 적습니다(`round(…, 4)`). compile report에는 반올림하지 않은 값이 있습니다. 6.1절에서 `c1-office`의 report가 0.026957333…이고 manifest가 0.027인 이유입니다.
+**demand의 출력과 기록.** `compile.py`는 파일마다 utilization을 소수 둘째 자리로 출력하고, manifest의 `demand` 기록에는 소수 넷째 자리로 반올림해 적습니다(`round(…, 4)`). compile report에는 반올림하지 않은 값이 있습니다. 6.1절에서 `c1-office`의 report가 0.026957333…이고 manifest가 0.0269인 이유입니다.
 
 `artifact` — compile의 산출물 파일, 여기서는 `<id>.workload.json`입니다. `compile report` — artifact 옆에 놓이는 `<id>.report.json`, 그 파일의 CPU 수요 계산과 operation 길이 기록입니다(12.5절). `manifest` — artifact와 report와 입력 파일의 hash를 모아 둔 lockfile, `dataset/build.manifest.json`입니다(13.5절).
 
@@ -1544,7 +1545,7 @@ input_run: {dist: quantiles,
 
 이 권을 쓰며 두 artifact를 읽어 비교했습니다.
 
-- 편집기의 timer wake. `c1-dev`에서 26.385 s 전에 떨어지는 `timer:editor` wake는 2,774개이고, `c7-dev`의 `timer:editor` wake도 2,774개이며, 시각 목록이 완전히 같습니다. 두 파일 모두 첫 넷이 2,670 µs, 3,007 µs, 4,449 µs, 16,901 µs입니다.
+- 편집기의 timer wake. `c1-dev`에서 26.385 s 전에 떨어지는 `timer:editor` wake는 2,761개이고, `c7-dev`의 `timer:editor` wake도 2,761개이며, 시각 목록이 완전히 같습니다. 두 파일 모두 첫 넷이 2,748 µs, 3,079 µs, 4,537 µs, 16,901 µs입니다. `event:editor` wake도 26.385 s 전의 4개가 두 파일에서 같습니다.
 - 편집기의 키 입력. `c1-dev`의 `input:editor` wake 186개 중 2–24.385 s에 떨어지는 것은 49개이고, `c7-dev`의 `input:editor` wake 49개와 시각 목록이 완전히 같습니다. 첫 키 입력은 두 파일 모두 12,752,609 µs입니다.
 - program의 시작. 두 파일 모두 편집기 program이 `WAIT timer:editor`, `RUN 119`, `WAIT timer:editor`, `RUN 12`로 시작합니다.
 
@@ -1566,7 +1567,7 @@ timer wake가 같은 것은 열쇠 덕분입니다. component의 wake는 도착 
 
 ## 11.1 측정된 앱: component를 시간축에 뿌리기
 
-`code-editor`, `web-browser`, `office-writer` 같은 측정된 앱은 CI runner에서 실제 프로그램을 돌려 `perf sched record`로 기록한 값에서 왔습니다. 기록에서 thread 이름(comm)별로 "깨어나는 간격"과 "깨어날 때마다 쓰는 CPU"의 분포를 뽑은 것이 **component**입니다(6.1절에서 풀어 쓴 용어). 사용자가 아무것도 하지 않아도 이 thread들은 저마다의 timer로 깨어납니다. 커서 깜빡임, 자동 저장, 메일 확인, 화면 합성 같은 것들입니다.
+`code-editor`, `web-browser`, `office-writer` 같은 측정된 앱은 CI runner에서 실제 프로그램을 돌려 `perf sched record`로 기록한 값에서 왔습니다. 기록에서 thread 이름(comm)별로 "깨어나는 간격"과 "깨어날 때마다 쓰는 CPU"의 분포를 뽑은 것이 **component**입니다(6.1절에서 풀어 쓴 용어). 사용자가 아무것도 하지 않아도 이 thread들은 저마다의 timer로 깨어납니다. 커서 깜빡임, 자동 저장, 메일 확인, 화면 합성 같은 것들입니다. component는 측정된 wake 사슬이 시작한 곳에 따라 timer part와 event part로 나뉩니다. 사슬이 timer interrupt에서 시작한 wake가 timer part이고, 측정의 입력·다른 process·kernel thread에서 시작한 wake가 event part(`channel: event`)입니다.
 
 `_measured_unroll`은 이 component들을 task의 수명 위에 뿌립니다. `_component_events`가 component 하나마다 다음을 합니다.
 
@@ -1574,7 +1575,7 @@ timer wake가 같은 것은 열쇠 덕분입니다. component의 wake는 도착 
 2. 그 시각에 깨어남 하나를 놓고, 그 깨어남의 CPU(run)를 run 분포에서 뽑습니다.
 3. 다음 간격을 간격 분포에서 뽑아 더하고, 끝 시각 t₁에 닿을 때까지 반복합니다.
 
-모든 component의 깨어남을 모으면 `(시각, run, "timer")` 목록이 됩니다. 이것을 나중에 키 입력과 합쳐 시각 순으로 정렬하고(같은 시각이면 timer가 먼저), 깨어남마다 `wake` event 하나(`timer:<iid>` channel)와 program의 `WAIT`·`RUN` 한 쌍을 만듭니다. run이 0이면 `RUN`을 생략합니다. 그리고 마지막 깨어남 뒤에 그 깨어남의 channel로 `WAIT`을 하나 더 붙입니다(9.23 D16, 2026-10-15). 깨어남이 N개면 WAIT이 N + 1개이고, program은 할 일이 바닥나지 않고 막힌 채로 박힌 퇴장을 맞습니다. 측정된 대화형 앱은 대개 timer component로 마지막에 깨어나므로 그 WAIT은 보통 `timer:` channel입니다. core set에서는 키 입력을 받는 task 24개가 모두 `timer:`의 WAIT으로 끝납니다. 9.23 D16의 기록은 괄호 안에 "an interactive task's on its input"이라고 적었지만, 코드는 마지막 깨어남의 channel을 쓰고, 2026-10-16에 인지오가 코드 쪽을 그대로 두기로 정했습니다. 그 WAIT의 channel을 읽는 소비자는 없습니다.
+모든 component의 깨어남을 모으면 `(시각, run, 종류)` 목록이 됩니다. 종류는 timer part이면 `"timer"`, event part이면 `"event"`입니다. 이것을 나중에 키 입력(`"input"`)과 합쳐 시각 순으로 정렬하고(같은 시각이면 timer, event, 키 입력 순), 깨어남마다 `wake` event 하나(`timer:<iid>`, `event:<iid>` 또는 `input:<iid>` channel)와 program의 `WAIT`·`RUN` 한 쌍을 만듭니다. run이 0이면 `RUN`을 생략합니다. 그리고 마지막 깨어남 뒤에 그 깨어남의 channel로 `WAIT`을 하나 더 붙입니다(9.23 D16, 2026-10-15). 깨어남이 N개면 WAIT이 N + 1개이고, program은 할 일이 바닥나지 않고 막힌 채로 박힌 퇴장을 맞습니다. 측정된 앱은 대개 timer part로 마지막에 깨어나므로 그 WAIT은 보통 `timer:` channel입니다. core set의 측정된 segment-bound task 103개 가운데 95개가 `timer:`, 5개가 `event:`, 3개가 `input:`의 WAIT으로 끝나고, 키 입력을 받는 task 24개는 모두 `timer:`의 WAIT으로 끝납니다. 9.23 D16의 기록은 괄호 안에 "an interactive task's on its input"이라고 적었지만, 코드는 마지막 깨어남의 channel을 쓰고, 2026-10-16에 인지오가 코드 쪽을 그대로 두기로 정했습니다. 그 WAIT의 channel을 읽는 소비자는 없습니다.
 
 **forward-recurrence 간격이 왜 필요한가.** 버스 정류장에 아무 때나 도착했을 때 다음 버스까지 기다리는 시간은 "버스 배차 간격"과 다릅니다. 긴 간격일수록 그 안에 도착할 확률이 높으니, 무작위로 떨어진 순간이 속한 간격은 평균보다 깁니다(length-biased). 그리고 그 간격 안의 아무 지점에나 떨어지므로 남은 시간은 그 간격의 일부입니다. task가 0 s에 "이미 돌고 있던 프로그램"으로 등장한다면, 첫 깨어남까지의 시간은 이 방식으로 뽑아야 맞습니다. `sample_first_gap`은 간격의 구간을 "그 구간의 확률 × 구간 평균"에 비례하게 고르고, 구간 안에서도 길이에 비례하게 고른 뒤, 그 간격의 균등한 일부를 첫 간격으로 씁니다.
 
@@ -1600,7 +1601,7 @@ timer wake가 같은 것은 열쇠 덕분입니다. component의 wake는 도착 
 
 `launch phase` — 앱이 실행된 직후부터 안정 상태에 이를 때까지의 활동입니다. 이 dataset은 그것을 측정해 두었다가, timeline에서 0 s보다 늦게 도착하는 task에 재생합니다.
 
-`_launch_stream`은 이렇게 동작합니다. task의 archetype이 `launch` parameter를 갖고 도착 시각이 0보다 크면, 그 launch 파일의 측정 repeat 다섯 개 중 하나를 `(seed, task id, "launch", "repeat")`로 고릅니다. repeat 안의 stream(thread별 깨어남 기록)들을 열쇠 순서로 섞고, instance 번호에 맞는 stream을 고릅니다. 그 stream의 `(상대 시각, run)` 목록과 phase 길이를 돌려줍니다. `_measured_unroll`은 phase 길이 동안 이 기록을 timer 깨어남으로 그대로 재생하고, 평소 component는 phase가 끝난 시각(`t_steady`)부터 뿌립니다.
+`_launch_stream`은 이렇게 동작합니다. task의 archetype이 `launch` parameter를 갖고 도착 시각이 0보다 크면, 그 launch 파일의 측정 repeat 다섯 개 중 하나를 `(seed, task id, "launch", "repeat")`로 고릅니다. repeat 안의 stream(thread별 깨어남 기록)들을 열쇠 순서로 섞고, instance 번호에 맞는 stream을 고릅니다. 그 stream의 `(상대 시각, run, 종류)` 목록과 phase 길이를 돌려줍니다. 종류는 launch 파일의 넷째 열에서 옵니다(0이면 timer, 1이면 event). `_measured_unroll`은 phase 길이 동안 이 기록을 각 깨어남의 channel(`timer:<iid>` 또는 `event:<iid>`)로 그대로 재생하고, 평소 component는 phase가 끝난 시각(`t_steady`)부터 뿌립니다.
 
 `c3-workday`로 계산하면, 60 s에 도착하는 Writer의 launch phase는 40.756 s 동안 깨어남 857개이고, 1,485 s에 도착하는 Thunderbird의 것은 408.917 s 동안 깨어남 13,110개입니다(이 권을 쓰며 `_launch_stream`을 직접 불러 계산했습니다). Thunderbird의 phase는 파일 끝(1,545 s)보다 훨씬 길어서, 파일이 그 phase 안에서 끝납니다. 0 s에 도착하는 브라우저와 renderer는 launch phase가 없습니다.
 
@@ -1686,7 +1687,7 @@ TIMER의 의미는 contract §3의 절대 격자입니다. task의 t₀(첫 TIME
 3. 각 구성원의 program은 고정된 각본입니다. `sh`가 먼저 돌아 `gcc`를 깨우고, `gcc`가 `cc1`을 깨우고, … 하는 순서가 WAIT/WAKE로 짜여 있습니다. 일을 마친 구성원은 자기 channel에서 다시 기다리고, 마지막에 `sh`가 모든 구성원을 깨워 함께 `EXIT`합니다.
 4. `make` 자신의 program은 job마다 `RUN(dispatch_overhead)` 하나와 `FORK` 여섯 개, 끝에 `WAIT children:<iid>`와 `EXIT`입니다.
 
-`c1-compile`에서 첫 job의 `cc1` 단계는 476,877 µs(약 0.48 s)이고, `sh`의 첫 단계는 848 µs입니다. 컴파일러 본체가 일의 대부분을 합니다. 빌드 전체의 CPU는 compile report에서 1,315,906,652 µs(약 22분)이고, 편집기가 275,297,827 µs를 더해 utilization이 0.9982입니다. 9.10 D78/D90의 규칙이 파일 길이를 "어떤 정책 아래에서도 빌드가 끝나는 가장 작은 정수 초"로 정해서 1,594 s가 되었습니다.
+`c1-compile`에서 첫 job의 `cc1` 단계는 476,877 µs(약 0.48 s)이고, `sh`의 첫 단계는 848 µs입니다. 컴파일러 본체가 일의 대부분을 합니다. 빌드 전체의 CPU는 compile report에서 1,315,906,652 µs(약 22분)이고, 편집기가 275,297,827 µs를 더해 utilization이 0.9983입니다. 9.10 D78/D90의 규칙이 파일 길이를 "어떤 정책 아래에서도 빌드가 끝나는 가장 작은 정수 초"로 정해서 1,594 s가 되었습니다.
 
 > **왜 이렇게 정했나.** 단계별 CPU를 역할 하나의 표가 아니라 `(역할, 단계)`마다 따로 뽑는 것은 9.6 D20입니다. 기록된 이유는 측정된 2,857개 job에서 `cc1`은 99.3 %가 한 번만 깨어나는데 `sh`는 5–7번, `gcc`는 4–7번 깨어나고, 첫 run이 크고(중앙값 0.72 ms, 1.70 ms) 나중 run이 작아서(0.01–0.34 ms) "one table per role describes neither"였기 때문입니다.
 
@@ -1748,7 +1749,7 @@ compile이 끝나면 compiler는 각 파일이 CPU를 얼마나 원하는지를 
 
 | 경로 | `demand_us` |
 |---|---|
-| 측정된 앱 | 모든 timer 깨어남, heavy event, launch phase, operation, 키 입력의 run 합계 |
+| 측정된 앱 | 모든 component 깨어남(timer part와 event part), heavy event, launch phase, operation, 키 입력의 run 합계 |
 | 주기적 재생기 | 모든 cycle의 run 합계 |
 | batch job | `total_work` 그대로(run의 합이 정확히 그것이 되도록 잘랐으므로) |
 | 빌드(`make`) | dispatch run 합계 + spawn table의 모든 자식의 단계 CPU 합계 |
@@ -1765,7 +1766,7 @@ compile이 끝나면 compiler는 각 파일이 CPU를 얼마나 원하는지를 
 
 **segment별 utilization.** `wlc/estimate.py`의 `per_segment`가 계산합니다. 규칙은 이렇습니다. task마다 그 demand를 수명(도착부터 박힌 퇴장까지, 퇴장이 없으면 파일 끝까지) 위에 **고르게 펼칩니다.** 그리고 segment마다 그 segment와 겹치는 부분의 몫을 더해 segment 길이로 나눕니다.
 
-`c3-workday`로 보면 segment 넷의 utilization은 0.0031(browsing), 0.0053(office), 0.9597(compile), 1.0251(mail)입니다(compile report). 빌드가 도는 compile 구간이 CPU를 거의 채우고, 빌드의 꼬리와 Thunderbird의 launch phase가 겹친 mail 구간이 1.0을 조금 넘습니다. 9.14 D4는 이 숫자들을 "the contended segments the pair review reads"의 예로 기록합니다(`c3-workday`'s compile segment 0.96 and its mail segment 1.03).
+`c3-workday`로 보면 segment 넷의 utilization은 0.003(browsing), 0.0052(office), 0.9596(compile), 1.0638(mail)입니다(compile report). 빌드가 도는 compile 구간이 CPU를 거의 채우고, 빌드의 꼬리와 Thunderbird의 launch phase가 겹친 mail 구간이 1.0을 조금 넘습니다. 9.14 D4는 이 숫자들을 "the contended segments the pair review reads"의 예로 기록합니다(`c3-workday`'s compile segment 0.96 and its mail segment 1.03).
 
 segment들이 파일을 빈틈없이 덮으면, segment별 utilization을 길이로 가중 평균한 값은 파일의 utilization과 같습니다. 이것이 test로 고정되어 있습니다(`test_demand_is_recorded_per_segment`, "the segments' time-weighted mean is the file's utilization").
 
@@ -1874,14 +1875,14 @@ utilization은 소수 넷째 자리로 반올림합니다. tree의 manifest에�
 | `c2-p1b` | 0.9238 | 0.5272, 1.5272 |
 | `c2-p2a`, `c2-p2a-idle` | 9.3829 | 0.9651, 28.5251 |
 | `c2-p2b` | 1.2706 | 0.9651, 1.9651 |
-| `c2-p3a` | 0.4401 | 0.3893, 0.4515 |
-| `c2-p3b` | 0.8975 | 0.3893, 1.0122 |
-| `c3-creation` | 0.9417 | 0.0151, 0.0169, 1.0165 |
-| `c3-evening` | 0.9006 | 0.0139, 1.5062, 0.1327 |
-| `c3-workday` | 0.888 | 0.0031, 0.0053, 0.9597, 1.0251 |
+| `c2-p3a` | 0.4422 | 0.3915, 0.4537 |
+| `c2-p3b` | 0.8997 | 0.3915, 1.0143 |
+| `c3-creation` | 0.9428 | 0.0233, 0.0176, 1.0173 |
+| `c3-evening` | 0.9007 | 0.0145, 1.5062, 0.1327 |
+| `c3-workday` | 0.8894 | 0.003, 0.0052, 0.9596, 1.0638 |
 | `c6-dual` | 0.8388 | 0.8388 |
 
-`calibration` 40개 중에도 1.0을 넘는 파일이 많습니다. C7 counterpart는 원하지 않는 쪽의 job(indexing과 batch mode 넷의 다섯은 label만 바꾼 base 자신의 job)을 그 CPU 총량 C 길이의 파일에 통째로 묶으므로 그 job 하나가 lane 하나를 채우고 나머지 task가 그 위에 더해져 16개 모두 1.0을 넘고(`c7-idle` 1.0007부터 `c7-gaming` 1.9149까지), C1 calibration 묶음의 batch 파일은 job이 segment를 거의 채우도록 길이를 맞췄으므로 0.99대입니다(`c1-compile` 0.9982, `c1-transcode` 0.9993). 이것이 building-plan §5a가 "a timeline's demand class … says nothing about the file's compiled demand"라고 강조하는 이유입니다. class는 의도이고, 숫자는 결과입니다.
+`calibration` 40개 중에도 1.0을 넘는 파일이 많습니다. C7 counterpart는 원하지 않는 쪽의 job(indexing과 batch mode 넷의 다섯은 label만 바꾼 base 자신의 job)을 그 CPU 총량 C 길이의 파일에 통째로 묶으므로 그 job 하나가 lane 하나를 채우고 나머지 task가 그 위에 더해져 16개 모두 1.0을 넘고(`c7-idle` 1.0007부터 `c7-gaming` 1.9149까지), C1 calibration 묶음의 batch 파일은 job이 segment를 거의 채우도록 길이를 맞췄으므로 0.99대입니다(`c1-compile` 0.9983, `c1-transcode` 0.9985). 이것이 building-plan §5a가 "a timeline's demand class … says nothing about the file's compiled demand"라고 강조하는 이유입니다. class는 의도이고, 숫자는 결과입니다.
 
 `c6-dual`의 utilization은 9.13 R5의 기록(1.00)과 지금 manifest(0.8388)가 다릅니다. 9.23 D7(2026-10-14)이 그 사이를 기록합니다. R5의 1.00은 0.9997을 반올림한 값으로, 읽은 시점에는 맞았습니다. 0.8388이 된 것은 9.17의 다시 bless 때입니다. 9.17 D1이 편집기의 타자를 12,068 s짜리 창 하나에서 686–688 s짜리 창 아홉 개로 나누었기 때문입니다(4.4절). `39d8d815` 전후로 다시 compile하면 편집기의 CPU는 3,460.4 s → 1,518.6 s, 키 입력 wake는 33,518 → 13,751이 되고, 빌드와 게임 chain은 그대로입니다. 그 차이 0.161 lane이 줄어든 전부입니다. 이 값을 읽는 소비자는 없습니다. demand window는 관문이 아니고(9.14 결정 4), `c6-dual`은 보고 파일이며, guard 면제는 이 파일의 label에 기댑니다.
 
@@ -2164,7 +2165,7 @@ Phase 2가 끝났을 때 core set은 24개 파일이었고(`_dev/TODO.md`의 2.4
 
 scheduler 쪽 상수를 조사한 9.11은 simulator 담당 인경민과 projection 담당 박이안에게 두 memo를 보냈습니다.
 
-- **2026-10-07, TIMER skip 규칙.** TIMER의 늦은 tick을 backlog로 몰아 실행하는 대신 지나간 마지막 tick만 실행하고 나머지는 놓친 job으로 셉니다(7.6절). canonical 파일의 모양은 바뀌지 않습니다. reference simulator는 2026-10-23부터 이 규칙을 돌리고, contract의 TIMER 행은 2026-10-30에 고쳐졌으며, schema의 TIMER 설명 문장은 아직 backlog를 말합니다(16장).
+- **2026-10-07, TIMER skip 규칙.** TIMER의 늦은 tick을 backlog로 몰아 실행하는 대신 지나간 마지막 tick만 실행하고 나머지는 놓친 job으로 셉니다(7.6절). canonical 파일의 모양은 바뀌지 않습니다. reference simulator는 2026-10-23부터 이 규칙을 돌리고, contract의 TIMER 행은 2026-10-30에, schema의 TIMER 설명 문장은 2026-10-31에 고쳐졌습니다(16장).
 - **2026-10-08, declared scheduling class.** task가 바인딩한 entry의 class를 싣는 field를 제안했고, 두 사람이 동의해 9.13이 `declared_class`로 넣었습니다(3.7절). memo는 이것이 세 동결 계약(archetype, workload, run file)과 projection을 바꾸는 변경이라서 세 사람의 동의가 필요하다고 적습니다.
 
 ## 15.7 9.13(2026-10-09): 재건의 build
@@ -2216,14 +2217,6 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 
 ## 16.1 문서가 tree와 다르게 말하는 곳
 
-**TIMER의 늦은 tick.** workload schema의 TIMER 설명은 아직 늦은 tick을 backlog로 몰아 실행한다고 적습니다.
-
-| 위치 | 문서가 말하는 것 | 지금의 진실과 근거 |
-|---|---|---|
-| workload schema의 TIMER 설명 | "late iterations accumulate as backlog (contract §3)" | skip 규칙. memo 2026-10-07; interpretation contract §3의 TIMER 행(2026-10-30) |
-
-9.15는 이 문장과 interpretation contract §3의 TIMER 행, `docs/data-contracts.md` §4 예제 B의 backlog 문장을 일부러 남겼습니다. simulator의 동작과 TIMER의 뜻을 적은 문장은 인경민의 simulator가 skip 규칙을 구현할 때 함께 고치기로 하고 `_dev/TODO.md`의 Phase 10 TIMER 줄로 넘겼습니다(9.15 spec 결정 9). 그 구현은 2026-10-17의 final memo가 RQ0 gate spec의 simulator 적합성 항목 (b)로 부탁했고, 인경민이 2026-10-23에 넣었습니다(16.2절의 4). canonical 파일의 `TIMER` 명령어는 어느 규칙에서나 같습니다(7.6절).
-
 **`docs/memos/2026-10-08-declared-scheduling-class.md` §1.** 이름이 class를 정하지 않는다는 예로 `c5-t3`을 듭니다. 그 파일은 2026-10-12에 `c6-alias`로 옮겨졌습니다(9.20). memo는 날짜가 박힌 기록이라 고쳐 쓰지 않고, 9.15가 memo 끝에 정정 절을 덧붙입니다.
 
 **2026-10-14에 여기 있던 나머지는 고쳐졌습니다.**
@@ -2238,6 +2231,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 - task 2.4 결정 4의 "warns"와 deriver의 거절: 결정문이 잘못 적은 말이고, 거절하는 이유는 2026-10-16의 archive가 적습니다(5.4절).
 - 9.18 D6의 키 입력 수: 9.23 D7이 바로잡았습니다(11.4절).
 - interpretation contract §3의 TIMER 행("Late iterations accumulate as backlog; they are not silently skipped")과 `docs/data-contracts.md` §4 예제 B("missed ticks pile up as backlog"): memo 2026-10-07 §6의 문장과 skip 규칙으로 — 2026-10-30(`docs/data-contracts.md` §14).
+- workload schema의 TIMER 설명("late iterations accumulate as backlog (contract §3)"): 9.15가 simulator 쪽 TIMER 문장으로 남겨 `_dev/TODO.md`의 Phase 10 TIMER 줄로 넘긴 것(9.15 spec 결정 9). memo 2026-10-07 §6의 skip 규칙으로 — 2026-10-31(측정된 프로그램 자신의 wake를 시작점에 따라 나눈 re-bless와 함께). 같은 re-bless에서 `wake_event`의 설명은 측정 entry의 component wake를 `timer:<task>`와 `event:<task>`로 나눠 적고, `WAIT`의 설명은 channel 종류마다 붙드는 wake의 수를 적습니다.
 
 ## 16.2 기록이 아직 정하지 않은 곳
 
@@ -2276,7 +2270,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 | `primitive` | project | program의 기본 명령어. `RUN`, `SLEEP`, `TIMER`, `WAIT`, `WAKE`, `FORK`/`EXIT`(7.6) |
 | `LOOP` | project | program 안의 반복. primitive가 아닌 VM 내부 제어문. 지금은 게임 chain 구성원에서만 `count: "unbounded"`로 나옴(7.6) |
 | `arrive` / `wake` event | project | canonical `events`의 두 종류. task의 탄생과, 박힌 시각의 외부 깨우기(7.5) |
-| `channel` | project | `WAIT`와 `wake`가 쓰는 우편함 이름. `timer:`, `input:`, `chain:`, `job:`, `children:`(7.7) |
+| `channel` | project | `WAIT`와 `wake`가 쓰는 우편함 이름. `timer:`, `event:`, `input:`, `chain:`, `job:`, `children:`(7.7) |
 | `spawn table` | project | orchestrator가 들고 오는, 미리 다 쓴 자식 task 목록. `FORK`가 순서대로 소비(7.8) |
 | `fork_cap` | project | 동시에 살아 있을 수 있는 자식 수. compiler가 `parallelism_cap × 6`으로 씀(7.8) |
 | `object job` | project | `make`가 소스 하나를 컴파일하는 단위. 자식 여섯(`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`)으로 모형화(3.3, 11.7) |

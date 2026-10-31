@@ -1,5 +1,5 @@
 # Background Guide — everything to know before building your part
-> Status: normative · Created 2026-08-28 · Updated 2026-10-17
+> Status: normative · Created 2026-08-28 · Updated 2026-10-31
 
 This is the shared first half of onboarding for both builders — the simulator (인경민) and the daemon (박이안) — written for a reader who has skimmed the research proposal once and has general CS knowledge but no OS background. It is deliberately self-contained: it re-explains everything it needs, in plain language, so you can read it top to bottom without opening another document. The component-specific second halves — what your program must do — are `simulator/simulator-guide.md` and `daemon/daemon-guide.md`, each of which assumes you've read this one.
 
@@ -150,9 +150,9 @@ The whole experiment's raw material is a directory of **canonical workload files
         { "op": "RUN",  "us": 250 }
         // …thousands more, all concrete numbers
       ] },
-    { "op": "wake", "t": 2469, "channel": "timer:editor", "target": "editor" },
+    { "op": "wake", "t": 2470, "channel": "timer:editor", "target": "editor" },
     { "op": "wake", "t": 2090485, "channel": "input:editor", "target": "editor" },
-    // …11,344 wakes for the editor in all: 525 keystrokes, the rest its own timer wakes
+    // …11,293 wakes for the editor in all: 525 keystrokes, the rest its own wakes — 10,740 on timer:editor, 28 on event:editor
     { "op": "arrive", "t": 60000000, "id": "hog", "name": "python", "declared_class": "normal",
       "program": [
         { "op": "RUN", "us": 192 },
@@ -170,7 +170,7 @@ Four blocks, each for a different audience:
 - **`focus`** — which task holds the window focus, and when: pinned like an arrival, because it is something the user does. The daemon sees it (the recognizer is shown which process holds the focus); the simulator's scheduler does nothing with it and never gets it.
 - **`events`** — the workload itself. This is what the simulator actually executes, and there are only two kinds of event, ever:
   - **`arrive`** — a task pops into existence, carrying its complete pre-written script (its `program`) and its declared class (`normal`, or `idle` for work that declares itself background, which runs only when nothing else wants the CPU). The editor above arrives at t=0 and its script says: wait for the next wake, compute for 22 µs, wait, compute for 250 µs… Its `depart` field says the user closes it at t = 99.435 s sharp. The training run has no `depart`: it runs until its measured work is done, past the file's end.
-  - **`wake`** — an external stimulus arrives: a keystroke, a timer firing inside a program, a network reply. The wake at t ≈ 2.090 s above, on `input:editor`, is "the user pressed a key in the editor"; the one at 2.469 ms, on `timer:editor`, is one of the editor's own timer wakes, as measured. A task sitting in a `WAIT` gets unblocked by it. This is how "a human is using the machine" exists in the simulation without simulating a human.
+  - **`wake`** — an external stimulus arrives: a keystroke, a timer firing inside a program, a network reply. The wake at t ≈ 2.090 s above, on `input:editor`, is "the user pressed a key in the editor"; the one at 2.470 ms, on `timer:editor`, is one of the editor's own measured wakes, one whose measured wake chain starts at a timer; the editor's own wakes whose chain starts elsewhere — another process, a kernel thread — come on `event:editor`. A task sitting in a `WAIT` gets unblocked by it. This is how "a human is using the machine" exists in the simulation without simulating a human.
 
 Notice what this means: **everything the user does is pre-scripted** (arrivals, keystrokes, focus changes, app-closings — pinned to absolute times), but **everything the scheduler influences is not** (when a compile finishes depends on how much CPU the scheduler gave it). That split is deliberate, and it's the whole trick: user behavior must not depend on the scheduler (else conditions wouldn't be comparable), while outcomes must (else there'd be nothing to measure).
 

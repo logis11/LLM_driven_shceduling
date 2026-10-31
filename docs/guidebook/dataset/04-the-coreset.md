@@ -316,25 +316,25 @@ focus:
 
 ## 2.3 compile하면 무엇이 되나
 
-2026-10-17의 `build/coreset-single/c1-dev.workload.json`을 열면 top-level key가 넷입니다. `meta`, `ground_truth`, `focus`, `events`.
+2026-10-31의 `build/coreset-single/c1-dev.workload.json`을 열면 top-level key가 넷입니다. `meta`, `ground_truth`, `focus`, `events`.
 
 - `meta`는 `id: c1-dev`, `derived_from`(timeline 경로와 그 git blob hash), `sampled`(seed 107과 library의 blob hash)입니다.
 - `ground_truth`는 `{t_start: 0, t_end: 60000000, mode: dev, attributes: {background_wanted: true}}` 하나입니다.
 - `focus`는 `{t_start: 0, t_end: 60000000, task: editor}` 하나입니다.
-- `events`에는 arrive event 하나와 wake event 6,642개가 있습니다.
+- `events`에는 arrive event 하나와 wake event 6,648개가 있습니다.
 
-arrive event는 `{t: 0, op: arrive, id: editor, name: code, declared_class: normal, depart: 60000000, program: […]}`입니다. `program`은 명령 13,285개짜리 목록이고(wake 하나마다 WAIT과 RUN 한 쌍, 그리고 끝에 마지막 wake의 channel로 `WAIT timer:editor` 하나; 9.23 D16), 처음은 이렇게 시작합니다.
+arrive event는 `{t: 0, op: arrive, id: editor, name: code, declared_class: normal, depart: 60000000, program: […]}`입니다. `program`은 명령 13,297개짜리 목록이고(wake 하나마다 WAIT과 RUN 한 쌍, 그리고 끝에 마지막 wake의 channel로 `WAIT timer:editor` 하나; 9.23 D16), 처음은 이렇게 시작합니다.
 
 ```text
 WAIT timer:editor → RUN 119 µs → WAIT timer:editor → RUN 12 µs → WAIT timer:editor → RUN 7 µs → …
 ```
 
 - **wake** — 잠들어 있던 task가 깨어나 다시 실행 가능해지는 사건입니다. workload에서는 `{t, op: wake, target, channel}` event로 적히고, 시각이 compile 때 고정됩니다.
-- **channel** — wake가 어느 경로로 오는지의 이름입니다. `timer:<task id>`는 측정된 application이 스스로 깨어나는 timer component들의 wake이고, `input:<task id>`는 재생된 keystroke입니다.
+- **channel** — wake가 어느 경로로 오는지의 이름입니다. `timer:<task id>`는 측정된 application이 스스로 깨어나는 wake 가운데 측정된 wake 사슬이 timer interrupt에서 시작한 것(component의 timer part)이고, `event:<task id>`는 사슬이 그 밖 — 측정의 입력, 다른 process, kernel thread — 에서 시작한 것(event part)이며, `input:<task id>`는 재생된 keystroke입니다. task가 기다리고 있지 않을 때 온 wake를 `input:`과 `event:`는 모두 쌓아 두고, `timer:`는 처음 하나만 붙들고 나머지는 버립니다(simulator가 `wake_drop` 줄을 씀).
 
-`c1-dev`의 wake 6,642개는 `timer:editor` 6,456개와 `input:editor` 186개로 나뉩니다(2026-10-14 tree에서 직접 셈). 편집기 그림을 "keystroke 하나 받고 조금 일하고"의 반복으로만 상상하면 틀립니다. 측정된 VS Code는 keystroke보다 훨씬 자주 스스로 깨어납니다. 이 비율(timer wake가 keystroke wake보다 한두 자릿수 많음)은 interactive 파일 모두에서 나타납니다. 예를 들어 `c1-office`는 3,064 대 270, `c1-mail`은 5,371 대 35입니다.
+`c1-dev`의 wake 6,648개는 `timer:editor` 6,443개, `event:editor` 19개, `input:editor` 186개로 나뉩니다(2026-10-31 build에서 직접 셈). 편집기 그림을 "keystroke 하나 받고 조금 일하고"의 반복으로만 상상하면 틀립니다. 측정된 VS Code는 keystroke보다 훨씬 자주 스스로 깨어납니다. 이 비율(application 자신의 wake가 keystroke wake보다 한두 자릿수 많음)은 interactive 파일 모두에서 나타납니다. 예를 들어 `c1-office`는 3,058(timer 3,057, event 1) 대 270, `c1-mail`은 6,091(timer 2,643, event 3,448) 대 35입니다.
 
-compile은 artifact 옆에 report도 씁니다(`c1-dev.report.json`). `demand_us`는 19,913,142 µs(약 19.9 s), `duration_us`는 60,000,000, `utilization`은 0.3318857, `demand_class`는 `calibration`입니다. 이 값들은 core manifest(`dataset/build.manifest.json`)의 `demand` 절에도 반올림되어 들어갑니다(`c1-dev`: `utilization 0.3319`).
+compile은 artifact 옆에 report도 씁니다(`c1-dev.report.json`). `demand_us`는 19,914,194 µs(약 19.9 s), `duration_us`는 60,000,000, `utilization`은 0.3319032, `demand_class`는 `calibration`입니다. 이 값들은 core manifest(`dataset/build.manifest.json`)의 `demand` 절에도 반올림되어 들어갑니다(`c1-dev`: `utilization 0.3319`).
 
 ## 2.4 counterpart 하나를 나란히 읽기: `c7-dev`
 
@@ -365,7 +365,7 @@ compile은 artifact 옆에 report도 씁니다(`c1-dev.report.json`). `demand_us
 
 셋째, **keystroke는 base의 것을 잘라 쓴다.** `slice_of`는 "이 창은 base의 2–58 s 창(index 0)의 앞부분"이라는 표시입니다. compiler는 재생할 keystroke 흐름의 시작점을 base 창의 길이로 뽑고 그 앞부분만 씁니다. 그래서 counterpart의 keystroke는 base의 keystroke와 그 구간에서 byte 단위로 같습니다. 2026-10-14 tree에서 세어 보면 `c1-dev`의 keystroke wake 186개(서로 다른 시각 181개) 가운데 26.385 s 이전의 것은 49개(서로 다른 시각 47개)이고, `c7-dev`의 keystroke wake도 49개(서로 다른 시각 47개)이며 시각이 하나하나 같습니다(10.5절). 두 수가 다른 이유는 재생된 흐름에서 keystroke 두 개가 같은 µs에 떨어지는 경우가 있기 때문입니다. `c1-dev`에서는 그런 시각이 다섯 번, 그중 두 번이 앞 26.385 s 안에 있습니다.
 
-compile된 `c7-dev`는 arrive event 둘(`code`, `unattended-upgr`), wake 2,823개(timer 2,774, input 49), utilization 1.2129입니다.
+compile된 `c7-dev`는 arrive event 둘(`code`, `unattended-upgr`), wake 2,814개(timer 2,761, event 4, input 49), utilization 1.2129입니다.
 
 > **코드로.** `dataset/tools/tests/test_coreset.py`의 `test_c7_input_wakes_are_a_subset_of_the_bases_in_the_first_c_seconds`가 counterpart의 keystroke 시각이 base의 앞 C초 keystroke 시각의 부분집합인지 test합니다. 같음이 아니라 부분집합인 이유는 9.18 spec decision 3이 적습니다. compiler가 operation 안에 떨어지는 keystroke를 버리기 때문에, operation 위치가 다른 counterpart(예: `c7-browsing`)는 base보다 keystroke가 몇 개 적을 수 있습니다.
 
@@ -508,7 +508,7 @@ C3(transition arc 그룹)와 C4(distractor injection 그룹)와 C5(familiarity l
 
 - **term** — 채점 항목 하나입니다. 어느 task(entity)의 어떤 지표(metric)를 어떤 집계(aggregate)로 볼지, 그리고 가중치(weight)를 적습니다. 파일의 점수는 term들의 정규화된 몫 `(fixed − condition)/(fixed − oracle)`의 가중합입니다. 여기서 `fixed`는 recognition 없이 boot 기본 설정(MLFQ)만 쓰는 조건입니다.
 - **`input_latency` P99** — keystroke 하나가 온 순간부터 task가 그 keystroke를 처리하기 시작할 때까지 걸린 시간의 99번째 백분위입니다. keystroke 흐름이 있는 task의 term이고, 파일 안에서 끝내 처리되지 못한 keystroke는 task의 끝(또는 파일 끝)까지의 시간을 하한으로 넣습니다. 뒤의 장에서 "P99(input)"이 이것입니다.
-- **`timer_latency` P99** — keystroke 흐름이 없는 application(GIMP, Kdenlive, `c7-mail`의 mailer)의 term입니다. 그 application 스스로의 timer wake 하나가 온 순간부터 처리되기 시작할 때까지의 시간을, `input_latency`와 같은 규칙으로 잽니다. 뒤의 장에서 "P99(timer)"가 이것입니다.
+- **`app_latency` P99** — keystroke 흐름이 없는 application(GIMP, Kdenlive, `c7-mail`의 mailer)의 term입니다. 그 application 스스로의 wake 하나 — `timer:`와 `event:` 두 channel 함께 — 가 온 순간부터 처리되기 시작할 때까지의 시간입니다. `event:`의 wake는 `input_latency`와 같은 규칙으로 재고, `timer:`에서 앞의 wake가 붙들려 있는 동안 와서 버려진 wake는 그 붙들린 wake의 처리가 시작될 때까지를 잽니다. 뒤의 장에서 "P99(app)"이 이것입니다.
 - **`ready_wait` P99** — task가 깨어나 실행 가능해진 뒤 실제로 CPU를 받기까지 기다린 시간의 99번째 백분위입니다. 웹 서비스의 tail latency와 같은 생각입니다.
 - **`job` miss rate** — 주기적으로 일하는 task(영상 프레임, 오디오 프레임, 게임 frame chain)가 마감을 놓친 비율입니다.
 - **turnaround** — batch job이 도착해서 끝나기까지 걸린 시간입니다. 파일 안에서 job이 끝날 때만 씁니다.
@@ -554,7 +554,7 @@ C1(calibration 그룹)에는 두 번째 역할도 있습니다. C1의 task set 1
 
 ## 4.4 C1의 채점과 RQ0에서의 역할
 
-scoring spec의 C1(calibration 그룹) term은 mode 부류에 따라 정해진 틀을 따릅니다(Phase 7 spec decision 9). interactive-only mode(`browsing`, `office`, `mail`, `dev`, `photo`, `video-edit`)는 foreground task의 P99 하나, weight 1.0입니다. keystroke 흐름이 있는 편집기(`code`, `soffice.bin`, Chrome, Thunderbird)는 `input_latency`, keystroke 흐름이 없는 GIMP와 Kdenlive는 `timer_latency`입니다. periodic mode(`media`, `meeting`)는 소비자 task의 `job` miss rate이고, `media`는 음악 1.0, 영상 0.5의 가중치입니다. `gaming`은 chain head(`game.chain.1`)의 `job` miss rate입니다. batch-beside-editor mode(`compile`, `ml-train`, `render`, `transcode`, `indexing`, `backup`)는 편집기의 P99에 job의 turnaround를 더합니다. 가중치는 compile 1.0, ml-train·render·transcode 0.5, indexing 1.0, backup 0.25입니다. `c1-idle`은 term이 없습니다.
+scoring spec의 C1(calibration 그룹) term은 mode 부류에 따라 정해진 틀을 따릅니다(Phase 7 spec decision 9). interactive-only mode(`browsing`, `office`, `mail`, `dev`, `photo`, `video-edit`)는 foreground task의 P99 하나, weight 1.0입니다. keystroke 흐름이 있는 편집기(`code`, `soffice.bin`, Chrome, Thunderbird)는 `input_latency`, keystroke 흐름이 없는 GIMP와 Kdenlive는 `app_latency`입니다. periodic mode(`media`, `meeting`)는 소비자 task의 `job` miss rate이고, `media`는 음악 1.0, 영상 0.5의 가중치입니다. `gaming`은 chain head(`game.chain.1`)의 `job` miss rate입니다. batch-beside-editor mode(`compile`, `ml-train`, `render`, `transcode`, `indexing`, `backup`)는 편집기의 P99에 job의 turnaround를 더합니다. 가중치는 compile 1.0, ml-train·render·transcode 0.5, indexing 1.0, backup 0.25입니다. `c1-idle`은 term이 없습니다.
 
 > **왜 이렇게 정했나.** scoring spec 주석은 batch 가중치를 "ml-train/render/transcode 0.5 from the C2 and C3 progress terms, backup 0.25 from c2-p3b"라고 적습니다. 새 base가 그 mode의 기존 instance가 이미 가진 가중치를 물려받아, 기존 `true` row의 상한이 하나도 바뀌지 않게 하려는 것입니다(Phase 7 archive decision 10). `c1-indexing`의 turnaround 1.0은 "a stated assumption — a user waiting on a reindex as c1-compile's user waits on a build"입니다.
 
@@ -576,7 +576,7 @@ RQ0 gate에서 C1(calibration 그룹)은 둘로 갈립니다. 네 batch base(`c1
 
 segment는 0–60 s `browsing`, `background_wanted: true`, `[S2]`. input은 browser 2–58 s, focus는 browser 0–60 s, operation `page-load`가 30 s입니다. keystroke 흐름은 SWELL-KW의 Internet Explorer 녹화(`swell-ie-c1`)입니다.
 
-**compile된 모양.** arrive event 5개(모두 `chrome`), wake 3,852개(timer 3,729, input 123), artifact 514,175 byte, utilization 0.0164, `calibration`. query point는 0 s와 60 s 둘입니다. 이름이 `chrome ×5` 하나뿐이라 tier는 1입니다.
+**compile된 모양.** arrive event 5개(모두 `chrome`), wake 3,902개(timer 2,954, event 825, input 123), artifact 520,776 byte, utilization 0.0176, `calibration`. query point는 0 s와 60 s 둘입니다. 이름이 `chrome ×5` 하나뿐이라 tier는 1입니다.
 
 **짝과 파생.** 이 파일은 C1(calibration 그룹) 가운데 가장 많이 쓰이는 base입니다. `c6-spoof`, `c6-fold`, `c7-browsing`이 이 파일에서 나옵니다.
 
@@ -602,7 +602,7 @@ segment는 0–60 s `browsing`, `background_wanted: true`, `[S2]`. input은 brow
 
 segment 0–60 s `office`, `true`, `[S1, S2, S4]`. input은 writer 2–58 s, focus는 writer 0–60 s. operation은 없습니다.
 
-**compile된 모양.** arrive 7개, wake 3,334개(timer 3,064, input 270), 443,368 byte, utilization 0.0270, `calibration`. query point 0 s와 60 s. `soffice.bin`이 tier 2라 segment는 tier 2입니다.
+**compile된 모양.** arrive 7개, wake 3,328개(timer 3,057, event 1, input 270), 442,594 byte, utilization 0.0269, `calibration`. query point 0 s와 60 s. `soffice.bin`이 tier 2라 segment는 tier 2입니다.
 
 **짝과 파생.** `c4-office`(7z 압축 injection), `c7-office`(unattended upgrade injection)가 이 파일에서 나옵니다.
 
@@ -618,7 +618,7 @@ segment 0–60 s `office`, `true`, `[S1, S2, S4]`. input은 writer 2–58 s, foc
 
 segment 0–60 s `mail`, `true`, `[S4]`. input 2–58 s(`swell-outlook-c23`, SWELL-KW의 Outlook 녹화), focus 0–60 s, operation `send` 40 s.
 
-**compile된 모양.** arrive 1개, wake 5,406개(timer 5,371, input 35), 703,530 byte, utilization 0.0287. keystroke 35개는 모두 45.9 s와 53.1 s 사이에 몰려 있습니다. RQ0 gate spec이 이 사실을 적는데, 재생 흐름의 offset이 Outlook 녹화의 타이핑 구간 하나에 떨어졌기 때문입니다.
+**compile된 모양.** arrive 1개, wake 6,126개(timer 2,643, event 3,448, input 35), 796,249 byte, utilization 0.04. keystroke 35개는 모두 45.9 s와 53.1 s 사이에 몰려 있습니다. RQ0 gate spec이 이 사실을 적는데, 재생 흐름의 offset이 Outlook 녹화의 타이핑 구간 하나에 떨어졌기 때문입니다.
 
 **짝과 파생.** `c7-mail`. 위의 keystroke 위치 때문에 `c7-mail`(앞 26.385 s)에는 keystroke가 하나도 없고, 그래서 `c7-mail`은 보고 파일입니다(10장).
 
@@ -638,7 +638,7 @@ segment 0–60 s `mail`, `true`, `[S4]`. input 2–58 s(`swell-outlook-c23`, SWE
 
 segment 0–60 s `dev`, `true`, `[S11]`. input 2–58 s, focus 0–60 s.
 
-**compile된 모양.** arrive 1개, wake 6,642개(timer 6,456, input 186), 863,958 byte, utilization 0.3319. 2장의 worked example입니다.
+**compile된 모양.** arrive 1개, wake 6,648개(timer 6,443, event 19, input 186), 864,736 byte, utilization 0.3319. 2장의 worked example입니다.
 
 **짝과 파생.** `c7-dev`. `c7-dev`는 RQ0의 판정 파일이고 trace-replay variant(11장)의 대상이기도 합니다.
 
@@ -652,13 +652,13 @@ segment 0–60 s `dev`, `true`, `[S11]`. input 2–58 s, focus 0–60 s.
 |---|---|---|---|
 | `photo-editor` | `gimp` | `image-editor` | 0–60 s |
 
-- **`image-editor`** — GIMP를 측정한 archetype입니다. 측정된 driven phase는 마우스로 하는 조작이라 keystroke 흐름이 없고, 그 활동은 application 자신의 timer component로 실립니다.
+- **`image-editor`** — GIMP를 측정한 archetype입니다. 측정된 driven phase는 마우스로 하는 조작이라 keystroke 흐름이 없고, 그 활동은 application 자신의 component(timer part와 event part)로 실립니다.
 
 segment 0–60 s `photo`, `true`, `[S6]`. input 2–58 s가 적혀 있지만 이 archetype은 keystroke를 받지 않으므로 input wake는 0입니다. focus 0–60 s, operation `unsharp-mask` 30 s.
 
-**compile된 모양.** arrive 1개, wake 511개(모두 timer), 76,363 byte, utilization 0.0442.
+**compile된 모양.** arrive 1개, wake 533개(timer 134, event 399), 79,636 byte, utilization 0.0441.
 
-**채점에서의 결과.** keystroke wake가 없으므로 scoring spec은 이 파일의 term을 application 자신의 timer wake로 둡니다(2026-10-30부터 `timer_latency`). 9.14 D2(재구축된 파일 위의 scoring spec, 2026-10-09)가 "fourteen of the scored editors have no input-channel wake at all — every file of the video editor … and of the image editor"를 찾고, 이 열네 term을 timer channel로 읽게 했습니다. 이 term이 재는 것은 keystroke의 echo가 아니라 application 자신의 반응성입니다.
+**채점에서의 결과.** keystroke wake가 없으므로 scoring spec은 이 파일의 term을 application 자신의 wake로 둡니다(2026-10-31부터 `timer:`와 `event:` 두 channel을 읽는 `app_latency`; 2026-10-30에는 timer channel만 읽는 `timer_latency`). 9.14 D2(재구축된 파일 위의 scoring spec, 2026-10-09)가 "fourteen of the scored editors have no input-channel wake at all — every file of the video editor … and of the image editor"를 찾고, 이 열네 term을 timer channel로 읽게 했습니다. 이 term이 재는 것은 keystroke의 echo가 아니라 application 자신의 반응성입니다.
 
 **짝과 파생.** `c7-photo`. **정한 결정.** Phase 7 spec decision 8, `c3-creation` segment 0에서 gimp만 들어 올림(seed 109). 9.10 D20이 unsharp mask를 30 s에 두었습니다.
 
@@ -701,7 +701,7 @@ segment 0–60 s `meeting`, `true`, `[S3]`. input 없음, focus voice 0–60 s.
 
 segment 0–60 s `gaming`, `true`, `[S9]`. input 없음(`input: []`), focus game 0–60 s.
 
-**compile된 모양.** arrive 18개, 곧 chain member 16개(이름 `Troy.exe` ×7, `Task worker thr` ×4, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli`)와 compiler가 붙이는 `wineserver`, 그리고 `steam`입니다. wake 18,062개(모두 timer), 2,296,348 byte, utilization 0.9153. chain member 이름이 tier 3이라 segment는 tier 3입니다.
+**compile된 모양.** arrive 18개, 곧 chain member 16개(이름 `Troy.exe` ×7, `Task worker thr` ×4, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli`)와 compiler가 붙이는 `wineserver`, 그리고 `steam`입니다. wake 18,090개(timer 17,950, event 140), 2,299,901 byte, utilization 0.9153. chain member 이름이 tier 3이라 segment는 tier 3입니다.
 
 **짝과 파생.** `c4-gaming`(chat client injection), `c7-gaming`(unattended upgrade injection).
 
@@ -747,7 +747,7 @@ segment 0–60 s `media`, `true`, `[S13]`. input 없음, focus video 0–60 s.
 
 segment 0–60 s `video-edit`, `true`, `[S7]`. input 2–58 s(keystroke 흐름 없음), focus 0–60 s, operation `preview-render` 30 s.
 
-**compile된 모양.** arrive 1개, wake 17,232개(모두 timer), 2,243,632 byte, utilization 0.4586.
+**compile된 모양.** arrive 1개, wake 17,375개(timer 8,809, event 8,566), 2,262,815 byte, utilization 0.4769.
 
 **짝과 파생.** `c7-video-edit`(판정 파일). **정한 결정.** Phase 7 spec decision 8, `c2-p3a` segment 0에서 kdenlive만 들어 올림(seed 108). 9.10 D20의 preview render.
 
@@ -765,7 +765,7 @@ segment 0–60 s `video-edit`, `true`, `[S7]`. input 2–58 s(keystroke 흐름 �
 
 segment 0–1,594 s `compile`, `true`, `[S11]`. input 2–1,592 s, focus 0–1,594 s.
 
-**compile된 모양.** arrive 2개, spawn table 항목 17,448개(2,908 × 6), `fork_cap` 48(8 × 6), wake 181,026개(timer 178,482, input 2,544), 30,140,505 byte, utilization 0.9982. query point는 0 s, 2 s(build와 자식 이름들이 한꺼번에 나타남), 1,594 s. snapshot에는 `cc1 ×2908`을 비롯한 자식 이름이 2 s부터 끝까지 보입니다. telemetry 규칙은 "spawn children appear when their parent does"이기 때문입니다.
+**compile된 모양.** arrive 2개, spawn table 항목 17,448개(2,908 × 6), `fork_cap` 48(8 × 6), wake 180,961개(timer 177,683, event 734, input 2,544), 30,132,055 byte, utilization 0.9983. query point는 0 s, 2 s(build와 자식 이름들이 한꺼번에 나타남), 1,594 s. snapshot에는 `cc1 ×2908`을 비롯한 자식 이름이 2 s부터 끝까지 보입니다. telemetry 규칙은 "spawn children appear when their parent does"이기 때문입니다.
 
 **짝과 파생.** `c4-compile`(Chrome injection), `c7-compile`(DKMS module build로 교체).
 
@@ -790,7 +790,7 @@ segment 0–1,594 s `compile`, `true`, `[S11]`. input 2–1,592 s, focus 0–1,5
 
 segment 0–1,612 s `ml-train`, `true`, `[S11, S12]`. input 2–1,610 s, focus 0–1,612 s.
 
-**compile된 모양.** arrive 2개, wake 184,363개(timer 182,379, input 1,984), 24,230,004 byte, utilization 0.9982.
+**compile된 모양.** arrive 2개, wake 184,268개(timer 181,454, event 830, input 1,984), 24,217,560 byte, utilization 0.9982.
 
 **짝과 파생.** `c7-ml-train`(같은 job에 label만 뒤집은 pre-committed miss).
 
@@ -812,7 +812,7 @@ segment 0–1,612 s `ml-train`, `true`, `[S11, S12]`. input 2–1,610 s, focus 0
 
 segment 0–60 s `render`, `true`, `initiated: user`, `[S7]`. input 2–58 s, focus 0–60 s, operation `preview-render` 30 s.
 
-**compile된 모양.** arrive 2개, wake 16,296개(모두 timer), 2,124,939 byte, utilization 0.7339. query point 0 s, 2 s, 60 s.
+**compile된 모양.** arrive 2개, wake 15,964개(timer 7,428, event 8,536), 2,081,618 byte, utilization 0.7054. query point 0 s, 2 s, 60 s.
 
 **짝과 파생.** `c7-render`(pre-committed miss).
 
@@ -836,7 +836,7 @@ segment 0–60 s `render`, `true`, `initiated: user`, `[S7]`. input 2–58 s, fo
 
 segment 0–4,762 s `transcode`, `true`, `initiated: user`, `[S8, S7]`. input 2–4,760 s, focus 0–4,762 s, operation `preview-render` 2,381 s.
 
-**compile된 모양.** arrive 2개, wake 1,015,553개(모두 timer), 152,752,546 byte(core set에서 두 번째로 큰 파일), utilization 0.9993.
+**compile된 모양.** arrive 2개, wake 1,014,792개(timer 901,776, event 113,016), 152,656,106 byte(core set에서 두 번째로 큰 파일), utilization 0.9985.
 
 **짝과 파생.** `c7-transcode`(pre-committed miss). `c3-creation`의 마지막 segment도 같은 job을 묶습니다.
 
@@ -861,7 +861,7 @@ segment 0–4,762 s `transcode`, `true`, `initiated: user`, `[S8, S7]`. input 2�
 
 segment 0–60 s `indexing`, `background_wanted: true`, `initiated: user`, `pre_committed_miss: true`, `[S11, S14]`. input 2–58 s, focus 0–60 s.
 
-**compile된 모양.** arrive 2개(`code`는 `normal`, `tracker-miner-f`는 `idle`), wake 6,855개(timer 6,808, input 47), 1,749,308 byte, utilization 0.7477. query point 0 s, 2 s, 60 s. `tracker-miner-f`가 tier 3이라 segment는 tier 3.
+**compile된 모양.** arrive 2개(`code`는 `normal`, `tracker-miner-f`는 `idle`), wake 6,858개(timer 6,777, event 34, input 47), 1,749,697 byte, utilization 0.7477. query point 0 s, 2 s, 60 s. `tracker-miner-f`가 tier 3이라 segment는 tier 3.
 
 **왜 pre-committed miss인가.** 이 파일은 `indexing`의 **`true`** cell입니다. 머리 주석은 "The label differs from the unwanted case by intent alone, which names and behaviour cannot show — a pre-committed miss"라고 적습니다. 같은 indexer가 같은 일을 하는데, 사용자가 시켰는지만 다릅니다. Tracker는 기본적으로 사용자가 부탁하지 않은 때에 도는 프로그램이므로, recognizer가 `tracker-miner-f`를 보고 `false`라고 답하는 것은 합리적입니다. 그래서 miss는 counterpart(`c7-indexing`)가 아니라 이쪽 base에 있습니다. 2026-09-10 memo §4.1이 같은 이유를 적습니다.
 
@@ -889,7 +889,7 @@ segment 0–60 s `indexing`, `background_wanted: true`, `initiated: user`, `pre_
 
 segment 0–277 s `backup`, `true`, `initiated: scheduled`, `[S7, S15]`. input 2–275 s, focus 0–277 s, operation `preview-render` 138.5 s(창의 가운데).
 
-**compile된 모양.** arrive 2개(`deja-dup`은 `idle`), wake 62,851개(모두 timer), 8,256,905 byte, utilization 0.9897. query point 0 s, 2 s, 277 s.
+**compile된 모양.** arrive 2개(`deja-dup`은 `idle`), wake 63,601개(timer 50,198, event 13,403), 8,356,270 byte, utilization 0.9878. query point 0 s, 2 s, 277 s.
 
 **짝과 파생.** `c7-backup`(pre-committed miss). C2(intent pair 그룹)의 `c2-p3b`도 같은 job을 묶습니다.
 
@@ -915,7 +915,7 @@ segment 0–277 s `backup`, `true`, `initiated: scheduled`, `[S7, S15]`. input 2
 
 모든 task가 0–60 s. segment 0–60 s `idle`, `true`, `[S18]`. `input: []`, `focus: []`. 창이 없으므로 focus가 비어 있는 유일한 C1(calibration 그룹)입니다.
 
-**compile된 모양.** arrive 4개, wake 59개, 8,401 byte, utilization 0.0004. 이름 넷이 모두 tier 2라 segment는 tier 2입니다.
+**compile된 모양.** arrive 4개, wake 60개(timer 53, event 7), 8,540 byte, utilization 0.0004. 이름 넷이 모두 tier 2라 segment는 tier 2입니다.
 
 **짝과 파생.** `c7-idle`.
 
@@ -979,7 +979,7 @@ RQ0 gate spec의 민감도 line 가운데 `seg1-30s`와 `seg1-120s`는 네 판�
 
 input은 editor 2–97.435 s, focus는 editor 0–99.435 s. `meta.demand`는 적혀 있지 않아 기본값 `oversubscribed`입니다. seed 201.
 
-**compile된 모양.** arrive 2개, wake 11,344개(timer 10,819, input 525), 1,477,765 byte. utilization은 파일 14.505, segment 0 0.5272, segment 1 35.7721입니다. 2.5절에서 말했듯 segment 1의 숫자는 1,389.885 s짜리 job의 CPU 전체를 39.435 s에 몰아 센 정적 추정이지, 실제로 lane 35개를 쓴다는 뜻이 아닙니다. 9.14 D4는 이 segment의 demand를 "35.77 lanes (second segment)"로 기록합니다. query point는 0 s, 60 s, 99.435 s입니다.
+**compile된 모양.** arrive 2개, wake 11,293개(timer 10,740, event 28, input 525), 1,471,142 byte. utilization은 파일 14.505, segment 0 0.5272, segment 1 35.7721입니다. 2.5절에서 말했듯 segment 1의 숫자는 1,389.885 s짜리 job의 CPU 전체를 39.435 s에 몰아 센 정적 추정이지, 실제로 lane 35개를 쓴다는 뜻이 아닙니다. 9.14 D4는 이 segment의 demand를 "35.77 lanes (second segment)"로 기록합니다. query point는 0 s, 60 s, 99.435 s입니다.
 
 **정한 결정.**
 - 9.10 D12와 D85, D90: training은 PyTorch MNIST 예제, CPU 총량 1,389.885 s(4.15절과 같은 job).
@@ -1004,7 +1004,7 @@ recipe `c2-pairs.variant.yaml`의 연산 둘로 만듭니다.
 
 결과로 segment 1은 60–99.435 s `indexing`, `background_wanted: false`, `initiated: session`, `[S11, S14]`(S11은 software development, S14는 file indexing scenario)이 됩니다. 나머지는 `c2-p1a`와 같습니다.
 
-**compile된 모양.** arrive 2개(`code` normal, `tracker-miner-f` idle), wake 11,344개(timer 10,819, input 525 — `c2-p1a`와 같은 수), 2,346,535 byte. utilization은 파일 0.9238, segment 1 1.5272입니다. 편집기의 wake가 `c2-p1a`와 똑같은 이유는 seed가 같고 추첨이 task id로 열쇠가 걸려 있기 때문입니다(2.2절). 두 파일이 다른 곳은 `hog` task와 segment 1의 label뿐입니다.
+**compile된 모양.** arrive 2개(`code` normal, `tracker-miner-f` idle), wake 11,293개(timer 10,740, event 28, input 525 — `c2-p1a`와 같은 수), 2,339,912 byte. utilization은 파일 0.9238, segment 1 1.5272입니다. 편집기의 wake가 `c2-p1a`와 똑같은 이유는 seed가 같고 추첨이 task id로 열쇠가 걸려 있기 때문입니다(2.2절). 두 파일이 다른 곳은 `hog` task와 segment 1의 label뿐입니다.
 
 **정한 결정.**
 - 9.10 D6(측정된 indexer 자신의 표, 5.2절).
@@ -1036,7 +1036,7 @@ recipe `c2-pairs.variant.yaml`의 연산 둘로 만듭니다.
 
 `input: []`, focus game 0–86.385 s. 기본값 `oversubscribed`, seed 202.
 
-**compile된 모양.** arrive 19개(chain 17 + `steam` 둘), wake 26,010개(모두 timer), 12,888,039 byte. utilization 파일 9.3829, segment 0 0.9651, segment 1 28.5251(727.170 s의 CPU를 26.385 s에 몰아 센 값). query point 0 s, 60 s(`steam`이 둘이 됨), 86.385 s.
+**compile된 모양.** arrive 19개(chain 17 + `steam` 둘), wake 26,045개(timer 25,851, event 194), 12,892,487 byte. utilization 파일 9.3829, segment 0 0.9651, segment 1 28.5251(727.170 s의 CPU를 26.385 s에 몰아 센 값). query point 0 s, 60 s(`steam`이 둘이 됨), 86.385 s.
 
 **정한 결정.**
 - 9.10 D7(`c2-p2a`의 원하는 다운로드는 게임 중 사용자가 시작한 다른 게임의 설치라는 결정, 2026-10-01). 이유: Valve의 FAQ(`steam-downloads`)는 "Steam automatically pauses your downloads when a game is launched"라고 적고, steam-for-linux 이슈 #8821은 게임 중 Install을 누르면 바로 받기 시작한다고 보고합니다. 그래서 "게임 중 배경 update 다운로드"라는 옛 그림은 기본 동작에 어긋나고, "사용자가 직접 시작한 설치"가 실제로 일어나는 상황입니다. segment 1에 `initiated: user`가 붙은 이유입니다.
@@ -1065,7 +1065,7 @@ segment 1은 60–86.385 s `gaming`, `background_wanted: false`, `background: pa
 
 - **`package-upgrade`** — Ubuntu 24.04의 `apt-daily-upgrade.service`가 하루치 보안 업데이트(2026-07-27의 glibc 업데이트)를 설치하는 단계를 측정한 batch-loop archetype입니다. CPU의 대부분은 `locale-gen`이 돌리는 `localedef` 18번입니다.
 
-**compile된 모양.** arrive 19개, wake 26,010개, 3,396,114 byte, utilization 1.2706(segment 1 1.9651). query point 0 s, 60 s, 86.385 s.
+**compile된 모양.** arrive 19개, wake 26,045개, 3,400,562 byte, utilization 1.2706(segment 1 1.9651). query point 0 s, 60 s, 86.385 s.
 
 **정한 결정.**
 - 9.10 D3(원치 않는 anti-virus scan을 Ubuntu 기본 unattended upgrade로 바꾼 결정, 2026-10-01). 이유: ClamAV 문서는 스스로를 "not a traditional anti-virus or endpoint security suite"라고 부르고, 어떤 ClamAV package도 예약 scan을 싣지 않으며, ClamTk는 "no longer maintained"이고 Debian popcon에서 정기 사용이 0.11 %입니다. 반대로 `unattended-upgrades`는 Ubuntu 24.04 데스크톱 기본 layer에 있고 기본으로 켜져 매일 돕니다. `background_wanted: false`의 정의("work nobody asked for right now")에 맞는 실제 기본 작업입니다.
@@ -1089,7 +1089,7 @@ recipe의 연산 하나:
 
 - **`game-download-idle`** — `game-download`의 표, 수명, 크기 조정 규칙, 검증 기록을 YAML anchor로 그대로 공유하고, `declared_class: idle`과 짧은 modelling note만 자기 내용으로 가진 library 항목입니다.
 
-**compile된 모양.** arrive 19개(18개 normal, 다운로드 하나 idle), wake 26,010개, 12,888,047 byte(`c2-p2a`보다 8 byte 큼 — id 문자열과 class 문자열의 길이 차), utilization 9.3829. segment, label, attribute, event 시각이 `c2-p2a`와 모두 같습니다. `dataset/tools/tests/test_coreset.py`의 `test_idle_download_variant_differs_in_the_class_alone`가 "두 compile 결과는 다운로드 task의 class만 다르다"를 test합니다.
+**compile된 모양.** arrive 19개(18개 normal, 다운로드 하나 idle), wake 26,045개, 12,892,495 byte(`c2-p2a`보다 8 byte 큼 — id 문자열과 class 문자열의 길이 차), utilization 9.3829. segment, label, attribute, event 시각이 `c2-p2a`와 모두 같습니다. `dataset/tools/tests/test_coreset.py`의 `test_idle_download_variant_differs_in_the_class_alone`가 "두 compile 결과는 다운로드 task의 class만 다르다"를 test합니다.
 
 **왜 이 파일이 있나.** 이 파일은 recognition도 scheduling 이득도 직접 재지 않습니다. RQ0 gate spec의 `bounding_pair` line이 `c2-p2a`와 이 파일을 함께 읽습니다. 그 이유를 이해하려면 nice를 알아야 합니다.
 
@@ -1121,7 +1121,7 @@ P3(export 대 backup 쌍)는 다른 두 쌍과 성격이 다릅니다. 두 파�
 
 input 2–324 s, focus 0–326 s, operation `preview-render` 30 s. seed 203, 기본값 `oversubscribed`.
 
-**compile된 모양.** arrive 2개, wake 73,890개(모두 timer), 9,708,687 byte, utilization 파일 0.4401(segment 0 0.3893, segment 1 0.4515). query point 0 s, 60 s, 326 s.
+**compile된 모양.** arrive 2개, wake 73,832개(timer 59,667, event 14,165), 9,701,924 byte, utilization 파일 0.4422(segment 0 0.3915, segment 1 0.4537). query point 0 s, 60 s, 326 s.
 
 **정한 결정.**
 - 9.10 D10, D105–D107: export는 Kdenlive 자신의 export(4.16절과 같은 job).
@@ -1149,7 +1149,7 @@ recipe의 연산 둘:
 
 segment 1은 60–326 s `backup`, `background_wanted: true`, `initiated: scheduled`, `[S7, S15]`(S7은 video editing, S15는 backup/sync scenario)가 됩니다.
 
-**compile된 모양.** arrive 2개(`deja-dup`은 idle), wake 73,890개, 9,709,347 byte, utilization 0.8975(segment 1 1.0122). query point 0 s, 60 s, 326 s.
+**compile된 모양.** arrive 2개(`deja-dup`은 idle), wake 73,832개, 9,702,584 byte, utilization 0.8997(segment 1 1.0143). query point 0 s, 60 s, 326 s.
 
 **정한 결정.** 9.10 D8, D112–D125: Déjà Dup의 주간 incremental(4.19절과 같은 job). 9.10 D123, D125: segment 1은 backup이 그 안에서 끝나는 가장 작은 정수 초. 9.10 D162가 여유 0.337 s를 확인했습니다.
 
@@ -1211,7 +1211,7 @@ scoring spec의 C3(transition arc 그룹) term은 task별입니다. 주석은 "P
 
 input은 browser 2–58 s, writer 62–118 s, mailer 1,487–1,543 s. focus는 browser 0–60 s, writer 60–1,485 s, mailer 1,485–1,545 s. operation은 `page-load` 30 s, `send` 1,525 s입니다. build 동안(120–1,485 s)에는 input 창이 없지만 focus는 writer에 남습니다. 9.17의 authoring 규칙("does not leave when typing stops")이 그대로 적용된 모습입니다.
 
-**compile된 모양.** arrive 8개, spawn table 17,448개, wake 92,827개(timer 92,621, input 206), 18,781,853 byte, utilization 0.888(segment별 0.0031, 0.0053, 0.9597, 1.0251). query point는 0 s, 60 s, 120 s, 1,485 s, 1,545 s의 다섯입니다.
+**compile된 모양.** arrive 8개, spawn table 17,448개, wake 95,689개(timer 81,196, event 14,287, input 206), 19,159,698 byte, utilization 0.8894(segment별 0.003, 0.0052, 0.9596, 1.0638). query point는 0 s, 60 s, 120 s, 1,485 s, 1,545 s의 다섯입니다.
 
 mail segment가 tier 3인 이유는 grid의 규칙 때문입니다. `make`는 `depart`가 없는 finite task라서, grid는 도착 뒤의 모든 segment에 그 이름(과 자식 이름 `cc1`)을 셉니다. build가 실제로는 1,485 s 전에 끝나도 마찬가지입니다. telemetry도 같습니다. 위의 query point 표를 보면 1,485 s snapshot에 `cc1 ×2908`이 그대로 있습니다. 9.21 D2의 기록은 이 관례를 "the segment after a batch mode departs … still counts the finished job's names … The core set's table has the same convention; left as is"라고 적습니다.
 
@@ -1250,7 +1250,7 @@ mail segment가 tier 3인 이유는 grid의 규칙 때문입니다. `make`는 `d
 
 input은 browser 2–58 s, focus는 browser 0–60 s, game 60–300 s, video 300–420 s. operation `page-load` 30 s.
 
-**compile된 모양.** arrive 26개(browser 1, renderer 4, chain 17, chat 1, steam 1, player 2), wake 107,145개(timer 107,068, input 77), 13,997,908 byte, utilization 0.9006(segment별 0.0139, 1.5062, 0.1327). query point 0 s, 60 s, 300 s, 420 s.
+**compile된 모양.** arrive 26개(browser 1, renderer 4, chain 17, chat 1, steam 1, player 2), wake 107,190개(timer 93,466, event 13,647, input 77), 14,004,798 byte, utilization 0.9007(segment별 0.0145, 1.5062, 0.1327). query point 0 s, 60 s, 300 s, 420 s.
 
 **정한 결정.**
 - 9.10 D29: 순서는 design. 이 arc에는 후보 출처가 없었습니다.
@@ -1280,7 +1280,7 @@ input은 browser 2–58 s, focus는 browser 0–60 s, game 60–300 s, video 300
 
 input은 gimp 2–118 s, kdenlive 122–238 s. focus는 gimp 0–120 s, kdenlive 120–3,212 s. operation은 `unsharp-mask` 30 s, `preview-render` 150 s.
 
-**compile된 모양.** arrive 3개, wake 35,653개(모두 timer — GIMP와 Kdenlive는 keystroke 흐름이 없습니다), 5,332,574 byte, utilization 0.9417(segment별 0.0151, 0.0169, 1.0165). query point 0 s, 120 s, 240 s, 3,212 s.
+**compile된 모양.** arrive 3개, wake 36,477개(timer 23,613, event 12,864; input은 없음 — GIMP와 Kdenlive는 keystroke 흐름이 없습니다), 5,456,028 byte, utilization 0.9428(segment별 0.0233, 0.0176, 1.0173). query point 0 s, 120 s, 240 s, 3,212 s.
 
 **정한 결정.**
 - 9.10 D29: 순서는 design. SYSmark 30 ACC가 "photo editing beside a background encode"를 정의하므로 이런 겹침의 존재 근거입니다.
@@ -1332,7 +1332,7 @@ recipe `c4.variant.yaml`은 세 파일 모두 같은 연산 셋을 씁니다. `a
 
 segment는 하나, 0–1,594 s `compile`, `background_wanted: true`, `[S11, S2]`. input과 focus는 `c1-compile`과 같습니다(editor). seed 103(상속).
 
-**compile된 모양.** arrive 7개, spawn table 17,448개, wake 189,792개(timer 187,248, input 2,544), 31,563,205 byte, utilization 0.9994. query point는 0 s, 2 s, 30 s(`chrome ×5` 등장), 60 s(사라짐), 1,594 s의 다섯입니다. 30 s와 60 s의 두 점이 distractor의 순간입니다. 이때도 정답은 `compile/true`입니다.
+**compile된 모양.** arrive 7개, spawn table 17,448개, wake 189,727개(timer 185,773, event 1,410, input 2,544), 31,554,755 byte, utilization 0.9994. query point는 0 s, 2 s, 30 s(`chrome ×5` 등장), 60 s(사라짐), 1,594 s의 다섯입니다. 30 s와 60 s의 두 점이 distractor의 순간입니다. 이때도 정답은 `compile/true`입니다.
 
 **정한 결정.**
 - 9.10 D21, D132–D138: 끼어든 browser는 launch phase를 먼저 재생합니다(`meas-ci:desktop:2026-10-04b`). renderer 넷은 9.10 D152(`renderer-hidden`을 page thread가 가라앉은 뒤로 다시 잰 결정, 1,030 s grace-settle)에 맞춰 다시 추적한 launch 흐름을 씁니다(`meas-ci:desktop:2026-10-05b`). 9.10 D140의 기록에서 browser의 launch phase는 420.6 s이므로, 30 s 동안만 있는 이 Chrome은 처음부터 끝까지 launch 작업 중입니다.
@@ -1353,7 +1353,7 @@ segment는 하나, 0–1,594 s `compile`, `background_wanted: true`, `[S11, S2]`
 
 segment 0–60 s `gaming`, `true`, `[S9, S5]`. input 없음, focus game. seed 102.
 
-**compile된 모양.** arrive 19개, wake 27,177개(모두 timer), 3,671,081 byte, utilization 0.9638. query point 0 s, 30 s, 60 s.
+**compile된 모양.** arrive 19개, wake 27,205개(timer 24,590, event 2,615), 3,674,634 byte, utilization 0.9638. query point 0 s, 30 s, 60 s.
 
 **정한 결정.**
 - 9.10 D23: chat client는 메시지 없는 idle 상태, id는 `injected-chat`(예전 `injected-overlay`).
@@ -1374,7 +1374,7 @@ segment 0–60 s `gaming`, `true`, `[S9, S5]`. input 없음, focus game. seed 10
 
 segment 0–60 s `office`, `true`, `[S1, S2, S4, S16]`(S16(archive burst)은 archive/compression burst scenario). seed 101.
 
-**compile된 모양.** arrive 8개, wake 3,334개(`c1-office`와 같은 수 — 7z는 batch loop라 wake event가 없습니다), 443,509 byte, utilization 0.1270. query point 0 s, 30 s, 60 s. 60 s snapshot에는 `7z ×1`만 남습니다. finite task는 telemetry에서 사라지지 않기 때문입니다(`docs/data-contracts.md` §5: "a finite task that exits never disappears from telemetry").
+**compile된 모양.** arrive 8개, wake 3,328개(`c1-office`와 같은 수 — 7z는 batch loop라 wake event가 없습니다), 442,735 byte, utilization 0.1269. query point 0 s, 30 s, 60 s. 60 s snapshot에는 `7z ×1`만 남습니다. finite task는 telemetry에서 사라지지 않기 때문입니다(`docs/data-contracts.md` §5: "a finite task that exits never disappears from telemetry").
 
 **정한 결정.**
 - 9.10 D161(`c4-office`의 7z는 6 s, design, injection에 대한 9.10 D17의 예외라는 결정, 2026-10-06). 이유: 9.7이 측정한 job은 CPU 4,882–5,283 s입니다. 통째로 돌리면 `c4-office`가 약 5,100 s로 늘어나 `c1-office`와의 짝이 깨지고, 더 작은 입력을 정할 출처는 없습니다. 그래서 injection은 실험자의 개입(phase decision 3: 실험의 개입과 calibration 크기는 design)으로 보고 크기를 design으로 둡니다. recipe 주석은 "part of 9.7's measured archive of the Mahoney set, the set cached"라고 적습니다.
@@ -1489,7 +1489,7 @@ segment는 둘입니다. 0–20 s `browsing`, `background_wanted: true`, `[S2]`,
 
 - **`cpu-batch`의 `spoof` program** — 설계상 한 번의 끊기지 않는 RUN입니다. library의 `cpu-batch` 설명은 "The `chrome` spoof is one uninterrupted RUN by construction"이라고 적습니다.
 
-**compile된 모양.** arrive 6개(모두 `chrome`), wake 3,852개(`c1-browsing`과 같은 수), 514,442 byte, utilization 0.5164(segment별 0.0164, 0.7664). query point 0 s, 20 s, 60 s. 20 s의 snapshot은 `chrome ×6`으로, 개수만 하나 늘어납니다. 60 s snapshot에는 `chrome ×1`이 남는데, 끝난 spoof 작업이 telemetry에서 사라지지 않기 때문입니다.
+**compile된 모양.** arrive 6개(모두 `chrome`), wake 3,902개(`c1-browsing`과 같은 수), 521,043 byte, utilization 0.5176(segment별 0.0176, 0.7676). query point 0 s, 20 s, 60 s. 20 s의 snapshot은 `chrome ×6`으로, 개수만 하나 늘어납니다. 60 s snapshot에는 `chrome ×1`이 남는데, 끝난 spoof 작업이 telemetry에서 사라지지 않기 때문입니다.
 
 **정한 결정.**
 - 이 파일은 2026-08-28의 첫 core set부터 있었습니다. 이름 충돌로만 만든다는 원칙은 scenario catalog의 "names only, no paths" 결정에서 옵니다. catalog는 "Family 5 spoofing is authored as *name collision* (a process simply bearing a trusted name), which is exactly the stated resolution limit; path-mismatch detection is future work"라고 적습니다. 실행 파일 경로를 담으면 출처 없는 값이 생기고 recognition 주장을 오염시키기 때문에 경로는 schema에 없습니다.
@@ -1535,7 +1535,7 @@ recipe의 연산:
 
 segment는 둘입니다. 0–30 s `browsing`(S2, web browsing), 30–60 s `meeting`(S3 video conferencing과 S2). 둘 다 `background_wanted: true`이고, meeting segment는 `pre_committed_miss: true`입니다. input browser 2–58 s, focus browser 0–60 s, operation `page-load` 30 s. seed 105.
 
-**compile된 모양.** arrive 6개(모두 `chrome`), wake 3,852개, 681,137 byte, utilization 0.3144(segment별 0.0164, 0.6123). segment 1의 utilization이 큰 것은 통화의 launch phase가 처음 수십 초 동안 CPU를 꽉 쓰기 때문입니다(9.10 D140의 기록: 통화의 launch는 약 10–70 s에 포화). query point 0 s, 30 s, 60 s.
+**compile된 모양.** arrive 6개(모두 `chrome`), wake 3,902개, 687,738 byte, utilization 0.3155(segment별 0.0176, 0.6135). segment 1의 utilization이 큰 것은 통화의 launch phase가 처음 수십 초 동안 CPU를 꽉 쓰기 때문입니다(9.10 D140의 기록: 통화의 launch는 약 10–70 s에 포화). query point 0 s, 30 s, 60 s.
 
 **정한 결정.**
 - 처음 설계(2026-08-28)는 `c1-browsing`의 task를 그대로 두고 segment만 둘로 나눈 것이었습니다. Phase 3 archive는 이 파일을 "never seen", 곧 30 s에 아무 snapshot도 생기지 않는 파일로 기록합니다.
@@ -1556,7 +1556,7 @@ segment는 둘입니다. 0–30 s `browsing`(S2, web browsing), 30–60 s `meeti
 
 segment는 하나, 0–12,072 s `ambiguous`, `attributes: {dual_active: true}`, `[S9, S11]`. `background_wanted`는 없습니다. input 창은 편집기가 focus를 가진 아홉 구간(2–688 s, 1,376–2,064 s, … 11,008–11,696 s)이고, focus는 0 s 편집기에서 시작해 688 s마다 게임과 번갈아 18개 구간입니다. seed 601, 기본값 `oversubscribed`.
 
-**compile된 모양.** core set에서 가장 큰 파일입니다. arrive 19개(chain 17, `code`, `make`), spawn table 17,448개, wake 1,371,292개(timer 1,357,541, input 13,751), 187,601,795 byte, utilization 0.8388. query point 20개, 곧 0 s, 10 s(build 도착), 688 s부터 11,696 s까지 focus가 바뀌는 17번, 12,072 s입니다. 9.17 D1의 기록은 이 17번을 "the core set's only focus-only query points"라고 적습니다. 이름 집합은 그대로이고 focus만 바뀌는 query point가 core set에서 이 파일에만 있다는 뜻입니다.
+**compile된 모양.** core set에서 가장 큰 파일입니다. arrive 19개(chain 17, `code`, `make`), spawn table 17,448개, wake 1,370,845개(timer 1,351,112, event 5,982, input 13,751), 187,542,816 byte, utilization 0.8388. query point 20개, 곧 0 s, 10 s(build 도착), 688 s부터 11,696 s까지 focus가 바뀌는 17번, 12,072 s입니다. 9.17 D1의 기록은 이 17번을 "the core set's only focus-only query points"라고 적습니다. 이름 집합은 그대로이고 focus만 바뀌는 query point가 core set에서 이 파일에만 있다는 뜻입니다.
 
 **정한 결정.**
 - 2026-08-26 grill D21(dual-active label 규칙 비준): 진짜 애매한 dual-active 상태는 문서화된 resolution limit이고 "shipped as a third C6 file ('even the oracle cannot assign a label')"입니다.
@@ -1692,18 +1692,18 @@ photo, video-edit, render, transcode, backup은 GIMP와 Kdenlive라 keystroke가
 
 | 파일 | 0 s의 task(모두 26.385 s에 떠남) | input / operation | scenario | arrive | wake(timer/input) | utilization | RQ0 |
 |---|---|---|---|---|---|---|---|
-| `c7-browsing` | `chrome` ×5 + `unattended-upgr` | 2–24.385 s / `page-load` 13.1925 s | S2, S17 | 6 | 2,168 (2,084/84) | 1.0268 | 판정 |
-| `c7-office` | `soffice.bin`, `chrome` ×5, `thunderbird-bin` + upgrade | 2–24.385 s / 없음 | S1, S2, S4, S17 | 8 | 1,400 (1,299/101) | 1.0251 | 판정 |
-| `c7-mail` | `thunderbird-bin` + upgrade | 2–24.385 s / `send` 17.189821 s | S4, S17 | 2 | 5,308 (5,308/0) | 1.0545 | 보고 |
-| `c7-dev` | `code` + upgrade | 2–24.385 s / 없음 | S11, S17 | 2 | 2,823 (2,774/49) | 1.2129 | 판정 |
-| `c7-photo` | `gimp` + upgrade | 2–24.385 s / `unsharp-mask` 13.1925 s | S6, S17 | 2 | 214 (214/0) | 1.0967 | 판정 |
+| `c7-browsing` | `chrome` ×5 + `unattended-upgr` | 2–24.385 s / `page-load` 13.1925 s | S2, S17 | 6 | 2,233 (1,324/84) | 1.0295 | 판정 |
+| `c7-office` | `soffice.bin`, `chrome` ×5, `thunderbird-bin` + upgrade | 2–24.385 s / 없음 | S1, S2, S4, S17 | 8 | 1,399 (1,298/101) | 1.0251 | 판정 |
+| `c7-mail` | `thunderbird-bin` + upgrade | 2–24.385 s / `send` 17.189821 s | S4, S17 | 2 | 2,579 (2,579/0) | 1.0802 | 보고 |
+| `c7-dev` | `code` + upgrade | 2–24.385 s / 없음 | S11, S17 | 2 | 2,814 (2,761/49) | 1.2129 | 판정 |
+| `c7-photo` | `gimp` + upgrade | 2–24.385 s / `unsharp-mask` 13.1925 s | S6, S17 | 2 | 46 (46/0) | 1.0965 | 판정 |
 | `c7-meeting` | `chrome`(통화) + upgrade | 없음 | S3, S17 | 2 | 0 | 1.2400 | 판정 |
-| `c7-gaming` | chain 17 + `steam` + upgrade | 없음 | S9, S17 | 19 | 7,937 (7,937/0) | 1.9149 | 판정 |
+| `c7-gaming` | chain 17 + `steam` + upgrade | 없음 | S9, S17 | 19 | 7,881 (7,881/0) | 1.9149 | 판정 |
 | `c7-media` | `mpv` ×2 + upgrade | 없음 | S13, S17 | 3 | 0 | 1.1267 | 보고 |
-| `c7-video-edit` | `kdenlive` + upgrade | 2–24.385 s / `preview-render` 13.1925 s | S7, S17 | 2 | 9,836 (9,836/0) | 1.5618 | 판정 |
-| `c7-idle` | 세션 넷 + upgrade | 없음(focus도 없음) | S18, S17 | 5 | 46 (46/0) | 1.0007 | 보고 |
+| `c7-video-edit` | `kdenlive` + upgrade | 2–24.385 s / `preview-render` 13.1925 s | S7, S17 | 2 | 1,843 (1,843/0) | 1.5878 | 판정 |
+| `c7-idle` | 세션 넷 + upgrade | 없음(focus도 없음) | S18, S17 | 5 | 44 (44/0) | 1.0007 | 보고 |
 
-숫자는 2026-10-14의 compile 결과와 `build.manifest.json`에서 셌습니다. 모든 파일의 query point는 0 s와 26.385 s 둘입니다. utilization이 1을 넘는 것은 26.385 s짜리 job이 26.385 s 파일 안에 통째로 있고(그것만으로 1.0) 그 위에 base의 부하가 얹히기 때문입니다. building plan §5a는 이 결과를 "For C7 that puts the interactive counterparts at 1.0007–1.5618 lanes and `c7-gaming` at 1.9149"라고 적습니다.
+숫자는 2026-10-31의 compile 결과와 `build.manifest.json`에서 셌습니다. 모든 파일의 query point는 0 s와 26.385 s 둘입니다. utilization이 1을 넘는 것은 26.385 s짜리 job이 26.385 s 파일 안에 통째로 있고(그것만으로 1.0) 그 위에 base의 부하가 얹히기 때문입니다. building plan §5a는 이 결과를 "For C7 that puts the interactive counterparts at 1.0007–1.5878 lanes and `c7-gaming` at 1.9149"라고 적습니다.
 
 > **왜 이렇게 정했나.** C7(attribute counterpart 그룹) 파일이 `oversubscribed`가 아니라 `calibration`을 명시하는 이유는 Phase 7 spec decision 7과 7.5 grill (a)가 적습니다. Phase 7 archive decision 8은 "`oversubscribed` cannot hold for a uniform op (gaming's base alone is 1.46)"라고 적고, 7.5 grill은 "a counterpart's demand is its base's plus the injected job by construction; the pair, not the window, is the control"이라고 적습니다. counterpart의 demand는 구성상 base의 demand에 넣은 job을 더한 것이고, 통제 장치는 demand 창이 아니라 짝이라는 뜻입니다.
 
@@ -1713,11 +1713,11 @@ photo, video-edit, render, transcode, backup은 GIMP와 Kdenlive라 keystroke가
 
 **`c7-office`.** base의 task 넷(writer, browser, renderer ×4, mail)이 모두 26.385 s에 떠납니다. operation이 없습니다. 판정 파일이고 venue 둘, corner 둘의 variant가 붙습니다.
 
-**`c7-mail`.** 이 파일만 keystroke가 하나도 없습니다. `c1-mail`의 keystroke 35개가 모두 45.9–53.1 s에 있기 때문입니다. 그래서 9.14 decision 2의 2026-10-09 수정이 이 파일을 판정에서 뺐습니다. 기록된 이유는 "its only term cannot read keystroke latency; it is reporting-only with its term read on the mailer's own wakes"입니다. scoring spec도 이 파일만 `base`를 선언하지 않고 mailer의 timer wake를 읽는 term(`timer_latency`)을 따로 둡니다("no `base`, the terms differ"). 기각된 안도 적혀 있습니다. 파일을 다시 자르는 것(dataset 변경이고 compiler에 없는 replay offset 연산이 필요)과, 두 파일 모두를 mailer 자신의 wake로 읽는 것입니다. 결과로 mail mode의 attribute 짝은 측정되지 않습니다.
+**`c7-mail`.** 이 파일만 keystroke가 하나도 없습니다. `c1-mail`의 keystroke 35개가 모두 45.9–53.1 s에 있기 때문입니다. 그래서 9.14 decision 2의 2026-10-09 수정이 이 파일을 판정에서 뺐습니다. 기록된 이유는 "its only term cannot read keystroke latency; it is reporting-only with its term read on the mailer's own wakes"입니다. scoring spec도 이 파일만 `base`를 선언하지 않고 mailer 자신의 wake를 읽는 term(`app_latency`)을 따로 둡니다("no `base`, the terms differ"). 기각된 안도 적혀 있습니다. 파일을 다시 자르는 것(dataset 변경이고 compiler에 없는 replay offset 연산이 필요)과, 두 파일 모두를 mailer 자신의 wake로 읽는 것입니다. 결과로 mail mode의 attribute 짝은 측정되지 않습니다.
 
 **`c7-dev`.** 2장의 worked example입니다. 판정 파일이고 venue 둘, corner 둘, replay 하나가 붙습니다.
 
-**`c7-photo`.** unsharp mask가 13.1925 s로 옮겨졌습니다. keystroke 흐름이 없으므로 term은 GIMP의 `timer_latency` P99입니다. 판정 파일이고 venue variant 둘이 붙습니다.
+**`c7-photo`.** unsharp mask가 13.1925 s로 옮겨졌습니다. keystroke 흐름이 없으므로 term은 GIMP의 `app_latency` P99입니다. 판정 파일이고 venue variant 둘이 붙습니다.
 
 **`c7-meeting`.** 통화 task(`voice`, `chrome`)와 upgrade 둘입니다. 9.14 decision 2가 이 파일을 다시 판정에 넣었습니다. 기록된 이유는 "the measured call's cycle runs consume the boot slice in about a fifth of its cycles, so the tie with the boot default that moved it out in 8.8 no longer holds"였습니다. "about a fifth"는 `cycle_run`의 분위 표(p1부터 p99.9까지 열 점)를 십분위로 읽은 값이어서, 9.16 D1(2026-10-17, `c7-meeting`을 판정 파일로 두고 이유를 맞는 수치로 다시 적은 결정)이 이유를 다시 적었습니다. 9.16 D1은 측정된 통화의 cycle이 약 스무 번에 한 번(측정된 표에서 4.9 %, compile된 파일에서 5.5 %) 10 ms slice를 다 쓴다고 적었습니다. 이것은 burst 하나를 slice와 견준 읽기입니다. 한 level에서 쓴 CPU는 burst를 넘어 boost까지 쌓이므로(OSTEP §8.4의 Rule 4), 2026-10-31에 이유를 boost 구간당 CPU로 다시 적었습니다. 통화는 100 ms boost 구간마다 CPU를 평균 23.9 ms 써서, 고정 설정 아래에서 boost 구간의 97 %에서 강등되고 작업의 20 %가 마감을 놓칩니다(reference simulator). 그래서 boot 기본 설정과의 동률이 깨졌습니다. 다만 RQ0 gate spec의 note는 "the cap axis is inert and the gap reads EDF against the drawn algorithm"이라고 적습니다. EDF는 deadline class인 통화를 상한과 상관없이 먼저 돌리므로, 이 파일의 gap은 attribute row의 차이(상한)가 아니라 mode recognition(EDF냐 아니냐)을 읽습니다. venue variant 둘과 trace-replay variant 하나가 붙습니다.
 
@@ -1725,7 +1725,7 @@ photo, video-edit, render, transcode, backup은 GIMP와 Kdenlive라 keystroke가
 
 **`c7-media`.** 판정 파일이 아닙니다. 9.14 decision 2의 이유는 "a 32 ms worst case against a 33.3 ms period, a 1.3 ms margin stated"였습니다. 영상 player의 최악 cycle 16.0 ms에 boot MLFQ가 강등 뒤에 줄 수 있는 20 ms Q1 slice 한 번을 더한 값인데, 이 합은 36 ms라 33.3 ms 주기를 넘습니다(2026-10-31에 바로잡음). 지금의 이유는 compile된 파일에서 나옵니다. 그 최악 영상 cycle은 7.28 ms이고, reference simulator에서 고정 설정 아래 영상 player는 boost 구간의 88 %에서 강등되지만 어느 player도 마감을 놓치지 않습니다. 그래서 어떤 row에서도 headroom이 없습니다.
 
-**`c7-video-edit`.** preview render가 13.1925 s로 옮겨졌습니다. term은 Kdenlive의 `timer_latency` P99입니다. 판정 파일이고 venue variant 둘이 붙습니다.
+**`c7-video-edit`.** preview render가 13.1925 s로 옮겨졌습니다. term은 Kdenlive의 `app_latency` P99입니다. 판정 파일이고 venue variant 둘이 붙습니다.
 
 **`c7-idle`.** 세션 process 넷이 upgrade 옆에 남습니다. focus가 없고 scoring 항목도 없습니다. 이 파일에는 세 결정이 얽혀 있습니다.
 
@@ -1754,7 +1754,7 @@ recipe의 연산:
 
 `spawn_count`가 없는 것에 주의하십시오. 이 archetype의 `binding_params`는 `parallelism_cap`과 `child_name` 둘뿐입니다. job의 순서와 수는 측정된 landing 하나(9.10 D59: landing 23, medoid)에서 옵니다.
 
-**compile된 모양.** arrive 2개(`code`, `dkms`), spawn table 9,980개, `fork_cap` 48, wake 25,391개(timer 24,993, input 398), 7,060,652 byte, utilization 1.1866. query point 0 s와 225.458 s. 첫 snapshot에는 자식 이름이 개수와 함께 다 보입니다. `sh ×2253`, `x86_64-linux-gn ×1557`, `cc1 ×1557`, `as ×1412`, `rm ×1644`, `mkdir ×1125`, `dirname ×232`, `fixdep ×200`입니다(합 9,980). `dkms`와 `cc1`이 tier 3이라 segment는 tier 3이고, 이것은 base `c1-compile`(`cc1` 때문에 tier 3)과 같습니다.
+**compile된 모양.** arrive 2개(`code`, `dkms`), spawn table 9,980개, `fork_cap` 48, wake 25,410개(timer 24,903, event 109, input 398), 7,063,143 byte, utilization 1.1866. query point 0 s와 225.458 s. 첫 snapshot에는 자식 이름이 개수와 함께 다 보입니다. `sh ×2253`, `x86_64-linux-gn ×1557`, `cc1 ×1557`, `as ×1412`, `rm ×1644`, `mkdir ×1125`, `dirname ×232`, `fixdep ×200`입니다(합 9,980). `dkms`와 `cc1`이 tier 3이라 segment는 tier 3이고, 이것은 base `c1-compile`(`cc1` 때문에 tier 3)과 같습니다.
 
 **정한 결정.**
 - Phase 7의 7.3(2026-09-10): batch counterpart의 이름 규칙(Phase 7 spec decision 6)에 따라 `compile/false`는 `make` → `dkms`로 이름을 바꿨습니다. 이름 검증 workflow(`meas-ci:names:2`)가 Ubuntu, Fedora, Arch container에서 `dkms`를 runtime 수준으로 확인했고, Fedora는 kernel-install hook과 `dkms.service`까지 싣고 있었다고 archive는 적습니다.
@@ -1787,7 +1787,7 @@ recipe의 연산:
 
 job은 바뀌지 않습니다. 같은 `file-indexer`, 같은 이름 `tracker-miner-f`, 같은 `total_work: 39.435s`를 0 s로 당기고, 파일을 C = 39.435 s에서 자릅니다.
 
-**compile된 모양.** arrive 2개(`tracker-miner-f`는 idle), wake 4,631개(timer 4,604, input 27), 1,459,981 byte, utilization 1.0937. query point 0 s와 39.435 s. tier 3.
+**compile된 모양.** arrive 2개(`tracker-miner-f`는 idle), wake 4,619개(timer 4,584, event 8, input 27), 1,458,428 byte, utilization 1.0936. query point 0 s와 39.435 s. tier 3.
 
 **pre-committed miss가 아닌 이유.** 이 파일의 label(`false`)은 Tracker의 기본 성격과 맞습니다. 2026-09-10 memo §4.2는 "S14의 indexer가 기본적으로 unwanted라 recognizer가 맞힐 수 있는 쪽"이라고 적습니다. miss는 반대편 `c1-indexing`에 있습니다.
 
@@ -1821,29 +1821,29 @@ job은 바뀌지 않습니다. 같은 `file-indexer`, 같은 이름 `tracker-min
 
 ### `c7-ml-train`
 
-base `c1-ml-train`의 앞 C = 1,389.885 s. training(`python`, `cpu-batch` `python3`)이 0 s에 도착하고 편집기가 1,389.885 s에 떠납니다. segment `ml-train`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S11, S12]`. input 2–1,387.885 s(`slice_of` 2–1,610 s). arrive 2개, wake 158,589개(timer 156,836, input 1,753), 20,825,570 byte, utilization 1.1405. query point 0 s, 1,389.885 s.
+base `c1-ml-train`의 앞 C = 1,389.885 s. training(`python`, `cpu-batch` `python3`)이 0 s에 도착하고 편집기가 1,389.885 s에 떠납니다. segment `ml-train`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S11, S12]`. input 2–1,387.885 s(`slice_of` 2–1,610 s). arrive 2개, wake 158,589개(timer 156,109, event 727, input 1,753), 20,825,630 byte, utilization 1.1405. query point 0 s, 1,389.885 s.
 
 C는 9.10 D90의 CPU 총량이고, 길이 형식은 recipe가 적듯 "D78's form"입니다. 편집기 P99(input) 하나로 채점됩니다. RQ0 판정 파일이며 `layer1_exclusions`에 들어 있습니다. venue 둘, corner 둘의 variant가 붙고, corner는 training run의 두 block 값(`python3_run` ±27.3 %, `python3_block` ±10.8 %)을 움직입니다.
 
 ### `c7-render`
 
-base `c1-render`의 앞 C = 16.545 s. export(`kdenlive_render`)가 0 s에 도착하고 편집기가 16.545 s에 떠납니다. segment `render`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S7]`. input 2–14.545 s, operation `preview-render` 8.2725 s(창의 가운데). 9.10 D111은 이 preview render가 편집기가 떠나는 순간 잘린다고 기록합니다("cut at the editor's departure, ~8.3 s of it"). arrive 2개, wake 6,619개(모두 timer), 861,757 byte, utilization 1.6189. query point 0 s, 16.545 s.
+base `c1-render`의 앞 C = 16.545 s. export(`kdenlive_render`)가 0 s에 도착하고 편집기가 16.545 s에 떠납니다. segment `render`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S7]`. input 2–14.545 s, operation `preview-render` 8.2725 s(창의 가운데). 9.10 D111은 이 preview render가 편집기가 떠나는 순간 잘린다고 기록합니다("cut at the editor's departure, ~8.3 s of it"). arrive 2개, wake 6,452개(timer 1,067, event 5,385), 839,988 byte, utilization 1.5416. query point 0 s, 16.545 s.
 
-편집기 P99(timer)로 채점되고, RQ0 판정 파일이며 `layer1_exclusions`에 있습니다. venue variant 둘이 붙습니다.
+편집기 P99(app)로 채점되고, RQ0 판정 파일이며 `layer1_exclusions`에 있습니다. venue variant 둘이 붙습니다.
 
 ### `c7-transcode`
 
-base `c1-transcode`의 앞 C = 2,970.871 s. encode(`HandBrakeCLI`)가 0 s에 도착합니다. segment `transcode`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S8, S7]`. input 2–2,968.871 s, operation `preview-render` 1,485.4355 s(창의 가운데, 9.10 D44와 D96). arrive 2개, wake 632,587개(모두 timer), 95,061,365 byte(core set에서 세 번째로 큼), utilization 1.3727. query point 0 s, 2,970.871 s.
+base `c1-transcode`의 앞 C = 2,970.871 s. encode(`HandBrakeCLI`)가 0 s에 도착합니다. segment `transcode`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S8, S7]`. input 2–2,968.871 s, operation `preview-render` 1,485.4355 s(창의 가운데, 9.10 D44와 D96). arrive 2개, wake 630,201개(timer 558,149, event 72,052), 94,713,607 byte(core set에서 세 번째로 큼), utilization 1.3712. query point 0 s, 2,970.871 s.
 
-편집기 P99(timer)로 채점되고, RQ0 판정 파일이며 `layer1_exclusions`에 있습니다. venue variant 둘이 붙습니다.
+편집기 P99(app)로 채점되고, RQ0 판정 파일이며 `layer1_exclusions`에 있습니다. venue variant 둘이 붙습니다.
 
 ### `c7-backup`
 
-base `c1-backup`의 앞 C = 165.668 s. backup(`deja-dup`)이 0 s에 도착합니다. segment `backup`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S7, S15]`. input 2–163.668 s, operation `preview-render` 82.834 s. arrive 2개(`deja-dup`은 idle), wake 39,672개(모두 timer), 5,200,773 byte, utilization 1.4032. query point 0 s, 165.668 s.
+base `c1-backup`의 앞 C = 165.668 s. backup(`deja-dup`)이 0 s에 도착합니다. segment `backup`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S7, S15]`. input 2–163.668 s, operation `preview-render` 82.834 s. arrive 2개(`deja-dup`은 idle), wake 40,176개(timer 29,382, event 10,794), 5,267,063 byte, utilization 1.4004. query point 0 s, 165.668 s.
 
 > **왜 이렇게 정했나.** 9.10 D9(`c7-backup`은 예약 run의 label flip으로 남고 그 전제를 다시 적는다는 결정, 2026-10-01)가 이유를 적습니다. 자기 이름으로 도는 원치 않는 backup은 있습니다. dpkg의 `dpkg-db-backup.timer`가 매일 돕니다. 그러나 Mint 22.1 데스크톱 하나에서 관찰했을 때 "finished in the second it started"였고, changelog는 "A sub-second job cannot hold a backup segment"라고 적습니다. 1초 안에 끝나는 일로는 backup segment를 채울 수 없으니, 같은 예약 run에 label만 뒤집는 형식을 지킨다는 뜻입니다.
 
-편집기 P99(timer) 하나로 채점됩니다. RQ0에서는 보고 파일이고(idle class) `layer1_exclusions`에 있습니다.
+편집기 P99(app) 하나로 채점됩니다. RQ0에서는 보고 파일이고(idle class) `layer1_exclusions`에 있습니다.
 
 ## 10.10 의도만 다른 다섯 cell
 
@@ -2281,7 +2281,7 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 | headroom | 한 workload에서 얻을 수 있는 개선의 여지 |
 | term | 채점 항목 하나. entity, metric, aggregate, weight |
 | `input_latency` P99 | keystroke가 온 순간부터 그 처리가 시작되기까지 걸린 시간의 99번째 백분위 |
-| `timer_latency` P99 | application 자신의 timer wake가 온 순간부터 그 처리가 시작되기까지 걸린 시간의 99번째 백분위 |
+| `app_latency` P99 | application 자신의 wake(`timer:`와 `event:`)가 온 순간부터 그 처리가 시작되기까지 걸린 시간의 99번째 백분위. 버려진 timer wake는 붙들려 있던 wake의 처리 시작까지 |
 | `ready_wait` P99 | 깨어난 task가 CPU를 받기까지 기다린 시간의 99번째 백분위 |
 | `job` miss rate | 주기 task가 마감을 놓친 비율 |
 | turnaround / progress | batch job이 끝나기까지 걸린 시간 / 파일 안에서 받은 CPU |
@@ -2374,7 +2374,7 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 | `declared_class` | dataset의 모든 task 기록에 실리는 scheduling class(`normal`, `idle`) |
 | nice | Linux normal class 안의 가중치. nice 10은 nice 0 옆에서 CPU의 약 10분의 1 |
 | wake | 잠든 task가 다시 실행 가능해지는 사건 |
-| channel | wake가 오는 경로의 이름(`timer:<id>`, `input:<id>`) |
+| channel | wake가 오는 경로의 이름(`timer:<id>`, `event:<id>`, `input:<id>`) |
 | TIMER | 정해진 주기로 task를 깨우는 primitive(drift 없음) |
 | LOOP | 명령 목록을 되풀이하는 VM 내부 제어 흐름 |
 | fork / spawn table / `fork_cap` | 자식 process 만들기 / compiler가 미리 뽑아 둔 자식 목록 / 동시에 살아 있을 수 있는 자식 수 상한 |

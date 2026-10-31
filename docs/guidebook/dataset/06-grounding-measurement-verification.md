@@ -1,6 +1,6 @@
 # 6권 · 근거, 측정, 검증: 숫자 하나가 믿을 수 있게 되는 길
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-30
+> Status: draft · Created 2026-10-14 · Updated 2026-10-31
 
 **데이터셋의 숫자와 구조는 어떤 기준으로 근거를 얻고, 우리가 직접 잰 것은 어떻게 재고 확인했으며, 틀린 것은 어떻게 찾아내 고쳤나.**
 
@@ -799,13 +799,13 @@ family마다 세부는 다르지만, job 하나의 뼈대는 같습니다. `back
 - **wake**(깨어남): "A schedule-in preceded by a wakeup event for that thread since its last sleep; a resume after preemption is folded into the wake it continues." 스레드가 잠들었다가 누군가에게 깨워져 CPU에 올라가는 것이 wake 하나입니다. **schedule-in**은 스레드가 CPU를 받는 순간입니다. **preemption**(선점)은 스레드가 스스로 잠들지 않았는데 scheduler가 CPU를 빼앗아 다른 스레드에 주는 것입니다. 선점당했다가 다시 올라가는 것은 새 wake가 아니라 이전 wake의 연장으로 셉니다. 웹으로 비유하면, `await`에서 잠들었다 깨어나는 것이 wake이고, 같은 callback이 time slice 때문에 잠시 밀렸다 이어지는 것은 같은 실행의 연속입니다.
 - **run**: wake 하나의 CPU 시간. 선점으로 끊긴 조각들은 합칩니다.
 - **gap**: 한 component의 연속된 wake 사이 시간. 9.5 D71 이후로 gap은 component의 모든 스레드를 합친 wake 시각들 위에서 재고, 관찰 구간을 고리처럼 이어 마지막 wake의 gap이 첫 wake로 넘어가게 합니다. 그래서 "the gaps sum to the span, one per wake, so the rate a gap table implies is the rate measured." gap 표가 암시하는 wake 빈도가 측정된 빈도와 정확히 같아집니다.
-- **component**: 한 프로세스 역할 안의 스레드 이름(comm) 하나(예: `gpu/Chrome_ChildIOT`, `pid1/systemd`). `chat-client`와 `game-client`에서는 9.8 desktop slice의 규칙대로 tree의 프로세스들을 가로지른 comm 하나입니다. 9.5 D67은 "a component is identified by its process role and comm together"로 정했습니다. component는 wake 빈도가 큰 순서로 단계 wake의 95 %를 덮을 때까지 고르고, 나머지는 **residual**(나머지) 하나로 묶습니다.
+- **component**: 한 프로세스 역할 안의 스레드 이름(comm) 하나(예: `gpu/Chrome_ChildIOT`, `pid1/systemd`). `chat-client`와 `game-client`에서는 9.8 desktop slice의 규칙대로 tree의 프로세스들을 가로지른 comm 하나입니다. 9.5 D67은 "a component is identified by its process role and comm together"로 정했습니다. component마다 wake는 그 wake 사슬이 시작한 곳에 따라 둘로 나뉩니다(2026-10-31). 응용 tree의 스레드가 깨운 wake는 그 스레드 자신의 마지막 wake가 시작한 곳을 물려받고, X server가 전달한 wake도 같은 식으로 거슬러 올라갑니다. 사슬이 timer interrupt(유휴 CPU에서 돈 wakeup)에서 시작하면 **timer part**이고, 그 밖(측정의 입력 재생, 다른 프로세스, kernel thread)에서 시작하면 **event part**(`channel: event`)입니다. channel마다 따로, component는 wake 빈도가 큰 순서로 단계 wake의 95 %를 덮을 때까지 고르고, 나머지는 그 channel의 **residual**(나머지) 하나로 묶습니다.
 - **table**(표): "the ten pooled quantiles p1 … p99.9, the sample's minimum and maximum, and the measured mean of the samples in each of the eleven intervals they bound". 열 개의 분위수(p1, p5, p10, p25, p50, p75, p90, p95, p99, p99.9), 최솟값과 최댓값, 그리고 그 열두 값이 나누는 열한 구간 각각의 실제 평균. 구간 평균을 함께 들고 다니므로 표에서 뽑은 값의 평균이 표본의 평균과 같아집니다(`distribution.py`의 docstring: "so a table's mean is the sample's mean").
 
 entry의 종류에 따라 담는 것이 다릅니다.
 
 - **타이핑 entry**(`office-writer`, `code-editor`, `mail-client`, `web-browser`): component들과 함께 **per-input run**(입력 하나당 run)을 담습니다. 9.5 D13의 "window rule"에 따라 "all run time of the process tree until the next input minus the idle rate", 곧 한 입력에서 다음 입력까지 process tree 전체가 쓴 CPU에서 유휴 상태의 기본 소비를 뺀 값입니다. 음수는 0으로 자릅니다(9.5 D13). 유휴 속도보다 조용한 창은 입력의 일을 갖지 않습니다.
-- **operation**: 벤치마크가 정의한 무거운 동작(GIMP의 unsharp mask, Kdenlive의 preview render, Chrome의 page load, Thunderbird의 send)은 지속 시간 표와 자기 component들을 담습니다.
+- **operation**: 벤치마크가 정의한 무거운 동작(GIMP의 unsharp mask, Kdenlive의 preview render, Chrome의 page load, Thunderbird의 send)은 지속 시간 표, 측정한 조작마다 가장 큰 run의 표와 그 channel(창마다 시작하는 순간 한 번 싣는 run, timer-wakes-by-origin spec 결정 17), 그리고 그 run들을 뺀 자기 component들을 담습니다.
 - **재생과 통화 entry**: 매체의 주기마다 periodic job 하나 — 주기(`period`)와 주기당 CPU(`cycle_run`)(9.5 D75).
 - **build, 일괄, 백그라운드 entry**: "runs between voluntary blocks and the block after each run", 곧 스스로 잠들기 전까지 연속으로 쓴 CPU 덩어리와, 그 뒤 잠들어 있던 시간의 표(9.6 D21, D22, D25; 9.7 D29). **voluntary block**은 스레드가 I/O나 다른 사건을 기다리며 스스로 CPU를 내려놓는 것입니다.
 

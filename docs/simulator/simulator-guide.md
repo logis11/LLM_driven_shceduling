@@ -70,7 +70,7 @@ Open any file in `dataset/build/coreset-single/` and look at its `events` key. I
 
 Reading it in words: at time 0, a task exists; call it `editor` internally (`id`), it wears the process name `code` (`name` — bookkeeping label only, never scheduling input), the user will close it at exactly t = 180 s (`depart`), and here is its complete pre-written script (`program`) — the alternating waits and CPU bursts it will perform. The last two fields appear only on orchestrator tasks like `make`: the pre-written list of children it will launch, and how many may be alive at once. `declared_class` is the scheduling class the program declares for itself — `normal`, or `idle` for a program that sets SCHED_IDLE on itself (e.g. the file indexer and the backup): an `idle` task runs only when no task of another class is runnable and is preempted at once when one wakes, under every algorithm, below whatever the configured policy decides (`../data-contracts.md` §4). Every task record carries it, each spawn-table entry included.
 
-The illustration simplifies what the compiled files show: `c1-compile`'s `make` carries `fork_cap` 48 (§4, FORK), and a measured editor waits for its own timer components' wakes (`timer:<id>`) as well as for keystrokes — `c1-dev`'s editor gets 6,456 of those against 186 keystrokes.
+The illustration simplifies what the compiled files show: `c1-compile`'s `make` carries `fork_cap` 48 (§4, FORK), and a measured editor waits for its own wakes (`timer:<id>` where the measured wake's chain starts at a timer, `event:<id>` where it starts elsewhere) as well as for keystrokes — `c1-dev`'s editor gets 6,443 timer and 19 event wakes against 186 keystrokes.
 
 **"An external stimulus arrives."** At its stated time, the outside world pokes a task — a keystroke lands, a network reply comes back:
 
@@ -78,7 +78,7 @@ The illustration simplifies what the compiled files show: `c1-compile`'s `make` 
 { "op": "wake", "t": 2098333, "channel": "input:editor", "target": "editor" }
 ```
 
-In words: at t ≈ 2.098 s, something arrives on the mailbox named `input:editor`, and the task `editor` — if it's currently waiting on that mailbox — becomes runnable. Wakes on `input:<id>` are the simulated human's hands; most wake events, though, are a measured program's own timer-component wakes on `timer:<id>`. All are pinned to absolute times, so every experimental condition faces the identical user and the identical program.
+In words: at t ≈ 2.098 s, something arrives on the mailbox named `input:editor`, and the task `editor` — if it's currently waiting on that mailbox — becomes runnable. Wakes on `input:<id>` are the simulated human's hands; most wake events, though, are a measured program's own wakes — on `timer:<id>` where the measured wake's chain starts at a timer, on `event:<id>` where it starts elsewhere (the measurement's input, another process, a kernel thread; 2026-10-31). All are pinned to absolute times, so every experimental condition faces the identical user and the identical program.
 
 That's the entire input format: arrivals and wakes, nothing else. Which leaves one question — how does a task *end*? Three ways, and you can tell which applies from the arrive event alone:
 
@@ -146,7 +146,7 @@ In the compiled coreset, TIMER appears in shapes like the frame producer of the 
 ```
 
 ### `{ "op": "WAIT", "channel": "…" }`
-Block until a wake addressed to that channel arrives — either an exogenous `wake` event from the file, or a `WAKE` instruction executed by another task. This is how "editor waits for a keystroke" and "pipeline stage waits for its upstream" both work. No `wake` event or `WAKE` in a file targets an orchestrator, so nothing completes its `WAIT children:<id>` this way; its proposed rule is under FORK below.
+Block until a wake addressed to that channel arrives — either an exogenous `wake` event from the file, or a `WAKE` instruction executed by another task. This is how "editor waits for a keystroke" and "pipeline stage waits for its upstream" both work. A wake that comes first is held for the task, by the channel's kind — §9.1. No `wake` event or `WAKE` in a file targets an orchestrator, so nothing completes its `WAIT children:<id>` this way; its proposed rule is under FORK below.
 
 ### `{ "op": "WAKE", "target": "<task-id>" }`
 Make the target task runnable (it's the sending half of task-to-task WAIT/WAKE edges). The gaming files use chains of these: a frame source ticks on a TIMER, RUNs, WAKEs the next stage, which RUNs and WAKEs the next — a 17-task bucket brigade (the head, `wineserver` and fifteen further members), once per frame. The target may be any task of the file, a spawn-table child included: a build's object job wires its six members to one another this way, each waking the next in the job's parent-child order, and `sh`, ending the job, wakes the other five to their EXITs.
@@ -159,7 +159,7 @@ After its last FORK an orchestrator waits on `children:<id>`, its own id — `ma
 Worked example of the cap, on an illustrative table of single-process children: `make` has `fork_cap: 8` and rattles off eight FORKs — children c1…c8 now exist and compete for the lane alongside everyone else. Make reaches its ninth FORK while all eight are still alive: the FORK **blocks**. At some later, scheduler-dependent moment c3 happens to finish and EXITs; a slot opens; make's blocked FORK completes and c9 is born. Note what this implies: c9's start time depends on how the scheduler treated c1–c8 — starve the compile family and the whole table drains slowly; favor it and the pipeline stays full. The total *work* is identical either way; the *shape in time* is not.
 
 ### `{ "op": "LOOP", "count": N | "unbounded", "body": [ … ] }`
-Pure control flow — it generates no event of its own; the task simply cycles through the body's instructions. `count: N` repeats N times. `count: "unbounded"` repeats forever and is legal only for segment-bound tasks: the loop's true terminator is the task's pinned `depart`. (Bounded repetition with per-iteration variety is instead unrolled flat by the compiler — that's why editor programs are thousands of literal WAIT/RUN pairs — 6,642 in `c1-dev`'s editor — while a game frame loop is one compact unbounded LOOP.)
+Pure control flow — it generates no event of its own; the task simply cycles through the body's instructions. `count: N` repeats N times. `count: "unbounded"` repeats forever and is legal only for segment-bound tasks: the loop's true terminator is the task's pinned `depart`. (Bounded repetition with per-iteration variety is instead unrolled flat by the compiler — that's why editor programs are thousands of literal WAIT/RUN pairs — 6,648 in `c1-dev`'s editor — while a game frame loop is one compact unbounded LOOP.)
 
 ## 4½. A complete worked run, event by event
 
@@ -224,7 +224,7 @@ Its configuration is exactly the frozen MLFQ `params` from `../recognition-vocab
 
 The simulator's product is a **trace**: a machine-readable record from which every metric is computed *after the fact* by the harness. The simulator times nothing and computes no statistics; it writes down what happened.
 
-The format is **frozen** in `../data-contracts.md` §9 (ratified 2026-08-28): JSONL, one `meta` header line, then seven event types — `task_arrive`, `task_end`, `ready`, `run_start`, `run_end`, `deadline`, `config_applied` — with `x_`-prefixed event names free for your own diagnostics (the harness ignores them). The full field lists, the metric-to-event mapping, and the rationale (notably why `ready` is its own event) live there; the shape of what you must be able to answer:
+The format is **frozen** in `../data-contracts.md` §9 (ratified 2026-08-28): JSONL, one `meta` header line, then eight event types — `task_arrive`, `task_end`, `ready`, `run_start`, `run_end`, `deadline`, `config_applied` and, since 2026-10-31, `wake_drop` (§9.1) — with `x_`-prefixed event names free for your own diagnostics (the harness ignores them). The full field lists, the metric-to-event mapping, and the rationale (notably why `ready` is its own event) live there; the shape of what you must be able to answer:
 
 - when each task arrived (spawned children included — their start times are emergent), first ran, and ended (→ response time, turnaround);
 - when each task *became runnable* and why (→ per-stimulus interaction latency, starvation);
@@ -286,6 +286,13 @@ These are real ambiguities you will hit while implementing, and this guide delib
 ### 9.1 A wake with no waiter — decided
 
 What if the *wake arrives first* — the editor mid-RUN on its previous burst when the next keystroke's `wake` event fires? Decided: the wake is **remembered, with depth**. A wake that finds no waiter is held for the task, like a letter in a mailbox, so its next WAIT completes at once; three wakes that pile up during one long burst complete the next three WAITs (`../harness/metrics.md` §11 item 2, from the trace clarifications of `../memos/2026-09-07-trace-clarifications-for-the-simulator.md`; your simulator's mailbox, step M, does this). A lost or collapsed wake would mean less work for a starved editor, softening exactly the signal the experiment measures.
+
+Decided 2026-10-31 by 인지오, for a measured program's own wakes (`../data-contracts.md` §14; `../memos/2026-10-30-harness-changes-for-the-simulator.md`), the mailbox depends on the channel's kind:
+
+- **`input:<id>` and `event:<id>` — with depth, as above.** A keystroke, and a program wake whose measured chain starts at another process, a kernel thread or the measurement's input, is a message that waits in a queue until the program reads it (X input events, `xlib-xnextevent`; events posted from another thread, `qt-postevent`).
+- **`timer:<id>` — one held wake, the first.** A program wake whose measured chain starts at a timer is held if the task's timer mailbox is empty; one that comes while a wake is already held is **dropped**, since the toolkits' timers do not queue missed firings (`qt-qtimer`, `glib-timeout`, `gecko-nsitimer`). At the dropped wake's own time the simulator writes one trace line, `{"event":"wake_drop", "t":<the wake's time>, "task":<id>, "channel":"timer:<id>"}`. The program still carries that wake's `WAIT` and the `RUN` after it, in their place: the timer channel's WAITs pair one to one, in order, with the task's timer wakes in the file, and when the program reaches the WAIT of a dropped wake, that WAIT and its RUN pass at once — no block, no work, and no line: no `ready`, no occupancy. The held wake's own WAIT completes at once when the program reaches it, as a held keystroke's does.
+
+The harness reads the dropped wake's latency from its own time to the service of the held wake that covered it (`../harness/metrics.md` §6.13), and checks that every timer wake has exactly one of a service or a `wake_drop` line (the guard spec, 1.4).
 
 ### 9.2 TIMER's t₀ — decided
 

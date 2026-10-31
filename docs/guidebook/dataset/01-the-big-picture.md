@@ -280,7 +280,7 @@ task의 행동은 크게 세 모양으로 나뉩니다. 이 구분은 데이터�
 
 > **용어.** `program`은 task 하나가 따르는 명령어 목록입니다. compile이 끝난 파일에서는 모든 숫자가 이미 구체적인 값으로 정해져 있습니다. scheduler가 무엇을 하든 program 자체는 바뀌지 않습니다. 바뀌는 것은 각 명령이 **언제** 실행되는가뿐입니다.
 
-> **용어.** `channel`은 task가 WAIT할 수 있는 이름 붙은 우편함입니다. wake는 channel로 배달됩니다. compile된 파일에서 쓰이는 channel 이름의 꼴은 `timer:<task id>`(application 안의 timer성 깨어남), `input:<task id>`(키 입력), `chain:<task id>`(game frame chain의 다음 단계로 넘기는 신호), `job:<…>`(compile 작업 하나의 process들 사이 신호), `children:<task id>`(자식이 모두 끝나기를 기다림)입니다. 이 목록은 이 권을 쓰면서 `c1-dev`, `c1-gaming`, `c1-compile`의 compile 결과에서 직접 확인했습니다.
+> **용어.** `channel`은 task가 WAIT할 수 있는 이름 붙은 우편함입니다. wake는 channel로 배달됩니다. compile된 파일에서 쓰이는 channel 이름의 꼴은 `timer:<task id>`(application 자신의 깨어남 가운데 측정된 wake 사슬이 timer interrupt에서 시작한 것), `event:<task id>`(그 사슬이 그 밖, 곧 측정의 입력·다른 process·kernel thread에서 시작한 것), `input:<task id>`(키 입력), `chain:<task id>`(game frame chain의 다음 단계로 넘기는 신호), `job:<…>`(compile 작업 하나의 process들 사이 신호), `children:<task id>`(자식이 모두 끝나기를 기다림)입니다. 이 목록은 이 권을 쓰면서 `c1-dev`, `c1-gaming`, `c1-compile`의 compile 결과에서 직접 확인했습니다. task가 그 channel에서 기다리고 있지 않을 때 온 wake는 우편함에 남는데, `input:`과 `event:`의 우편함은 온 것을 모두 차례로 쌓고, `timer:`의 우편함은 처음 하나만 붙들고 그 뒤에 온 것은 버립니다(simulator가 그 시각에 `wake_drop` 줄을 씁니다; `docs/simulator/interpretation-contract.md` §3의 `WAIT` 행).
 
 왜 하필 이 여섯인지에 대한 기록이 있습니다. 2026-08-26의 workload 생성 grill(질문을 하나씩 따져 결정을 내리는 설계 회의)의 결정 D13은 여섯 번째 primitive로 `TIMER`를 추가했습니다. 기록된 이유는 이렇습니다. 주기 작업을 "일하고, 상대 시간만큼 SLEEP"으로 적으면, 일이 늦게 끝날 때마다 다음 주기도 그만큼 밀립니다. 그러면 나쁜 설정 아래서 기계가 체계적으로 덜 붐비게 되고, 결과가 "나쁜 설정도 그렇게 나쁘지 않다"는 쪽으로 치우칩니다. 절대 격자를 쓰는 TIMER는 밀리지 않으므로 이 편향이 없습니다(rt-app이라는 scheduling 시험 도구의 `timer` 명령이 선례로 기록되어 있습니다).
 
@@ -308,18 +308,18 @@ task의 행동은 크게 세 모양으로 나뉩니다. 이 구분은 데이터�
     { "op": "RUN",  "us": 12 },
     { "op": "WAIT", "channel": "timer:editor" },
     { "op": "RUN",  "us": 7 },
-    // … 이런 WAIT/RUN 쌍이 모두 6,642개, 그리고 맨 끝에 WAIT 하나
+    // … 이런 WAIT/RUN 쌍이 모두 6,648개, 그리고 맨 끝에 WAIT 하나
     { "op": "WAIT", "channel": "timer:editor" }
   ] }
 ```
 
-한 줄씩 읽어 봅시다. editor는 t = 0에 나타나고, 정확히 t = 60 s에 사라집니다(`depart: 60000000`, 모든 시간은 microsecond 정수입니다). 처음에는 `timer:editor` channel에서 기다립니다. 거기로 wake가 오면 119 µs 일하고, 다시 기다리고, 12 µs 일하고… 이 반복이 program 전체입니다. program은 13,285개 명령, 즉 WAIT 6,643개와 RUN 6,642개입니다. 마지막 명령은 마지막 wake의 channel에서 기다리는 `WAIT timer:editor`입니다. 2026-10-15의 9.23 D16(어떤 program도 떠나기 전에 바닥나지 않게 한 결정)부터, 떠나는 시각이 고정된 program은 막힌 채로 끝나고 떠나는 순간 사라집니다. wake로 움직이는 program은 마지막 wake의 channel에서 기다리는 WAIT로 끝나는데, 측정된 interactive 항목은 대개 timer 성분의 깨어남이 마지막이라 그 channel이 `timer:<id>`입니다.
+한 줄씩 읽어 봅시다. editor는 t = 0에 나타나고, 정확히 t = 60 s에 사라집니다(`depart: 60000000`, 모든 시간은 microsecond 정수입니다). 처음에는 `timer:editor` channel에서 기다립니다. 거기로 wake가 오면 119 µs 일하고, 다시 기다리고, 12 µs 일하고… 이 반복이 program 전체입니다. program은 13,297개 명령, 즉 WAIT 6,649개와 RUN 6,648개입니다. 마지막 명령은 마지막 wake의 channel에서 기다리는 `WAIT timer:editor`입니다. 2026-10-15의 9.23 D16(어떤 program도 떠나기 전에 바닥나지 않게 한 결정)부터, 떠나는 시각이 고정된 program은 막힌 채로 끝나고 떠나는 순간 사라집니다. wake로 움직이는 program은 마지막 wake의 channel에서 기다리는 WAIT로 끝나는데, 측정된 항목은 대개 timer part의 깨어남이 마지막이라 그 channel이 `timer:<id>`입니다. core set의 측정된 segment-bound task 103개 가운데 95개가 그렇고, 5개는 `event:<id>`, 3개는 `input:<id>`에서 끝납니다.
 
-그 wake들은 어디서 올까요? 파일의 나머지 `events`에 있습니다. 이 파일에는 wake event가 6,642개 있고, 그 가운데 6,456개는 `timer:editor`로, 186개는 `input:editor`로 갑니다. `timer:editor`의 wake는 VS Code의 여러 thread가 측정에서 보인 주기적 깨어남(compositor, IO thread 등)을 합친 것이고, `input:editor`의 wake는 사용자의 키 입력입니다. 키 입력은 2012년에 기록된 실제 사람의 타이핑 시각(SWELL-KW 기록, 6장)을 재생한 것이며, 이 파일에서 첫 키 입력은 t = 12.752609 s에 도착합니다. program을 따라가 보면 2,551번째 명령이 처음으로 `WAIT input:editor`이고, 그 키가 오면 editor는 59,020 µs, 약 59 ms를 일합니다. timer성 깨어남 뒤의 RUN은 중앙값이 33 µs로 짧고, 키 입력 뒤의 RUN은 중앙값이 약 80 ms로 깁니다.
+그 wake들은 어디서 올까요? 파일의 나머지 `events`에 있습니다. 이 파일에는 wake event가 6,648개 있고, 그 가운데 6,443개는 `timer:editor`로, 19개는 `event:editor`로, 186개는 `input:editor`로 갑니다. `timer:editor`의 wake는 VS Code의 여러 thread가 측정에서 보인 깨어남 가운데 측정된 wake 사슬이 timer interrupt에서 시작한 것(compositor, IO thread 등)을 합친 것이고, `event:editor`의 wake는 그 사슬이 그 밖(다른 process, kernel thread 등)에서 시작한 것이며, `input:editor`의 wake는 사용자의 키 입력입니다. 키 입력은 2012년에 기록된 실제 사람의 타이핑 시각(SWELL-KW 기록, 6장)을 재생한 것이며, 이 파일에서 첫 키 입력은 t = 12.752609 s에 도착합니다. program을 따라가 보면 2,541번째 명령이 처음으로 `WAIT input:editor`이고, 그 키가 오면 editor는 59,020 µs, 약 59 ms를 일합니다. timer성 깨어남 뒤의 RUN은 중앙값이 33 µs로 짧고, 키 입력 뒤의 RUN은 중앙값이 약 80 ms로 깁니다.
 
-program의 RUN을 모두 더하면 19,913,142 µs, 약 19.9초입니다. 60초짜리 파일에서 이 task가 lane의 약 33 %를 원한다는 뜻이고, 이 값은 compile report의 `utilization 0.3318857`과 정확히 같습니다.
+program의 RUN을 모두 더하면 19,914,194 µs, 약 19.9초입니다. 60초짜리 파일에서 이 task가 lane의 약 33 %를 원한다는 뜻이고, 이 값은 compile report의 `utilization 0.3319032`와 정확히 같습니다.
 
-> **코드로.** compiler(`dataset/tools/wlc/compiler.py`)는 측정된 application archetype의 여러 timer 성분과 재생된 키 입력을 task 하나의 명시적인 사건 흐름으로 합칩니다. `dataset/archetypes.yaml`의 머리 주석은 이 규칙을 "각 timer wake는 task의 timer channel에 대한 WAIT이며 마감이 없다(9.5 D74)"라고 적고(9.5 D74는 interactive 측정 sub-task 9.5의 결정), 마감이 있는 TIMER는 재생·통화 archetype과 game chain만 쓴다고 적습니다. `docs/data-contracts.md` §4와 `dataset/README.md`의 예시(compile된 `c2-p1a`의 editor)도 같은 모양을 보여 줍니다. 측정 기반 editor에서는 timer성 깨어남이 키 입력보다 한두 자릿수 많습니다(`c1-dev`에서 6,456 대 186).
+> **코드로.** compiler(`dataset/tools/wlc/compiler.py`)는 측정된 application archetype의 여러 component — timer part와 event part — 와 재생된 키 입력을 task 하나의 명시적인 사건 흐름으로 합칩니다. `dataset/archetypes.yaml`의 머리 주석은 이 규칙을 "각 timer wake는 task의 timer channel에 대한 WAIT이며 마감이 없다(9.5 D74)"라고 적고(9.5 D74는 interactive 측정 sub-task 9.5의 결정), 마감이 있는 TIMER는 재생·통화 archetype과 game chain만 쓴다고 적습니다. `docs/data-contracts.md` §4와 `dataset/README.md`의 예시(compile된 `c2-p1a`의 editor)도 같은 모양을 보여 줍니다. 측정 기반 editor에서는 timer part의 깨어남이 키 입력보다 한두 자릿수 많습니다(`c1-dev`에서 6,443 대 186).
 
 ### 주기 작업 둘: `c1-media`의 `mpv` 두 개
 
@@ -528,13 +528,20 @@ code-editor:
   params:                        # 모든 숫자는 분포 객체 {dist, …, sampling, source}
     input_run:   {dist: quantiles, p: [12581, …, 1179716], …, source: "meas-ci:interactive:2026-09-25"}
     stimulus:    {stream: swell-word-c1, kinds: [key], sampling: per-task, source: "swell-icmi14:word-c1"}
-    components:                  # thread별 timer성 깨어남
-      - comm: "gpu/VizCompositorTh"
+    components:                  # thread별, channel별 자기 깨어남
+      - comm: "gpu/VizCompositorTh"   # 측정된 wake 사슬이 timer에서 시작한 timer part
         threads: 1
-        wakes_per_s: 23.119
+        wakes_per_s: 23.083
         gap: {dist: quantiles, …}
         run: {dist: quantiles, …}
-      # … 8개 성분이 초당 112.4번 깨어남의 97.2 %를 덮고 나머지는 residual
+      # … timer part 8개가 초당 111.8번 깨어남의 97.4 %를 덮고 나머지는 timer channel의 residual
+      - comm: "code"                  # 사슬이 그 밖에서 시작한 event part
+        channel: event
+        threads: [2, 4]
+        wakes_per_s: 0.15633
+        gap: {dist: quantiles, …}
+        run: {dist: quantiles, …}
+      # … event part 8개가 초당 0.5번 깨어남의 87.3 %를 덮고 나머지는 event channel의 residual
   lifetime: segment-bound
   binding_params: []             # timeline이 줘야 하는 knob: 없음
   scalable: []                   # lane scaling으로 바꿀 수 있는 필드: 없음
@@ -650,7 +657,7 @@ compiler는 파일을 언제나 같은 byte로 씁니다. key를 정렬하고 �
 
 ## 3.6 compile 한 번을 손으로 따라가기: `c1-dev`
 
-이제 `c1-dev.timeline.yaml`(주석까지 21줄)이 어떻게 863,958 byte짜리 `c1-dev.workload.json`이 되는지 단계별로 따라가 보겠습니다. timeline은 이렇습니다.
+이제 `c1-dev.timeline.yaml`(주석까지 21줄)이 어떻게 864,736 byte짜리 `c1-dev.workload.json`이 되는지 단계별로 따라가 보겠습니다. timeline은 이렇습니다.
 
 ```yaml
 meta:     {id: c1-dev, seed: 107, demand: calibration}
@@ -662,21 +669,21 @@ focus:    [{from: 0s, to: 60s, task: editor}]
 
 **1단계 — 읽고 검사합니다.** `Timeline` loader(`dataset/tools/wlc/timeline.py`)가 시간을 microsecond로 바꾸고 구조를 검사합니다. archetype `code-editor`가 library에 있는가, segment-bound이므로 `depart`가 있는가, `bind`가 `binding_params`와 정확히 맞는가(여기서는 둘 다 비어 있음), input 창이 task의 수명 안에 있고 focus 구간 안에 있는가, 등입니다.
 
-**2단계 — `meta`를 씁니다.** `id`는 그대로, `derived_from`은 `dataset/timelines/coreset/c1-dev.timeline.yaml@7450b5e9…`, `sampled`는 `{"seed": 107, "archetypes": "archetypes.yaml@c78d8cf9…"}`가 됩니다. `@` 뒤의 두 hex는 git이 그 파일 내용에 매기는 blob hash입니다. 2026-10-17에 `git rev-parse HEAD:<경로>`로 두 파일의 blob hash를 계산해 보았고, 두 값이 그대로 나왔습니다. 두 값 모두 2026-10-16에 바뀌었습니다. 그날 9.15의 재빌드가 timeline의 머리 주석과 library의 주석·`modeling_notes`를 고쳤기 때문입니다(그 전에는 `@cbf1349a…`와 `@46e10504…`). library의 값은 2026-10-17에 세 번 더 바뀌었습니다. 9.15의 두 번째 재빌드가 library의 머리 주석과 `modeling_notes`를 고쳐 `@818b41b8…`가 `@143e2f4b…`가 되었고, 같은 날 세 번째 재빌드가 측정 entry의 trace 범위 문장과 `video-editor`의 idle probe 문장을 고쳐 `@803395dc…`가 되었고, 출구 감사 9.16의 재빌드가 library의 문장과 꼬리표를 감사의 기록대로 고쳐 지금의 `@c78d8cf9…`가 되었습니다. 그러니 파일의 숫자 하나를 보고 "어느 대본의 어느 판, 어느 library의 어느 판에서 나왔는가"를 정확히 되짚을 수 있습니다.
+**2단계 — `meta`를 씁니다.** `id`는 그대로, `derived_from`은 `dataset/timelines/coreset/c1-dev.timeline.yaml@7450b5e9…`, `sampled`는 `{"seed": 107, "archetypes": "archetypes.yaml@aa2f8842…"}`가 됩니다. `@` 뒤의 두 hex는 git이 그 파일 내용에 매기는 blob hash입니다. 2026-10-17에 `git rev-parse HEAD:<경로>`로 두 파일의 blob hash를 계산해 보았고, 두 값이 그대로 나왔습니다. 두 값 모두 2026-10-16에 바뀌었습니다. 그날 9.15의 재빌드가 timeline의 머리 주석과 library의 주석·`modeling_notes`를 고쳤기 때문입니다(그 전에는 `@cbf1349a…`와 `@46e10504…`). library의 값은 2026-10-17에 세 번 더 바뀌었습니다. 9.15의 두 번째 재빌드가 library의 머리 주석과 `modeling_notes`를 고쳐 `@818b41b8…`가 `@143e2f4b…`가 되었고, 같은 날 세 번째 재빌드가 측정 entry의 trace 범위 문장과 `video-editor`의 idle probe 문장을 고쳐 `@803395dc…`가 되었고, 출구 감사 9.16의 재빌드가 library의 문장과 꼬리표를 감사의 기록대로 고쳐 `@c78d8cf9…`가 되었습니다. 2026-10-31의 재빌드가 측정된 프로그램 자신의 wake를 측정된 wake 사슬의 시작점에 따라 나눠 component마다 timer part와 event part를 실으면서 `@6267dbde…`가 되었고, 같은 날 operation마다 측정한 조작별 가장 큰 run을 따로 싣는 재빌드(timer-wakes-by-origin spec 결정 17, 18)가 지금의 `@aa2f8842…`로 바꾸었습니다(2026-10-31에 `git hash-object`로 확인). 그러니 파일의 숫자 하나를 보고 "어느 대본의 어느 판, 어느 library의 어느 판에서 나왔는가"를 정확히 되짚을 수 있습니다.
 
 **3단계 — 정답과 focus를 옮깁니다.** 구간 하나가 `{"t_start": 0, "t_end": 60000000, "mode": "dev", "attributes": {"background_wanted": true}}`가 됩니다. `scenario` tag는 compiler가 무시하므로 옮겨지지 않습니다. focus는 `[{"t_start": 0, "t_end": 60000000, "task": "editor"}]`가 됩니다.
 
-**4단계 — task의 사건 흐름을 만듭니다.** 이것이 compile의 본체입니다. `code-editor`의 각 timer 성분(`gpu/VizCompositorTh`, `renderer/Compositor`, …)에 대해, compiler는 수명 0–60초 전체에 걸쳐 측정된 간격 분포에서 깨어날 시각을 차례로 뽑고, 깨어날 때마다 측정된 run 분포에서 RUN 길이를 뽑습니다. 그다음 재생할 키 입력을 놓습니다. archetype의 `stimulus`가 가리키는 기록 `swell-word-c1`(Word를 쓰는 실제 사람들의 입력 event 82,634개, 그 가운데 키 입력 78,014개, 이어 붙인 길이 약 33,863초; `dataset/stimulus/streams.json`)에서, archetype이 `kinds: [key]`로 고른 키 입력만 가지고 56초 길이 창에 들어갈 연속된 조각 하나를 고릅니다. 조각의 시작점은 seed에서 뽑은 균등 난수 × (기록 전체 길이 − 창 길이)입니다. 조각 안의 키 입력마다 창 안의 시각을 계산해 `input:editor` wake를 놓고, `input_run` 분포에서 그 입력에 대한 RUN 길이를 뽑습니다. 마지막으로 모든 깨어남을 시각 순으로 합쳐, task의 program(WAIT 한 번, RUN 한 번의 쌍 6,642개와, 마지막 wake의 channel에서 기다리는 WAIT 하나)과 `wake` event 6,642개를 씁니다.
+**4단계 — task의 사건 흐름을 만듭니다.** 이것이 compile의 본체입니다. `code-editor`의 각 component(timer part `gpu/VizCompositorTh`, `renderer/Compositor`, …와 event part `code`, …)에 대해, compiler는 수명 0–60초 전체에 걸쳐 측정된 간격 분포에서 깨어날 시각을 차례로 뽑고, 깨어날 때마다 측정된 run 분포에서 RUN 길이를 뽑습니다. timer part의 깨어남은 `timer:editor`로, event part의 깨어남은 `event:editor`로 갑니다. 그다음 재생할 키 입력을 놓습니다. archetype의 `stimulus`가 가리키는 기록 `swell-word-c1`(Word를 쓰는 실제 사람들의 입력 event 82,634개, 그 가운데 키 입력 78,014개, 이어 붙인 길이 약 33,863초; `dataset/stimulus/streams.json`)에서, archetype이 `kinds: [key]`로 고른 키 입력만 가지고 56초 길이 창에 들어갈 연속된 조각 하나를 고릅니다. 조각의 시작점은 seed에서 뽑은 균등 난수 × (기록 전체 길이 − 창 길이)입니다. 조각 안의 키 입력마다 창 안의 시각을 계산해 `input:editor` wake를 놓고, `input_run` 분포에서 그 입력에 대한 RUN 길이를 뽑습니다. 마지막으로 모든 깨어남을 시각 순으로 합쳐, task의 program(WAIT 한 번, RUN 한 번의 쌍 6,648개와, 마지막 wake의 channel에서 기다리는 WAIT 하나)과 `wake` event 6,648개를 씁니다.
 
 **5단계 — 검사하고 씁니다.** compile 안에서 canonical lint가 돕니다. schema 검증(`jsonschema-rs`), event가 시각 순인가, task id가 고유한가, TIMER가 있는 program은 TIMER로 시작하는가, FORK가 있으면 spawn table이 있는가, WAIT하는 channel에 wake가 오는가, WAKE의 대상이 알려진 task인가, focus 구간이 올바른가. 2026-10-15의 9.23 D14가 셋을 더했습니다. spawn된 자식의 WAKE 대상도 top-level task의 것처럼 풀리는가, 이름이 kernel `comm` 한도(15글자) 안에 드는가, program이 바닥나지 않는가(떠나는 시각이 없는 task는 EXIT로, 떠나는 시각이 고정된 task는 막힌 채로 끝나는가)입니다. 통과하면 `c1-dev.workload.json`을 쓰고, 그 옆에 compile report `c1-dev.report.json`을 씁니다.
 
 ```json
-{ "demand_class": "calibration", "demand_us": 19913142, "duration_us": 60000000,
+{ "demand_class": "calibration", "demand_us": 19914194, "duration_us": 60000000,
   "operations": {}, "per_segment": [ { "index": 0, "t_start_us": 0, "t_end_us": 60000000,
-  "utilization": 0.3318857 } ], "per_task": { "editor": 19913142 }, "utilization": 0.3318857 }
+  "utilization": 0.3319032 } ], "per_task": { "editor": 19914194 }, "utilization": 0.3319032 }
 ```
 
-**6단계 — lockfile에 적습니다.** 모든 파일을 compile한 뒤 `build.manifest.json`에 이 파일의 hash(`f0f67836…`), report의 hash(`cdbb308b…`), 그리고 수요 기록(`calibration`, utilization 0.3319)을 적습니다. 2026-10-17에 디스크의 `c1-dev.workload.json`을 `shasum -a 256`으로 계산해 보았고, manifest의 값과 같았습니다.
+**6단계 — lockfile에 적습니다.** 모든 파일을 compile한 뒤 `build.manifest.json`에 이 파일의 hash(`9b657fb1…`), report의 hash(`42b34a07…`), 그리고 수요 기록(`calibration`, utilization 0.3319)을 적습니다. 2026-10-31에 디스크의 `c1-dev.workload.json`을 `shasum -a 256`으로 계산해 보았고, manifest의 값과 같았습니다.
 
 > **코드로.** 위 4단계에서 키 입력 조각의 시작점은 `dataset/tools/wlc/compiler.py`의 `offset = round(sampling.uniform(seed, iid, "stimulus", outer["index"]) * max(0, span - (outer["to"] - outer["from"]))) + …`로 계산됩니다. 여기서 `outer`는 보통 그 창 자신이지만, 파생 파일의 창이 원본 창의 일부(`slice_of`)이면 원본 창입니다. 그래서 C7 attribute counterpart group의 파일처럼 원본을 앞부분만 잘라 만든 파일은 원본과 같은 시작점을 받아, 잘린 구간 안의 키 입력이 원본과 byte 단위로 같습니다(9.18 spec 결정 1).
 
@@ -998,7 +1005,7 @@ compiler는 파일마다 정적 수요를 계산해 manifest의 `demand`에 적�
 
 > **용어.** `utilization`(이 데이터셋에서)은 task들의 CPU 수요 합을 lane 하나가 그 시간에 줄 수 있는 양으로 나눈 값입니다. 1을 넘으면 모든 task가 원하는 만큼 받을 수 없으므로 scheduler의 선택이 결과를 바꿉니다. `demand class`는 그 파일이 경쟁을 품도록 설계되었는지를 나타내는 timeline의 표시입니다(`oversubscribed`, `calibration`).
 
-몇 가지 값을 보면 감이 옵니다(manifest에서 꺼낸 값). `c1-office`는 0.027로, 사무 작업 넷이 lane의 3 %도 쓰지 않습니다. `c1-dev`는 0.332, `c1-gaming`은 0.915, `c1-compile`은 0.998입니다. `c7-gaming`은 1.915로 lane 두 개 가까이를 원합니다. `c3-workday`는 구간마다 0.003, 0.005, 0.960, 1.025로, build 구간에서만 경쟁이 생깁니다.
+몇 가지 값을 보면 감이 옵니다(manifest에서 꺼낸 값). `c1-office`는 0.0269로, 사무 작업 넷이 lane의 3 %도 쓰지 않습니다. `c1-dev`는 0.332, `c1-gaming`은 0.915, `c1-compile`은 0.998입니다. `c7-gaming`은 1.915로 lane 두 개 가까이를 원합니다. `c3-workday`는 구간마다 0.003, 0.005, 0.960, 1.025로, build 구간에서만 경쟁이 생깁니다.
 
 > **왜 이렇게 정했나 — 제공된 수요(offered demand).** `c2-p1a`의 utilization은 14.505이고, 두 번째 구간은 35.772입니다. lane 서른다섯 개를 쓴다는 뜻이 아닙니다. 정적 추정은 각 task의 수요를 도착부터 고정된 떠남 또는 파일 끝까지 고르게 펴는데, 이 파일의 training은 1,389.885초 분량의 일을 들고 오지만 파일은 99.435초에서 끝나도록 설계되어 있어서(training이 구간의 모든 순간에 살아 있게 하려고) 그 일 전체가 짧은 수명에 펴지기 때문입니다. `c2-p2a`와 `c2-p2a-idle`(9.3829, 두 번째 구간 28.5251)도 같은 이유입니다. 그래서 파일 끝을 넘어 사는 작업이 있는 파일의 수요는 lane이 실제로 지는 부하가 아니라 제공된 수요로 읽고, 과부하로 읽지 않습니다. 2026-10-10 감사는 범위를 밝히는 문장과 파일 안에서 잘라 계산하는 방법을 제안했습니다. 9.15는 추정을 자르지 않는 코드를 그대로 두고 앞의 길을 택해, `dataset/README.md`의 "Demand is reported, not held"와 building plan §5a가 이 문장을 적습니다.
 
@@ -1535,7 +1542,7 @@ timeline 한 줄 편집
 | `program` | task 하나가 따르는 명령어 목록. compile된 파일에서는 모든 숫자가 구체적 | 2.4 |
 | primitive | program의 명령어: `RUN`, `SLEEP`, `TIMER`, `WAIT`, `WAKE`, `FORK`/`EXIT`. 여기에 흐름 제어 `LOOP` | 2.4 |
 | `TIMER` | 절대 격자 t₀ + k·period의 다음 눈금까지 기다리는 primitive. 다음 눈금이 그 job의 마감 | 2.4 |
-| `channel` | task가 WAIT하는 이름 붙은 우편함. `timer:<id>`, `input:<id>`, `chain:<id>`, `job:<…>`, `children:<id>` | 2.4 |
+| `channel` | task가 WAIT하는 이름 붙은 우편함. `timer:<id>`, `event:<id>`, `input:<id>`, `chain:<id>`, `job:<…>`, `children:<id>` | 2.4 |
 | `arrive` event / `wake` event | task가 존재하기 시작함 / 바깥 자극 하나가 channel로 배달됨. `events`의 두 종류 전부 | 2.6 |
 | `pinned` / `emergent` | 파일에 절대 시각으로 고정된 시각(사용자 행동) / scheduling 결과로 실행 중에 정해지는 시각 | 2.7 |
 | `segment-bound` / `finite` / `spawned` | 떠나는 시각이 고정된 task / 일을 다 하면 스스로 끝나는 top-level task / 실행 중 FORK로 생기는 task | 2.8 |

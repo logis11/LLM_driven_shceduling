@@ -54,7 +54,7 @@
 
 ## 1.3 Compile time이 모든 randomness를 푼다
 
-workload에는 무작위가 많습니다. 여기서 `wake`는 기다리던 task가 다시 실행 가능해지는 사건이고, `RUN`은 task가 CPU를 정해진 시간만큼 쓰는 program 명령입니다. 편집기의 timer wake 간격, 각 RUN의 길이, replay할 키 입력 stream의 시작 offset, build의 각 object job이 쓰는 CPU 시간이 모두 측정된 분포에서 뽑힙니다. 이 무작위를 언제 푸느냐가 결정론의 출발점입니다.
+workload에는 무작위가 많습니다. 여기서 `wake`는 기다리던 task가 다시 실행 가능해지는 사건이고, `RUN`은 task가 CPU를 정해진 시간만큼 쓰는 program 명령입니다. 편집기 자신의 wake 간격, 각 RUN의 길이, replay할 키 입력 stream의 시작 offset, build의 각 object job이 쓰는 CPU 시간이 모두 측정된 분포에서 뽑힙니다. 이 무작위를 언제 푸느냐가 결정론의 출발점입니다.
 
 2026-08-26의 workload-generation grill은 이 원칙을 D12로 못 박았습니다. 원문은 이렇습니다. "*compile time resolves all randomness; run time resolves all timing that scheduling can influence.*" (`_dev/archive/2026-08-26-workload-generation-grill.md`). compile time에 모든 무작위를 구체적인 숫자로 바꿔 파일에 적고, simulator는 무작위를 전혀 쓰지 않습니다. 같은 grill의 D11은 "Simulator stays 100% RNG-free"라고 적습니다. scheduling이 영향을 주는 시각(예를 들어 어떤 task가 실제로 언제 CPU를 받는지)만 run time에 정해집니다.
 
@@ -118,7 +118,7 @@ generated layer의 timeline(`dataset/generated/<set>/`)도 같은 이유로 comm
 | `build/familiarity-ladder-single/` | 96 MB | 132 |
 | `dataset/generated/` (generated timeline) | 6.2 MB | 1,562 |
 
-가장 큰 단일 파일은 `c6-dual.workload.json`으로 187,601,795 bytes입니다. 그 다음이 `c1-transcode`(152.8 MB), `c7-transcode`(95.1 MB)입니다.
+가장 큰 단일 파일은 `c6-dual.workload.json`으로 187,542,816 bytes입니다. 그 다음이 `c1-transcode`(152.7 MB), `c7-transcode`(94.7 MB)입니다.
 
 이 권이 2026-10-14에 처음 센 값은 core artifact 678,167,934 bytes, `c6-dual` 187,601,756 bytes였습니다. 9.23 D10(2026-10-14)의 rebuild 뒤 기록은 core 합 678,168,083 bytes, `c6-dual` 187,601,756 bytes이고, 9.23 D17(2026-10-15, segment-bound program 끝에 blocking 명령을 붙인 rebuild)이 각각 4,633 bytes와 39 bytes를 더했습니다. 9.15의 2026-10-16 rebuild는 `meta`에 적힌 hash의 값만 바꿔 크기는 그대로입니다(같은 길이의 hex). 9.15의 2026-10-17 rebuild도 core의 크기는 그대로 두었고, corner variant 넷(`c7-browsing`과 `c7-office`의 `corner-low`, `corner-high`)의 숨은 탭 renderer event가 바뀌어 variant의 합이 1,030,354,566 bytes에서 144 bytes 늘었습니다(9.15 기록 `logs/B1-data-rebuild.md`). 같은 날의 두 번째 rebuild는 artifact의 `meta`에 적힌 hash만 바꿔 core와 variant의 크기가 그대로입니다(9.15 기록 `logs/B4-data-rebuild.md`).
 
@@ -378,11 +378,11 @@ report에는 파일 id가 들어 있지 않습니다. 그래서 timeline의 이�
 `demand`는 artifact마다 `{demand_class, utilization, segments}`를 적습니다. `utilization`은 report의 값을 소수 넷째 자리로 반올림한 것이고, `segments`는 정답 segment마다 `{index, t_start_us, t_end_us, utilization}`입니다. `c3-workday`(한 사람의 근무일을 browsing → office → compile → mail로 이은 C3, 즉 transition arc 그룹의 파일)의 entry는 이렇습니다.
 
 ```json
-{"demand_class": "oversubscribed", "utilization": 0.888,
- "segments": [{"index": 0, "t_start_us": 0,          "t_end_us": 60000000,   "utilization": 0.0031},
-              {"index": 1, "t_start_us": 60000000,   "t_end_us": 120000000,  "utilization": 0.0053},
-              {"index": 2, "t_start_us": 120000000,  "t_end_us": 1485000000, "utilization": 0.9597},
-              {"index": 3, "t_start_us": 1485000000, "t_end_us": 1545000000, "utilization": 1.0251}]}
+{"demand_class": "oversubscribed", "utilization": 0.8894,
+ "segments": [{"index": 0, "t_start_us": 0,          "t_end_us": 60000000,   "utilization": 0.003},
+              {"index": 1, "t_start_us": 60000000,   "t_end_us": 120000000,  "utilization": 0.0052},
+              {"index": 2, "t_start_us": 120000000,  "t_end_us": 1485000000, "utilization": 0.9596},
+              {"index": 3, "t_start_us": 1485000000, "t_end_us": 1545000000, "utilization": 1.0638}]}
 ```
 
 `demand_class`는 timeline의 `meta.demand`에서 옵니다. `oversubscribed`는 "경합을 담도록 설계한 파일"이고 `calibration`은 "경합을 담지 않는 파일"입니다. 2026-10-14의 core manifest에서는 `calibration` 40개, `oversubscribed` 11개입니다.
@@ -546,16 +546,16 @@ bless의 절차를 순서대로 쓰면 이렇습니다.
 
 ## 3.3 Pin: 실험 사양이 manifest를 고정하는 것
 
-`pin`은 "다른 파일이 이 파일의 SHA-256을 적어 두고, 실행 전에 그 값이 지금의 바이트와 같은지 확인하는 것"을 뜻합니다. dataset 바깥에서 dataset을 pin하는 파일은 지금 하나입니다. RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)입니다. 이 파일은 RQ0 실험의 사전 등록을 harness가 실행할 수 있는 데이터로 적은 것으로, 조건, seed 수, 판정 파일 목록, 판정 기준, 보고 항목과 함께 맨 아래에 `pins` block을 가집니다. 지금의 block은 이렇습니다(scoring spec과 guard spec은 2026-10-30의 harness 항목, driver table은 9.16의 2026-10-17 harness 항목, dataset과 variants는 9.16의 2026-10-17 data rebuild 항목의 re-pin).
+`pin`은 "다른 파일이 이 파일의 SHA-256을 적어 두고, 실행 전에 그 값이 지금의 바이트와 같은지 확인하는 것"을 뜻합니다. dataset 바깥에서 dataset을 pin하는 파일은 지금 하나입니다. RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)입니다. 이 파일은 RQ0 실험의 사전 등록을 harness가 실행할 수 있는 데이터로 적은 것으로, 조건, seed 수, 판정 파일 목록, 판정 기준, 보고 항목과 함께 맨 아래에 `pins` block을 가집니다. 지금의 block은 이렇습니다(scoring spec, guard spec, dataset과 variants는 2026-10-31의 harness 항목 "a measured program's own wakes by origin", driver table은 2026-10-31의 driver table 항목의 re-pin).
 
 ```yaml
 pins:
-  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 84b997ad467f98b5e9cc62ecbb74097607efb41c6fc2a65b1401ff672e78e8c2}
-  guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.3", sha256: 7029308eb8eae4068dfd8114daf089889320daa290267827ae12ed74f0b3a482}
+  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 4f3e34c180b26f932b1583ba16e3e928e31dd56806f3032fb1cbb214d159bb68}
+  guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.4", sha256: 7d79201d5f6c61e5eb05f8d7d9155afb3be4660f6924f24b4775a4f274382372}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: 36267c38cd3782a821427caa8a64f403c3fffc0133300d1c9d768ab719c67f09}
-  dataset:      {path: dataset/build.manifest.json, sha256: 8e1eb7530b32378e3c5c76e449bf367b4962b9138b62dc7404c6df4b8d525837}
+  dataset:      {path: dataset/build.manifest.json, sha256: 27d347bc8079e2ac6bd81527070c283db28e0cae9adb40bd6ebf30d4ecbe6c34}
   variants:
-    all: {path: dataset/build.variants.manifest.json, sha256: 8e2948b18812a546375ccd1f67d61604ee06c51d87060b8a1a48f5aa6cd0f1a4}
+    all: {path: dataset/build.variants.manifest.json, sha256: de9802e787cfdb6af1568134dffc28ddf78713e57ab2e3fee41880f073ee4205}
 ```
 
 다섯 pin을 하나씩 풀면 이렇습니다.
@@ -566,17 +566,17 @@ pins:
 - `dataset` — core manifest입니다.
 - `variants.all` — variants manifest입니다.
 
-2026-10-17에 이 다섯 경로의 파일을 `shasum -a 256`으로 계산해 보면 다섯 값 모두 pin과 같습니다. 즉 지금 저장소의 상태는 RQ0 gate spec이 사전 등록한 상태와 일치합니다.
+2026-10-31에 이 다섯 경로의 파일을 `shasum -a 256`으로 계산해 보면 다섯 값 모두 pin과 같습니다. 즉 지금 저장소의 상태는 RQ0 gate spec이 사전 등록한 상태와 일치합니다.
 
 pin이 dataset에 대해 무엇을 보장하는지 따라가 봅시다. pin은 manifest 파일의 hash만 적습니다. 그런데 manifest는 artifact 51개의 hash를 적고, artifact는 자신이 나온 timeline과 library의 git blob hash와 seed를 적습니다. 그러므로 pin 한 줄이 51개 artifact의 모든 바이트를, 그리고 간접적으로 그 바이트를 만든 입력까지를 고정합니다.
 
 ```
-rq0-gate.yaml  pins.dataset.sha256 = 8e1eb753…
-   └─ build.manifest.json (그 바이트의 SHA-256이 8e1eb753…)
-        ├─ inputs:    archetypes.yaml → 1e308606…, wlc/compiler.py → 49922655…, …
+rq0-gate.yaml  pins.dataset.sha256 = 27d347bc…
+   └─ build.manifest.json (그 바이트의 SHA-256이 27d347bc…)
+        ├─ inputs:    archetypes.yaml → 85570c57…, wlc/compiler.py → 4947e6d1…, …
         └─ artifacts: coreset-single/c1-dev.workload.json → <sha256>
                         └─ meta.derived_from = …c1-dev.timeline.yaml@7450b5e9…
-                           meta.sampled      = archetypes.yaml@c78d8cf9…, seed 107
+                           meta.sampled      = archetypes.yaml@aa2f8842…, seed 107
 ```
 
 이것은 git이 commit hash 하나로 tree 전체를 고정하는 방식, 즉 Merkle tree와 같은 구조입니다. 위쪽의 hash 하나가 같으면 그 아래 전부가 같습니다.
@@ -652,20 +652,22 @@ RQ0 gate spec의 dataset과 variants pin이 지금까지 어떻게 움직였는�
 | 2026-10-17 | 9.15 (정정 작업이 찾은 data 수정의 묶은 rebuild) | `d52e7bd4…` | `6c1c3e09…` | library의 머리 주석과 notes, schema의 설명 세 개, `c1-idle`의 머리 주석, compiler·loader·variants module의 docstring. core artifact는 `meta`에서만 움직임. `variants.yaml`의 `carried_values`에 숨은 탭 renderer의 두 thread를 더해 corner variant 넷이 바뀜 |
 | 2026-10-17 | 9.15 (인지오의 답 세 가지를 묶은 두 번째 rebuild) | `0f0af422…` | `cdc14319…` | library에서 측정 entry 열넷의 trace 문장과 `video-editor`의 idle probe 문장. core artifact와 variant는 `meta`의 library hash에서만 움직임 |
 | 2026-10-17 | 9.16 (출구 감사가 찾은 data 수정의 rebuild) | `8e1eb753…` | `8e2948b1…` | library의 문장과 꼬리표, compile timeline의 `parallelism_cap` 꼬리표 `design` → `convention`, `c2-p3a`·`c3-creation`·`c3-evening`·`c6-dual`의 주석. 모든 artifact가 `meta`에서만 움직임(library hash, 그리고 timeline 바이트가 바뀐 core 8개와 variant 12개는 `derived_from`도). 그 앞의 harness 항목에서 scoring spec(`f7d1df4c…`), guard spec 1.2(`c2dad06f…`), driver table(`e1155a72…`) re-pin |
+| 2026-10-31 | Phase 10 항목 "Timer wakes that find their task behind"(`_dev/docs/spec/jioh/timer-wakes-by-origin.md`) | `d80f06e0…` | `4cb07941…` | 측정된 프로그램 자신의 wake를 그 측정된 wake 사슬의 시작점에 따라 `timer:<id>`(timer interrupt에서 시작)와 `event:<id>`(그 밖에서 시작)로 나눔: component마다 timer part와 event part, launch와 trace-replay stream에 channel 열. 51개 artifact와 78개 variant가 모두 바뀜. 같은 harness 항목에서 scoring spec(`4f3e34c1…`), guard spec 1.4(`7d79201d…`) re-pin |
+| 2026-10-31 | 같은 항목의 결정 17, 18 | `27d347bc…` | `de9802e7…` | operation마다 측정한 조작별 가장 큰 run을 창이 열리는 순간 한 번 실음(`largest_run`, `largest_run_channel`), component는 그 run을 뺀 나머지; GIMP operation의 남은 값 셋은 runner kernel이 바뀌어 repeat를 더할 수 없어 반폭과 함께 실음. core와 variant 파일 40개가 바뀜(operation 창마다 wake 하나가 늚) |
 
-이 기간에 scoring spec pin은 `5d8a3243…`(9.14) → `1f7e9e30…`(9.18, 주석만) → `9cd9a155…`(9.20) → `0ff71b1f…`(9.21, 머리글의 규칙 문장) → `2ad757b6…`(9.23 D10, 머리글 문장) → `f7d1df4c…`(9.16, `c2-p3b`의 backup을 turnaround로 채점하는 term과 `c7-meeting`의 이유 문장)으로 움직였습니다. guard spec은 9.14의 1.1(`24ccb875…`)에서 9.16의 1.2(`c2dad06f…`, `tick_count`의 chain 검사를 window 규칙으로)가 되었습니다. driver table은 9.14의 `6e271dd0…`에서 9.15의 2026-10-16 re-pin으로 `0fba4b3c…`가 되었고(compile row의 LOTTERY 설명 문장, 값은 그대로), 9.16에서 `e1155a72…`가 되었습니다(문장만, 값은 그대로). Phase 9 뒤에도 다시 pin되었습니다. 2026-10-30에 guard spec이 1.3(`7029308e…`, stimulus 검사가 잃어버린 wake를 읽음)이 되었고, scoring spec이 `1c738540…`(`input_latency`)와 `205add64…`(`timer_latency`)로 움직였습니다. 2026-10-31에는 scoring spec이 `84b997ad…`(`c7-media`·`c7-meeting` 설명 문장), driver table이 `36267c38…`(MLFQ 문장을 OSTEP §8.4의 Rule 4로, 값은 그대로)가 되었습니다(`harness/CHANGELOG.md`). 그 뒤 2026-10-30에 scoring spec은 `1c738540…`(키 입력 term 24개가 `input_latency`를 읽음), guard spec은 1.3(`7029308e…`, `tick_count`의 stimulus 검사가 잃어버린 wake를 읽음)이 되었고, dataset과 variants pin은 그대로입니다.
+이 기간에 scoring spec pin은 `5d8a3243…`(9.14) → `1f7e9e30…`(9.18, 주석만) → `9cd9a155…`(9.20) → `0ff71b1f…`(9.21, 머리글의 규칙 문장) → `2ad757b6…`(9.23 D10, 머리글 문장) → `f7d1df4c…`(9.16, `c2-p3b`의 backup을 turnaround로 채점하는 term과 `c7-meeting`의 이유 문장)으로 움직였습니다. guard spec은 9.14의 1.1(`24ccb875…`)에서 9.16의 1.2(`c2dad06f…`, `tick_count`의 chain 검사를 window 규칙으로)가 되었습니다. driver table은 9.14의 `6e271dd0…`에서 9.15의 2026-10-16 re-pin으로 `0fba4b3c…`가 되었고(compile row의 LOTTERY 설명 문장, 값은 그대로), 9.16에서 `e1155a72…`가 되었습니다(문장만, 값은 그대로). Phase 9 뒤에도 다시 pin되었습니다. 2026-10-30에 guard spec이 1.3(`7029308e…`, `tick_count`의 stimulus 검사가 잃어버린 wake를 읽음)이 되었고, scoring spec이 `1c738540…`(키 입력 term 24개가 `input_latency`를 읽음)와 `205add64…`(`timer_latency`)로 움직였으며, dataset과 variants pin은 그대로였습니다. 2026-10-31에는 scoring spec이 `84b997ad…`(`c7-media`·`c7-meeting` 설명 문장), driver table이 `36267c38…`(MLFQ 문장을 OSTEP §8.4의 Rule 4로, 값은 그대로)가 되었습니다(`harness/CHANGELOG.md`). 같은 날의 wake 시작점 rebuild와 함께 scoring spec은 `4f3e34c1…`(`timer_latency`를 읽던 term 15개가 두 channel의 `app_latency`를 읽음), guard spec은 1.4(`7d79201d…`, stimulus 검사가 event channel을 input channel처럼 읽고, timer channel에서는 wake마다 service나 `wake_drop` 하나를 요구함)가 되었고, dataset과 variants pin은 `d80f06e0…`와 `4cb07941…`가 되었으며, 같은 날 operation마다 가장 큰 run을 따로 싣는 rebuild(결정 17, 18) 뒤 `27d347bc…`와 `de9802e7…`가 되었습니다.
 
 generated manifest의 hash도 같은 방식으로 기록되어 있습니다(각 sub-task changelog와 `harness/CHANGELOG.md`). 어떤 실험도 이것을 pin하지 않습니다. sub-task마다의 이 값들은 9.16(최종 audit)의 TODO 줄에 재현 대상으로 넘겨졌고, 9.16은 중간 pin을 이름 짓는 이 항목들을 집에서 한 번 돌린 dataset gate와 최종 build의 CI run으로 닫았습니다. 각 중간 pin은 최종 상태의 pin으로 대체되었습니다(9.16 spec decision 3; 9.16 기록 `_dev/research/jioh/task-9.16-exit-audits/handed/checks.md`의 마지막 표).
 
-| set | 9.19 (2026-10-11) | 9.20 (2026-10-12) | 9.21 (2026-10-13) | 9.23 D10 (2026-10-14) | 9.23 D17 (2026-10-15) | 9.15 (2026-10-16) | 9.15 (2026-10-17 첫째) | 9.15 (2026-10-17 둘째) | 9.16 (2026-10-17, 현재) |
-|---|---|---|---|---|---|---|---|---|---|
-| transition grid | `899efa53…` | `593dc23a…` | `e26aa8e6…` | `3035cfe3…` | `826c719c…` | `a8eebb33…` | `4bb7a444…` | `d84fb68a…` | `01e539ee…` |
-| return grid | `7a758f6e…` | `183deedb…` | `21826be3…` | `2e381b42…` | `392d6071…` | `2e57a6c1…` | `ec7ca574…` | `a6980482…` | `2d80cff9…` |
-| flap-stress | `8c4c6fce…` | `d2686e73…` | `a8c271dd…` | `90cc782a…` | `97ba813f…` | `dd6a7c24…` | `79a6c5c4…` | `92676677…` | `53420ed5…` |
-| distractor grid | — | `7236f4b2…` | `6d9192db…` | `e61fd777…` | `919bb2c0…` | `264d3333…` | `3478a908…` | `1d129a51…` | `21502219…` |
-| familiarity ladder | — | `0b8b76ce…` | `2cb56e69…` | `1a7d35d7…` | `b6f82df5…` | `58a34d65…` | `415cfbd6…` | `8c38e7a8…` | `1dd08130…` |
+| set | 9.19 (2026-10-11) | 9.20 (2026-10-12) | 9.21 (2026-10-13) | 9.23 D10 (2026-10-14) | 9.23 D17 (2026-10-15) | 9.15 (2026-10-16) | 9.15 (2026-10-17 첫째) | 9.15 (2026-10-17 둘째) | 9.16 (2026-10-17) | Phase 10 (2026-10-31) | Phase 10, 결정 17·18 (2026-10-31, 현재) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| transition grid | `899efa53…` | `593dc23a…` | `e26aa8e6…` | `3035cfe3…` | `826c719c…` | `a8eebb33…` | `4bb7a444…` | `d84fb68a…` | `01e539ee…` | `e6603b2b…` | `eee6a020…` |
+| return grid | `7a758f6e…` | `183deedb…` | `21826be3…` | `2e381b42…` | `392d6071…` | `2e57a6c1…` | `ec7ca574…` | `a6980482…` | `2d80cff9…` | `2e86b6bf…` | `b593144c…` |
+| flap-stress | `8c4c6fce…` | `d2686e73…` | `a8c271dd…` | `90cc782a…` | `97ba813f…` | `dd6a7c24…` | `79a6c5c4…` | `92676677…` | `53420ed5…` | `28e90700…` | `e3a94dc8…` |
+| distractor grid | — | `7236f4b2…` | `6d9192db…` | `e61fd777…` | `919bb2c0…` | `264d3333…` | `3478a908…` | `1d129a51…` | `21502219…` | `82a2bdd5…` | `07d59e41…` |
+| familiarity ladder | — | `0b8b76ce…` | `2cb56e69…` | `1a7d35d7…` | `b6f82df5…` | `58a34d65…` | `415cfbd6…` | `8c38e7a8…` | `1dd08130…` | `debcf78e…` | `2b99f65e…` |
 
-9.20에서 앞의 세 set이 다시 bless된 이유는 generator(`grids.yaml`, `gen/cells.py`, `gen/compose.py`, `generate.py`)가 바뀌어 `inputs`가 움직였기 때문입니다. artifact, report, demand, grid record는 바이트가 같았습니다(9.20 changelog D10). 9.21에서는 다섯 set 모두 `inputs`(generator source)와 `grid`(placements와 segments 추가)만 움직였습니다(9.21 changelog D1). 9.23 D10과 9.15의 rebuild에서는 generated artifact가 library hash에서만 달라졌고(9.15에서는 `inputs`의 C1 timeline과 도구 줄도), 9.23 D17에서는 모든 artifact가 D16으로 움직이고 `inputs`가 55개가 되었습니다. 9.15의 2026-10-17 첫 rebuild에서는 모든 generated artifact가 library hash에서 움직였고, transition grid의 `focus` 형태 timeline 214개가 둘째 segment에 A의 남는 프로그램의 scenario tag를 더해 그 artifact가 `derived_from`에서도 움직였습니다(workload 계약에는 scenario tag가 없어 `meta` 밖은 그대로). `inputs`에서는 library, schema, `c1-idle`, `gen/compose.py`, `wlc/compiler.py`, `wlc/timeline.py`, `wlc/variants.py`의 줄이 움직였습니다(`harness/CHANGELOG.md`의 2026-10-17 항목). 같은 날의 두 번째 rebuild에서는 모든 generated artifact가 다시 library hash에서 움직였고, distractor grid의 timeline 68개가 같은 규칙을 따라 둘째 segment에서 A의 batch job만 보이던 tag를 빼 그 artifact가 `derived_from`에서도 움직였습니다. A가 `backup`, `indexing`, `ml-train`, `transcode`인 칸으로 mode마다 17개이고, `grid`, `demand`, `reports`는 그대로입니다. `inputs`에서는 library, `grids.yaml`, `gen/compose.py`의 줄이 움직였습니다(`harness/CHANGELOG.md`의 두 번째 rebuild 항목, 9.15 기록 `logs/B4-data-rebuild.md`). 9.16의 rebuild에서는 모든 generated artifact가 library hash에서 움직였고, compile set의 `parallelism_cap` 꼬리표가 `convention`이 되어 그 timeline을 합성한 artifact가 `derived_from`에서도 움직였습니다. transition grid 60개, return grid 90개, distractor grid 32개, familiarity ladder 6개, flap-stress 0개입니다. `inputs`에서는 library, `grids.yaml`(주석), `c1-compile` timeline의 줄이 움직였고 `grid`, `demand`, `reports`는 그대로입니다(`harness/CHANGELOG.md`의 2026-10-17 "the exit audits' data findings" 항목, 9.16 기록 `logs/D.md`). 2026-10-17에 일곱 manifest의 SHA-256을 계산하면 표의 "현재" 열 및 RQ0 pin과 모두 같습니다.
+9.20에서 앞의 세 set이 다시 bless된 이유는 generator(`grids.yaml`, `gen/cells.py`, `gen/compose.py`, `generate.py`)가 바뀌어 `inputs`가 움직였기 때문입니다. artifact, report, demand, grid record는 바이트가 같았습니다(9.20 changelog D10). 9.21에서는 다섯 set 모두 `inputs`(generator source)와 `grid`(placements와 segments 추가)만 움직였습니다(9.21 changelog D1). 9.23 D10과 9.15의 rebuild에서는 generated artifact가 library hash에서만 달라졌고(9.15에서는 `inputs`의 C1 timeline과 도구 줄도), 9.23 D17에서는 모든 artifact가 D16으로 움직이고 `inputs`가 55개가 되었습니다. 9.15의 2026-10-17 첫 rebuild에서는 모든 generated artifact가 library hash에서 움직였고, transition grid의 `focus` 형태 timeline 214개가 둘째 segment에 A의 남는 프로그램의 scenario tag를 더해 그 artifact가 `derived_from`에서도 움직였습니다(workload 계약에는 scenario tag가 없어 `meta` 밖은 그대로). `inputs`에서는 library, schema, `c1-idle`, `gen/compose.py`, `wlc/compiler.py`, `wlc/timeline.py`, `wlc/variants.py`의 줄이 움직였습니다(`harness/CHANGELOG.md`의 2026-10-17 항목). 같은 날의 두 번째 rebuild에서는 모든 generated artifact가 다시 library hash에서 움직였고, distractor grid의 timeline 68개가 같은 규칙을 따라 둘째 segment에서 A의 batch job만 보이던 tag를 빼 그 artifact가 `derived_from`에서도 움직였습니다. A가 `backup`, `indexing`, `ml-train`, `transcode`인 칸으로 mode마다 17개이고, `grid`, `demand`, `reports`는 그대로입니다. `inputs`에서는 library, `grids.yaml`, `gen/compose.py`의 줄이 움직였습니다(`harness/CHANGELOG.md`의 두 번째 rebuild 항목, 9.15 기록 `logs/B4-data-rebuild.md`). 9.16의 rebuild에서는 모든 generated artifact가 library hash에서 움직였고, compile set의 `parallelism_cap` 꼬리표가 `convention`이 되어 그 timeline을 합성한 artifact가 `derived_from`에서도 움직였습니다. transition grid 60개, return grid 90개, distractor grid 32개, familiarity ladder 6개, flap-stress 0개입니다. `inputs`에서는 library, `grids.yaml`(주석), `c1-compile` timeline의 줄이 움직였고 `grid`, `demand`, `reports`는 그대로입니다(`harness/CHANGELOG.md`의 2026-10-17 "the exit audits' data findings" 항목, 9.16 기록 `logs/D.md`). 2026-10-31의 rebuild에서는 측정된 프로그램 자신의 wake가 `timer:`와 `event:` channel로 나뉘어 다섯 set의 모든 generated artifact가 움직였고, `grid`는 그대로입니다. `inputs`에서는 library, workload schema, launch stream 열 개, trace-replay stream 세 개, `wlc/compiler.py`, `wlc/linter.py`의 줄이 움직였습니다. 2026-10-31에 일곱 manifest의 SHA-256을 계산하면 표의 "현재" 열 및 RQ0 pin과 모두 같습니다.
 
 ---
 

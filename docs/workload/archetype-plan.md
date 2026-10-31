@@ -1,5 +1,5 @@
 # Archetype Library — Writing Plan
-> Status: normative · Created 2026-08-25 · Updated 2026-10-17
+> Status: normative · Created 2026-08-25 · Updated 2026-10-31
 
 > Expands §2 of docs/workload/building-plan.md, the archetype library, into a buildable specification for `dataset/archetypes.yaml`. Normative for the archetype library. Source ids reference `dataset/sources.yaml`; citations live in docs/references.md; execution semantics live in docs/simulator/interpretation-contract.md. Every value, scope and modeling note is the library's own; §4 names its entries.
 
@@ -14,16 +14,17 @@ RUN(duration)      burn CPU
 SLEEP(duration)    voluntary relative wait
 TIMER(period)      absolute periodic wake at t0+k·period — drift-free; periodic
                    tasks use TIMER, never SLEEP loops
-WAIT(channel)      event wait (a timer component's wake, input, an upstream
-                   chain member, a job member, an orchestrator's children)
+WAIT(channel)      event wait (a component's wake on the timer or event
+                   channel, input, an upstream chain member, a job member,
+                   an orchestrator's children)
 WAKE(target)       make another task runnable
 FORK / EXIT        consume next spawn-table entry / terminate
 ```
 
-TIMER is the periodic entries' alone — the playback and call entries' medium cycles and the game chain's head. A measured application's own thread wakes are not periodic: each is a WAIT on the task's timer channel, woken at a time sampled from its measured gaps, with no deadline (9.5 D74).
+TIMER is the periodic entries' alone — the playback and call entries' medium cycles and the game chain's head. A measured application's own thread wakes are not periodic: each is a WAIT, woken at a time sampled from its measured gaps, with no deadline (9.5 D74) — on the task's timer channel where the measured wake's chain starts at a timer interrupt, on its event channel where it starts elsewhere: the measurement's input, another process, a kernel thread (2026-10-31, `docs/data-contracts.md` §14).
 
 **Defining an archetype is three steps:**
-1. **Pattern selection** — transcribe the measured program's observed behaviour into the grammar: `audio-player`, mpv playing a track, becomes a TIMER/RUN loop at its measured 49,635 µs cycle; a measured application, one stream of its threads' timer wakes, its replayed keystrokes and its operations, merged at compile time; a batch job, a loop of its measured runs between voluntary blocks and the blocks after them.
+1. **Pattern selection** — transcribe the measured program's observed behaviour into the grammar: `audio-player`, mpv playing a track, becomes a TIMER/RUN loop at its measured 49,635 µs cycle; a measured application, one stream of its threads' own wakes on its timer and event channels, its replayed keystrokes and its operations, merged at compile time; a batch job, a loop of its measured runs between voluntary blocks and the blocks after them.
 2. **Parameter filling** — numbers enter as *distributions*, not point values: a measured table carried as observed (`dist: quantiles`, the ten pooled quantiles with the sample's extremes and each interval's mean, 9.5 D17), a lognormal between two anchors where a source gives only a span (`game-task-chain`'s per-schedule run), a constant where the quantity is one value (a cycle's period). Every numeric carries `source: <id>` or `<id>:<locator>`.
 3. **Validation criterion** — an archetype's identity is not its code but the **statistics it must reproduce**, declared per entry in `validation_stats`: the referee, the campaign's run and repeats, the measured statistics, and the observation's scope. A measured entry's referee is its own campaign (`referee: meas-ci`); the compiled library keeps each measured table's quantiles and mean, and every measured entry compiles at the wake rate it carries (`dataset/tools/tests/test_measured_fidelity.py`). The `replay` sensitivity variants compile four judging files from one pooled repeat's observed stream — wakes, runs and the block after each, or cycles, as the entry compiles — in place of the sampled one (`dataset/variants.yaml`), so a verdict can be compared across the two. `game-task-chain` has no referee (`referee: none`): validation against LAVD would be circular — LAVD is also the parameter source — and the runner cannot observe a Proton game, as the entry states.
 
@@ -52,7 +53,7 @@ The library as it stands (`dataset/archetypes.yaml`, v0.2), grouped by how an en
 
 ### Measured applications and session processes — one merged event stream (16)
 
-One task carries the program's whole process tree: its threads' timer wakes (`components`, in every entry but `image-editor` and the playback and call entries: one per process role, or instance, and thread comm (9.5 D67), the comms below the coverage cut pooled into one `residual`; each from its measured gap and run tables), and where the observation holds them the driven cadence inside focus windows (`focus_components`), a replayed keystroke stream (`stimulus`), named operations and rare heavy runs, merged into one explicit stream at compile time; where the entry carries an observed launch phase (`launch`, ten of these sixteen: not `code-editor`, `image-editor` or the four session entries), a task arriving after 0 s first replays it (9.10 D136). The playback and call entries carry instead one periodic job per medium cycle — a constant `period` and a measured per-cycle `cycle_run` — a TIMER/RUN loop.
+One task carries the program's whole process tree: its threads' own wakes (`components`, in every entry but `image-editor` and the playback and call entries: one per process role, or instance, and thread comm (9.5 D67), split into its timer part and its event part (`channel: event`) by the origin of each measured wake's chain, each channel's comms below its own coverage cut pooled into its own `residual`; each from its measured gap and run tables), and where the observation holds them the driven cadence inside focus windows (`focus_components`, split the same way), a replayed keystroke stream (`stimulus`), named operations (each with its duration, the table of each measured operation's largest run, which every operation window takes once at its start on the channel its wake takes, and its components without those runs; 2026-10-31, decision 17) and rare heavy runs, merged into one explicit stream at compile time; where the entry carries an observed launch phase (`launch`, ten of these sixteen: not `code-editor`, `image-editor` or the four session entries), a task arriving after 0 s first replays it (9.10 D136). The playback and call entries carry instead one periodic job per medium cycle — a constant `period` and a measured per-cycle `cycle_run` — a TIMER/RUN loop.
 
 | Entry | The program measured | Campaign (`meas-ci:`) | Shown as |
 |---|---|---|---|
@@ -114,7 +115,7 @@ Per entry (the top-level key is its id): `category_source` (Tier-1 provenance), 
 - *A batch entry's tables are chosen by its binding, never by the task's name.* `cpu-batch`'s `program` binding selects `python3` or `kdenlive_render`; Tracker's index is its own entry, `file-indexer`, bound as `tracker-miner-f` in `c1-indexing`, `c2-p1b` and `c7-indexing`.
 - *The `steam` download carries SteamCMD's numbers by stated approximation* (9.7 D4): the desktop client's download needs a logged-in account, and no Steam account is used.
 
-Linter rules for the library (`dataset/tools/wlc/linter.py`, `make lint`): reject an entry missing `category_source`, `declared_class`, `pattern`, `params`, `lifetime`, `binding_params`, `scalable`, `validation_stats` or `modeling_notes`; reject a `lifetime` or `declared_class` outside its set and a spawned entry without `spawned_by`; reject a numeric param without a `source:`, with an id absent from the registry or a locator violating the id's `locator_pattern`, or with a bad `sampling`; reject a quantile table without ten non-decreasing values, or whose extremes and interval means do not fit them; reject a `stimulus`, `launch` or `replay` stream with no file beside the library; reject `meas-pending` under the freeze, which `make lint` runs; and fail a `meas-ci` campaign tag that `dataset/meas-releases.yaml` does not map to a release.
+Linter rules for the library (`dataset/tools/wlc/linter.py`, `make lint`): reject an entry missing `category_source`, `declared_class`, `pattern`, `params`, `lifetime`, `binding_params`, `scalable`, `validation_stats` or `modeling_notes`; reject a `lifetime` or `declared_class` outside its set and a spawned entry without `spawned_by`; reject a numeric param without a `source:`, with an id absent from the registry or a locator violating the id's `locator_pattern`, or with a bad `sampling`; reject a quantile table without ten non-decreasing values, or whose extremes and interval means do not fit them; reject a component whose `channel` is other than `timer`, the default, or `event`; reject an operation without `duration` or `largest_run`, or whose `largest_run_channel` is other than `timer` or `event`; reject a `stimulus`, `launch` or `replay` stream with no file beside the library; reject `meas-pending` under the freeze, which `make lint` runs; and fail a `meas-ci` campaign tag that `dataset/meas-releases.yaml` does not map to a release.
 
 ## 6. Open questions — resolutions
 
