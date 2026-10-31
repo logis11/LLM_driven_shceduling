@@ -66,3 +66,7 @@ The tasks the desktop and session campaigns measured — `renderer-hidden`, `cha
 ### 14. An event part that fails the stability rule is carried with its half-widths
 
 An event part whose values do not hold the stability rule (9.5 D26, D30, D78) at the repeats obtained is carried with its half-widths over at least five repeats, the tolerance not applied, under the existing class its evidence meets: 9.5 D57 where its rate moves far less within one run than across repeats; D57 extended as 9.8 D21 extends it where its spread lies in part within one run; 9.8 D27's sparse component where it wakes a few times a phase. Its three values are carried together, and the entry's scope states both spreads, its wakes per phase and that the class was decided after the value was seen failing (9.8 D28). The desktop and session campaigns' tasks follow the same rule.
+
+### 15. `video-editor`'s driven-phase main-thread timer-part run mean carried under 9.8 D17
+
+The run mean of `kdenlive`'s timer part in the driven phase, which fails the stability rule at the 20 repeats obtained, is carried with its half-width and range over at least five repeats, the tolerance not applied, under 9.8 D17's class: run times that follow the runner's speed. The entry's scope states what its spread follows — the driven phase's components' run means moving together across the repeats — its share of the phase's CPU, and that the class was decided after the value was seen failing (9.8 D28).
