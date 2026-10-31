@@ -55,7 +55,7 @@ thunderbird-send: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
    op Renderer run mean (ms): k 8, half-width 0.0464, passes
    op thunderbird-bin wakes/s: k 8, half-width 0.0597, at the window limit, reported (D46), needed 11
    op thunderbird-bin gap mean (ms): k 8, half-width 0.0613, at the window limit, reported (D46), needed 11
-   op thunderbird-bin run mean (ms): k 8, half-width 0.1491, at the window limit, reported (D46), needed 52
+   op thunderbird-bin run mean (ms): k 8, half-width 0.1198, at the window limit, reported (D46), needed 35
    op SwComposite wakes/s: k 8, half-width 0.0368, passes
    op SwComposite gap mean (ms): k 8, half-width 0.0377, passes
    op SwComposite run mean (ms): k 8, half-width 0.0376, passes
@@ -82,7 +82,7 @@ thunderbird-send: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
    op Socket Thread [event] run mean (ms): k 8, half-width 0.0419, passes
    op thunderbird-bin [event] wakes/s: k 8, half-width 0.043, passes
    op thunderbird-bin [event] gap mean (ms): k 8, half-width 0.0437, passes
-   op thunderbird-bin [event] run mean (ms): k 8, half-width 0.042, passes
+   op thunderbird-bin [event] run mean (ms): k 8, half-width 0.0754, at the window limit, reported (D46), needed 15
    op Compositor [event] wakes/s: k 8, half-width 0.0285, passes
    op Compositor [event] gap mean (ms): k 8, half-width 0.029, passes
    op Compositor [event] run mean (ms): k 8, half-width 0.0319, passes
@@ -113,6 +113,7 @@ thunderbird-send: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
    input_run mean, SWELL-KW (ms): k 8, half-width 0.0857, at the window limit, reported (D46), needed 19
    input_run mean, 136M (ms): k 8, half-width 0.069, at the window limit, reported (D46), needed 13
    operation duration mean (ms): k 8, half-width 0.0276, passes
+   operation largest run mean (ms): k 8, half-width 0.0088, passes
    phases ['idle', 'driven', 'driven-alt', 'op']; pooled record _dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine/pool-thunderbird-send.json
 validity:
    r1: ok

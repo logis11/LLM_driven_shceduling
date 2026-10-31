@@ -125,8 +125,8 @@ Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366] events per repeat):
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `thunderbird-bin [event]` | 1–1 | 352.8–408.5 | 0.19 (0.2–0.3) | 1.76 | 0.129 | 1.204 | 5.386 | 236997 |
-| `thunderbird-bin` | 1–1 | 56.0–70.0 | 0.72 (0.7–0.8) | 31.66 | 0.150 | 1.498 | 3.880 | 39464 |
+| `thunderbird-bin [event]` | 1–1 | 352.5–408.2 | 0.19 (0.2–0.3) | 1.76 | 0.129 | 1.201 | 5.056 | 236798 |
+| `thunderbird-bin` | 1–1 | 56.0–70.0 | 0.72 (0.7–0.8) | 31.66 | 0.150 | 1.498 | 3.876 | 39463 |
 | `Socket Thread [event]` | 1–1 | 654.7–706.6 | 0.06 (0.1–0.1) | 0.76 | 0.012 | 0.040 | 0.109 | 420054 |
 | `Renderer [event]` | 1–1 | 51.5–61.2 | 0.60 (0.5–0.7) | 48.20 | 0.064 | 0.303 | 1.512 | 33497 |
 | `Renderer` | 1–1 | 60.8–68.1 | 0.43 (0.4–0.5) | 31.93 | 0.113 | 0.250 | 1.050 | 40236 |
@@ -163,7 +163,7 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `gimp [event]` | 1–1 | 2.0–2.2 | 0.33 (0.3–0.3) | 2353.21 | 0.111 | 2438.067 | 2524.369 | 1195 |
+| `gimp [event]` | 1–1 | 1.6–1.8 | 0.38 (0.4–0.4) | 2373.31 | 0.071 | 0.197 | 1098.823 | 950 |
 | `script-fu [event]` | 1–1 | 10.7–10.8 | 0.14 (0.1–0.1) | 4.94 | 0.018 | 0.044 | 0.235 | 6213 |
 | `script-fu` | 1–1 | 0.8–0.9 | 2194.57 (1096.5–2222.6) | 2406.63 | 0.041 | 0.057 | 0.373 | 483 |
 
@@ -199,7 +199,7 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `kdenlive_render [event]` | 1412–1480 | 619.9–655.3 | 0.01 (0.0–0.0) | 4.68 | 0.007 | 3.008 | 14.747 | 3844521 |
+| `kdenlive_render [event]` | 1412–1480 | 619.9–655.2 | 0.01 (0.0–0.0) | 4.69 | 0.007 | 3.007 | 14.702 | 3843990 |
 | `kdenlive [event]` | 27–29 | 10.3–10.8 | 24.27 (23.0–25.0) | 393.45 | 3.819 | 9.536 | 12.038 | 63443 |
 | `kdenlive` | 1–2 | 0.2–0.3 | 8.84 (8.3–9.4) | 11589.71 | 3.508 | 8.854 | 10.303 | 1317 |
 | `QXcbEventQueue [event]` | 1–1 | 5.0–5.3 | 32.26 (31.2–33.4) | 442.31 | 0.019 | 0.023 | 0.045 | 31022 |
@@ -242,9 +242,9 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | application | repeats | quantities | out of tolerance | repeats needed at this spread | holds |
 |---|---|---|---|---|---|
 | `soffice` | 14 | 5 | 0 | 14 | yes |
-| `thunderbird-send` | 77 | 114 | 19 | 72 | yes |
-| `gimp` | 5 | 16 | 0 | 5 | yes |
-| `kdenlive` | 20 | 40 | 1 | 13 | yes |
+| `thunderbird-send` | 77 | 115 | 20 | 72 | yes |
+| `gimp` | 5 | 17 | 3 | 5 | yes |
+| `kdenlive` | 20 | 41 | 1 | 13 | yes |
 | `mpv-video` | 24 | 3 | 0 | 10 | yes |
 | `mpv-audio` | 31 | 3 | 0 | 28 | yes |
 
@@ -316,9 +316,9 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | op Renderer wakes/s | 8 | 65.48 | 3.4% | ±2.8% | 1.0% | 5 | yes |
 | op Renderer gap mean (ms) | 8 | 15.2812 | 3.5% | ±2.9% | 1.1% | 5 | yes |
 | op Renderer run mean (ms) | 8 | 0.1354 | 5.5% | ±4.6% | 1.3% | 8 | yes |
-| op thunderbird-bin wakes/s | 8 | 64.2571 | 7.1% | ±6.0% | 1.8% | 11 | no |
-| op thunderbird-bin gap mean (ms) | 8 | 15.5801 | 7.3% | ±6.1% | 1.9% | 11 | no |
-| op thunderbird-bin run mean (ms) | 8 | 0.5816 | 17.8% | ±14.9% | 4.3% | 52 | no |
+| op thunderbird-bin wakes/s | 8 | 64.2555 | 7.1% | ±6.0% | 1.8% | 11 | no |
+| op thunderbird-bin gap mean (ms) | 8 | 15.5805 | 7.3% | ±6.1% | 1.9% | 11 | no |
+| op thunderbird-bin run mean (ms) | 8 | 0.5515 | 14.3% | ±12.0% | 3.2% | 35 | no |
 | op SwComposite wakes/s | 8 | 40.8032 | 4.4% | ±3.7% | 1.0% | 6 | yes |
 | op SwComposite gap mean (ms) | 8 | 24.5186 | 4.5% | ±3.8% | 1.1% | 6 | yes |
 | op SwComposite run mean (ms) | 8 | 0.0115 | 4.5% | ±3.8% | 1.1% | 5 | yes |
@@ -343,9 +343,9 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | op Socket Thread [event] wakes/s | 8 | 683.4249 | 2.5% | ±2.1% | 0.6% | 5 | yes |
 | op Socket Thread [event] gap mean (ms) | 8 | 1.4637 | 2.5% | ±2.1% | 0.6% | 5 | yes |
 | op Socket Thread [event] run mean (ms) | 8 | 0.0218 | 5.0% | ±4.2% | 1.3% | 7 | yes |
-| op thunderbird-bin [event] wakes/s | 8 | 385.9774 | 5.1% | ±4.3% | 1.2% | 7 | yes |
-| op thunderbird-bin [event] gap mean (ms) | 8 | 2.5944 | 5.2% | ±4.4% | 1.3% | 7 | yes |
-| op thunderbird-bin [event] run mean (ms) | 8 | 1.6561 | 5.0% | ±4.2% | 1.5% | 7 | yes |
+| op thunderbird-bin [event] wakes/s | 8 | 385.6534 | 5.1% | ±4.3% | 1.2% | 7 | yes |
+| op thunderbird-bin [event] gap mean (ms) | 8 | 2.5965 | 5.2% | ±4.4% | 1.3% | 7 | yes |
+| op thunderbird-bin [event] run mean (ms) | 8 | 0.6703 | 9.0% | ±7.5% | 2.8% | 15 | no |
 | op Compositor [event] wakes/s | 8 | 323.8735 | 3.4% | ±2.9% | 0.9% | 5 | yes |
 | op Compositor [event] gap mean (ms) | 8 | 3.0856 | 3.5% | ±2.9% | 0.9% | 5 | yes |
 | op Compositor [event] run mean (ms) | 8 | 0.0141 | 3.8% | ±3.2% | 1.2% | 5 | yes |
@@ -376,6 +376,7 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | input_run mean, SWELL-KW (ms) | 8 | 6.8674 | 10.2% | ±8.6% | 2.4% | 19 | no |
 | input_run mean, 136M (ms) | 8 | 6.2957 | 8.2% | ±6.9% | 1.9% | 13 | no |
 | operation duration mean (ms) | 8 | 3074.2678 | 3.3% | ±2.8% | 0.9% | 5 | yes |
+| operation largest run mean (ms) | 8 | 1174.7391 | 1.1% | ±0.9% | 0.4% | 5 | yes |
 
 ### `gimp`
 
@@ -393,10 +394,11 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | op script-fu [event] wakes/s | 5 | 10.7449 | 0.7% | ±0.9% | 0.2% | 5 | yes |
 | op script-fu [event] gap mean (ms) | 5 | 93.0698 | 0.7% | ±0.9% | 0.2% | 5 | yes |
 | op script-fu [event] run mean (ms) | 5 | 0.033 | 3.7% | ±4.6% | 1.6% | 5 | yes |
-| op gimp [event] wakes/s | 5 | 2.0668 | 3.5% | ±4.4% | 1.4% | 5 | yes |
-| op gimp [event] gap mean (ms) | 5 | 483.885 | 3.5% | ±4.4% | 1.4% | 5 | yes |
-| op gimp [event] run mean (ms) | 5 | 500.5503 | 3.5% | ±4.4% | 1.4% | 5 | yes |
+| op gimp [event] wakes/s | 5 | 1.6431 | 4.3% | ±5.4% | 1.8% | 6 | no |
+| op gimp [event] gap mean (ms) | 5 | 608.6763 | 4.3% | ±5.4% | 1.8% | 6 | no |
+| op gimp [event] run mean (ms) | 5 | 30.5195 | 12.8% | ±16.0% | 4.7% | 28 | no |
 | operation duration mean (ms) | 5 | 2360.1735 | 1.0% | ±1.2% | 0.4% | 5 | yes |
+| operation largest run mean (ms) | 5 | 2323.1186 | 1.6% | ±2.0% | 0.4% | 5 | yes |
 
 ### `kdenlive`
 
@@ -435,13 +437,14 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | op QXcbEventQueue wakes/s | 20 | 0.1367 | 7.4% | ±3.5% | 0.8% | 11 | yes |
 | op QXcbEventQueue gap mean (ms) | 20 | 7315.8992 | 7.4% | ±3.5% | 0.8% | 11 | yes |
 | op QXcbEventQueue run mean (ms) | 20 | 0.0168 | 5.9% | ±2.8% | 0.6% | 7 | yes |
-| op kdenlive_render [event] wakes/s | 20 | 635.463 | 1.5% | ±0.7% | 0.2% | 5 | yes |
-| op kdenlive_render [event] gap mean (ms) | 20 | 1.5737 | 1.5% | ±0.7% | 0.2% | 5 | yes |
-| op kdenlive_render [event] run mean (ms) | 20 | 1.4758 | 1.5% | ±0.7% | 0.2% | 5 | yes |
+| op kdenlive_render [event] wakes/s | 20 | 635.3752 | 1.5% | ±0.7% | 0.2% | 5 | yes |
+| op kdenlive_render [event] gap mean (ms) | 20 | 1.574 | 1.5% | ±0.7% | 0.2% | 5 | yes |
+| op kdenlive_render [event] run mean (ms) | 20 | 1.445 | 1.5% | ±0.7% | 0.2% | 5 | yes |
 | op residual [event] wakes/s | 20 | 15.7112 | 1.4% | ±0.7% | 0.2% | 5 | yes |
 | op residual [event] gap mean (ms) | 20 | 63.6513 | 1.4% | ±0.7% | 0.2% | 5 | yes |
 | op residual [event] run mean (ms) | 20 | 3.2579 | 1.4% | ±0.6% | 0.1% | 5 | yes |
 | operation duration mean (ms) | 20 | 11394.0653 | 1.6% | ±0.7% | 0.2% | 5 | yes |
+| operation largest run mean (ms) | 20 | 224.5152 | 1.5% | ±0.7% | 0.2% | 5 | yes |
 
 ### `mpv-video`
 

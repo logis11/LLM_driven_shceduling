@@ -62,8 +62,8 @@ chrome: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
    op ThreadPoolForeg gap mean (ms): k 38, half-width 0.0507, at the window limit, reported (D46), needed 40
    op ThreadPoolForeg run mean (ms): k 38, half-width 0.0349, passes
    op renderer/chrome wakes/s: k 38, half-width 0.0287, passes
-   op renderer/chrome gap mean (ms): k 38, half-width 0.0286, passes
-   op renderer/chrome run mean (ms): k 38, half-width 0.058, at the window limit, reported (D46), needed 51
+   op renderer/chrome gap mean (ms): k 38, half-width 0.0287, passes
+   op renderer/chrome run mean (ms): k 38, half-width 0.0502, at the window limit, reported (D46), needed 39
    op renderer/Compositor wakes/s: k 38, half-width 0.0302, passes
    op renderer/Compositor gap mean (ms): k 38, half-width 0.0303, passes
    op renderer/Compositor run mean (ms): k 38, half-width 0.0366, passes
@@ -94,9 +94,9 @@ chrome: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
    op utility/Chrome_ChildIOT [event] wakes/s: k 38, half-width 0.0143, passes
    op utility/Chrome_ChildIOT [event] gap mean (ms): k 38, half-width 0.0145, passes
    op utility/Chrome_ChildIOT [event] run mean (ms): k 38, half-width 0.0281, passes
-   op renderer/chrome [event] wakes/s: k 38, half-width 0.0126, passes
-   op renderer/chrome [event] gap mean (ms): k 38, half-width 0.0126, passes
-   op renderer/chrome [event] run mean (ms): k 38, half-width 0.0192, passes
+   op renderer/chrome [event] wakes/s: k 38, half-width 0.0129, passes
+   op renderer/chrome [event] gap mean (ms): k 38, half-width 0.0129, passes
+   op renderer/chrome [event] run mean (ms): k 38, half-width 0.0315, passes
    op utility/ThreadPoolForeg [event] wakes/s: k 38, half-width 0.0697, at the window limit, reported (D46), needed 72
    op utility/ThreadPoolForeg [event] gap mean (ms): k 38, half-width 0.0705, at the window limit, reported (D46), needed 74
    op utility/ThreadPoolForeg [event] run mean (ms): k 38, half-width 0.0194, passes
@@ -109,6 +109,7 @@ chrome: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
    input_run mean, SWELL-KW (ms): k 38, half-width 0.059, at the window limit, reported (D46), needed 52
    input_run mean, 136M (ms): k 38, half-width 0.0337, passes
    operation duration mean (ms): k 38, half-width 0.01, passes
+   operation largest run mean (ms): k 38, half-width 0.0144, passes
    phases ['idle', 'driven', 'driven-alt', 'op']; pooled record /private/tmp/claude-501/-Users-jiohin-Desktop-future-of-sw-LLM-driven-shceduling/9e16ab67-6c3d-4661-9bd1-a7e6413c60b0/scratchpad/repool/pool-chrome.json
 validity:
    r1: ok

@@ -131,8 +131,8 @@ Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366] events per repeat):
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `thunderbird-bin [event]` | 1–1 | 374.7–426.6 | 0.18 (0.2–0.2) | 1.61 | 0.125 | 1.066 | 4.969 | 240019 |
-| `thunderbird-bin` | 1–1 | 57.8–74.9 | 0.70 (0.7–0.8) | 30.92 | 0.149 | 1.456 | 4.109 | 41003 |
+| `thunderbird-bin [event]` | 1–1 | 374.4–426.2 | 0.18 (0.2–0.2) | 1.62 | 0.125 | 1.060 | 4.649 | 239822 |
+| `thunderbird-bin` | 1–1 | 57.8–74.8 | 0.70 (0.7–0.8) | 30.92 | 0.149 | 1.456 | 4.061 | 41000 |
 | `Socket Thread [event]` | 1–1 | 661.2–710.0 | 0.06 (0.1–0.1) | 0.73 | 0.011 | 0.038 | 0.116 | 409821 |
 | `Renderer [event]` | 1–2 | 50.2–57.9 | 0.60 (0.5–0.8) | 48.45 | 0.065 | 0.305 | 1.506 | 31638 |
 | `Renderer` | 1–1 | 64.9–70.7 | 0.44 (0.4–0.5) | 31.71 | 0.113 | 0.244 | 1.063 | 40571 |
@@ -209,11 +209,11 @@ Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366, 2515, 1961, 1692, 12
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `renderer/chrome [event]` | 2–4 | 53.1–62.7 | 1.23 (0.8–1.5) | 42.02 | 0.067 | 11.135 | 138.657 | 60985 |
+| `renderer/chrome [event]` | 2–4 | 51.2–60.7 | 1.25 (0.8–1.6) | 47.35 | 0.059 | 3.772 | 35.463 | 59007 |
 | `renderer/ThreadPoolForeg [event]` | 6–10 | 227.2–269.1 | 0.02 (0.0–0.0) | 4.36 | 0.006 | 0.916 | 8.713 | 259673 |
 | `chrome [event]` | 1–1 | 162.3–183.0 | 0.78 (0.6–1.1) | 12.51 | 0.067 | 0.462 | 8.318 | 179809 |
 | `gpu/VizCompositorTh [event]` | 1–1 | 100.5–112.6 | 4.78 (4.1–5.2) | 15.97 | 0.064 | 1.834 | 2.199 | 109554 |
-| `renderer/chrome` | 4–8 | 17.2–25.0 | 10.72 (5.8–14.7) | 87.83 | 0.037 | 0.535 | 34.662 | 21729 |
+| `chrome` | 1–1 | 64.1–86.4 | 0.48 (0.4–0.7) | 16.37 | 0.086 | 0.385 | 1.101 | 81373 |
 
 Stimulus sensitivity (method §3, pre-registered): per-input run, rule (b), SWELL-KW (`driven`) against 136M Keystrokes (`driven-alt`):
 
@@ -246,8 +246,8 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | application | repeats | quantities | out of tolerance | repeats needed at this spread | holds |
 |---|---|---|---|---|---|
 | `code` | 44 | 56 | 15 | 41 | yes |
-| `thunderbird-send` | 8 | 114 | 56 | 98 | no |
-| `chrome` | 38 | 102 | 21 | 30 | yes |
+| `thunderbird-send` | 8 | 115 | 57 | 98 | no |
+| `chrome` | 38 | 103 | 21 | 30 | yes |
 | `webrtc` | 45 | 3 | 0 | 7 | yes |
 
 ### `code`
@@ -366,9 +366,9 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | op Compositor wakes/s | 8 | 267.0257 | 3.6% | ±3.0% | 1.2% | 5 | yes |
 | op Compositor gap mean (ms) | 8 | 3.7456 | 3.6% | ±3.0% | 1.2% | 5 | yes |
 | op Compositor run mean (ms) | 8 | 0.0143 | 4.7% | ±4.0% | 1.4% | 5 | yes |
-| op thunderbird-bin wakes/s | 8 | 69.09 | 7.9% | ±6.6% | 2.3% | 13 | no |
-| op thunderbird-bin gap mean (ms) | 8 | 14.4911 | 8.1% | ±6.8% | 2.4% | 13 | no |
-| op thunderbird-bin run mean (ms) | 8 | 0.6442 | 32.4% | ±27.1% | 11.0% | 165 | no |
+| op thunderbird-bin wakes/s | 8 | 69.0849 | 7.9% | ±6.6% | 2.3% | 13 | no |
+| op thunderbird-bin gap mean (ms) | 8 | 14.4921 | 8.1% | ±6.8% | 2.4% | 13 | no |
+| op thunderbird-bin run mean (ms) | 8 | 0.5618 | 14.4% | ±12.0% | 3.6% | 35 | no |
 | op Renderer wakes/s | 8 | 68.3082 | 2.8% | ±2.4% | 0.7% | 5 | yes |
 | op Renderer gap mean (ms) | 8 | 14.6454 | 2.9% | ±2.4% | 0.7% | 5 | yes |
 | op Renderer run mean (ms) | 8 | 0.1356 | 7.1% | ±6.0% | 1.5% | 11 | no |
@@ -396,9 +396,9 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | op Socket Thread [event] wakes/s | 8 | 689.7543 | 2.4% | ±2.0% | 0.6% | 5 | yes |
 | op Socket Thread [event] gap mean (ms) | 8 | 1.4498 | 2.4% | ±2.0% | 0.6% | 5 | yes |
 | op Socket Thread [event] run mean (ms) | 8 | 0.0214 | 4.4% | ±3.7% | 1.0% | 6 | yes |
-| op thunderbird-bin [event] wakes/s | 8 | 404.3326 | 4.8% | ±4.0% | 1.1% | 7 | yes |
-| op thunderbird-bin [event] gap mean (ms) | 8 | 2.4756 | 4.9% | ±4.1% | 1.1% | 7 | yes |
-| op thunderbird-bin [event] run mean (ms) | 8 | 1.5435 | 5.7% | ±4.8% | 1.5% | 8 | yes |
+| op thunderbird-bin [event] wakes/s | 8 | 404.0009 | 4.8% | ±4.0% | 1.1% | 7 | yes |
+| op thunderbird-bin [event] gap mean (ms) | 8 | 2.4776 | 4.9% | ±4.1% | 1.1% | 7 | yes |
+| op thunderbird-bin [event] run mean (ms) | 8 | 0.6304 | 9.5% | ±8.0% | 2.6% | 17 | no |
 | op Compositor [event] wakes/s | 8 | 322.8176 | 2.9% | ±2.4% | 0.8% | 5 | yes |
 | op Compositor [event] gap mean (ms) | 8 | 3.0967 | 2.9% | ±2.4% | 0.8% | 5 | yes |
 | op Compositor [event] run mean (ms) | 8 | 0.0137 | 7.2% | ±6.0% | 2.1% | 7 | yes |
@@ -429,6 +429,7 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | input_run mean, SWELL-KW (ms) | 8 | 6.0516 | 12.4% | ±10.4% | 3.3% | 27 | no |
 | input_run mean, 136M (ms) | 8 | 5.6439 | 5.7% | ±4.8% | 1.3% | 8 | yes |
 | operation duration mean (ms) | 8 | 2970.8859 | 2.5% | ±2.1% | 0.6% | 5 | yes |
+| operation largest run mean (ms) | 8 | 1113.4218 | 0.2% | ±0.2% | 0.1% | 5 | yes |
 
 ### `chrome`
 
@@ -488,9 +489,9 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | op ThreadPoolForeg wakes/s | 38 | 22.8745 | 15.3% | ±5.0% | 1.0% | 39 | no |
 | op ThreadPoolForeg gap mean (ms) | 38 | 43.6248 | 15.4% | ±5.1% | 1.0% | 40 | no |
 | op ThreadPoolForeg run mean (ms) | 38 | 0.0404 | 10.6% | ±3.5% | 1.1% | 20 | yes |
-| op renderer/chrome wakes/s | 38 | 20.8755 | 8.7% | ±2.9% | 0.5% | 15 | yes |
-| op renderer/chrome gap mean (ms) | 38 | 47.9795 | 8.7% | ±2.9% | 0.5% | 15 | yes |
-| op renderer/chrome run mean (ms) | 38 | 1.5131 | 17.6% | ±5.8% | 1.1% | 51 | no |
+| op renderer/chrome wakes/s | 38 | 20.7316 | 8.7% | ±2.9% | 0.5% | 15 | yes |
+| op renderer/chrome gap mean (ms) | 38 | 48.313 | 8.7% | ±2.9% | 0.5% | 15 | yes |
+| op renderer/chrome run mean (ms) | 38 | 0.692 | 15.3% | ±5.0% | 0.9% | 39 | no |
 | op renderer/Compositor wakes/s | 38 | 18.4564 | 9.2% | ±3.0% | 0.7% | 16 | yes |
 | op renderer/Compositor gap mean (ms) | 38 | 54.2512 | 9.2% | ±3.0% | 0.7% | 16 | yes |
 | op renderer/Compositor run mean (ms) | 38 | 0.0813 | 11.1% | ±3.7% | 0.8% | 22 | yes |
@@ -521,9 +522,9 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | op utility/Chrome_ChildIOT [event] wakes/s | 38 | 72.9756 | 4.3% | ±1.4% | 0.3% | 6 | yes |
 | op utility/Chrome_ChildIOT [event] gap mean (ms) | 38 | 13.7152 | 4.4% | ±1.5% | 0.4% | 6 | yes |
 | op utility/Chrome_ChildIOT [event] run mean (ms) | 38 | 0.1591 | 8.6% | ±2.8% | 0.5% | 14 | yes |
-| op renderer/chrome [event] wakes/s | 38 | 58.5187 | 3.9% | ±1.3% | 0.2% | 5 | yes |
-| op renderer/chrome [event] gap mean (ms) | 38 | 17.0951 | 3.8% | ±1.3% | 0.2% | 5 | yes |
-| op renderer/chrome [event] run mean (ms) | 38 | 6.1214 | 5.8% | ±1.9% | 0.4% | 8 | yes |
+| op renderer/chrome [event] wakes/s | 38 | 56.6197 | 3.9% | ±1.3% | 0.3% | 5 | yes |
+| op renderer/chrome [event] gap mean (ms) | 38 | 17.6682 | 3.9% | ±1.3% | 0.2% | 5 | yes |
+| op renderer/chrome [event] run mean (ms) | 38 | 2.0937 | 9.6% | ±3.1% | 0.6% | 17 | yes |
 | op utility/ThreadPoolForeg [event] wakes/s | 38 | 37.2525 | 21.2% | ±7.0% | 1.4% | 72 | no |
 | op utility/ThreadPoolForeg [event] gap mean (ms) | 38 | 26.9009 | 21.4% | ±7.0% | 1.4% | 74 | no |
 | op utility/ThreadPoolForeg [event] run mean (ms) | 38 | 0.032 | 5.9% | ±1.9% | 0.4% | 8 | yes |
@@ -536,6 +537,7 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | input_run mean, SWELL-KW (ms) | 38 | 4.2736 | 17.9% | ±5.9% | 2.0% | 52 | no |
 | input_run mean, 136M (ms) | 38 | 5.4147 | 10.2% | ±3.4% | 0.7% | 19 | yes |
 | operation duration mean (ms) | 38 | 489.9182 | 3.0% | ±1.0% | 0.2% | 5 | yes |
+| operation largest run mean (ms) | 38 | 125.8055 | 4.4% | ±1.4% | 0.3% | 6 | yes |
 
 ### `webrtc`
 

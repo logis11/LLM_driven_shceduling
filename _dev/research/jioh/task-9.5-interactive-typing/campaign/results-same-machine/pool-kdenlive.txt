@@ -34,11 +34,12 @@ kdenlive: repeats [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 1
    op QXcbEventQueue run mean (ms): k 20, half-width 0.0277, passes
    op kdenlive_render [event] wakes/s: k 20, half-width 0.0068, passes
    op kdenlive_render [event] gap mean (ms): k 20, half-width 0.0068, passes
-   op kdenlive_render [event] run mean (ms): k 20, half-width 0.007, passes
+   op kdenlive_render [event] run mean (ms): k 20, half-width 0.0071, passes
    op residual [event] wakes/s: k 20, half-width 0.0067, passes
    op residual [event] gap mean (ms): k 20, half-width 0.0067, passes
    op residual [event] run mean (ms): k 20, half-width 0.0063, passes
    operation duration mean (ms): k 20, half-width 0.0073, passes
+   operation largest run mean (ms): k 20, half-width 0.0069, passes
    phases ['idle', 'driven', 'op']; pooled record _dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine/pool-kdenlive.json
 validity:
    r1: ok

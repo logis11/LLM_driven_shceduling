@@ -50,9 +50,9 @@ thunderbird-send: repeats [1, 2, 3, 4, 5, 6, 7, 8]; stability rule does not hold
    op Compositor wakes/s: k 8, half-width 0.0304, passes
    op Compositor gap mean (ms): k 8, half-width 0.0305, passes
    op Compositor run mean (ms): k 8, half-width 0.0395, passes
-   op thunderbird-bin wakes/s: k 8, half-width 0.0663, at the window limit, reported (D46), needed 13
-   op thunderbird-bin gap mean (ms): k 8, half-width 0.0677, at the window limit, reported (D46), needed 13
-   op thunderbird-bin run mean (ms): k 8, half-width 0.2712, at the window limit, reported (D46), needed 165
+   op thunderbird-bin wakes/s: k 8, half-width 0.0662, at the window limit, reported (D46), needed 13
+   op thunderbird-bin gap mean (ms): k 8, half-width 0.0676, at the window limit, reported (D46), needed 13
+   op thunderbird-bin run mean (ms): k 8, half-width 0.1203, at the window limit, reported (D46), needed 35
    op Renderer wakes/s: k 8, half-width 0.0238, passes
    op Renderer gap mean (ms): k 8, half-width 0.0241, passes
    op Renderer run mean (ms): k 8, half-width 0.0598, at the window limit, reported (D46), needed 11
@@ -81,8 +81,8 @@ thunderbird-send: repeats [1, 2, 3, 4, 5, 6, 7, 8]; stability rule does not hold
    op Socket Thread [event] gap mean (ms): k 8, half-width 0.0198, passes
    op Socket Thread [event] run mean (ms): k 8, half-width 0.0371, passes
    op thunderbird-bin [event] wakes/s: k 8, half-width 0.0403, passes
-   op thunderbird-bin [event] gap mean (ms): k 8, half-width 0.0406, passes
-   op thunderbird-bin [event] run mean (ms): k 8, half-width 0.0476, passes
+   op thunderbird-bin [event] gap mean (ms): k 8, half-width 0.0407, passes
+   op thunderbird-bin [event] run mean (ms): k 8, half-width 0.0796, at the window limit, reported (D46), needed 17
    op Compositor [event] wakes/s: k 8, half-width 0.0241, passes
    op Compositor [event] gap mean (ms): k 8, half-width 0.0243, passes
    op Compositor [event] run mean (ms): k 8, half-width 0.0605, passes
@@ -113,6 +113,7 @@ thunderbird-send: repeats [1, 2, 3, 4, 5, 6, 7, 8]; stability rule does not hold
    input_run mean, SWELL-KW (ms): k 8, half-width 0.1041, at the window limit, reported (D46), needed 27
    input_run mean, 136M (ms): k 8, half-width 0.0479, passes
    operation duration mean (ms): k 8, half-width 0.0211, passes
+   operation largest run mean (ms): k 8, half-width 0.002, passes
    phases ['idle', 'driven', 'driven-alt', 'op']; pooled record _dev/research/jioh/task-9.5-interactive-typing/campaign/results-re-measured/pool-thunderbird-send.json
 validity:
    r1: ok

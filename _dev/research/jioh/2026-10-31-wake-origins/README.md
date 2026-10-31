@@ -1,6 +1,6 @@
 # 2026-10-31 wake origins
 
-The measured interactive applications' wakes classified by the origin of their wake chain, the data behind `_dev/docs/spec/jioh/timer-wakes-by-origin.md` (decisions 1, 8 and 9).
+The measured interactive applications' wakes classified by the origin of their wake chain, the data behind `_dev/docs/spec/jioh/timer-wakes-by-origin.md` (decisions 1, 8, 9 and 17).
 
 ## Inputs
 
@@ -12,6 +12,7 @@ A wake is `dataset/tools/meas/campaign/analyze.py`'s: a schedule-in with a wakeu
 
 - `first_hop.py` → `first-hop.md` (with `first_hop_tables.py`): each wake by its direct waker — the X server, `swapper` (the wakeup run in interrupt context on an idle CPU), a thread of the tree, a kernel thread, another process — and the components' top wakers.
 - `origins.py` → `tables.md` (with `tables.py`): each wake by the origin of its chain. The wakeup events are walked in time order; a wake by a thread of the tree, or by the X server, takes the origin of that thread's own last wake, the X server's wakes walked whether or not the snapshots hold it (Chrome's and VS Code's do not); otherwise the origin is the waker: `timer` (`swapper`), `input` (a measurement harness process — xdotool, the driver — or the driver's channel into the application, GIMP's Script-Fu server), `irq` (a kernel thread), `ext` (another process); `x` is the X server where its own wakes are not in the capture, `unknown` a tree thread not yet woken inside it, `none` a wake with no wakeup event.
+- `operations.py` → `operations.md`: each successful operation of the op phase (`ops.jsonl`'s [trigger, done) windows, `operation_windows`), its largest run — share of the operation's CPU, schedule-in from the trigger, the channel its wake's origin gives — over the operations, and the stability rule on the per-repeat means of its length and its schedule-in; the run directories are `jobs.txt`'s op phases.
 - `within_event.py` (the interactive campaigns, `campaign/analyze.py`'s wakes) and `within_event_desktop.py` (a desktop subject, `desktop/analyze.py`'s): 9.5 D57's test on a pool's parts — the part's wake rate over a window of the campaign's phase length slid along a long-phase probe, against its spread across the pool's repeats.
 
 Each cell is wakes/CPU: the share of the component's wakes and of its CPU.
@@ -63,6 +64,19 @@ Re-pooled with the split (the coverage cut per channel) and the X server walked 
 `pid1/systemd` and `system-bus/dbus-daemon` are 99.4 % and 98.3 % event-caused, so their parts carry the components' whole wakes. Before the X server was walked for Chrome and VS Code, whose snapshots hold no X server, code's `gpu/VizCompositorTh [event]` woke 1.22 times a second and moved ±4.1 % within a run against ±49.4 % across; read through the X server it is 0.036 a second.
 
 Kdenlive's driven phase: the main thread's timer part's run mean ±5.35 % over 20 repeats (±5.00 % before the split); across the repeats the run means of the phase's other four carried parts move with it, correlation +0.80 to +0.94.
+
+## Each operation's largest run
+
+In every successful operation of the four applications, its largest run (`operations.md`), the data behind the spec's decision 17:
+
+| application, operation | repeats | operations | operation CPU p50 (ms) | largest run p50 (ms) | its share of the operation's CPU, min / p50 | from the trigger p50 / p90 (ms) | channel (timer / event) | largest run mean, half-width over the repeats | from the trigger mean, half-width |
+|---|---|---|---|---|---|---|---|---|---|
+| chrome, page load | 38 | 2128 | 336.0 | 126.0 | 0.130 / 0.376 | 95.3 / 152.0 | 150 / 1978 | 125.8 ms ±1.44% | 99.4 ms ±1.84% |
+| gimp, unsharp mask | 5 | 245 | 2443.4 | 2434.2 | 0.535 / 1.000 | 1.2 / 3.7 | 0 / 245 | 2323.1 ms ±1.98% | 6.0 ms ±155.06% |
+| kdenlive, preview render | 20 | 531 | 11320.7 | 222.7 | 0.018 / 0.020 | 6067.9 / 9986.4 | 0 / 531 | 224.6 ms ±0.69% | 5873.7 ms ±5.18% |
+| thunderbird-send, send | 8 | 200 | 2233.9 | 1114.0 | 0.388 / 0.498 | 113.6 / 117.3 | 3 / 197 | 1113.4 ms ±0.20% | 113.1 ms ±1.27% |
+
+GIMP's unsharp mask holds two runs of a second or more in 19 of its 245 operations, one in the other 226; in two operations its largest run's wake is a kernel thread's (`irq`). Kdenlive's largest run is its render thread's (`kdenlive_render`), Chrome's the renderer's main thread's, Thunderbird's and GIMP's the main thread's.
 
 ## Limits
 

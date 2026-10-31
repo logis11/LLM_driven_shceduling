@@ -11,10 +11,11 @@ gimp: repeats [1, 2, 3, 5, 6]; stability rule holds
    op script-fu [event] wakes/s: k 5, half-width 0.0091, passes
    op script-fu [event] gap mean (ms): k 5, half-width 0.0091, passes
    op script-fu [event] run mean (ms): k 5, half-width 0.046, passes
-   op gimp [event] wakes/s: k 5, half-width 0.0438, passes
-   op gimp [event] gap mean (ms): k 5, half-width 0.0436, passes
-   op gimp [event] run mean (ms): k 5, half-width 0.0436, passes
+   op gimp [event] wakes/s: k 5, half-width 0.054, carried with its half-width, the venue taking no further repeat (decision 18)
+   op gimp [event] gap mean (ms): k 5, half-width 0.0538, carried with its half-width, the venue taking no further repeat (decision 18)
+   op gimp [event] run mean (ms): k 5, half-width 0.1595, carried with its half-width, the venue taking no further repeat (decision 18)
    operation duration mean (ms): k 5, half-width 0.0123, passes
+   operation largest run mean (ms): k 5, half-width 0.0198, passes
    phases ['idle', 'driven', 'op']; pooled record _dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine/pool-gimp.json
 validity:
    r1: ok
