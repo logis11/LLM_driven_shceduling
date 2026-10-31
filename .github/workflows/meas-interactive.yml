@@ -10,7 +10,7 @@ name: meas-interactive
 
 on:
   push:
-    branches: [jioh/dataset-rebuild]
+    branches: [jioh/dataset-rebuild, main]
     paths: [.github/campaign.json]
 
 permissions:
