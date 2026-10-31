@@ -536,6 +536,20 @@ def test_operation_windows_cut_rows_and_measure_duration():
     assert [r.t_in for r in res["outside"]] == [0.5, 2.01, 3.5]
 
 
+def test_each_operation_window_s_largest_run_is_taken_apart_from_its_components():
+    # timer wakes by origin, decision 17: each window's largest run is the operation's own, carried once per window; the
+    # components pool the rest; its schedule-in from the trigger is reported
+    ops = [{"op": "x", "i": 0, "trigger_us": 1_000_000, "done_us": 1_200_000, "rc": 0},
+           {"op": "x", "i": 1, "trigger_us": 2_000_000, "done_us": 2_100_000, "rc": 0},   # no row inside: no largest run
+           {"op": "x", "i": 2, "trigger_us": 3_000_000, "done_us": 3_400_000, "rc": 0}]
+    rows = [_row(1.05, 2.0), _row(1.10, 3.0), _row(1.15, 1.0), _row(3.002, 50.0), _row(3.1, 5.0), _row(3.5, 1.0)]
+    res = campaign.operation_windows(rows, ops)
+    assert [(r.t_in, r.run) for r in res["largest"]] == [(1.10, 3.0), (3.002, 50.0)]
+    assert res["largest_offsets_ms"] == [100.0, 2.0]
+    assert [r.t_in for r in res["rest"]] == [1.05, 1.15, 3.1]
+    assert len(res["inside"]) == 5                      # the operation's whole CPU still read as inside
+
+
 def test_one_comm_in_two_processes_is_two_components():
     # 9.5 D67: chrome's Chrome_ChildIOT names a thread of the GPU process (thousands of wakes) and one of each utility
     # process (one to six); pooled by comm alone, the utility threads' gaps of minutes move the component's gap mean
@@ -747,6 +761,30 @@ def test_every_measured_scope_states_the_stability_rule_over_its_repeats(fold_95
         assert "a table read by the mean it carries, over every repeat's samples" in scope, aid
 
 
+def test_each_operation_carries_its_largest_run_on_its_origin_s_channel(fold_95):
+    # timer wakes by origin, decision 17: the four measured operations' largest runs, one per window at its start;
+    # every one's largest runs mostly wake on input, so on the event channel
+    import yaml
+    doc = yaml.safe_load("archetypes:\n" + fold_95.read_text())["archetypes"]
+    ops = {aid: (name, op) for aid, e in doc.items() for name, op in (e["params"].get("operations") or {}).items()}
+    assert sorted((aid, name) for aid, (name, _) in ops.items()) == [
+        ("image-editor", "unsharp-mask"), ("mail-client", "send"), ("video-editor", "preview-render"),
+        ("web-browser", "page-load")]
+    for aid, (name, op) in ops.items():
+        assert op["largest_run"]["dist"] == "quantiles" and op["largest_run_channel"] == "event", aid
+        assert "the largest run of each measured operation" in doc[aid]["modeling_notes"], aid
+    # the unsharp mask's largest run is the filter's: about the operation's length, every operation
+    assert 2_000_000 < op_median(ops["image-editor"][1]["largest_run"]) < 2_600_000
+    # decision 18: the values decision 17 leaves short of the rule at the five repeats, carried at the venue's limit
+    scope = doc["image-editor"]["validation_stats"]["scope"]
+    assert "At the venue's limit (timer wakes by origin, decision 18;" in scope
+    assert "the hosted runners on the AMD EPYC 7763 now run kernel 7.0.0-1017-azure, where these 5 repeats ran 6.17.0-1022-azure" in scope
+
+
+def op_median(table):
+    return table["p"][4]
+
+
 def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
     # D32, D46: the phases that replay a recording's window stop at its last; their values state their half-widths,
     # each one outside the rule by name with the repeats the rule would need
@@ -759,7 +797,7 @@ def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
     assert "38 repeats" in web and "the per-input means and the page-load operation's values" in web
     # D84: its renderers carried, the SWELL-KW per-input mean sits outside the rule at the recording's last window
     assert "the per-input run mean under SWELL-KW 4.274 ms ±5.90 % (the rule needs 52 repeats)" in web
-    assert "the other 59 hold within it, the widest ±4.82 %" in web
+    assert "the other 60 hold within it, the widest ±4.82 %" in web
     mail = s["mail-client"]
     assert "8 repeats" in mail and "the per-input means and the send operation's values" in mail
     # D79: the keys-only re-measure's eight windows; its 136M mean now holds the rule

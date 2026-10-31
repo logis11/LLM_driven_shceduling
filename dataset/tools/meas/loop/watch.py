@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Watch a campaign: relaunch windows the machine gate stopped, stop on the first event that needs a decision.
 
-watch.py <family>[/<app>]... [--since N] [--app APP:N]... [--done APP,...] [--poll S] [--from-now]
+watch.py <family>[/<app>]... [--since N] [--app APP:N]... [--done APP,...] [--poll S] [--from-now] [--batch]
 
 Every S seconds (default 30) the family's runs numbered N or later are read. N is the run of the latest launch — the
 default, the family's newest run when the watcher starts — never the campaign's first run: reading every run of a long
@@ -12,7 +12,9 @@ window or repeat index (9.5 D26) — only while its application has no other job
 relaunch or added repeat at a time), and never for an application in --done. The watcher exits, printing the event, when
 a watched job lands, fails, or ends short without the gate. Handled jobs are kept in <work>/watch-seen.txt, so a restart
 does not repeat them; a completed run whose jobs are all handled is not read again. --from-now counts every job already
-finished at the start as handled.
+finished at the start as handled. --batch: the watched runs are one batch's (a first or an added batch), whose gated
+indices are relaunched together, each as soon as it is read gated, not one at a time (the campaign workflow's loop,
+step 2: they are the indices the batch already named).
 """
 
 import os
@@ -39,7 +41,7 @@ def main():
     a = sys.argv[1:]
     if not a:
         raise SystemExit(__doc__)
-    targets, since, app_since, done, poll, from_now = [], None, {}, set(), 30, False
+    targets, since, app_since, done, poll, from_now, batch = [], None, {}, set(), 30, False, False
     i = 0
     while i < len(a):
         if a[i] == "--since":
@@ -52,6 +54,8 @@ def main():
             poll = int(a[i + 1]); i += 2
         elif a[i] == "--from-now":
             from_now = True; i += 1
+        elif a[i] == "--batch":
+            batch = True; i += 1
         else:
             targets.append(common.parse_target(a[i])[:2]); i += 1
     if since is None:   # the newest run of the watched families: the latest launch
@@ -114,7 +118,7 @@ def main():
                 seen.add(key); open(seen_path, "a").write(key + "\n")
                 print(f"{time.strftime('%H:%M')} {app} r{k} gated ({model}); not relaunched ({app} done)", flush=True)
                 continue
-            if (fam, app) in busy or any(x[:2] == (fam, app) for x in go):
+            if not batch and ((fam, app) in busy or any(x[:2] == (fam, app) for x in go)):
                 if key not in deferred:
                     deferred.add(key)
                     print(f"{time.strftime('%H:%M')} {app or 'build'} r{k} gated ({model}); left for the next check", flush=True)

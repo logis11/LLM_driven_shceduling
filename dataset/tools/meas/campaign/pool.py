@@ -91,6 +91,10 @@ SPARSE = {("thunderbird-send", "idle BgIOThr~Pool [event]"), ("chrome", "idle ut
 # decision 15: 9.8 D17's class, a run mean whose spread follows the runner's speed — kdenlive's driven-phase run means
 # move together across the repeats — carried with its half-width and range over at least MIN_REPEATS repeats
 MACHINE_RUN_MEANS = {("kdenlive", "driven kdenlive run mean")}
+# decision 18: values the campaign's venue takes no further repeat for — the hosted runners on the AMD EPYC 7763 moved
+# from kernel 6.17.0-1022-azure to 7.0.0-1017-azure — carried with their half-widths as D46 carries a value at a
+# recording's window limit: gimp's operation-phase event part once decision 17 takes each operation's largest run apart
+VENUE_LIMITED = {("gimp", "op gimp [event] ")}
 # D64: a rare heavy run carried as its own stated event, not as a component's wake — chrome's MemoryInfra pass of 54–61 ms
 # at no fixed time (9 in 20 sessions × 600 s) against its regular runs of at most 11.5 ms; (app, phase) -> (comm, run floor
 # in ms, the floor being design between the two). The event's runs leave the component rows, so the residual converges.
@@ -272,6 +276,7 @@ def criterion(app, entry):
             add_table(f"input_run mean, {label} (ms)", ph[p]["per_input"]["window"]["run_ms_minus_idle"], ABS_FLOOR_MS)
     if ph.get("op", {}).get("operation"):
         add_table("operation duration mean (ms)", ph["op"]["operation"]["duration_ms"], ABS_FLOOR_MS)
+        add_table("operation largest run mean (ms)", ph["op"]["operation"]["largest_run_ms"], ABS_FLOOR_MS)
     return crit
 
 
@@ -303,8 +308,9 @@ def mark_limited(app, entry, crit):
 def mark_carried(app, crit):
     """The rule's exceptions by class, each value carried with its half-width once it has MIN_REPEATS repeats: D57
     (`session_spread`; `in_run` where its spread lies in part within one run, 9.8 D21's extension), 9.8 D27's sparse
-    component (`sparse`) and 9.8 D17's run mean following the runner's speed (`excepted`) — the last three by the timer
-    wakes by origin's decisions 14 and 15. A class names a value by its prefix: a component's three values or one."""
+    component (`sparse`), 9.8 D17's run mean following the runner's speed (`excepted`) and the venue's limit
+    (`venue_limited`) — the last four by the timer wakes by origin's decisions 14, 15 and 18. A class names a value by
+    its prefix: a component's three values or one."""
     for q, c in crit.items():
         hit = lambda classes: any(a == app and q.startswith(pre) for a, pre in classes)
         if hit(SESSION_SPREAD) or hit(SESSION_SPREAD_IN_RUN):
@@ -315,6 +321,8 @@ def mark_carried(app, crit):
             c["sparse"] = True
         elif hit(MACHINE_RUN_MEANS):
             c["excepted"] = True
+        elif hit(VENUE_LIMITED):
+            c["venue_limited"] = True
         else:
             continue
         c["carried"] = c["k"] >= MIN_REPEATS
@@ -488,9 +496,10 @@ def main():
             slim = {"phases": {}}
             for phase, pd in raw["phases"].items():
                 # the op phase pools the operation's components, i.e. the rows inside the [trigger, done) windows,
-                # over the summed window span; its duration samples travel beside them (spec decisions 8–9)
+                # over the summed window span; its duration samples travel beside them (spec decisions 8–9), and each
+                # window's largest run, carried apart and out of the components (timer wakes by origin, decision 17)
                 op = pd.get("operation")
-                phase_rows = op["inside"] if op else pd["rows"]
+                phase_rows = op["rest"] if op else pd["rows"]
                 phase_rows, events = split_events(app, phase, phase_rows)
                 phase_span = (sum(op["durations_ms"]) / 1000 or 1e-6) if op else pd["span"]
                 # the gaps' segments: the phase, or the operation's windows joined end to end (the pause between
@@ -501,6 +510,9 @@ def main():
                                          "cycle": None if op else cycle_windows(app, phase, pd["rows"], pd["segments"], pd.get("roles") or {}),
                                          "events": None if events is None else [(t - pd["t0"], x) for t, x in events],
                                          "operation": {"name": op["name"], "durations_ms": op["durations_ms"],
+                                                       "largest_runs_ms": [r.run for r in op["largest"]],
+                                                       "largest_channels": [wake_channel(r) for r in op["largest"]],
+                                                       "largest_offsets_ms": op["largest_offsets_ms"],
                                                        "n_ok": op["n_ok"], "n_failed": op["n_failed"]} if op else None}
             raws[r] = slim
             del raw
@@ -562,7 +574,13 @@ def main():
                 ops = {r: raws[r]["phases"][phase]["operation"] for r in preps}
                 ph["operation"] = {"name": ops[preps[0]]["name"],
                                    "n_ok": [ops[r]["n_ok"] for r in preps], "n_failed": [ops[r]["n_failed"] for r in preps],
-                                   "duration_ms": summary([ops[r]["durations_ms"] for r in preps])}
+                                   "duration_ms": summary([ops[r]["durations_ms"] for r in preps]),
+                                   # decision 17: each operation's largest run — its table carried, its channel the one
+                                   # most of them take, its schedule-in from the trigger reported, not carried
+                                   "largest_run_ms": summary([ops[r]["largest_runs_ms"] for r in preps]),
+                                   "largest_run_channels": {c: sum(ops[r]["largest_channels"].count(c) for r in preps)
+                                                            for c in ("timer", "event")},
+                                   "largest_offset_ms": summary([ops[r]["largest_offsets_ms"] for r in preps])}
             if phase in ("driven", "driven-alt") and all(raws[r]["phases"][phase].get("per_input") for r in preps):
                 pi = {r: raws[r]["phases"][phase]["per_input"] for r in preps}
                 ph["per_input"] = {
@@ -585,8 +603,8 @@ def main():
         crit = criterion(app, entry)
         mark_limited(app, entry, crit)
         mark_carried(app, crit)
-        live = [c for c in crit.values()
-                if not c.get("limited") and not c.get("session_spread") and not c.get("sparse") and not c.get("excepted")]
+        live = [c for c in crit.values() if not c.get("limited") and not c.get("session_spread") and not c.get("sparse")
+                and not c.get("excepted") and not c.get("venue_limited")]
         needed = [c["needed"] for c in live]
         entry["stability"] = {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS,
                               "window_limit": WINDOW_LIMIT.get(app), "quantities": crit,
@@ -596,7 +614,7 @@ def main():
         print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {build_census(entry['version'])}; CPU {sorted(set(entry['cpu_model'].values()))})")
         st = entry["stability"]
         fails = [q for q, c in crit.items() if not c["passes"] and not c.get("limited") and not c.get("session_spread")
-                 and not c.get("sparse") and not c.get("excepted")]
+                 and not c.get("sparse") and not c.get("excepted") and not c.get("venue_limited")]
         print(f"   stability: {len(crit)} quantities over {len(reps)} repeats, {len(fails)} out of tolerance; repeats needed at "
               f"this spread {st['needed'] or 'over 200'} — {'holds' if st['passes'] else 'does not hold yet'}")
         for q in fails:
@@ -614,6 +632,9 @@ def main():
             if "operation" in ph:
                 o = ph["operation"]
                 print(f"     operation {o['name']}: ok {o['n_ok']} failed {o['n_failed']}; duration p50/p90/p99 {o['duration_ms']['p50']}/{o['duration_ms']['p90']}/{o['duration_ms']['p99']} ms ({o['duration_ms']['repeat_p50']})")
+                lr, lo = o["largest_run_ms"], o["largest_offset_ms"]
+                print(f"     largest run (decision 17): p50/p90/p99 {lr['p50']}/{lr['p90']}/{lr['p99']} ms ({lr['repeat_p50']}); "
+                      f"channels {o['largest_run_channels']}; from the trigger p50/p90 {lo['p50']}/{lo['p90']} ms")
             print(f"     roles r{preps[0]}: {ph['roles'][preps[0]]}")
             for sp in ph["components"].get("sporadic", []):
                 print(f"     sporadic, not carried (D43): {sp['comm']}{' ' + str(sp['comms']) if 'comms' in sp else ''}, "

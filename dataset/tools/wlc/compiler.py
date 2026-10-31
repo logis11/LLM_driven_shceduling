@@ -312,7 +312,8 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
     t_steady = t0 + launch[0] if launch else t0   # D136: the steady stream begins at the launch phase's end
     windows = [w for w in timeline.input if w["task"] == task["id"]]
     # operations (spec decisions 8–9): a window from the authored start for a duration drawn from the measured
-    # table; inside it the operation's components replace whatever is active and no input wake is emitted
+    # table; inside it the operation's components replace whatever is active and no input wake is emitted, and the
+    # window's start takes one run of the operation's largest-run table (timer wakes by origin, decision 17)
     op_windows = []
     for j, op in enumerate(o for o in timeline.operations if o["task"] == task["id"]):
         spec = params["operations"][op["name"]]
@@ -360,6 +361,8 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
                 events.extend(ev for ev in _component_events(focus_components, seed, iid, w["from"], w["to"], ("focus", j))
                               if not in_operation(ev[0]))
     for j, w in enumerate(op_windows):
+        events.append((w["from"], sampling.sample(w["spec"]["largest_run"], seed, iid, "operation", j, "largest_run"),
+                       w["spec"]["largest_run_channel"]))
         events.extend(_component_events(w["spec"]["components"], seed, iid, w["from"], w["to"], ("operation", j)))
     # replayed stimulus inside input windows
     stimulus = params.get("stimulus")

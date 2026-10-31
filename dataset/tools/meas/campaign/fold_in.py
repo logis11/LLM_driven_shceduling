@@ -248,7 +248,8 @@ def stability_scope(aid, d):
     event = {k: c for k, c in carried.items() if k.split(" ", 1)[0] != "op" and EVENT_SUFFIX + " " in k}
     session = {k: c for k, c in carried.items() if c.get("session_spread") and k not in event}
     machine = {k: c for k, c in carried.items() if c.get("excepted")}
-    if not limited and not session and not event and not machine:
+    venue = {k: c for k, c in carried.items() if c.get("venue_limited")}
+    if not limited and not session and not event and not machine and not venue:
         return text + ". "
     text += ", except these, stated with their half-widths. "
     if limited:
@@ -299,6 +300,8 @@ def stability_scope(aid, d):
         text += event_parts_text(aid, d, event)
     if machine:
         text += machine_run_means_text(d, machine)
+    if venue:
+        text += venue_limit_text(aid, d, venue)
     return text
 
 
@@ -366,6 +369,30 @@ def event_parts_text(aid, d, event):
     return text + "Each class was taken after its values were seen failing, once the wakes were split by origin (9.8 D28). "
 
 
+# timer wakes by origin, decision 18: the repeats added on 2026-10-31 on the runners' new kernel, kept as the evidence of
+# the venue's limit and not pooled — their indices, runs and the operation's per-repeat duration means (ms)
+VENUE_LIMIT = {"image-editor": {"kernel": "7.0.0-1017-azure", "repeats": "8–13", "runs": "41189590366, 41189857228",
+                                "durations_ms": (2822.9, 2861.1)}}
+
+
+def venue_limit_text(aid, d, venue):
+    """Timer wakes by origin, decision 18: values the campaign's venue takes no further repeat for, carried with their
+    half-widths as 9.5 D46 carries a value at the recording's window limit, the kernels and the added repeats stated."""
+    ev = VENUE_LIMIT[aid]
+    parts = [f"the operation's `{comm[:-len(EVENT_SUFFIX)]}` (event) {values_text(vals, d['phases'][phase]['threads'][comm])}"
+             for (phase, comm), vals in by_component(venue).items()]
+    kernels = sorted(set(d["kernel"].values()))
+    durs = [v for v in d["phases"]["op"]["operation"]["duration_ms"]["repeat_mean"] if v is not None]
+    return (f"At the venue's limit (timer wakes by origin, decision 18; carried as D46 carries a value past a recording's last "
+            f"window), once each "
+            f"operation's largest run is carried apart (decision 17): " + "; ".join(parts) + ". No repeat can be added on "
+            f"this campaign's venue: the hosted runners on the AMD EPYC 7763 now run kernel {ev['kernel']}, where these "
+            f"{len(d['repeats'])} repeats ran {', '.join(kernels)}; repeats {ev['repeats']}, added on 2026-10-31 (runs "
+            f"{ev['runs']}), ran the operation {ev['durations_ms'][0]:,.0f}–{ev['durations_ms'][1]:,.0f} ms (repeat means) "
+            f"against these repeats' {min(durs):,.0f}–{max(durs):,.0f} ms and are kept as that evidence, not pooled; the "
+            f"treatment decided after the values were seen failing (9.8 D28). ")
+
+
 def machine_run_means_text(d, machine):
     """Timer wakes by origin, decision 15: a run mean whose spread follows the runner's speed (9.8 D17), with its
     half-width and range, the phase's other components' run means against it across the repeats, its CPU share."""
@@ -391,6 +418,25 @@ def machine_run_means_text(d, machine):
 
 def rng(vals, nd=4):
     return f"{min(vals):.{nd}f}–{max(vals):.{nd}f}"
+
+
+def largest_run_channel(op):
+    """Decision 17: the channel most of the operation's measured largest runs take, by their wakes' origin."""
+    ch = op["largest_run_channels"]
+    return "timer" if ch["timer"] > ch["event"] else "event"
+
+
+def largest_run_text(op):
+    """Decision 17's sentence for the entry's notes: the largest run's length, its channel's share, and its measured
+    schedule-in from the trigger, which the window's start stands for."""
+    lr, lo, ch = op["largest_run_ms"], op["largest_offset_ms"], op["largest_run_channels"]
+    main = largest_run_channel(op)
+    n = ch["timer"] + ch["event"]
+    return (f" Each window also takes one run from `largest_run`, the largest run of each measured operation "
+            f"({lr['n']} operations; median {lr['p50']:.1f} ms), its wake at the window's start on its `{main}:` channel "
+            f"(timer wakes by origin, decision 17): {ch[main]} of the {n} measured runs woke on that channel's origin, "
+            f"and the run came {lo['p50']:.1f} ms after the trigger at the median ({lo['p90']:.1f} ms at p90); the "
+            f"operation's components hold the rest of its wakes.")
 
 
 def dist(summary, tag, sampling="per-iteration"):
@@ -544,6 +590,10 @@ def entry(aid, spec, d):
         out.append("      operations:")
         out.append(f"        {o['name']}:")
         out.append(f"          duration: {dist(o['duration_ms'], tag)}")
+        # timer wakes by origin, decision 17: each measured operation's largest run, one per window at its start, on
+        # the channel most of them take
+        out.append(f"          largest_run: {dist(o['largest_run_ms'], tag)}")
+        out.append(f"          largest_run_channel: {largest_run_channel(o)}")
         out += components_block(d["phases"]["op"], tag, "components", indent="          ")
     out += ["    lifetime: segment-bound", "    binding_params: []", "    scalable: []", "    validation_stats:",
             "      referee: meas-ci"]
@@ -674,7 +724,7 @@ def entry(aid, spec, d):
         o = d["phases"]["op"]["operation"]
         notes += (f" Operation `{o['name']}` (spec decisions 8–10): the timeline names it and a start time; the compiler draws its length "
                   f"from the measured duration table (trigger to completion) and swaps in the operation's components for that span, "
-                  f"emitting no input wake; it runs to completion past the focus window.")
+                  f"emitting no input wake; it runs to completion past the focus window." + largest_run_text(o))
     if run == "code":
         notes += " Word streams drive this editor as the nearest recording: no code-editing keystroke dataset with timestamps exists (D4)."
     if run in ("thunderbird", "thunderbird-send"):

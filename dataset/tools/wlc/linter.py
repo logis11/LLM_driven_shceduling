@@ -78,10 +78,14 @@ def lint_repo(archetypes_path, sources_path, references_md, freeze=False):
                     errors.append(f"{where}: must be a non-empty map of operations")
                     continue
                 for oname, op in param.items():
-                    if "duration" not in op:
-                        errors.append(f"{where}.{oname}: missing 'duration'")
-                    else:
-                        errors.extend(_check_param(f"{where}.{oname}.duration", op["duration"], registry, freeze))
+                    # timer wakes by origin, decision 17: the operation's largest run, its table and its channel
+                    for field in ("duration", "largest_run"):
+                        if field not in op:
+                            errors.append(f"{where}.{oname}: missing {field!r}")
+                        else:
+                            errors.extend(_check_param(f"{where}.{oname}.{field}", op[field], registry, freeze))
+                    if op.get("largest_run_channel") not in ("timer", "event"):
+                        errors.append(f"{where}.{oname}: bad largest_run_channel {op.get('largest_run_channel')!r}")
                     comps = op.get("components")
                     if not isinstance(comps, list) or not comps:
                         errors.append(f"{where}.{oname}: must carry a non-empty list of components")

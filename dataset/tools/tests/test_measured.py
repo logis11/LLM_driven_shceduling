@@ -129,6 +129,9 @@ def test_linter_checks_components_and_stimulus(tmp_path, repo_root):
 OP_LIB_PATCH = {"unsharp-mask": {
     "duration": {"dist": "quantiles", "p": [900000, 950000, 1000000, 1050000, 1100000, 1150000, 1200000, 1250000, 1300000, 1400000],
                  "sampling": "per-iteration", "source": "meas-ci:interactive:3"},
+    "largest_run": {"dist": "quantiles", "p": [800000, 810000, 820000, 830000, 840000, 850000, 860000, 870000, 880000, 890000],
+                    "sampling": "per-iteration", "source": "meas-ci:interactive:3"},
+    "largest_run_channel": "event",
     "components": [{"comm": "worker", "threads": 3, "wakes_per_s": 3000.0,
                     "gap": {"dist": "quantiles", "p": [100, 150, 200, 250, 300, 350, 400, 500, 800, 2000],
                             "sampling": "per-iteration", "source": "meas-ci:interactive:3"},
@@ -166,6 +169,28 @@ def test_operation_replaces_components_for_its_measured_duration(tmp_path, repo_
     assert inside > 5 * max(before, 1)
     ops_report = report["operations"]["g"]
     assert ops_report[0]["name"] == "unsharp-mask" and 900_000 <= ops_report[0]["duration_us"] <= 1_400_000
+
+
+def test_an_operation_window_s_start_takes_one_run_of_its_largest_run_table(tmp_path, repo_root):
+    # timer wakes by origin, decision 17: one wake at the window's start, on the largest run's channel, its run drawn
+    # from the table — every window, not by chance
+    lib = _library_with_operation(tmp_path, repo_root)
+    data = {"meta": {"id": "x-op3", "seed": 5, "demand": "calibration"},
+            "segments": [{"from": "0s", "to": "20s", "mode": "photo", "attributes": {"background_wanted": True}}],
+            "tasks": [{"id": "g", "name": "gimp", "archetype": "image-editor", "arrive": "0s", "depart": "20s"}],
+            "focus": [{"from": "1s", "to": "19s", "task": "g"}],
+            "operations": [{"at": "5s", "task": "g", "name": "unsharp-mask"}, {"at": "12s", "task": "g", "name": "unsharp-mask"}]}
+    path = tmp_path / "x-op3.timeline.yaml"
+    path.write_text(yaml.safe_dump(data))
+    canonical, report = compile_timeline(Timeline(path, lib), lib, "single", rel_path="fx")
+    arrive = next(e for e in canonical["events"] if e["op"] == "arrive")
+    order = {"timer:g": 0, "event:g": 1, "input:g": 2}                  # the compiler's same-instant order
+    wakes = sorted(((e["t"], e["channel"]) for e in canonical["events"] if e["op"] == "wake"), key=lambda w: (w[0], order[w[1]]))
+    prog = arrive["program"]
+    runs = [prog[i + 1]["us"] if prog[i + 1]["op"] == "RUN" else 0 for i, s in enumerate(prog[:-1]) if s["op"] == "WAIT"]
+    for at in (5_000_000, 12_000_000):
+        k = wakes.index((at, "event:g"))
+        assert 800_000 <= runs[k] <= 890_000
 
 
 def test_operation_must_exist_on_the_archetype(tmp_path, repo_root):

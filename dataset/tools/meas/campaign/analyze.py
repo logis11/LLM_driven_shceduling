@@ -310,22 +310,30 @@ def merge_resumes(rows, wakeups_by_tid, check=None, by_state=False):
 
 def operation_windows(rows, ops):
     """Cut the op phase (spec decisions 8–9): rows whose schedule-in falls in a successful operation's
-    [trigger, done) window are `inside` (the operation's components), the rest `outside`; durations in ms
-    of the successful operations (rc 0), which the archetype carries as the operation's duration table."""
+    [trigger, done) window are `inside`, the rest `outside`; durations in ms of the successful operations (rc 0),
+    which the archetype carries as the operation's duration table. Each window's largest run (timer wakes by origin,
+    decision 17) is the operation's own, carried apart: `largest` (one row per window that holds one, with
+    `largest_offsets_ms`, its schedule-in from the trigger), and `rest`, the rows inside without them, which the
+    operation's components pool."""
     import bisect
     ok = [(o["trigger_us"] / 1e6, o["done_us"] / 1e6) for o in ops if o.get("rc") == 0 and o.get("trigger_us") and o.get("done_us")]
     ok.sort()
     starts = [a for a, _ in ok]
-    inside, outside = [], []
+    inside, outside, top = [], [], {}
     for r in rows:
         k = bisect.bisect_right(starts, r.t_in) - 1
         if k >= 0 and r.t_in < ok[k][1]:
             inside.append(r)
+            if k not in top or r.run > top[k].run:
+                top[k] = r
         else:
             outside.append(r)
+    largest = [top[k] for k in sorted(top)]
+    taken = {id(r) for r in largest}
     return {"durations_ms": [round((b - a) * 1000, 3) for a, b in ok], "n_ok": len(ok),
             "n_failed": sum(1 for o in ops if o.get("rc") != 0), "inside": inside, "outside": outside,
-            "windows": ok, "name": ops[0]["op"] if ops else None}
+            "largest": largest, "largest_offsets_ms": [round((top[k].t_in - ok[k][0]) * 1000, 3) for k in sorted(top)],
+            "rest": [r for r in inside if id(r) not in taken], "windows": ok, "name": ops[0]["op"] if ops else None}
 
 
 def pid_roles(D, phase):
@@ -486,6 +494,7 @@ def _analyze(args):
             in_span = sum(d for d in ow["durations_ms"]) / 1000 or 1e-6
             ph["operation"] = {"name": ow["name"], "n_ok": ow["n_ok"], "n_failed": ow["n_failed"],
                                "duration_ms": dist(ow["durations_ms"]),
+                               "largest_run_ms": dist([r.run for r in ow["largest"]]),
                                "inside": {"wakes": len(ow["inside"]), "span_s": round(in_span, 2),
                                           "wakes_per_s": round(len(ow["inside"]) / in_span, 2),
                                           "cpu_share": round(sum(r.run for r in ow["inside"]) / 1000 / in_span, 4),

@@ -63,6 +63,21 @@ def test_repo_lint_requires_declared_class(repo_root, tmp_path):
     assert lint_repo(archetypes, sources, references) == []
 
 
+def test_repo_lint_requires_each_operation_s_largest_run_and_its_channel(repo_root, tmp_path):
+    """Timer wakes by origin, decision 17: an operation carries its largest run's table and the channel it takes."""
+    sources = repo_root / "dataset" / "sources.yaml"
+    references = repo_root / "docs" / "references.md"
+    data = yaml.safe_load((repo_root / "dataset" / "archetypes.yaml").read_text())
+    op = data["archetypes"]["image-editor"]["params"]["operations"]["unsharp-mask"]
+    del op["largest_run"]
+    op["largest_run_channel"] = "input"
+    archetypes = tmp_path / "archetypes.yaml"
+    archetypes.write_text(yaml.safe_dump(data))
+    errors = lint_repo(archetypes, sources, references)
+    assert "image-editor.operations.unsharp-mask: missing 'largest_run'" in errors
+    assert "image-editor.operations.unsharp-mask: bad largest_run_channel 'input'" in errors
+
+
 def canonical_of(program, spawned=None):
     """A minimal schema-valid file around one task's program — with `spawned`, the task forks one child carrying it."""
     task = {"t": 0, "op": "arrive", "id": "a", "name": "x", "declared_class": "normal", "program": program}
