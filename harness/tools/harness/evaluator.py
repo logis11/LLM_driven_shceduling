@@ -94,6 +94,8 @@ def _pin_errors(spec, root):
     named = [(name, pins.get(name)) for name in PINS]
     named += [(f"variants/{name}", pin) for name, pin in sorted((pins.get("variants") or {}).items())]
     named += [(f"generated/{name}", pin) for name, pin in sorted((pins.get("generated") or {}).items())]
+    named += [(f"driver_table_alternatives/{name}", pin)
+              for name, pin in sorted((pins.get("driver_table_alternatives") or {}).items())]
     for name, pin in named:
         if not isinstance(pin, dict):
             continue
@@ -183,6 +185,16 @@ def lint_spec(spec_path, schema_path, build_dir, root):
                     errors.append(f"reporting_lines/{i}: {line[key]!r} is not a listed file")
         elif line["type"] == "longest_wait" and int(line["reopen_us"]) > int(line["threshold_us"]):
             errors.append(f"reporting_lines/{i}: reopen_us lies past threshold_us")
+        elif line["type"] == "cap_band":
+            pinned = (spec.get("pins") or {}).get("driver_table_alternatives") or {}
+            for stem in line["tables"]:
+                if stem not in pinned:
+                    errors.append(f"reporting_lines/{i}: table {stem!r} is not pinned under "
+                                  f"pins/driver_table_alternatives")
+            for stem in line.get("reasons") or {}:
+                if stem != "primary" and stem not in line["tables"]:
+                    errors.append(f"reporting_lines/{i}: reason for {stem!r}, which is neither the primary "
+                                  f"nor a table of the line")
     for i, ex in enumerate(spec["guard_exemptions"]):
         if ex["guard"] not in guards.GUARDS:
             errors.append(f"guard_exemptions/{i}: guard {ex['guard']!r} is not in the guard registry")
@@ -243,11 +255,40 @@ def _read_inputs(aggregates_path, scores_path, guards_path, grades_path):
             read_csv(guards_path, guards.COLUMNS), read_csv(grades_path, grader.COLUMNS))
 
 
+def table_label(role: str, stem: str) -> str:
+    """The `table` column of a run under an alternative driver table (10.1): the primary's role and the
+    alternative's stem, `prior@floor-0.2`; a run under the primary carries the role alone."""
+    return f"{role}@{stem}"
+
+
+def _unwanted_cap(doc) -> str:
+    caps = {row.get("batch_bandwidth_cap") for row in (doc or {}).get("rows") or [] if not row.get("background_wanted")}
+    return str(caps.pop()) if len(caps) == 1 else ""
+
+
+def _tables(spec, root):
+    """The driver tables the runs read — the primary and the cap band's alternatives (10.1) — each with the label
+    its runs carry in the `table` column and its unwanted rows' cap, keyed by stem, the primary under `primary`."""
+    pins = spec["pins"]
+    root = pathlib.Path(root)
+    primary = yaml.safe_load((root / pins["driver_table"]["path"]).read_text()) or {}
+    role = str(primary.get("role", ""))
+    out = {"primary": {"label": role, "unwanted_cap": _unwanted_cap(primary)}}
+    for stem, pin in sorted((pins.get("driver_table_alternatives") or {}).items()):
+        doc = yaml.safe_load((root / pin["path"]).read_text()) or {}
+        out[stem] = {"label": table_label(role, stem), "unwanted_cap": _unwanted_cap(doc)}
+    return out
+
+
 class _Set:
     """The experiment's run set as the four files describe it."""
 
-    def __init__(self, spec, agg_rows, score_rows, guard_rows, grade_rows):
+    def __init__(self, spec, agg_rows, score_rows, guard_rows, grade_rows, alternatives=None):
         self.spec = spec
+        # 10.1: the cap band's alternative tables, stem -> the label their runs carry; a row whose table is none of
+        # these is the primary's, whatever the primary's role is called
+        self.alternatives = dict(alternatives or {})
+        self.alt_labels = set(self.alternatives.values())
         self.judging, self.reporting = _listed(spec)
         self.variants = _variants(spec)
         self.listed = self.judging + self.reporting + self.variants
@@ -264,16 +305,22 @@ class _Set:
         # shape are scored and graded beside it and read by no criterion
         self.telemetry = str(spec["telemetry"][0])
 
-    def scored(self, wid, condition, boot):
-        """File-level score rows of `condition` on `wid` scored against `boot`, by seed, under the judged shape."""
-        return {k[3]: r for k, r in self.file_rows.items()
-                if k[0] == wid and k[1] == condition and k[4] == boot and k[5] == self.telemetry}
+    def on_table(self, key, table):
+        """Whether a score-row identity is under `table` (a label), or under the primary when `table` is None."""
+        return key[2] == table if table is not None else key[2] not in self.alt_labels
 
-    def runs_feeding(self, wid, boot):
-        """Identities (own) of the runs a gap under `boot` reads."""
+    def scored(self, wid, condition, boot, table=None):
+        """File-level score rows of `condition` on `wid` scored against `boot`, by seed, under the judged shape
+        and the given table (the primary when none)."""
+        return {k[3]: r for k, r in self.file_rows.items()
+                if k[0] == wid and k[1] == condition and k[4] == boot and k[5] == self.telemetry
+                and self.on_table(k, table)}
+
+    def runs_feeding(self, wid, boot, table=None):
+        """Identities (own) of the runs a gap under `boot` (and `table`, the primary when none) reads."""
         found = set()
         for key in self.file_rows:
-            if key[0] != wid or key[5] != self.telemetry:
+            if key[0] != wid or key[5] != self.telemetry or not self.on_table(key, table):
                 continue
             cond = key[1]
             if cond == "fixed" and key[4] == boot:
@@ -304,6 +351,18 @@ class _Set:
                 if run not in guarded:
                     raise GateError(f"{wid}: no guard rows for run {run[1]}"
                                     f"{' seed ' + run[3] if run[3] else ''}; the guards were not run on it")
+            for stem, label in sorted(self.alternatives.items()):     # 10.1: the cap band's tables, primary boot
+                if not self.scored(wid, self.reference, "", table=label):
+                    raise GateError(f"{wid}: no {self.reference} run scored under table {stem!r}")
+                seeds = self.scored(wid, self.compared, "", table=label)
+                if len(seeds) != self.n_seeds:
+                    raise GateError(f"{wid}: {len(seeds)} {self.compared} seed(s) scored under table {stem!r}, "
+                                    f"the spec names {self.n_seeds}: {sorted(seeds) or 'none'}")
+                for run in sorted(self.runs_feeding(wid, "", table=label)):
+                    if run not in guarded:
+                        raise GateError(f"{wid}: no guard rows for run {run[1]}"
+                                        f"{' seed ' + run[3] if run[3] else ''} under table {stem!r}; "
+                                        f"the guards were not run on it")
         for wid in self.variants:                        # run under the primary boot default alone
             if not [k for k in self.file_rows
                     if k[0] == wid and k[1] == "fixed" and k[4] == "" and k[5] == self.telemetry]:
@@ -328,16 +387,19 @@ def _exempt(spec, row):
     return None
 
 
-def _gap_rows(rs: _Set, g: Fraction, file_rows=None, boots=None, unavailable=()):
-    """One gap row per listed file per boot default, from `file_rows` (default the set's)."""
+def _gap_rows(rs: _Set, g: Fraction, file_rows=None, boots=None, unavailable=(), table=None):
+    """One gap row per listed file per boot default, from `file_rows` (default the set's), under `table` (a
+    label; the primary when none)."""
     file_rows = rs.file_rows if file_rows is None else file_rows
     rows = []
     for wid in rs.listed:
         for boot in (rs.boots if boots is None else boots):
             ref = {k[3]: r for k, r in file_rows.items()
-                   if k[0] == wid and k[1] == rs.reference and k[4] == boot and k[5] == rs.telemetry}
+                   if k[0] == wid and k[1] == rs.reference and k[4] == boot and k[5] == rs.telemetry
+                   and rs.on_table(k, table)}
             cmp = {k[3]: r for k, r in file_rows.items()
-                   if k[0] == wid and k[1] == rs.compared and k[4] == boot and k[5] == rs.telemetry}
+                   if k[0] == wid and k[1] == rs.compared and k[4] == boot and k[5] == rs.telemetry
+                   and rs.on_table(k, table)}
             if not ref or not cmp:
                 continue
             ref_row = next(iter(ref.values()))
@@ -391,7 +453,7 @@ def k_of_n_gap(rs: _Set, crit, guard_report):
     detail = {"met": primary["met"], "judging": primary["judging"], "k": k, "invalid_runs": invalid_runs}
     shown = {"type": "k_of_n_gap", "k": k, "g": fmt(g), "reference": crit["reference"],
              "compared": crit["compared"], "seed_statistic": crit["seed_statistic"]}
-    return verdict, detail, gaps, shown, {"g": g, "k": k, "unavailable": unavailable}
+    return verdict, detail, gaps, shown, {"g": g, "k": k, "unavailable": unavailable, "failing": failing}
 
 
 CRITERIA = {"k_of_n_gap": k_of_n_gap}
@@ -657,8 +719,52 @@ def line_flip_cost(rs, params, ctx):
             "changes_total": sum(r["changes"] for r in rows), "wrong_total": sum(r["wrong_changes"] for r in rows)}
 
 
+def line_headroom_count(rs, params, ctx):
+    """10.1 decision 1: the number of judging files with headroom under the primary — the oracle improving on
+    fixed on at least one term, the scoring spec's no-headroom rule read per term — and whether that number is
+    zero, the condition the spec's statement names as falsifying link 2 of the claims chain (fixed, the boot
+    default scheduling by behaviour alone, reaching the oracle's outcome on every term of every judging file).
+    Read apart from the criterion's gap: a file whose headroom the compared condition captures fails link 1's
+    reading, not this one."""
+    rows = [{"workload_id": r["workload_id"], "n_terms": r["n_terms"], "n_no_headroom": r["n_no_headroom"],
+             "has_headroom": not r["all_no_headroom"], "available": r["available"]}
+            for r in ctx["gaps"] if r["judging"] and r["boot_default"] == ""]
+    available = all(r["available"] for r in rows)
+    with_headroom = sum(1 for r in rows if r["has_headroom"])
+    return {"type": "headroom_count", "reason": params.get("reason", ""), "with_headroom": with_headroom,
+            "judging": len(rows), "available": available,
+            "none_has_headroom": (with_headroom == 0) if available else None, "rows": rows}
+
+
+def line_cap_band(rs, params, ctx):
+    """10.1 decisions 4–7: the verdict count under each alternative driver table of the band beside the
+    primary's — the reference and compared conditions re-run on the judging files under that table at the run's
+    N, fixed shared, each table's gaps recomputed from its own runs; a failed non-exempt guard on a run a table's
+    gap reads makes that table's count unavailable, as a boot default's is. A count that moves makes the verdict
+    a range over this axis (statement `sensitivity-lines`)."""
+    reasons = dict(params.get("reasons") or {})
+    rows, gaps = [], []
+    for stem in ["primary"] + list(params["tables"]):
+        t = ctx["tables"][stem]
+        label = None if stem == "primary" else t["label"]
+        if stem == "primary":
+            unavailable = ctx["unavailable"]
+        else:
+            unavailable = {(wid, "") for wid in rs.judging
+                           if any(run in ctx["failing"] for run in rs.runs_feeding(wid, "", table=label))}
+        gap_rows = _gap_rows(rs, ctx["g"], boots=[""], unavailable=unavailable, table=label)
+        count = _count(gap_rows, "", ctx["k"])
+        rows.append({"table": stem, "label": t["label"], "unwanted_cap": t["unwanted_cap"], **count,
+                     "reason": reasons.get(stem, "")})
+        gaps += [{"table": stem, "workload_id": r["workload_id"], "reference_score": r["reference_score"],
+                  "compared_mean": r["compared_mean"], "gap": r["gap"], "meets_g": r["meets_g"],
+                  "all_no_headroom": r["all_no_headroom"], "available": r["available"]}
+                 for r in gap_rows if r["judging"]]
+    return {"type": "cap_band", "tables": list(params["tables"]), "reasons": reasons, "rows": rows, "gaps": gaps}
+
+
 LINES = {"sensitivity": line_sensitivity, "g_band": line_g_band, "seed_standard_error": line_seed_standard_error,
-         "floor_band": line_floor_band,
+         "floor_band": line_floor_band, "headroom_count": line_headroom_count, "cap_band": line_cap_band,
          "exclusion_accuracy": line_exclusion_accuracy, "layer1_headline": line_layer1_headline,
          "random_beats_oracle": line_random_beats_oracle, "note": line_note,
          "variant_set": line_variant_set, "trace_replay": line_trace_replay, "bounding_pair": line_bounding_pair,
@@ -693,7 +799,9 @@ def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, 
     except (OSError, ValueError) as exc:
         raise GateError(str(exc)) from None
     expanded, _paths, axes = _expanded(spec, root)              # 9.21 decision 6
-    rs = _Set(expanded, agg_rows, score_rows, guard_rows, grade_rows)
+    tables = _tables(spec, root)                                # 10.1: the primary and the cap band's tables
+    rs = _Set(expanded, agg_rows, score_rows, guard_rows, grade_rows,
+              alternatives={stem: t["label"] for stem, t in tables.items() if stem != "primary"})
     rs.check_complete()
 
     guard_report = []
@@ -704,7 +812,8 @@ def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, 
 
     verdict, detail, gaps, shown, ctx = CRITERIA[crit["type"]](rs, crit, guard_report)
     ctx.update({"gaps": gaps, "scoring_spec_path": pathlib.Path(root) / spec["pins"]["scoring_spec"]["path"],
-                "axes": axes})                                   # {selected file: (manifest name, its axes)}
+                "axes": axes,                                    # {selected file: (manifest name, its axes)}
+                "tables": tables})
 
     scores_out = [{**{c: r[c] for c in agg.IDENTITY}, "score": r["score"], "weight_sum": r["weight_sum"],
                    "n_terms": int(r["n_terms"]), "n_no_headroom": int(r["n_no_headroom"]),
@@ -749,7 +858,19 @@ def _table(headers, rows):
 def _ident(r):
     return f"{r['workload_id']} · {r['condition']}" + (f" · {r['seed']}" if r["seed"] else "") \
         + (f" · boot {r['boot_default']}" if r["boot_default"] else "") \
+        + (f" · table {r['table']}" if "@" in str(r.get("table", "")) else "") \
         + (f" · telemetry {r['telemetry']}" if r.get("telemetry") else "")
+
+
+def _pin_rows(pins):
+    """One row per pinned file; a nested block (`variants`, `generated`, `driver_table_alternatives`) one per entry."""
+    rows = []
+    for k, v in pins.items():
+        if "path" in v:
+            rows.append([k, v["path"], v["sha256"], v.get("version", "")])
+        else:
+            rows += [[f"{k}/{n}", p["path"], p["sha256"], p.get("version", "")] for n, p in v.items()]
+    return rows
 
 
 def render(report) -> str:
@@ -769,8 +890,7 @@ def render(report) -> str:
         out.append("")
     out += ["## Criterion", "", _table(["field", "value"], [[k, v] for k, v in c.items()]), "",
             "## Pins", "",
-            _table(["pin", "path", "sha256", "version"],
-                   [[k, v["path"], v["sha256"], v.get("version", "")] for k, v in report["pins"].items()]), "",
+            _table(["pin", "path", "sha256", "version"], _pin_rows(report["pins"])), "",
             *(["## Statements", ""] + [f"**{s['id']}** — {s['text'].strip()}\n" for s in report["statements"]]
               if report["statements"] else []),
             "## Per-file gaps", "",
@@ -803,6 +923,24 @@ def render(report) -> str:
             out.append(_table(["latency floor (µs)", "workload", "reference", "mean", "gap", "meets g", "all no headroom"],
                               [[r["latency_floor_us"], r["workload_id"], r["reference_score"], r["compared_mean"],
                                 r["gap"], r["meets_g"], r["all_no_headroom"]] for r in line["gaps"]]))
+        elif t == "headroom_count":
+            out.append(f"Judging files with headroom under the primary: {line['with_headroom']} of {line['judging']}; "
+                       f"none has headroom: {line['none_has_headroom']}."
+                       + (f" {line['reason'].strip()}" if line["reason"] else ""))
+            out.append("")
+            out.append(_table(["workload", "terms", "no headroom", "has headroom", "available"],
+                              [[r["workload_id"], r["n_terms"], r["n_no_headroom"], r["has_headroom"], r["available"]]
+                               for r in line["rows"]]))
+        elif t == "cap_band":
+            out.append(_table(["table", "label", "unwanted rows' cap", "met", "judging", "verdict", "available",
+                               "reason"],
+                              [[r["table"], r["label"], r["unwanted_cap"], r["met"], r["judging"], r["verdict"],
+                                r["available"], r["reason"]] for r in line["rows"]]))
+            out.append("")
+            out.append(_table(["table", "workload", "reference", "mean", "gap", "meets g", "all no headroom",
+                               "available"],
+                              [[r["table"], r["workload_id"], r["reference_score"], r["compared_mean"], r["gap"],
+                                r["meets_g"], r["all_no_headroom"], r["available"]] for r in line["gaps"]]))
         elif t == "exclusion_accuracy":
             out.append(_table(["condition", "table", "axis", "statistic", "excluded (headline)", "included",
                                "n excluded", "n included"],
@@ -893,4 +1031,4 @@ def render(report) -> str:
 
 
 __all__ = ["CONDITIONS", "CRITERIA", "EXPERIMENTS", "GateError", "LINES", "REPORT_SCHEMA", "SPEC_SCHEMA",
-           "evaluate", "lint_spec", "load_spec", "render", "validate_report", "write_report"]
+           "evaluate", "lint_spec", "load_spec", "render", "table_label", "validate_report", "write_report"]

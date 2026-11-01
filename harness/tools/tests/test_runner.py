@@ -237,3 +237,21 @@ def test_smoke_cli_generates_runs_and_discards_the_spec(tmp_path):
     # the generated spec is gone; only pre-registered experiments remain (the RQ0 gate spec since 8.8)
     assert [p.name for p in (REPO / "harness" / "experiments").glob("*.yaml")] == ["rq0-gate.yaml"]
     assert not list(tmp_path.glob("*.yaml")) or all(p.name == "machine.yaml" for p in tmp_path.glob("*.yaml"))
+
+
+def test_expand_adds_the_cap_band_s_runs_under_each_alternative_table(tmp_path):
+    """10.1: every condition but fixed on the judging files under each pinned alternative table, labelled
+    `<role>@<stem>` in the table column, the daemon reading the alternative's file; the matrix is otherwise as it was."""
+    doc = yaml.safe_load((FX / "experiment.yaml").read_text())
+    doc["pins"]["driver_table_alternatives"] = {"x": dict(doc["pins"]["driver_table"])}
+    spec = tmp_path / "cap-band.yaml"
+    spec.write_text(yaml.safe_dump(doc))
+    runs = expand(spec, _machine(tmp_path), REPO)
+    extra = [r for r in runs if r.table_file is not None]
+    assert [(r.condition, r.seed, r.table, r.boot_default) for r in extra] == [
+        ("oracle", "", "calibrated@x", ""), ("random", "1", "calibrated@x", ""), ("random", "2", "calibrated@x", "")]
+    assert [r.name for r in extra] == ["oracle@x~names", "random-1@x~names", "random-2@x~names"]
+    assert all(r.table_file == REPO / doc["pins"]["driver_table"]["path"] and r.table_stem == "x" for r in extra)
+    assert [r.name for r in runs if r.table_file is None] == ["fixed~names", "fixed+alt~names", "oracle~names",
+                                                             "random-1~names", "random-2~names"]
+    assert len({r.identity for r in runs}) == 8

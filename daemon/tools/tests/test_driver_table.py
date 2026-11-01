@@ -184,3 +184,15 @@ def test_committed_prior_table_is_clean():
             assert entry["params"]["batch_share"] == r["batch_bandwidth_cap"]
         if not r["background_wanted"]:
             assert r["batch_bandwidth_cap"] == 0.05
+
+
+def test_a_variant_of_table_skips_the_pair_check_and_needs_its_base_beside_it(table_file, prior):
+    """10.1: a table derived for a reporting line — the cap band's — declares its base; the byte-identical pair it
+    composes is what the line measures, and the base must sit beside it."""
+    row(prior, "gaming", False)["batch_bandwidth_cap"] = row(prior, "gaming", True)["batch_bandwidth_cap"]
+    table_file(prior, name="prior.yaml")
+    variant = clone(prior)
+    variant["variant_of"] = "prior.yaml"
+    assert errors_of(table_file, variant) == []
+    variant["variant_of"] = "missing.yaml"
+    assert any("variant_of 'missing.yaml' is not a file beside it" in e for e in errors_of(table_file, variant))

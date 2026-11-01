@@ -120,6 +120,13 @@ def lint_table(path, schema_path, references_path=REFERENCES):
                     errors.append(f"{path.name}: row {k}: LOTTERY batch_share {share} "
                                   f"exceeds batch_bandwidth_cap {cap}")
 
+    # --- a derived table (variant_of): its base must sit beside it; the pair check below is what it varies
+    base = table.get("variant_of")
+    if base is not None:
+        if not (path.parent / base).is_file():
+            errors.append(f"{path.name}: variant_of {base!r} is not a file beside it")
+        return errors
+
     # --- byte-identical wanted pairs on the default configuration
     for mode in MODES:
         a, b = seen.get((mode, True)), seen.get((mode, False))

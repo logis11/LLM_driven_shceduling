@@ -1,6 +1,6 @@
 # 7권 · Build gate, manifest, CI, tests: 같은 바이트를 보장하는 장치
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-31
+> Status: draft · Created 2026-10-14 · Updated 2026-11-01
 
 **아무도 commit하지 않는 `build/`가 어떻게 모두에게 같은 파일임이 보장되고, 무엇이 그것을 지키나.**
 
@@ -546,27 +546,32 @@ bless의 절차를 순서대로 쓰면 이렇습니다.
 
 ## 3.3 Pin: 실험 사양이 manifest를 고정하는 것
 
-`pin`은 "다른 파일이 이 파일의 SHA-256을 적어 두고, 실행 전에 그 값이 지금의 바이트와 같은지 확인하는 것"을 뜻합니다. dataset 바깥에서 dataset을 pin하는 파일은 지금 하나입니다. RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)입니다. 이 파일은 RQ0 실험의 사전 등록을 harness가 실행할 수 있는 데이터로 적은 것으로, 조건, seed 수, 판정 파일 목록, 판정 기준, 보고 항목과 함께 맨 아래에 `pins` block을 가집니다. 지금의 block은 이렇습니다(scoring spec, guard spec, dataset과 variants는 2026-10-31의 harness 항목 "a measured program's own wakes by origin", driver table은 2026-10-31의 driver table 항목의 re-pin).
+`pin`은 "다른 파일이 이 파일의 SHA-256을 적어 두고, 실행 전에 그 값이 지금의 바이트와 같은지 확인하는 것"을 뜻합니다. dataset 바깥에서 dataset을 pin하는 파일은 지금 하나입니다. RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)입니다. 이 파일은 RQ0 실험의 사전 등록을 harness가 실행할 수 있는 데이터로 적은 것으로, 조건, seed 수, 판정 파일 목록, 판정 기준, 보고 항목과 함께 맨 아래에 `pins` block을 가집니다. 지금의 block은 이렇습니다(scoring spec, guard spec, dataset과 variants는 2026-10-31의 harness 항목 "a measured program's own wakes by origin", driver table은 2026-10-31의 driver table 항목의 re-pin, 세 table pin은 2026-11-01의 pre-run lines 항목).
 
 ```yaml
 pins:
   scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 4f3e34c180b26f932b1583ba16e3e928e31dd56806f3032fb1cbb214d159bb68}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.4", sha256: 7d79201d5f6c61e5eb05f8d7d9155afb3be4660f6924f24b4775a4f274382372}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: 36267c38cd3782a821427caa8a64f403c3fffc0133300d1c9d768ab719c67f09}
+  driver_table_alternatives:
+    floor-0.2:   {path: daemon/driver-table/prior-floor-0.2.yaml, sha256: 58c1107efd67f60841fefe1251ccd674e33b27849fba5c19eafd0edfcfee9393}
+    floor-0.333: {path: daemon/driver-table/prior-floor-0.333.yaml, sha256: 4fe86c3f627e720b6902573aef8a945d0a6cf2260df342ddb4c87f1f2e49237c}
+    floor-0.5:   {path: daemon/driver-table/prior-floor-0.5.yaml, sha256: 9295b76e62afce151e97a7ecdb94aeae523dc833023916c5ab650bcb1c2b91a4}
   dataset:      {path: dataset/build.manifest.json, sha256: 27d347bc8079e2ac6bd81527070c283db28e0cae9adb40bd6ebf30d4ecbe6c34}
   variants:
     all: {path: dataset/build.variants.manifest.json, sha256: de9802e787cfdb6af1568134dffc28ddf78713e57ab2e3fee41880f073ee4205}
 ```
 
-다섯 pin을 하나씩 풀면 이렇습니다.
+pin을 하나씩 풀면 이렇습니다.
 
 - `scoring_spec` — 파일별로 어떤 성능 항(term)을 어떤 가중치로 점수에 넣을지 정한 frozen 파일입니다.
 - `guard_spec` — run의 숫자를 읽기 전에 run이 통과해야 하는 여덟 개 연구 전반의 guard와 그 임계값을 적은 frozen 파일입니다.
 - `driver_table` — `prior table`, 즉 측정 전에 scheduling 이론으로 쓴 configuration 표입니다. 32개 행(mode × `background_wanted`)마다 configuration을 하나씩 적습니다. RQ0 gate는 이 표로 돌아갑니다.
+- `driver_table_alternatives.floor-0.2`, `.floor-0.333`, `.floor-0.5` — 2026-11-01에 더해진 세 pin입니다. prior table에서 unwanted 행 16개의 cap(schema의 바닥 0.05)만 각각 0.2, 0.333, 0.5로 바꾸고 나머지는 바이트까지 같은 table 셋으로, RQ0 gate spec의 cap band 줄이 읽습니다(sub-task 10.1). dataset을 pin하는 것은 아닙니다.
 - `dataset` — core manifest입니다.
 - `variants.all` — variants manifest입니다.
 
-2026-10-31에 이 다섯 경로의 파일을 `shasum -a 256`으로 계산해 보면 다섯 값 모두 pin과 같습니다. 즉 지금 저장소의 상태는 RQ0 gate spec이 사전 등록한 상태와 일치합니다.
+2026-10-31에 이 다섯 경로의 파일을 `shasum -a 256`으로 계산해 보면 다섯 값 모두 pin과 같습니다. 즉 지금 저장소의 상태는 RQ0 gate spec이 사전 등록한 상태와 일치합니다. 2026-11-01에 더해진 세 table pin도 같습니다.
 
 pin이 dataset에 대해 무엇을 보장하는지 따라가 봅시다. pin은 manifest 파일의 hash만 적습니다. 그런데 manifest는 artifact 51개의 hash를 적고, artifact는 자신이 나온 timeline과 library의 git blob hash와 seed를 적습니다. 그러므로 pin 한 줄이 51개 artifact의 모든 바이트를, 그리고 간접적으로 그 바이트를 만든 입력까지를 고정합니다.
 
@@ -597,7 +602,7 @@ rq0-gate.yaml  pins.dataset.sha256 = 27d347bc…
 
 ## 3.5 Pin이 맞지 않으면 무엇이 실패하나
 
-pin을 확인하는 코드는 `harness/tools/harness/evaluator.py`의 `_pin_errors`입니다. 이 함수는 `scoring_spec`, `guard_spec`, `driver_table`, `dataset` 네 이름과, `variants` 아래의 모든 이름, `generated` 아래의 모든 이름을 돌며 각 경로의 파일을 SHA-256으로 계산해 pin과 비교합니다. 다르면 이런 줄을 냅니다.
+pin을 확인하는 코드는 `harness/tools/harness/evaluator.py`의 `_pin_errors`입니다. 이 함수는 `scoring_spec`, `guard_spec`, `driver_table`, `dataset` 네 이름과, `variants` 아래의 모든 이름, `generated` 아래의 모든 이름, `driver_table_alternatives` 아래의 모든 이름을 돌며 각 경로의 파일을 SHA-256으로 계산해 pin과 비교합니다. 다르면 이런 줄을 냅니다.
 
 ```
 pins/dataset: sha256 <지금 파일의 hash> of dataset/build.manifest.json != pinned 8e1eb7530b32…

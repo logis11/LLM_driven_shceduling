@@ -16,6 +16,11 @@
         "calibrated"
       ]
     },
+    "variant_of": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*\\.yaml$",
+      "description": "for a table derived from another beside it for a reporting line of an experiment spec (the RQ0 gate spec's cap band, 10.1): the base table's file name; the lint skips the byte-identical pair cross-check on such a table, the pair's collapse being what the line measures"
+    },
     "rows": {
       "type": "array",
       "items": {

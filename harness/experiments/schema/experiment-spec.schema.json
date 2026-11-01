@@ -318,6 +318,68 @@
       "if": {
        "properties": {
         "type": {
+         "const": "headroom_count"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "required": [
+        "type"
+       ],
+       "properties": {
+        "type": true,
+        "reason": {
+         "type": "string",
+         "minLength": 1,
+         "description": "the number of judging files with headroom under the primary and whether it is zero (10.1 decision 1: the reading of link 2 of the claims chain, named in a statement)"
+        }
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "cap_band"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "required": [
+        "type",
+        "tables"
+       ],
+       "properties": {
+        "type": true,
+        "tables": {
+         "type": "array",
+         "minItems": 1,
+         "uniqueItems": true,
+         "items": {
+          "$ref": "#/$defs/stem"
+         },
+         "description": "stems of pins/driver_table_alternatives: the verdict count recomputed under each table from the judging files' reference and drawing runs re-run under it, fixed shared (10.1 decisions 4–7)"
+        },
+        "reasons": {
+         "type": "object",
+         "propertyNames": {
+          "$ref": "#/$defs/stem"
+         },
+         "additionalProperties": {
+          "type": "string",
+          "minLength": 1
+         },
+         "description": "one reason per table of the band, keyed by stem, the primary under `primary`"
+        }
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
          "const": "floor_band"
         }
        }
@@ -667,6 +729,16 @@
       "$ref": "#/$defs/pin"
      },
      "description": "one pin per generated set's manifest a selection or a line reads (9.21 decisions 5, 6), keyed by the set's name (`return-grid`, `flap-stress`, …)"
+    },
+    "driver_table_alternatives": {
+     "type": "object",
+     "propertyNames": {
+      "$ref": "#/$defs/stem"
+     },
+     "additionalProperties": {
+      "$ref": "#/$defs/pin"
+     },
+     "description": "one pin per alternative driver table a cap band line reads (10.1), keyed by its stem; the runner re-runs every drawing and reference condition on the judging files under each, their rows labelled `<role>@<stem>` in the `table` column"
     }
    }
   },

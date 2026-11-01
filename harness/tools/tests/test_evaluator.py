@@ -402,3 +402,102 @@ def test_the_flip_cost_line_reads_the_flip_aggregates_and_the_runs_score(tmp_pat
     assert "wrong-switch excess into MLFQ" in render(report)
     import jsonschema
     jsonschema.Draft202012Validator(json.loads(REPORT_SCHEMA.read_text())).validate(report)
+
+
+# ---- 10.1: the pre-run lines --------------------------------------------------------------------------------------
+
+def _spec_with_lines(tmp_path, lines, pins=None):
+    spec = yaml.safe_load((FX / "experiment.yaml").read_text())
+    spec["reporting_lines"] = lines
+    spec["pins"].update(pins or {})
+    sp = tmp_path / "experiment.yaml"
+    sp.write_text(yaml.safe_dump(spec, sort_keys=False))
+    return sp
+
+
+def test_the_headroom_count_line_counts_judging_files_with_headroom(tmp_path):
+    sp = _spec_with_lines(tmp_path, [{"type": "headroom_count", "reason": "link 2's reading"}])
+    line = _line(_evaluate(spec=sp), "headroom_count")
+    assert line["with_headroom"] == 1 and line["judging"] == 1 and line["none_has_headroom"] is False
+    assert line["available"] is True and line["reason"] == "link 2's reading"
+    (row,) = line["rows"]
+    assert row["workload_id"] == "mock-score" and row["n_no_headroom"] == 1 and row["n_terms"] == 4
+    assert row["has_headroom"] is True
+    rows = read_csv(MS / "expected-scores.csv", scorer.COLUMNS)
+    for r in rows:
+        if r["level"] == "file":
+            r["n_no_headroom"] = r["n_terms"]
+    p = tmp_path / "scores.csv"
+    write_csv(rows, scorer.COLUMNS, p)
+    line = _line(_evaluate(spec=sp, scores=p), "headroom_count")
+    assert line["with_headroom"] == 0 and line["none_has_headroom"] is True
+    assert "none has headroom: True" in render(_evaluate(spec=sp, scores=p))
+
+
+ALT = "calibrated@x"      # the fixture's pinned table has role `calibrated`; `x` is the alternative's stem
+
+
+def _with_alternative(tmp_path, guard_fail=False, drop_seed=None):
+    """The mock inputs with every primary-boot `mock-score` score and guard row copied under the alternative
+    table's label, a copy of the pinned table with its unwanted rows' cap at 0.2 pinned under `x`, and a cap band
+    line; optionally one failing guard on the alternative's oracle run, or one random seed's rows left out."""
+    paths = {}
+    for name, columns in (("scores", scorer.COLUMNS), ("guards", guards_mod.COLUMNS)):
+        rows = read_csv(INPUTS[name], columns)
+        extra = [{**r, "table": ALT} for r in rows
+                 if r["workload_id"] == "mock-score" and r["boot_default"] == "" and r["condition"] != "fixed"
+                 and r["seed"] != drop_seed]
+        if name == "scores":
+            extra += [{**r, "table": ALT} for r in rows if r["condition"] == "fixed" and r["boot_default"] == ""]
+        if guard_fail and name == "guards":
+            for r in extra:
+                if r["condition"] == "oracle" and r["guard"] == "utilisation_sanity":
+                    r.update(result="fail", value="1.200000000000", reason="busy above T_end")
+        out = tmp_path / f"{name}.csv"
+        write_csv(rows + extra, columns, out)
+        paths[name] = out
+    table = yaml.safe_load((FIXTURES / "mock-grades" / "driver-table.yaml").read_text())
+    for row in table["rows"]:
+        if not row["background_wanted"]:
+            row["batch_bandwidth_cap"] = 0.2
+    alt = tmp_path / "table-x.yaml"
+    alt.write_text(yaml.safe_dump(table, sort_keys=False))
+    import hashlib
+    pin = {"x": {"path": str(alt), "sha256": hashlib.sha256(alt.read_bytes()).hexdigest()}}
+    sp = _spec_with_lines(tmp_path, [{"type": "cap_band", "tables": ["x"],
+                                      "reasons": {"primary": "the primary", "x": "the floor at 0.2"}}],
+                          pins={"driver_table_alternatives": pin})
+    return sp, paths
+
+
+def test_the_cap_band_line_reads_each_table_s_gaps_from_its_own_runs(tmp_path):
+    sp, paths = _with_alternative(tmp_path)
+    report = evaluate(sp, INPUTS["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+    line = _line(report, "cap_band")
+    primary, alt = line["rows"]
+    assert primary["table"] == "primary" and primary["met"] == 1 and primary["verdict"] == "pass"
+    assert primary["reason"] == "the primary"
+    assert alt["table"] == "x" and alt["label"] == ALT and alt["unwanted_cap"] == "0.2"
+    assert alt["met"] == 1 and alt["judging"] == 1 and alt["verdict"] == "pass" and alt["reason"] == "the floor at 0.2"
+    assert [(r["table"], r["workload_id"]) for r in line["gaps"]] == [("primary", "mock-score"), ("x", "mock-score")]
+    assert line["gaps"][0]["gap"] == line["gaps"][1]["gap"] == _gap(report)["gap"]     # identical runs, one gap
+    assert report["verdict"] == "pass"
+    assert [r["boot_default"] for r in report["gaps"]] == ["", "alt"]                   # the primary's rows alone
+    assert any(r["table"] == ALT for r in report["scores"])
+    md = render(report)
+    assert "## Line: cap_band" in md and "| x | calibrated@x | 0.2 |" in md and "driver_table_alternatives/x" in md
+
+
+def test_a_failed_guard_on_an_alternative_table_s_run_marks_that_table_s_count_unavailable(tmp_path):
+    sp, paths = _with_alternative(tmp_path, guard_fail=True)
+    report = evaluate(sp, INPUTS["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+    primary, alt = _line(report, "cap_band")["rows"]
+    assert report["verdict"] == "pass" and primary["verdict"] == "pass"                 # the verdict is untouched
+    assert alt["available"] is False and alt["verdict"] is None
+    assert any(r["result"] == "fail" and r["table"] == ALT and not r["invalidating"] for r in report["guards"])
+
+
+def test_an_alternative_table_s_run_set_must_be_complete(tmp_path):
+    sp, paths = _with_alternative(tmp_path, drop_seed="s2")
+    with pytest.raises(GateError, match="1 random seed\\(s\\) scored under table 'x'"):
+        evaluate(sp, INPUTS["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)

@@ -100,11 +100,18 @@ class RunSpec:
     boot_file: pathlib.Path
     workload_file: pathlib.Path
     telemetry: str              # the telemetry shape shown to the recognizer: `focus` or `names` (9.17)
+    table_file: Optional[pathlib.Path] = None   # an alternative driver table's path (10.1); None: the pinned primary
+
+    @property
+    def table_stem(self) -> str:
+        """The alternative table's stem from its label (`prior@floor-0.2` → `floor-0.2`); empty under the primary."""
+        return self.table.partition("@")[2]
 
     @property
     def name(self) -> str:
         return self.condition + (f"-{self.seed}" if self.seed else "") \
-            + (f"+{self.boot_default}" if self.boot_default else "") + f"~{self.telemetry}"
+            + (f"+{self.boot_default}" if self.boot_default else "") \
+            + (f"@{self.table_stem}" if self.table_stem else "") + f"~{self.telemetry}"
 
     @property
     def identity(self):
@@ -140,6 +147,22 @@ def expand(spec_path, machine: Machine, root) -> List[RunSpec]:
                         runs.append(RunSpec(wid, condition, role, seed, "",
                                             machine.boot_defaults_dir / f"{primary}.json", workload,
                                             telemetry=shape))
+    # 10.1: the cap band's alternative driver tables — every condition that reads the table (all but fixed), on
+    # the judging files alone, under the primary boot default and every shape, at the run's N; the daemon reads
+    # the alternative's file and the rows carry the label `<role>@<stem>`
+    for stem, pin in sorted((spec["pins"].get("driver_table_alternatives") or {}).items()):
+        label = evaluator.table_label(role, stem)
+        for wid in spec["files"]["judging"]:
+            workload = manifests.workload_path(wid, paths, machine.build_dir)
+            for shape in shapes:
+                for condition in spec["conditions"]:
+                    if condition == "fixed":
+                        continue
+                    seeds = [str(i) for i in range(1, n_seeds + 1)] if condition in drawing else [""]
+                    for seed in seeds:
+                        runs.append(RunSpec(wid, condition, label, seed, "",
+                                            machine.boot_defaults_dir / f"{primary}.json", workload,
+                                            telemetry=shape, table_file=root / pin["path"]))
     return runs
 
 
@@ -292,9 +315,10 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
     for run in runs:
         run_dir = exp_dir / run.workload_id / run.name
         run_dir.mkdir(parents=True, exist_ok=True)
+        run_table = run.table_file or table_path                 # 10.1: an alternative table's run reads its own
         try:
             d = invoke(machine.daemon, "daemon", machine.cache_dir, run.condition, run.seed,
-                       inputs={"workload": run.workload_file, "driver-table": table_path,
+                       inputs={"workload": run.workload_file, "driver-table": run_table,
                                "boot-default": run.boot_file},
                        outputs={"out-schedule": run_dir / "schedule.json", "out-log": run_dir / "log.json"},
                        stderr_log=run_dir / "daemon.stderr.log", telemetry=run.telemetry)
@@ -324,7 +348,7 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
                 grade_rows_run, _gmessages = grader.grade_log(grader.Run(
                     workload_id=run.workload_id, condition=run.condition, table=run.table, seed=run.seed,
                     boot_default=run.boot_default, log=run_dir / "log.json", workload=run.workload_file,
-                    table_path=table_path, telemetry=run.telemetry))
+                    table_path=run_table, telemetry=run.telemetry))
                 records.write_csv(grade_rows_run, run_dir / "recognition-records.csv")
                 aggregates = aggregates + agg.flip_aggregates(
                     aggregates, read_config_schedule(run_dir / "schedule.json"),
@@ -382,7 +406,8 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
         gmanifest["runs"].append({"workload_id": run.workload_id, "condition": run.condition,
                                   "table": run.table, "seed": run.seed, "boot_default": run.boot_default,
                                   "telemetry": run.telemetry,
-                                  "log": str(run_dir / "log.json"), "workload": str(run.workload_file)})
+                                  "log": str(run_dir / "log.json"), "workload": str(run.workload_file),
+                                  **({"driver_table": str(run.table_file)} if run.table_file else {})})
         grade_rows.extend(b["grade_rows"])                      # graded in the main loop, beside its aggregates
     (exp_dir / "grade-manifest.json").write_text(json.dumps(gmanifest, indent=1) + "\n")
     grades = grader.compute_grades(grade_rows, bootstrap=grader.Bootstrap())

@@ -138,6 +138,20 @@ reporting_lines:
   - {type: floor_band, latency_floors_us: [500, 1000, 2000, 5000]}
   # 8.8 decision 4: the verdict count recomputed under a band of g at scoring time
   - {type: g_band, gaps: [0.25, 0.33, 0.5, 0.67]}
+  # 10.1 decision 1: the number of judging files with headroom under the primary — the reading of
+  # link 2 of docs/research-claims.md's chain (statement `claim-links`)
+  - type: headroom_count
+    reason: "link 2 of docs/research-claims.md's chain — some of the differences where the correct config differs are invisible to behavioural observation — is falsified when this count is 0: fixed, the boot default scheduling by behaviour alone, reaching the oracle's outcome on every term of every judging file (statement `claim-links`)"
+  # 10.1 decisions 4–7: the verdict count under the three tables that move the unwanted rows' floor
+  # to the wanted rows' values, the oracle and random runs re-run on the judging files under each
+  # (statement `cap-band`)
+  - type: cap_band
+    tables: [floor-0.2, floor-0.333, floor-0.5]
+    reasons:
+      primary: "the pinned prior table: every unwanted row at the schema floor 0.05, every wanted row at the batch term's share of its file's scoring weight"
+      floor-0.2: "every unwanted row's cap at 0.2, the backup row's wanted value; the wanted rows unchanged"
+      floor-0.333: "every unwanted row's cap at 0.333, the gaming, ml-train, render and transcode rows' wanted value; gaming's two rows compose one configuration"
+      floor-0.5: "every unwanted row's cap at 0.5, the browsing, office, mail, dev, photo, meeting, media, video-edit, compile, indexing and idle rows' wanted value — the band's end: nine modes' two rows (browsing, office, mail, dev, photo, meeting, media, video-edit, idle) compose one configuration, the table differing by algorithm alone on them"
   # 8.8 decision 6: the precision N buys, per judging file, checked against the data
   - {type: seed_standard_error}
   - {type: exclusion_accuracy}
@@ -389,6 +403,20 @@ statements:
       execution; no source grounds a value. The g band line prints the verdict
       count under 0.25, 0.33, 0.5, and 0.67 beside the primary; if the count moves
       inside the band, the verdict is reported as a range over g, not as a point.
+  - id: claim-links
+    text: >
+      Which link of docs/research-claims.md's chain each reading tests (10.1,
+      decisions 1 and 2). The K-of-N criterion reads link 1 — realistic situations
+      where the correct config differs and the difference is measurable — by random
+      against perfect recognition. The headroom-count line reads link 2 — some of
+      those differences are invisible to behavioural observation: in RQ0's terms,
+      headroom, the oracle improving on fixed, the boot default that schedules by
+      behaviour alone, on a term the scoring spec defines (an oracle improvement
+      under the latency floor is no headroom). Link 2 is falsified when no judging
+      file has headroom under the primary — fixed reaching the oracle's outcome on
+      every term of every judging file — and stands otherwise; it is read apart
+      from the criterion's gap, so a file whose headroom random captures fails
+      link 1's reading and not link 2's.
   - id: prior-table-structure
     text: >
       A known property of the prior driver table, stated before execution: its 32
@@ -402,6 +430,22 @@ statements:
       rows shared by at most three (9 % or less). The duplicate structure makes the
       gate conservative; a fail concentrated in the nine-file class routes to the
       failure procedure's table check first.
+  - id: cap-band
+    text: >
+      The size of the gap between random and oracle depends on the cap values the
+      table carries (docs/memos/2026-10-20-batch-class-and-cap.md §3). The wanted
+      rows' caps follow a stated rule, the batch term's share of the file's scoring
+      weight; the unwanted rows' cap is the schema floor, 0.05, a design value. The
+      cap band line prints the verdict count under three tables derived from the
+      pinned prior table with every unwanted row's cap moved to one of the wanted
+      rows' values — 0.2, 0.333 and 0.5 — and nothing else changed
+      (daemon/driver-table/prior-floor-*.yaml, pinned under
+      driver_table_alternatives), reading how far the verdict rests on the floor's
+      harshness; at 0.5 nine modes' two rows compose one configuration and the band
+      ends. Fixed reads no table and is shared; under each table the oracle run and
+      the random condition's N seeds are re-run on the judging files alone, and the
+      table's gaps are recomputed from its own runs. A count that moves makes the
+      verdict a range over this axis (statement `sensitivity-lines`).
   - id: k-grounding
     text: >
       K = 10 reads: a majority of the 19 judging files (13 of 25 by the same
@@ -416,9 +460,12 @@ statements:
       single-row configuration is never drawn in N seeds is (31/32)^N, below 5% at
       N = 95. The seed standard-error line prints the measured error per judging
       file beside the mean. The sensitivity lines run their variant files at the
-      same N, about two and a half times the main judging run in all (9.14). If
-      the real simulator's measured cost makes N = 100 unaffordable, N changes by
-      a harness changelog entry before any run (Phase 8 spec, decision 20).
+      same N, about two and a half times the main judging run in all (9.14), and
+      the cap band line re-runs the oracle and random conditions on the judging
+      files under each of its three tables at the same N, about three times the
+      main judging run more (10.1). If the real simulator's measured cost makes
+      N = 100 unaffordable, N changes by a harness changelog entry before any run
+      (Phase 8 spec, decision 20).
   - id: random-reading
     text: >
       The random condition draws, at every telemetry set change, one uniform draw
@@ -533,12 +580,17 @@ statements:
       for a true row, its C7 counterpart for a false row, plus any C2 or C3 segment
       labelled with that row.
 
-# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-31, the wakes-by-origin, demotion-edge and driver-table entries; 2026-10-30, the timer_latency, input_latency and guard spec 1.3 entries; 2026-10-17, the 9.16 entries; 2026-10-17 and 2026-10-16, the 9.15 entries;
+# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-11-01, the pre-run lines entry; 2026-10-31, the wakes-by-origin, demotion-edge and driver-table entries; 2026-10-30, the timer_latency, input_latency and guard spec 1.3 entries; 2026-10-17, the 9.16 entries; 2026-10-17 and 2026-10-16, the 9.15 entries;
 # 2026-10-15 and 2026-10-14, the 9.23 entries; 2026-10-12, the 9.20 entry; 2026-10-11, the 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
   scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 4f3e34c180b26f932b1583ba16e3e928e31dd56806f3032fb1cbb214d159bb68}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.4", sha256: 7d79201d5f6c61e5eb05f8d7d9155afb3be4660f6924f24b4775a4f274382372}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: 36267c38cd3782a821427caa8a64f403c3fffc0133300d1c9d768ab719c67f09}
+  # 10.1: the cap band's tables — the pinned prior table with every unwanted row's cap moved to a wanted value
+  driver_table_alternatives:
+    floor-0.2:   {path: daemon/driver-table/prior-floor-0.2.yaml, sha256: 58c1107efd67f60841fefe1251ccd674e33b27849fba5c19eafd0edfcfee9393}
+    floor-0.333: {path: daemon/driver-table/prior-floor-0.333.yaml, sha256: 4fe86c3f627e720b6902573aef8a945d0a6cf2260df342ddb4c87f1f2e49237c}
+    floor-0.5:   {path: daemon/driver-table/prior-floor-0.5.yaml, sha256: 9295b76e62afce151e97a7ecdb94aeae523dc833023916c5ab650bcb1c2b91a4}
   dataset:      {path: dataset/build.manifest.json, sha256: 27d347bc8079e2ac6bd81527070c283db28e0cae9adb40bd6ebf30d4ecbe6c34}
   variants:
     all: {path: dataset/build.variants.manifest.json, sha256: de9802e787cfdb6af1568134dffc28ddf78713e57ab2e3fee41880f073ee4205}

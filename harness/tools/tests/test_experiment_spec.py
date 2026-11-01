@@ -179,3 +179,32 @@ def test_the_flip_cost_line_is_registered_and_takes_no_parameters(tmp_path):
     spec = load_spec(FX / "experiment.yaml")
     spec["reporting_lines"].append({"type": "flip_cost", "threshold": 1})
     assert next(v.iter_errors(spec), None) is not None
+
+
+# ---- 10.1: the pre-run lines --------------------------------------------------------------------------------------
+
+def test_lint_refuses_a_cap_band_naming_an_unpinned_table_or_a_reason_for_no_table(tmp_path):
+    def mutate(s):
+        s["reporting_lines"].append({"type": "cap_band", "tables": ["nope"],
+                                     "reasons": {"primary": "the primary", "other": "a reason for no table"}})
+    errs = _errors(_broken(tmp_path, mutate))
+    assert any("'nope' is not pinned under pins/driver_table_alternatives" in e for e in errs), errs
+    assert any("reason for 'other'" in e for e in errs), errs
+
+
+def test_the_headroom_count_line_is_registered_and_takes_a_reason_alone(tmp_path):
+    def mutate(s):
+        s["reporting_lines"].append({"type": "headroom_count", "reason": "link 2's reading"})
+    assert _errors(_broken(tmp_path, mutate)) == []
+    v = jsonschema.Draft202012Validator(_schema())
+    bad = load_spec(FX / "experiment.yaml")
+    bad["reporting_lines"].append({"type": "headroom_count", "tables": ["x"]})
+    assert next(v.iter_errors(bad), None) is not None
+
+
+def test_an_alternative_table_pin_is_checked_like_every_pin(tmp_path):
+    def mutate(s):
+        s["pins"]["driver_table_alternatives"] = {"x": {**s["pins"]["driver_table"], "sha256": "0" * 64}}
+        s["reporting_lines"].append({"type": "cap_band", "tables": ["x"]})
+    errs = _errors(_broken(tmp_path, mutate))
+    assert any(e.startswith("pins/driver_table_alternatives/x") for e in errs), errs

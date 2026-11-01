@@ -1,6 +1,6 @@
 # Harness와 records 이해하기 — trace에서 논문의 숫자까지
 
-> Status: draft · Created 2026-09-08 · Updated 2026-10-31
+> Status: draft · Created 2026-09-08 · Updated 2026-11-01
 
 이 문서는 **공부용 문서**예요. Phase 5(primitive metrics and the records pipeline)를 직접 수행하기 위해, harness가 무엇을 읽고 무엇을 쓰는지, `records`의 row 하나가 무슨 뜻인지, 그리고 그 위에 어떤 score가 올라가는지를 OS/시스템 지식이 거의 없는 사람 기준으로 바닥부터 풀어 쓴 거예요. 규범적(normative)인 정의는 `docs/harness/metrics.md`(metrics doc)가 갖고, 이 문서는 그 문서를 읽을 수 있게 만드는 다리예요. 둘이 다르면 metrics doc이 맞아요.
 
@@ -1451,6 +1451,8 @@ verdict는 primary boot default에서 한 번만 계산해요. 그 판정이 우
 | `sensitivity` | boot default를 sweep의 10개 지점(top slice 0.5, 0.7, 1.2, 2, 5, 7, 12, 20, 30, 100 ms)으로 바꿔 `fixed`를 다시 돌리고, gap을 다시 계산한 뒤 통과 개수. 지점마다 이유가 spec에 적혀 있어요(config schema의 두 경계와 배포된 scheduler들의 기본값, 그리고 다시 지은 파일의 주기 task가 갖는 demotion 경계, 곧 100 ms boost 구간당 CPU — music player, frame chain의 task, video player, 통화 — 양쪽) | `fixed` run 10개 × listed 파일 51개 |
 | `floor_band` | latency floor를 0.5 / 1 / 2 / 5 ms로 바꿔 채점을 다시 하고 통과 개수 | 재채점만 |
 | `g_band` | g를 0.25 / 0.33 / 0.5 / 0.67로 바꿔 통과 개수 | 재계산만 |
+| `headroom_count` | primary에서 headroom이 있는 judging 파일 수 — oracle이 `fixed`보다 term 하나에서라도 나아진 파일 — 와 그 수가 0인지. `fixed`는 boot default 하나로 행동만 보고 scheduling하는 조건이라, 0이면 연구 주장 사슬의 link 2("차이 일부는 행동 관찰로 보이지 않는다")가 반증돼요. gap과는 따로 읽어요: headroom을 random이 다 가져간 파일은 link 1의 읽기에서 떨어지지 link 2에서 떨어지는 게 아니에요(gate spec의 `claim-links` 문장; 10.1) | 계산만 |
+| `cap_band` | prior table의 unwanted 행 cap(schema 바닥 0.05)을 wanted 행의 값 0.2 / 0.333 / 0.5로 바꾼 table 셋(`daemon/driver-table/prior-floor-*.yaml`, 각각 pin) 아래에서 통과 개수. table마다 judging 파일의 `oracle` 1 run과 `random` N seed를 그 table로 다시 돌리고(`fixed`는 table을 안 읽어 그대로), 그 table의 run으로 gap을 다시 계산해요. 그 run의 행은 `table` 열에 `prior@floor-0.2`처럼 적혀요. 0.5에서는 아홉 mode의 두 행이 같은 config가 되어 band가 끝나요(`cap-band` 문장; 10.1) | table마다 judging 파일의 oracle 1 + random N run |
 | `seed_standard_error` | 파일마다 random 점수의 seed 평균의 표준오차 — N이 산 정밀도 | 계산만 |
 | `exclusion_accuracy`, `layer1_headline` | grades 파일에서 | — |
 | `random_beats_oracle` | random 평균이 oracle을 넘은 파일 표시 | — |

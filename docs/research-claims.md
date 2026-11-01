@@ -1,5 +1,5 @@
 # Research Claims and Questions
-> Status: normative · Created 2026-08-23 · Updated 2026-10-17
+> Status: normative · Created 2026-08-23 · Updated 2026-11-01
 
 What this project asserts, what would falsify it, and what it does not claim.
 
@@ -57,13 +57,20 @@ stay out of it.
 
 Links 1 through 3 are properties of the workload space rather than of language
 models. Phase 1's committed spec (`harness/experiments/rq0-gate.yaml`) tests
-link 1, by RQ0: `random` against perfect recognition, before any prompt exists.
+links 1 and 2, by RQ0, before any prompt exists (its statement `claim-links`).
+Link 1 by its criterion: `random` against perfect recognition. Link 2 by its
+headroom-count line: a difference invisible to behavioural observation is, in
+RQ0's terms, headroom — the oracle improving on `fixed`, the boot default that
+schedules by behaviour alone, on a term the scoring spec defines — and link 2 is
+falsified when no judging file has headroom, `fixed` reaching the oracle's
+outcome on every term of every judging file. The two readings are separate: a
+file whose headroom `random` captures fails link 1's reading and not link 2's.
 Link 3 is held by how the dataset is built, and its limits are measured by the
 pre-committed misses: the segments shipped with `pre_committed_miss: true`
 because no recognizer can reach their label from names and behaviour; the
-headline accuracy excludes them and a second reported line includes them.
-Link 2 has no falsification condition yet. If link 1 fails, no model recovers
-the paper. This is why section 5.3 is a gate rather than a milestone.
+headline accuracy excludes them and a second reported line includes them. If
+link 1 fails, no model recovers the paper. This is why section 5.3 is a gate
+rather than a milestone.
 
 Link 7 is argued in section 4.4.4 and demonstrated nowhere, because the project
 builds one driver. Section 7 already states this as the proposal's most
