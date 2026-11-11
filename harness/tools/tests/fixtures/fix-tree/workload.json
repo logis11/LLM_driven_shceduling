@@ -73,6 +73,10 @@
      "op": "FORK"
     },
     {
+     "op": "WAIT",
+     "channel": "children:build"
+    },
+    {
      "op": "EXIT"
     }
    ],

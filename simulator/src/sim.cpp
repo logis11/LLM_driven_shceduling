@@ -19,6 +19,9 @@
 //   X a ready line per completed primitive, RUN→RUN in one occupancy, a lone slice expiry kept
 //   Y TIMER skips missed ticks (the skip rule, 9.11 D3) in place of K's backlog
 //   Z declared_class idle — a strict scheduling band below the normal class (conformance (e))
+//   AA WAIT children:<id> — an orchestrator's wait for every child it spawned (conformance (g))
+//   AB (a)'s last case and the drain at a RUN's end (memo_261023 Part H4, H5)
+//   AC the timer: mailbox holds one wake and drops the rest with a wake_drop line (conformance (j))
 //
 // Design notes worth carrying:
 //   · gen (F): a preempted Lane reservation cannot be removed from a priority_queue, so
@@ -30,7 +33,9 @@
 //     work and a deadline line met:false. The offered load is unchanged and every skipped tick
 //     is counted, so the damage is measured, not hidden. A chain skips at its head only.
 //   · channels (M): an external wake with no waiter is not lost — it goes to a mailbox.
-//     Losing it would shrink a starved task's demand and hide the harm being measured.
+//     Losing it would shrink a starved task's demand and hide the harm being measured. AC narrows
+//     this for timer: channels alone, whose toolkit timers do not pile up fires: a drop there is
+//     written (wake_drop), so the harm is still measured.
 //   · FORK (N): tasks are born at runtime, so tasks_ is a std::deque — a vector realloc
 //     would dangle the `Task&` held across a step().
 //   · loader (Q): the loader parses, validates (reject the whole file on any violation),
@@ -76,8 +81,8 @@
 //     completes writes its ready line at that instant, a WAIT met from a mailbox and a TIMER in
 //     backlog included — inside the occupancy when the holder passes it, at the arrival when the
 //     arrival step does. A slice that expires while the policy picks the same holder again is
-//     no switch either: no run_end/run_start pair. A FORK that finds a slot writes no line — the
-//     fork-slot wait is the block, and there was none. Whatever ends a RUN at the very µs of
+//     no switch either: no run_end/run_start pair. (X wrote no line for a FORK that finds a slot;
+//     AB does — H4 below.) Whatever ends a RUN at the very µs of
 //     another decision (a preemption, a cap park, a config apply, a policy timer) leaves the
 //     boundary to the RUN's own Lane event, so the boundary is settled in one place.
 //     Fixed beside it: a segment-bound task that EXITs before its depart wrote a second
@@ -91,6 +96,26 @@
 //     algorithm — only when none is. The field is optional in the loader (absent = normal), so a
 //     file with no idle task carries has_idle_ = false and the band is a strict no-op: V/W/X/Y
 //     stay byte-identical. No starvation safety net (the memo's §2; the harness's 30 s guard).
+//   · children wait (AA; conformance (g), data-contracts §4 Example B and §14 2026-10-16/31): the
+//     orchestrator's WAIT children:<own id>, after its last FORK, completes when every child it
+//     spawned has ended — its ready(wake) line written at the last task_end — and at once, with a
+//     zero-wait ready(wake) line, when none is live as it reaches the WAIT. It is a WAIT, so the
+//     harness pairs that line with it as with any other; but no channel: nothing wakes it but the
+//     executor, so a WAKE sent to it meanwhile goes to its mailbox. Before AA it blocked forever,
+//     and the build's turnaround (c1-compile's term) was censored under every condition.
+//   · (a)'s last case and the RUN-end drain (AB; memo_261023 Part H4, H5, decided 2026-10-30):
+//     H4 a FORK that takes a free slot writes its zero-wait ready(fork_slot) line, before the
+//     child's task_arrive — the line on_unblock_fork() wrote after a blocked wait now comes from
+//     the FORK itself, so it is written once either way. H5 a switch waiting on the drain applies
+//     at a RUN's end inside an occupancy as at a slice end: the holder back to the ready set,
+//     the incoming algorithm picking, run_end(preempt) when it picks another.
+//   · two mailboxes by origin (AC; conformance (j), the 2026-10-30 harness-changes memo §2.1, the
+//     2026-10-31 wakes-by-origin decisions 2 and 5): a measured app's own wakes come on timer:<id>
+//     (a toolkit timer, which does not pile up fires) or event:<id> (queued, as input: is). With no
+//     waiter, a timer: wake is held if none is held, else dropped and written as wake_drop at its
+//     time. The k-th timer WAIT pairs with the k-th timer wake: a held one is met at zero wait with
+//     its ready line; a dropped one's WAIT, and the RUN after it, pass with no block, no work and no
+//     line. event:, input: and the task channels keep M's mailbox with depth.
 //   · policy-timer epoch (S, fixes R): a policy timer used to survive a config apply, so each
 //     MLFQ start() added one more boost chain, and the chains kept each other alive past the
 //     arm() stop rule — c1-compile under the mock-switch schedule never terminated. The switch
@@ -114,9 +139,19 @@
 
 using i64 = std::int64_t;
 
+// (h): the trace header's `sim`, cross-checked by the runner against its machine configuration's
+// `version` (harness/tools/harness/runner.py; data-contracts §9, "simulator@<version-or-commit>").
+// The program does not choose it (invocation memo item 12): src/Makefile passes
+// simulator@<git blob hash of sim.cpp + mini_json.hpp, 12 hex>, so a binary built from other
+// source bytes names another version and the runner refuses its trace
+#ifndef SIM_VERSION
+#define SIM_VERSION "simulator@unversioned"
+#endif
+
 enum class Op { RUN, SLEEP, TIMER, WAIT, WAKE, FORK, EXIT, LOOP_BEGIN, LOOP_END };
 struct Instr { Op op; i64 us = 0; i64 period_us = 0; int jump = -1; i64 count = -1;
-               int chan = -1; int target = -1; };
+               int chan = -1; int target = -1;
+               bool children = false; };   // AA (g): WAIT children:<own id> — no channel
 
 // One entry of a FORK spawn table — a child spec straight from the file (id/name/program)
 struct ChildSpec { std::string sid, name; std::vector<Instr> prog; bool periodic = false;
@@ -143,6 +178,7 @@ struct Task {
   std::size_t spawn_next = 0;
   i64 born = -1, ended = -1;  // born is the emergence time — meaningful only for FORK children
   char blocked_by = 'w';      // why last blocked: w=wait s=sleep t=timer f=fork_slot
+                              // c=children (AA (g): WAIT children:<id>, no channel)
   std::uint64_t gen = 0;      // bumped each time the lane is released = reservation void
   bool periodic = false;      // B2 class — fixed at load, never changes during the run
   bool idle = false;          // Z (e) — declared_class idle; a strict band below the normal class
@@ -520,6 +556,10 @@ class Sim : public Trace, public Clock, public TaskView {
     chan_id_.emplace(name, c);
     chan_waiters_.emplace_back();
     chan_pending_.push_back(0);
+    chan_name_.push_back(name);                                      // AC: the wake_drop line's
+    chan_timer_.push_back(name.compare(0, 6, "timer:") == 0 ? 1 : 0); // channel and task (after ':')
+    chan_fate_.emplace_back();
+    chan_held_.push_back(0);
     return c;
   }
   // W: one slot per spawn-table entry that a WAKE can name. The index is unknown until the
@@ -582,8 +622,8 @@ class Sim : public Trace, public Clock, public TaskView {
 
   void run(const Params& p) {
     std::printf("{\"event\":\"meta\",\"workload_id\":\"%s\",\"condition\":\"%s\","
-                "\"sim\":\"src/sim\",\"schedule_entries\":%zu}\n", wid_.c_str(), cond_.c_str(),
-                schedule_.size());
+                "\"sim\":\"%s\",\"schedule_entries\":%zu}\n", wid_.c_str(), cond_.c_str(),
+                SIM_VERSION, schedule_.size());
     if (schedule_.empty()) { pol_->start(p, true); batch_slice_ = p.timeslice_us; }  // no schedule → argument params
     while (!q_.empty()) {
       const Event e = q_.top();
@@ -812,7 +852,17 @@ class Sim : public Trace, public Clock, public TaskView {
   const Task& T2(int id) const { return tasks_[static_cast<std::size_t>(id)]; }
   std::map<std::string, int> chan_id_;
   std::vector<std::deque<int>> chan_waiters_;
-  std::vector<int> chan_pending_;               // channel mailboxes
+  std::vector<int> chan_pending_;               // channel mailboxes (input:, event:, and the rest)
+  // AC (j): a timer: channel's mailbox holds one wake, the first, and drops a later one while it
+  // is held. The k-th timer WAIT of the task pairs with the k-th timer wake of the run file, so the
+  // fate of each wake that came with no waiter is kept in order until its WAIT is reached —
+  // 'h' held, 'd' dropped. Two counters (held, dropped) cannot tell which WAIT is whose (the
+  // 2026-10-30 memo §2's warning): w1 held, w2 dropped, w1 consumed, w3 held is (1,1) as is
+  // w1 held, w2 dropped — and the next WAIT is w2's in the one, w1's in the other
+  std::vector<std::string> chan_name_;
+  std::vector<char> chan_timer_;                // 1 = a timer: channel
+  std::vector<std::deque<char>> chan_fate_;     // arrived, WAIT not yet reached, in order
+  std::vector<char> chan_held_;                 // a held wake is in chan_fate_ (at most one)
   std::vector<std::string> spawn_sid_;          // W: slot → the file's id (diagnostics only)
   std::vector<int> spawn_live_;                 // W: slot → task index, -1 before the birth
   std::map<int, std::deque<i64>> spawn_mail_;   // W: slot → deadlines of wakes before the birth
@@ -899,10 +949,14 @@ class Sim : public Trace, public Clock, public TaskView {
       return;
     }
     note("x_run_cont", id);
+    // AB (H5, memo_261023 Part H): a waiting switch drains at a RUN's end inside an occupancy as at
+    // a slice end — the holder goes back to the ready set, dispatch() applies the switch and the
+    // incoming algorithm picks, the holder included; run_end(preempt) only if it picks another
+    // (Q2's lane_prev_). Preempted, not SliceEnd: the slice did not run out, so the outgoing
+    // policy is not to demote it (its state is handed off anyway). X held the lane and re-armed
+    // the holder under the incoming algorithm (rule a), which is the FIFO-outgoing rule alone
+    if (!pending_.empty()) { yield_lane(id, Yield::Preempted); lane_prev_ = id; return; }
     running_ = id; set_st(id, State::Running); lane_start_ = now_;
-    // Drain: a waiting switch applies as the current RUN ends, the holder freshly dispatched by
-    // the incoming algorithm (rule a), as a switch out of FIFO treats it
-    while (!pending_.empty()) { const int idx = pending_.front(); pending_.pop_front(); apply_config(idx); }
     const i64 h = pol_->horizon(id);
     if (h != kNoHorizon && h <= 0) { release(); slice_over(id); return; }   // slice spent here, or
                                                                              // shrunk below it (U2)
@@ -975,8 +1029,26 @@ class Sim : public Trace, public Clock, public TaskView {
           return;
         }
         case Op::WAIT: {
+          if (t.prog[t.pc].children) {                    // AA (g): every child it spawned ended?
+            if (t.live_children == 0) { t.chain_dl = -1; ++t.pc;   // none live → zero-wait line
+                                        ready_line(id, "wake"); break; }
+            set_st(id, State::Blocked); t.blocked_by = 'c'; t.wait_chan = -1; t.burst = 0;
+            return;                                       // on_task_end of the last one unblocks
+          }
           const int c = t.prog[t.pc].chan;
-          if (chan_pending_[(std::size_t)c] > 0) { --chan_pending_[(std::size_t)c];
+          auto& fate = chan_fate_[(std::size_t)c];
+          if (chan_timer_[(std::size_t)c] && !fate.empty()) {   // AC (j): this WAIT's wake came
+            const char f = fate.front(); fate.pop_front();
+            if (f == 'd') {               // dropped: the WAIT and the RUN after it pass with no
+              ++t.pc;                     // block, no work and no line (the exception to (a));
+              if (t.pc < t.prog.size() && t.prog[t.pc].op == Op::RUN) ++t.pc;   // the compiler
+              break;                      // leaves out the RUN of a zero-run wake
+            }
+            chan_held_[(std::size_t)c] = 0;                       // held: met at zero wait
+            t.chain_dl = -1; ++t.pc; ready_line(id, "wake"); break;
+          }
+          if (!chan_timer_[(std::size_t)c] && chan_pending_[(std::size_t)c] > 0) {
+                                                   --chan_pending_[(std::size_t)c];
                                                    t.chain_dl = -1; ++t.pc;
                                                    ready_line(id, "wake"); break; }   // X
           if (t.mailbox > 0) { --t.mailbox; t.chain_dl = t.mail_dl.front(); t.mail_dl.pop_front();
@@ -992,6 +1064,10 @@ class Sim : public Trace, public Clock, public TaskView {
             set_st(id, State::Blocked); t.blocked_by = 'f'; t.wait_chan = -1;  // wait for a slot
             return;                                                       // pc stays put
           }
+          // AB (H4, memo_261023 Part H): the slot wait completed — at zero wait if it never
+          // blocked — so its line comes first, then the child's task_arrive. After a blocked wait
+          // this is the line on_unblock_fork() used to write itself
+          ready_line(id, "fork_slot");
           spawn(id); ++t.pc; break;
         case Op::EXIT: set_st(id, State::Done); return;
         case Op::LOOP_BEGIN:
@@ -1029,6 +1105,8 @@ class Sim : public Trace, public Clock, public TaskView {
     for (const char* c : held) ev("ready", id, "cause", c);
     if (ready) { pol_->on_ready(id); maybe_preempt(id); } else settled(id);
   }
+  // (g)'s children wait is a WAIT: its line is ready(wake) and its block blocked_on wait, so the
+  // harness pairs it with the program's WAIT like any other (data-contracts §9's closed sets)
   static const char* cause_of(const Task& t) {
     switch (t.blocked_by) { case 's': return "sleep_end"; case 't': return "timer_tick";
                             case 'f': return "fork_slot"; default: return "wake"; }
@@ -1084,18 +1162,35 @@ class Sim : public Trace, public Clock, public TaskView {
     Task& p = T(t.parent);
     assert(p.live_children > 0);
     --p.live_children;
-    if (p.st == State::Blocked && p.wait_chan < 0) on_unblock_fork(t.parent);
+    if (p.st != State::Blocked) return;
+    // AA: judged by why the parent blocked. `wait_chan < 0` stood for the fork-slot wait, but a
+    // parent blocked on SLEEP, TIMER or (g)'s children wait has no channel either
+    if (p.blocked_by == 'f') on_unblock_fork(t.parent);
+    else if (p.blocked_by == 'c' && p.live_children == 0) on_unblock(t.parent);   // (g)
   }
   void on_unblock_fork(int id) {   // a slot opened — retry the same FORK (no pc advance)
-    set_st(id, State::Ready);
-    ev("ready", id, "cause", "fork_slot");
+    set_st(id, State::Ready);      // AB: the retried FORK finds the slot and writes the line
     step(id);
     if (T(id).st == State::Ready) { pol_->on_ready(id); maybe_preempt(id); } else settled(id);
   }
 
   void on_ext_wake(int c) {                     // external wake — channel-addressed
     auto& w = chan_waiters_[(std::size_t)c];
+    if (w.empty() && chan_timer_[(std::size_t)c]) {   // AC (j): the timer mailbox, depth one
+      if (chan_held_[(std::size_t)c]) {
+        chan_fate_[(std::size_t)c].push_back('d');
+        const std::string& n = chan_name_[(std::size_t)c];
+        std::printf("{\"event\":\"wake_drop\",\"t\":%lld,\"task\":\"%s\",\"channel\":\"%s\"}\n",
+                    (long long)now_, n.c_str() + 6, n.c_str());
+      } else {
+        chan_fate_[(std::size_t)c].push_back('h');
+        chan_held_[(std::size_t)c] = 1;
+      }
+      return;
+    }
     if (w.empty()) { ++chan_pending_[(std::size_t)c]; return; }  // mailbox (D2)
+    // a waiter on a timer channel has met every earlier wake of it, so its WAIT is this one's
+    assert(!chan_timer_[(std::size_t)c] || chan_fate_[(std::size_t)c].empty());
     const int id = w.front(); w.pop_front();
     T(id).wait_chan = -1;
     T(id).chain_dl = -1;                        // an external wake carries no deadline
@@ -1190,8 +1285,13 @@ class Sim : public Trace, public Clock, public TaskView {
 // ── loader ──────────────────────────────────────────────────────────────────
 using IdMap = std::map<std::string, int>;
 
+// AA (g): `children:<id>` is not a channel. The compiler writes it only into the orchestrator's
+// own program, after its last FORK (dataset/tools/wlc/compiler.py, `children:{iid}`); a WAIT on
+// another task's children has no rule, so it is refused, as is a run-file wake on that name
+static bool is_children(const std::string& ch) { return ch.compare(0, 9, "children:") == 0; }
+
 static void compile_prog(const Json& a, Sim& s, const IdMap& ids, const IdMap& spawn,
-                         std::vector<Instr>& out) {
+                         const std::string& owner, std::vector<Instr>& out) {
   for (const Json& in : a.arr) {
     const std::string& op = in.at("op").as_str("op");
     if      (op == "RUN")   out.push_back({Op::RUN,   in.at("us").as_int("RUN.us")});
@@ -1204,7 +1304,13 @@ static void compile_prog(const Json& a, Sim& s, const IdMap& ids, const IdMap& s
       if (i.period_us <= 0) die("TIMER.period_us must be > 0");
       out.push_back(i);
     }
-    else if (op == "WAIT")  { Instr i{Op::WAIT}; i.chan = s.channel(in.at("channel").as_str("ch"));
+    else if (op == "WAIT")  { Instr i{Op::WAIT};
+                              const std::string& ch = in.at("channel").as_str("ch");
+                              if (is_children(ch)) {                       // AA (g)
+                                if (ch.substr(9) != owner)
+                                  die("WAIT " + ch + " outside its own task: " + owner);
+                                i.children = true;
+                              } else i.chan = s.channel(ch);
                               out.push_back(i); }
     else if (op == "WAKE")  { const std::string& tg = in.at("target").as_str("target");
                               Instr i{Op::WAKE};
@@ -1223,7 +1329,7 @@ static void compile_prog(const Json& a, Sim& s, const IdMap& ids, const IdMap& s
       if (c.k == Json::K::Str) { if (c.s != "unbounded") die("LOOP.count: " + c.s); bi.count = -1; }
       else bi.count = c.as_int("LOOP.count");
       out.push_back(bi);
-      compile_prog(in.at("body"), s, ids, spawn, out);
+      compile_prog(in.at("body"), s, ids, spawn, owner, out);
       Instr e{Op::LOOP_END}; e.jump = (int)(b + 1); out.push_back(e);
       out[b].jump = (int)out.size();
     } else die("unknown op: " + op);
@@ -1268,16 +1374,17 @@ static void load_workload(const std::string& path, Sim& s) {
   for (const Json& e : evs.arr) {               // pass 2 — programs and wakes
     const std::string& op = e.at("op").as_str("op");
     if (op == "arrive") {
-      const int id = ids.at(e.at("id").as_str("id"));
+      const std::string& sid = e.at("id").as_str("id");
+      const int id = ids.at(sid);
       std::vector<Instr> prog;
-      compile_prog(e.at("program"), s, ids, spawn, prog);
+      compile_prog(e.at("program"), s, ids, spawn, sid, prog);
       s.set_prog(id, std::move(prog));
       s.set_idle(id, decl_idle(e));                  // Z (e)
       if (e.has("spawn_table")) {
         std::vector<ChildSpec> tab;
         for (const Json& c : e.at("spawn_table").arr) {
           std::vector<Instr> cp;
-          compile_prog(c.at("program"), s, ids, spawn, cp);
+          compile_prog(c.at("program"), s, ids, spawn, c.at("id").as_str("id"), cp);
           ChildSpec cs{c.at("id").as_str("id"), c.at("name").as_str("name"), std::move(cp)};
           cs.idle = decl_idle(c);               // Z (e): a spawn-table entry's declared class
           cs.slot = spawn.at(cs.sid);           // W: the slot its siblings' WAKEs resolve through
@@ -1289,7 +1396,9 @@ static void load_workload(const std::string& path, Sim& s) {
         s.set_spawn(id, std::move(tab), (int)cap);
       }
     } else if (op == "wake") {
-      s.wake(e.at("t").as_int("t"), s.channel(e.at("channel").as_str("channel")));
+      const std::string& ch = e.at("channel").as_str("channel");
+      if (is_children(ch)) die("a wake event on " + ch + ": the executor completes that WAIT");  // AA
+      s.wake(e.at("t").as_int("t"), s.channel(ch));
     } else die("unknown event op: " + op);
   }
   s.classify_periodic();
@@ -1348,11 +1457,14 @@ static void load_schedule(const std::string& path, Sim& s) {
 // --workload / --schedule / --out-trace, every flag required, no positional argument, the trace
 // written to that file (gzip when the path ends in `.gz`), standard output otherwise ignored,
 // exit 0 only once it is written. This is main()-level plumbing: the trace content is unchanged,
-// so it is not a ladder stage. The positional form (./sim workload [schedule], trace on stdout) is
-// kept for the steps ladder and hand runs — a strict "reject positional" is deferred (RQ0 does not
-// need it; the runner always calls with the flags).
+// so it is not a ladder stage. Since 2026-11-11 the positional form is refused here, as the
+// contract says; it lives on in the ladder's last rung (steps/sim_ac: ./sim_ac W [S], trace on
+// stdout), byte-identical to this binary but for the header's `sim`, which hand runs, the fixture
+// replay (tools/replay_fixtures.py) and fix-object's generate.py use.
+static const char* const kFlags[] = {"--workload", "--schedule", "--out-trace"};
+
 static std::string arg_after(int argc, char** argv, const char* flag) {
-  for (int i = 1; i + 1 < argc; ++i) if (std::strcmp(argv[i], flag) == 0) return argv[i + 1];
+  for (int i = 1; i + 1 < argc; i += 2) if (std::strcmp(argv[i], flag) == 0) return argv[i + 1];
   return std::string();
 }
 
@@ -1368,34 +1480,34 @@ int main(int argc, char** argv) {
   sim.register_policy("EDF", edf);
   sim.register_policy("LOTTERY", lottery);
 
-  bool flags = false;
-  for (int i = 1; i < argc; ++i) if (std::strncmp(argv[i], "--", 2) == 0) { flags = true; break; }
-
-  std::string wl, sched, out;
+  // (h): exactly the three flags, each once, each with its value — no positional argument, no
+  // other option; anything else is refused before any input is read
+  const char* usage = "usage: --workload W --schedule S --out-trace T (no positional argument;"
+                      " hand runs: steps/sim_ac W [S])";
+  if (argc != 7) die(usage);
+  for (int i = 1; i < argc; i += 2) {
+    bool known = false, seen = false;
+    for (const char* f : kFlags) if (std::strcmp(argv[i], f) == 0) known = true;
+    for (int j = 1; j < i; j += 2) if (std::strcmp(argv[i], argv[j]) == 0) seen = true;
+    if (!known || seen) die(usage);
+  }
+  const std::string wl = arg_after(argc, argv, "--workload");
+  const std::string sched = arg_after(argc, argv, "--schedule");
+  const std::string out = arg_after(argc, argv, "--out-trace");
+  if (wl.empty() || sched.empty() || out.empty()) die(usage);
   FILE* gzpipe = nullptr;
-  if (flags) {                                      // (h): the invocation contract
-    wl = arg_after(argc, argv, "--workload");
-    sched = arg_after(argc, argv, "--schedule");
-    out = arg_after(argc, argv, "--out-trace");
-    if (wl.empty() || out.empty()) die("usage: --workload W --schedule S --out-trace T");
-    const bool gz = out.size() > 3 && out.compare(out.size() - 3, 3, ".gz") == 0;
-    if (gz) {                                       // pipe the trace through gzip -c > out
-      const std::string cmd = "exec gzip -c > '" + out + "'";   // absolute path from the harness
-      gzpipe = popen(cmd.c_str(), "w");
-      if (!gzpipe || dup2(fileno(gzpipe), fileno(stdout)) < 0) die("cannot open --out-trace (gzip)");
-    } else if (!std::freopen(out.c_str(), "w", stdout)) {
-      die("cannot open --out-trace: " + out);
-    }
-  } else {                                          // positional — the ladder and hand runs
-    if (argc < 2) die("usage: ./sim <workload.json> [<config-schedule.json>]"
-                      "   (or --workload W --schedule S --out-trace T)");
-    wl = argv[1];
-    if (argc > 2) sched = argv[2];
+  const bool gz = out.size() > 3 && out.compare(out.size() - 3, 3, ".gz") == 0;
+  if (gz) {                                       // pipe the trace through gzip -c > out
+    const std::string cmd = "exec gzip -c > '" + out + "'";   // absolute path from the harness
+    gzpipe = popen(cmd.c_str(), "w");
+    if (!gzpipe || dup2(fileno(gzpipe), fileno(stdout)) < 0) die("cannot open --out-trace (gzip)");
+  } else if (!std::freopen(out.c_str(), "w", stdout)) {
+    die("cannot open --out-trace: " + out);
   }
 
   load_workload(wl, sim);
   lottery.seed(fnv1a(sim.workload_id()));   // before a schedule file's workload_id overwrites it
-  if (!sched.empty()) load_schedule(sched, sim);
+  load_schedule(sched, sim);
   Params p;                     // the boot default when there is no schedule (OSTEP §8 whole)
   sim.run(p);
   sim.report();

@@ -36,9 +36,9 @@ Also not a trace pair. `experiment.yaml` is a per-experiment spec over the `mock
 
 `build.toy-grid.manifest.json` beside it is a two-file generated set's manifest in the dataset's form (9.21): `tg-a` (`split: measurement`) and `tg-b` (`split: tuning`), each a copy of `mock-score` under `build/toy-grid-single/` with its `grid` record — the axes, the placements, the segments' labels. The experiment-spec tests select from it (`files.select`, `pins.generated`) and the scoring tests derive the generated-layer rule's entries from it.
 
-## `fix-object`, `fix-tree` — the simulator's evidence for conformance (i)
+## `fix-object`, `fix-tree` — the simulator's evidence for conformance (i) and (g)
 
-Not trace pairs, and not hand-written: each holds a compiled `workload.json` built by the dataset's own job builders, the reference simulator's `reference-trace.jsonl` for it, and a `worked.md`; `fix-object/generate.py` rebuilds both. They show the RQ0 gate spec's item (i) — a WAKE naming a spawn-table child reaches it, and one sent before the child's birth is held and taken at the birth, because `fork_cap` splits a job (`simulator/memo/memo_261021.md` E2, H3). Having no `trace.jsonl` or `expected.csv`, they are outside the pair sweeps above. Added by 인경민, 2026-10-24.
+Not trace pairs, and not hand-written: each holds a compiled `workload.json` built by the dataset's own job builders, the reference simulator's `reference-trace.jsonl` for it, and a `worked.md`; `fix-object/generate.py` rebuilds both. They show the RQ0 gate spec's item (i) — a WAKE naming a spawn-table child reaches it, and one sent before the child's birth is held and taken at the birth, because `fork_cap` splits a job (`simulator/memo/memo_261021.md` E2, H3); and, since 2026-11-11, item (g) — the parent ends in `WAIT children:build` as the compiler's orchestrators do, and the wait completes at its last child's end. Their trace comes from the simulator's last ladder rung, `simulator/steps/sim_ac`, since `simulator/src/sim` takes the contract's flags only; the two differ in the header's `sim` alone (`simulator/memo/memo_261111.md`). Having no `trace.jsonl` or `expected.csv`, they are outside the pair sweeps above. Added by 인경민, 2026-10-24.
 
 ## Fixed here, documented in the metrics doc (5.2)
 

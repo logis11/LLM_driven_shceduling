@@ -79,7 +79,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -o sim sim.cpp
 ```
 `sim.cpp` depends on `mini_json.hpp` (in this directory).
 
-## 2. Stages implemented (A–Z)
+## 2. Stages implemented (A–AC)
 
 | stage | feature |
 |---|---|
@@ -101,6 +101,9 @@ g++ -std=c++17 -O2 -Wall -Wextra -o sim sim.cpp
 | X | a `ready` line per completed blocking primitive, zero-wait ones included; RUN→RUN in one occupancy (`boundary()`, `x_run_cont`); a lone slice expiry keeps the lane with no `run_end` (Q2); a RUN ending at the µs of another decision is settled by its own Lane event — conformance (a) (2026-10-23; fixes §4 items 4 and 10) |
 | Y | TIMER skip rule — conformance (b): the latest passed tick consumed at once, the earlier ones skipped, each a `deadline` line `met: false` (2026-10-23; replaces K's backlog) |
 | Z | `declared_class` idle — conformance (e): an idle task runs only when no non-idle task is runnable, preempted at once when one wakes, under every algorithm; `idle_gate()`, a band alongside V's cap; the field is optional (absent = normal) so a file with no idle task is a strict no-op (2026-10-28) |
+| AA | `WAIT children:<id>` — conformance (g): the orchestrator's wait completes when every child it spawned has ended (its `ready(wake)` at the last `task_end`), at once with a zero-wait line when none is live; not a channel, so nothing but the executor completes it; the loader refuses one naming another task and a run-file wake on that name. Fixes §4 item 14 (2026-11-11) |
+| AB | (a)'s last case and the RUN-end drain (`../memo/memo_261023.md` H4, H5): a FORK that takes a free slot writes its zero-wait `ready(fork_slot)` line; a switch waiting on the drain applies at a RUN's end inside an occupancy as at a slice end, the incoming algorithm picking with the holder back in the ready set (2026-11-11) |
+| AC | two mailboxes by origin — conformance (j): a `timer:` channel holds the first wake with no waiter and drops a later one with a `wake_drop` line; the k-th timer WAIT pairs with the k-th timer wake through a per-channel queue of fates, a dropped one's WAIT and the RUN after it passing with no block, work or line; `event:` queues with depth as `input:` does (2026-11-11) |
 
 ## 3. Verification performed
 
@@ -171,10 +174,11 @@ independent of the `sim_r` comparison.
    non-batch task is runnable. The accounting window the batch memo §7 item 3 left to this tree
    is D10: a token bucket, rate = cap, depth = one slice, so contiguous batch interference is
    bounded by the quantity the algorithm already imposes on everyone and no new constant is
-   invented; the implied window is slice/cap. Remaining in this area: the two unit tests of the
-   batch memo §7.6, the `x_batch_class` diagnostic (V emits `x_cap_park` instead, which records
-   the throttle rather than the class), and checking that the rebuilt core set's batch tasks
-   enter the class as §4 predicts. Two consequences need 인지오's confirmation, both in
+   invented; the implied window is slice/cap. The two unit tests of the batch memo §7 item 6 are
+   in `../tests/test_batch_class.py` (2026-11-11, black-box through `x_cap_park`; `make check`).
+   Remaining in this area: the `x_batch_class` diagnostic (V emits `x_cap_park` instead, which
+   records the throttle rather than the class; held back for the trace's cost, memo_261111 J), and
+   checking that the rebuilt core set's batch tasks enter the class as §4 predicts. Two consequences need 인지오's confirmation, both in
    `../memo/memo_261020.md` Part F: under FIFO the cap must preempt, since a ceiling over a
    non-preemptive algorithm has no other lever; and a stretch that opens mid-occupancy leaves a
    debt rather than re-arming the holder, bounded by one grant (measured: one bucket depth).
@@ -210,10 +214,13 @@ independent of the `sim_r` comparison.
    name (`../memo/memo_261021.md` H2: a build with no parallelism cap is not a shape the
    contract has). Before, a missing cap died on the generic missing-key message and a cap of 0
    ran unbounded. The rebuild's 13 tables all carry 48.
-7. **No output-path / gzip / invocation handling** — data-contracts §11 wants the
-   trace gzipped when the output path ends in `.gz`; the code writes JSONL to stdout
-   only. `meta.sim` is hardcoded (`"src/sim"`) rather than a version string. The
-   invocation contract (`docs/memos/2026-09-11-invocation-contract.md`) was not audited.
+7. ~~**No output-path / gzip / invocation handling**~~ — **done, conformance (h).** The flags,
+   gzip on `.gz` and exit 0 only once written came on 2026-10-28 (`8dab1176`). On 2026-11-11:
+   the header's `sim` is `simulator@<12 hex>`, the git blob hash of `sim.cpp` + `mini_json.hpp`,
+   passed by `Makefile` (`make version` prints it for the runner's machine configuration, which
+   cross-checks it against every trace); `--schedule` is required; and the binary takes exactly
+   the three flags — a positional argument, an unknown or repeated flag is refused (exit 2). The
+   positional form lives on in the last ladder rung, `../steps/sim_ac`, for hand runs.
 8. **§9-open-question decisions not in the normative contract** — D1–D5 (tie-break,
    mailbox, depart, TIMER `t0`, policy switch) are recorded in `../notes/README.md`
    (untracked), but guide §9 wants them absorbed into the contract docs.
@@ -269,6 +276,16 @@ independent of the `sim_r` comparison.
    **Invisible on the local build** — the 2026-09-04 build predates the structure and its
    `c1-compile` has zero child WAKE targets, so this and the rebuild have to land together.
 
+14. **Fixed in AA — a child's end could retry a FORK its parent was not waiting on.**
+   `on_task_end` took a parent blocked with no channel (`wait_chan < 0`) to be waiting for a fork
+   slot, but a parent blocked on SLEEP or TIMER has no channel either: a child ending then wrote a
+   false `ready(fork_slot)`, re-stepped the parent from its SLEEP and pushed a second Unblock
+   (hand workload `g-sleep`: HEAD writes the line at 1000 while the parent sleeps to 5000). It now
+   asks why the parent blocked (`blocked_by`). No dataset file reaches it: an orchestrator runs
+   only RUN and FORK before its children wait, and the module build's SLEEPs come after it, when
+   no child is live (checked on `c1-compile`, `c3-workday`, `c7-compile`). Before AA that tail
+   never ran at all.
+
 ### Deferred (cannot be settled from code alone)
 
 > **Indexed in `../memo/memo_261021.md` Part B**, the single entry point for everything addressed to 인지오.
@@ -290,18 +307,20 @@ independent of the `sim_r` comparison.
 
 ## 5. Bottom line
 
-The contract skeleton — the 7 non-negotiables, the 8 instructions, the 8 trace
-events, the config schedule, determinism, and the whole-file-rejecting loader — is
-satisfied and byte-identical to the ladder's final rung across every coreset
-workload — through Z (`steps/sim_z`, 2026-10-28).
+The contract skeleton is satisfied, and byte-identical to the ladder's final rung across every
+coreset workload, through AC (`steps/sim_ac`, 2026-11-11). The skeleton is the 7 non-negotiables,
+the 8 instructions, the trace's events (`wake_drop` the eighth runtime event since (j)), the
+config schedule, determinism, and the whole-file-rejecting loader. `src/sim` and the rung differ
+only in the header's `sim` and the invocation `main()`.
 
-`batch_bandwidth_cap` (V) and EDF/lottery (S) are done. What is open, as of 2026-10-28, is the
-`simulator-conformance` statement of `harness/experiments/rq0-gate.yaml`: **(a), (b), (c), (d), (e),
-(f), (i) met; (g) `WAIT children:<id>` and (h) the invocation contract still owed.** The gate spec's
-own sentence still reads "(c), (d), (f) and (i)" — its edit is 인지오's, with a harness changelog
-entry; so are the five normative passages that still state the backlog rule (`../memo/memo_261023.md`
-Part G) and, now, (e)'s own line. The RQ0 run does not start until all eight are shown. Beside them:
-TIMER `t0` (§4 item 3) still needs 인지오's ruling, and the remaining invocation plumbing is (h). (e)
-was verified on the rebuilt build directly (the idle band is a no-op on the stale 24-file build,
-which carries no `declared_class`); the regression baselines still stand on that 2026-09-04 build
-while the dataset is rebuilt to 51 files plus 78 variants, and re-baselining remains 인지오's to run.
+The `simulator-conformance` statement of `harness/experiments/rq0-gate.yaml`, as of 2026-11-11:
+**(a) through (j) are all done in the code.** Stage AB added (a)'s FORK case, AA added (g), the
+version string and the refusal of positional arguments finished (h), and AC added (j). The
+evidence is in `../memo/memo_261111.md`. Showing them to the gate is 인지오's 10.2: every hand
+fixture replayed through the binary (`../tools/replay_fixtures.py` does the replay). One fixture
+line is open there, `mock-guards`' schedule entry past the run's end (memo_261111 I1). The
+regression baseline is now the 2026-10-31 build (51 files + 78 variants), with TODO 1.3's sanity
+checks automated in `../tools/trace_check.py`.
+
+Still ours: the TIMER `t0` ruling (§4 item 3) and the other "ours to decide" lines of TODO; the
+mailbox merge (D2); the diagnostics and unit tests of TODO's backlog.

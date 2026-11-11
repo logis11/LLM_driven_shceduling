@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Regenerate fix-object/workload.json and fix-tree/workload.json from the dataset's own job
 builders (compiler._object_job / _tree_job, seed 1), and each reference-trace.jsonl from the
-reference simulator. Run from anywhere: python3 generate.py [path/to/sim]."""
+reference simulator's ladder rung — the positional form, which simulator/src/sim refuses since
+2026-11-11 (the invocation contract); steps/sim_ac is that binary but for the header's `sim`.
+Run from anywhere: python3 generate.py [path/to/sim]."""
 import json
 import pathlib
 import subprocess
@@ -22,14 +24,15 @@ def doc(wid, table, jobs, cap):
     for n in jobs:   # one dispatch RUN per job, then its members forked together (9.6 D19)
         prog.append({"op": "RUN", "us": 500})
         prog += [{"op": "FORK"} for _ in range(n)]
-    prog.append({"op": "EXIT"})   # not WAIT children:<id> — that is conformance (g)
+    prog += [{"op": "WAIT", "channel": "children:build"},   # the compiler's tail, conformance (g)
+             {"op": "EXIT"}]
     return {"meta": {"id": wid}, "ground_truth": {},
             "events": [{"op": "arrive", "t": 0, "id": "build", "name": "make",
                         "program": prog, "spawn_table": table, "fork_cap": cap}]}
 
 
 def main():
-    sim = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else REPO / "simulator" / "src" / "sim"
+    sim = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else REPO / "simulator" / "steps" / "sim_ac"
     lib = Library(REPO / "dataset" / "archetypes.yaml")
     docs = {}
 

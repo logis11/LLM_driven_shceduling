@@ -43,6 +43,13 @@ make lines      # 단계별 코드 줄수
 | **x** | 끝난 블록 primitive 마다 ready 한 줄(우편함 WAIT·backlog TIMER·tick 0 포함), RUN→RUN 은 점유 하나(`boundary()`, `x_run_cont`), 혼자 남은 홀더의 슬라이스 만료는 run_end/run_start 짝 없음(Q2), 경계는 RUN 의 Lane 이벤트 한 곳에서 (conformance (a)) | 995 (+29) | harness 손 fixture 줄 단위: mock-office **일치**(W 는 8줄 차이), cap 을 끄면 mock-switch·mock-guards **일치** (fixture 가 cap 을 모델링하지 않는다). 로컬 corpus 128 run: 레인 위반 717,297 → **0**, guard 187,733(115 run) → 73,271(38 run) — 남은 것은 (b) 와 입력 잔량뿐 |
 | **y** | TIMER skip 규칙 (conformance (b); 9.11 D3): 지난 틱이 여럿이면 마지막 틱 m 만 즉시 소비, 앞의 틱은 일 없이 건너뛰고 틱마다 `deadline` met:false 한 줄 (늦은 job 줄 뒤에). K 의 backlog 를 갈아낸다 | 1000 (+5) | 손 fixture: 같은 µs 순서를 빼고 cap 을 끄면 **6 개 중 5 개 일치** — mock-media 가 X 의 17줄 차이에서 **일치**로 (양성 대조). 로컬 2026-09-04 빌드 128 run: guard 73,271 → **22** (남은 22 는 전부 입력 잔량, 22/22 보존) |
 | **z** | `declared_class` idle (conformance (e); 2026-10-08 declared-class 메모 §2): idle 태스크는 non-idle 이 runnable 이면 못 뛴다, non-idle 이 깨면 즉시 선점, 네 알고리즘 공통. `idle_gate()` 가 V 의 cap 옆 두 번째 밴드 — idle 을 정책 ready set 에서 빼고, 아무도 없을 때만 돌려준다. 필드는 옵션(없으면 normal) → idle 없는 파일은 `has_idle_` false 로 **엄격한 no-op** | 1053 (+53) | **음성 대조**: idle 태스크 없는 파일은 `sim_y` 와 바이트 동일(V/W/X/Y 불변). **양성**: idle 7파일 전수 종료·재현, trace 재생으로 "idle 이 Running 인데 non-idle 이 Ready" **위반 0** (MLFQ/FIFO/EDF/LOTTERY), 레인 lint 위반 0 |
+| **aa** | `WAIT children:<자기 id>` (conformance (g)): 자식이 모두 끝나면 완료 — 마지막 `task_end` 바로 뒤 `ready(wake)`, 닿을 때 살아있는 자식이 없으면 대기 0. 채널이 아니다(`Instr::children`, `blocked_by='c'`). 로더는 남의 id 와 그 이름의 run-file wake 를 거부. 곁들여: 부모를 풀지 판정을 `wait_chan < 0` → `blocked_by == 'f'` 로 (SLEEP/TIMER 중인 부모를 fork-slot 대기로 오인하던 잠복 결함) | 1072 (+19) | **음성 대조** (2026-10-31 빌드 129파일, 스케줄 없음): FORK 없는 116파일 `src@HEAD` 와 바이트 동일. **양성**: build 13파일 전부 orchestrator 가 끝난다 — c1-compile 계열·c3-workday 는 정확히 2줄(`ready(wake)`, `task_end`) 삽입, c7-compile 계열은 module build 의 serial tail 이 이제 돈다(+약 9,000줄), c4-compile·c6-dual 은 영원히 막힌 build 가 붙들던 꼬리 `x_mlfq_boost` 한 줄이 빠진다. 손 워크로드: 막힘·대기 0·도착 단계 대기 0·cap 대기 뒤, 거부 둘, SLEEP 중 자식 종료(HEAD 는 가짜 `ready(fork_slot)`) |
+| **ab** | (a) 의 마지막 경우와 RUN 끝 drain (memo_261023 H4, H5): 빈 slot 을 바로 얻은 FORK 도 `ready(fork_slot)` 대기 0 줄(자식의 `task_arrive` 앞) — `on_unblock_fork()` 가 쓰던 줄을 FORK 가 쓰므로 막혔다 풀린 경우도 한 줄. drain 대기 중인 교체는 점유 안 RUN 끝에서도 슬라이스 끝처럼: 홀더를 ready set 으로(Preempted — 강등 없음), 들어오는 알고리즘이 홀더 포함해 고르고 다른 태스크면 `run_end(preempt)` | 1072 (+0) | fix-object·fix-tree: `fork_slot` 줄 4→12, 6→18 (= FORK 수), 그 밖의 줄 전부 동일. mock-switch 스케줄로 `sim_aa`→`sim_ab` 129파일: 114 동일, build 13파일은 `ready` 줄만 증가, c2-p2a@venue-x0.8·c2-p2b@venue-x0.8 은 `run_end`/`run_start` 한 쌍 증가 (H5 가 실제 파일에서 걸린 곳). 손: h5(다른 태스크 선택 → 3000 에 preempt), h5b(홀더 선택 → 짝 없음) |
+| **ac** | 두 mailbox (conformance (j); 2026-10-30 메모 §2.1): `timer:` 채널은 대기자 없을 때 첫 wake 하나만 쥐고, 쥔 게 있으면 버리고 그 시각에 `wake_drop`. k번째 timer WAIT ↔ k번째 timer wake 를 채널별 **운명 큐**(`h`/`d`)로 짝짓는다 — 계수기 둘로는 짝이 어긋난다(메모의 경고). 버려진 wake 의 WAIT 와 바로 뒤 RUN 은 블록·일·줄 없이 통과. `event:`·`input:`·태스크 채널은 M 의 깊이 있는 우편함 그대로 | 1105 (+33) | **양성**: harness `mock-wakes` 줄 단위 **일치**. 손: j-trap(w1 쥠·w2 버림·w1 소비·w3 쥠 → 둘째 WAIT 건너뜀), j-early(도착 전 wake 셋: 첫째 쥠, 둘·셋째 그 시각 drop). **음성 대조**: `sim_ab`→`sim_ac` 129파일, `wake_drop` 0개인 10파일 전부 바이트 동일, drop 있는 119파일 전부 다름 (파일당 중앙값 4,951, 최대 c6-dual 620,613). 채널별 drop ≤ run-file timer wake, 위반 0. 129 run 전부 exit 0 |
+
+`src/sim` 은 2026-11-11 부터 계약대로 **flag 만** 받는다(위치 인자 거부, (h)). 그래서 손 실행·fixture replay
+(`../tools/replay_fixtures.py`)·`fix-object/generate.py` 는 마지막 rung `sim_ac` 를 쓴다 — `src/sim` 과 trace 헤더의
+`sim` 만 다르다(10파일 × {boot, mock-switch} 20 run, `meta` 줄 빼고 동일).
 
 큰 델타 다섯(h, n, r, s, v)은 쪼갤 수 없는 단위다 — MLFQ 다섯 규칙, FORK 의 생애주기, 두 번째 입력,
 그리고 **부류**: EDF 와 LOTTERY 는 같은 실행기 부류(B2 주기 / B1 batch)를 읽으므로 따로 얹으면
@@ -282,9 +289,13 @@ idle_gate 가 바깥(엄격한) 밴드라 매 결정 지점에서 먼저 돈다.
 1. ✅ coreset **24파일 전수**가 로드되고 끝까지 돈다
 2. ✅ config schedule (boot default / MLFQ→FIFO→MLFQ 교체) 로 돌아간다
 3. ✅ 24파일 전부 두 번 돌려 trace **바이트 동일** (md5 일치)
-4. ⬜ 정상성 검사 4종이 아직 자동화 안 됨 (배달 CPU ≤ 경과 시간 / 완료 태스크의 RUN
-   수요 전부 배달 / segment-bound 가 depart 에 사라짐 / 시간 역순 이벤트 없음).
-   1·4 는 `release()` 의 assert 와 루프의 `assert(e.t >= now_)` 가 이미 지킨다.
+4. ✅ 정상성 검사 4종 자동화 (2026-11-11, `../tools/trace_check.py`): 배달 CPU ≤ 경과 시간 /
+   완료 태스크의 RUN 수요 전부 배달 / segment-bound 가 depart 에 사라짐 / 시간 역순 이벤트 없음,
+   그리고 레인 lint(홀더 하나, `run_end` 는 홀더만, `task_end` 뒤 줄 없음). trace 를 흘려 읽는다(c6-dual
+   4,877만 줄). `wake_drop` 이 있는 태스크는 수요 검사에서 따로 센다 — 버려진 wake 의 RUN 은 일 없이
+   지나가는데 trace 는 그 RUN 을 이름하지 않으므로 "배달 ≤ 수요" 만 본다. 양성 대조: 줄 순서 뒤집기,
+   `run_end` 삭제, depart 를 앞당긴 워크로드 — 셋 다 잡는다.
+   2026-10-31 빌드 129파일(`sim_ac`, 스케줄 없음) **129/129 통과**, exit 로 끝난 태스크 189,597개 전부 수요 = 배달.
 
 ---
 
