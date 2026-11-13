@@ -22,6 +22,7 @@
 //   AA WAIT children:<id> — an orchestrator's wait for every child it spawned (conformance (g))
 //   AB (a)'s last case and the drain at a RUN's end (memo_261023 Part H4, H5)
 //   AC the timer: mailbox holds one wake and drops the rest with a wake_drop line (conformance (j))
+//   AD a schedule entry at or after the workload's end is ignored (data-contracts §7, End)
 //
 // Design notes worth carrying:
 //   · gen (F): a preempted Lane reservation cannot be removed from a priority_queue, so
@@ -116,6 +117,13 @@
 //     time. The k-th timer WAIT pairs with the k-th timer wake: a held one is met at zero wait with
 //     its ready line; a dropped one's WAIT, and the RUN after it, pass with no block, no work and no
 //     line. event:, input: and the task channels keep M's mailbox with depth.
+//   · the End rule (AD; data-contracts §7, End; mock-guards' entry 4): a schedule entry stamped
+//     at or after the workload's end is not applied and writes no config_applied line. The end is
+//     T_end, the latest time the run file writes — an arrival, a depart or a wake event — and such
+//     an entry is the terminal snapshot's answer (telemetry rule 4). The rule reads the stamp: an
+//     entry stamped before the end that waits on the drain past it still applies. The boot entry,
+//     index 0, always applies: it is the configuration in force from t = 0, also in a file whose
+//     only time is 0 (T_end = 0).
 //   · policy-timer epoch (S, fixes R): a policy timer used to survive a config apply, so each
 //     MLFQ start() added one more boost chain, and the chains kept each other alive past the
 //     arm() stop rule — c1-compile under the mock-switch schedule never terminated. The switch
@@ -546,6 +554,7 @@ class Sim : public Trace, public Clock, public TaskView {
     const int id = static_cast<int>(tasks_.size()) - 1;
     push(t, Kind::Arrive, id);
     if (depart >= 0) push(depart, Kind::Depart, id);   // segment-bound
+    t_end_ = std::max({t_end_, t, depart});            // AD: the run file's latest time
     return id;
   }
 
@@ -588,9 +597,12 @@ class Sim : public Trace, public Clock, public TaskView {
     }
     if (n) std::fprintf(stderr, "children %d — first born %lld, last born %lld, all ended %lld\n",
                         n, (long long)first, (long long)last, (long long)done);
+    if (ignored_) std::fprintf(stderr, "schedule entries at or after the end (%lld) ignored: %d\n",
+                               (long long)t_end_, ignored_);   // AD
   }
 
-  void wake(i64 t, int chan) { q_.push({t, seq_++, Kind::Wake, -1, 0, chan}); }
+  void wake(i64 t, int chan) { q_.push({t, seq_++, Kind::Wake, -1, 0, chan});
+                               t_end_ = std::max(t_end_, t); }   // AD
   const std::string& workload_id() const { return wid_; }
 
   // B2 (batch-class memo §3): every task with a TIMER, and everything reachable from one
@@ -655,8 +667,13 @@ class Sim : public Trace, public Clock, public TaskView {
   void set_schedule(std::vector<ConfigEntry> sched) {
     if (sched.empty() || sched[0].t_us != 0) die("config schedule's first entry must be t_us:0");
     schedule_ = std::move(sched);
-    for (std::size_t k = 0; k < schedule_.size(); ++k)
+    // AD (data-contracts §7, End): an entry stamped at or after the workload's end is ignored —
+    // never queued, so it applies nothing and writes no line. The workload is loaded before the
+    // schedule, so t_end_ is final here. The boot entry always applies
+    for (std::size_t k = 0; k < schedule_.size(); ++k) {
+      if (k > 0 && schedule_[k].t_us >= t_end_) { ++ignored_; continue; }
       q_.push({schedule_[k].t_us, seq_++, Kind::ConfigApply, -1, 0, (int)k});
+    }
   }
 
  private:
@@ -872,6 +889,8 @@ class Sim : public Trace, public Clock, public TaskView {
   Task& T(int id) { return tasks_[static_cast<std::size_t>(id)]; }
 
   std::deque<int> pending_;                  // U3: entries waiting for the drain, in arrival order
+  i64 t_end_ = 0;                            // AD: the workload's end — the run file's latest time
+  int ignored_ = 0;                          // AD: schedule entries at or after it, never queued
 
   void on_config_apply(int idx) {
     const ConfigEntry& c = schedule_[(std::size_t)idx];
@@ -1458,9 +1477,9 @@ static void load_schedule(const std::string& path, Sim& s) {
 // written to that file (gzip when the path ends in `.gz`), standard output otherwise ignored,
 // exit 0 only once it is written. This is main()-level plumbing: the trace content is unchanged,
 // so it is not a ladder stage. Since 2026-11-11 the positional form is refused here, as the
-// contract says; it lives on in the ladder's last rung (steps/sim_ac: ./sim_ac W [S], trace on
-// stdout), byte-identical to this binary but for the header's `sim`, which hand runs, the fixture
-// replay (tools/replay_fixtures.py) and fix-object's generate.py use.
+// contract says; it lives on in the ladder's last rung (steps/sim_ad: ./sim_ad W [S], trace on
+// stdout), byte-identical to this binary but for the header's `sim`, which hand runs and the
+// fixture replay (tools/replay_fixtures.py) use.
 static const char* const kFlags[] = {"--workload", "--schedule", "--out-trace"};
 
 static std::string arg_after(int argc, char** argv, const char* flag) {
@@ -1483,7 +1502,7 @@ int main(int argc, char** argv) {
   // (h): exactly the three flags, each once, each with its value — no positional argument, no
   // other option; anything else is refused before any input is read
   const char* usage = "usage: --workload W --schedule S --out-trace T (no positional argument;"
-                      " hand runs: steps/sim_ac W [S])";
+                      " hand runs: steps/sim_ad W [S])";
   if (argc != 7) die(usage);
   for (int i = 1; i < argc; i += 2) {
     bool known = false, seen = false;

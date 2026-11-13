@@ -79,7 +79,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -o sim sim.cpp
 ```
 `sim.cpp` depends on `mini_json.hpp` (in this directory).
 
-## 2. Stages implemented (A–AC)
+## 2. Stages implemented (A–AD)
 
 | stage | feature |
 |---|---|
@@ -104,6 +104,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -o sim sim.cpp
 | AA | `WAIT children:<id>` — conformance (g): the orchestrator's wait completes when every child it spawned has ended (its `ready(wake)` at the last `task_end`), at once with a zero-wait line when none is live; not a channel, so nothing but the executor completes it; the loader refuses one naming another task and a run-file wake on that name. Fixes §4 item 14 (2026-11-11) |
 | AB | (a)'s last case and the RUN-end drain (`../memo/memo_261023.md` H4, H5): a FORK that takes a free slot writes its zero-wait `ready(fork_slot)` line; a switch waiting on the drain applies at a RUN's end inside an occupancy as at a slice end, the incoming algorithm picking with the holder back in the ready set (2026-11-11) |
 | AC | two mailboxes by origin — conformance (j): a `timer:` channel holds the first wake with no waiter and drops a later one with a `wake_drop` line; the k-th timer WAIT pairs with the k-th timer wake through a per-channel queue of fates, a dropped one's WAIT and the RUN after it passing with no block, work or line; `event:` queues with depth as `input:` does (2026-11-11) |
+| AD | the End rule — data contracts §7: a schedule entry stamped at or after the workload's end, `T_end`, the latest time the run file writes, is never queued, so it applies nothing and writes no `config_applied` line; read by the stamp, so an entry stamped before the end that waits on the drain past it still applies; the boot entry always applies. Written by 인지오 (2026-11-13; `../memo/memo_261111.md` K1) |
 
 ## 3. Verification performed
 
@@ -220,7 +221,7 @@ independent of the `sim_r` comparison.
    passed by `Makefile` (`make version` prints it for the runner's machine configuration, which
    cross-checks it against every trace); `--schedule` is required; and the binary takes exactly
    the three flags — a positional argument, an unknown or repeated flag is refused (exit 2). The
-   positional form lives on in the last ladder rung, `../steps/sim_ac`, for hand runs.
+   positional form lives on in the last ladder rung, `../steps/sim_ad`, for hand runs.
 8. **§9-open-question decisions not in the normative contract** — D1–D5 (tie-break,
    mailbox, depart, TIMER `t0`, policy switch) are recorded in `../notes/README.md`
    (untracked), but guide §9 wants them absorbed into the contract docs.
@@ -308,7 +309,7 @@ independent of the `sim_r` comparison.
 ## 5. Bottom line
 
 The contract skeleton is satisfied, and byte-identical to the ladder's final rung across every
-coreset workload, through AC (`steps/sim_ac`, 2026-11-11). The skeleton is the 7 non-negotiables,
+coreset workload, through AD (`steps/sim_ad`, 2026-11-13). The skeleton is the 7 non-negotiables,
 the 8 instructions, the trace's events (`wake_drop` the eighth runtime event since (j)), the
 config schedule, determinism, and the whole-file-rejecting loader. `src/sim` and the rung differ
 only in the header's `sim` and the invocation `main()`.
@@ -317,10 +318,12 @@ The `simulator-conformance` statement of `harness/experiments/rq0-gate.yaml`, as
 **(a) through (j) are all done in the code.** Stage AB added (a)'s FORK case, AA added (g), the
 version string and the refusal of positional arguments finished (h), and AC added (j). The
 evidence is in `../memo/memo_261111.md`. Showing them to the gate is 인지오's 10.2: every hand
-fixture replayed through the binary (`../tools/replay_fixtures.py` does the replay). One fixture
-line is open there, `mock-guards`' schedule entry past the run's end (memo_261111 I1). The
+fixture replayed through the binary (`../tools/replay_fixtures.py` does the replay). The one
+fixture line that was open there, `mock-guards`' schedule entry past the run's end (memo_261111
+I1), is closed by stage AD, the data contracts' End rule (memo_261111 K1, 2026-11-13). The
 regression baseline is now the 2026-10-31 build (51 files + 78 variants), with TODO 1.3's sanity
 checks automated in `../tools/trace_check.py`.
 
 Still ours: the TIMER `t0` ruling (§4 item 3) and the other "ours to decide" lines of TODO; the
-mailbox merge (D2); the diagnostics and unit tests of TODO's backlog.
+diagnostics of TODO's backlog. The mailbox merge (D2) is closed, not implemented (memo_261111 I5,
+K5); the unit tests are in `../tests/`.
