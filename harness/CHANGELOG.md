@@ -2,6 +2,13 @@
 
 The harness tree's own record of what its committed data files and programs changed, newest first. The scoring spec (`scoring/scoring-spec.yaml`) and the guard spec (`guards/guard-spec.yaml`) are frozen here (Phase 8 spec, decision 19): a change to either after its freeze is an entry below before any run reads it, and the RQ0 gate spec (`experiments/rq0-gate.yaml`) pins the frozen bytes by hash. The metrics doc and the data contracts keep their own changelogs.
 
+## 2026-11-13 — `fix-object` and `fix-tree`: the children wait, and the reference traces through the contract's invocation (인경민, jioh)
+
+No pinned file changes, and no pin moves.
+
+- **Fixtures**, `tools/tests/fixtures/fix-object/` and `fix-tree/` (인경민, 2026-11-11, commit `2ee49785`; `simulator/memo/memo_261111.md` Part H): the parent ends as the compiler's orchestrators do, `WAIT children:build` then `EXIT`, so the two are item (g)'s evidence beside item (i)'s; every FORK writes its `ready(cause = fork_slot)` line, at zero wait when it took a free slot (item (a)'s last case).
+- **Fixtures**, the same two (인지오, 2026-11-13; `simulator/memo/memo_261111.md` K4): each `reference-trace.jsonl` comes from `simulator/src/sim` called as the runner calls it, its schedule the boot entry alone (`boot-defaults/ostep.json` at t = 0, provenance `fallback`). It gains the `config_applied` line at 0, and its header's `sim` is the version string of the source it came from. `fix-object/generate.py` produces both that way.
+
 ## 2026-11-01 — the RQ0 gate spec's pre-run lines: link 2's reading and the cap band; the RQ0 gate spec re-pinned (jioh)
 
 Decided by 인지오 (`_dev/docs/spec/jioh/task-10.1-gate-spec-pre-run-lines.md`; the Phase 10 spec, decision 6).

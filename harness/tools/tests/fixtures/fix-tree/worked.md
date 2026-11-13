@@ -7,8 +7,8 @@ conventions this one shares. `../fix-object/generate.py` rebuilds both.
   `compiler._tree_job` (the `module-compiler-child` entry of `dataset/archetypes.yaml`, seed 1):
   `conftest_a` with 8 members and `conftest_b` with 10 (9.10 D53), `fork_cap` 12. As in
   `fix-object`, a 500 µs dispatch RUN per job and `WAIT children:build` then `EXIT`.
-- `reference-trace.jsonl` — `simulator/steps/sim_ac workload.json`, no schedule. Byte identical across
-  reruns.
+- `reference-trace.jsonl` — `simulator/src/sim` through the contract's flags, its schedule the boot
+  entry alone, as in `fix-object`. Byte identical across reruns.
 
 ## What happens
 
@@ -18,7 +18,7 @@ conventions this one shares. `../fix-object/generate.py` rebuilds both.
 | 1000 | job 2's first four members are born — 12 of 12; the fifth FORK blocks for a slot |
 | 11650 | `build.j2.gcc` ends its first RUN and WAKEs `build.j2.cc1`, **not yet born**: the wake is held |
 | 164256 | job 1 ends, the slots free; `build` forks job 2's last six and blocks on `WAIT children:build`. `build.j2.cc1`'s birth takes the held wake (`ready(arrive)`, then a zero-wait `ready(wake)`) |
-| 190037 | job 2 ends; at its last member's `task_end` the children wait completes — `build`'s `ready(wake)` and `task_end` (lines 241–242). 19 arrivals, 19 `task_end` |
+| 190037 | job 2 ends; at its last member's `task_end` the children wait completes — `build`'s `ready(wake)` and `task_end` (lines 242–243). 19 arrivals, 19 `task_end` |
 
 The trees are 8 and 10 members while `fork_cap` is a multiple of six in the dataset, so a cap
 always splits one of them; 12 here splits the second.

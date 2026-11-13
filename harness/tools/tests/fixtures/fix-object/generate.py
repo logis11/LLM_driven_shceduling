@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Regenerate fix-object/workload.json and fix-tree/workload.json from the dataset's own job
 builders (compiler._object_job / _tree_job, seed 1), and each reference-trace.jsonl from the
-reference simulator's ladder rung — the positional form, which simulator/src/sim refuses since
-2026-11-11 (the invocation contract); steps/sim_ac is that binary but for the header's `sim`.
-Run from anywhere: python3 generate.py [path/to/sim]."""
+reference simulator called as the runner calls it (contract 10: --workload, --schedule,
+--out-trace), its schedule the boot entry alone — harness/boot-defaults/ostep.json at t = 0,
+provenance fallback, as the daemon writes the fixed condition.
+Run from anywhere: python3 generate.py [path/to/sim]; build it first, make -C simulator/src."""
 import json
 import pathlib
 import subprocess
 import sys
+import tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
 FIXTURES = HERE.parent
@@ -17,6 +19,7 @@ from wlc import compiler  # noqa: E402
 from wlc.library import Library  # noqa: E402
 
 SEED = 1
+BOOT = REPO / "harness" / "boot-defaults" / "ostep.json"
 
 
 def doc(wid, table, jobs, cap):
@@ -32,7 +35,7 @@ def doc(wid, table, jobs, cap):
 
 
 def main():
-    sim = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else REPO / "simulator" / "steps" / "sim_ac"
+    sim = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else REPO / "simulator" / "src" / "sim"
     lib = Library(REPO / "dataset" / "archetypes.yaml")
     docs = {}
 
@@ -58,8 +61,12 @@ def main():
     for wid, d in docs.items():
         w = FIXTURES / wid / "workload.json"
         w.write_text(json.dumps(d, indent=1))
-        with open(FIXTURES / wid / "reference-trace.jsonl", "wb") as out:
-            subprocess.run([str(sim), str(w)], stdout=out, check=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            s = pathlib.Path(tmp) / "schedule.json"
+            s.write_text(json.dumps({"workload_id": wid, "condition": "fixed", "schedule": [
+                {"t_us": 0, "config": json.loads(BOOT.read_text()), "provenance": "fallback"}]}))
+            subprocess.run([str(sim), "--workload", str(w), "--schedule", str(s),
+                            "--out-trace", str(FIXTURES / wid / "reference-trace.jsonl")], check=True)
         print(wid, "written")
 
 

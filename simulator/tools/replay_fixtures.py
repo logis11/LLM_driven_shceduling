@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Replay the harness's hand fixtures through a simulator binary and compare line by line.
 
-    python3 simulator/tools/replay_fixtures.py [--sim simulator/steps/sim_ac] [--cap-null] [--only mock-wakes] [--show 8]
+    python3 simulator/tools/replay_fixtures.py [--sim simulator/steps/sim_ad] [--cap-null] [--only mock-wakes] [--show 8]
 
 The binary is called in the positional form (`sim W [S]`, trace on stdout), so it is a ladder rung:
 `simulator/src/sim` takes the invocation contract's flags only, and the last rung is that binary but
@@ -14,7 +14,9 @@ Each directory under harness/tools/tests/fixtures/ holding a trace is one case:
   `config_applied` lines at their times with the boot params (a fixture without a schedule file
   applies its entries where they are written, so no drain stands between);
 - a reference fixture (`workload.json` + `reference-trace.jsonl`, fix-object and fix-tree): the
-  reference simulator's own output, run with no schedule.
+  reference simulator's own output, run with the boot entry alone as its schedule
+  (harness/boot-defaults/ostep.json at t = 0, provenance fallback), as fix-object/generate.py
+  produces it through `simulator/src/sim`.
 
 `meta` and `x_` diagnostic lines are dropped on both sides (the harness reads neither,
 data-contracts §9). A case is `identical`, `same-us order` (the same lines at every µs in another
@@ -104,7 +106,10 @@ def run_case(sim, name, d, kind, cap_null, tmp):
         expected = read_lines(os.path.join(d, "reference-trace.jsonl"))
         with open(os.path.join(d, "workload.json")) as f:
             wl = json.load(f)
-        sched = None
+        with open(os.path.join(ROOT, "harness", "boot-defaults", "ostep.json")) as f:
+            boot = json.load(f)
+        sched = {"workload_id": wl["meta"]["id"], "condition": "fixed",
+                 "schedule": [{"t_us": 0, "config": boot, "provenance": "fallback"}]}
     wl_path = os.path.join(tmp, name + ".workload.json")
     with open(wl_path, "w") as f:
         json.dump(wl, f)
@@ -134,7 +139,7 @@ def run_case(sim, name, d, kind, cap_null, tmp):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--sim", default=os.path.join(ROOT, "simulator", "steps", "sim_ac"))
+    ap.add_argument("--sim", default=os.path.join(ROOT, "simulator", "steps", "sim_ad"))
     ap.add_argument("--cap-null", action="store_true")
     ap.add_argument("--only", nargs="*")
     ap.add_argument("--show", type=int, default=6, help="differing lines to print per case")

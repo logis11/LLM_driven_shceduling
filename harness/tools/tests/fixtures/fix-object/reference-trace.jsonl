@@ -1,4 +1,5 @@
-{"event":"meta","workload_id":"fix-object","condition":"fixed","sim":"notes/sim","schedule_entries":0}
+{"event":"meta","workload_id":"fix-object","condition":"fixed","sim":"simulator@1ce6b8807157","schedule_entries":1}
+{"event":"config_applied","t":0,"index":0,"algorithm":"MLFQ","provenance":"fallback"}
 {"event":"task_arrive","t":0,"task":"build","source":"file"}
 {"event":"ready","t":0,"task":"build","cause":"arrive"}
 {"event":"run_start","t":0,"task":"build"}
