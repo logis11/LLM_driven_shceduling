@@ -18,6 +18,10 @@ control in each test, a task that is batch-class, must be parked, or the test pr
     memo §5) after the start of its burst. Run under FIFO: the cap bites only while a non-batch task
     is runnable, and under MLFQ the chain takes the lane whenever it is, so the plain task's batch
     stretches never overlap it and the positive control would not fire (it did not, 2026-11-11).
+(c) An idle-class task does not turn the cap on (docs/recognition-vocabulary.md §2, 2026-11-13;
+    stage AE): beside a runnable idle task alone, a batch-class task of the normal class is never
+    parked, and the lane is never free while one of the two is runnable. Positive control: with a
+    non-batch task of the normal class beside them, the same task is parked.
 """
 import json
 import os
@@ -105,10 +109,33 @@ def test_b(sim):
     return f"plain parked {len(pk)}x, each >= {SLICE} us into its burst; chain 0x"
 
 
+def test_c(sim):
+    end = 2_000_000
+    work = [{"op": "LOOP", "count": "unbounded", "body": [{"op": "RUN", "us": 30000}, {"op": "SLEEP", "us": 2000}]}]
+    idler = [{"op": "RUN", "us": 5_000_000}, {"op": "EXIT"}]      # more than the window holds: always runnable
+    ev = [{"op": "arrive", "t": 0, "id": "work", "name": "w", "depart": end, "program": work},
+          {"op": "arrive", "t": 0, "id": "idler", "name": "i", "depart": end, "declared_class": "idle",
+           "program": idler}]
+    tr = run(sim, "batch-c", ev)
+    assert not parks(tr, "work"), f"the batch task was parked beside an idle task alone, at {parks(tr, 'work')[:3]}"
+    busy, cpu, since = 0, {"work": 0, "idler": 0}, None
+    for e in tr:
+        if e["event"] == "run_start":
+            since = e["t"]
+        elif e["event"] == "run_end" and since is not None:
+            busy += e["t"] - since; cpu[e["task"]] += e["t"] - since; since = None
+    assert busy == end, f"the lane was free for {end - busy} us of {end} with a task runnable throughout"
+    assert cpu["idler"] > 0, "the idle task never ran in the other's sleeps"
+    ctl = run(sim, "batch-c-control", ev + poke(end))
+    assert parks(ctl, "work"), "positive control: beside a non-batch normal task the batch task is never parked"
+    return (f"work parked 0x beside the idle task alone, the lane busy {busy} of {end} us (idler {cpu['idler']}); "
+            f"{len(parks(ctl, 'work'))}x with a non-batch normal task beside them")
+
+
 def main():
     sim = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "simulator", "src", "sim")
     ok = True
-    for name, t in (("a", test_a), ("b", test_b)):
+    for name, t in (("a", test_a), ("b", test_b), ("c", test_c)):
         try:
             print(f"test {name}: ok — {t(sim)}")
         except AssertionError as e:

@@ -23,6 +23,7 @@
 //   AB (a)'s last case and the drain at a RUN's end (memo_261023 Part H4, H5)
 //   AC the timer: mailbox holds one wake and drops the rest with a wake_drop line (conformance (j))
 //   AD a schedule entry at or after the workload's end is ignored (data-contracts §7, End)
+//   AE an idle-class task does not turn the cap on (recognition-vocabulary §2, 2026-11-13)
 //
 // Design notes worth carrying:
 //   · gen (F): a preempted Lane reservation cannot be removed from a priority_queue, so
@@ -124,6 +125,13 @@
 //     entry stamped before the end that waits on the drain past it still applies. The boot entry,
 //     index 0, always applies: it is the configuration in force from t = 0, also in a file whose
 //     only time is 0 (T_end = 0).
+//   · the cap beside the idle class (AE; recognition-vocabulary §2, the declared-class memo §2,
+//     both 2026-11-13): the ceiling applies while a non-batch task of a non-idle class is
+//     runnable. Before AE a held idle task counted as that non-batch task and turned the cap on,
+//     while the capped batch task, still runnable, kept the idle task held: neither ran and the
+//     lane sat free (c2-p1b under the oracle: 4.8 % busy over 39 s, the idle indexer waiting all
+//     of it), against the cap being work-conserving. Now the batch task runs uncapped beside an
+//     idle task, which runs when the other blocks. A file with no idle task is unchanged.
 //   · policy-timer epoch (S, fixes R): a policy timer used to survive a config apply, so each
 //     MLFQ start() added one more boost chain, and the chains kept each other alive past the
 //     arm() stop rule — c1-compile under the mock-switch schedule never terminated. The switch
@@ -726,8 +734,11 @@ class Sim : public Trace, public Clock, public TaskView {
     }
   }
 
-  bool capped_now() const {      // is any non-batch task runnable (batch-class memo §3)
-    for (int id : runnable_) if (!batch(id)) return true;
+  // Is any non-batch task of a non-idle class runnable (batch-class memo §3). AE: an idle task
+  // is not such a task — it may not run while another class is runnable, so it has no claim the
+  // ceiling could protect, and counting it left the lane free with two tasks runnable
+  bool capped_now() const {
+    for (int id : runnable_) if (!batch(id) && !T2(id).idle) return true;
     return false;
   }
 
@@ -1477,7 +1488,7 @@ static void load_schedule(const std::string& path, Sim& s) {
 // written to that file (gzip when the path ends in `.gz`), standard output otherwise ignored,
 // exit 0 only once it is written. This is main()-level plumbing: the trace content is unchanged,
 // so it is not a ladder stage. Since 2026-11-11 the positional form is refused here, as the
-// contract says; it lives on in the ladder's last rung (steps/sim_ad: ./sim_ad W [S], trace on
+// contract says; it lives on in the ladder's last rung (steps/sim_ae: ./sim_ae W [S], trace on
 // stdout), byte-identical to this binary but for the header's `sim`, which hand runs and the
 // fixture replay (tools/replay_fixtures.py) use.
 static const char* const kFlags[] = {"--workload", "--schedule", "--out-trace"};
@@ -1502,7 +1513,7 @@ int main(int argc, char** argv) {
   // (h): exactly the three flags, each once, each with its value — no positional argument, no
   // other option; anything else is refused before any input is read
   const char* usage = "usage: --workload W --schedule S --out-trace T (no positional argument;"
-                      " hand runs: steps/sim_ad W [S])";
+                      " hand runs: steps/sim_ae W [S])";
   if (argc != 7) die(usage);
   for (int i = 1; i < argc; i += 2) {
     bool known = false, seen = false;

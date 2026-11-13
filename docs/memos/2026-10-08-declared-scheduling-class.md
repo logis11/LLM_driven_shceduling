@@ -1,6 +1,6 @@
 # The declared scheduling class — a field in the workload, a rule in the executor
 
-> Status: memo · Created 2026-10-08 · Updated 2026-10-31
+> Status: memo · Created 2026-10-08 · Updated 2026-11-13
 > Closed — §4's item 4: the status memo's §6 answers 1 and 2 confirmed by 인경민 to 인지오 verbally as the reply the RQ0 gate spec's statement `executor-assumptions` asks for (recorded 2026-10-31). §4's item 1, the idle rule of §2 in the executor (the RQ0 gate spec's conformance item (e)), is in the simulator since its stage Z (2026-10-28, commit `8dab1176`): its loader reads `declared_class` (`simulator/src/notes.md`, the Z entry). Items 2 and 3 are answered (§1's 2026-10-09 line; `docs/data-contracts.md` §14, 2026-10-09).
 > From 인지오 to 인경민 and 박이안. Decisions D4–D6, D16, D18, D19, D26 and D34 of task 9.11 (`_dev/research/jioh/task-9.11-scheduler-constants/changelog.md`). Archetype entries gain a field that the workload and the run file carry, a change to three frozen contracts — the archetype, the workload and the run file, four if the visible projection shows it (§3) — that needs the three of us (`docs/data-contracts.md` §13). The heads-up memo of 2026-09-13 said your programs' input and output formats were outside the rebuild; this field is the exception.
 
@@ -19,6 +19,8 @@ A task whose class is `idle` runs only when no task of another class is runnable
 The rule is our design for the scheduler under test, which through sched_ext schedules every task, idle-policy ones included, and decides what an idle task's weight means (`kernel/sched/ext.c` at v6.17, `:4663–4670`, `:5736`, `:3850–3860`). Against the stock desktop it depicts: the backup runs in the editor's CPU group and gets about 0.3 % of the CPU beside it there, as the rule nearly gives; Tracker runs in `background.slice`, whose group gets about 23 % against the editor's, so the simulated indexer interferes less than the real one.
 
 **No starvation safety net.** The executor builds none. The algorithm-switch memo (2026-09-08) and the batch-class memo (2026-09-09) said one exists, and your status memo lists it as owed (§5.5); instead the harness's `starvation_floor` guard bounds every task's wait at 30 s, the bound sched_ext's watchdog enforces, by design. If the consumer rework's dry runs (task 9.14) show waits near 30 s, the question comes back to you.
+
+**The cap beside the idle class (2026-11-13).** An idle task does not turn `batch_bandwidth_cap` on: the ceiling applies while a non-batch task of another class is runnable (`docs/recognition-vocabulary.md` §2). A batch-class task beside a runnable idle task alone runs uncapped, and the idle task runs when it blocks. In the simulator since stage AE (`simulator/memo/memo_261111.md` Part L).
 
 ## 3. The visible projection (박이안)
 

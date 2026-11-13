@@ -79,7 +79,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -o sim sim.cpp
 ```
 `sim.cpp` depends on `mini_json.hpp` (in this directory).
 
-## 2. Stages implemented (A–AD)
+## 2. Stages implemented (A–AE)
 
 | stage | feature |
 |---|---|
@@ -105,6 +105,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -o sim sim.cpp
 | AB | (a)'s last case and the RUN-end drain (`../memo/memo_261023.md` H4, H5): a FORK that takes a free slot writes its zero-wait `ready(fork_slot)` line; a switch waiting on the drain applies at a RUN's end inside an occupancy as at a slice end, the incoming algorithm picking with the holder back in the ready set (2026-11-11) |
 | AC | two mailboxes by origin — conformance (j): a `timer:` channel holds the first wake with no waiter and drops a later one with a `wake_drop` line; the k-th timer WAIT pairs with the k-th timer wake through a per-channel queue of fates, a dropped one's WAIT and the RUN after it passing with no block, work or line; `event:` queues with depth as `input:` does (2026-11-11) |
 | AD | the End rule — data contracts §7: a schedule entry stamped at or after the workload's end, `T_end`, the latest time the run file writes, is never queued, so it applies nothing and writes no `config_applied` line; read by the stamp, so an entry stamped before the end that waits on the drain past it still applies; the boot entry always applies. Written by 인지오 (2026-11-13; `../memo/memo_261111.md` K1) |
+| AE | the cap beside the idle class — `docs/recognition-vocabulary.md` §2 (2026-11-13): an idle-class task does not turn `batch_bandwidth_cap` on, so the ceiling applies while a non-batch task of a non-idle class is runnable. Before, a held idle task turned the cap on and the capped task kept it held, the lane free with both runnable. A file with no idle task is unchanged. Written by 인지오 (2026-11-13; `../memo/memo_261111.md` Part L) |
 
 ## 3. Verification performed
 
@@ -221,7 +222,7 @@ independent of the `sim_r` comparison.
    passed by `Makefile` (`make version` prints it for the runner's machine configuration, which
    cross-checks it against every trace); `--schedule` is required; and the binary takes exactly
    the three flags — a positional argument, an unknown or repeated flag is refused (exit 2). The
-   positional form lives on in the last ladder rung, `../steps/sim_ad`, for hand runs.
+   positional form lives on in the last ladder rung, `../steps/sim_ae`, for hand runs.
 8. **§9-open-question decisions not in the normative contract** — D1–D5 (tie-break,
    mailbox, depart, TIMER `t0`, policy switch) are recorded in `../notes/README.md`
    (untracked), but guide §9 wants them absorbed into the contract docs.
@@ -309,7 +310,7 @@ independent of the `sim_r` comparison.
 ## 5. Bottom line
 
 The contract skeleton is satisfied, and byte-identical to the ladder's final rung across every
-coreset workload, through AD (`steps/sim_ad`, 2026-11-13). The skeleton is the 7 non-negotiables,
+coreset workload, through AE (`steps/sim_ae`, 2026-11-13). The skeleton is the 7 non-negotiables,
 the 8 instructions, the trace's events (`wake_drop` the eighth runtime event since (j)), the
 config schedule, determinism, and the whole-file-rejecting loader. `src/sim` and the rung differ
 only in the header's `sim` and the invocation `main()`.

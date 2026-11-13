@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Replay the harness's hand fixtures through a simulator binary and compare line by line.
 
-    python3 simulator/tools/replay_fixtures.py [--sim simulator/steps/sim_ad] [--cap-null] [--only mock-wakes] [--show 8]
+    python3 simulator/tools/replay_fixtures.py [--sim simulator/steps/sim_ae] [--cap-null] [--only mock-wakes] [--show 8]
 
 The binary is called in the positional form (`sim W [S]`, trace on stdout), so it is a ladder rung:
 `simulator/src/sim` takes the invocation contract's flags only, and the last rung is that binary but
@@ -139,7 +139,7 @@ def run_case(sim, name, d, kind, cap_null, tmp):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--sim", default=os.path.join(ROOT, "simulator", "steps", "sim_ad"))
+    ap.add_argument("--sim", default=os.path.join(ROOT, "simulator", "steps", "sim_ae"))
     ap.add_argument("--cap-null", action="store_true")
     ap.add_argument("--only", nargs="*")
     ap.add_argument("--show", type=int, default=6, help="differing lines to print per case")
