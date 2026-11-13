@@ -1,6 +1,7 @@
 # 2026-10-30–31의 변동 사항 — simulator 쪽에서 볼 것
 
-> Status: memo · Created 2026-10-30 · Updated 2026-10-31
+> Status: memo · Created 2026-10-30 · Updated 2026-11-13
+> Closed — §2의 여섯 항목은 인경민의 2026-11-11 commit(`2ee49785`)으로 모두 들어왔어요. 그 뒤에 남은 차이는 인지오가 2026-11-13에 고쳤고, 그 기록은 `docs/memos/2026-11-13-simulator-changes-by-jioh.md`에 있어요.
 > From 인지오 to 인경민.
 
 ## 0. 이 문서
