@@ -1,0 +1,58 @@
+{
+ "files": [
+  "c1-office",
+  "c1-photo",
+  "c7-mail",
+  "c2-p2b",
+  "c1-gaming",
+  "c7-compile",
+  "c1-compile"
+ ],
+ "experiment": "smoke",
+ "seconds": {
+  "old": 398.9,
+  "new": 185.8
+ },
+ "lines": [
+  "floor_band",
+  "exclusion_accuracy",
+  "layer1_headline",
+  "random_beats_oracle",
+  "input_wake_count",
+  "longest_wait",
+  "flip_cost"
+ ],
+ "compared": {
+  "aggregates.csv": {
+   "identical": true,
+   "sha256": "d2fa4ec5a60467395d0384ac872f479265160ab4e7eddc7495b6d5ec28698c0f",
+   "bytes": 470937573
+  },
+  "scores.csv": {
+   "identical": true,
+   "sha256": "28eef4dbcfcfe52a4e0f79cd7ad93dad752cad326c922730444ca6b59727f034",
+   "bytes": 15689
+  },
+  "guards.csv": {
+   "identical": true,
+   "sha256": "f3783143d4e7de5104241188714724c5593f00e01bdc5a9b0213e6a954d42124",
+   "bytes": 33551
+  },
+  "grades.csv": {
+   "identical": true,
+   "sha256": "a27d122593fda6a7565efb5e32df75e5fd1248d88b52fc0abad03a10d0a34281",
+   "bytes": 39420
+  },
+  "report.json": {
+   "identical": true,
+   "sha256": "27be88e4c3178a17c9bf5436f5da0fd08df05de6ed8e631e4cc3eb5d2ce698ad",
+   "bytes": 219060
+  },
+  "report.md": {
+   "identical": true,
+   "sha256": "3bcaa09f18386e04b166d4fdec9f7f1d0cfbcf21dada691364d048aace9debef",
+   "bytes": 26504
+  }
+ },
+ "identical": true
+}

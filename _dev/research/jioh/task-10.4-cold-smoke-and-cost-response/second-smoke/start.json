@@ -1,0 +1,11 @@
+{
+ "started": "2026-11-14T18:54:22+0900",
+ "commit": "a3aadfe929a78d20369bbf57d85819307ac7ba95",
+ "dirty": false,
+ "simulator": "simulator@0d323c84470a",
+ "daemon": "daemon@62c71f0d2de0",
+ "workers": 4,
+ "heavy_workers": 1,
+ "heavy_mb": 50,
+ "free_gb": 319.6
+}

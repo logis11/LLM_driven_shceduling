@@ -1,0 +1,1 @@
+identical: aggregates.csv, scores.csv, guards.csv, grades.csv, report.json, report.md; old 398.9 s, new 185.8 s; lines ['floor_band', 'exclusion_accuracy', 'layer1_headline', 'random_beats_oracle', 'input_wake_count', 'longest_wait', 'flip_cost']

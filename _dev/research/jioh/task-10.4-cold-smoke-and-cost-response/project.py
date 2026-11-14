@@ -1,7 +1,11 @@
 """10.4 decisions 12–13: the full run's cost projected from the cold smoke, and whether the cost is carried.
 
     python3 _dev/research/jioh/task-10.4-cold-smoke-and-cost-response/project.py --smoke runs/cold-smoke \
-        --free-gb FREE [--budget-hours 80] [--machine harness/runner.yaml]
+        --free-gb FREE [--stages runs/smoke-rerun] [--budget-hours 80] [--machine harness/runner.yaml]
+
+`--stages` names the experiment whose `stage-times.csv` gives the end stages, the smoke's own when left out — the
+rerun's, its traces from the execution cache, when the end stages changed after the cold smoke (decision 14); the
+runs are always the cold smoke's.
 
 The upper projection (decision 12): for each file, its slowest measured run of any condition stands for every one of
 its runs in the full run, and its largest run for their bytes. The wall projection is the longer of the two pools —
@@ -47,10 +51,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", required=True, help="the smoke's experiment directory")
     ap.add_argument("--free-gb", type=float, required=True, help="free space measured at the smoke's start, GB")
+    ap.add_argument("--stages", default=None, help="the experiment directory whose stage-times.csv gives the end stages")
     ap.add_argument("--budget-hours", type=float, default=80.0)
     ap.add_argument("--machine", default=str(REPO / "harness" / "runner.yaml"))
     args = ap.parse_args()
     smoke = pathlib.Path(args.smoke)
+    stages = pathlib.Path(args.stages) if args.stages else smoke
     machine = runner.load_machine(args.machine, REPO)
 
     per_file = collections.defaultdict(list)
@@ -58,7 +64,7 @@ def main():
         for r in csv.DictReader(f):
             per_file[r["workload_id"]].append((float(r["seconds"]), int(r["bytes"])))
     smoke_runs = sum(len(v) for v in per_file.values())
-    with open(smoke / "stage-times.csv", newline="") as f:
+    with open(stages / "stage-times.csv", newline="") as f:
         end_seconds = sum(float(r["seconds"]) for r in csv.DictReader(f) if r["stage"] != "runs")
 
     full = runner.expand(SPEC, machine, REPO)
@@ -75,7 +81,7 @@ def main():
     carried = upper["wall_hours"] <= args.budget_hours and upper["disk_gb"] <= args.free_gb
     top = sorted(((max(s for s, _ in per_file[w]) * n, w) for w, n in full_counts.items()), reverse=True)[:10]
     doc = {"smoke": str(smoke.resolve().relative_to(REPO)) if smoke.resolve().is_relative_to(REPO) else str(smoke),
-           "smoke_runs": smoke_runs, "full_runs": len(full),
+           "stages": str(stages), "smoke_runs": smoke_runs, "full_runs": len(full),
            "machine": {"workers": machine.workers, "heavy_workers": machine.heavy_workers,
                        "heavy_mb": machine.heavy_mb},
            "budget_hours": args.budget_hours, "free_gb_at_start": args.free_gb,

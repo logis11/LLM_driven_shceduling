@@ -45,10 +45,25 @@ Started 2026-11-14T13:04:18+0900 on `a0ed61ad`, `simulator@0d323c84470a`, `daemo
 | `first-smoke/` | the first smoke's `start.json`, `exit.json` and `cold-smoke.log` |
 | `excess_check.py`, `excess-check.json`, `excess-check.log` | the first smoke's 39 runs whose cached aggregates carry a per-switch excess (61 rows), each run's results built again from its trace with the lookup — records, records messages, aggregates and graded queries — and compared exactly with the ones cached before it. 39 of 39 identical; `c1-transcode/random-1` 42.6 s, the two `c6-dual` `random` runs 714 s and 616 s |
 
+## The second smoke
+
+Started 2026-11-14T18:54:22+0900 on `a3aadfe9`, the same versions and workers, 319.6 GB free. The 1,197 runs finished at 22:20:57, none failed. The end stages: `aggregates.csv` written 22:24 (47,089,102 rows, 4.65 GB), `scores.csv` 22:30, then the guards; stopped 2026-11-15T07:52:30 (exit 143) inside the guards, 9 h 22 min after they began, before `guards.csv`. `second-smoke/` holds its `start.json`, `exit.json`, log and `run-times.csv` (every run's wall time, peak memory and bytes).
+
+- **The guards stage**, `tools/harness/guards.py` `evaluate`: for each run, its aggregates are the rows of the whole experiment whose identity matches, read by a pass over all 47,089,102 rows — 0.55 s a million rows in memory, about 26 s a run and 8.6 h for the 1,197. The runner held every run's aggregates as Python dicts: footprint 26 GB on the 16 GB machine, 10.9 GB of swap in use, the runner at 48 % CPU.
+- **The rows**: `ready_wait`'s seven aggregates per entity (count, max, mean, over_threshold, p50, p95, p99) are 39.9 million of the 47.1 million; `c1-compile`'s runs 10.5 million, a `c6-dual` run 457,000, the median run 103. Of the seven, `max` alone is read after the aggregates are written — by `starvation_floor` and by the evaluator's longest-wait line; no scoring term reads `ready_wait`.
+- **At the full run's 19,425 runs**, each run's rows as its smoke counterpart's (seed 1 for a drawing run): 740,818,977 aggregate rows, about 73 GB as CSV; `ready_wait` 627,173,344 of them, its `max` 89,596,192.
+- **The end stages a run at a time** (decision 14, ahead of the projection; the harness changelog's entry of 2026-11-15): no stage holds the experiment's aggregates whole. The rows are kept as they are.
+
+| file | what it holds |
+|---|---|
+| `second-smoke/` | the second smoke's `start.json`, `exit.json`, `cold-smoke.log` and `run-times.csv` |
+| `end_stage_check.py`, `end-stage-check.json`, `end-stage-check.log` | the runner before the change (`a3aadfe9`'s harness tree) and after, through the real programs on the integration gate's short run's seven files, the smoke spec with the cap band's `floor-0.2` table and the input wake count, longest wait and flip cost lines added — 49 runs, 21 under `floor-0.2`: aggregates (471 MB), scores, guards, grades, report JSON and Markdown identical; old 399 s, new 186 s, the second's programs from the shared execution cache |
+
 ## The smoke and after
 
 | file | what it holds |
 |---|---|
 | `cold_smoke.sh` | decisions 9–10: the launcher — refuses to start over an existing `runs/cold-smoke` or `runs/.cache`, writes `start.json` (date, commit, versions, workers, free space), runs `harness/tools/run.py` on `harness/experiments/rq0-gate.yaml` with `--seed-count 2 --experiment cold-smoke`, writes `exit.json` |
-| `project.py`, `projection.json` | decisions 12–13: the upper and the mean projection of the full run's wall time and disk from `runs/cold-smoke/run-times.csv` and `stage-times.csv`, and whether the cost is carried |
+| `rerun_smoke.sh` | decision 14: the smoke rerun, its traces from the execution cache the cold smoke left — refuses to start over an existing `runs/smoke-rerun` or without `runs/.cache`, writes `rerun/start.json` and `rerun/exit.json`, runs `harness/tools/run.py` on `harness/experiments/rq0-gate.yaml` with `--seed-count 2 --experiment smoke-rerun` |
+| `project.py`, `projection.json` | decisions 12–13: the upper and the mean projection of the full run's wall time and disk from `runs/cold-smoke/run-times.csv` and a `stage-times.csv` — the smoke's, or with `--stages` the rerun's — and whether the cost is carried |
 | `starvation.py`, `starvation.json` | decisions 16–17: the guard table of every condition on the judging files, `simulator/tools/wait_check.py` on every trace, the `starvation_floor` failures beside the five named `oracle` runs; and the 10.3 spec's decision 8 (`_dev/docs/spec/jioh/task-10.3-variant-lines-read-a-failed-guard.md`): every reporting line's availability in the smoke's report, the two chain-scale lines expected unavailable on the four chain-scaled `oracle` runs and no other |
