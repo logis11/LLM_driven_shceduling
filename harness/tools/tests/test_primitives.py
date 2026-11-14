@@ -856,3 +856,45 @@ def test_a_timer_wake_neither_served_nor_dropped_at_a_blocked_end_is_lost():
     ]
     r = compute(run, events)
     assert any("blocked on a timer WAIT at its end" in g for g in r.guards)
+
+
+# ---- 10.4 decision 3: the drop count by bisection against the count it replaced
+
+def _drop_wake_reference(times, t, dropped, timer_ready):
+    """The count as it stood before 10.4: every earlier drop counted for each candidate wake."""
+    import bisect
+    same = [j for j in range(bisect.bisect_left(times, t), bisect.bisect_right(times, t)) if j not in dropped]
+    if not same:
+        return None, "unnamed"
+    held = lambda j: j - sum(1 for d in dropped if d < j) - timer_ready
+    j = next((j for j in same if held(j) >= 1), None)
+    if j is None:
+        return same[-1], "none_held"
+    return j, None
+
+
+def test_drop_wake_matches_the_reference_count_on_generated_sequences():
+    import random
+    from harness.primitives import drop_wake
+    rng = random.Random(104)
+    seen = set()
+    for _case in range(400):
+        n = rng.randint(1, 60)
+        times = sorted(rng.choice(range(0, 40, rng.choice((1, 2, 5)))) for _ in range(n))   # ties among them
+        dropped, dropped_sorted, timer_ready = set(), [], 0
+        for _step in range(rng.randint(1, 80)):
+            if rng.random() < 0.3:
+                timer_ready += 1                     # a timer line completed a WAIT
+                continue
+            # a drop at one of the wakes' times, or at a time no wake has
+            t = rng.choice(times) if rng.random() < 0.85 else rng.choice((41, 43, -1))
+            got = drop_wake(times, t, dropped, dropped_sorted, timer_ready)
+            want = _drop_wake_reference(times, t, dropped, timer_ready)
+            assert got == want, (times, t, sorted(dropped), timer_ready)
+            seen.add(got[1])
+            if got[1] == "unnamed":
+                continue
+            dropped.add(got[0])
+            import bisect
+            bisect.insort(dropped_sorted, got[0])
+    assert seen == {None, "unnamed", "none_held"}            # both guard branches were reached

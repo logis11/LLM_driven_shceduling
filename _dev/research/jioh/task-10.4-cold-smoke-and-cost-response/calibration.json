@@ -1,0 +1,72 @@
+{
+ "date": "2026-11-14",
+ "machine": "home M1 Pro, 16 GB",
+ "simulator": "simulator@0d323c84470a",
+ "daemon": "daemon@62c71f0d2de0",
+ "runs": [
+  {
+   "workload_id": "c1-transcode",
+   "run": "fixed~focus",
+   "workload_mb": 145.6,
+   "seconds": 49.4,
+   "peak_rss_mb": 2209,
+   "bytes": 28500673
+  },
+  {
+   "workload_id": "c7-transcode",
+   "run": "fixed~focus",
+   "workload_mb": 90.3,
+   "seconds": 30.3,
+   "peak_rss_mb": 1466,
+   "bytes": 18087366
+  },
+  {
+   "workload_id": "c4-compile",
+   "run": "fixed~focus",
+   "workload_mb": 30.1,
+   "seconds": 26.7,
+   "peak_rss_mb": 672,
+   "bytes": 45084568
+  },
+  {
+   "workload_id": "c1-compile",
+   "run": "fixed~focus",
+   "workload_mb": 28.7,
+   "seconds": 26.4,
+   "peak_rss_mb": 647,
+   "bytes": 44935993
+  },
+  {
+   "workload_id": "c1-ml-train",
+   "run": "fixed~focus",
+   "workload_mb": 23.1,
+   "seconds": 8.9,
+   "peak_rss_mb": 445,
+   "bytes": 5318068
+  },
+  {
+   "workload_id": "c7-ml-train",
+   "run": "fixed~focus",
+   "workload_mb": 19.9,
+   "seconds": 7.7,
+   "peak_rss_mb": 396,
+   "bytes": 4559324
+  },
+  {
+   "workload_id": "c3-workday",
+   "run": "fixed~focus",
+   "workload_mb": 18.3,
+   "seconds": 25.1,
+   "peak_rss_mb": 566,
+   "bytes": 44139889
+  },
+  {
+   "workload_id": "c6-dual",
+   "run": "fixed~focus",
+   "workload_mb": 178.9,
+   "seconds": 588.2,
+   "peak_rss_mb": 9593,
+   "bytes": 347291615
+  }
+ ]
+}

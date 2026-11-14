@@ -100,13 +100,38 @@ def _in_window(t, window):
     return (start is None or t >= start) and (end is None or t <= end)
 
 
-def compute_aggregates(rows, windows=None, interactive=None):
+FRAME_CHUNK = 1 << 20          # rows per chunk when the frame consumes its rows
+
+
+def _frame_consuming(rows):
+    """`pd.DataFrame(rows)` built a chunk at a time, each chunk of rows released from the list once its frame
+    exists, so the rows and the whole frame never coexist (10.4 decision 2: c6-dual's fourteen million rows).
+    The chunks are joined in order with their columns in order of first appearance, as one frame from the whole
+    list has them; a column a chunk lacks is NaN there, as a key a row lacks is."""
+    if len(rows) <= FRAME_CHUNK:
+        df = pd.DataFrame(rows)
+        rows.clear()
+        return df
+    chunks = []
+    while rows:
+        part = rows[:FRAME_CHUNK]
+        del rows[:FRAME_CHUNK]
+        chunks.append(pd.DataFrame(part))
+        del part
+    columns = list(dict.fromkeys(c for chunk in chunks for c in chunk.columns))
+    df = pd.concat(chunks, ignore_index=True, sort=False)
+    return df[columns] if list(df.columns) != columns else df
+
+
+def compute_aggregates(rows, windows=None, interactive=None, consume=False):
     """Aggregate rows for one run. `windows`: {(entity, metric): [(start_us, end_us), …]};
-    `interactive`: {entity: latency metric}, whose rows the per-switch excess aggregates measure."""
+    `interactive`: {entity: latency metric}, whose rows the per-switch excess aggregates measure.
+    With `consume` the list of rows is emptied as it is read, its memory going to the frame (the runner's
+    records build, which writes the rows before it aggregates them)."""
     windows = windows or {}
     interactive = interactive or {}
     identity = run_identity(rows)
-    df = pd.DataFrame(rows)
+    df = _frame_consuming(rows) if consume else pd.DataFrame(rows)
     for col in ("cause", "channel", "provenance", "algorithm", "index", "period_us", "skipped", "censored"):
         if col not in df.columns:
             df[col] = np.nan

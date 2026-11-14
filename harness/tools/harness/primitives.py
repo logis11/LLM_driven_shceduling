@@ -32,6 +32,7 @@ given).
 """
 
 import bisect
+import sys
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, Iterator, List, Optional
 
@@ -72,6 +73,7 @@ class _TaskState:
     ready_on: Dict[str, int] = field(default_factory=lambda: {"timer": 0, "event": 0})   # ready(wake) lines on those channels
     timer_waits: int = 0                                        # timer-channel WAITs of the program reached so far
     dropped: set = field(default_factory=set)                   # indices of its timer wakes a wake_drop line names
+    dropped_sorted: List[int] = field(default_factory=list)     # the same indices, ascending, for drop_wake's count
     drop_guards: List[str] = field(default_factory=list)        # wake_drop lines the run file or the held wake contradicts
     after_end: Optional[tuple] = None                           # (kind,) of the WAIT next in program order at the end, read once
 
@@ -147,6 +149,11 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
 
     for ev in events:
         kind, t = ev["event"], ev["t"]
+        # one string object per task id and cause, however many lines name it: every row keeps a reference
+        # to them, and a parsed line's strings are its own (10.4 decision 2; the values are unchanged)
+        for key in ("task", "cause"):
+            if type(ev.get(key)) is str:
+                ev[key] = sys.intern(ev[key])
         if kind == "config_applied":
             if t < t_end:
                 configs.append(ev)
@@ -220,22 +227,15 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
         elif kind == "deadline":
             st.deadlines.append(ev)
         elif kind == "wake_drop":
-            # decision 5: the wake is one of the run file's timer wakes of the task, dropped because one is held —
-            # a timer wake before it, not itself dropped, whose WAIT no line has completed yet. Of the task's
-            # timer wakes at that time not yet dropped, it is the first after the held one: those before it
-            # completed a WAIT or are the held wake
-            times = run.timer_wakes.get(ev["task"], [])
-            same = [j for j in range(bisect.bisect_left(times, t), bisect.bisect_right(times, t)) if j not in st.dropped]
-            if not same:
+            j, problem = drop_wake(run.timer_wakes.get(ev["task"], []), t, st.dropped, st.dropped_sorted,
+                                   st.ready_on["timer"])
+            if problem == "unnamed":
                 st.drop_guards.append(f"task {ev['task']}: wake_drop at t={t} names no timer wake of the run file")
                 continue
-            def held(j):
-                return j - sum(1 for d in st.dropped if d < j) - st.ready_on["timer"]
-            j = next((j for j in same if held(j) >= 1), None)
-            if j is None:
+            if problem == "none_held":
                 st.drop_guards.append(f"task {ev['task']}: wake_drop at t={t} with no timer wake held")
-                j = same[-1]
             st.dropped.add(j)
+            bisect.insort(st.dropped_sorted, j)
 
     # open occupancy at T_end
     for st in tasks.values():
@@ -516,6 +516,25 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                           f"of its program, the first at t={extra[0]}")
 
     return Result(rows=rows, guards=guards, switches=switches)
+
+
+def drop_wake(times, t, dropped, dropped_sorted, timer_ready):
+    """Which of a task's timer wakes a `wake_drop` line at `t` names (decision 5 of 2026-10-31): one of the run
+    file's timer wakes at `t` (`times`, ascending), dropped because one is held — a timer wake before it, not itself
+    dropped, whose WAIT no line has completed yet. Of the task's timer wakes at that time not yet dropped, it is the
+    first after the held one: those before it completed a WAIT or are the held wake. `dropped` holds the indices
+    dropped so far, `dropped_sorted` the same ascending, `timer_ready` the task's timer-channel ready(wake) lines.
+
+    Returns (index, problem): problem None; "unnamed" (index None) when no timer wake at `t` is left; "none_held"
+    when none of them has a wake held before it, the index then the last of them. The wakes held before index j are
+    j less the drops before it (by bisection, 10.4 decision 1) less the timer lines."""
+    same = [j for j in range(bisect.bisect_left(times, t), bisect.bisect_right(times, t)) if j not in dropped]
+    if not same:
+        return None, "unnamed"
+    for j in same:
+        if j - bisect.bisect_left(dropped_sorted, j) - timer_ready >= 1:
+            return j, None
+    return same[-1], "none_held"
 
 
 def _is_hog(st, t_apply) -> bool:

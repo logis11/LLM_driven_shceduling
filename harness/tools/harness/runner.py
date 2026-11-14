@@ -20,6 +20,16 @@ manifest, and the RQ0 gate evaluator. A failed invocation leaves the run's
 outputs absent; the runner names every failed run and stops before scoring.
 Traces are asked for uncompressed in this phase (8.6 spec, decision 3).
 
+What a run keeps on disk (10.4 decisions 4–5): the trace once, gzipped, in the
+execution cache's first execution and placed in the run directory by hard link
+(`trace.jsonl.gz`); the second execution's trace as its SHA-256
+(`trace.rerun.sha256`), which the determinism guard reads; the records gzipped
+(`records.csv.gz`); the small files as they are. The trace is unpacked beside
+the records only while they are built, and removed after. Every gzip stream is
+written with no name and mtime 0, so the stored bytes are a function of the
+content alone. Each run's wall time, peak resident memory (its process and the
+programs it starts) and bytes on disk go to `run-times.csv`.
+
 The machine configuration (`Machine`, an uncommitted YAML beside
 `harness/runner.example.yaml`) names the two commands with their version
 strings, the compiled build, the boot-default files, the runs and cache
@@ -38,6 +48,7 @@ again — a restart after a crash, a second pass — is not rebuilt.
 
 import concurrent.futures
 import csv
+import gzip
 import hashlib
 import json
 import multiprocessing
@@ -46,10 +57,13 @@ import pathlib
 import pickle
 import shutil
 import subprocess
+import sys
+import threading
 import time
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional
 
+import psutil
 import yaml
 
 from . import aggregates as agg
@@ -214,21 +228,44 @@ class Invocation:
     entry: pathlib.Path         # the cache entry: first/, second/, stderr.log, stderr.rerun.log, meta.json
 
 
+_MAXRSS_UNIT = 1 if sys.platform == "darwin" else 1024      # ru_maxrss: bytes on macOS, KiB on Linux
+_child_peak = 0                                             # the largest ru_maxrss of a program this process ran
+
+
 def _execute(argv, out_dir, stderr_path):
+    global _child_peak
     out_dir.mkdir(parents=True, exist_ok=True)
     with open(stderr_path, "w", encoding="utf-8") as err:
-        proc = subprocess.run(argv, stdout=subprocess.DEVNULL, stderr=err)
+        proc = subprocess.Popen(argv, stdout=subprocess.DEVNULL, stderr=err)
+        _pid, status, usage = os.wait4(proc.pid, 0)
+        proc.returncode = os.waitstatus_to_exitcode(status)
+    _child_peak = max(_child_peak, usage.ru_maxrss * _MAXRSS_UNIT)
     return proc.returncode
+
+
+def gzip_file(src, dst):
+    """`src` gzipped to `dst`: no name and mtime 0 in the header, so the bytes are the content's alone."""
+    with open(src, "rb") as fin, open(dst, "wb") as raw, \
+            gzip.GzipFile(filename="", mode="wb", fileobj=raw, compresslevel=6, mtime=0) as out:
+        shutil.copyfileobj(fin, out, 1 << 20)
+
+
+def gunzip_file(src, dst):
+    with gzip.open(src, "rb") as fin, open(dst, "wb") as out:
+        shutil.copyfileobj(fin, out, 1 << 20)
 
 
 def invoke(program: Program, role: str, cache_dir, condition: str, seed: str,
            inputs: Dict[str, pathlib.Path], outputs: Dict[str, pathlib.Path], stderr_log,
-           with_condition: bool = True, telemetry: str = "") -> Invocation:
+           with_condition: bool = True, telemetry: str = "", packed=()) -> Invocation:
     """Run `program` for one run, twice, through the invocation contract, or
     serve it from the cache; copy the first execution's outputs to `outputs`
     and its stderr to `stderr_log`. `inputs` and `outputs` map flag names
     (without dashes) to paths. `telemetry`, the daemon's shape flag (9.17), is
-    passed when given and is part of the key."""
+    passed when given and is part of the key. An output whose file name is in
+    `packed` is kept in the entry as `first/<name>.gz` and `second/<name>.sha256`
+    once the two executions are shown byte-identical, and is not copied out:
+    the caller reads it from the entry (`packed_output`, `packed_rerun_sha256`)."""
     cache_dir = pathlib.Path(cache_dir)
     key = cache_key(program, role, condition, seed, inputs, telemetry)
     entry = cache_dir / key
@@ -261,10 +298,16 @@ def invoke(program: Program, role: str, cache_dir, condition: str, seed: str,
                         raise RunError(f"{role} exit 0 but did not write {pathlib.Path(path).name}")
             for path in outputs.values():
                 name = pathlib.Path(path).name
-                if (tmp / "first" / name).read_bytes() != (tmp / "second" / name).read_bytes():
+                second = _sha256(tmp / "second" / name)
+                if _sha256(tmp / "first" / name) != second:
                     shutil.copy(tmp / "stderr.log", stderr_log)
                     raise RunError(f"{role}: {name} is not byte-identical across the two executions "
                                    f"(contract 10, determinism)")
+                if name in packed:
+                    gzip_file(tmp / "first" / name, tmp / "first" / f"{name}.gz")
+                    (tmp / "first" / name).unlink()
+                    (tmp / "second" / f"{name}.sha256").write_text(second + "\n")
+                    (tmp / "second" / name).unlink()
             (tmp / "meta.json").write_text(json.dumps(
                 {"program": role, "version": program.version, "command": list(program.command),
                  "condition": condition, "seed": seed, "telemetry": telemetry,
@@ -279,10 +322,42 @@ def invoke(program: Program, role: str, cache_dir, condition: str, seed: str,
         cached = True
     for path in outputs.values():
         path = pathlib.Path(path)
+        if path.name in packed:
+            continue
         path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(entry / "first" / path.name, path)
     shutil.copy(entry / "stderr.log", stderr_log)
     return Invocation(key=key, cached=cached, entry=entry)
+
+
+def packed_output(entry: pathlib.Path, name: str) -> pathlib.Path:
+    """The first execution's gzipped output in a cache entry. An entry written before 10.4 holds it unpacked; it
+    is packed in place then, its second execution reduced to the hash, so every entry ends in one form."""
+    gz = entry / "first" / f"{name}.gz"
+    if not gz.is_file():
+        raw = entry / "first" / name
+        if not raw.is_file():
+            raise RunError(f"cache entry {entry.name} holds no {name}")
+        tmp = gz.with_name(f".{gz.name}.{os.getpid()}")
+        gzip_file(raw, tmp)
+        tmp.replace(gz)
+        packed_rerun_sha256(entry, name)
+        raw.unlink(missing_ok=True)
+    return gz
+
+
+def packed_rerun_sha256(entry: pathlib.Path, name: str) -> str:
+    """The second execution's output's SHA-256 in a cache entry (an entry from before 10.4 hashed and reduced)."""
+    path = entry / "second" / f"{name}.sha256"
+    if not path.is_file():
+        raw = entry / "second" / name
+        if not raw.is_file():
+            raise RunError(f"cache entry {entry.name} holds no rerun {name}")
+        tmp = path.with_name(f".{path.name}.{os.getpid()}")
+        tmp.write_text(_sha256(raw) + "\n")
+        tmp.replace(path)
+        raw.unlink(missing_ok=True)
+    return path.read_text().strip()
 
 
 def _publish(tmp: pathlib.Path, entry: pathlib.Path):
@@ -297,7 +372,8 @@ def _publish(tmp: pathlib.Path, entry: pathlib.Path):
 
 
 def _trace_sim(path) -> str:
-    with open(path, "r", encoding="utf-8") as f:
+    opener = gzip.open if str(path).endswith(".gz") else open
+    with opener(path, "rt", encoding="utf-8") as f:
         head = json.loads(f.readline())
     return str(head.get("sim", ""))
 
@@ -323,7 +399,8 @@ def harness_version() -> str:
     return h.hexdigest()
 
 
-RESULT_FILES = ("records.csv", "records-messages.json", "recognition-records.csv")
+RESULT_FILES = ("records.csv.gz", "records-messages.json", "recognition-records.csv")
+RUN_FILES = ("schedule.json", "log.json", "trace.jsonl.gz", "trace.rerun.sha256", "trace.jsonl", "records.csv")
 
 
 def result_key(ctx: RunContext, run: RunSpec, daemon_key: str, simulator_key: str) -> str:
@@ -353,47 +430,149 @@ def process_run(run: RunSpec, ctx: RunContext) -> dict:
     under `result_key`, the records files placed in the run directory as if built. Returns a dict with
     `aggregates`, `messages`, `grade_rows`, `executed`, `cached`, `results_cached` and `seconds`, or
     `failure` with the reason when an invocation or a reader failed (the run's outputs then removed).
+    Beside them `peak_rss` (bytes: the largest resident set of this process and the programs it started,
+    sampled, or a program's own peak where larger) and `bytes` (the run directory and the cache entries the
+    run reads, each file once however many links it has).
     The cache entry is a pickle the runner wrote itself; nothing else writes into the cache directory."""
     t0 = time.time()
     machine = ctx.machine
     run_dir = ctx.exp_dir / run.workload_id / run.name
     run_dir.mkdir(parents=True, exist_ok=True)
     run_table = run.table_file or ctx.table_path                 # 10.1: an alternative table's run reads its own
+    sampler = _PeakRSS()
     try:
-        d = invoke(machine.daemon, "daemon", machine.cache_dir, run.condition, run.seed,
-                   inputs={"workload": run.workload_file, "driver-table": run_table,
-                           "boot-default": run.boot_file},
-                   outputs={"out-schedule": run_dir / "schedule.json", "out-log": run_dir / "log.json"},
-                   stderr_log=run_dir / "daemon.stderr.log", telemetry=run.telemetry)
-        s = invoke(machine.simulator, "simulator", machine.cache_dir, run.condition, run.seed,
-                   inputs={"workload": run.workload_file, "schedule": run_dir / "schedule.json"},
-                   outputs={"out-trace": run_dir / "trace.jsonl"},
-                   stderr_log=run_dir / "simulator.stderr.log", with_condition=False)
-        shutil.copy(s.entry / "second" / "trace.jsonl", run_dir / "trace.rerun.jsonl")
-        sim = _trace_sim(run_dir / "trace.jsonl")
-        if sim != machine.simulator.version:
-            raise RunError(f"trace header names simulator {sim!r}, the machine configuration "
-                           f"{machine.simulator.version!r}")
-        for name in RESULT_FILES:
-            (run_dir / name).unlink(missing_ok=True)
-        entry = machine.cache_dir / "results" / result_key(ctx, run, d.key, s.key)
-        if (entry / "result.pickle").is_file():
-            with open(entry / "result.pickle", "rb") as f:
-                kept = pickle.load(f)
-            for name in RESULT_FILES:
-                if (entry / name).is_file():
-                    _place(entry / name, run_dir / name)
-            from_cache = True
-        else:
-            kept = _build_results(run, ctx, run_dir, run_table)
-            _store_results(entry, run_dir, kept)
-            from_cache = False
+        with sampler:
+            d = invoke(machine.daemon, "daemon", machine.cache_dir, run.condition, run.seed,
+                       inputs={"workload": run.workload_file, "driver-table": run_table,
+                               "boot-default": run.boot_file},
+                       outputs={"out-schedule": run_dir / "schedule.json", "out-log": run_dir / "log.json"},
+                       stderr_log=run_dir / "daemon.stderr.log", telemetry=run.telemetry)
+            s = invoke(machine.simulator, "simulator", machine.cache_dir, run.condition, run.seed,
+                       inputs={"workload": run.workload_file, "schedule": run_dir / "schedule.json"},
+                       outputs={"out-trace": run_dir / "trace.jsonl"},
+                       stderr_log=run_dir / "simulator.stderr.log", with_condition=False, packed=("trace.jsonl",))
+            for name in RESULT_FILES + RUN_FILES[2:]:
+                (run_dir / name).unlink(missing_ok=True)
+            _place(packed_output(s.entry, "trace.jsonl"), run_dir / "trace.jsonl.gz")
+            (run_dir / "trace.rerun.sha256").write_text(packed_rerun_sha256(s.entry, "trace.jsonl") + "\n")
+            sim = _trace_sim(run_dir / "trace.jsonl.gz")
+            if sim != machine.simulator.version:
+                raise RunError(f"trace header names simulator {sim!r}, the machine configuration "
+                               f"{machine.simulator.version!r}")
+            entry = machine.cache_dir / "results" / result_key(ctx, run, d.key, s.key)
+            if (entry / "result.pickle").is_file():
+                with open(entry / "result.pickle", "rb") as f:
+                    kept = pickle.load(f)
+                for name in RESULT_FILES:
+                    if (entry / name).is_file():
+                        _place(entry / name, run_dir / name)
+                from_cache = True
+            else:
+                gunzip_file(run_dir / "trace.jsonl.gz", run_dir / "trace.jsonl")   # read by the records build alone
+                try:
+                    kept = _build_results(run, ctx, run_dir, run_table)
+                finally:
+                    (run_dir / "trace.jsonl").unlink(missing_ok=True)
+                _store_results(entry, run_dir, kept)
+                from_cache = False
         return {**kept, "executed": int(not d.cached) + int(not s.cached), "cached": int(d.cached) + int(s.cached),
-                "results_cached": from_cache, "seconds": round(time.time() - t0, 1)}
+                "results_cached": from_cache, "seconds": round(time.time() - t0, 1),
+                "peak_rss": sampler.peak, "bytes": _bytes_on_disk([run_dir, d.entry, s.entry, entry])}
     except (RunError, ValueError, OSError) as exc:
-        for name in ("schedule.json", "log.json", "trace.jsonl", "trace.rerun.jsonl") + RESULT_FILES:
+        for name in RUN_FILES + RESULT_FILES:
             (run_dir / name).unlink(missing_ok=True)
         return {"failure": str(exc)}
+
+
+def _footprint(proc) -> int:
+    """A process's memory as the system counts it against the machine: on macOS its physical footprint
+    (`proc_pid_rusage`'s `ri_phys_footprint`, what Activity Monitor and `top` show as its memory), which keeps
+    the pages the system compressed or swapped out — its resident set leaves them out, and a records build past
+    the machine's memory shows a few tens of MB resident while it holds gigabytes; elsewhere the resident set."""
+    if _libproc is not None:
+        info = _RusageInfoV2()
+        if _libproc.proc_pid_rusage(proc.pid, 2, ctypes.byref(info)) == 0:
+            return int(info.ri_phys_footprint)
+    return proc.memory_info().rss
+
+
+if sys.platform == "darwin":
+    import ctypes
+    import ctypes.util
+
+    class _RusageInfoV2(ctypes.Structure):
+        _fields_ = [("ri_uuid", ctypes.c_uint8 * 16)] + [(name, ctypes.c_uint64) for name in (
+            "ri_user_time", "ri_system_time", "ri_pkg_idle_wkups", "ri_interrupt_wkups", "ri_pageins",
+            "ri_wired_size", "ri_resident_size", "ri_phys_footprint", "ri_proc_start_abstime",
+            "ri_proc_exit_abstime", "ri_child_user_time", "ri_child_system_time", "ri_child_pkg_idle_wkups",
+            "ri_child_interrupt_wkups", "ri_child_pageins", "ri_child_elapsed_abstime", "ri_diskio_bytesread",
+            "ri_diskio_byteswritten")]
+
+    try:
+        _libproc = ctypes.CDLL(ctypes.util.find_library("proc") or "/usr/lib/libproc.dylib")
+        _libproc.proc_pid_rusage.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_void_p]
+    except OSError:
+        _libproc = None
+else:
+    _libproc = None
+
+
+class _PeakRSS:
+    """The largest memory of this process and its descendants together while the block runs (`_footprint`),
+    sampled every `interval` seconds, raised to any program's own peak resident set (`ru_maxrss` from
+    `os.wait4`) added to this process's memory when the block began, where that is larger."""
+
+    def __init__(self, interval=0.02):
+        self.interval = interval
+        self.peak = 0
+        self._stop = threading.Event()
+
+    def _sample(self):
+        me = psutil.Process()
+        while True:
+            total = 0
+            try:
+                total = _footprint(me)
+                for child in me.children(recursive=True):
+                    try:
+                        total += _footprint(child)
+                    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                        pass
+            except psutil.Error:
+                pass
+            self.peak = max(self.peak, total)
+            if self._stop.wait(self.interval):
+                return
+
+    def __enter__(self):
+        global _child_peak
+        _child_peak = 0
+        self._base = _footprint(psutil.Process())
+        self._thread = threading.Thread(target=self._sample, daemon=True)
+        self._thread.start()
+        return self
+
+    def __exit__(self, *exc):
+        self._stop.set()
+        self._thread.join()
+        self.peak = max(self.peak, self._base + _child_peak)
+        return False
+
+
+def _bytes_on_disk(dirs) -> int:
+    """The bytes of every file under `dirs`, a file with several links counted once."""
+    seen, total = set(), 0
+    for d in dirs:
+        for path in pathlib.Path(d).rglob("*"):
+            try:
+                st = path.lstat()
+            except OSError:
+                continue
+            if not path.is_file() or (st.st_dev, st.st_ino) in seen:
+                continue
+            seen.add((st.st_dev, st.st_ino))
+            total += st.st_size
+    return total
 
 
 def _build_results(run: RunSpec, ctx: RunContext, run_dir: pathlib.Path, run_table: pathlib.Path) -> dict:
@@ -402,10 +581,11 @@ def _build_results(run: RunSpec, ctx: RunContext, run_dir: pathlib.Path, run_tab
     rows, messages = records.build(run.workload_file, run_dir / "trace.jsonl", table=run.table,
                                    seed=run.seed, schedule_path=run_dir / "schedule.json",
                                    boot_default=run.boot_default, telemetry=run.telemetry)
-    records.write_csv(rows, run_dir / "records.csv")
+    records.write_csv(rows, run_dir / "records.csv.gz")          # 10.4 decision 5: gzipped as written
     (run_dir / "records-messages.json").write_text(json.dumps(messages, indent=1) + "\n")
     aggregates = agg.compute_aggregates(rows, scoring.windows_from_spec(ctx.scoring_spec, run.workload_id),
-                                        scoring.interactive_from_spec(ctx.scoring_spec, run.workload_id))
+                                        scoring.interactive_from_spec(ctx.scoring_spec, run.workload_id),
+                                        consume=True)          # the rows are written: the frame takes their memory
     del rows
     grade_rows_run = []
     if run.condition != "fixed":
@@ -558,6 +738,7 @@ def run_experiment(spec_path, machine: Machine, root,
     ctx = RunContext(machine=machine, exp_dir=exp_dir, table_path=table_path, scoring_spec=scoring_spec,
                      harness=harness_version())
     times = []
+    stages = [("runs", time.time())]                 # each stage's start, for stage-times.csv (10.4)
     for run, out in run_all(runs, ctx, progress):
         if "failure" in out:
             result.failed.append(Failure(run=f"{run.workload_id}/{run.name}", reason=out["failure"]))
@@ -565,13 +746,14 @@ def run_experiment(spec_path, machine: Machine, root,
         result.executed += out["executed"]
         result.cached += out["cached"]
         result.results_cached += int(out["results_cached"])
-        times.append((run.workload_id, run.name, out["seconds"], "cache" if out["results_cached"] else "built"))
+        times.append((run.workload_id, run.name, out["seconds"], "cache" if out["results_cached"] else "built",
+                      round(out["peak_rss"] / (1 << 20)), out["bytes"]))
         built[run.identity] = {"run": run, "dir": exp_dir / run.workload_id / run.name,
                                "aggregates": out["aggregates"], "messages": out["messages"],
                                "grade_rows": out["grade_rows"]}
-    with open(exp_dir / "run-times.csv", "w", newline="", encoding="utf-8") as f:   # wall seconds per run, for cost
+    with open(exp_dir / "run-times.csv", "w", newline="", encoding="utf-8") as f:   # per run, for cost (10.4)
         w = csv.writer(f, lineterminator="\n")
-        w.writerow(["workload_id", "run", "seconds", "records"])
+        w.writerow(["workload_id", "run", "seconds", "records", "peak_rss_mb", "bytes"])
         w.writerows(sorted(times))
     order = {f"{r.workload_id}/{r.name}": k for k, r in enumerate(runs)}
     result.failed.sort(key=lambda f: order[f.run])                 # matrix order, however the runs finished
@@ -582,34 +764,37 @@ def run_experiment(spec_path, machine: Machine, root,
     (exp_dir / "failures.json").unlink(missing_ok=True)
 
     # aggregates and scores
+    stages.append(("aggregates and scores", time.time()))
     agg_rows = [row for _identity, b in sorted(built.items()) for row in b["aggregates"]]
     write_csv(agg_rows, agg.COLUMNS, exp_dir / "aggregates.csv")
     term_rows, file_rows = scorer.score(agg_rows, scoring_spec)
     write_csv(term_rows + file_rows, scorer.COLUMNS, exp_dir / "scores.csv")
 
     # guards, through the manifest the guards command reads
+    stages.append(("guards", time.time()))
     manifest = {"aggregates": str(exp_dir / "aggregates.csv"), "scoring_spec": str(scoring_path), "runs": []}
     guard_runs = []
     for identity, b in sorted(built.items()):
         run, run_dir = b["run"], b["dir"]
         entry = {"workload_id": run.workload_id, "condition": run.condition, "table": run.table,
                  "seed": run.seed, "boot_default": run.boot_default, "telemetry": run.telemetry,
-                 "records": str(run_dir / "records.csv"), "schedule": str(run_dir / "schedule.json"),
+                 "records": str(run_dir / "records.csv.gz"), "schedule": str(run_dir / "schedule.json"),
                  "log": str(run_dir / "log.json"), "workload": str(run.workload_file),
-                 "rerun_trace": str(run_dir / "trace.rerun.jsonl"), "trace": str(run_dir / "trace.jsonl"),
+                 "rerun_trace": str(run_dir / "trace.rerun.sha256"), "trace": str(run_dir / "trace.jsonl.gz"),
                  "guard_messages": b["messages"]}
         manifest["runs"].append(entry)
         guard_runs.append(guards.Run(workload_id=run.workload_id, condition=run.condition, table=run.table,
                                      seed=run.seed, boot_default=run.boot_default,
-                                     records=run_dir / "records.csv", schedule=run_dir / "schedule.json",
+                                     records=run_dir / "records.csv.gz", schedule=run_dir / "schedule.json",
                                      log=run_dir / "log.json", workload=run.workload_file,
-                                     rerun_trace=run_dir / "trace.rerun.jsonl", guard_messages=b["messages"],
-                                     trace=run_dir / "trace.jsonl", telemetry=run.telemetry))
+                                     rerun_trace=run_dir / "trace.rerun.sha256", guard_messages=b["messages"],
+                                     trace=run_dir / "trace.jsonl.gz", telemetry=run.telemetry))
     (exp_dir / "guards-manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
     guard_rows = guards.evaluate(guard_runs, guards.load_spec(guard_spec_path), agg_rows, scoring_spec)
     write_csv(guard_rows, guards.COLUMNS, exp_dir / "guards.csv")
 
     # grades, through the grade command's manifest, over every recognizing run
+    stages.append(("grades", time.time()))
     gmanifest = {"driver_table": str(table_path),
                  "bootstrap": {"seed": grader.BOOTSTRAP_SEED, "repetitions": grader.BOOTSTRAP_REPETITIONS},
                  "runs": []}
@@ -629,16 +814,39 @@ def run_experiment(spec_path, machine: Machine, root,
     write_csv(grades, grader.COLUMNS, exp_dir / "grades.csv")
 
     # the verdict
+    stages.append(("report", time.time()))
     report = evaluator.evaluate(spec_path, exp_dir / "aggregates.csv", exp_dir / "scores.csv",
                                 exp_dir / "guards.csv", exp_dir / "grades.csv", root)
     evaluator.validate_report(report)
     evaluator.write_report(report, exp_dir / "report.json")
     (exp_dir / "report.md").write_text(evaluator.render(report), encoding="utf-8")
+    stages.append(("end", time.time()))
+    with open(exp_dir / "stage-times.csv", "w", newline="", encoding="utf-8") as f:   # wall seconds per stage, for cost
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow(["stage", "seconds", "runs"])
+        for (name, t0), (_next, t1) in zip(stages, stages[1:]):
+            w.writerow([name, round(t1 - t0, 1), len(runs)])
     result.report = report
     return result
 
 
 # ------------------------------------------------------------------ smoke
+
+def write_seed_copy(spec_path, path, seed_count: int, experiment: str, machine: Machine, root) -> pathlib.Path:
+    """A throwaway copy of a committed experiment spec with its seed count and experiment name replaced and
+    nothing else (10.4 decision 9: the cold smoke is the RQ0 gate spec's run list at seed count 2). Linted
+    before it is returned; never committed."""
+    doc = yaml.safe_load(pathlib.Path(spec_path).read_text())
+    doc["seed_count"] = int(seed_count)
+    doc["experiment"] = experiment
+    path = pathlib.Path(path)
+    path.write_text(f"# throwaway copy of {pathlib.Path(spec_path).name} at seed count {seed_count} — generated by "
+                    "harness/tools/harness/runner.py, never committed\n" + yaml.safe_dump(doc, sort_keys=False))
+    errors = evaluator.lint_spec(path, evaluator.SPEC_SCHEMA, machine.build_dir, root)
+    if errors:
+        raise RunError("the seed-count copy does not lint: " + "; ".join(errors))
+    return path
+
 
 def write_smoke_spec(path, machine: Machine, root, files=None, experiment="smoke", only=None) -> pathlib.Path:
     """A throwaway experiment spec over the compiled coreset for the pipeline
@@ -684,5 +892,6 @@ def write_smoke_spec(path, machine: Machine, root, files=None, experiment="smoke
 
 
 __all__ = ["Failure", "Invocation", "Machine", "Program", "Result", "RunContext", "RunError", "RunSpec",
-           "cache_key", "expand", "harness_version", "invoke", "is_heavy", "load_machine", "process_run",
+           "cache_key", "expand", "gunzip_file", "gzip_file", "harness_version", "invoke", "is_heavy",
+           "load_machine", "packed_output", "packed_rerun_sha256", "process_run", "write_seed_copy",
            "program_pin_errors", "result_key", "run_all", "run_experiment", "write_smoke_spec"]

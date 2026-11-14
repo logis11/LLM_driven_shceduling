@@ -3,7 +3,9 @@ through contract 10 with both programs executed twice, the execution cache,
 the run directories and manifests, and the pipeline through the report on a
 handful of coreset files via the generated smoke spec."""
 
+import hashlib
 import json
+import os
 import subprocess
 import sys
 import textwrap
@@ -174,10 +176,17 @@ def test_the_pipeline_runs_a_handful_of_files_through_to_the_report(tmp_path):
         assert (exp / name).exists(), name
     wid = doc["files"]["judging"][0]
     run_dir = exp / wid / "random-1~focus"   # <condition>-<seed>~<shape> (9.17); the smoke spec's one shape is focus
-    for name in ("schedule.json", "log.json", "trace.jsonl", "trace.rerun.jsonl", "daemon.stderr.log",
-                 "simulator.stderr.log", "records.csv", "recognition-records.csv"):
+    for name in ("schedule.json", "log.json", "trace.jsonl.gz", "trace.rerun.sha256", "daemon.stderr.log",
+                 "simulator.stderr.log", "records.csv.gz", "recognition-records.csv"):
         assert (run_dir / name).exists(), name
-    assert not list(run_dir.glob("*.gz"))
+    # 10.4 decision 5: the trace once, gzipped, the rerun as its hash, the records gzipped; nothing unpacked left
+    assert not (run_dir / "trace.jsonl").exists() and not (run_dir / "records.csv").exists()
+    import gzip
+    raw = gzip.decompress((run_dir / "trace.jsonl.gz").read_bytes())
+    assert (run_dir / "trace.rerun.sha256").read_text().strip() == hashlib.sha256(raw).hexdigest()
+    entry = next(p.parent.parent for p in machine.cache_dir.glob("*/first/trace.jsonl.gz")
+                 if os.path.samefile(p, run_dir / "trace.jsonl.gz"))
+    assert sorted(x.name for x in (entry / "second").iterdir()) == ["trace.jsonl.sha256"]
     guard_rows = read_csv(exp / "guards.csv", guards_mod.COLUMNS)
     det = [r for r in guard_rows if r["guard"] == "determinism"]
     assert det and all(r["result"] == "pass" for r in det)
@@ -317,7 +326,8 @@ def test_the_smoke_spec_takes_named_files(tmp_path):
 # ------------------------------------------------- runs at once, the results cache
 
 COMPARED = ("aggregates.csv", "scores.csv", "guards.csv", "grades.csv", "report.json", "report.md")
-PER_RUN = ("schedule.json", "log.json", "trace.jsonl", "records.csv", "records-messages.json", "recognition-records.csv")
+PER_RUN = ("schedule.json", "log.json", "trace.jsonl.gz", "trace.rerun.sha256", "records.csv.gz",
+           "records-messages.json", "recognition-records.csv")
 
 
 def _outputs(exp):
@@ -345,7 +355,10 @@ def test_runs_spread_over_processes_write_the_same_files_as_runs_one_at_a_time(t
     assert first.results_cached == second.results_cached == light.results_cached == 0   # three caches, all built
     assert _outputs(one.runs_dir / exp) == _outputs(many.runs_dir / exp) == _outputs(third.runs_dir / exp)
     times = (many.runs_dir / exp / "run-times.csv").read_text().splitlines()
-    assert times[0] == "workload_id,run,seconds,records" and len(times) == 1 + 3 * 4
+    assert times[0] == "workload_id,run,seconds,records,peak_rss_mb,bytes" and len(times) == 1 + 3 * 4
+    for line in times[1:]:                                        # 10.4 decision 7: memory and bytes per run
+        peak_mb, size = (int(x) for x in line.split(",")[4:])
+        assert peak_mb > 10 and size > 0
 
 
 @pytest.mark.slow
@@ -360,7 +373,7 @@ def test_a_run_met_again_is_served_from_the_results_cache_until_the_harness_chan
     assert again.results_cached == 4 and again.report == first.report       # fixed, oracle, two random seeds
     assert _outputs(exp) == built
     for run_dir in exp.glob("*/*"):                                          # the records placed as if built
-        assert (run_dir / "records.csv").is_file()
+        assert (run_dir / "records.csv.gz").is_file()
     import harness.runner as runner_mod
     monkeypatch.setattr(runner_mod, "harness_version", lambda: "another harness")
     rebuilt = run_experiment(spec, machine, REPO)
@@ -387,3 +400,49 @@ def test_the_machine_configuration_names_its_workers(tmp_path):
     path.write_text(yaml.safe_dump(doc))
     m = load_machine(path, REPO)
     assert (m.workers, m.heavy_workers, m.heavy_mb) == (6, 2, 40)
+
+
+
+# ------------------------------------------------------------- 10.4: what a run keeps
+
+def test_a_packed_output_is_kept_gzipped_with_its_rerun_as_a_hash_and_not_copied_out(tmp_path):
+    import gzip
+    from harness.runner import packed_output, packed_rerun_sha256
+    program, calls = _fake(tmp_path, "stable")
+    wl = tmp_path / "w.json"
+    wl.write_text("{}")
+    out = tmp_path / "run"
+    inv = invoke(program, "simulator", tmp_path / "cache", "fixed", "", inputs={"workload": wl},
+                 outputs={"out-a": out / "a.txt", "out-b": out / "b.txt"}, stderr_log=out / "stderr.log",
+                 packed=("a.txt",))
+    assert not (out / "a.txt").exists() and (out / "b.txt").read_text() == "b\n"
+    assert sorted(x.name for x in (inv.entry / "first").iterdir()) == ["a.txt.gz", "b.txt"]
+    assert sorted(x.name for x in (inv.entry / "second").iterdir()) == ["a.txt.sha256", "b.txt"]
+    gz = packed_output(inv.entry, "a.txt")
+    assert gzip.decompress(gz.read_bytes()) == b"stable\n"
+    assert packed_rerun_sha256(inv.entry, "a.txt") == hashlib.sha256(b"stable\n").hexdigest()
+    assert gz.read_bytes()[4:8] == b"\0\0\0\0"                     # mtime 0: the bytes are the content's alone
+
+
+def test_an_entry_from_before_the_storage_change_is_packed_in_place_when_read(tmp_path):
+    from harness.runner import packed_output, packed_rerun_sha256
+    entry = tmp_path / "entry"
+    for which in ("first", "second"):
+        (entry / which).mkdir(parents=True)
+        (entry / which / "trace.jsonl").write_text("line\n")
+    gz = packed_output(entry, "trace.jsonl")
+    assert gz.name == "trace.jsonl.gz" and not (entry / "first" / "trace.jsonl").exists()
+    assert packed_rerun_sha256(entry, "trace.jsonl") == hashlib.sha256(b"line\n").hexdigest()
+    assert not (entry / "second" / "trace.jsonl").exists()
+
+
+def test_gzipped_records_read_back_as_the_plain_ones(tmp_path):
+    import gzip
+    from harness import records
+    d = REPO / "harness" / "tools" / "tests" / "fixtures" / "mock-office"
+    rows, _ = records.build(d / "run.json", d / "trace.jsonl")
+    records.write_csv(rows, tmp_path / "records.csv")
+    records.write_csv(rows, tmp_path / "records.csv.gz")
+    assert gzip.decompress((tmp_path / "records.csv.gz").read_bytes()) == (tmp_path / "records.csv").read_bytes()
+    assert records.read_csv(tmp_path / "records.csv.gz") == records.read_csv(tmp_path / "records.csv")
+    assert records.read_first(tmp_path / "records.csv.gz") == records.read_csv(tmp_path / "records.csv")[0]

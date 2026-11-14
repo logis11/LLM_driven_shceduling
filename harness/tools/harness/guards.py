@@ -13,9 +13,10 @@ run. `not_applicable` is reserved for a run the guard's scope excludes by
 construction (its condition is not in `applies_to`; a non-C2 file for the pair
 check; a `fixed` run of a pair whose events differ).
 
-Inputs per run (`Run`): its records file (identity and the trace hash), the
-config schedule, the recognition log, the compiled workload (ground truth), an
-optional rerun trace, the trace itself (the pair check hashes its body, header
+Inputs per run (`Run`): its records file (identity and the trace hash, read from
+its first row; plain or gzipped), the config schedule, the recognition log, the
+compiled workload (ground truth), an optional rerun trace (or its SHA-256 in a
+`.sha256` file, as the runner keeps it), the trace itself (the pair check hashes its body, header
 left out, since the header names the workload), and the primitives' guard
 messages the records build returned. The aggregates rows are passed once for the set. Exemptions are
 per-experiment data (the RQ0 gate spec), never here.
@@ -120,6 +121,13 @@ def _sha256(path) -> str:
     return h.hexdigest()
 
 
+def _rerun_sha256(path) -> str:
+    """The rerun trace's SHA-256: read from a `.sha256` file, as the runner keeps it (10.4 decision 5), else hashed."""
+    if str(path).endswith(".sha256"):
+        return pathlib.Path(path).read_text().split()[0]
+    return _sha256(path)
+
+
 def _body_sha256(path) -> str:
     """The trace's hash with its header line left out: the header names the
     workload, so two files' traces could never be byte-identical as wholes.
@@ -190,7 +198,7 @@ def starvation_floor(run, ctx, params):
 def determinism(run, ctx, params):
     if run.rerun_trace is None:
         return _fail("no rerun trace recorded; the run has not been shown deterministic")
-    rerun = _sha256(run.rerun_trace)
+    rerun = _rerun_sha256(run.rerun_trace)
     if rerun != ctx["sha256"]:
         return _fail(f"trace {ctx['sha256']} differs from its rerun {rerun}", partner=rerun)
     return _pass(partner=rerun)
@@ -338,10 +346,9 @@ def evaluate(runs, spec, aggregates, scoring_spec=None):
     for run in runs:
         if run.identity in by_identity:
             raise GuardError(f"run {run.identity} listed twice")
-        rows = rec.read_csv(run.records)
-        if not rows:
+        first = rec.read_first(run.records)
+        if first is None:
             raise GuardError(f"{run.records}: empty records file")
-        first = rows[0]
         found = tuple(str(first.get(k, "")) for k in IDENTITY)
         if found != run.identity:
             raise GuardError(f"{run.records}: records identity {found} != manifest {run.identity}")

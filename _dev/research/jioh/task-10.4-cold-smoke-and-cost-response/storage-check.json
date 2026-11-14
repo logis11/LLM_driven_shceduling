@@ -1,0 +1,443 @@
+{
+ "experiment_files": {
+  "aggregates.csv": {
+   "sha256": "74b67dbb78996f1f8bdb48ff42b07902b03ce5b2a8d73bbbf331de6d04514d40",
+   "identical": true
+  },
+  "scores.csv": {
+   "sha256": "f20358f937d38758b692cf299732a6f82b6b23f8cdd936a7f180c56b91ca027e",
+   "identical": true
+  },
+  "guards.csv": {
+   "sha256": "cd4475515df9087988099332489a4b2746fae88b52b809add496cbcbc97bfdae",
+   "identical": true
+  },
+  "grades.csv": {
+   "sha256": "fa6b6a2df6f6ae14265ced1b88b943c36e64981235cd8c9851f070698bc25eb8",
+   "identical": true
+  },
+  "report.md": {
+   "sha256": "35a75dfad6c59acccb82f600e33a867492e6803a4c288f35e3affa3c986f42c4",
+   "identical": true
+  },
+  "report.json": {
+   "identical_but_spec_sha256": true
+  }
+ },
+ "runs": [
+  {
+   "run": "c1-compile/fixed~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true
+   },
+   "run_dir_bytes_old": 177416998,
+   "run_dir_bytes_new": 6466418
+  },
+  {
+   "run": "c1-compile/oracle~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 176004062,
+   "run_dir_bytes_new": 6473650
+  },
+  {
+   "run": "c1-compile/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 198977525,
+   "run_dir_bytes_new": 7027744
+  },
+  {
+   "run": "c1-compile/random-2~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 176350691,
+   "run_dir_bytes_new": 6476474
+  },
+  {
+   "run": "c1-gaming/fixed~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true
+   },
+   "run_dir_bytes_old": 58145828,
+   "run_dir_bytes_new": 2105024
+  },
+  {
+   "run": "c1-gaming/oracle~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 54956212,
+   "run_dir_bytes_new": 1906322
+  },
+  {
+   "run": "c1-gaming/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 55047725,
+   "run_dir_bytes_new": 1905656
+  },
+  {
+   "run": "c1-gaming/random-2~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 58841120,
+   "run_dir_bytes_new": 2108777
+  },
+  {
+   "run": "c1-office/fixed~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true
+   },
+   "run_dir_bytes_old": 2754489,
+   "run_dir_bytes_new": 95612
+  },
+  {
+   "run": "c1-office/oracle~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 2797085,
+   "run_dir_bytes_new": 98041
+  },
+  {
+   "run": "c1-office/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 2749018,
+   "run_dir_bytes_new": 94217
+  },
+  {
+   "run": "c1-office/random-2~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 2803784,
+   "run_dir_bytes_new": 97995
+  },
+  {
+   "run": "c1-photo/fixed~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true
+   },
+   "run_dir_bytes_old": 464993,
+   "run_dir_bytes_new": 17782
+  },
+  {
+   "run": "c1-photo/oracle~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 473935,
+   "run_dir_bytes_new": 19891
+  },
+  {
+   "run": "c1-photo/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 420661,
+   "run_dir_bytes_new": 17234
+  },
+  {
+   "run": "c1-photo/random-2~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 475052,
+   "run_dir_bytes_new": 19941
+  },
+  {
+   "run": "c2-p2b/fixed~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true
+   },
+   "run_dir_bytes_old": 80318634,
+   "run_dir_bytes_new": 3003532
+  },
+  {
+   "run": "c2-p2b/oracle~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 79056502,
+   "run_dir_bytes_new": 2735859
+  },
+  {
+   "run": "c2-p2b/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 78474698,
+   "run_dir_bytes_new": 2829953
+  },
+  {
+   "run": "c2-p2b/random-2~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 74815019,
+   "run_dir_bytes_new": 2764433
+  },
+  {
+   "run": "c7-compile/fixed~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true
+   },
+   "run_dir_bytes_old": 51976241,
+   "run_dir_bytes_new": 1823591
+  },
+  {
+   "run": "c7-compile/oracle~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 62840040,
+   "run_dir_bytes_new": 2132838
+  },
+  {
+   "run": "c7-compile/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 62126914,
+   "run_dir_bytes_new": 2105318
+  },
+  {
+   "run": "c7-compile/random-2~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 60792916,
+   "run_dir_bytes_new": 2095360
+  },
+  {
+   "run": "c7-mail/fixed~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true
+   },
+   "run_dir_bytes_old": 4947059,
+   "run_dir_bytes_new": 170265
+  },
+  {
+   "run": "c7-mail/oracle~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 5033792,
+   "run_dir_bytes_new": 174911
+  },
+  {
+   "run": "c7-mail/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 4934342,
+   "run_dir_bytes_new": 168755
+  },
+  {
+   "run": "c7-mail/random-2~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "trace": true,
+    "rerun_sha256": true,
+    "schedule.json": true,
+    "log.json": true,
+    "records-messages.json": true,
+    "recognition-records.csv": true
+   },
+   "run_dir_bytes_old": 4995043,
+   "run_dir_bytes_new": 173136
+  }
+ ],
+ "identical": true
+}

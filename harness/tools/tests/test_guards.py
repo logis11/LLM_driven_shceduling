@@ -170,6 +170,21 @@ def test_determinism_fails_on_a_differing_rerun(tmp_path, spec):
     assert row["result"] == "fail" and row["partner"] == hashlib.sha256(other.read_bytes()).hexdigest()
 
 
+def test_the_guards_read_gzipped_records_and_a_rerun_kept_as_its_hash_as_the_plain_files(tmp_path, spec):
+    """10.4 decision 5: what a finished run leaves — the records gzipped, the rerun trace as its SHA-256."""
+    run, aggs = _records(tmp_path)
+    plain = evaluate([run], spec, aggs)
+    gz = tmp_path / "records.csv.gz"
+    records.write_csv(records.read_csv(run.records), gz)
+    digest = tmp_path / "trace.rerun.sha256"
+    digest.write_text(hashlib.sha256((MG / "trace.jsonl").read_bytes()).hexdigest() + "\n")
+    packed = Run(**{**run.__dict__, "records": gz, "rerun_trace": digest})
+    assert evaluate([packed], spec, aggs) == plain
+    digest.write_text("0" * 64 + "\n")
+    row = _row(evaluate([packed], spec, aggs), "determinism")
+    assert row["result"] == "fail" and row["partner"] == "0" * 64
+
+
 def test_missing_inputs_fail_with_a_reason(tmp_path, spec):
     run, aggs = _records(tmp_path)
     bare = Run(**{**run.__dict__, "rerun_trace": None, "guard_messages": None, "log": None})

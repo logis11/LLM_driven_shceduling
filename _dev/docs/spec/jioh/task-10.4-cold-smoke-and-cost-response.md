@@ -18,9 +18,9 @@ Out of scope: the RQ0 run (10.5); the variant lines reading a failed guard (10.3
 
 `held()` in `harness/tools/harness/primitives.py` counts every earlier drop for each `wake_drop` line — 92 % of `c1-compile`'s records time, 168,698 drops (`_dev/research/jioh/task-10.2-integration-gate/records-profile-c1-compile.txt`). Its replacement lands before the smoke, and the smoke measures the records path the full run uses. The Phase 10 spec's decision 5 names one response chosen from the smoke's figures; here the fix precedes the smoke, and the cost response is what the smoke's figures select after it.
 
-### 2. The pre-smoke records change is the count alone
+### 2. The pre-smoke records change is the count, the schema check and the rows' memory
 
-The rows' schema check — 7 % in the same profile — stays as it is. The smoke measures its share.
+Extended 2026-11-14. Beside the count, the rows' schema check — 18.7 of `c7-compile`'s 19.5 s records build once the count is fixed — and the memory the rows hold — `c6-dual`'s records build past 15 GB on the 16 GB home machine, swapping — change before the smoke, the records held byte for byte by decision 3's suite and its 28 runs. The smoke measures the records path after all three.
 
 ### 3. The fix is held byte for byte by three things
 

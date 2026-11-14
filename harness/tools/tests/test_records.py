@@ -8,7 +8,7 @@ import sys
 
 import pytest
 
-from conftest import MOCKS, TOOLS
+from conftest import FIXTURES, MOCKS, TOOLS
 from harness.records import COLUMNS, build, read_csv, validate_rows, write_csv
 
 IDENTITY = {                      # what the trace does not carry: table, seed
@@ -126,3 +126,102 @@ def test_cli_takes_the_config_schedule(fixture_dir, tmp_path):
                     "--schedule", str(d / "config-schedule.json"),
                     "--table", "calibrated", "--telemetry", "names", "--out", str(out)], check=True)
     assert out.read_bytes() == (d / "expected.csv").read_bytes()
+
+
+# ---- 10.4 decision 2: the schema check by signature
+
+def _walk(node):
+    if isinstance(node, dict):
+        yield node
+        for v in node.values():
+            yield from _walk(v)
+    elif isinstance(node, list):
+        for v in node:
+            yield from _walk(v)
+
+
+def test_the_signature_covers_every_field_and_bound_the_schema_names():
+    """A field or a bound added to the schema must be added to the signature: the cache is sound only while
+    the signature keeps everything the schema can reject a row on."""
+    from harness import records as rec
+    schema = rec._schema()
+    assert set(schema["properties"]) == rec.SIGNATURE_FIELDS
+    bounds = set()
+    for node in _walk(schema):
+        for k in ("minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum"):
+            if k in node:
+                bounds.add(node[k])
+        for k in ("minLength", "maxLength"):
+            if k in node:
+                assert node[k] in (0, 1), node            # a free string: empty or not
+    assert bounds <= {0, 1, 5}
+    entity_consts = {n["const"] for n in _walk(schema) if isinstance(n.get("entity"), dict)
+                     for n in [n["entity"]] if "const" in n}
+    assert entity_consts <= rec._ENTITY_CONSTS
+
+
+def test_rows_sharing_a_signature_are_all_valid_or_all_invalid():
+    import random
+    from harness import records as rec
+    import jsonschema
+    validator = jsonschema.Draft202012Validator(rec._schema())
+    base = []
+    for mock in MOCKS:
+        d = FIXTURES / mock
+        rows, _ = build(d / "run.json", d / "trace.jsonl")
+        base.extend(rows[:200])
+    rng = random.Random(1042)
+    values = [-7, -1, 0, 1, 2, 4, 5, 6, 9, 10 ** 9, "", "x", "fixed", "schedule", "lane", "recognizer", "wake",
+              "timer", "a:b", "MLFQ", True, 1.5, None]
+    rows = list(base)
+    for _ in range(4000):
+        r = dict(rng.choice(base))
+        for _k in range(rng.randint(1, 3)):
+            key = rng.choice(list(rec.SIGNATURE_FIELDS) + ["extra"])
+            v = rng.choice(values)
+            if v is None:
+                r.pop(key, None)
+            else:
+                r[key] = v
+        rows.append(r)
+    seen = {}
+    for r in rows:
+        clean = {k: v for k, v in r.items() if v not in ("", None)}
+        ok = validator.is_valid(clean)
+        sig = rec._signature(clean)
+        assert seen.setdefault(sig, ok) == ok, clean
+    assert True in seen.values() and False in seen.values()
+
+
+def test_the_schema_check_raises_on_the_first_invalid_row_as_before(tmp_path):
+    from harness import records as rec
+    d = FIXTURES / "mock-office"
+    rows, _ = build(d / "run.json", d / "trace.jsonl")
+    rec.validate_rows(rows)
+    bad = [dict(r) for r in rows]
+    bad[7]["t"] = -3
+    bad[9]["metric"] = "nope"
+    with pytest.raises(ValueError, match=r"records row 7: t: "):
+        rec.validate_rows(bad)
+
+
+def test_the_frame_built_a_chunk_at_a_time_equals_the_frame_of_the_whole_list(monkeypatch):
+    """10.4 decision 2: compute_aggregates(consume=True) frees the rows as its frame is built; same frame, same
+    aggregates, the list emptied."""
+    import pandas as pd
+    from harness import aggregates as agg
+    rows = []
+    for mock in MOCKS:
+        d = FIXTURES / mock
+        part, _ = build(d / "run.json", d / "trace.jsonl")
+        rows.extend(part)
+    monkeypatch.setattr(agg, "FRAME_CHUNK", 37)                 # chunks that split the metrics and the columns
+    whole = pd.DataFrame(rows)
+    copy = list(rows)
+    chunked = agg._frame_consuming(copy)
+    assert copy == [] and whole.equals(chunked)
+    assert list(whole.columns) == list(chunked.columns) and list(whole.dtypes) == list(chunked.dtypes)
+    d = FIXTURES / "mock-office"
+    one, _ = build(d / "run.json", d / "trace.jsonl")
+    consumed = list(one)
+    assert agg.compute_aggregates(consumed, consume=True) == agg.compute_aggregates(one) and consumed == []
