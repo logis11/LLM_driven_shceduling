@@ -116,6 +116,17 @@ def test_expected_guards_validate_against_the_schema():
     validate_rows(read_csv(MG / "expected-guards.csv", COLUMNS), GUARDS_SCHEMA)
 
 
+def test_a_run_s_aggregates_given_by_identity_guard_as_the_rows_do(tmp_path, spec):
+    """10.4 decision 14: the runner hands the guards each run's own aggregates by its identity, never the
+    experiment's whole; the rows are the same as the whole list's, other runs' rows beside them changing nothing."""
+    run, aggs = _records(tmp_path)
+    other = [{**r, "workload_id": "elsewhere"} for r in aggs]
+    asked = []
+    by_identity = evaluate([run], spec, lambda identity: asked.append(identity) or list(aggs))
+    assert by_identity == evaluate([run], spec, other + aggs) == evaluate([run], spec, aggs)
+    assert asked == [run.identity]
+
+
 def test_every_run_gets_one_row_per_guard(tmp_path, spec):
     run, aggs = _records(tmp_path)
     rows = evaluate([run], spec, aggs)

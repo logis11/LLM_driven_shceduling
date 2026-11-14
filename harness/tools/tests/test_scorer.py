@@ -53,6 +53,26 @@ def test_fixture_scores_byte_for_byte(tmp_path):
     assert out.read_bytes() == (MS / "expected-scores.csv").read_bytes()
 
 
+def test_the_index_kept_to_the_keys_the_scorer_reads_scores_as_the_rows_do():
+    """10.4 decision 14: the runner's and the floor band's index, each run's aggregates kept to its terms' keys with
+    their censored companions, every run present, scores exactly as the whole rows, under each floor too; a run
+    missing a term's aggregate is refused the same way."""
+    spec = _spec()
+    rows = _aggregate_all(sorted((MS / "records").glob("*.csv")), spec)
+    index = scorer.index_rows(rows, scorer.reads(spec), {})
+    assert set(index) == {tuple(str(r[k]) for k in scorer.IDENTITY) for r in rows}
+    assert sum(len(v) for v in index.values()) < len(rows)
+    for floors in (None, scorer.floors_for(latency_floor_us=1000), scorer.floors_for(latency_floor_us=50_000)):
+        assert scorer.score_index(index, spec, floors) == scorer.score(rows, spec, floors)
+    first_term = scorer._term_key(next(iter(spec["files"].values()))["terms"][0])
+    short = [r for r in rows if not (r["condition"] == "oracle" and (r["entity"], r["metric"], r["aggregate"]) == first_term[:3])]
+    with pytest.raises(scorer.ScoringError) as whole:
+        scorer.score(short, spec)
+    with pytest.raises(scorer.ScoringError) as kept:
+        scorer.score_index(scorer.index_rows(short, scorer.reads(spec), {}), spec)
+    assert str(kept.value) == str(whole.value)
+
+
 def test_expected_files_validate_against_their_schemas():
     validate_rows(read_csv(MS / "expected-aggregates.csv", agg.COLUMNS), AGGREGATES_SCHEMA)
     validate_rows(read_csv(MS / "expected-scores.csv", scorer.COLUMNS), SCORES_SCHEMA)

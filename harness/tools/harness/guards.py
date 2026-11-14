@@ -340,7 +340,16 @@ def _applies(params, condition):
 
 
 def evaluate(runs, spec, aggregates, scoring_spec=None):
-    """One row per (run, guard), in run-identity order then spec order."""
+    """One row per (run, guard), in run-identity order then spec order. `aggregates` is the experiment's
+    aggregate rows, grouped once by run identity, or a function from a run's identity to its own rows, in their
+    order (10.4 decision 14: the runner's, which never holds the experiment's aggregates whole)."""
+    if callable(aggregates):
+        aggregates_of = aggregates
+    else:
+        grouped = {}
+        for r in aggregates:
+            grouped.setdefault(tuple(str(r.get(k, "")) for k in IDENTITY), []).append(r)
+        aggregates_of = lambda identity: grouped.get(identity, [])   # noqa: E731
     by_identity = {}
     hashes = {}
     for run in runs:
@@ -358,8 +367,7 @@ def evaluate(runs, spec, aggregates, scoring_spec=None):
     out = []
     for run in sorted(runs, key=lambda r: r.identity):
         ctx = {
-            "aggregates": [r for r in aggregates
-                           if tuple(str(r.get(k, "")) for k in IDENTITY) == run.identity],
+            "aggregates": aggregates_of(run.identity),
             "sha256": hashes[run.identity],
             "hashes": hashes,
             "runs": by_identity,

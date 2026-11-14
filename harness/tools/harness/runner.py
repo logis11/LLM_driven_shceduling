@@ -428,7 +428,8 @@ def process_run(run: RunSpec, ctx: RunContext) -> dict:
     execution cache when known), the trace header checked, then the records, the aggregates and, for a
     recognizing run, the graded queries and the flip aggregates — or those served from the results cache
     under `result_key`, the records files placed in the run directory as if built. Returns a dict with
-    `aggregates`, `messages`, `grade_rows`, `executed`, `cached`, `results_cached` and `seconds`, or
+    `aggregates`, `messages`, `grade_rows`, `executed`, `cached`, `results_cached`, `results_entry` (the
+    results-cache entry holding them) and `seconds`, or
     `failure` with the reason when an invocation or a reader failed (the run's outputs then removed).
     Beside them `peak_rss` (bytes: the largest resident set of this process and the programs it started,
     sampled, or a program's own peak where larger) and `bytes` (the run directory and the cache entries the
@@ -476,7 +477,7 @@ def process_run(run: RunSpec, ctx: RunContext) -> dict:
                 _store_results(entry, run_dir, kept)
                 from_cache = False
         return {**kept, "executed": int(not d.cached) + int(not s.cached), "cached": int(d.cached) + int(s.cached),
-                "results_cached": from_cache, "seconds": round(time.time() - t0, 1),
+                "results_cached": from_cache, "results_entry": str(entry), "seconds": round(time.time() - t0, 1),
                 "peak_rss": sampler.peak, "bytes": _bytes_on_disk([run_dir, d.entry, s.entry, entry])}
     except (RunError, ValueError, OSError) as exc:
         for name in RUN_FILES + RESULT_FILES:
@@ -602,6 +603,12 @@ def _build_results(run: RunSpec, ctx: RunContext, run_dir: pathlib.Path, run_tab
     return {"aggregates": aggregates, "messages": list(messages), "grade_rows": grade_rows_run}
 
 
+def _aggregates_of(entry: pathlib.Path) -> list:
+    """A run's aggregate rows, in their order, from its results-cache entry."""
+    with open(entry / "result.pickle", "rb") as f:
+        return pickle.load(f)["aggregates"]
+
+
 def _store_results(entry: pathlib.Path, run_dir: pathlib.Path, kept: dict):
     tmp = entry.parent / f".tmp-{entry.name}-{os.getpid()}"
     shutil.rmtree(tmp, ignore_errors=True)
@@ -625,7 +632,9 @@ def _init_worker(ctx: RunContext):
 
 
 def _in_worker(run: RunSpec) -> dict:
-    return process_run(run, _WORKER_CTX)
+    out = process_run(run, _WORKER_CTX)
+    out.pop("aggregates", None)          # read back from the results-cache entry by the end stages, not sent over
+    return out
 
 
 def is_heavy(run: RunSpec, machine: Machine) -> bool:
@@ -734,7 +743,9 @@ def run_experiment(spec_path, machine: Machine, root,
         manifest = manifests.load(root / pins["generated"][set_name]["path"])
         scoring_spec = scoring.with_generated(scoring_spec, manifest, only=wids)
 
-    built: Dict[tuple, dict] = {}           # identity -> {run, dir, aggregates, messages, grade_rows}
+    # identity -> {run, dir, entry, messages, grade_rows}: a run's aggregates stay in its results-cache entry, read
+    # back a run at a time by each end stage (10.4 decision 14: the experiment's aggregates are never held whole)
+    built: Dict[tuple, dict] = {}
     ctx = RunContext(machine=machine, exp_dir=exp_dir, table_path=table_path, scoring_spec=scoring_spec,
                      harness=harness_version())
     times = []
@@ -749,7 +760,7 @@ def run_experiment(spec_path, machine: Machine, root,
         times.append((run.workload_id, run.name, out["seconds"], "cache" if out["results_cached"] else "built",
                       round(out["peak_rss"] / (1 << 20)), out["bytes"]))
         built[run.identity] = {"run": run, "dir": exp_dir / run.workload_id / run.name,
-                               "aggregates": out["aggregates"], "messages": out["messages"],
+                               "entry": pathlib.Path(out["results_entry"]), "messages": out["messages"],
                                "grade_rows": out["grade_rows"]}
     with open(exp_dir / "run-times.csv", "w", newline="", encoding="utf-8") as f:   # per run, for cost (10.4)
         w = csv.writer(f, lineterminator="\n")
@@ -765,9 +776,17 @@ def run_experiment(spec_path, machine: Machine, root,
 
     # aggregates and scores
     stages.append(("aggregates and scores", time.time()))
-    agg_rows = [row for _identity, b in sorted(built.items()) for row in b["aggregates"]]
-    write_csv(agg_rows, agg.COLUMNS, exp_dir / "aggregates.csv")
-    term_rows, file_rows = scorer.score(agg_rows, scoring_spec)
+    # the runs' rows written in identity order as they are read, the scorer's index kept to the keys it reads
+    read, index = scorer.reads(scoring_spec), {}
+
+    def agg_stream():
+        for _identity, b in sorted(built.items()):
+            rows = _aggregates_of(b["entry"])
+            scorer.index_rows(rows, read, index)
+            yield from rows
+    write_csv(agg_stream(), agg.COLUMNS, exp_dir / "aggregates.csv")
+    term_rows, file_rows = scorer.score_index(index, scoring_spec)
+    del index
     write_csv(term_rows + file_rows, scorer.COLUMNS, exp_dir / "scores.csv")
 
     # guards, through the manifest the guards command reads
@@ -790,7 +809,8 @@ def run_experiment(spec_path, machine: Machine, root,
                                      rerun_trace=run_dir / "trace.rerun.sha256", guard_messages=b["messages"],
                                      trace=run_dir / "trace.jsonl.gz", telemetry=run.telemetry))
     (exp_dir / "guards-manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
-    guard_rows = guards.evaluate(guard_runs, guards.load_spec(guard_spec_path), agg_rows, scoring_spec)
+    guard_rows = guards.evaluate(guard_runs, guards.load_spec(guard_spec_path),
+                                 lambda identity: _aggregates_of(built[identity]["entry"]), scoring_spec)
     write_csv(guard_rows, guards.COLUMNS, exp_dir / "guards.csv")
 
     # grades, through the grade command's manifest, over every recognizing run

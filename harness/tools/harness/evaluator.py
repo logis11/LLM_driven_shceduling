@@ -37,7 +37,7 @@ import yaml
 
 from . import aggregates as agg
 from . import grader, guards, manifests, scorer, scoring
-from .outputs import read_csv
+from .outputs import iter_csv, read_csv
 
 HARNESS = pathlib.Path(__file__).resolve().parents[2]
 EXPERIMENTS = HARNESS / "experiments"
@@ -47,6 +47,7 @@ REPORT_SCHEMA = EXPERIMENTS / "schema" / "report.schema.json"
 CONDITIONS = ("fixed", "random", "shipped_catalogue", "strongest_name_table", "llm_vocab", "llm_algo", "llm_full", "oracle")
 PINS = ("scoring_spec", "guard_spec", "driver_table", "dataset")
 PROVENANCE_AGGREGATES = tuple(f"time_share_{p}" for p in agg.PROVENANCES) + ("fallback_share",)
+WAKE_COUNT_METRICS = ("input_latency", "app_latency", "ready_wait")     # the latency terms line_input_wake_count reads
 PLACES = scorer.PLACES
 
 
@@ -251,7 +252,8 @@ def _identity(row):
 
 
 def _read_inputs(aggregates_path, scores_path, guards_path, grades_path):
-    return (read_csv(aggregates_path, agg.COLUMNS), read_csv(scores_path, scorer.COLUMNS),
+    """The aggregates as a stream of rows, read once by `_Set` (10.4 decision 14); the other three files whole."""
+    return (iter_csv(aggregates_path, agg.COLUMNS), read_csv(scores_path, scorer.COLUMNS),
             read_csv(guards_path, guards.COLUMNS), read_csv(grades_path, grader.COLUMNS))
 
 
@@ -283,7 +285,7 @@ def _tables(spec, root):
 class _Set:
     """The experiment's run set as the four files describe it."""
 
-    def __init__(self, spec, agg_rows, score_rows, guard_rows, grade_rows, alternatives=None):
+    def __init__(self, spec, agg_rows, score_rows, guard_rows, grade_rows, scoring_spec, alternatives=None):
         self.spec = spec
         # 10.1: the cap band's alternative tables, stem -> the label their runs carry; a row whose table is none of
         # these is the primary's, whatever the primary's role is called
@@ -292,7 +294,7 @@ class _Set:
         self.judging, self.reporting = _listed(spec)
         self.variants = _variants(spec)
         self.listed = self.judging + self.reporting + self.variants
-        self.agg_rows = [r for r in agg_rows if r["workload_id"] in self.listed]
+        self._read_aggregates(agg_rows, scoring_spec)
         self.file_rows = {_identity(r): r for r in score_rows
                           if r["level"] == "file" and r["workload_id"] in self.listed}
         self.guard_rows = [r for r in guard_rows if r["workload_id"] in self.listed]
@@ -304,6 +306,44 @@ class _Set:
         # 9.17: the criterion is judged on the first telemetry shape the spec lists; runs under any other listed
         # shape are scored and graded beside it and read by no criterion
         self.telemetry = str(spec["telemetry"][0])
+
+    def _read_aggregates(self, agg_rows, scoring_spec):
+        """The listed files' aggregate rows read once, in their order, into what the lines read of them (10.4
+        decision 14: never held whole) — the scorer's index for the floor band, each latency term's count on the
+        fixed runs under the primary boot default, each run's longest `ready_wait` (the first in row order where
+        two tie), each run's flip aggregates and its provenance shares."""
+        listed, judging = set(self.listed), set(self.judging)
+        read = scorer.reads(scoring_spec)
+        wake_terms = set()
+        for wid in judging:
+            for t in (scoring_spec["files"].get(wid) or {}).get("terms") or []:
+                if t["metric"] in WAKE_COUNT_METRICS:
+                    w = t.get("window") or {}
+                    wake_terms.add((wid, t["entity"], t["metric"], t.get("cause", ""), t.get("channel", ""),
+                                    str(w.get("start_us", "")), str(w.get("end_us", ""))))
+        self.score_index, self.wake_counts, self.longest_wait, self.flips, self.provenance = {}, {}, {}, {}, {}
+        for r in agg_rows:
+            wid = r["workload_id"]
+            if wid not in listed:
+                continue
+            scorer.index_row(r, read, self.score_index)
+            if r["aggregate"] == "count" and r["condition"] == "fixed" and r["boot_default"] == "":
+                term = (wid, r["entity"], r["metric"], r["cause"], r["channel"],
+                        str(r["window_start_us"]), str(r["window_end_us"]))
+                if term in wake_terms:
+                    self.wake_counts.setdefault(term + (r["telemetry"],), r["value"])
+            if r["window_start_us"] or r["window_end_us"]:
+                continue
+            if r["metric"] == "ready_wait" and r["aggregate"] == "max" and not r["cause"] and not r["channel"]:
+                key, value = _identity(r), int(Decimal(r["value"]))
+                if value > self.longest_wait.get(key, (-1, ""))[0]:
+                    self.longest_wait[key] = (value, r["entity"])
+            elif r["entity"] == "schedule" and r["metric"] == "config_interval":
+                if r["aggregate"] in agg.FLIP_AGGREGATES:
+                    self.flips.setdefault(_identity(r), {})[r["aggregate"]] = r["value"]
+                if r["aggregate"] in PROVENANCE_AGGREGATES and not r["cause"]:
+                    self.provenance.setdefault(_identity(r), {c: r[c] for c in agg.IDENTITY})[r["aggregate"]] \
+                        = r["value"]
 
     def on_table(self, key, table):
         """Whether a score-row identity is under `table` (a label), or under the primary when `table` is None."""
@@ -514,7 +554,7 @@ def line_floor_band(rs, params, ctx):
     spec = scoring.load_spec(ctx["scoring_spec_path"])
     rows, gaps = [], []
     for floor in params["latency_floors_us"]:
-        _, file_rows = scorer.score(rs.agg_rows, spec, floors=scorer.floors_for(latency_floor_us=floor))
+        _, file_rows = scorer.score_index(rs.score_index, spec, floors=scorer.floors_for(latency_floor_us=floor))
         rescored = {_identity(r): r for r in file_rows if r["workload_id"] in rs.listed}
         gap_rows = _gap_rows(rs, ctx["g"], file_rows=rescored, boots=[""], unavailable=ctx["unavailable"])
         count = _count(gap_rows, "", ctx["k"])
@@ -682,17 +722,12 @@ def line_input_wake_count(rs, params, ctx):
     rows = []
     for wid in rs.judging:
         for t in (spec["files"].get(wid) or {}).get("terms") or []:
-            if t["metric"] not in ("input_latency", "app_latency", "ready_wait"):
+            if t["metric"] not in WAKE_COUNT_METRICS:
                 continue
             w = t.get("window") or {}
             start, end = str(w.get("start_us", "")), str(w.get("end_us", ""))
-            value = next((r["value"] for r in rs.agg_rows
-                          if r["workload_id"] == wid and r["condition"] == "fixed" and r["boot_default"] == ""
-                          and r["telemetry"] == rs.telemetry
-                          and r["entity"] == t["entity"] and r["metric"] == t["metric"]
-                          and r["aggregate"] == "count" and r["cause"] == t.get("cause", "")
-                          and r["channel"] == t.get("channel", "")
-                          and str(r["window_start_us"]) == start and str(r["window_end_us"]) == end), None)
+            value = rs.wake_counts.get((wid, t["entity"], t["metric"], t.get("cause", ""), t.get("channel", ""),
+                                        start, end, rs.telemetry))
             rows.append({"workload_id": wid, "entity": t["entity"], "cause": t.get("cause", ""),
                          "channel": t.get("channel", ""), "window_start_us": start, "window_end_us": end,
                          "count": None if value is None else int(Decimal(value))})
@@ -705,14 +740,7 @@ def line_longest_wait(rs, params, ctx):
     threshold, and whether it lies past the point at which the executor-net
     question reopens."""
     threshold, reopen = int(params["threshold_us"]), int(params["reopen_us"])
-    per_run = {}
-    for r in rs.agg_rows:
-        if (r["metric"] == "ready_wait" and r["aggregate"] == "max" and not r["cause"] and not r["channel"]
-                and not r["window_start_us"] and not r["window_end_us"]):
-            key = _identity(r)
-            value = int(Decimal(r["value"]))
-            if value > per_run.get(key, (-1, ""))[0]:
-                per_run[key] = (value, r["entity"])
+    per_run = rs.longest_wait
     rows = [{**dict(zip(agg.IDENTITY, key)), "longest_wait_us": value, "entity": entity,
              "margin_us": threshold - value, "past_reopen": value > reopen}
             for key, (value, entity) in sorted(per_run.items())]
@@ -727,11 +755,7 @@ def line_flip_cost(rs, params, ctx):
     0, the sum of the per-switch excess over the wrong changes that were switches into MLFQ (`aggregates.py`,
     `flip_aggregates`), and the run's file score beside them, read off the scores file (empty where the file has no
     scoring terms)."""
-    per_run = {}
-    for r in rs.agg_rows:
-        if (r["entity"] == "schedule" and r["metric"] == "config_interval" and r["aggregate"] in agg.FLIP_AGGREGATES
-                and not r["window_start_us"] and not r["window_end_us"]):
-            per_run.setdefault(_identity(r), {})[r["aggregate"]] = r["value"]
+    per_run = rs.flips
     rows = []
     for key in sorted(per_run):
         values = per_run[key]
@@ -829,6 +853,7 @@ def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, 
     expanded, _paths, axes = _expanded(spec, root)              # 9.21 decision 6
     tables = _tables(spec, root)                                # 10.1: the primary and the cap band's tables
     rs = _Set(expanded, agg_rows, score_rows, guard_rows, grade_rows,
+              scoring.load_spec(pathlib.Path(root) / spec["pins"]["scoring_spec"]["path"]),
               alternatives={stem: t["label"] for stem, t in tables.items() if stem != "primary"})
     rs.check_complete()
 
@@ -847,11 +872,7 @@ def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, 
                    "n_terms": int(r["n_terms"]), "n_no_headroom": int(r["n_no_headroom"]),
                    "n_censored": int(r["n_censored"])}
                   for _, r in sorted(rs.file_rows.items())]
-    provenance = {}
-    for r in rs.agg_rows:
-        if r["entity"] == "schedule" and r["metric"] == "config_interval" and r["aggregate"] in PROVENANCE_AGGREGATES \
-                and not r["cause"] and not r["window_start_us"] and not r["window_end_us"]:
-            provenance.setdefault(_identity(r), {c: r[c] for c in agg.IDENTITY})[r["aggregate"]] = r["value"]
+    provenance = rs.provenance
     prov_out = [provenance[k] for k in sorted(provenance) if all(a in provenance[k] for a in PROVENANCE_AGGREGATES)]
 
     lines = [LINES[line["type"]](rs, line, ctx) for line in spec["reporting_lines"]]

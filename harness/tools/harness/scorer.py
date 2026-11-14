@@ -98,12 +98,54 @@ def _improve(direction, fixed, value):
     return fixed - value if direction == "lower" else value - fixed
 
 
+def reads(spec):
+    """Per scored workload, the aggregate keys `score` can read of its runs: each term's key, an input_latency or
+    app_latency term's censored count beside it and a turnaround term's censored bound (`_lookup`)."""
+    out = {}
+    for wid, entry in spec["files"].items():
+        keys = set()
+        for term in entry["terms"]:
+            tk = _term_key(term)
+            keys.add(tk)
+            if tk[1] in ("input_latency", "app_latency"):
+                keys.add(tk[:2] + ("censored_count",) + tk[3:])
+            if tk[2] == "turnaround":
+                keys.add(tk[:2] + ("turnaround_censored",) + tk[3:])
+        out[wid] = keys
+    return out
+
+
+def index_rows(agg_rows, read, into):
+    """`_runs` over `agg_rows` added to `into`, each run's aggregates kept to the keys `read` (from `reads`) names
+    for its workload — every run present however many of its rows are kept, so `score_index` on the index gives
+    what `score` gives on the rows (10.4 decision 14: the experiment's aggregates are never held whole)."""
+    for r in agg_rows:
+        index_row(r, read, into)
+    return into
+
+
+def index_row(r, read, into):
+    """One row into an `index_rows` index."""
+    key = tuple(str(r.get(k, "")) for k in IDENTITY)
+    run = into.setdefault(key, {})
+    keys = read.get(key[0])
+    if keys:
+        k = (r["entity"], r["metric"], r["aggregate"], r["cause"], r.get("channel", ""),
+             str(r["window_start_us"]), str(r["window_end_us"]))
+        if k in keys:
+            run[k] = Fraction(str(r["value"]))
+
+
 def score(agg_rows, spec, floors=None):
     """(term_rows, file_rows) for every run whose workload has a scoring entry.
     `floors` overrides the no-headroom floors per aggregate (default `FLOOR`,
     the metrics doc §10 constants); the floor-band line passes `floors_for(...)`."""
+    return score_index(_runs(agg_rows), spec, floors)
+
+
+def score_index(runs, spec, floors=None):
+    """`score` on the runs' aggregates indexed by `_runs` or `index_rows`."""
     floors = FLOOR if floors is None else floors
-    runs = _runs(agg_rows)
     files = spec["files"]
     fixed_runs = {(k[0], k[4], k[5]): v for k, v in runs.items() if k[1] == "fixed"}
     term_rows, file_rows = [], []

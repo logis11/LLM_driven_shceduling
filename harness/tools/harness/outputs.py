@@ -30,6 +30,24 @@ def read_csv(path, columns):
         return [dict(r) for r in reader]
 
 
+def iter_csv(path, columns):
+    """`read_csv`'s rows one at a time, the file opened and its columns checked before the first is asked for."""
+    f = open(path, "r", newline="", encoding="utf-8")
+    try:
+        reader = csv.DictReader(f)
+        if tuple(reader.fieldnames or ()) != tuple(columns):
+            raise ValueError(f"{path}: columns {reader.fieldnames} != {list(columns)}")
+    except BaseException:
+        f.close()
+        raise
+
+    def rows():
+        with f:
+            for r in reader:
+                yield dict(r)
+    return rows()
+
+
 def validate_rows(rows, schema_path):
     schema = json.loads(pathlib.Path(schema_path).read_text())
     validator = jsonschema.Draft202012Validator(schema)
