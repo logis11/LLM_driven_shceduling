@@ -354,8 +354,7 @@ statements:
     text: >
       Every consumer this spec pins is written against the ratified contract, not
       the simulator as it stands (9.14 decision 1). Before the RQ0 run the
-      simulator must show, on the hand fixtures replayed through it with their
-      traces compared line by line: (a) a ready line at every completion of a
+      simulator must show: (a) a ready line at every completion of a
       blocking primitive, at zero wait when it did not block, inside the
       occupancy after the run_start (metrics doc §11 item 1), save a dropped
       timer wake's WAIT and RUN, which pass with no line (j); (b) the TIMER skip
@@ -391,10 +390,27 @@ statements:
       held dropped, a wake_drop line written at its time, and the WAIT and RUN
       compiled for it passing at once with no block, work or line when the
       program reaches them (the interpretation contract's WAIT(channel) row;
-      data contracts §9 and §14, 2026-10-31; metrics doc §11 item 2). (a) save a
-      FORK taking a free slot, (b), (c), (d), (e), (f) and (i) the simulator does
-      today; the others its owner holds as owed. The run does not start until
-      each is shown.
+      data contracts §9 and §14, 2026-10-31; metrics doc §11 item 2). Shown by
+      the integration gate (sub-task 10.2, passed 2026-11-14 on the versions
+      pinned below; its results under
+      _dev/research/jioh/task-10.2-integration-gate/) in two ways. On the hand
+      fixtures under harness/tools/tests/fixtures/, replayed through the binary
+      with the invocation contract's flags, each fixture matching when every µs
+      holds its lines in any order and the records built from the trace equal
+      its expected.csv but for sim and source_sha256: (a) on mock-office and
+      mock-wakes, a FORK's line on fix-object and fix-tree; (b) on mock-media;
+      (c) on mock-switch, the cold start, and mock-p1a, the same-algorithm entry;
+      (g) and (i) on fix-object and fix-tree; (j) on mock-wakes. By black-box
+      unit tests on the binary under simulator/tests/: (d) test_cap_ceiling.py,
+      beside test_batch_class.py for the class; (e) test_idle_class.py under all
+      four algorithms; (f) test_edf_chain.py; (g) and (i) test_spawn_children.py;
+      (h) test_invocation.py, with every fixture replayed twice to byte-identical
+      traces whose header names the pinned version. Each behavioural test fails
+      on a mutant of the source without its behaviour (simulator/tests/mutants.py).
+      The daemon the run uses is daemon/daemon.py, byte-identical to the
+      harness's mock daemon on this spec's whole run list. The run does not start
+      on another simulator or daemon: the runner refuses a machine configuration
+      naming a version other than pins.simulator and pins.daemon.
   - id: g-grounding
     text: >
       g = 0.5 reads: recognition accounts for at least half of the achievable
@@ -580,20 +596,23 @@ statements:
       for a true row, its C7 counterpart for a false row, plus any C2 or C3 segment
       labelled with that row.
 
-# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-11-01, the pre-run lines entry; 2026-10-31, the wakes-by-origin, demotion-edge and driver-table entries; 2026-10-30, the timer_latency, input_latency and guard spec 1.3 entries; 2026-10-17, the 9.16 entries; 2026-10-17 and 2026-10-16, the 9.15 entries;
+# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-11-14, the integration gate entry; 2026-11-01, the pre-run lines entry; 2026-10-31, the wakes-by-origin, demotion-edge and driver-table entries; 2026-10-30, the timer_latency, input_latency and guard spec 1.3 entries; 2026-10-17, the 9.16 entries; 2026-10-17 and 2026-10-16, the 9.15 entries;
 # 2026-10-15 and 2026-10-14, the 9.23 entries; 2026-10-12, the 9.20 entry; 2026-10-11, the 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
   scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 4f3e34c180b26f932b1583ba16e3e928e31dd56806f3032fb1cbb214d159bb68}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.4", sha256: 7d79201d5f6c61e5eb05f8d7d9155afb3be4660f6924f24b4775a4f274382372}
-  driver_table: {path: daemon/driver-table/prior.yaml, sha256: 36267c38cd3782a821427caa8a64f403c3fffc0133300d1c9d768ab719c67f09}
+  driver_table: {path: daemon/driver-table/prior.yaml, sha256: f693bfbee5b261782ca27f0fcd8f4f4f7302e835b6a27246d2cb906542f22e9d}
   # 10.1: the cap band's tables — the pinned prior table with every unwanted row's cap moved to a wanted value
   driver_table_alternatives:
-    floor-0.2:   {path: daemon/driver-table/prior-floor-0.2.yaml, sha256: 58c1107efd67f60841fefe1251ccd674e33b27849fba5c19eafd0edfcfee9393}
-    floor-0.333: {path: daemon/driver-table/prior-floor-0.333.yaml, sha256: 4fe86c3f627e720b6902573aef8a945d0a6cf2260df342ddb4c87f1f2e49237c}
-    floor-0.5:   {path: daemon/driver-table/prior-floor-0.5.yaml, sha256: 9295b76e62afce151e97a7ecdb94aeae523dc833023916c5ab650bcb1c2b91a4}
+    floor-0.2:   {path: daemon/driver-table/prior-floor-0.2.yaml, sha256: 6cbae471694d7953ecf38cdbaf42467e9c48bff201eea676988079fe97c73b81}
+    floor-0.333: {path: daemon/driver-table/prior-floor-0.333.yaml, sha256: 1020d6abafed36c636e4db72ce5a9fa00a1a874e2084e552d3434601aaf84405}
+    floor-0.5:   {path: daemon/driver-table/prior-floor-0.5.yaml, sha256: 38f8de5eaac7a7331b959f3b4e46be16cb96a81b748bca8e322965eed63320b8}
   dataset:      {path: dataset/build.manifest.json, sha256: 27d347bc8079e2ac6bd81527070c283db28e0cae9adb40bd6ebf30d4ecbe6c34}
   variants:
     all: {path: dataset/build.variants.manifest.json, sha256: de9802e787cfdb6af1568134dffc28ddf78713e57ab2e3fee41880f073ee4205}
+  # 10.2: the versions the integration gate passed on (`make -C simulator/src version`, `make -C daemon version`)
+  simulator:    {version: simulator@0d323c84470a}
+  daemon:       {version: daemon@62c71f0d2de0}
 
 criterion:
   type: k_of_n_gap

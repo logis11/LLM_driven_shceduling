@@ -1,0 +1,76 @@
+{
+ "part": "unit",
+ "passed": true,
+ "started": "2026-11-14T09:50:31+09:00",
+ "finished": "2026-11-14T09:50:44+09:00",
+ "simulator": {
+  "version": "simulator@0d323c84470a",
+  "binary": "simulator/src/sim",
+  "binary_sha256": "94681c9283a1a4db8e57fbcfa2543023ac7a49380a20790c4a1337ec678ff11c",
+  "compiler": "g++: Apple clang version 21.0.0 (clang-2100.4.1.1)"
+ },
+ "figures": {
+  "tests": [
+   {
+    "test": "test_batch_class.py",
+    "exit": 0
+   },
+   {
+    "test": "test_switch_demand.py",
+    "exit": 0
+   },
+   {
+    "test": "test_cap_ceiling.py",
+    "exit": 0
+   },
+   {
+    "test": "test_idle_class.py",
+    "exit": 0
+   },
+   {
+    "test": "test_edf_chain.py",
+    "exit": 0
+   },
+   {
+    "test": "test_spawn_children.py",
+    "exit": 0
+   },
+   {
+    "test": "test_invocation.py",
+    "exit": 0
+   }
+  ],
+  "mutants": [
+   {
+    "mutant": "idle-band-off",
+    "test": "test_idle_class.py",
+    "takes_out": "the idle band (stage Z) never holds an idle task out: idle_gate() returns at once",
+    "test_failed": true
+   },
+   {
+    "mutant": "chain-no-deadline",
+    "test": "test_edf_chain.py",
+    "takes_out": "a WAKE carries no deadline: a woken chain stage is never in EDF's deadline class",
+    "test_failed": true
+   },
+   {
+    "mutant": "spawn-wake-dropped",
+    "test": "test_spawn_children.py",
+    "takes_out": "a WAKE naming a spawn-table entry not yet born is dropped, not held for its birth (stage W)",
+    "test_failed": true
+   },
+   {
+    "mutant": "children-never-complete",
+    "test": "test_spawn_children.py",
+    "takes_out": "the last child's task_end does not complete the orchestrator's WAIT children:<id> (stage AA)",
+    "test_failed": true
+   },
+   {
+    "mutant": "children-always-block",
+    "test": "test_spawn_children.py",
+    "takes_out": "a WAIT children:<id> reached with no child live blocks instead of completing at once (stage AA)",
+    "test_failed": true
+   }
+  ]
+ }
+}

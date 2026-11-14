@@ -328,3 +328,10 @@ checks automated in `../tools/trace_check.py`.
 Still ours: the TIMER `t0` ruling (§4 item 3) and the other "ours to decide" lines of TODO; the
 diagnostics of TODO's backlog. The mailbox merge (D2) is closed, not implemented (memo_261111 I5,
 K5); the unit tests are in `../tests/`.
+
+The integration gate passed on 2026-11-14 on `simulator@0d323c84470a` (`docs/memos/2026-11-14-integration-gate.md`,
+by 인지오). `../tests/` gained the black-box tests for the conformance items no hand fixture shows —
+`test_cap_ceiling.py` (d), `test_idle_class.py` (e), `test_edf_chain.py` (f), `test_spawn_children.py`
+(i, g), `test_invocation.py` (h) — and `mutants.py`, the source with each behaviour's line taken out,
+on which each behavioural test must fail (`make check`, `make mutants`). The RQ0 gate spec pins the
+version: a change to `sim.cpp` or `mini_json.hpp` reruns the gate before the RQ0 run.

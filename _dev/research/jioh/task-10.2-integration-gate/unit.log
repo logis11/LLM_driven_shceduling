@@ -1,0 +1,42 @@
+== test_batch_class.py (exit 0)
+test a: ok — hog parked 189x, sleeper 0x
+test b: ok — plain parked 157x, each >= 10000 us into its burst; chain 0x
+test c: ok — work parked 0x beside the idle task alone, the lane busy 2000000 of 2000000 us (idler 124000); 40x with a non-batch normal task beside them
+
+== test_switch_demand.py (exit 0)
+ok — entries applied [0, 1, 2, 3, 4, 5, 6, 7], exited ['a', 'b', 'c']; trace_check: ok  lines 164 busy 159500 elapsed 220000 completed-checked 3 with-drops 0
+
+== test_cap_ceiling.py (exit 0)
+test d-ceiling: ok — MLFQ uncapped 0.7000, cap 0.05 → 0.0527, cap 0.2 → 0.1869; FIFO uncapped 1.0000, cap 0.05 → 0.0053, cap 0.2 → 0.0063; LOTTERY uncapped 0.1100, cap 0.05 → 0.0403, cap 0.2 → 0.0850 (bound: cap + 0.0150)
+test d-work-conserving: ok — alone under cap 0.05 the hog holds the whole window, never parked (MLFQ, FIFO, EDF, LOTTERY)
+
+== test_idle_class.py (exit 0)
+test e: ok — MLFQ idler preempted at 72 wakes, 500000 µs in the gaps; FIFO idler preempted at 72 wakes, 500000 µs in the gaps; EDF idler preempted at 72 wakes, 500000 µs in the gaps; LOTTERY idler preempted at 72 wakes, 500000 µs in the gaps
+
+== test_edf_chain.py (exit 0)
+test f-class: ok — head → s1 → s2 to 17000 µs, the residual task first at 17000 µs
+test f-deadline: ok — s1: preempted by a probe due at 29999 µs, kept the lane against one due at 30000 µs; s2: preempted by a probe due at 29999 µs, kept the lane against one due at 30000 µs
+
+== test_spawn_children.py (exit 0)
+test i+g-reference: ok — fix-object: 1 held wake(s), build.j2.cc1 at 457239 µs; 13 arrivals, 13 ends; build's wait done at 666567 µs; fix-tree: 1 held wake(s), build.j2.cc1 at 164256 µs; 19 arrivals, 19 ends; build's wait done at 190037 µs
+test g-none-live: ok — the child ended at 1000 µs; the WAIT passed at 51000 µs with a zero-wait ready(wake)
+
+== test_invocation.py (exit 0)
+test h-accepted: ok — 18 lines, byte-identical twice, nothing on stdout, sim simulator@0d323c84470a
+test h-refused: ok — 6 refusals, each exit 2 with no trace
+test h-unwritten: ok — exit 2 when the trace cannot be written
+
+== mutant idle-band-off → test_idle_class.py: fails as it must
+test e: FAIL — MLFQ: the idler held the lane while a normal task was runnable — (task, runnable from, to, idler from, to) [('ui', 5000, 13000, 0, 10000), ('ui', 35000, 42000, 36000, 40000), ('ui', 105000, 113000, 98000, 110000)] | FIFO: the idler held the lane while a normal task was runnable — (task, runnable from, to, idler from, to) [('ui', 5000, 1000000, 0, 1000000), ('hog', 300000, 1000000, 0, 1000000)] | EDF: the idler held the lane while a normal task was runnable — (task, runnable from, to, idler from, to) [('ui', 5000, 13000, 0, 10000), ('ui', 15000, 29000, 13000, 23000), ('ui', 35000, 42000, 29000, 39000)] | LOTTERY: the idler held the lane while a normal task was runnable — (task, runnable from, to, idler from, to) [('ui', 5000, 13000, 0, 10000), ('ui', 15000, 29000, 13000, 23000), ('ui', 35000, 58000, 29000, 49000)]
+== mutant chain-no-deadline → test_edf_chain.py: fails as it must
+test f-class: FAIL — the lane before s2's end went ['head', 'bulk', 's1'], not head → s1 → s2
+test f-deadline: FAIL — s1 was not preempted at 3000 µs by the earlier deadline
+== mutant spawn-wake-dropped → test_spawn_children.py: fails as it must
+test i+g-reference: FAIL — fix-object: build.j2.cc1, woken by build.j2.gcc at 6188 µs before its birth at 457239 µs, did not take the wake at its birth — its lines then: [('task_arrive', None), ('x_block', None)]
+test g-none-live: ok — the child ended at 1000 µs; the WAIT passed at 51000 µs with a zero-wait ready(wake)
+== mutant children-never-complete → test_spawn_children.py: fails as it must
+test i+g-reference: FAIL — fix-object: 13 arrivals, 12 task_end lines — never ended: ['build']
+test g-none-live: ok — the child ended at 1000 µs; the WAIT passed at 51000 µs with a zero-wait ready(wake)
+== mutant children-always-block → test_spawn_children.py: fails as it must
+test i+g-reference: ok — fix-object: 1 held wake(s), build.j2.cc1 at 457239 µs; 13 arrivals, 13 ends; build's wait done at 666567 µs; fix-tree: 1 held wake(s), build.j2.cc1 at 164256 µs; 19 arrivals, 19 ends; build's wait done at 190037 µs
+test g-none-live: FAIL — the parent's ready(wake) lines [], not one at 51000 µs

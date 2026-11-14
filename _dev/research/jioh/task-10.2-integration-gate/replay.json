@@ -1,0 +1,175 @@
+{
+ "part": "replay",
+ "passed": true,
+ "started": "2026-11-14T09:50:44+09:00",
+ "finished": "2026-11-14T09:50:44+09:00",
+ "simulator": {
+  "version": "simulator@0d323c84470a",
+  "binary": "simulator/src/sim",
+  "binary_sha256": "94681c9283a1a4db8e57fbcfa2543023ac7a49380a20790c4a1337ec678ff11c",
+  "compiler": "g++: Apple clang version 21.0.0 (clang-2100.4.1.1)"
+ },
+ "figures": {
+  "cases": [
+   {
+    "case": "fix-object",
+    "kind": "reference",
+    "passed": true,
+    "lines": "identical",
+    "compared_lines": 120,
+    "rerun_identical": true,
+    "header_sim": "simulator@0d323c84470a",
+    "cap_null": false,
+    "schedule": "boot entry",
+    "records": null,
+    "first_differences": []
+   },
+   {
+    "case": "fix-tree",
+    "kind": "reference",
+    "passed": true,
+    "lines": "identical",
+    "compared_lines": 180,
+    "rerun_identical": true,
+    "header_sim": "simulator@0d323c84470a",
+    "cap_null": false,
+    "schedule": "boot entry",
+    "records": null,
+    "first_differences": []
+   },
+   {
+    "case": "mock-chain",
+    "kind": "hand",
+    "passed": true,
+    "lines": "same-µs order",
+    "compared_lines": 44,
+    "rerun_identical": true,
+    "header_sim": "simulator@0d323c84470a",
+    "cap_null": false,
+    "schedule": "rebuilt from config_applied",
+    "records": {
+     "equal": true,
+     "rows": 36,
+     "expected_rows": 36,
+     "guard_messages": [],
+     "first_difference": null
+    },
+    "first_differences": []
+   },
+   {
+    "case": "mock-guards",
+    "kind": "hand",
+    "passed": true,
+    "lines": "identical",
+    "compared_lines": 22,
+    "rerun_identical": true,
+    "header_sim": "simulator@0d323c84470a",
+    "cap_null": true,
+    "schedule": "config-schedule.json",
+    "records": {
+     "equal": true,
+     "rows": 29,
+     "expected_rows": 29,
+     "guard_messages": [],
+     "first_difference": null
+    },
+    "first_differences": []
+   },
+   {
+    "case": "mock-media",
+    "kind": "hand",
+    "passed": true,
+    "lines": "same-µs order",
+    "compared_lines": 40,
+    "rerun_identical": true,
+    "header_sim": "simulator@0d323c84470a",
+    "cap_null": false,
+    "schedule": "rebuilt from config_applied",
+    "records": {
+     "equal": true,
+     "rows": 36,
+     "expected_rows": 36,
+     "guard_messages": [],
+     "first_difference": null
+    },
+    "first_differences": []
+   },
+   {
+    "case": "mock-office",
+    "kind": "hand",
+    "passed": true,
+    "lines": "identical",
+    "compared_lines": 10,
+    "rerun_identical": true,
+    "header_sim": "simulator@0d323c84470a",
+    "cap_null": false,
+    "schedule": "rebuilt from config_applied",
+    "records": {
+     "equal": true,
+     "rows": 18,
+     "expected_rows": 18,
+     "guard_messages": [],
+     "first_difference": null
+    },
+    "first_differences": []
+   },
+   {
+    "case": "mock-p1a",
+    "kind": "hand",
+    "passed": true,
+    "lines": "identical",
+    "compared_lines": 30,
+    "rerun_identical": true,
+    "header_sim": "simulator@0d323c84470a",
+    "cap_null": true,
+    "schedule": "config-schedule.json",
+    "records": {
+     "equal": true,
+     "rows": 23,
+     "expected_rows": 23,
+     "guard_messages": [],
+     "first_difference": null
+    },
+    "first_differences": []
+   },
+   {
+    "case": "mock-switch",
+    "kind": "hand",
+    "passed": true,
+    "lines": "identical",
+    "compared_lines": 40,
+    "rerun_identical": true,
+    "header_sim": "simulator@0d323c84470a",
+    "cap_null": true,
+    "schedule": "config-schedule.json",
+    "records": {
+     "equal": true,
+     "rows": 34,
+     "expected_rows": 34,
+     "guard_messages": [],
+     "first_difference": null
+    },
+    "first_differences": []
+   },
+   {
+    "case": "mock-wakes",
+    "kind": "hand",
+    "passed": true,
+    "lines": "identical",
+    "compared_lines": 13,
+    "rerun_identical": true,
+    "header_sim": "simulator@0d323c84470a",
+    "cap_null": false,
+    "schedule": "rebuilt from config_applied",
+    "records": {
+     "equal": true,
+     "rows": 18,
+     "expected_rows": 18,
+     "guard_messages": [],
+     "first_difference": null
+    },
+    "first_differences": []
+   }
+  ]
+ }
+}

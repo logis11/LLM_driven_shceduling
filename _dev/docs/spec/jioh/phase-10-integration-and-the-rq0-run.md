@@ -28,7 +28,7 @@ The RQ0 run runs `daemon/daemon.py`, the committed daemon, in the mock daemon's 
 
 ### 4. The integration gate is shown by 인지오 on the harness's hand fixtures
 
-인지오 compiles `simulator/src/sim.cpp` on the home machine and replays every hand fixture under `harness/tools/tests/fixtures/` through that binary, each trace compared line by line with the fixture's. A fixture that differs goes back to 인경민. The gate is passed when every fixture matches, and that binary runs RQ0. What 인경민 checks on the simulator's own step ladder is 인경민's development, not the gate.
+인지오 compiles `simulator/src/sim.cpp` on the home machine and replays every hand fixture under `harness/tools/tests/fixtures/` through that binary, each trace compared line by line with the fixture's. On a failure the ratified contract decides which side is wrong and 인지오 changes it: a simulator fault as a new stage on the step ladder, ported to `simulator/src/sim.cpp` and reported to 인경민 by memo; a fixture or test fault with a harness changelog entry (the 10.2 spec, decision 14). The gate is passed when every fixture matches, and that binary runs RQ0. What 인경민 checks on the simulator's own step ladder is 인경민's development, not the gate.
 
 ### 5. A cold smoke, then the cost response, then the full run
 

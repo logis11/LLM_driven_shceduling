@@ -1,0 +1,37 @@
+{
+ "part": "daemon",
+ "passed": true,
+ "started": "2026-11-14T08:40:44+09:00",
+ "finished": "2026-11-14T09:24:04+09:00",
+ "daemon": {
+  "version": "daemon@62c71f0d2de0",
+  "command": [
+   "python3",
+   "daemon/daemon.py"
+  ]
+ },
+ "figures": {
+  "spec": "harness/experiments/rq0-gate.yaml",
+  "spec_sha256": "99c3f0c4eb40f5c03953f7e6d9710a9755617d727ba7fc7c56df0fde408de0d5",
+  "run_list": 19425,
+  "compared": 19425,
+  "identical": 19425,
+  "differing": [],
+  "differing_count": 0,
+  "run_list_sha256": "2aec1c26a25d80d3dce5002b18d38dc0a0fc720294784089b8e8a414cf2bd5ca",
+  "mock": {
+   "command": [
+    "python3",
+    "harness/tools/tests/mocks/mock_daemon.py"
+   ],
+   "version": "mock-daemon@0",
+   "sources": {
+    "mock_daemon.py": "4ed7f68085c12ef675f1c3228d09a1c9d03af4283e2f88daed22d6f14a8308cc",
+    "daemon.py": "ee6498622a269f5220b79e1dffab2b672aab1a5429a9521e3036ed4e978aa918"
+   }
+  },
+  "workers": 6,
+  "heavy_at_once": 2,
+  "wall_seconds": 2599.9
+ }
+}

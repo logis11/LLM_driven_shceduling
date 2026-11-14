@@ -1,0 +1,2 @@
+smoke spec: 52 lines, discarded after the run
+verdict: invalid — 2 of 7 judging files met the criterion (K = 1); 56 invocation(s) executed, 0 from the cache; report in runs/integration-gate/smoke/report.json

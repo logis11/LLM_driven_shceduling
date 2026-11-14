@@ -1,0 +1,9 @@
+fix-object     reference identical, rerun identical, header simulator@0d323c84470a
+fix-tree       reference identical, rerun identical, header simulator@0d323c84470a
+mock-chain     hand      same-µs order, records equal (36 rows), rerun identical, header simulator@0d323c84470a
+mock-guards    hand      identical, records equal (29 rows), rerun identical, header simulator@0d323c84470a
+mock-media     hand      same-µs order, records equal (36 rows), rerun identical, header simulator@0d323c84470a
+mock-office    hand      identical, records equal (18 rows), rerun identical, header simulator@0d323c84470a
+mock-p1a       hand      identical, records equal (23 rows), rerun identical, header simulator@0d323c84470a
+mock-switch    hand      identical, records equal (34 rows), rerun identical, header simulator@0d323c84470a
+mock-wakes     hand      identical, records equal (18 rows), rerun identical, header simulator@0d323c84470a

@@ -1,0 +1,50 @@
+{
+ "part": "short",
+ "passed": true,
+ "started": "2026-11-14T08:45:01+09:00",
+ "finished": "2026-11-14T09:42:41+09:00",
+ "simulator": {
+  "version": "simulator@0d323c84470a",
+  "binary": "simulator/src/sim",
+  "binary_sha256": "94681c9283a1a4db8e57fbcfa2543023ac7a49380a20790c4a1337ec678ff11c",
+  "compiler": "g++: Apple clang version 21.0.0 (clang-2100.4.1.1)"
+ },
+ "daemon": {
+  "version": "daemon@62c71f0d2de0",
+  "command": [
+   "python3",
+   "daemon/daemon.py"
+  ]
+ },
+ "figures": {
+  "files": [
+   "c1-photo",
+   "c1-office",
+   "c7-mail",
+   "c2-p2b",
+   "c1-gaming",
+   "c7-compile",
+   "c1-compile"
+  ],
+  "exit": 0,
+  "wall_seconds": 3459.8,
+  "runs_dir": "runs/integration-gate",
+  "guard_rows": 224,
+  "guard_results": {
+   "not_applicable": 48,
+   "pass": 175,
+   "fail": 1
+  },
+  "guards_failed": [
+   {
+    "workload_id": "c2-p2b",
+    "condition": "oracle",
+    "seed": "",
+    "guard": "c2_pair",
+    "value": "",
+    "reason": "partner c2-p2a not in the run set (condition oracle, seed '', boot_default '', telemetry 'focus')"
+   }
+  ],
+  "verdict": "invalid"
+ }
+}
