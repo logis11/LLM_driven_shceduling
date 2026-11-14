@@ -17,6 +17,10 @@ def pytest_configure(config):
         "coreset_wide: reads all 51 compiled coreset files and builds every record row of each; "
         "needs more memory than a 16 GB runner holds (c6-dual), so `make test` leaves these out and "
         "`make test-full` runs them (9.21 D13)")
+    config.addinivalue_line(
+        "markers",
+        "slow: takes more than about two seconds — the pipeline end to end, the scoring lint over the compiled "
+        "coreset; `make test-quick` leaves these out, `make test` and `make test-full` run them")
 
 
 @pytest.fixture(scope="session")

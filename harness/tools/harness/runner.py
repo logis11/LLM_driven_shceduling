@@ -26,15 +26,29 @@ strings, the compiled build, the boot-default files, the runs and cache
 directories — nothing experiment-shaped. A spec that pins the two programs'
 version strings (`pins.simulator`, `pins.daemon`; 10.2) is refused before any
 run when the machine configuration names other versions.
+
+The configuration's `workers` spreads the runs over processes (`run_all`), the
+runs on heavy files in a pool of their own; every stage after the runs reads
+them sorted by identity, so the outputs do not depend on how many ran at once.
+Each run's records, aggregates and graded queries are kept in a results cache
+beside the execution cache (`process_run`), keyed by both invocations, the
+run's identity, its scoring windows and the harness's own code, so a run met
+again — a restart after a crash, a second pass — is not rebuilt.
 """
 
+import concurrent.futures
+import csv
 import hashlib
 import json
+import multiprocessing
+import os
 import pathlib
+import pickle
 import shutil
 import subprocess
+import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 import yaml
 
@@ -67,6 +81,9 @@ class Machine:
     boot_defaults_dir: pathlib.Path
     runs_dir: pathlib.Path
     cache_dir: pathlib.Path
+    workers: int = 1            # runs at once on a file under heavy_mb; 1 runs everything in this process, in order
+    heavy_workers: int = 1      # with workers > 1: runs at once on a file of heavy_mb or more, each in a fresh process
+    heavy_mb: int = 50          # a workload file this large or larger is a heavy run (its records hold gigabytes)
 
 
 def load_machine(path, root) -> Machine:
@@ -89,7 +106,9 @@ def load_machine(path, root) -> Machine:
     return Machine(daemon=program(doc["daemon"]), simulator=program(doc["simulator"]),
                    build_dir=resolve(doc["build_dir"]),
                    boot_defaults_dir=resolve(doc.get("boot_defaults_dir", "harness/boot-defaults")),
-                   runs_dir=resolve(doc["runs_dir"]), cache_dir=resolve(doc["cache_dir"]))
+                   runs_dir=resolve(doc["runs_dir"]), cache_dir=resolve(doc["cache_dir"]),
+                   workers=int(doc.get("workers", 1)), heavy_workers=int(doc.get("heavy_workers", 1)),
+                   heavy_mb=int(doc.get("heavy_mb", 50)))
 
 
 # ------------------------------------------------------------------ matrix
@@ -215,7 +234,7 @@ def invoke(program: Program, role: str, cache_dir, condition: str, seed: str,
     entry = cache_dir / key
     stderr_log = pathlib.Path(stderr_log)
     if not entry.is_dir():
-        tmp = cache_dir / f".tmp-{key}"
+        tmp = cache_dir / f".tmp-{key}-{os.getpid()}"     # one per process: parallel runs may share a key
         if tmp.exists():
             shutil.rmtree(tmp)
         try:
@@ -251,7 +270,7 @@ def invoke(program: Program, role: str, cache_dir, condition: str, seed: str,
                  "condition": condition, "seed": seed, "telemetry": telemetry,
                  "inputs": {n: _sha256(p) for n, p in sorted(inputs.items())},
                  "outputs": sorted(pathlib.Path(p).name for p in outputs.values())}, indent=1) + "\n")
-            tmp.rename(entry)
+            _publish(tmp, entry)
             cached = False
         except RunError:
             shutil.rmtree(tmp, ignore_errors=True)
@@ -266,10 +285,210 @@ def invoke(program: Program, role: str, cache_dir, condition: str, seed: str,
     return Invocation(key=key, cached=cached, entry=entry)
 
 
+def _publish(tmp: pathlib.Path, entry: pathlib.Path):
+    """Move a finished cache entry into place. Another process may have published the same key meanwhile — the same
+    bytes, by the determinism clause — and then its entry stands and this one is dropped."""
+    try:
+        tmp.rename(entry)
+    except OSError:
+        if not entry.is_dir():
+            raise
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def _trace_sim(path) -> str:
     with open(path, "r", encoding="utf-8") as f:
         head = json.loads(f.readline())
     return str(head.get("sim", ""))
+
+
+# ------------------------------------------------------------- one run's work
+
+@dataclass
+class RunContext:
+    """What one run's work reads beyond its RunSpec — the same for every run, sent once to each worker process."""
+    machine: Machine
+    exp_dir: pathlib.Path
+    table_path: pathlib.Path    # the pinned primary driver table
+    scoring_spec: dict          # with the variant and generated files' entries
+    harness: str                # harness_version()
+
+
+def harness_version() -> str:
+    """The SHA-256 of the harness package's own source files: part of every results-cache key, so a change to
+    any module that builds records, aggregates or graded queries rebuilds every run's."""
+    h = hashlib.sha256()
+    for path in sorted(pathlib.Path(__file__).resolve().parent.glob("*.py")):
+        h.update(path.name.encode() + b"\0" + path.read_bytes() + b"\0")
+    return h.hexdigest()
+
+
+RESULT_FILES = ("records.csv", "records-messages.json", "recognition-records.csv")
+
+
+def result_key(ctx: RunContext, run: RunSpec, daemon_key: str, simulator_key: str) -> str:
+    """The results cache's key: both invocations' keys (every input byte and both programs' versions), the run's
+    identity, the scoring windows its aggregates read, and the harness's own code."""
+    material = {"harness": ctx.harness, "daemon": daemon_key, "simulator": simulator_key,
+                "identity": list(run.identity),
+                "windows": repr(scoring.windows_from_spec(ctx.scoring_spec, run.workload_id)),
+                "interactive": repr(scoring.interactive_from_spec(ctx.scoring_spec, run.workload_id))}
+    return hashlib.sha256(json.dumps(material, sort_keys=True).encode()).hexdigest()
+
+
+def _place(src: pathlib.Path, dst: pathlib.Path):
+    """dst as a hard link to src where the file system allows, else a copy. A run never writes into a file
+    it placed: every result file is unlinked before the run's work begins."""
+    dst.unlink(missing_ok=True)
+    try:
+        os.link(src, dst)
+    except OSError:
+        shutil.copy(src, dst)
+
+
+def process_run(run: RunSpec, ctx: RunContext) -> dict:
+    """One run's work: the daemon and the simulator through the invocation contract (served from the
+    execution cache when known), the trace header checked, then the records, the aggregates and, for a
+    recognizing run, the graded queries and the flip aggregates — or those served from the results cache
+    under `result_key`, the records files placed in the run directory as if built. Returns a dict with
+    `aggregates`, `messages`, `grade_rows`, `executed`, `cached`, `results_cached` and `seconds`, or
+    `failure` with the reason when an invocation or a reader failed (the run's outputs then removed).
+    The cache entry is a pickle the runner wrote itself; nothing else writes into the cache directory."""
+    t0 = time.time()
+    machine = ctx.machine
+    run_dir = ctx.exp_dir / run.workload_id / run.name
+    run_dir.mkdir(parents=True, exist_ok=True)
+    run_table = run.table_file or ctx.table_path                 # 10.1: an alternative table's run reads its own
+    try:
+        d = invoke(machine.daemon, "daemon", machine.cache_dir, run.condition, run.seed,
+                   inputs={"workload": run.workload_file, "driver-table": run_table,
+                           "boot-default": run.boot_file},
+                   outputs={"out-schedule": run_dir / "schedule.json", "out-log": run_dir / "log.json"},
+                   stderr_log=run_dir / "daemon.stderr.log", telemetry=run.telemetry)
+        s = invoke(machine.simulator, "simulator", machine.cache_dir, run.condition, run.seed,
+                   inputs={"workload": run.workload_file, "schedule": run_dir / "schedule.json"},
+                   outputs={"out-trace": run_dir / "trace.jsonl"},
+                   stderr_log=run_dir / "simulator.stderr.log", with_condition=False)
+        shutil.copy(s.entry / "second" / "trace.jsonl", run_dir / "trace.rerun.jsonl")
+        sim = _trace_sim(run_dir / "trace.jsonl")
+        if sim != machine.simulator.version:
+            raise RunError(f"trace header names simulator {sim!r}, the machine configuration "
+                           f"{machine.simulator.version!r}")
+        for name in RESULT_FILES:
+            (run_dir / name).unlink(missing_ok=True)
+        entry = machine.cache_dir / "results" / result_key(ctx, run, d.key, s.key)
+        if (entry / "result.pickle").is_file():
+            with open(entry / "result.pickle", "rb") as f:
+                kept = pickle.load(f)
+            for name in RESULT_FILES:
+                if (entry / name).is_file():
+                    _place(entry / name, run_dir / name)
+            from_cache = True
+        else:
+            kept = _build_results(run, ctx, run_dir, run_table)
+            _store_results(entry, run_dir, kept)
+            from_cache = False
+        return {**kept, "executed": int(not d.cached) + int(not s.cached), "cached": int(d.cached) + int(s.cached),
+                "results_cached": from_cache, "seconds": round(time.time() - t0, 1)}
+    except (RunError, ValueError, OSError) as exc:
+        for name in ("schedule.json", "log.json", "trace.jsonl", "trace.rerun.jsonl") + RESULT_FILES:
+            (run_dir / name).unlink(missing_ok=True)
+        return {"failure": str(exc)}
+
+
+def _build_results(run: RunSpec, ctx: RunContext, run_dir: pathlib.Path, run_table: pathlib.Path) -> dict:
+    # each run is aggregated as soon as its records are built, so a run's rows — fourteen million for c6-dual —
+    # live only until its aggregates exist, never all runs' at once
+    rows, messages = records.build(run.workload_file, run_dir / "trace.jsonl", table=run.table,
+                                   seed=run.seed, schedule_path=run_dir / "schedule.json",
+                                   boot_default=run.boot_default, telemetry=run.telemetry)
+    records.write_csv(rows, run_dir / "records.csv")
+    (run_dir / "records-messages.json").write_text(json.dumps(messages, indent=1) + "\n")
+    aggregates = agg.compute_aggregates(rows, scoring.windows_from_spec(ctx.scoring_spec, run.workload_id),
+                                        scoring.interactive_from_spec(ctx.scoring_spec, run.workload_id))
+    del rows
+    grade_rows_run = []
+    if run.condition != "fixed":
+        # Layer 1 for this run now, so the flip aggregates (9.21 decision 7) can read its graded queries
+        grade_rows_run, _gmessages = grader.grade_log(grader.Run(
+            workload_id=run.workload_id, condition=run.condition, table=run.table, seed=run.seed,
+            boot_default=run.boot_default, log=run_dir / "log.json", workload=run.workload_file,
+            table_path=run_table, telemetry=run.telemetry))
+        records.write_csv(grade_rows_run, run_dir / "recognition-records.csv")
+        aggregates = aggregates + agg.flip_aggregates(
+            aggregates, read_config_schedule(run_dir / "schedule.json"),
+            read_recognition_log(run_dir / "log.json"), grade_rows_run)
+        aggregates.sort(key=agg.sort_key)
+    return {"aggregates": aggregates, "messages": list(messages), "grade_rows": grade_rows_run}
+
+
+def _store_results(entry: pathlib.Path, run_dir: pathlib.Path, kept: dict):
+    tmp = entry.parent / f".tmp-{entry.name}-{os.getpid()}"
+    shutil.rmtree(tmp, ignore_errors=True)
+    tmp.mkdir(parents=True)
+    for name in RESULT_FILES:
+        if (run_dir / name).is_file():
+            _place(run_dir / name, tmp / name)
+    with open(tmp / "result.pickle", "wb") as f:
+        pickle.dump(kept, f, protocol=pickle.HIGHEST_PROTOCOL)
+    _publish(tmp, entry)
+
+
+# ------------------------------------------------------------ runs at once
+
+_WORKER_CTX: Optional[RunContext] = None
+
+
+def _init_worker(ctx: RunContext):
+    global _WORKER_CTX
+    _WORKER_CTX = ctx
+
+
+def _in_worker(run: RunSpec) -> dict:
+    return process_run(run, _WORKER_CTX)
+
+
+def is_heavy(run: RunSpec, machine: Machine) -> bool:
+    return run.workload_file.stat().st_size >= machine.heavy_mb * (1 << 20)
+
+
+def run_all(runs: List[RunSpec], ctx: RunContext, progress=None):
+    """Every run's work, as (run, outcome) pairs in the order the runs finish. With `workers` 1 the runs
+    go one after another in this process, in matrix order. Otherwise a pool of `workers` processes takes
+    the runs on files under `heavy_mb` and a pool of `heavy_workers` the rest, each heavy run in a fresh
+    process so that the gigabytes its records held go back to the system when it ends; each pool takes
+    its largest files first. Nothing the runner writes depends on the order: the stages after the runs
+    read them sorted by identity."""
+    machine = ctx.machine
+    total = len(runs)
+    if machine.workers <= 1:
+        for k, run in enumerate(runs, 1):
+            out = process_run(run, ctx)
+            if progress:
+                progress(k, total, run, out)
+            yield run, out
+        return
+    by_size = sorted(runs, key=lambda r: -r.workload_file.stat().st_size)
+    heavy = [r for r in by_size if is_heavy(r, machine)]
+    light = [r for r in by_size if not is_heavy(r, machine)]
+    spawn = multiprocessing.get_context("spawn")
+    pools = [concurrent.futures.ProcessPoolExecutor(max_workers=machine.workers, mp_context=spawn,
+                                                    initializer=_init_worker, initargs=(ctx,))]
+    if heavy:
+        pools.append(concurrent.futures.ProcessPoolExecutor(max_workers=max(1, machine.heavy_workers),
+                                                            mp_context=spawn, initializer=_init_worker,
+                                                            initargs=(ctx,), max_tasks_per_child=1))
+    try:
+        futures = {pools[0].submit(_in_worker, r): r for r in light}
+        futures.update({pools[-1].submit(_in_worker, r): r for r in heavy})
+        for k, fut in enumerate(concurrent.futures.as_completed(futures), 1):
+            run, out = futures[fut], fut.result()
+            if progress:
+                progress(k, total, run, out)
+            yield run, out
+    finally:
+        for pool in pools:
+            pool.shutdown(wait=True, cancel_futures=True)
 
 
 # --------------------------------------------------------------- pipeline
@@ -300,10 +519,14 @@ class Result:
     failed: List[Failure] = field(default_factory=list)
     executed: int = 0
     cached: int = 0
+    results_cached: int = 0     # runs whose records, aggregates and graded queries came from the results cache
     experiment_dir: Optional[pathlib.Path] = None
 
 
-def run_experiment(spec_path, machine: Machine, root) -> Result:
+def run_experiment(spec_path, machine: Machine, root,
+                   progress: Optional[Callable[[int, int, "RunSpec", dict], None]] = None) -> Result:
+    """The pipeline from the run matrix to the report. Runs are spread over the machine configuration's
+    workers (`run_all`); `progress(done, total, run, outcome)` is called as each one finishes."""
     root = pathlib.Path(root)
     spec = evaluator.load_spec(spec_path)
     refused = program_pin_errors(spec, machine)                  # 10.2: before any run, and before any directory
@@ -320,8 +543,7 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
     spec, _paths, axes = manifests.expand(spec, root)              # 9.21 decision 6: the selected files and their sets
     # the scoring spec, with an entry per variant file (9.14 decision 12: scored on its base's terms, its windows
     # on its own segments) and per selected generated file (9.21 decision 1: the rule over the C1 entries, from the
-    # set's pinned manifest); each run is aggregated as soon as its records are built, so a run's rows — fourteen
-    # million for c6-dual — live only until its aggregates exist, never all runs' at once
+    # set's pinned manifest)
     scoring_spec = scoring.with_variants(scoring.load_spec(scoring_path),
                                          {wid: machine.build_dir / f"{wid}.workload.json"
                                           for wid in (spec["files"].get("variants") or [])})
@@ -332,55 +554,27 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
         manifest = manifests.load(root / pins["generated"][set_name]["path"])
         scoring_spec = scoring.with_generated(scoring_spec, manifest, only=wids)
 
-    built: Dict[tuple, dict] = {}           # identity -> {run, dir, aggregates, messages}
-    for run in runs:
-        run_dir = exp_dir / run.workload_id / run.name
-        run_dir.mkdir(parents=True, exist_ok=True)
-        run_table = run.table_file or table_path                 # 10.1: an alternative table's run reads its own
-        try:
-            d = invoke(machine.daemon, "daemon", machine.cache_dir, run.condition, run.seed,
-                       inputs={"workload": run.workload_file, "driver-table": run_table,
-                               "boot-default": run.boot_file},
-                       outputs={"out-schedule": run_dir / "schedule.json", "out-log": run_dir / "log.json"},
-                       stderr_log=run_dir / "daemon.stderr.log", telemetry=run.telemetry)
-            s = invoke(machine.simulator, "simulator", machine.cache_dir, run.condition, run.seed,
-                       inputs={"workload": run.workload_file, "schedule": run_dir / "schedule.json"},
-                       outputs={"out-trace": run_dir / "trace.jsonl"},
-                       stderr_log=run_dir / "simulator.stderr.log", with_condition=False)
-            shutil.copy(s.entry / "second" / "trace.jsonl", run_dir / "trace.rerun.jsonl")
-            sim = _trace_sim(run_dir / "trace.jsonl")
-            if sim != machine.simulator.version:
-                raise RunError(f"trace header names simulator {sim!r}, the machine configuration "
-                               f"{machine.simulator.version!r}")
-            rows, messages = records.build(run.workload_file, run_dir / "trace.jsonl", table=run.table,
-                                           seed=run.seed, schedule_path=run_dir / "schedule.json",
-                                           boot_default=run.boot_default, telemetry=run.telemetry)
-            records.write_csv(rows, run_dir / "records.csv")
-            (run_dir / "records-messages.json").write_text(json.dumps(messages, indent=1) + "\n")
-            for inv in (d, s):
-                result.cached += int(inv.cached)
-                result.executed += int(not inv.cached)
-            aggregates = agg.compute_aggregates(rows, scoring.windows_from_spec(scoring_spec, run.workload_id),
-                                                scoring.interactive_from_spec(scoring_spec, run.workload_id))
-            del rows
-            grade_rows_run = []
-            if run.condition != "fixed":
-                # Layer 1 for this run now, so the flip aggregates (9.21 decision 7) can read its graded queries
-                grade_rows_run, _gmessages = grader.grade_log(grader.Run(
-                    workload_id=run.workload_id, condition=run.condition, table=run.table, seed=run.seed,
-                    boot_default=run.boot_default, log=run_dir / "log.json", workload=run.workload_file,
-                    table_path=run_table, telemetry=run.telemetry))
-                records.write_csv(grade_rows_run, run_dir / "recognition-records.csv")
-                aggregates = aggregates + agg.flip_aggregates(
-                    aggregates, read_config_schedule(run_dir / "schedule.json"),
-                    read_recognition_log(run_dir / "log.json"), grade_rows_run)
-                aggregates.sort(key=agg.sort_key)
-            built[run.identity] = {"run": run, "dir": run_dir, "aggregates": aggregates, "messages": list(messages),
-                                   "grade_rows": grade_rows_run}
-        except (RunError, ValueError, OSError) as exc:
-            for name in ("schedule.json", "log.json", "trace.jsonl", "trace.rerun.jsonl", "records.csv"):
-                (run_dir / name).unlink(missing_ok=True)
-            result.failed.append(Failure(run=f"{run.workload_id}/{run.name}", reason=str(exc)))
+    built: Dict[tuple, dict] = {}           # identity -> {run, dir, aggregates, messages, grade_rows}
+    ctx = RunContext(machine=machine, exp_dir=exp_dir, table_path=table_path, scoring_spec=scoring_spec,
+                     harness=harness_version())
+    times = []
+    for run, out in run_all(runs, ctx, progress):
+        if "failure" in out:
+            result.failed.append(Failure(run=f"{run.workload_id}/{run.name}", reason=out["failure"]))
+            continue
+        result.executed += out["executed"]
+        result.cached += out["cached"]
+        result.results_cached += int(out["results_cached"])
+        times.append((run.workload_id, run.name, out["seconds"], "cache" if out["results_cached"] else "built"))
+        built[run.identity] = {"run": run, "dir": exp_dir / run.workload_id / run.name,
+                               "aggregates": out["aggregates"], "messages": out["messages"],
+                               "grade_rows": out["grade_rows"]}
+    with open(exp_dir / "run-times.csv", "w", newline="", encoding="utf-8") as f:   # wall seconds per run, for cost
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow(["workload_id", "run", "seconds", "records"])
+        w.writerows(sorted(times))
+    order = {f"{r.workload_id}/{r.name}": k for k, r in enumerate(runs)}
+    result.failed.sort(key=lambda f: order[f.run])                 # matrix order, however the runs finished
     if result.failed:
         (exp_dir / "failures.json").write_text(json.dumps(
             [{"run": f.run, "reason": f.reason} for f in result.failed], indent=1) + "\n")
@@ -489,5 +683,6 @@ def write_smoke_spec(path, machine: Machine, root, files=None, experiment="smoke
     return path
 
 
-__all__ = ["Failure", "Invocation", "Machine", "Program", "Result", "RunError", "RunSpec", "cache_key",
-           "expand", "invoke", "load_machine", "program_pin_errors", "run_experiment", "write_smoke_spec"]
+__all__ = ["Failure", "Invocation", "Machine", "Program", "Result", "RunContext", "RunError", "RunSpec",
+           "cache_key", "expand", "harness_version", "invoke", "is_heavy", "load_machine", "process_run",
+           "program_pin_errors", "result_key", "run_all", "run_experiment", "write_smoke_spec"]

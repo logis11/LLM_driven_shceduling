@@ -6,6 +6,9 @@ lint:               ## fixture pairs under the frozen contracts; the scoring spe
 	$(PY) tools/guards_lint.py
 	$(PY) tools/experiment_lint.py
 
+test-quick:         ## the suite without the tests marked slow (over about two seconds each): the edit loop
+	$(PY) -m pytest tools/tests -q -m "not slow and not coreset_wide"
+
 test:               ## the suite without the two coreset-wide mock tests (what CI runs; they exceed a 16 GB runner)
 	$(PY) -m pytest tools/tests -q -m "not coreset_wide"
 
@@ -21,4 +24,4 @@ gate:               ## the integration gate (10.2) on runner.yaml's real program
 gate-status:        ## the integration gate's parts against the RQ0 gate spec's version pins
 	$(PY) tools/integration_gate.py --status --machine runner.yaml
 
-.PHONY: lint test test-full smoke gate gate-status
+.PHONY: lint test-quick test test-full smoke gate gate-status

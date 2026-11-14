@@ -25,7 +25,7 @@ And three lints plus one checker that is not part of the harness:
 | `experiment_lint.py` | every per-experiment spec against its schema, the build, the pinned scoring spec's terms, the registries, and its pins |
 | `check_mlfq_levels.py` | the `x_mlfq_level` trace lines the readers skip, against each switch window; a diagnostic for the simulator, not a harness stage |
 
-`--help` on any command prints its flags. `make lint`, `make test`, `make test-full`, and `make smoke` in the parent directory run the lints, the suite as CI runs it, the whole suite, and the smoke; `make gate` and `make gate-status` run the integration gate on `runner.yaml` and read its results.
+`--help` on any command prints its flags. `make lint`, `make test-quick`, `make test`, `make test-full`, and `make smoke` in the parent directory run the lints, the suite without its slow tests, the suite as CI runs it, the whole suite, and the smoke; `make gate` and `make gate-status` run the integration gate on `runner.yaml` and read its results.
 
 ## Layout
 

@@ -4,13 +4,14 @@ decisions 7–8) — a throwaway experiment spec generated from the files as the
 are, run through `run.py`'s path, and discarded.
 
     smoke.py [--machine harness/runner.example.yaml] [--files N] [--workloads ID ...]
-             [--runs-dir DIR --cache-dir DIR] [--root REPO]
+             [--runs-dir DIR --cache-dir DIR] [--workers N] [--quiet] [--root REPO]
 
 `--files N` limits the judging set to the first N scored files (the test suite
 uses a handful; the make target runs them all); `--workloads` names the files
 instead (the integration gate's short run, 10.2). `--runs-dir` and `--cache-dir`
 put the runs and the cache elsewhere than the machine configuration says, so a
-run of its own leaves that cache as it was. The smoke checks the plumbing,
+run of its own leaves that cache as it was. `--workers` and `--quiet` are
+`run.py`'s. The smoke checks the plumbing,
 not the mocks' verdict, which is `invalid` by construction (c6-dual's oracle runs
 on fallback and the spec exempts nothing): exit 0 once a report was written,
 1 when a run failed or the spec was refused. The verdict is printed."""
@@ -24,7 +25,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from harness.evaluator import GateError  # noqa: E402
 from harness.runner import RunError, load_machine, run_experiment, write_smoke_spec  # noqa: E402
-from run import report_result  # noqa: E402
+from run import print_progress, report_result, with_workers  # noqa: E402
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 
@@ -36,10 +37,12 @@ def main(argv=None):
     ap.add_argument("--workloads", nargs="+", default=None)
     ap.add_argument("--runs-dir", default=None)
     ap.add_argument("--cache-dir", default=None)
+    ap.add_argument("--workers", type=int, default=None, help="runs at once (overrides the machine configuration)")
+    ap.add_argument("--quiet", action="store_true", help="no line per finished run")
     ap.add_argument("--root", default=str(REPO))
     args = ap.parse_args(argv)
     try:
-        machine = load_machine(args.machine, args.root)
+        machine = with_workers(load_machine(args.machine, args.root), args.workers)
         if args.runs_dir:
             machine = dataclasses.replace(machine, runs_dir=pathlib.Path(args.runs_dir).resolve())
         if args.cache_dir:
@@ -48,7 +51,7 @@ def main(argv=None):
             spec = write_smoke_spec(pathlib.Path(tmp) / "smoke.yaml", machine, args.root, files=args.files,
                                     only=args.workloads)
             print(f"smoke spec: {len(spec.read_text().splitlines())} lines, discarded after the run")
-            result = run_experiment(spec, machine, args.root)
+            result = run_experiment(spec, machine, args.root, progress=None if args.quiet else print_progress)
     except (GateError, RunError, OSError, ValueError, KeyError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

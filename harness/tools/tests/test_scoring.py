@@ -38,6 +38,7 @@ def one(spec, wid, entity, metric):
 
 # ------------------------------------------------------------------ the file
 
+@pytest.mark.slow
 def test_committed_spec_lints_clean():
     assert lint_spec(SPEC_PATH, SCHEMA_PATH, BUILD, RECIPES) == []
 
@@ -259,6 +260,7 @@ def test_declared_base_must_match_the_variant_recipe_and_terms_must_equal(tmp_pa
     assert any("c1-office" in e and "not a variant" in e for e in errs)
 
 
+@pytest.mark.slow
 def test_flipped_counterpart_may_drop_only_batch_terms(tmp_path):
     base_terms = [term(entity="editor"),
                   term(entity="build", metric="turnaround", aggregate="turnaround",
@@ -301,8 +303,11 @@ def test_schema_rejects_unknown_fields(tmp_path):
     assert any("note" in e for e in errs)
 
 
+@pytest.mark.slow
 def test_cli_exit_codes(tmp_path):
-    p = subprocess.run([sys.executable, str(TOOLS / "scoring_lint.py")], capture_output=True, text=True)
+    # the generated layer's lint (every generated set's compiled files, minutes) is `make lint`'s; its rule is
+    # tested in process below
+    p = subprocess.run([sys.executable, str(TOOLS / "scoring_lint.py"), "--no-generated"], capture_output=True, text=True)
     assert p.returncode == 0, p.stdout + p.stderr
     assert "scoring spec" in p.stdout and "lint clean" in p.stdout
     bad = write(tmp_path, minimal(**{"c2-p1a": {"terms": [term(entity="trainer")]}}))

@@ -22,6 +22,9 @@ FX = FIXTURES / "mock-experiment"
 BUILD = REPO / "dataset" / "build" / "coreset-single"
 EXAMPLE = REPO / "harness" / "runner.example.yaml"
 needs_build = pytest.mark.skipif(not BUILD.exists(), reason="compiled coreset absent")
+# three small scored files for the pipeline tests (the first scored files by name include c1-compile, whose
+# records take minutes a run); one of them where a test needs a single file
+SMALL = ["c1-office", "c1-photo", "c7-mail"]
 
 
 def _machine(tmp_path, **override):
@@ -156,10 +159,11 @@ def test_a_rerun_that_differs_is_a_failure_and_is_not_cached(tmp_path):
 
 # ---------------------------------------------------------------- pipeline
 
+@pytest.mark.slow
 @needs_build
 def test_the_pipeline_runs_a_handful_of_files_through_to_the_report(tmp_path):
     machine = _machine(tmp_path)
-    spec = write_smoke_spec(tmp_path / "smoke.yaml", machine, REPO, files=3)
+    spec = write_smoke_spec(tmp_path / "smoke.yaml", machine, REPO, only=SMALL)
     doc = yaml.safe_load(spec.read_text())
     assert len(doc["files"]["judging"]) == 3 and doc["boot_defaults"]["alternatives"] == []
     result = run_experiment(spec, machine, REPO)
@@ -187,11 +191,12 @@ def test_the_pipeline_runs_a_handful_of_files_through_to_the_report(tmp_path):
     assert again.report == result.report
 
 
+@pytest.mark.slow
 @needs_build
 def test_a_failed_run_stops_the_pipeline_before_scoring(tmp_path):
     machine = _machine(tmp_path, simulator=Program(command=[sys.executable, "-c", "import sys; sys.exit(9)"],
                                                     version="broken@0"))
-    spec = write_smoke_spec(tmp_path / "smoke.yaml", machine, REPO, files=1)
+    spec = write_smoke_spec(tmp_path / "smoke.yaml", machine, REPO, only=SMALL[:1])
     result = run_experiment(spec, machine, REPO)
     assert result.report is None and len(result.failed) >= 1
     assert "exit 9" in result.failed[0].reason
@@ -199,24 +204,26 @@ def test_a_failed_run_stops_the_pipeline_before_scoring(tmp_path):
     assert not (exp / "scores.csv").exists() and (exp / "failures.json").exists()
 
 
+@pytest.mark.slow
 @needs_build
 def test_a_trace_header_that_names_another_simulator_is_a_failure(tmp_path):
     machine = _machine(tmp_path)
     machine = _machine(tmp_path, simulator=Program(command=machine.simulator.command, version="other@9"))
-    spec = write_smoke_spec(tmp_path / "smoke.yaml", machine, REPO, files=1)
+    spec = write_smoke_spec(tmp_path / "smoke.yaml", machine, REPO, only=SMALL[:1])
     result = run_experiment(spec, machine, REPO)
     assert result.report is None and any("other@9" in f.reason for f in result.failed)
 
 
 # --------------------------------------------------------------- commands
 
+@pytest.mark.slow
 @needs_build
 def test_run_cli(tmp_path):
     machine_path = tmp_path / "machine.yaml"
     doc = yaml.safe_load(EXAMPLE.read_text())
     doc["runs_dir"] = str(tmp_path / "runs"); doc["cache_dir"] = str(tmp_path / "cache")
     machine_path.write_text(yaml.safe_dump(doc))
-    spec = write_smoke_spec(tmp_path / "smoke.yaml", load_machine(machine_path, REPO), REPO, files=1)
+    spec = write_smoke_spec(tmp_path / "smoke.yaml", load_machine(machine_path, REPO), REPO, only=SMALL[:1])
     proc = subprocess.run([sys.executable, str(TOOLS / "run.py"), "--spec", str(spec),
                            "--machine", str(machine_path)], capture_output=True, text=True)
     assert proc.returncode in (0, 2), proc.stderr
@@ -224,6 +231,7 @@ def test_run_cli(tmp_path):
     assert (tmp_path / "runs" / yaml.safe_load(spec.read_text())["experiment"] / "report.json").exists()
 
 
+@pytest.mark.slow
 @needs_build
 def test_smoke_cli_generates_runs_and_discards_the_spec(tmp_path):
     machine_path = tmp_path / "machine.yaml"
@@ -231,7 +239,7 @@ def test_smoke_cli_generates_runs_and_discards_the_spec(tmp_path):
     doc["runs_dir"] = str(tmp_path / "runs"); doc["cache_dir"] = str(tmp_path / "cache")
     machine_path.write_text(yaml.safe_dump(doc))
     proc = subprocess.run([sys.executable, str(TOOLS / "smoke.py"), "--machine", str(machine_path),
-                           "--files", "1"], capture_output=True, text=True)
+                           "--workloads", SMALL[0]], capture_output=True, text=True)
     assert proc.returncode == 0, proc.stderr                  # the smoke's code is not the verdict's
     assert "verdict:" in proc.stdout
     # the generated spec is gone; only pre-registered experiments remain (the RQ0 gate spec since 8.8)
@@ -295,6 +303,7 @@ def test_a_relative_program_path_resolves_against_the_root(tmp_path):
     assert load_machine(path, REPO).simulator.command == [str(REPO / "simulator" / "src" / "Makefile")]
 
 
+@pytest.mark.slow
 @needs_build
 def test_the_smoke_spec_takes_named_files(tmp_path):
     """10.2 decision 12: the short run's seven files, by name."""
@@ -303,3 +312,78 @@ def test_the_smoke_spec_takes_named_files(tmp_path):
     assert yaml.safe_load(spec.read_text())["files"]["judging"] == sorted(files)
     with pytest.raises(RunError, match="no-such-file"):
         write_smoke_spec(tmp_path / "smoke2.yaml", _machine(tmp_path), REPO, only=["no-such-file"])
+
+
+# ------------------------------------------------- runs at once, the results cache
+
+COMPARED = ("aggregates.csv", "scores.csv", "guards.csv", "grades.csv", "report.json", "report.md")
+PER_RUN = ("schedule.json", "log.json", "trace.jsonl", "records.csv", "records-messages.json", "recognition-records.csv")
+
+
+def _outputs(exp):
+    """Every file the comparison holds the two runners to, by path inside the experiment directory."""
+    files = {name: (exp / name).read_bytes() for name in COMPARED}
+    for path in sorted(exp.glob("*/*/*")):
+        if path.name in PER_RUN:
+            files[str(path.relative_to(exp))] = path.read_bytes()
+    return files
+
+
+@pytest.mark.slow
+@needs_build
+def test_runs_spread_over_processes_write_the_same_files_as_runs_one_at_a_time(tmp_path):
+    """The stages after the runs read them sorted by identity, so how many ran at once changes no byte."""
+    one = _machine(tmp_path / "one")
+    spec = write_smoke_spec(tmp_path / "smoke.yaml", one, REPO, only=SMALL)
+    exp = yaml.safe_load(spec.read_text())["experiment"]
+    first = run_experiment(spec, one, REPO)
+    many = _machine(tmp_path / "many", workers=3, heavy_workers=1, heavy_mb=0)   # every file heavy
+    third = _machine(tmp_path / "third", workers=3, heavy_workers=1, heavy_mb=1000)  # every file light
+    second = run_experiment(spec, many, REPO)
+    light = run_experiment(spec, third, REPO)
+    assert first.failed == [] and second.failed == [] and light.failed == []
+    assert first.results_cached == second.results_cached == light.results_cached == 0   # three caches, all built
+    assert _outputs(one.runs_dir / exp) == _outputs(many.runs_dir / exp) == _outputs(third.runs_dir / exp)
+    times = (many.runs_dir / exp / "run-times.csv").read_text().splitlines()
+    assert times[0] == "workload_id,run,seconds,records" and len(times) == 1 + 3 * 4
+
+
+@pytest.mark.slow
+@needs_build
+def test_a_run_met_again_is_served_from_the_results_cache_until_the_harness_changes(tmp_path, monkeypatch):
+    machine = _machine(tmp_path)
+    spec = write_smoke_spec(tmp_path / "smoke.yaml", machine, REPO, only=SMALL[:1])
+    exp = machine.runs_dir / yaml.safe_load(spec.read_text())["experiment"]
+    first = run_experiment(spec, machine, REPO)
+    built = _outputs(exp)
+    again = run_experiment(spec, machine, REPO)
+    assert again.results_cached == 4 and again.report == first.report       # fixed, oracle, two random seeds
+    assert _outputs(exp) == built
+    for run_dir in exp.glob("*/*"):                                          # the records placed as if built
+        assert (run_dir / "records.csv").is_file()
+    import harness.runner as runner_mod
+    monkeypatch.setattr(runner_mod, "harness_version", lambda: "another harness")
+    rebuilt = run_experiment(spec, machine, REPO)
+    assert rebuilt.results_cached == 0 and _outputs(exp) == built
+
+
+def test_the_results_key_moves_with_each_thing_a_run_s_results_read():
+    from harness.runner import RunContext, RunSpec, result_key
+    base = RunSpec("mock-score", "oracle", "prior", "", "", REPO / "b.json", REPO / "w.json", "focus")
+    ctx = RunContext(machine=None, exp_dir=REPO, table_path=REPO, scoring_spec={"files": {}}, harness="h1")
+    k = result_key(ctx, base, "d1", "s1")
+    assert k == result_key(ctx, base, "d1", "s1")
+    assert k != result_key(ctx, base, "d2", "s1") and k != result_key(ctx, base, "d1", "s2")
+    other = RunSpec("mock-score", "oracle", "prior", "", "", REPO / "b.json", REPO / "w.json", "names")
+    assert k != result_key(ctx, other, "d1", "s1")
+    assert k != result_key(RunContext(None, REPO, REPO, {"files": {}}, "h2"), base, "d1", "s1")
+
+
+def test_the_machine_configuration_names_its_workers(tmp_path):
+    doc = yaml.safe_load(EXAMPLE.read_text())
+    assert load_machine(EXAMPLE, REPO).workers == 1                          # one at a time unless named
+    doc.update(workers=6, heavy_workers=2, heavy_mb=40)
+    path = tmp_path / "machine.yaml"
+    path.write_text(yaml.safe_dump(doc))
+    m = load_machine(path, REPO)
+    assert (m.workers, m.heavy_workers, m.heavy_mb) == (6, 2, 40)

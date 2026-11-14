@@ -21,4 +21,7 @@ simulator:
 build_dir: dataset/build/coreset-single      # the compiled workloads
 boot_defaults_dir: harness/boot-defaults     # <stem>.json per boot default the spec names
 runs_dir: runs                               # <runs_dir>/<experiment>/<workload>/<run>/
-cache_dir: runs/.cache                       # one entry per invocation key, both executions kept
+cache_dir: runs/.cache                       # one entry per invocation key, both executions kept; results/ per run
+# workers: 6         # runs at once on files under heavy_mb (default 1: one after another, in the runner's process)
+# heavy_workers: 1   # runs at once on files of heavy_mb or more, each in a fresh process
+# heavy_mb: 50       # a workload file this large is heavy (c6-dual's records hold gigabytes)

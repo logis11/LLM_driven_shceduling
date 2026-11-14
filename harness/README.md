@@ -43,6 +43,7 @@ Everything runs from this directory with Python 3.12 and `tools/requirements.txt
 pip install -r tools/requirements.txt -r ../dataset/tools/requirements.txt
 make -C ../dataset dataset        # compiles dataset/build/coreset-single
 make lint                         # fixtures, scoring spec, guard spec, experiment specs, boot defaults
+make test-quick                   # the suite without the tests marked slow (the pipeline end to end, the coreset-wide scoring lint): the edit loop
 make test                         # the suite without the two coreset-wide mock tests, what CI runs; about 20 min after the build
 make test-full                    # the whole suite; the two coreset-wide tests hold about 10 GB resident, more than a 16 GB CI runner
 make smoke                        # the whole pipeline on the mocks over every scored coreset file, 4 h 50 min on the home machine (9.14 D14)
