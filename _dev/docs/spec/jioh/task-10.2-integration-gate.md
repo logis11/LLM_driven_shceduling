@@ -59,7 +59,7 @@ The RQ0 gate spec gains two pins, the simulator's and the daemon's version strin
 
 ### 12. A short attended run through the runner
 
-The smoke tool runs on the real machine configuration over seven files — `c1-photo`, `c1-office`, `c7-mail`, `c2-p2b`, `c1-gaming`, `c7-compile`, `c1-compile` — in runs and cache directories of its own, so the cold smoke of 10.3 keeps an empty cache.
+The smoke tool runs on the real machine configuration over seven files — `c1-photo`, `c1-office`, `c7-mail`, `c2-p2b`, `c1-gaming`, `c7-compile`, `c1-compile` — in runs and cache directories of its own, so the cold smoke of 10.4 keeps an empty cache.
 
 ### 13. One entry point, parts that run alone
 

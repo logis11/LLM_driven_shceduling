@@ -48,7 +48,7 @@ At the phase's end: the verdict read from the report after every guard; the repo
 
 ### 9. Structure of the phase
 
-Five sub-tasks, in order: the gate spec's pre-run lines (10.1); the integration gate (10.2); the cold smoke and the cost response (10.3); the RQ0 run, its verdict and its record (10.4); the docs sweep (10.5) — the harness guide's conformance passages, the mocks' README, the docs index, the TODO. The Layer 1 and RQ4 item of the old Phase 10 list moves to the Backlog, carried by the experiment specs its text names. Schedule: 10.1 and 10.2 before the next weekend; 10.3's smoke left running over the overnight leave that weekend, its cost response decided in the week after; 10.4 over the leave two weeks on; 10.5 after.
+Six sub-tasks, in order: the gate spec's pre-run lines (10.1); the integration gate (10.2); the variant lines reading a failed guard (10.3); the cold smoke and the cost response (10.4); the RQ0 run, its verdict and its record (10.5); the docs sweep (10.6) — the harness guide's conformance passages, the mocks' README, the docs index, the TODO. The Layer 1 and RQ4 item of the old Phase 10 list moves to the Backlog, carried by the experiment specs its text names. Schedule: 10.1 and 10.2 before the next weekend; 10.4's smoke left running over the overnight leave that weekend, its cost response decided in the week after; 10.5 over the leave two weeks on; 10.6 after.
 
 ### 10. The smoke does not wait for the gate
 
@@ -61,4 +61,4 @@ If 인경민's owed items are not done by the overnight leave, the cold smoke ru
 
 ## Open items
 
-Left to each sub-task's own spec session: the cost response's choice and its figures (10.3); the report's place in the repository (10.4).
+Left to each sub-task's own spec session: the cost response's choice and its figures (10.4); the report's place in the repository (10.5).

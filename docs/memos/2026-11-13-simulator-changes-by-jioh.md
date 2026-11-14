@@ -1,6 +1,6 @@
 # 2026-11-13의 변동 사항 — 인지오가 simulator tree에서 바꾼 것
 
-> Status: memo · Created 2026-11-13 · Updated 2026-11-13
+> Status: memo · Created 2026-11-13 · Updated 2026-11-14
 > From 인지오 to 인경민.
 
 ## TL;DR
@@ -11,7 +11,7 @@
   - **AE**: idle class의 task는 `batch_bandwidth_cap`을 켜지 않아요.
 - 경민이 할 일은 셋이에요. pull한 뒤 다시 build하기, AD와 AE 읽어 보기, batch-class 메모 §7의 항목 5.
 - 통합 gate(TODO의 10.2)를 막는 일은 경민 쪽에 없어요.
-- cold smoke(TODO의 10.3)에서 judging 파일이 starvation guard에 걸리면, starvation 안전망의 설계가 경민에게 돌아가요.
+- cold smoke(TODO의 10.4)에서 judging 파일이 starvation guard에 걸리면, starvation 안전망의 설계가 경민에게 돌아가요.
 
 ## 1. 경민이 할 일
 

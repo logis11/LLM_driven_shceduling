@@ -10,7 +10,7 @@ Sub-task 10.1 of Phase 10 (`_dev/docs/spec/jioh/phase-10-integration-and-the-rq0
 - `docs/research-claims.md`, the harness guide's reporting-line table (`docs/harness/harness-and-records-guide.md` §19.4) and `harness/experiments/README.md`'s list of line types, changed in the same commits.
 - One `harness/CHANGELOG.md` entry and one re-pin of the RQ0 gate spec.
 
-Out of scope: the cost response to the runs the cap band adds (10.3); any change to the primary driver table's rows or to the wanted rows' cap values.
+Out of scope: the cost response to the runs the cap band adds (10.4); any change to the primary driver table's rows or to the wanted rows' cap values.
 
 ## Locked decisions
 
@@ -32,7 +32,7 @@ Three driver tables, each the primary `daemon/driver-table/prior.yaml` with ever
 
 ### 5. The cap band's runs: the oracle and random conditions re-run under each table, at the same N, on the judging files
 
-`fixed` reads no driver table and is shared. Under each of the three tables the oracle condition and the random condition's N seeds are re-run on the judging files only, N the run's own (the `n-grounding` statement's rule for the sensitivity lines); if 10.3 changes N by a changelog entry, this line follows it. The `n-grounding` statement's multiple of the main judging run is restated to the new total.
+`fixed` reads no driver table and is shared. Under each of the three tables the oracle condition and the random condition's N seeds are re-run on the judging files only, N the run's own (the `n-grounding` statement's rule for the sensitivity lines); if 10.4 changes N by a changelog entry, this line follows it. The `n-grounding` statement's multiple of the main judging run is restated to the new total.
 
 ### 6. The three tables are committed files, each pinned
 
@@ -53,7 +53,7 @@ The two lines, the three tables' pins and the `n-grounding` restatement land und
 ## Invariants
 
 - The RQ0 gate spec's pinned inputs are committed files; the cap band adds files, not run-time derivation.
-- Nothing in the run changes after execution begins except by a harness changelog entry made before any run; this sub-task's entry precedes 10.3 and the run.
+- Nothing in the run changes after execution begins except by a harness changelog entry made before any run; this sub-task's entry precedes 10.4 and the run.
 
 ## Open items
 
