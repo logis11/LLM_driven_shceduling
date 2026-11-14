@@ -9,4 +9,6 @@ Each part of the gate (`harness/tools/integration_gate.py`; `make -C harness gat
 | `daemon` | `daemon/daemon.py` and the harness's mock daemon on the 19 425 runs the runner expands from `harness/experiments/rq0-gate.yaml`, schedule and log compared byte for byte | `daemon@62c71f0d2de0` |
 | `short` | `harness/tools/smoke.py` on the home machine's configuration over seven files (`c1-photo`, `c1-office`, `c7-mail`, `c2-p2b`, `c1-gaming`, `c7-compile`, `c1-compile`), runs under `runs/integration-gate/` | both |
 
+`records-profile-c1-compile.txt` is the records builder profiled on `c1-compile`'s `fixed` run of the short run, for 10.3's cost response: 92 % of the time in `held()` (`harness/tools/harness/primitives.py`), 7 % in the rows' schema check.
+
 The paths in the files are relative to the repository root.

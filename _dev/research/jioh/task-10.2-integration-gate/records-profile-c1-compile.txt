@@ -1,0 +1,61 @@
+# records.build profiled on c1-compile's fixed run of the short run (2026-11-14)
+
+Under cProfile, which inflates the times; the shares hold. The run: runs/integration-gate/smoke/c1-compile/fixed~focus (simulator@0d323c84470a), the trace 56 MB, 347,362 records rows.
+
+## The script
+
+import cProfile, pstats, sys, time, pathlib, resource
+sys.path.insert(0, "harness/tools")
+from harness import records, scoring
+from harness import aggregates as agg
+REPO = pathlib.Path(".")   # the repository root
+run = REPO / "runs/integration-gate/smoke/c1-compile/fixed~focus"
+wl = REPO / "dataset/build/coreset-single/c1-compile.workload.json"
+spec = scoring.load_spec(REPO / "harness/scoring/scoring-spec.yaml")
+prof = cProfile.Profile()
+t0 = time.time()
+prof.enable()
+rows, msgs = records.build(wl, run / "trace.jsonl", schedule_path=run / "schedule.json", telemetry="focus")
+prof.disable()
+t1 = time.time()
+records.write_csv(rows, pathlib.Path(sys.argv[1]) / "records.csv")
+t2 = time.time()
+a = agg.compute_aggregates(rows, scoring.windows_from_spec(spec, "c1-compile"), scoring.interactive_from_spec(spec, "c1-compile"))
+t3 = time.time()
+print(f"rows {len(rows)}; records.build {t1-t0:.0f} s; write_csv {t2-t1:.0f} s; aggregates {t3-t2:.0f} s; peak RSS {resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1e9:.2f} GB")
+pstats.Stats(prof).sort_stats("cumulative").print_stats(25)
+
+## The output
+
+rows 347362; records.build 2500 s; write_csv 2 s; aggregates 15 s; peak RSS 0.91 GB
+         14863077114 function calls (14845217393 primitive calls) in 2499.563 seconds
+
+   Ordered by: cumulative time
+   List reduced from 203 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.175    0.175 2499.566 2499.566 harness/tools/harness/records.py:41(build)
+6188282/758092    1.440    0.000 2483.769    0.003 {built-in method builtins.next}
+        1    2.062    2.062 2314.727 2314.727 harness/tools/harness/primitives.py:97(compute)
+   168698    0.161    0.000 2301.313    0.014 harness/tools/harness/primitives.py:234(<genexpr>)
+   168698    0.316    0.000 2301.152    0.014 harness/tools/harness/primitives.py:232(held)
+   168699 1476.482    0.009 2300.862    0.014 {built-in method builtins.sum}
+14229591951  824.369    0.000  824.369    0.000 harness/tools/harness/primitives.py:233(<genexpr>)
+        1    0.685    0.685  182.727  182.727 harness/tools/harness/records.py:89(validate_rows)
+   347362    0.123    0.000  182.001    0.001 site-packages/jsonschema/exceptions.py:435(best_match)
+5777552/347362    4.844    0.000  181.760    0.001 site-packages/jsonschema/validators.py:350(iter_errors)
+15757054/8977529   25.190    0.000  174.678    0.000 site-packages/jsonschema/validators.py:397(descend)
+   347362    1.698    0.000  139.137    0.000 site-packages/jsonschema/_keywords.py:332(allOf)
+5430190/5210430    4.137    0.000  107.288    0.000 site-packages/jsonschema/_keywords.py:382(if_)
+  9103213    6.323    0.000  101.447    0.000 site-packages/jsonschema/_keywords.py:290(properties)
+  5430190    2.961    0.000   73.467    0.000 site-packages/jsonschema/validators.py:486(is_valid)
+ 21187244   26.390    0.000   54.591    0.000 site-packages/jsonschema/validators.py:340(evolve)
+ 21187245    4.921    0.000   18.023    0.000 <attrs generated methods jsonschema.validators.create.<locals>.Validator>:26(__init__)
+ 15757054    3.235    0.000   14.693    0.000 site-packages/referencing/_core.py:700(in_subresource)
+  8005262    8.296    0.000   13.794    0.000 site-packages/jsonschema/exceptions.py:160(_set)
+ 21187245   11.149    0.000   13.102    0.000 site-packages/jsonschema/validators.py:283(__attrs_post_init__)
+ 14309060    2.996    0.000   12.712    0.000 site-packages/jsonschema/validators.py:453(is_type)
+ 15757055    3.433    0.000   11.458    0.000 site-packages/referencing/_core.py:227(id)
+ 15757055    5.615    0.000   10.566    0.000 site-packages/referencing/_core.py:165(create_resource)
+122200218   10.250    0.000   10.250    0.000 {built-in method builtins.getattr}
+ 14309060    5.597    0.000    9.715    0.000 site-packages/jsonschema/_types.py:90(is_type)
