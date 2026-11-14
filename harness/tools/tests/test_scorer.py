@@ -151,6 +151,22 @@ def test_excess_aggregates_on_mock_switch(fixture_dir):
     assert out[("share_inside_switch_windows", "")] == "0.125000000000"
 
 
+def test_the_boost_window_lookup_agrees_with_a_scan_of_every_window():
+    """The per-switch excess's boost-window check (10.4 decision 11, 2026-11-14): the sorted lookup says a time is
+    in a window exactly when a scan of every window does — nested, overlapping, touching and single-point windows,
+    and every time at, beside and between their ends."""
+    import random
+    rng = random.Random(7)
+    for _ in range(300):
+        windows = []
+        for _ in range(rng.randint(0, 12)):
+            a = rng.randint(0, 200)
+            windows.append((a, a + rng.choice((0, 1, rng.randint(0, 60)))))
+        within = agg._within_any(windows)
+        for t in range(-2, 265):
+            assert within(t) == any(a <= t <= b for a, b in windows), (windows, t)
+
+
 def _wake_records(condition, wakes, t_end=100000, extra=()):
     """Typed records rows of one run of workload `w`: the lane's busy row and one
     editor ready_wait wake row per (t, value, channel)."""

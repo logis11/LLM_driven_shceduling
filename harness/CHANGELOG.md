@@ -2,6 +2,13 @@
 
 The harness tree's own record of what its committed data files and programs changed, newest first. The scoring spec (`scoring/scoring-spec.yaml`) and the guard spec (`guards/guard-spec.yaml`) are frozen here (Phase 8 spec, decision 19): a change to either after its freeze is an entry below before any run reads it, and the RQ0 gate spec (`experiments/rq0-gate.yaml`) pins the frozen bytes by hash. The metrics doc and the data contracts keep their own changelogs.
 
+## 2026-11-14 — the per-switch excess's boost-window check by lookup (jioh)
+
+Decided by 인지오 (`_dev/docs/spec/jioh/task-10.4-cold-smoke-and-cost-response.md`, decision 14). No pinned file changes, and no pin moves; no output changes — on the 39 runs of the first cold smoke whose aggregates carry a per-switch excess (61 rows), the records, records messages, aggregates and graded queries built again with the change equal the ones built before it (`_dev/research/jioh/task-10.4-cold-smoke-and-cost-response/excess-check.json`).
+
+- **Aggregates**, `tools/harness/aggregates.py`: whether an interactive latency point of an MLFQ config interval lies in one of the interval's boost windows is read from the windows sorted by start once, each beside the latest end among the windows starting at or before it (`_within_any`, new), in place of a scan of every window for each point, twice. The rule is unchanged. `c1-transcode/random-1~focus` — one MLFQ interval, 1,014,792 `app_latency` points, 47,599 boost windows — took 4,297 s in the first cold smoke; its records, aggregates and graded queries build in 42.6 s.
+- **Tests**, `tools/tests/test_scorer.py`: the lookup against a scan of every window on 300 drawn sets of nested, overlapping, touching and single-point windows, at every time at, beside and between their ends.
+
 ## 2026-11-14 — the rows' table column takes a cap-band run's label (jioh)
 
 Decided by 인지오 (`_dev/docs/spec/jioh/task-10.4-cold-smoke-and-cost-response.md`, decision 11, and the 10.2 spec's decision 14). On the cold smoke of 2026-11-14 every run under an alternative driver table — 153 runs, the 17 judging files' `oracle`, `random-1` and `random-2` under each of `floor-0.2`, `floor-0.333` and `floor-0.5` — failed at the records' schema check: the runner labels such a run `<role>@<stem>` in the `table` column, as the experiment-spec schema's `driver_table_alternatives` states (10.1), and the five row schemas took the role alone. No pinned file changes, and no pin moves; on a run under the primary table no output changes.

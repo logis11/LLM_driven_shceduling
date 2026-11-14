@@ -47,6 +47,7 @@ computed exactly on the integer records with numpy's "linear" convention
 neighbours; R type 7), so no float noise reaches the file.
 """
 
+import bisect
 import json
 from decimal import ROUND_HALF_EVEN, Decimal
 from fractions import Fraction
@@ -98,6 +99,22 @@ def run_identity(rows) -> dict:
 def _in_window(t, window):
     start, end = window
     return (start is None or t >= start) and (end is None or t <= end)
+
+
+def _within_any(windows):
+    """Whether a time lies in any of the closed windows [a, b], as `any(a <= t <= b for a, b in windows)`: the
+    windows sorted by start once, each beside the latest end among the windows starting at or before it, so t is
+    in one exactly when the last start at or before t carries an end at or after t."""
+    windows = sorted(windows)
+    starts, reach, latest = [a for a, _ in windows], [], None
+    for _, b in windows:
+        latest = b if latest is None or b > latest else latest
+        reach.append(latest)
+
+    def within(t):
+        i = bisect.bisect_right(starts, t) - 1
+        return i >= 0 and reach[i] >= t
+    return within
 
 
 FRAME_CHUNK = 1 << 20          # rows per chunk when the frame consumes its rows
@@ -279,13 +296,14 @@ def compute_aggregates(rows, windows=None, interactive=None, consume=False):
             if interval.empty:
                 continue
             t_i_end = int(interval["t"].iloc[0]) + int(interval["value"].iloc[0])
-            boosts = [(int(t), int(t) + int(v)) for t, v in zip(bw["t"], bw["value"]) if t_s <= int(t) <= t_i_end]
+            in_boosts = _within_any([(int(t), int(t) + int(v)) for t, v in zip(bw["t"], bw["value"])
+                                     if t_s <= int(t) <= t_i_end])
             for entity, metric in interactive.items():
                 g = df[(df["metric"] == metric) & (df["entity"] == entity)]
                 pts = [(int(t), int(v)) for t, v in zip(g["t"], g["value"]) if t_s <= int(t) <= t_i_end]
                 in_switch = [v for t, v in pts if t <= t_s + v_s]
-                in_boost = [v for t, v in pts if any(a <= t <= b for a, b in boosts)]
-                outside = [v for t, v in pts if t > t_s + v_s and not any(a <= t <= b for a, b in boosts)]
+                in_boost = [v for t, v in pts if in_boosts(t)]
+                outside = [v for t, v in pts if t > t_s + v_s and not in_boosts(t)]
                 if not outside:
                     continue
                 mean_out = Fraction(sum(outside), len(outside))
