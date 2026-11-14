@@ -2,6 +2,14 @@
 
 The harness tree's own record of what its committed data files and programs changed, newest first. The scoring spec (`scoring/scoring-spec.yaml`) and the guard spec (`guards/guard-spec.yaml`) are frozen here (Phase 8 spec, decision 19): a change to either after its freeze is an entry below before any run reads it, and the RQ0 gate spec (`experiments/rq0-gate.yaml`) pins the frozen bytes by hash. The metrics doc and the data contracts keep their own changelogs.
 
+## 2026-11-14 — the rows' table column takes a cap-band run's label (jioh)
+
+Decided by 인지오 (`_dev/docs/spec/jioh/task-10.4-cold-smoke-and-cost-response.md`, decision 11, and the 10.2 spec's decision 14). On the cold smoke of 2026-11-14 every run under an alternative driver table — 153 runs, the 17 judging files' `oracle`, `random-1` and `random-2` under each of `floor-0.2`, `floor-0.333` and `floor-0.5` — failed at the records' schema check: the runner labels such a run `<role>@<stem>` in the `table` column, as the experiment-spec schema's `driver_table_alternatives` states (10.1), and the five row schemas took the role alone. No pinned file changes, and no pin moves; on a run under the primary table no output changes.
+
+- **Row schemas**, `records/schema/records.schema.json`, `guards/schema/guards.schema.json`, `aggregates/schema/aggregates.schema.json`, `scores/schema/scores.schema.json`, `grades/schema/grades.schema.json`: `table` is `prior` or `calibrated`, optionally followed by `@` and a stem written as the experiment-spec schema writes one (`^[A-Za-z0-9][A-Za-z0-9._-]*$`), in place of the two roles alone.
+- **Commands**, `tools/records.py`: `--table` takes the same label, the rows' schema check refusing any other.
+- **Tests**, `tools/tests/test_runner.py`: a run under the pinned `floor-0.2` table on `c7-mail` through the real programs to the report, its records written and its guard, aggregate, score and grade rows labelled `prior@floor-0.2`.
+
 ## 2026-11-14 — a line that reads a gap from a run with a failed guard gives no reading (jioh)
 
 Decided by 인지오 (`_dev/docs/spec/jioh/task-10.3-variant-lines-read-a-failed-guard.md`; `simulator/memo/memo_261111.md` Part L, L3 decision 4: under `oracle` the starvation guard fails on the chain-scaled variants of `c2-p2a` and `c2-p2b`, the files the `chain-x1.2` and `chain-x1.4` lines read). No pinned file changes, and no pin moves; on runs with no failed non-exempt guard no gap, count or verdict changes, and the verdict is invalid only on a judging file's failed run, as before.

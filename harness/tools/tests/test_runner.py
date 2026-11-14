@@ -274,6 +274,29 @@ def test_expand_adds_the_cap_band_s_runs_under_each_alternative_table(tmp_path):
     assert len({r.identity for r in runs}) == 8
 
 
+@pytest.mark.slow
+@needs_build
+def test_a_cap_band_run_goes_through_to_the_report_with_its_label_in_every_row(tmp_path):
+    """10.4 decision 11: a run under an alternative driver table builds its records and its guard, aggregate,
+    score and grade rows, each row's table column `<role>@<stem>` (the experiment-spec schema's
+    driver_table_alternatives), and the report is written."""
+    machine = _machine(tmp_path)
+    spec = write_smoke_spec(tmp_path / "smoke.yaml", machine, REPO, only=SMALL[2:])
+    doc = yaml.safe_load(spec.read_text())
+    gate = yaml.safe_load((REPO / "harness" / "experiments" / "rq0-gate.yaml").read_text())
+    doc["pins"]["driver_table_alternatives"] = {"floor-0.2": gate["pins"]["driver_table_alternatives"]["floor-0.2"]}
+    spec.write_text(yaml.safe_dump(doc))
+    result = run_experiment(spec, machine, REPO)
+    assert result.failed == [] and result.report is not None
+    exp = machine.runs_dir / doc["experiment"]
+    assert (exp / SMALL[2] / "oracle@floor-0.2~focus" / "records.csv.gz").exists()
+    from harness import aggregates as agg_mod, grader, scorer
+    for name, columns in (("guards.csv", guards_mod.COLUMNS), ("aggregates.csv", agg_mod.COLUMNS),
+                          ("scores.csv", scorer.COLUMNS), ("grades.csv", grader.COLUMNS)):
+        tables = {r["table"] for r in read_csv(exp / name, columns)}
+        assert "prior@floor-0.2" in tables, name
+
+
 def _pinned_spec(tmp_path, **versions):
     doc = yaml.safe_load((FX / "experiment.yaml").read_text())
     for role, version in versions.items():

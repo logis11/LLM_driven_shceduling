@@ -32,10 +32,8 @@
     },
     "table": {
       "type": "string",
-      "enum": [
-        "prior",
-        "calibrated"
-      ]
+      "pattern": "^(prior|calibrated)(@[A-Za-z0-9][A-Za-z0-9._-]*)?$",
+      "description": "the driver table's role; under an alternative driver table (10.1) `<role>@<stem>`"
     },
     "seed": {
       "type": "string",

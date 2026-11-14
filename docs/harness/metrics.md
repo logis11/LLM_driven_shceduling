@@ -1,6 +1,6 @@
 # Metrics — primitives, records, and the aggregates the research reads
 
-> Status: normative · Created 2026-09-08 · Updated 2026-10-31
+> Status: normative · Created 2026-09-08 · Updated 2026-11-14
 
 Every number the project reports is defined here. The document fixes three things: the **primitives** — the raw observations the harness computes from a trace or a recognition log; the **records** file they land in; and the **aggregates** — the statistics, the normalisation rule, and the constants that turn records into the figures the research questions ask for. Per-file weights are not here; they are data, in the scoring spec (`harness/scoring/scoring-spec.yaml`, §2). The code that implements the trace primitives lives in `harness/`; the grader that implements the recognition primitives is built in Phase 8 to the definitions below.
 
@@ -72,7 +72,7 @@ One CSV file per trace (or per recognition log), every row self-contained, twent
 |---|---|
 | `workload_id` | the workload |
 | `condition` | the recognizer condition (`fixed`, `random`, `shipped_catalogue`, `strongest_name_table`, `llm_vocab`, `llm_algo`, `llm_full`, `oracle`; the two name-table conditions replaced `whitelist` on 2026-10-09, 9.12 D6 and 9.14 decision 7) |
-| `table` | `prior` or `calibrated`; empty for `fixed`, which uses no table |
+| `table` | `prior` or `calibrated`; under an alternative driver table of the cap band, the primary's role and the alternative's stem, `prior@floor-0.2` (10.1); empty for `fixed`, which uses no table |
 | `seed` | `random`'s PRNG seed; empty otherwise |
 | `boot_default` | the id of the boot configuration the run started in; empty for the primary. Only the `fixed` runs of the RQ0 gate spec's sensitivity check carry one; the scorer pairs a run with the `fixed` run of the same `boot_default` (added 2026-09-11, 8.2) |
 | `telemetry` | the telemetry shape the run's daemon showed the recognizer (data-contracts §5, rule 6): `focus`, the name → count multiset with the focus holder, or `names`, the multiset alone. An axis of every experiment, orthogonal to the condition: the scorer pairs a run with the `fixed` run of its own shape, the grader groups by it, and a `paired` grades row of one condition under its two shapes is the field's measured difference (added 2026-10-11, 9.17) |

@@ -24,7 +24,9 @@ def main():
     ap.add_argument("--trace", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--schedule", default=None, help="the daemon's config schedule for this run")
-    ap.add_argument("--table", default="", choices=["", "prior", "calibrated"])
+    ap.add_argument("--table", default="",
+                    help="the driver table's role, prior or calibrated; under an alternative driver table "
+                         "<role>@<stem> (10.1); empty for fixed")
     ap.add_argument("--seed", default="")
     ap.add_argument("--boot-default", default="", dest="boot_default",
                     help="id of the boot configuration the run started in; empty = the primary")

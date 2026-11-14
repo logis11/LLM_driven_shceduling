@@ -12,7 +12,7 @@ A row is one observation of one entity at one time: a task's wait after it becam
 
 ```
 python3 tools/records.py --run RUN.json --trace TRACE.jsonl --schedule SCHEDULE.json --out records.csv \
-        [--table prior|calibrated] [--seed N] [--boot-default STEM]
+        [--table prior|calibrated|ROLE@STEM] [--seed N] [--boot-default STEM]
 ```
 
 The readers validate the trace line by line and refuse it at the first violation. The primitives fold the event stream into rows and also emit guard messages, printed on stderr: a chain whose tail iterations do not match its head ticks, a task with more input wake lines than the run file's input wake events or one that ends blocked on an input WAIT with an input wake sent to it unconsumed (a task ending with keystrokes it has not reached is no message), a wake line past the last WAIT of its task's program, an applied config entry the schedule does not carry. The runner does the same in process for every run and records the messages in its manifest.

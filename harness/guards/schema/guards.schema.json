@@ -9,7 +9,7 @@
   "properties": {
     "workload_id": {"type": "string", "minLength": 1},
     "condition": {"type": "string", "enum": ["fixed", "random", "shipped_catalogue", "strongest_name_table", "llm_vocab", "llm_algo", "llm_full", "oracle"]},
-    "table": {"type": "string", "enum": ["prior", "calibrated"]},
+    "table": {"type": "string", "pattern": "^(prior|calibrated)(@[A-Za-z0-9][A-Za-z0-9._-]*)?$", "description": "the driver table's role; under an alternative driver table (10.1) `<role>@<stem>`"},
     "seed": {"type": "string", "minLength": 1},
     "boot_default": {"type": "string", "minLength": 1},
     "telemetry": {"type": "string", "enum": ["focus", "names"], "description": "the telemetry shape the run's daemon showed (9.17)"},
