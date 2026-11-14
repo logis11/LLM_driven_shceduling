@@ -1,0 +1,475 @@
+{
+ "smoke": "runs/cold-smoke",
+ "runs": 39,
+ "identical": true,
+ "results": [
+  {
+   "run": "c1-backup/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 3.4
+  },
+  {
+   "run": "c1-compile/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 87.3
+  },
+  {
+   "run": "c1-compile@corner-high/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 88.8
+  },
+  {
+   "run": "c1-compile@corner-low/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 72.1
+  },
+  {
+   "run": "c1-compile@venue-x0.8/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 79.6
+  },
+  {
+   "run": "c1-indexing/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 0.9
+  },
+  {
+   "run": "c1-ml-train/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 7.8
+  },
+  {
+   "run": "c1-ml-train@corner-high/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 7.9
+  },
+  {
+   "run": "c1-ml-train@corner-low/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 7.6
+  },
+  {
+   "run": "c1-ml-train@venue-x0.8/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 9.1
+  },
+  {
+   "run": "c1-ml-train@venue-x1.25/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 7.0
+  },
+  {
+   "run": "c1-render/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 0.7
+  },
+  {
+   "run": "c1-render@venue-x0.8/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 0.8
+  },
+  {
+   "run": "c1-render@venue-x1.25/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 0.7
+  },
+  {
+   "run": "c1-transcode/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 42.6
+  },
+  {
+   "run": "c1-transcode@venue-x1.25/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 42.2
+  },
+  {
+   "run": "c2-p1a/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 0.7
+  },
+  {
+   "run": "c2-p1a@corner-high/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 0.6
+  },
+  {
+   "run": "c2-p1a@corner-low/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 0.4
+  },
+  {
+   "run": "c2-p1a@replay/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 0.4
+  },
+  {
+   "run": "c2-p1a@seg1-120s/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 0.7
+  },
+  {
+   "run": "c2-p1a@seg1-30s/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 0.4
+  },
+  {
+   "run": "c2-p1a@venue-x0.8/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 0.5
+  },
+  {
+   "run": "c2-p1a@venue-x1.25/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 0.6
+  },
+  {
+   "run": "c2-p1b/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 0.9
+  },
+  {
+   "run": "c2-p3a/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 3.1
+  },
+  {
+   "run": "c2-p3a@seg1-120s/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 4.0
+  },
+  {
+   "run": "c2-p3a@seg1-30s/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 3.1
+  },
+  {
+   "run": "c2-p3a@venue-x0.8/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 3.3
+  },
+  {
+   "run": "c2-p3a@venue-x1.25/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 3.3
+  },
+  {
+   "run": "c2-p3b/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 3.7
+  },
+  {
+   "run": "c3-creation/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 1.5
+  },
+  {
+   "run": "c3-workday/oracle~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 26.3
+  },
+  {
+   "run": "c3-workday/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 28.7
+  },
+  {
+   "run": "c3-workday/random-2~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 27.5
+  },
+  {
+   "run": "c4-office/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 0.2
+  },
+  {
+   "run": "c6-dual/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 2,
+   "seconds": 713.5
+  },
+  {
+   "run": "c6-dual/random-2~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 3,
+   "seconds": 616.3
+  },
+  {
+   "run": "c6-spoof/random-1~focus",
+   "identical": true,
+   "checks": {
+    "records": true,
+    "aggregates": true,
+    "messages": true,
+    "grade_rows": true
+   },
+   "excess_rows": 1,
+   "seconds": 0.3
+  }
+ ]
+}

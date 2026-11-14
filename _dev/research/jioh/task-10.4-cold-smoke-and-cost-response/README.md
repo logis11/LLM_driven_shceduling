@@ -33,6 +33,18 @@ One `fixed` run each, one after another, nothing else running (`calibration.json
 - `heavy_workers: 1` — two `c6-dual` runs at once are 19,186 MB.
 - `workers: 4` — the peaks at once are at most 9,593 + 4 × 672 = 12,281 MB; with the 2,370 MB the kernel held wired with no run going (`vm_stat`, 144,689 pages of 16 KB) that is 14,651 MB of the 16,384.
 
+## The first smoke
+
+Started 2026-11-14T13:04:18+0900 on `a0ed61ad`, `simulator@0d323c84470a`, `daemon@62c71f0d2de0`, workers 4 / 1 / 50, 324.2 GB free; stopped 18:22:00 (exit 143) at 1,151 of the 1,197 runs, 998 finished and 153 failed. `first-smoke/` holds its `start.json`, `exit.json` and log.
+
+- **The failed runs** (decision 11): every run under an alternative driver table — the 17 judging files' `oracle`, `random-1` and `random-2` under each of `floor-0.2`, `floor-0.333` and `floor-0.5` — at the records' schema check, `table: 'prior@floor-0.2' is not one of ['prior', 'calibrated']`. The runner labels such a run `<role>@<stem>`, as the experiment-spec schema's `driver_table_alternatives` states; the five row schemas took the role alone. Fixed on the harness side (`df0b9348`, the harness changelog's entry of 2026-11-14).
+- **The slow runs** (decision 14, ahead of the projection): `c1-transcode/random-1~focus` 4,297 s and `c1-transcode@venue-x1.25/random-1~focus` 4,041 s, where the file's `fixed` run took 49 s, `random-2` of the venue variant 53 s. Their aggregates' per-switch excess scanned every boost window of the MLFQ interval for each interactive latency point, twice — 1,014,792 `app_latency` points against 47,599 boost windows in the first, 2.6 ms a point. Replaced by a lookup over the windows sorted once.
+
+| file | what it holds |
+|---|---|
+| `first-smoke/` | the first smoke's `start.json`, `exit.json` and `cold-smoke.log` |
+| `excess_check.py`, `excess-check.json`, `excess-check.log` | the first smoke's 39 runs whose cached aggregates carry a per-switch excess (61 rows), each run's results built again from its trace with the lookup — records, records messages, aggregates and graded queries — and compared exactly with the ones cached before it. 39 of 39 identical; `c1-transcode/random-1` 42.6 s, the two `c6-dual` `random` runs 714 s and 616 s |
+
 ## The smoke and after
 
 | file | what it holds |
