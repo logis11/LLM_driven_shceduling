@@ -432,17 +432,20 @@ def k_of_n_gap(rs: _Set, crit, guard_report):
     """RQ0's criterion (Phase 8 spec, decisions 2–6): at least K of the judging
     files show a gap of at least g, the gap being one minus the compared
     condition's seed-mean score over the reference's, with a failed non-exempt
-    guard on a run the criterion reads making the verdict invalid."""
+    guard on a run the criterion reads making the verdict invalid. A failed
+    non-exempt guard on a run any listed file's gap reads — judging, reporting or
+    variant — marks that gap unavailable (10.3 decision 1)."""
     k, g = int(crit["k"]), Fraction(str(crit["g"]))
-    failing = {_identity(r): r for r in guard_report if r["result"] == "fail" and not r["exempt"]}
+    failing_rows = [r for r in guard_report if r["result"] == "fail" and not r["exempt"]]
+    failing = {_identity(r): r for r in failing_rows}
     unavailable = set()
     invalid_runs = []
-    for wid in rs.judging:
+    for wid in rs.listed:
         for boot in rs.boots:
             hit = sorted(run for run in rs.runs_feeding(wid, boot) if run in failing)
             if hit:
                 unavailable.add((wid, boot))
-            if boot == "":
+            if boot == "" and wid in rs.judging:
                 for run in hit:
                     row = failing[run]
                     row["invalidating"] = True
@@ -453,7 +456,8 @@ def k_of_n_gap(rs: _Set, crit, guard_report):
     detail = {"met": primary["met"], "judging": primary["judging"], "k": k, "invalid_runs": invalid_runs}
     shown = {"type": "k_of_n_gap", "k": k, "g": fmt(g), "reference": crit["reference"],
              "compared": crit["compared"], "seed_statistic": crit["seed_statistic"]}
-    return verdict, detail, gaps, shown, {"g": g, "k": k, "unavailable": unavailable, "failing": failing}
+    return verdict, detail, gaps, shown, {"g": g, "k": k, "unavailable": unavailable, "failing": failing,
+                                          "failing_rows": failing_rows}
 
 
 CRITERIA = {"k_of_n_gap": k_of_n_gap}
@@ -578,6 +582,17 @@ def _primary_gaps(ctx):
     return {r["workload_id"]: r for r in ctx["gaps"] if r["boot_default"] == ""}
 
 
+def _failed_runs(rs, ctx, wids):
+    """10.3 decision 2: the failed non-exempt guards on the runs the primary gaps of `wids` read, one row per
+    run and guard."""
+    out = []
+    for wid in sorted(set(wids)):
+        feeding = rs.runs_feeding(wid, "")
+        out += [{**{c: r[c] for c in agg.IDENTITY}, "guard": r["guard"]}
+                for r in ctx["failing_rows"] if _identity(r) in feeding]
+    return out
+
+
 def _gap_cell(r):
     return ({"gap": r["gap"], "meets_g": r["meets_g"], "all_no_headroom": r["all_no_headroom"],
              "available": r["available"]} if r is not None
@@ -589,12 +604,14 @@ def line_variant_set(rs, params, ctx):
     from its variant's runs — a rebuilt file (every measured RUN scaled, the chain
     scaled, a segment length changed, the carried half-widths at a bound). Files
     the line does not name keep their primary gap. A count that moves makes the
-    verdict a range over this axis."""
+    verdict a range over this axis; a count that reads an unavailable gap is
+    unavailable, the verdict not read over this axis and the failed runs named
+    (10.3 decision 2)."""
     primary = _primary_gaps(ctx)
     files = dict(params["files"])
     rows = [{"workload_id": base, "variant": variant, "primary": _gap_cell(primary.get(base)),
              "variant_result": _gap_cell(primary.get(variant))} for base, variant in sorted(files.items())]
-    met, judging, available = 0, 0, True
+    met, judging, available, read = 0, 0, True, []
     for wid in rs.judging:
         r = primary.get(files.get(wid, wid))
         if r is None:
@@ -603,45 +620,56 @@ def line_variant_set(rs, params, ctx):
         judging += 1
         met += bool(r["meets_g"])
         available = available and bool(r["available"])
+        if not r["available"]:
+            read.append(files.get(wid, wid))
     verdict = ("pass" if met >= ctx["k"] else "fail") if available else None
     return {"type": "variant_set", "name": params["name"], "axis": params["axis"], "value": str(params["value"]),
             "reason": params.get("reason", ""), "met": met, "judging": judging, "verdict": verdict,
+            "available": available, "failed": _failed_runs(rs, ctx, read),
             "primary_met": _count(ctx["gaps"], "", ctx["k"])["met"], "rows": rows}
 
 
 def line_trace_replay(rs, params, ctx):
     """9.14 decision 10: each named judging file built twice — as compiled, and
     on a pooled repeat's measured wake sequence — agrees when its gap falls on
-    the same side of g under both and differs by less than the tolerance."""
+    the same side of g under both and differs by less than the tolerance. A row
+    that reads an unavailable gap on either side has no agreement, and the line's
+    agreement is then unavailable, the failed runs named (10.3 decision 3)."""
     primary = _primary_gaps(ctx)
     tol = Fraction(str(params["tolerance"]))
-    rows = []
+    rows, read = [], []
     for base, variant in sorted(params["files"].items()):
         b, v = primary.get(base), primary.get(variant)
-        if b is None or v is None:
+        available = b is not None and v is not None and b["available"] and v["available"]
+        read += [wid for wid, r in ((base, b), (variant, v)) if r is not None and not r["available"]]
+        if not available:
             rows.append({"workload_id": base, "variant": variant, "gap": b["gap"] if b else "",
                          "replayed_gap": v["gap"] if v else "", "difference": "", "same_side_of_g": None,
-                         "within_tolerance": None, "agrees": None})
+                         "within_tolerance": None, "agrees": None, "available": False})
             continue
         gb, gv = Fraction(b["gap"]), Fraction(v["gap"])
         same, within = b["meets_g"] == v["meets_g"], abs(gv - gb) < tol
         rows.append({"workload_id": base, "variant": variant, "gap": b["gap"], "replayed_gap": v["gap"],
                      "difference": fmt(gv - gb), "same_side_of_g": same, "within_tolerance": within,
-                     "agrees": same and within})
+                     "agrees": same and within, "available": True})
     decided = [r["agrees"] for r in rows if r["agrees"] is not None]
     return {"type": "trace_replay", "tolerance": str(params["tolerance"]), "reason": params.get("reason", ""),
-            "rows": rows, "agreement": all(decided) if decided and len(decided) == len(rows) else None}
+            "rows": rows, "agreement": all(decided) if decided and len(decided) == len(rows) else None,
+            "available": all(r["available"] for r in rows), "failed": _failed_runs(rs, ctx, read)}
 
 
 def line_bounding_pair(rs, params, ctx):
     """9.14 decision 10 (9.11 D21): two files that differ in one task's declared
-    class alone; each file's gap and verdict, and the difference between them."""
+    class alone; each file's gap and verdict, and the difference between them —
+    unavailable when either gap is, the failed runs named (10.3 decision 3)."""
     primary = _primary_gaps(ctx)
     a, b = primary.get(params["a"]), primary.get(params["b"])
-    difference = fmt(Fraction(b["gap"]) - Fraction(a["gap"])) if a is not None and b is not None else ""
+    available = a is not None and b is not None and a["available"] and b["available"]
+    difference = fmt(Fraction(b["gap"]) - Fraction(a["gap"])) if available else ""
+    read = [params[x] for x, r in (("a", a), ("b", b)) if r is not None and not r["available"]]
     return {"type": "bounding_pair", "a": {"workload_id": params["a"], **_gap_cell(a)},
             "b": {"workload_id": params["b"], **_gap_cell(b)}, "difference": difference,
-            "reason": params.get("reason", "")}
+            "available": available, "failed": _failed_runs(rs, ctx, read), "reason": params.get("reason", "")}
 
 
 def line_input_wake_count(rs, params, ctx):
@@ -876,6 +904,15 @@ def _pin_rows(pins):
     return rows
 
 
+def _failed_lines(line):
+    """10.3 decision 2: the failed non-exempt guards a line's unavailable gaps read, one bullet per run and guard,
+    then a blank line; nothing when there are none."""
+    if not line["failed"]:
+        return []
+    return (["Unavailable: failed non-exempt guards on the runs this line reads:", ""]
+            + [f"- `{r['guard']}` on {_ident(r)}" for r in line["failed"]] + [""])
+
+
 def render(report) -> str:
     """The report as Markdown. Every number is copied from the report; none is computed here."""
     c = report["criterion"]
@@ -968,30 +1005,40 @@ def render(report) -> str:
         elif t == "note":
             out.append(f"**{line['workload_id']}** — {line['text'].strip()}")
         elif t == "variant_set":
+            verdict = (f"verdict {line['verdict']}" if line["available"]
+                       else "unavailable — the verdict is not read over this axis")
             out.append(f"**{line['name']}** ({line['axis']} = {line['value']}): {line['met']} of {line['judging']} met, "
-                       f"verdict {line['verdict']} (primary {line['primary_met']} met)."
+                       f"{verdict} (primary {line['primary_met']} met)."
                        + (f" {line['reason'].strip()}" if line["reason"] else ""))
             out.append("")
+            out += _failed_lines(line)
             out.append(_table(["workload", "variant", "gap", "meets g", "variant gap", "variant meets g",
-                               "variant no headroom"],
+                               "variant no headroom", "variant available"],
                               [[r["workload_id"], r["variant"], r["primary"]["gap"], r["primary"]["meets_g"],
                                 r["variant_result"]["gap"], r["variant_result"]["meets_g"],
-                                r["variant_result"]["all_no_headroom"]] for r in line["rows"]]))
+                                r["variant_result"]["all_no_headroom"], r["variant_result"]["available"]]
+                               for r in line["rows"]]))
         elif t == "trace_replay":
-            out.append(f"Agreement: {line['agreement']} (tolerance {line['tolerance']})."
+            out.append(f"Agreement: {line['agreement'] if line['available'] else 'unavailable'} "
+                       f"(tolerance {line['tolerance']})."
                        + (f" {line['reason'].strip()}" if line["reason"] else ""))
             out.append("")
+            out += _failed_lines(line)
             out.append(_table(["workload", "replayed as", "gap", "replayed gap", "difference", "same side of g",
-                               "within tolerance", "agrees"],
+                               "within tolerance", "agrees", "available"],
                               [[r["workload_id"], r["variant"], r["gap"], r["replayed_gap"], r["difference"],
-                                r["same_side_of_g"], r["within_tolerance"], r["agrees"]] for r in line["rows"]]))
+                                r["same_side_of_g"], r["within_tolerance"], r["agrees"], r["available"]]
+                               for r in line["rows"]]))
         elif t == "bounding_pair":
             out.append(_table(["file", "gap", "meets g", "all no headroom", "available"],
                               [[x["workload_id"], x["gap"], x["meets_g"], x["all_no_headroom"], x["available"]]
                                for x in (line["a"], line["b"])]))
             out.append("")
-            out.append(f"Difference (b − a): {line['difference']}."
+            out.append(f"Difference (b − a): {line['difference'] if line['available'] else 'unavailable'}."
                        + (f" {line['reason'].strip()}" if line["reason"] else ""))
+            if line["failed"]:
+                out.append("")
+                out += _failed_lines(line)[:-1]
         elif t == "input_wake_count":
             out.append(_table(["workload", "entity", "cause", "channel", "window", "wakes the P99 rests on"],
                               [[r["workload_id"], r["entity"], r["cause"], r["channel"],

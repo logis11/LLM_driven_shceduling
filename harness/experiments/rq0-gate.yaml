@@ -533,7 +533,14 @@ statements:
       seeded window of it per measured or periodic task, a batch job's runs from
       its start on the nearest repeat whose CPU covers the bind (the six streams
       under dataset/replay/, each stating its landing). A verdict count that moves under any line makes the verdict
-      a range over that axis. The input-wake-count line prints, per judging file
+      a range over that axis. A failed non-exempt guard on a run a gap reads makes
+      that gap unavailable, on a judging, a reporting or a variant file alike; a
+      count, an agreement or a difference that reads an unavailable gap — a boot
+      default's count, a band table's count, a variant line's count, the trace
+      replay's agreement, the bounding pair's difference — gives no reading, and
+      the verdict is stated as not read over that axis; the failed runs and their
+      guards are in the report's guard table, and a variant line, the trace replay
+      and the bounding pair name them beside the line. The input-wake-count line prints, per judging file
       and latency term, the number of observations its P99 rests on — an
       input_latency term's keystrokes, an app_latency term's timer and event wakes: a
       26 s counterpart holds 49 to 101 keystrokes and c3-workday's browser seven,

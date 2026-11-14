@@ -12,6 +12,10 @@
    with 인경민; on any other file it is recorded with its run.
 3. Every run that fails `starvation_floor`, on any file, beside the five `oracle` runs named before the smoke
    (`simulator/memo/memo_261111.md` Part L).
+4. The availability of every reporting line in the smoke's report (10.3 decision 8): each count, agreement or
+   difference a line gives, available or not, with the failed runs a line names. Expected: the two chain-scale
+   lines, `chain-x1.2` and `chain-x1.4`, unavailable on the four chain-scaled `oracle` runs' `starvation_floor`,
+   and no other line.
 
 Run from the repository root; writes starvation.json beside this file and prints its summary."""
 import argparse
@@ -32,6 +36,25 @@ import wait_check  # noqa: E402
 SPEC = REPO / "harness" / "experiments" / "rq0-gate.yaml"
 NET_US, QUESTION_US = 30_000_000, 15_000_000
 NAMED_ORACLE = ("c3-evening", "c2-p2a@chain-x1.2", "c2-p2a@chain-x1.4", "c2-p2b@chain-x1.2", "c2-p2b@chain-x1.4")
+EXPECTED_UNAVAILABLE = ["variant_set chain-x1.2", "variant_set chain-x1.4"]
+EXPECTED_FAILED = sorted((w, "oracle", "starvation_floor") for w in NAMED_ORACLE[1:])
+
+
+def availability(report):
+    """Every count, agreement or difference a reporting line gives, and whether it is available."""
+    out = []
+    for line in report["lines"]:
+        t = line["type"]
+        if "available" in line:
+            label = t + (f" {line['name']}" if "name" in line else "")
+            out.append({"line": label, "available": line["available"],
+                        "failed": [(r["workload_id"], r["condition"], r["guard"]) for r in line.get("failed", [])]})
+        for r in line.get("rows", []):
+            if "met" in r and "verdict" in r:            # a count per boot default, band table, g, latency floor
+                key = next((r[k] for k in ("boot_default", "table", "g", "latency_floor_us") if k in r), "")
+                out.append({"line": f"{t} {key or '(primary)'}", "available": r.get("available", r["verdict"] is not None),
+                            "failed": []})
+    return out
 
 
 def run_name(r):
@@ -92,6 +115,13 @@ def main():
             findings.append({"run": w["run"], "kind": kind, "wait_us": us, "task": w[f"{kind}_task"],
                              "judging": on_judging, "leads_to": leads_to})
 
+    # 4. every line's availability in the smoke's report
+    lines = availability(json.loads((smoke / "report.json").read_text()))
+    unavailable = [l for l in lines if not l["available"]]
+    failed_named = sorted({f for l in unavailable for f in l["failed"]})
+    as_expected = ([l["line"] for l in unavailable] == EXPECTED_UNAVAILABLE
+                   and all(f in EXPECTED_FAILED for f in failed_named) and failed_named != [])
+
     reopened = [f for f in starvation_fails if f["judging"]] + [f for f in findings if f["judging"]]
     doc = {"smoke": str(smoke), "runs": len(waits), "judging_files": sorted(judging),
            "guard_table_judging": [{"condition": c, "guard": g, **dict(n)} for (c, g), n in sorted(table.items())],
@@ -100,6 +130,8 @@ def main():
            "named_oracle_runs": {name: [f for f in starvation_fails if f["run"].startswith(f"{name}/oracle")]
                                  for name in NAMED_ORACLE},
            "unread_waits_past_15s": findings,
+           "line_availability": lines, "unavailable_lines": unavailable,
+           "unavailable_as_expected": as_expected, "expected_unavailable": EXPECTED_UNAVAILABLE,
            "reopens": bool(reopened), "reopened_by": reopened,
            "waits": waits}
     (pathlib.Path(__file__).parent / "starvation.json").write_text(json.dumps(doc, indent=1) + "\n")
@@ -107,6 +139,11 @@ def main():
           f"{len(starvation_fails)} starvation_floor fails ({sum(f['judging'] for f in starvation_fails)} on judging); "
           f"{len(findings)} unread waits past 15 s ({sum(f['judging'] for f in findings)} on judging); "
           f"{'REOPENS' if reopened else 'nothing reopened'}")
+    print(f"{len(lines)} line readings; unavailable: {[l['line'] for l in unavailable] or 'none'} "
+          f"({'as expected' if as_expected else 'NOT as expected: ' + ', '.join(EXPECTED_UNAVAILABLE) + ' expected'})")
+    for l in unavailable:
+        for f in l["failed"]:
+            print(f"  {l['line']}: {f[2]} on {f[0]} · {f[1]}")
     for f in starvation_fails:
         print(f"  starvation_floor fail: {f['run']} {f['reason']}")
     for f in findings:

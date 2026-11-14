@@ -284,9 +284,11 @@ def test_statements_are_echoed_into_the_report_in_order():
 VARIANT = "mock-score@v"
 
 
-def _with_variant(tmp_path, lines, variants=(VARIANT,)):
+def _with_variant(tmp_path, lines, variants=(VARIANT,), exempt_variant=True):
     """The mock inputs with every `mock-score` row under the primary boot default copied
-    to a variant workload, and a spec listing it under `files.variants` with `lines`."""
+    to a variant workload, and a spec listing it under `files.variants` with `lines`. The
+    copied rows carry `mock-score`'s failed `starvation_floor` on random s2, exempt on the
+    variant as on its base unless `exempt_variant` is false (10.3)."""
     from harness import aggregates as agg_mod
     columns = {"aggregates": agg_mod.COLUMNS, "scores": scorer.COLUMNS, "guards": guards_mod.COLUMNS}
     paths = {}
@@ -300,9 +302,16 @@ def _with_variant(tmp_path, lines, variants=(VARIANT,)):
     spec = yaml.safe_load((FX / "experiment.yaml").read_text())
     spec["files"]["variants"] = list(variants)
     spec["reporting_lines"] = lines
+    if exempt_variant:
+        spec["guard_exemptions"] += [{**ex, "workload": VARIANT} for ex in spec["guard_exemptions"]
+                                     if ex["workload"] == "mock-score"]
     sp = tmp_path / "experiment.yaml"
     sp.write_text(yaml.safe_dump(spec, sort_keys=False))
     return sp, paths
+
+
+VARIANT_FAILED = [{"workload_id": VARIANT, "condition": "random", "table": "prior", "seed": "s2",
+                   "boot_default": "", "telemetry": "names", "guard": "starvation_floor"}]
 
 
 def test_variant_set_line_substitutes_the_variants_gap(tmp_path):
@@ -326,7 +335,8 @@ def test_trace_replay_line_agrees_on_identical_gaps(tmp_path):
     line = _line(report, "trace_replay")
     (row,) = line["rows"]
     assert row["difference"] == "0.000000" and row["same_side_of_g"] and row["within_tolerance"] and row["agrees"]
-    assert line["agreement"] is True and line["tolerance"] == "0.17"
+    assert row["available"] is True
+    assert line["agreement"] is True and line["tolerance"] == "0.17" and line["available"] is True
 
 
 def test_bounding_pair_line_reports_both_files_and_the_difference(tmp_path):
@@ -336,6 +346,68 @@ def test_bounding_pair_line_reports_both_files_and_the_difference(tmp_path):
     line = _line(report, "bounding_pair")
     assert line["a"]["workload_id"] == "mock-score" and line["b"]["workload_id"] == VARIANT
     assert line["a"]["gap"] == line["b"]["gap"] and line["difference"] == "0.000000"
+    assert line["available"] is True and line["failed"] == []
+
+
+# 10.3: a failed non-exempt guard on a run a variant's gap reads
+
+def test_a_failed_guard_on_a_variant_s_run_marks_its_gap_unavailable_and_leaves_the_verdict(tmp_path):
+    sp, paths = _with_variant(tmp_path, [], exempt_variant=False)
+    report = evaluate(sp, paths["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+    assert report["verdict"] == "pass" and report["verdict_detail"]["invalid_runs"] == []
+    variant = next(r for r in report["gaps"] if r["workload_id"] == VARIANT)
+    assert variant["available"] is False and variant["gap"] == _gap(report)["gap"]   # still computed and reported
+    assert _gap(report)["available"] is True
+    fail = next(r for r in report["guards"] if r["workload_id"] == VARIANT and r["result"] == "fail")
+    assert fail["exempt"] is False and fail["invalidating"] is False
+
+
+def test_a_variant_set_line_reading_an_unavailable_gap_has_no_count(tmp_path):
+    sp, paths = _with_variant(tmp_path, [
+        {"type": "variant_set", "name": "venue-x1.25", "axis": "venue_factor", "value": 1.25,
+         "files": {"mock-score": VARIANT}}], exempt_variant=False)
+    report = evaluate(sp, paths["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+    line = _line(report, "variant_set")
+    assert line["available"] is False and line["verdict"] is None
+    assert line["met"] == 1 and line["judging"] == 1                      # the numbers stay in the report
+    assert line["failed"] == VARIANT_FAILED
+    (row,) = line["rows"]
+    assert row["variant_result"]["available"] is False and row["variant_result"]["gap"] == _gap(report)["gap"]
+    md = render(report)
+    assert "unavailable — the verdict is not read over this axis" in md
+    assert f"`starvation_floor` on {VARIANT}" in md
+
+
+def test_a_variant_set_line_on_available_gaps_keeps_its_count(tmp_path):
+    sp, paths = _with_variant(tmp_path, [
+        {"type": "variant_set", "name": "venue-x1.25", "axis": "venue_factor", "value": 1.25,
+         "files": {"mock-score": VARIANT}}])
+    line = _line(evaluate(sp, paths["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO),
+                 "variant_set")
+    assert line["available"] is True and line["verdict"] == "pass" and line["failed"] == []
+
+
+def test_a_trace_replay_row_reading_an_unavailable_gap_has_no_agreement(tmp_path):
+    sp, paths = _with_variant(tmp_path, [
+        {"type": "trace_replay", "files": {"mock-score": VARIANT}, "tolerance": 0.17}], exempt_variant=False)
+    report = evaluate(sp, paths["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+    line = _line(report, "trace_replay")
+    (row,) = line["rows"]
+    assert row["available"] is False and row["gap"] == row["replayed_gap"] == _gap(report)["gap"]
+    assert row["difference"] == "" and row["same_side_of_g"] is None and row["within_tolerance"] is None
+    assert row["agrees"] is None
+    assert line["available"] is False and line["agreement"] is None and line["failed"] == VARIANT_FAILED
+    assert "Agreement: unavailable" in render(report)
+
+
+def test_a_bounding_pair_reading_an_unavailable_gap_has_no_difference(tmp_path):
+    sp, paths = _with_variant(tmp_path, [
+        {"type": "bounding_pair", "a": "mock-score", "b": VARIANT}], exempt_variant=False)
+    report = evaluate(sp, paths["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+    line = _line(report, "bounding_pair")
+    assert line["b"]["available"] is False and line["b"]["gap"] == line["a"]["gap"]
+    assert line["difference"] == "" and line["available"] is False and line["failed"] == VARIANT_FAILED
+    assert "Difference (b − a): unavailable." in render(report)
 
 
 def test_input_wake_count_and_longest_wait_lines_read_the_aggregates(tmp_path):
