@@ -13,9 +13,23 @@ version:
 	@echo $(VERSION)
 
 # the unit tests on this binary (black-box, a few seconds): the batch-class rule's two (batch memo
-# §7 item 6) and demand across config switches (memo_261010 D2)
+# §7 item 6) and demand across config switches (memo_261010 D2); then the RQ0 gate spec's
+# conformance items no hand fixture shows (`simulator-conformance`; the integration gate's spec,
+# _dev/docs/spec/jioh/task-10.2-integration-gate.md, decisions 4, 6 and 7): the cap's ceiling (d),
+# the strict idle class (e), the frame chain in EDF's deadline class (f), the spawn-table wake and
+# the children wait on the two reference workloads (i, g), the invocation contract's refusals (h)
 check: sim
 	python3 ../tests/test_batch_class.py ./sim
 	python3 ../tests/test_switch_demand.py ./sim
+	python3 ../tests/test_cap_ceiling.py ./sim
+	python3 ../tests/test_idle_class.py ./sim
+	python3 ../tests/test_edf_chain.py ./sim
+	python3 ../tests/test_spawn_children.py ./sim
+	python3 ../tests/test_invocation.py ./sim
 
-.PHONY: version check
+# each behavioural test above fails on a simulator without its behaviour: a mutant of this source
+# with the behaviour's line taken out (the integration gate's spec, decision 8)
+mutants:
+	python3 ../tests/mutants.py
+
+.PHONY: version check mutants
