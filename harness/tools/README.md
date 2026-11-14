@@ -13,6 +13,7 @@ All of the harness's code: the `harness` Python package, one command-line tool p
 | `evaluate.py` | a per-experiment spec and the four files above → `report.json` and `report.md` | 0 pass, 2 fail or invalid, 1 refusal |
 | `run.py` | a per-experiment spec and a machine configuration → every run invoked, every stage above, the report | 1 a failed run, else the verdict's |
 | `smoke.py` | a generated throwaway spec over the compiled coreset, run through `run.py`'s path with the mocks | 0 once a report is written |
+| `integration_gate.py` | the machine configuration's simulator and daemon → the integration gate's four parts (unit tests and mutants, fixture replay, daemon against the mock daemon on the RQ0 gate spec's run list, a short run) and their results; `--status` reads them against the gate spec's version pins (10.2) | 0 every part passed, else 1 |
 
 And three lints plus one checker that is not part of the harness:
 
@@ -24,7 +25,7 @@ And three lints plus one checker that is not part of the harness:
 | `experiment_lint.py` | every per-experiment spec against its schema, the build, the pinned scoring spec's terms, the registries, and its pins |
 | `check_mlfq_levels.py` | the `x_mlfq_level` trace lines the readers skip, against each switch window; a diagnostic for the simulator, not a harness stage |
 
-`--help` on any command prints its flags. `make lint`, `make test`, `make test-full`, and `make smoke` in the parent directory run the lints, the suite as CI runs it, the whole suite, and the smoke.
+`--help` on any command prints its flags. `make lint`, `make test`, `make test-full`, and `make smoke` in the parent directory run the lints, the suite as CI runs it, the whole suite, and the smoke; `make gate` and `make gate-status` run the integration gate on `runner.yaml` and read its results.
 
 ## Layout
 

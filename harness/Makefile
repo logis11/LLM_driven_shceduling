@@ -15,4 +15,10 @@ test-full:          ## the whole suite, the coreset-wide tests included (about 1
 smoke:              ## the full pipeline on the mocks over every scored coreset file (8.6): a generated throwaway spec, runs under runs/
 	$(PY) tools/smoke.py --machine runner.example.yaml
 
-.PHONY: lint test test-full smoke
+gate:               ## the integration gate (10.2) on runner.yaml's real programs: unit tests and mutants, fixture replay, daemon comparison, short run
+	$(PY) tools/integration_gate.py --machine runner.yaml
+
+gate-status:        ## the integration gate's parts against the RQ0 gate spec's version pins
+	$(PY) tools/integration_gate.py --status --machine runner.yaml
+
+.PHONY: lint test test-full smoke gate gate-status

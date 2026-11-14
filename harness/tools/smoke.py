@@ -3,14 +3,19 @@
 decisions 7–8) — a throwaway experiment spec generated from the files as they
 are, run through `run.py`'s path, and discarded.
 
-    smoke.py [--machine harness/runner.example.yaml] [--files N] [--root REPO]
+    smoke.py [--machine harness/runner.example.yaml] [--files N] [--workloads ID ...]
+             [--runs-dir DIR --cache-dir DIR] [--root REPO]
 
 `--files N` limits the judging set to the first N scored files (the test suite
-uses a handful; the make target runs them all). The smoke checks the plumbing,
+uses a handful; the make target runs them all); `--workloads` names the files
+instead (the integration gate's short run, 10.2). `--runs-dir` and `--cache-dir`
+put the runs and the cache elsewhere than the machine configuration says, so a
+run of its own leaves that cache as it was. The smoke checks the plumbing,
 not the mocks' verdict, which is `invalid` by construction (c6-dual's oracle runs
 on fallback and the spec exempts nothing): exit 0 once a report was written,
 1 when a run failed or the spec was refused. The verdict is printed."""
 import argparse
+import dataclasses
 import pathlib
 import sys
 import tempfile
@@ -24,16 +29,24 @@ from run import report_result  # noqa: E402
 REPO = pathlib.Path(__file__).resolve().parents[2]
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--machine", default=str(REPO / "harness" / "runner.example.yaml"))
     ap.add_argument("--files", type=int, default=None)
+    ap.add_argument("--workloads", nargs="+", default=None)
+    ap.add_argument("--runs-dir", default=None)
+    ap.add_argument("--cache-dir", default=None)
     ap.add_argument("--root", default=str(REPO))
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
     try:
         machine = load_machine(args.machine, args.root)
+        if args.runs_dir:
+            machine = dataclasses.replace(machine, runs_dir=pathlib.Path(args.runs_dir).resolve())
+        if args.cache_dir:
+            machine = dataclasses.replace(machine, cache_dir=pathlib.Path(args.cache_dir).resolve())
         with tempfile.TemporaryDirectory() as tmp:
-            spec = write_smoke_spec(pathlib.Path(tmp) / "smoke.yaml", machine, args.root, files=args.files)
+            spec = write_smoke_spec(pathlib.Path(tmp) / "smoke.yaml", machine, args.root, files=args.files,
+                                    only=args.workloads)
             print(f"smoke spec: {len(spec.read_text().splitlines())} lines, discarded after the run")
             result = run_experiment(spec, machine, args.root)
     except (GateError, RunError, OSError, ValueError, KeyError) as exc:

@@ -739,6 +739,34 @@
       "$ref": "#/$defs/pin"
      },
      "description": "one pin per alternative driver table a cap band line reads (10.1), keyed by its stem; the runner re-runs every drawing and reference condition on the judging files under each, their rows labelled `<role>@<stem>` in the `table` column"
+    },
+    "simulator": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "version"
+     ],
+     "properties": {
+      "version": {
+       "type": "string",
+       "pattern": "^simulator@[0-9a-f]{12}$"
+      }
+     },
+     "description": "the simulator's version string the integration gate passed on (10.2, decision 11): `make -C simulator/src version`, the trace header's `sim`; the runner refuses to run when its machine configuration names another"
+    },
+    "daemon": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "version"
+     ],
+     "properties": {
+      "version": {
+       "type": "string",
+       "pattern": "^daemon@[0-9a-f]{12}$"
+      }
+     },
+     "description": "the daemon's version string the integration gate passed on (10.2, decisions 10 and 11): `make -C daemon version`; the runner refuses to run when its machine configuration names another"
     }
    }
   },

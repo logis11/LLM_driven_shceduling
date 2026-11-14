@@ -3,6 +3,13 @@
 # per-experiment spec under harness/experiments/. Copy to a file of your own
 # (harness/runner.yaml is git-ignored) and edit; relative paths resolve against
 # the repository root. This example drives the two mocks.
+#
+# The real programs (10.2): build the simulator (`make -C simulator/src`) and name each
+# program with the version its source prints — the integration gate
+# (`make -C harness gate`) refuses a version its source does not have, and the
+# runner refuses one the experiment spec does not pin:
+#   daemon:    {command: [python3, daemon/daemon.py], version: <make -C daemon version>}
+#   simulator: {command: [simulator/src/sim],         version: <make -C simulator/src version>}
 
 daemon:
   command: [python3, harness/tools/tests/mocks/mock_daemon.py]   # the prefix contract 10 flags are appended to

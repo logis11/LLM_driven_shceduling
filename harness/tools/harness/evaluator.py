@@ -863,10 +863,13 @@ def _ident(r):
 
 
 def _pin_rows(pins):
-    """One row per pinned file; a nested block (`variants`, `generated`, `driver_table_alternatives`) one per entry."""
+    """One row per pinned file; a nested block (`variants`, `generated`, `driver_table_alternatives`) one per entry;
+    a program's version pin (`simulator`, `daemon`; 10.2) one row with its version alone."""
     rows = []
     for k, v in pins.items():
-        if "path" in v:
+        if set(v) == {"version"}:
+            rows.append([k, "", "", v["version"]])
+        elif "path" in v:
             rows.append([k, v["path"], v["sha256"], v.get("version", "")])
         else:
             rows += [[f"{k}/{n}", p["path"], p["sha256"], p.get("version", "")] for n, p in v.items()]

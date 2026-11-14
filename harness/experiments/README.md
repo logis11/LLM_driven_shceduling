@@ -20,9 +20,12 @@ reporting_lines: [{type: sensitivity, …}, {type: floor_band, …}, {type: g_ba
 statements: [{id, text}]                        # pre-registered text, echoed verbatim into the report
 pins: {scoring_spec, guard_spec, driver_table, dataset,    # path + sha256
        driver_table_alternatives: {floor-0.2: {path, sha256}, …},   # the cap band's tables (10.1)
-       generated: {return-grid: {path, sha256}}}           # one pin per generated set's manifest a selection or a line reads (9.21)
+       generated: {return-grid: {path, sha256}},          # one pin per generated set's manifest a selection or a line reads (9.21)
+       simulator: {version}, daemon: {version}}             # the version strings the integration gate passed on (10.2); optional
 criterion: {type: k_of_n_gap, k: 13, g: 0.5, reference: oracle, compared: random, seed_statistic: mean}
 ```
+
+The two program pins carry a version string alone, `simulator@<12 hex>` and `daemon@<12 hex>` (`make -C simulator/src version`, `make -C daemon version`): the runner refuses to run before any invocation when its machine configuration names another. The mocks' specs and the generated smoke spec carry none.
 
 The RQ0 gate spec's `statements` carry the reason behind every number in it: the judging rule and the re-entry condition for two files, the executor assumptions pending confirmation, the groundings of g, K, and N, the link of the claims chain each reading tests, the prior table's duplicate structure, the cap band's tables, the design of the boot-default sweep, the failure procedure, and the held-out-rows pre-registration. Read them before reading the numbers.
 

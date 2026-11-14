@@ -255,3 +255,51 @@ def test_expand_adds_the_cap_band_s_runs_under_each_alternative_table(tmp_path):
     assert [r.name for r in runs if r.table_file is None] == ["fixed~names", "fixed+alt~names", "oracle~names",
                                                              "random-1~names", "random-2~names"]
     assert len({r.identity for r in runs}) == 8
+
+
+def _pinned_spec(tmp_path, **versions):
+    doc = yaml.safe_load((FX / "experiment.yaml").read_text())
+    for role, version in versions.items():
+        doc["pins"][role] = {"version": version}
+    spec = tmp_path / "pinned.yaml"
+    spec.write_text(yaml.safe_dump(doc))
+    return spec
+
+
+def test_a_spec_pinning_another_program_version_is_refused_before_any_run(tmp_path):
+    """10.2 decision 11: the runner checks the spec's program pins against the machine configuration."""
+    m = _machine(tmp_path)
+    for role in ("simulator", "daemon"):
+        spec = _pinned_spec(tmp_path, **{role: f"{role}@0123456789ab"})
+        with pytest.raises(RunError, match=f"pins/{role}"):
+            run_experiment(spec, m, REPO)
+    assert not m.runs_dir.exists() and not m.cache_dir.exists()       # nothing ran, nothing was made
+
+
+def test_program_pins_naming_the_configured_versions_pass_and_are_optional(tmp_path):
+    from harness.runner import program_pin_errors
+    m = _machine(tmp_path, simulator=Program(["sim"], "simulator@0123456789ab"),
+                 daemon=Program(["d"], "daemon@0123456789ab"))
+    both = yaml.safe_load(_pinned_spec(tmp_path, simulator="simulator@0123456789ab",
+                                       daemon="daemon@0123456789ab").read_text())
+    assert program_pin_errors(both, m) == []
+    assert program_pin_errors(yaml.safe_load((FX / "experiment.yaml").read_text()), m) == []
+    assert len(program_pin_errors({"pins": {"daemon": {"version": "daemon@ffffffffffff"}}}, m)) == 1
+
+
+def test_a_relative_program_path_resolves_against_the_root(tmp_path):
+    doc = yaml.safe_load(EXAMPLE.read_text())
+    doc["simulator"] = {"command": ["simulator/src/Makefile"], "version": "simulator@0123456789ab"}
+    path = tmp_path / "machine.yaml"
+    path.write_text(yaml.safe_dump(doc))
+    assert load_machine(path, REPO).simulator.command == [str(REPO / "simulator" / "src" / "Makefile")]
+
+
+@needs_build
+def test_the_smoke_spec_takes_named_files(tmp_path):
+    """10.2 decision 12: the short run's seven files, by name."""
+    files = ["c1-office", "c2-p2b"]
+    spec = write_smoke_spec(tmp_path / "smoke.yaml", _machine(tmp_path), REPO, only=files)
+    assert yaml.safe_load(spec.read_text())["files"]["judging"] == sorted(files)
+    with pytest.raises(RunError, match="no-such-file"):
+        write_smoke_spec(tmp_path / "smoke2.yaml", _machine(tmp_path), REPO, only=["no-such-file"])

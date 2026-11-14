@@ -208,3 +208,25 @@ def test_an_alternative_table_pin_is_checked_like_every_pin(tmp_path):
         s["reporting_lines"].append({"type": "cap_band", "tables": ["x"]})
     errs = _errors(_broken(tmp_path, mutate))
     assert any(e.startswith("pins/driver_table_alternatives/x") for e in errs), errs
+
+
+def test_the_program_version_pins_are_optional_and_shaped(tmp_path):
+    """10.2 decision 11: `pins.simulator` and `pins.daemon` carry a version string alone."""
+    v = jsonschema.Draft202012Validator(_schema())
+    spec = load_spec(FX / "experiment.yaml")
+    good = copy.deepcopy(spec)
+    good["pins"].update(simulator={"version": "simulator@0d323c84470a"}, daemon={"version": "daemon@62c71f0d2de0"})
+    assert list(v.iter_errors(good)) == []
+    assert _errors(_broken(tmp_path, lambda s: s["pins"].update(good["pins"]))) == []
+    for bad in ({"version": "simulator@0d32"}, {"version": "daemon@0d323c84470a"},
+                {"version": "simulator@0d323c84470a", "sha256": "0" * 64}, {}):
+        broken = copy.deepcopy(spec)
+        broken["pins"]["simulator"] = bad
+        assert next(v.iter_errors(broken), None) is not None, bad
+
+
+def test_the_report_renders_a_program_pin_as_its_version():
+    from harness.evaluator import _pin_rows
+    rows = _pin_rows({"simulator": {"version": "simulator@0d323c84470a"},
+                      "dataset": {"path": "dataset/build.manifest.json", "sha256": "0" * 64}})
+    assert rows == [["simulator", "", "", "simulator@0d323c84470a"], ["dataset", "dataset/build.manifest.json", "0" * 64, ""]]

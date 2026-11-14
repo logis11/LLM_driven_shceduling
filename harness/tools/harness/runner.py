@@ -23,7 +23,9 @@ Traces are asked for uncompressed in this phase (8.6 spec, decision 3).
 The machine configuration (`Machine`, an uncommitted YAML beside
 `harness/runner.example.yaml`) names the two commands with their version
 strings, the compiled build, the boot-default files, the runs and cache
-directories — nothing experiment-shaped.
+directories — nothing experiment-shaped. A spec that pins the two programs'
+version strings (`pins.simulator`, `pins.daemon`; 10.2) is refused before any
+run when the machine configuration names other versions.
 """
 
 import hashlib
@@ -78,6 +80,8 @@ def load_machine(path, root) -> Machine:
 
     def program(d):
         cmd = [str(c) for c in d["command"]]
+        if "/" in cmd[0] and not pathlib.Path(cmd[0]).is_absolute() and (root / cmd[0]).exists():
+            cmd[0] = str(root / cmd[0])                 # a program run directly: simulator/src/sim
         if len(cmd) > 1 and not cmd[1].startswith("-") and (root / cmd[1]).exists():
             cmd[1] = str(root / cmd[1])
         return Program(command=cmd, version=str(d["version"]))
@@ -270,6 +274,20 @@ def _trace_sim(path) -> str:
 
 # --------------------------------------------------------------- pipeline
 
+def program_pin_errors(spec, machine: Machine) -> List[str]:
+    """The spec's program pins against the machine configuration (10.2, decision 11): each of
+    `pins.simulator` and `pins.daemon` the spec carries must name the version the configuration
+    names. Optional: a spec without them (the mocks', the generated smoke spec) checks nothing."""
+    errors = []
+    pins = spec.get("pins") or {}
+    for role, program in (("simulator", machine.simulator), ("daemon", machine.daemon)):
+        pin = pins.get(role)
+        if pin and pin.get("version") != program.version:
+            errors.append(f"pins/{role}: the spec pins {pin.get('version')!r}, the machine configuration "
+                          f"names {program.version!r}")
+    return errors
+
+
 @dataclass
 class Failure:
     run: str
@@ -288,6 +306,9 @@ class Result:
 def run_experiment(spec_path, machine: Machine, root) -> Result:
     root = pathlib.Path(root)
     spec = evaluator.load_spec(spec_path)
+    refused = program_pin_errors(spec, machine)                  # 10.2: before any run, and before any directory
+    if refused:
+        raise RunError("the spec's program pins do not match the machine configuration: " + "; ".join(refused))
     pins = spec["pins"]
     scoring_path = root / pins["scoring_spec"]["path"]
     guard_spec_path = root / pins["guard_spec"]["path"]
@@ -425,17 +446,23 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
 
 # ------------------------------------------------------------------ smoke
 
-def write_smoke_spec(path, machine: Machine, root, files=None, experiment="smoke") -> pathlib.Path:
+def write_smoke_spec(path, machine: Machine, root, files=None, experiment="smoke", only=None) -> pathlib.Path:
     """A throwaway experiment spec over the compiled coreset for the pipeline
     smoke run (8.6 spec, decision 8): every file with scoring terms as judging
-    (the first `files` of them when given), the mock conditions, two seeds, no
-    alternative boot default, pins computed from the files as they are, and a
-    placeholder criterion. Linted before it is returned; never committed."""
+    (the first `files` of them when given, or the files named in `only` — 10.2's
+    short run), the mock conditions, two seeds, no alternative boot default, pins
+    computed from the files as they are, and a placeholder criterion. Linted
+    before it is returned; never committed."""
     root = pathlib.Path(root)
     pins = {"scoring_spec": "harness/scoring/scoring-spec.yaml", "guard_spec": "harness/guards/guard-spec.yaml",
             "driver_table": "daemon/driver-table/prior.yaml", "dataset": "dataset/build.manifest.json"}
     spec = scoring.load_spec(root / pins["scoring_spec"])
     judging = [wid for wid in sorted(spec["files"]) if (machine.build_dir / f"{wid}.workload.json").is_file()]
+    if only is not None:
+        missing = sorted(set(only) - set(judging))
+        if missing:
+            raise RunError(f"smoke: no scored, compiled file {missing}")
+        judging = [wid for wid in judging if wid in set(only)]
     if files is not None:
         judging = judging[:files]
     exclusions = [wid for wid in judging
@@ -463,4 +490,4 @@ def write_smoke_spec(path, machine: Machine, root, files=None, experiment="smoke
 
 
 __all__ = ["Failure", "Invocation", "Machine", "Program", "Result", "RunError", "RunSpec", "cache_key",
-           "expand", "invoke", "load_machine", "run_experiment", "write_smoke_spec"]
+           "expand", "invoke", "load_machine", "program_pin_errors", "run_experiment", "write_smoke_spec"]
