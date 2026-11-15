@@ -422,7 +422,41 @@ def test_input_wake_count_and_longest_wait_lines_read_the_aggregates(tmp_path):
     assert waits["threshold_us"] == 30000000 and waits["rows"]
     assert all(r["margin_us"] == 30000000 - r["longest_wait_us"] for r in waits["rows"])
     assert waits["any_past_reopen"] == any(r["past_reopen"] for r in waits["rows"])
+    assert all(r["reopens"] == (r["past_reopen"] and r["judging"]) for r in waits["rows"])
+    assert waits["reopens"] == any(r["reopens"] for r in waits["rows"])
     assert "## Line: longest_wait" in render(report) and "## Line: input_wake_count" in render(report)
+
+
+def test_the_longest_wait_line_reopens_on_judging_files_outside_the_boot_defaults_left_out(tmp_path):
+    def waits(**extra):
+        sp, paths = _with_variant(tmp_path, [{"type": "longest_wait", "threshold_us": 30000000, "reopen_us": 1,
+                                              **extra}])
+        report = evaluate(sp, paths["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+        return _line(report, "longest_wait"), render(report)
+
+    line, _ = waits()
+    past = [r for r in line["rows"] if r["past_reopen"]]
+    assert {r["boot_default"] for r in past} >= {"", "alt"}          # past a 1 µs reopen point, under both
+    assert [r for r in past if r["workload_id"] == VARIANT and r["reopens"]] == []      # a variant file never
+    assert any(r["reopens"] and r["boot_default"] == "alt" for r in line["rows"]) and line["reopens"] is True
+
+    line, md = waits(reopen_excluded_boot_defaults=["alt"])
+    assert line["reopen_excluded_boot_defaults"] == ["alt"]
+    assert not any(r["reopens"] for r in line["rows"] if r["boot_default"] == "alt")
+    assert any(r["past_reopen"] for r in line["rows"] if r["boot_default"] == "alt")    # still printed past it
+    assert line["reopens"] == any(r["reopens"] for r in line["rows"] if r["boot_default"] == "")
+    assert "boot defaults left out: alt" in md
+
+
+def test_lint_refuses_a_longest_wait_exclusion_naming_no_boot_default(tmp_path):
+    from harness.evaluator import SPEC_SCHEMA, lint_spec
+    sp = _spec_with_lines(tmp_path, [{"type": "longest_wait", "threshold_us": 30, "reopen_us": 15,
+                                      "reopen_excluded_boot_defaults": ["nowhere"]}])
+    build = tmp_path / "build"
+    build.mkdir()
+    (build / "mock-score.workload.json").write_bytes((FX / "workloads" / "mock-score.workload.json").read_bytes())
+    errors = lint_spec(sp, SPEC_SCHEMA, build, REPO)
+    assert any("reopen_excluded_boot_defaults: boot default 'nowhere' is not an alternative" in e for e in errors)
 
 
 def test_variant_lines_are_linted_against_the_lists(tmp_path):
@@ -567,6 +601,32 @@ def test_a_failed_guard_on_an_alternative_table_s_run_marks_that_table_s_count_u
     assert report["verdict"] == "pass" and primary["verdict"] == "pass"                 # the verdict is untouched
     assert alt["available"] is False and alt["verdict"] is None
     assert any(r["result"] == "fail" and r["table"] == ALT and not r["invalidating"] for r in report["guards"])
+
+
+def test_an_exemption_naming_a_table_exempts_that_table_s_runs_alone(tmp_path):
+    sp, paths = _with_alternative(tmp_path, guard_fail=True)
+    spec = yaml.safe_load(sp.read_text())
+    spec["guard_exemptions"].append({"guard": "utilisation_sanity", "workload": "mock-score", "conditions": ["oracle"],
+                                     "tables": ["x"], "reason": "the alternative's oracle run, by construction"})
+    sp.write_text(yaml.safe_dump(spec, sort_keys=False))
+    report = evaluate(sp, INPUTS["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+    primary, alt = _line(report, "cap_band")["rows"]
+    assert alt["available"] is True and alt["verdict"] == "pass"
+    (row,) = [r for r in report["guards"] if r["result"] == "fail" and r["table"] == ALT
+              and r["guard"] == "utilisation_sanity"]
+    assert row["exempt"] is True and row["exemption_reason"] == "the alternative's oracle run, by construction"
+
+    rows = read_csv(paths["guards"], guards_mod.COLUMNS)          # the same failure on the primary's oracle run
+    for r in rows:
+        if (r["table"] != ALT and r["condition"] == "oracle" and r["boot_default"] == ""
+                and r["guard"] == "utilisation_sanity"):
+            r.update(result="fail", value="1.200000000000", reason="busy above T_end")
+    write_csv(rows, guards_mod.COLUMNS, paths["guards"])
+    report = evaluate(sp, INPUTS["aggregates"], paths["scores"], paths["guards"], INPUTS["grades"], REPO)
+    assert report["verdict"] == "invalid"                           # the exemption does not reach it
+    (row,) = [r for r in report["guards"] if r["result"] == "fail" and r["table"] != ALT
+              and r["guard"] == "utilisation_sanity"]
+    assert row["exempt"] is False and row["invalidating"] is True
 
 
 def test_an_alternative_table_s_run_set_must_be_complete(tmp_path):

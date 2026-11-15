@@ -184,8 +184,13 @@ def lint_spec(spec_path, schema_path, build_dir, root):
             for key in ("a", "b"):
                 if line[key] not in judging + reporting + variants:
                     errors.append(f"reporting_lines/{i}: {line[key]!r} is not a listed file")
-        elif line["type"] == "longest_wait" and int(line["reopen_us"]) > int(line["threshold_us"]):
-            errors.append(f"reporting_lines/{i}: reopen_us lies past threshold_us")
+        elif line["type"] == "longest_wait":
+            if int(line["reopen_us"]) > int(line["threshold_us"]):
+                errors.append(f"reporting_lines/{i}: reopen_us lies past threshold_us")
+            for stem in line.get("reopen_excluded_boot_defaults") or []:
+                if stem not in spec["boot_defaults"]["alternatives"]:
+                    errors.append(f"reporting_lines/{i}: reopen_excluded_boot_defaults: boot default {stem!r} "
+                                  f"is not an alternative")
         elif line["type"] == "cap_band":
             pinned = (spec.get("pins") or {}).get("driver_table_alternatives") or {}
             for stem in line["tables"]:
@@ -204,6 +209,11 @@ def lint_spec(spec_path, schema_path, build_dir, root):
         for c in ex.get("conditions") or []:
             if c not in conditions:
                 errors.append(f"guard_exemptions/{i}: condition {c!r} is not one of the experiment's")
+        pinned = (spec.get("pins") or {}).get("driver_table_alternatives") or {}
+        for stem in ex.get("tables") or []:
+            if stem not in pinned:
+                errors.append(f"guard_exemptions/{i}: table {stem!r} is not pinned under "
+                              f"pins/driver_table_alternatives")
     both = sorted(set(judging) & set(reporting))
     if both:
         errors.append(f"files listed as both judging and reporting: {both}")
@@ -418,10 +428,15 @@ class _Set:
 # ------------------------------------------------------------- criterion
 
 def _exempt(spec, row):
+    """The reason of the first exemption naming the row's guard and file, and its condition and the stem of its
+    driver table (`prior@floor-0.2` → `floor-0.2`) where the exemption names conditions or tables."""
+    stem = row["table"].partition("@")[2]
     for ex in spec["guard_exemptions"]:
         if ex["guard"] != row["guard"] or ex["workload"] != row["workload_id"]:
             continue
         if ex.get("conditions") and row["condition"] not in ex["conditions"]:
+            continue
+        if ex.get("tables") and stem not in ex["tables"]:
             continue
         return ex["reason"]
     return None
@@ -738,15 +753,24 @@ def line_longest_wait(rs, params, ctx):
     """9.14 decision 10 (9.11 D19): per run, the longest `ready_wait` over every
     task and cause — what the starvation floor reads — its margin to the
     threshold, and whether it lies past the point at which the executor-net
-    question reopens."""
+    question reopens. The question reopens on a judging file's run past that
+    point, under any boot default but those the line leaves out (10.4,
+    decision 16 and 2026-11-15)."""
     threshold, reopen = int(params["threshold_us"]), int(params["reopen_us"])
+    excluded = list(params.get("reopen_excluded_boot_defaults") or [])
     per_run = rs.longest_wait
-    rows = [{**dict(zip(agg.IDENTITY, key)), "longest_wait_us": value, "entity": entity,
-             "margin_us": threshold - value, "past_reopen": value > reopen}
-            for key, (value, entity) in sorted(per_run.items())]
-    return {"type": "longest_wait", "threshold_us": threshold, "reopen_us": reopen, "rows": rows,
+    rows = []
+    for key, (value, entity) in sorted(per_run.items()):
+        ident = dict(zip(agg.IDENTITY, key))
+        judging = ident["workload_id"] in rs.judging
+        rows.append({**ident, "longest_wait_us": value, "entity": entity, "margin_us": threshold - value,
+                     "past_reopen": value > reopen, "judging": judging,
+                     "reopens": value > reopen and judging and ident["boot_default"] not in excluded})
+    return {"type": "longest_wait", "threshold_us": threshold, "reopen_us": reopen,
+            "reopen_excluded_boot_defaults": excluded, "rows": rows,
             "longest_us": max((r["longest_wait_us"] for r in rows), default=None),
-            "any_past_reopen": any(r["past_reopen"] for r in rows)}
+            "any_past_reopen": any(r["past_reopen"] for r in rows),
+            "reopens": any(r["reopens"] for r in rows)}
 
 
 def line_flip_cost(rs, params, ctx):
@@ -1066,12 +1090,15 @@ def render(report) -> str:
                                 f"[{r['window_start_us']}, {r['window_end_us']}]" if r["window_start_us"] else "(whole file)",
                                 r["count"]] for r in line["rows"]]))
         elif t == "longest_wait":
+            left_out = ", ".join(line["reopen_excluded_boot_defaults"]) or "none"
             out.append(f"Longest wait in any run: {line['longest_us']} µs against the {line['threshold_us']} µs floor; "
-                       f"any run past the {line['reopen_us']} µs reopen point: {line['any_past_reopen']}.")
+                       f"any run past the {line['reopen_us']} µs reopen point: {line['any_past_reopen']}; "
+                       f"reopens the executor-net question (a judging file's run past it, boot defaults left out: "
+                       f"{left_out}): {line['reopens']}.")
             out.append("")
-            out.append(_table(["run", "task", "longest wait (µs)", "margin (µs)", "past reopen"],
-                              [[_ident(r), r["entity"], r["longest_wait_us"], r["margin_us"], r["past_reopen"]]
-                               for r in line["rows"]]))
+            out.append(_table(["run", "task", "longest wait (µs)", "margin (µs)", "past reopen", "reopens"],
+                              [[_ident(r), r["entity"], r["longest_wait_us"], r["margin_us"], r["past_reopen"],
+                                r["reopens"]] for r in line["rows"]]))
         elif t == "flip_cost":
             out.append(f"Configuration changes over the listed files' recognizing runs: {line['changes_total']}, "
                        f"of which {line['wrong_total']} on a query graded config-incorrect.")

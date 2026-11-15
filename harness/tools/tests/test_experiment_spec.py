@@ -66,6 +66,11 @@ def test_lint_refuses_an_exemption_naming_no_guard_or_no_reason(tmp_path):
     assert any("reason" in e for e in errs)
 
 
+def test_lint_refuses_an_exemption_naming_a_table_not_pinned(tmp_path):
+    errs = _errors(_broken(tmp_path, lambda s: s["guard_exemptions"][0].update(tables=["floor-9"])))
+    assert any("floor-9" in e and "driver_table_alternatives" in e for e in errs)
+
+
 def test_lint_refuses_an_unknown_condition(tmp_path):
     errs = _errors(_broken(tmp_path, lambda s: s["conditions"].append("psychic")))
     assert any("psychic" in e for e in errs)

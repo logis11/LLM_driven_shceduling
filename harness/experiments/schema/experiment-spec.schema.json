@@ -210,6 +210,15 @@
        "$ref": "#/$defs/condition"
       }
      },
+     "tables": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+       "$ref": "#/$defs/stem"
+      },
+      "description": "stems of pins/driver_table_alternatives: the exemption holds on the runs under those tables alone; without it, on the runs under every table (10.4, 2026-11-15)"
+     },
      "reason": {
       "type": "string",
       "minLength": 1
@@ -638,9 +647,19 @@
         "reopen_us": {
          "type": "integer",
          "minimum": 1
+        },
+        "reopen_excluded_boot_defaults": {
+         "type": "array",
+         "minItems": 1,
+         "uniqueItems": true,
+         "items": {
+          "type": "string",
+          "minLength": 1
+         },
+         "description": "alternatives of boot_defaults whose runs the reopen condition leaves out; they are printed past the reopen point as any run (10.4, 2026-11-15)"
         }
        },
-       "description": "per run, the longest ready_wait over every task and cause against the starvation floor, flagged past the reopen point (9.11 D19; 9.14 decision 10)"
+       "description": "per run, the longest ready_wait over every task and cause against the starvation floor, flagged past the reopen point; a judging file's run past it reopens the executor-net question, under every boot default but those left out (9.11 D19; 9.14 decision 10; 10.4 decision 16)"
       }
      },
      {

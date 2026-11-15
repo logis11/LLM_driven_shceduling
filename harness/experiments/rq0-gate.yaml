@@ -109,6 +109,23 @@ guard_exemptions:
       condition runs it on fallback by construction and the fallback share is 1
       (task 3.2; the 8.6 smoke run). The file is reporting-only and excluded from
       Layer-2 aggregation; the exemption keeps the report's guard table honest.
+  # 10.4, 2026-11-15: the C2 pair guard on the cap band's oracle runs, one entry per judging half
+  - guard: c2_pair
+    workload: c2-p1a
+    conditions: [oracle]
+    tables: [floor-0.2, floor-0.333, floor-0.5]
+    reason: &band-pair >
+      Under a cap band table the guard's premise — under oracle the pair's
+      configuration sequences differ by construction, the guard a plumbing check
+      there (guards/guard-spec.yaml) — does not hold: the band re-runs the judging
+      files alone, so a pair's reporting half has no run under the table (c2-p1b,
+      c2-p3b), and a table whose unwanted rows' cap reaches a mode's wanted value
+      composes that mode's two rows into one configuration (floor-0.333's gaming
+      rows: c2-p2a and c2-p2b). The plumbing is checked on the primary table's
+      runs.
+  - {guard: c2_pair, workload: c2-p2a, conditions: [oracle], tables: [floor-0.2, floor-0.333, floor-0.5], reason: *band-pair}
+  - {guard: c2_pair, workload: c2-p2b, conditions: [oracle], tables: [floor-0.2, floor-0.333, floor-0.5], reason: *band-pair}
+  - {guard: c2_pair, workload: c2-p3a, conditions: [oracle], tables: [floor-0.2, floor-0.333, floor-0.5], reason: *band-pair}
 
 reporting_lines:
   # decision 12 as amended 2026-09-12: the fixed run re-run under each alternative,
@@ -229,9 +246,12 @@ reporting_lines:
     reason: "four judging files, one per term shape, rebuilt on one pooled repeat's measured wake sequence in place of the compiled stream (the launch-phase replay of 9.10 D136 extended to the carried phases): a measured or periodic task takes a window of its entry's carried phase at an offset the file's seed draws, the operations and the keystroke replay as compiled; a batch job its repeat's runs from the start, the repeat the nearest whose CPU covers the file's bind (dataset/replay/, each file stating its landing); agreement when each file's gap falls on the same side of g under both builds and differs by less than the g band's step; a disagreement is stated beside the verdict as the compiled streams' ordering threat (the 2026-09-26 burstiness finding: the streams reproduce each component's rates and distributions, not the order of its gaps nor its components waking together)"
     files: {c7-dev: c7-dev@replay, c7-browsing: c7-browsing@replay, c7-meeting: c7-meeting@replay, c2-p1a: c2-p1a@replay}
   - type: input_wake_count
+  # 10.4 decision 16: the reopen condition on the judging files' runs; 2026-11-15: the 100 ms
+  # point's runs left out of it, their cause stated in `sensitivity-lines`
   - type: longest_wait
     threshold_us: 30000000
     reopen_us: 15000000
+    reopen_excluded_boot_defaults: [ostep-slice-100000us]
   - type: bounding_pair
     a: c2-p2a
     b: c2-p2a-idle
@@ -549,8 +569,23 @@ statements:
       a slice of its base's at the base's stimulus offset (9.18), so its input
       wakes are those of the base's input window up to 24.385 s less the ones
       inside its own operations. The longest-wait line prints each run's longest
-      ready_wait against the 30 s floor; any run past 15 s reopens the executor-net question
-      with 인경민 before the verdict is read (9.11 D19).
+      ready_wait against the 30 s floor; a judging file's run past 15 s reopens the
+      executor-net question with 인경민 before the verdict is read (9.11 D19), under every
+      boot default but ostep-slice-100000us. Two causes fail the starvation guard by
+      the configuration a run applies (the cold smoke, 10.4, 2026-11-15). Under EDF the
+      frame chain takes the whole lane (simulator/memo/memo_261111.md Part L): on
+      c3-evening and the chain-scaled variants of c2-p2a and c2-p2b, a run whose
+      schedule holds EDF over the frame chain fails starvation_floor — oracle always,
+      random on each seed that draws EDF there; in the smoke the five oracle runs
+      (steam waiting 240.0 s on c3-evening, 86.4 s on the four variants) and the four
+      variants' random-1 runs (60.0 s). Under ostep-slice-100000us the top slice
+      equals the boost interval, and the boost, returning every task to the top queue
+      with its allotment afresh (docs/simulator/simulator-guide.md §5, rule 5),
+      restarts the running task's slice: a running task that does not block holds the
+      lane through every boost, and starvation_floor fails on fixed runs — in the
+      smoke c1-ml-train and c7-ml-train (editor, 320.3 s and 300.0 s), c1-transcode,
+      c7-transcode and c3-creation (video-editor, 168.0 s, 167.9 s and 197.3 s); the
+      boot default's count reads those runs and gives no reading.
   - id: re-measurement-contingency
     text: >
       The values the library carries under the stability rule's exceptions — the
