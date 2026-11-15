@@ -19,4 +19,4 @@ The record of sub-task 10.5 (`_dev/docs/spec/jioh/task-10.5-the-rq0-run.md`). Th
 
 **The hash manifest on two smoke passes** (`runs/cold-smoke`, `runs/smoke-rerun-2`): the two manifests are identical, 1,197 lines; 16 s and 21 s with 6 workers.
 
-**The slow-run flag's multiple**, 6: the largest ratio between one run's slowest and fastest time over the three smoke passes that built it — the second cold smoke, the rerun and the second rerun (the 10.4 record's three `run-times.csv`) — is 6.0. A run is flagged past 6 times its file's slowest run in the second cold smoke. The first cold smoke's two runs in the boost-window scan were 88 and 76 times their file's `fixed` run.
+**The slow-run flag's multiple**, 6: the largest ratio between one run's slowest and fastest time over the three smoke passes that built it — the second cold smoke, the rerun and the second rerun (the 10.4 record's three `run-times.csv`) — is 6.0. A run is flagged past 6 times its file's slowest run in the second cold smoke. The first cold smoke's two runs in the boost-window scan were 88 and 82 times their file's `fixed` run (4,297 s and 4,041 s against 49 s, the 10.4 record).
