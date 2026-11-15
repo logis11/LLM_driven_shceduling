@@ -10,7 +10,7 @@
 - The RQ0 run, its verdict and its record.
 - The docs that describe the harness and the mocks brought to the phase's end state.
 
-Out of scope: the failure procedure the RQ0 gate spec names on a FAIL (its configuration search and what follows), the RQ1–RQ4 experiment specs, the hold-time plan's step 0 (`_dev/docs/plan/jioh/hold-time-and-hysteresis.md`, the need measured with no rule), and the Layer 1 and RQ4 items the experiment specs carry.
+Out of scope: the failure procedure the RQ0 gate spec names on a FAIL (its configuration search and what follows), the re-measurement the RQ0 gate spec's `re-measurement-contingency` statement names (the 10.5 spec, decision 16), the RQ1–RQ4 experiment specs, the hold-time plan's step 0 (`_dev/docs/plan/jioh/hold-time-and-hysteresis.md`, the need measured with no rule), and the Layer 1 and RQ4 items the experiment specs carry.
 
 ## Locked decisions
 
@@ -32,7 +32,7 @@ The RQ0 run runs `daemon/daemon.py`, the committed daemon, in the mock daemon's 
 
 ### 5. A cold smoke, then the cost response, then the full run
 
-After the gate the real programs run the smoke with an empty cache, and its wall time per file, `c6-dual`'s among it, is recorded. From those figures the full run's cost is projected and one response is chosen — a cheaper records path, N changed under the RQ0 gate spec's `n-grounding` statement, or the cost carried — by a harness changelog entry before the run. The machine is the home M1 Pro; the full run's budget is about 80 hours of unattended wall time, the leave two weeks on.
+After the gate the real programs run the smoke with an empty cache, and its wall time per file, `c6-dual`'s among it, is recorded. From those figures the full run's cost is projected and one response is chosen — a cheaper records path, N changed under the RQ0 gate spec's `n-grounding` statement, or the cost carried — by a harness changelog entry before the run. The machine is the home M1 Pro; the full run's budget is about 80 hours of wall time. Restated 2026-11-15 (the 10.5 spec, decision 1): the run starts on 2026-11-16, at home, on the machine itself.
 
 ### 6. The gate spec's two pre-run lines are one sub-task
 
@@ -48,7 +48,7 @@ At the phase's end: the verdict read from the report after every guard; the repo
 
 ### 9. Structure of the phase
 
-Six sub-tasks, in order: the gate spec's pre-run lines (10.1); the integration gate (10.2); the variant lines reading a failed guard (10.3); the cold smoke and the cost response (10.4); the RQ0 run, its verdict and its record (10.5); the docs sweep (10.6) — the harness guide's conformance passages, the mocks' README, the docs index, the TODO. The Layer 1 and RQ4 item of the old Phase 10 list moves to the Backlog, carried by the experiment specs its text names. Schedule: 10.1 and 10.2 before the next weekend; 10.4's smoke left running over the overnight leave that weekend, its cost response decided in the week after; 10.5 over the leave two weeks on; 10.6 after.
+Six sub-tasks, in order: the gate spec's pre-run lines (10.1); the integration gate (10.2); the variant lines reading a failed guard (10.3); the cold smoke and the cost response (10.4); the RQ0 run, its verdict and its record (10.5); the docs sweep (10.6) — the harness guide's conformance passages, the mocks' README, the docs index, the TODO. The Layer 1 and RQ4 item of the old Phase 10 list moves to the Backlog, carried by the experiment specs its text names. Schedule: 10.1 and 10.2 before the next weekend; 10.4's smoke left running over the overnight leave that weekend, its cost response decided in the week after; 10.5 started on 2026-11-16, at home, on the machine itself (restated 2026-11-15); 10.6 after.
 
 ### 10. The smoke does not wait for the gate
 
