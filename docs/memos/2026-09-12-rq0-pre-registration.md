@@ -1,7 +1,7 @@
 # RQ0 gate spec 확정 안내 — 판정 기준을 실행 전에 파일로 못 박았어요
 
-> Status: memo · Created 2026-09-12 · Updated 2026-10-17
-> 열림 — §5의 부탁: `random`의 읽기와 N = 100을 daemon 쪽에서 확인해 주시는 것, 담당 박이안(RQ0 gate spec의 statement `random-reading`이 아직 확인을 기다려요). §4의 세 가정은 지금 spec의 statement `executor-assumptions`로 다시 적혔고(아래 정정), 그중 1·2에 대한 인경민의 정식 답은 2026-10-08 declared-class memo §4의 4번이 받아요.
+> Status: memo · Created 2026-09-12 · Updated 2026-11-15
+> 닫힘 — §5의 부탁(`random`의 읽기와 N = 100을 daemon 쪽에서 확인해 주시는 것)은 박이안이 인지오에게 구두로 확인해 줬어요(2026-11-15 기록). RQ0 gate spec의 statement `random-reading`에 그렇게 적혀 있어요. §4의 세 가정은 지금 spec의 statement `executor-assumptions`로 다시 적혔고(아래 정정), 그중 1·2에 대한 인경민의 정식 답은 2026-10-08 declared-class memo §4의 4번이 받아요.
 > From 인지오 to 인경민, 박이안. RQ0(random vs oracle의 gap이 잴 만큼 큰가)의 판정 기준을 **실행 전에** 하나의 파일로 확정했어요: `harness/experiments/rq0-gate.yaml`. 이 memo는 거기에 무엇이 어떤 근거로 들어갔는지, 그리고 두 분께 확인을 부탁드릴 것이 무엇인지 적어요. 두 분 프로그램의 입출력 형식은 하나도 안 바뀌었어요. 급하면 §1과 §4·§5만 읽어도 돼요.
 
 ## 1. 한 문단 요약

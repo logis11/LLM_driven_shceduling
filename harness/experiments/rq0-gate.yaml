@@ -508,9 +508,10 @@ statements:
       over the 32 driver-table rows, independent of previous draws and of the
       telemetry, from a PRNG seeded per run, logged with its draw and seed, at zero
       latency (daemon guide's definition; Phase 8 spec, decision 15). Proposed to
-      박이안 with N on 2026-09-12 (memo 2026-09-12-rq0-pre-registration) and pending
-      confirmation; enumerating the draw space instead of sampling it is a named
-      future option, not adopted.
+      박이안 with N on 2026-09-12 (memo 2026-09-12-rq0-pre-registration); 박이안
+      confirmed the reading and N = 100 to 인지오 verbally (recorded 2026-11-15).
+      Enumerating the draw space instead of sampling it is a named future option,
+      not adopted.
   - id: boot-default-sweep
     text: >
       Only the fixed run varies across the sweep: it is re-run under each alternative
@@ -571,7 +572,17 @@ statements:
       inside its own operations. The longest-wait line prints each run's longest
       ready_wait against the 30 s floor; a judging file's run past 15 s reopens the
       executor-net question with 인경민 before the verdict is read (9.11 D19), under every
-      boot default but ostep-slice-100000us. Two causes fail the starvation guard by
+      boot default but ostep-slice-100000us. The guard reads a ready_wait row, a
+      ready line to the task's next run_start, and two waits of a runnable task have
+      no row — one still open at the workload's end or the task's own, one after a
+      preemption; simulator/tools/wait_check.py reads them off every run's trace
+      before the report is read (10.5, decisions 4 and 5): on a run the criterion
+      reads — a judging file's fixed run under the primary boot default, its oracle
+      run, each random seed's — such a wait over 30 s is handled as a failed
+      starvation_floor is, its cause placed with the gaps unseen and fixed by a
+      harness changelog entry before the report is read; past 15 s it reopens the
+      executor-net question with 인경민; on any other run it is recorded with the
+      run. Two causes fail the starvation guard by
       the configuration a run applies (the cold smoke, 10.4, 2026-11-15). Under EDF the
       frame chain takes the whole lane (simulator/memo/memo_261111.md Part L): on
       c3-evening and the chain-scaled variants of c2-p2a and c2-p2b, a run whose

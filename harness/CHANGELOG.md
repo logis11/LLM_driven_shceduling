@@ -2,6 +2,13 @@
 
 The harness tree's own record of what its committed data files and programs changed, newest first. The scoring spec (`scoring/scoring-spec.yaml`) and the guard spec (`guards/guard-spec.yaml`) are frozen here (Phase 8 spec, decision 19): a change to either after its freeze is an entry below before any run reads it, and the RQ0 gate spec (`experiments/rq0-gate.yaml`) pins the frozen bytes by hash. The metrics doc and the data contracts keep their own changelogs.
 
+## 2026-11-15 — before the RQ0 run: the wait check's rule, the `random` reading confirmed (jioh)
+
+Decided by 인지오 (`_dev/docs/spec/jioh/task-10.5-the-rq0-run.md`, decisions 3, 5 and 6). Two statements of the RQ0 gate spec change, before any run of the full matrix. No pinned file changes, and no pin moves; no harness source changes, and no output changes.
+
+- **RQ0 gate spec**, `experiments/rq0-gate.yaml`, statement `sensitivity-lines`: the two waits of a runnable task that `starvation_floor` cannot read — one still open at the workload's end or the task's own, one after a preemption — are read off every run's trace by `simulator/tools/wait_check.py` before the report is read. On a run the criterion reads — a judging file's `fixed` run under the primary boot default, its `oracle` run, each `random` seed's — such a wait over 30 s is handled as a failed `starvation_floor` is, its cause placed with the gaps unseen and fixed by an entry here before the report is read; past 15 s it reopens the executor-net question with 인경민; on any other run it is recorded with the run.
+- **RQ0 gate spec**, statement `random-reading`: 박이안 confirmed the reading of `random` and N = 100 to 인지오 verbally (recorded 2026-11-15), in place of "pending confirmation". The memo that asked it, `docs/memos/2026-09-12-rq0-pre-registration.md`, is closed.
+
 ## 2026-11-15 — the cost response: the C2 pair guard on the cap band's runs, the longest-wait line's reopen condition, the starvation guard's two causes stated (jioh)
 
 Decided by 인지오 (`_dev/docs/spec/jioh/task-10.4-cold-smoke-and-cost-response.md`, decisions 12 and 16 as restated 2026-11-15, 20 and 21). The cost is carried (decision 13): from the second cold smoke's run times and bytes and the smoke rerun's end stages, the full run's upper projection is 50.33 h of the 80 and 273.5 GB — 200.1 GB of runs and 73.4 GB of the experiment's own files — of the 319.6 GB free at the second smoke's start (`_dev/research/jioh/task-10.4-cold-smoke-and-cost-response/projection.json`). No pinned file changes, and no pin moves; the aggregates, scores, guards and grades are unchanged, the report changes in the guard rows and the line below.
