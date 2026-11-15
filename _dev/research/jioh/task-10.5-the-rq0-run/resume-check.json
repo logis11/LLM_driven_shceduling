@@ -1,0 +1,74 @@
+{
+ "files": [
+  "c1-office",
+  "c1-photo",
+  "c7-mail",
+  "c2-p2b",
+  "c1-gaming",
+  "c7-compile",
+  "c1-compile"
+ ],
+ "experiment": "smoke",
+ "runs": 28,
+ "kill_after": 10,
+ "finished_at_the_kill": 10,
+ "stop_recorded_at_the_kill": false,
+ "stray_tmp_entries_after_the_kill": [
+  ".tmp-5f40f32842367acac13d5d916d3ceb11550da2c716835f3f4aaf2a93d1bbaaf0-44747",
+  ".tmp-61496af4bca3f08484b54aed90448a0a2a56e127597f3b859f3807a6333b76cd-44744"
+ ],
+ "resume": {
+  "progress_lines": 28,
+  "records_from_the_results_cache": 10,
+  "records_built": 18
+ },
+ "stops_recorded": [
+  "no stop was recorded: the launcher did not end by itself; cause unknown, recorded at the resume",
+  "finished: every run and the end stages; the verdict line and the exit code sealed"
+ ],
+ "sealed_at_the_end": {
+  "whole": true,
+  "resumed": true
+ },
+ "seconds": {
+  "whole": 130.0,
+  "to_the_kill": 58.5,
+  "resume": 113.4
+ },
+ "experiment_files": {
+  "aggregates.csv": {
+   "identical": true,
+   "sha256": "74b67dbb78996f1f8bdb48ff42b07902b03ce5b2a8d73bbbf331de6d04514d40",
+   "bytes": 254642313
+  },
+  "scores.csv": {
+   "identical": true,
+   "sha256": "f20358f937d38758b692cf299732a6f82b6b23f8cdd936a7f180c56b91ca027e",
+   "bytes": 7700
+  },
+  "guards.csv": {
+   "identical": true,
+   "sha256": "cd4475515df9087988099332489a4b2746fae88b52b809add496cbcbc97bfdae",
+   "bytes": 18004
+  },
+  "grades.csv": {
+   "identical": true,
+   "sha256": "fa6b6a2df6f6ae14265ced1b88b943c36e64981235cd8c9851f070698bc25eb8",
+   "bytes": 17442
+  },
+  "report.json": {
+   "identical": true,
+   "sha256": "179f27cd8c2167d796a09f78da49d06dde68d73508c4ac0039bb9e8c8f7234bc",
+   "bytes": 109713
+  },
+  "report.md": {
+   "identical": true,
+   "sha256": "35a75dfad6c59acccb82f600e33a867492e6803a4c288f35e3affa3c986f42c4",
+   "bytes": 10483
+  }
+ },
+ "run_directories": 28,
+ "run_files_compared": 168,
+ "differing": [],
+ "identical": true
+}

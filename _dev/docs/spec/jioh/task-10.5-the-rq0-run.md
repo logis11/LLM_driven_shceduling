@@ -39,9 +39,9 @@ Three things, on the full run's runs:
 
 The wait check's rule is written into the RQ0 gate spec before the run.
 
-### 6. One harness changelog entry and one re-pin before the run
+### 6. One harness changelog entry before the run
 
-The RQ0 gate spec's two pre-run edits — the wait check's rule (decision 5) and the `random-reading` statement (decision 3) — take one harness changelog entry and one re-pin.
+The RQ0 gate spec's two pre-run edits — the wait check's rule (decision 5) and the `random-reading` statement (decision 3) — take one harness changelog entry. Restated 2026-11-15: no pin moves — the two edits change the RQ0 gate spec's statements and none of the files it pins.
 
 ### 7. Light use of the machine during the run
 
