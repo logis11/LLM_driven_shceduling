@@ -1,0 +1,33 @@
+1197 runs; 12 failed guard rows on the judging files; 14 starvation_floor fails (4 on judging); 9 unread waits past 15 s (2 on judging); REOPENS
+34 line readings; unavailable: ['sensitivity ostep-slice-100000us', 'cap_band floor-0.2', 'cap_band floor-0.333', 'cap_band floor-0.5', 'variant_set chain-x1.2', 'variant_set chain-x1.4'] (NOT as expected: variant_set chain-x1.2, variant_set chain-x1.4 expected)
+  variant_set chain-x1.2: starvation_floor on c2-p2a@chain-x1.2 · oracle
+  variant_set chain-x1.2: starvation_floor on c2-p2a@chain-x1.2 · random
+  variant_set chain-x1.2: starvation_floor on c2-p2b@chain-x1.2 · oracle
+  variant_set chain-x1.2: starvation_floor on c2-p2b@chain-x1.2 · random
+  variant_set chain-x1.4: starvation_floor on c2-p2a@chain-x1.4 · oracle
+  variant_set chain-x1.4: starvation_floor on c2-p2a@chain-x1.4 · random
+  variant_set chain-x1.4: starvation_floor on c2-p2b@chain-x1.4 · oracle
+  variant_set chain-x1.4: starvation_floor on c2-p2b@chain-x1.4 · random
+  starvation_floor fail: c1-ml-train/fixed+ostep-slice-100000us~focus editor: max ready_wait 320318359 exceeds 30000000
+  starvation_floor fail: c1-transcode/fixed+ostep-slice-100000us~focus video-editor: max ready_wait 167953453 exceeds 30000000
+  starvation_floor fail: c2-p2a@chain-x1.2/oracle~focus steam: max ready_wait 86380441 exceeds 30000000
+  starvation_floor fail: c2-p2a@chain-x1.2/random-1~focus steam: max ready_wait 59997214 exceeds 30000000
+  starvation_floor fail: c2-p2a@chain-x1.4/oracle~focus steam: max ready_wait 86380441 exceeds 30000000
+  starvation_floor fail: c2-p2a@chain-x1.4/random-1~focus steam: max ready_wait 59997725 exceeds 30000000
+  starvation_floor fail: c2-p2b@chain-x1.2/oracle~focus steam: max ready_wait 86380441 exceeds 30000000
+  starvation_floor fail: c2-p2b@chain-x1.2/random-1~focus steam: max ready_wait 59997214 exceeds 30000000
+  starvation_floor fail: c2-p2b@chain-x1.4/oracle~focus steam: max ready_wait 86380441 exceeds 30000000
+  starvation_floor fail: c2-p2b@chain-x1.4/random-1~focus steam: max ready_wait 59997725 exceeds 30000000
+  starvation_floor fail: c3-creation/fixed+ostep-slice-100000us~focus video-editor: max ready_wait 197331094 exceeds 30000000
+  starvation_floor fail: c3-evening/oracle~focus steam: max ready_wait 239999886 exceeds 30000000
+  starvation_floor fail: c7-ml-train/fixed+ostep-slice-100000us~focus editor: max ready_wait 300012533 exceeds 30000000
+  starvation_floor fail: c7-transcode/fixed+ostep-slice-100000us~focus video-editor: max ready_wait 167949276 exceeds 30000000
+  ready_open 38.7 s c2-p1a/fixed+ostep-slice-100000us~focus task editor: reopens the starvation net
+  ready_open 240.0 s c3-evening/oracle~focus task chat: recorded with its run
+  preempt_done 21.8 s c6-dual/random-1~focus task build.j2125.cc1: recorded with its run
+  preempt_done 16.0 s c6-dual/random-2~focus task build.j1823.cc1: recorded with its run
+  ready_open 26.4 s c7-gaming@chain-x1.2/oracle~focus task steam: recorded with its run
+  ready_open 26.4 s c7-gaming@chain-x1.2/random-1~focus task steam: recorded with its run
+  ready_open 26.4 s c7-gaming@chain-x1.4/oracle~focus task steam: recorded with its run
+  ready_open 26.4 s c7-gaming@chain-x1.4/random-1~focus task steam: recorded with its run
+  ready_open 205.0 s c7-ml-train/fixed+ostep-slice-100000us~focus task editor: reopens the starvation net

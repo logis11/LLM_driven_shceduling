@@ -64,6 +64,8 @@ A run of the smoke that fails is placed and fixed by the 10.2 spec's decisions 1
 
 For each file, its slowest measured run of any condition stands for every one of its runs in the full run, and its largest run directory for their bytes. The wall projection is the longer of the two pools, plus the smoke's end stages scaled by the run count. The full run is counted cold: all 19,425 runs executed, all their bytes new. The mean projection is printed beside the upper one, for the record.
 
+Restated 2026-11-15: the disk projection is the runs' bytes plus the experiment's own files, scaled from the smoke — `aggregates.csv` by its row count, the other files by the run count.
+
 ### 13. When the cost is carried
 
 The cost is carried when the upper wall projection is at most 80 hours and the upper disk projection is at most the free space measured at the smoke's start.
@@ -82,6 +84,8 @@ The fallback of decision 5.
 
 The runs that fail `starvation_floor` under `oracle` today — `c3-evening`, `c2-p2a@chain-x1.2`, `c2-p2a@chain-x1.4`, `c2-p2b@chain-x1.2`, `c2-p2b@chain-x1.4`; `steam` behind the frame chain under EDF (`simulator/memo/memo_261111.md` Part L) — are named with their cause in the RQ0 gate spec's `sensitivity-lines` statement. The longest-wait line's reopen condition — any run past 15 s reopens the executor-net question with 인경민 before the verdict is read — is scoped to runs on the judging files.
 
+Restated 2026-11-15, on the smoke's starvation readings: the statement names the cause and the runs it reaches — on those five files, a run whose schedule holds EDF over the frame chain fails `starvation_floor`, `oracle` always and `random` on each seed that draws EDF there — with the smoke's runs as the instances: the five `oracle` runs and the four chain-scaled variants' `random-1` runs. The reopen condition leaves out the runs under `ostep-slice-100000us` (decision 20).
+
 ### 17. The guard table and the wait check
 
 The guard table of every condition is read on the judging files; a failed `starvation_floor` there reopens the executor's starvation net. `simulator/tools/wait_check.py` is run on the smoke's traces. A wait it finds that the guard cannot read — one still open at the end, one after a preemption — leads to what the guard's own reading leads to: on a judging file under any condition, over 30 s reopens the starvation net before the full run and past 15 s reopens the question with 인경민; on any other file it is recorded with its run. Reopened: the sub-task stops short of the full run, and the net is its own decision session.
@@ -93,6 +97,14 @@ A research folder for task 10.4 under `_dev/research/jioh/` holds the calibratio
 ### 19. A memo only when a teammate is reached
 
 A memo under `docs/memos/` is written if the starvation net is reopened (to 인경민) or if the seed count of the cap band and the variant files changes (to 박이안; the RQ0 gate spec's `random-reading` statement has N proposed to 박이안 and pending confirmation). A carried cost takes no memo.
+
+### 20. The 100 ms point's starvation is the point's own
+
+Decided 2026-11-15, in the starvation net's decision session that decision 17 opened. Under the boot default `ostep-slice-100000us` the top slice equals the boost interval, and the boost — every task back to the top queue with its allotment afresh (the simulator guide §5, rule 5) — restarts the running task's slice: a running task that does not block holds the lane through every boost, and `starvation_floor` fails on the `fixed` runs of four judging files (`c1-ml-train`, `c7-ml-train`, `c1-transcode`, `c7-transcode`) and of `c3-creation`. This is a property of the point under the contract as it stands: no starvation net, no simulator change. The RQ0 gate spec's `sensitivity-lines` statement names the point's failures with their cause; the point's count stays unavailable (the 10.3 spec's decision 1).
+
+### 21. The C2 pair guard on the cap band's runs
+
+Decided 2026-11-15. `c2_pair` is exempt on the cap band's `oracle` runs of the four judging halves of the C2 pairs (`c2-p1a`, `c2-p2a`, `c2-p2b`, `c2-p3a`), under all three band tables. A guard exemption takes a table field, the stems of `driver_table_alternatives` it holds on.
 
 ## Invariants
 

@@ -11,9 +11,12 @@ The upper projection (decision 12): for each file, its slowest measured run of a
 its runs in the full run, and its largest run for their bytes. The wall projection is the longer of the two pools —
 the runs on files under `heavy_mb` over `workers` processes, the rest over `heavy_workers` — each pool's run-seconds
 divided by its processes, never less than its longest run, plus the smoke's end stages scaled by the run count. The
-full run is counted cold: every run executed, all its bytes new. The mean projection, each file's mean run in place
-of its slowest and largest, is printed beside it. The cost is carried (decision 13) when the upper wall projection is
-at most the budget and the upper disk projection at most the free space measured at the smoke's start.
+full run is counted cold: every run executed, all its bytes new. The disk projection adds the experiment's own files
+(decision 12 as restated 2026-11-15), from the `--stages` experiment's: `aggregates.csv` by its rows, each full run's
+rows its smoke counterpart's (the same run, seed 1 for a drawing run's every seed), the other files by the run
+count. The mean projection, each file's mean run in place of its slowest and largest, is printed beside it. The cost
+is carried (decision 13) when the upper wall projection is at most the budget and the upper disk projection at most
+the free space measured at the smoke's start.
 
 Run from the repository root; writes projection.json beside this file."""
 import argparse
@@ -30,21 +33,46 @@ from harness import runner  # noqa: E402
 SPEC = REPO / "harness" / "experiments" / "rq0-gate.yaml"
 
 
-def project(per_file, full_counts, heavy, machine, end_seconds, smoke_runs, pick):
+def project(per_file, full_counts, heavy, machine, end_seconds, smoke_runs, pick, experiment_bytes):
     pools = {"light": [0.0, 0.0, machine.workers], "heavy": [0.0, 0.0, max(1, machine.heavy_workers)]}
-    disk = 0
+    runs_bytes = 0
     for wid, n in full_counts.items():
         seconds, size = pick(per_file[wid])
         pool = pools["heavy" if heavy[wid] else "light"]
         pool[0] += seconds * n
         pool[1] = max(pool[1], seconds)
-        disk += size * n
+        runs_bytes += size * n
     walls = {name: max(total / procs, longest) for name, (total, longest, procs) in pools.items()}
     total_runs = sum(full_counts.values())
     end = end_seconds * total_runs / smoke_runs
     wall = max(walls.values()) + end
     return {"wall_hours": round(wall / 3600, 2), "pools_hours": {k: round(v / 3600, 2) for k, v in walls.items()},
-            "end_stages_hours": round(end / 3600, 2), "disk_gb": round(disk / 1e9, 1)}
+            "end_stages_hours": round(end / 3600, 2), "runs_gb": round(runs_bytes / 1e9, 1),
+            "experiment_files_gb": round(experiment_bytes / 1e9, 1),
+            "disk_gb": round((runs_bytes + experiment_bytes) / 1e9, 1)}
+
+
+def experiment_files(stages, full, smoke_runs, full_runs):
+    """The full run's own files, from the `stages` experiment's: aggregates.csv by its rows — each full run's rows
+    its smoke counterpart's, seed 1 for a drawing run — the others by the run count."""
+    rows = collections.Counter()
+    with open(stages / "aggregates.csv", newline="") as f:
+        reader = csv.reader(f)
+        next(reader)
+        for r in reader:
+            rows[tuple(r[:6])] += 1
+    smoke_rows = sum(rows.values())
+    full_rows = 0
+    for run in full:
+        key = (run.workload_id, run.condition, run.table, "1" if run.seed else "", run.boot_default, run.telemetry)
+        if key not in rows:
+            sys.exit(f"no smoke counterpart of {run.identity()}")
+        full_rows += rows[key]
+    agg_bytes = (stages / "aggregates.csv").stat().st_size
+    other = sum(p.stat().st_size for p in stages.iterdir() if p.is_file() and p.name != "aggregates.csv")
+    return {"smoke_aggregate_rows": smoke_rows, "full_aggregate_rows": full_rows,
+            "aggregates_bytes": round(agg_bytes * full_rows / smoke_rows),
+            "other_bytes": round(other * full_runs / smoke_runs)}
 
 
 def main():
@@ -74,10 +102,13 @@ def main():
     if missing:
         sys.exit(f"no smoke run of {missing}: the projection reads every file")
 
+    files = experiment_files(stages, full, smoke_runs, len(full))
+    experiment_bytes = files["aggregates_bytes"] + files["other_bytes"]
     upper = project(per_file, full_counts, heavy, machine, end_seconds, smoke_runs,
-                    lambda runs: (max(s for s, _ in runs), max(b for _, b in runs)))
+                    lambda runs: (max(s for s, _ in runs), max(b for _, b in runs)), experiment_bytes)
     mean = project(per_file, full_counts, heavy, machine, end_seconds, smoke_runs,
-                   lambda runs: (sum(s for s, _ in runs) / len(runs), sum(b for _, b in runs) / len(runs)))
+                   lambda runs: (sum(s for s, _ in runs) / len(runs), sum(b for _, b in runs) / len(runs)),
+                   experiment_bytes)
     carried = upper["wall_hours"] <= args.budget_hours and upper["disk_gb"] <= args.free_gb
     top = sorted(((max(s for s, _ in per_file[w]) * n, w) for w, n in full_counts.items()), reverse=True)[:10]
     doc = {"smoke": str(smoke.resolve().relative_to(REPO)) if smoke.resolve().is_relative_to(REPO) else str(smoke),
@@ -85,7 +116,7 @@ def main():
            "machine": {"workers": machine.workers, "heavy_workers": machine.heavy_workers,
                        "heavy_mb": machine.heavy_mb},
            "budget_hours": args.budget_hours, "free_gb_at_start": args.free_gb,
-           "upper": upper, "mean": mean,
+           "experiment_files": files, "upper": upper, "mean": mean,
            "carried": carried, "over": [k for k, over in (("wall", upper["wall_hours"] > args.budget_hours),
                                                           ("disk", upper["disk_gb"] > args.free_gb)) if over],
            "largest_files_upper_run_hours": [{"workload_id": w, "hours": round(h / 3600, 2),

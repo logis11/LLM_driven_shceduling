@@ -1,0 +1,95 @@
+{
+ "smoke": "runs/cold-smoke",
+ "stages": "runs/smoke-rerun",
+ "smoke_runs": 1197,
+ "full_runs": 19425,
+ "machine": {
+  "workers": 4,
+  "heavy_workers": 1,
+  "heavy_mb": 50
+ },
+ "budget_hours": 80.0,
+ "free_gb_at_start": 319.6,
+ "experiment_files": {
+  "smoke_aggregate_rows": 47089102,
+  "full_aggregate_rows": 740818977,
+  "aggregates_bytes": 73193974031,
+  "other_bytes": 185488692
+ },
+ "upper": {
+  "wall_hours": 50.33,
+  "pools_hours": {
+   "light": 13.29,
+   "heavy": 47.73
+  },
+  "end_stages_hours": 2.6,
+  "runs_gb": 200.1,
+  "experiment_files_gb": 73.4,
+  "disk_gb": 273.5
+ },
+ "mean": {
+  "wall_hours": 38.75,
+  "pools_hours": {
+   "light": 8.23,
+   "heavy": 36.15
+  },
+  "end_stages_hours": 2.6,
+  "runs_gb": 170.3,
+  "experiment_files_gb": 73.4,
+  "disk_gb": 243.7
+ },
+ "carried": true,
+ "over": [],
+ "largest_files_upper_run_hours": [
+  {
+   "workload_id": "c6-dual",
+   "hours": 30.59,
+   "runs": 112
+  },
+  {
+   "workload_id": "c1-compile",
+   "hours": 13.36,
+   "runs": 415
+  },
+  {
+   "workload_id": "c1-transcode",
+   "hours": 7.17,
+   "runs": 415
+  },
+  {
+   "workload_id": "c7-transcode",
+   "hours": 4.54,
+   "runs": 415
+  },
+  {
+   "workload_id": "c1-compile@venue-x0.8",
+   "hours": 3.83,
+   "runs": 102
+  },
+  {
+   "workload_id": "c1-compile@corner-high",
+   "hours": 3.81,
+   "runs": 102
+  },
+  {
+   "workload_id": "c4-compile",
+   "hours": 3.18,
+   "runs": 112
+  },
+  {
+   "workload_id": "c1-compile@venue-x1.25",
+   "hours": 2.96,
+   "runs": 102
+  },
+  {
+   "workload_id": "c1-compile@corner-low",
+   "hours": 2.91,
+   "runs": 102
+  },
+  {
+   "workload_id": "c7-compile",
+   "hours": 2.02,
+   "runs": 415
+  }
+ ]
+}
