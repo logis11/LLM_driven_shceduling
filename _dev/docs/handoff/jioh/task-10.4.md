@@ -12,8 +12,7 @@ Spec `_dev/docs/spec/jioh/task-10.4-cold-smoke-and-cost-response.md` (decisions 
 
 ## Next
 
-1. Tick 10.4 (인지오's call) and wrap up.
-2. 10.5 (the RQ0 run): its spec session decides whether it starts from the smoke's cache, and what of the smoke's 38.9 GB on disk goes before it — free is 271.5 GB, under the upper disk projection's 273.5 GB, while they stay.
+1. 10.5 (the RQ0 run): its spec session decides whether it starts from the smoke's cache, and what of the smoke's 38.9 GB on disk goes before it — free is 271.5 GB, under the upper disk projection's 273.5 GB, while they stay.
 
 ## Facts worth not rediscovering
 
