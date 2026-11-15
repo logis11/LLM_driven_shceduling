@@ -102,6 +102,20 @@ A run's bytes, as the runner records them, are its run directory and its executi
   - The 100 ms boot default's sensitivity count, on the four judging files' `starvation_floor`.
   - The three cap band tables' counts, on the judging files' `c2_pair`.
 
+## The second smoke rerun
+
+Started 2026-11-15T12:18:04+0900 on `dd03f515`, the harness with the cost response (`251eb50f`), the same versions and workers, 285.6 GB free: 2,394 program invocations from the execution cache, none executed; no run's records from the results cache, whose key carries the harness package's own source, which `251eb50f` changed — every run's records and aggregates built again. The 1,197 runs finished in 11,671 s, none failed. The end stages, 582 s: aggregates and scores 225 s, guards 96 s, grades 133 s, report 128 s. Ended 15:42:45, exit 2.
+
+- `aggregates.csv`, `scores.csv`, `guards.csv` and `grades.csv` identical byte for byte to the rerun's.
+- Run-seconds 17,964 against the rerun's 15,416, every run's bytes the rerun's: `c6-dual`'s 14 runs 1.16 of their rerun time (494–1,033 s), the transcode files' 62 runs 1.04, the 68 other runs over 20 s 1.14, the other 1,053 runs 1.30. By completion order, each quarter of the runs 1.22, 1.22, 2.13 (100 s against 47 s) and 1.14 of its rerun time. 140 runs over their second-smoke time, 890 s over in all, the most `c6-dual`'s `fixed+ostep-slice-500us` (923.1 s against 822.9 s) and `random-1` (1,033.1 s against 983.1 s); all the runs 0.94 of the second smoke's run-seconds.
+- **The projection** with these end stages (`rerun-2/projection.json`): upper 50.35 h, its end stages 2.62 h, the pools and the disk as before (273.5 GB); mean 38.77 h. Carried.
+- **The starvation readings** (`rerun-2/starvation.json`, `rerun-2/starvation.log`), with `starvation.py` as the starvation net's decision session left it: the same failed guard rows, `starvation_floor` failures and unread waits as on the rerun, run for run and wait for wait. Nothing reopened: the six on judging files under the 100 ms boot default — four `starvation_floor` failures, two unread waits — are listed apart as that point's own. 34 line readings, three unavailable, as expected: the 100 ms boot default's sensitivity count and the two chain-scale lines. In the report, the eight `c2_pair` rows under the cap band's tables are exempt, and the longest-wait line, the 100 ms boot default left out, does not reopen.
+- Free after: 271.5 GB, with `runs/.cache` (24.9 GB) and `runs/cold-smoke`, `runs/smoke-rerun` and `runs/smoke-rerun-2` (4.7 GB each beyond it) on disk, 38.9 GB in all.
+
+| file | what it holds |
+|---|---|
+| `rerun-2/` | the second rerun's `start.json`, `exit.json`, `smoke-rerun-2.log`, `run-times.csv` and `stage-times.csv`; `projection.json` from its end stages; `starvation.json` and `starvation.log` on its runs |
+
 ## The smoke and after
 
 | file | what it holds |

@@ -1,24 +1,23 @@
-# Handoff — task 10.4 The cold smoke and the cost response (2026-11-14) — the pre-smoke work committed, the smoke not started
+# Handoff — task 10.4 The cold smoke and the cost response (2026-11-15) — the second rerun recorded, 10.4's work done
 
-Spec `_dev/docs/spec/jioh/task-10.4-cold-smoke-and-cost-response.md` (decisions 1–19). On `main`, not pushed: `cabebef5` the pre-smoke work; `c1e12a09` sub-task 10.3, which decision 8 puts before the smoke (spec `_dev/docs/spec/jioh/task-10.3-variant-lines-read-a-failed-guard.md`). Research folder `_dev/research/jioh/task-10.4-cold-smoke-and-cost-response/`, its README the record.
+Spec `_dev/docs/spec/jioh/task-10.4-cold-smoke-and-cost-response.md` (decisions 1–21; 12 and 16 restated 2026-11-15). Research folder `_dev/research/jioh/task-10.4-cold-smoke-and-cost-response/`, its README the record. On `main`, not pushed: `df0b9348`, `a0cbe2d1`, `a3aadfe9`, `3d949345`, `5c434017`, `251eb50f`, `dd03f515`, and the second rerun's record.
 
 ## Where it stands
 
-- **Landed:** the drop count by bisection, the schema check by signature, the rows' memory (decisions 1–2); what a finished run keeps — the trace and the records gzipped, the rerun trace as its hash (decisions 4–5); each run's peak memory and bytes in `run-times.csv`, each end stage's wall time in `stage-times.csv`; the smoke's spec copy at seed count 2, 1,197 runs (decision 9); the harness changelog's pre-smoke entry.
-- **Checked:** the 28 short-run runs rebuild byte for byte; the runner before and after write the same outputs on the short run's seven files, run directories 1,468 MB → 53 MB; harness suite 380 passed.
-- **Worker configuration** (decision 7), in the git-ignored `harness/runner.yaml`: `workers: 4`, `heavy_workers: 1`, `heavy_mb: 50`, from the calibration (`c6-dual` 9,593 MB peak, 588 s; the largest light file `c4-compile` 672 MB). The figures and the sum against 16 GB are in the README.
-- `runs/smoke` and `runs/.cache` deleted; `runs/` holds `integration-gate/` alone; 302 GB free on 2026-11-14.
+- **Smokes:** the first stopped at 1,151 runs (the cap band's schema check; the boost-window scan); the second finished its 1,197 runs, stopped in the guards stage; the rerun (`runs/smoke-rerun`, from `5c434017`) and the second rerun (`runs/smoke-rerun-2`, from `dd03f515`, the harness with the cost response) finished, aggregates, scores, guards and grades identical byte for byte.
+- **The cost is carried** (decision 13): upper 50.33 h of 80 on the rerun's end stages, 50.35 h on the second rerun's; 273.5 GB of 319.6 — 200.1 GB runs, 73.4 GB the experiment's own files (decision 12 restated).
+- **The starvation net was reopened and settled the same day** (decisions 17, 20, 21): the 100 ms boot default's failures are the point's own; 인경민 confirmed the boost resetting the running task's allotment is what the simulator means. On the second rerun nothing reopens; only the 100 ms count and the two chain-scale lines are unavailable; the cap band's `c2_pair` rows exempt; the longest-wait line does not reopen.
+- **Harness change** `251eb50f`; suite 390 passed; both lints clean. Memo `docs/memos/2026-11-15-starvation-net-reopened.md` to 인경민.
+- **The second rerun's runs took 16.5% more run-seconds than the rerun's** for the same work, spread through the run; still 0.94 of the second smoke's. The cause is not established.
 
 ## Next
 
-1. **Start the smoke** from the repository root, through the tunnel (decision 10): `nohup bash _dev/research/jioh/task-10.4-cold-smoke-and-cost-response/cold_smoke.sh &`. It refuses to start over `runs/cold-smoke` or `runs/.cache`; writes `start.json` (commit, versions, workers, free space) and `exit.json` in the research folder, the log to `runs/cold-smoke.log`.
-2. A run that fails goes through the 10.2 spec's decisions 13–14, and the smoke restarts (decision 11).
-3. After a smoke in which every run finished: `project.py --smoke runs/cold-smoke --free-gb <start.json's free_gb>` (decisions 12–13), then `starvation.py --smoke runs/cold-smoke` (decisions 16–17, and the 10.3 spec's decision 8: the two chain-scale lines expected unavailable, no other line).
-4. The cost response (decisions 13–15), then the second changelog entry with decision 16's restatement and the re-pin (decision 18). With the four chain-scaled runs named, the restatement adds that both chain-scale lines print unavailable under 10.3's rule.
-5. A memo only if a teammate is reached (decision 19).
+1. Tick 10.4 (인지오's call) and wrap up.
+2. 10.5 (the RQ0 run): its spec session decides whether it starts from the smoke's cache, and what of the smoke's 38.9 GB on disk goes before it — free is 271.5 GB, under the upper disk projection's 273.5 GB, while they stay.
 
 ## Facts worth not rediscovering
 
-- At one heavy worker the full run's 1,350 heavy runs come to about 32 h on the calibration's `fixed` times alone, `c6-dual`'s 112 about 18 h of it — not the projection; the smoke measures every condition.
-- `c1-compile/random-1` took 59 s in the rebuild check against 6.6–6.8 s for the file's other runs; left for the smoke's profile.
-- A calibration taken earlier on 2026-11-14 mixed code versions and was discarded; `calibration.json` is the clean pass.
+- The results-cache key carries the harness package's own source (`harness_version`): any change under `harness/tools/harness/` rebuilds every run's records and aggregates; the second rerun's rebuilt set took `runs/.cache` from 18.6 GB to 24.9 GB.
+- A run directory holds links into the cache: measured alone, each smoke experiment is 12.9 GB; beside `runs/.cache`, 4.7 GB.
+- End stages about 580 s on 1,197 runs; at the full run's 740,818,977 aggregate rows, `aggregates.csv` is about 73 GB.
+- The evaluator alone on a smoke's outputs takes about 2 min 20 s; `starvation.py` with 6 workers about 3 min 35 s; the harness suite about 16 min.
