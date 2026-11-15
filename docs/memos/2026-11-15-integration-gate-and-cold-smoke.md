@@ -90,6 +90,7 @@
 - **100 ms point의 실패는 그 point의 것이에요.** starvation net도, simulator 변경도 없어요. RQ0 gate spec의 `sensitivity-lines` statement가 원인과 함께 적고, 그 point의 count는 report에서 unavailable로 남아요.
 - **EDF의 frame chain.** 같은 statement가 원인과 그 원인이 닿는 run을 적어요. 그 다섯 파일에서 schedule이 frame chain 위에 EDF를 두는 run은 실패해요. `oracle`은 언제나, `random`은 거기서 EDF를 뽑은 seed마다요.
 - **longest-wait line이 경민과의 질문을 다시 여는 조건.** judging 파일의 run이 15 s를 넘으면 다시 열려요. `ostep-slice-100000us`의 run은 빼요.
+- **두 번째 rerun.** 위 결정을 담은 harness(`dd03f515`)로 smoke를 다시 돌렸어요. 1,197 run 모두 끝났고 다시 열린 것은 없어요. judging 파일의 `starvation_floor` 실패 넷과 guard가 못 읽는 wait 둘은 모두 100 ms point의 것이고, report에서 unavailable인 line은 그 point의 count와 chain-scale line 둘(`chain-x1.2`, `chain-x1.4`)뿐이에요. longest-wait line도 다시 열지 않아요. 기록은 `_dev/research/jioh/task-10.4-cold-smoke-and-cost-response/rerun-2/`에 있어요.
 
 ## 8. 자세한 기록
 
