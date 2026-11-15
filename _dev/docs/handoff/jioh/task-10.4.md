@@ -7,7 +7,7 @@ Spec `_dev/docs/spec/jioh/task-10.4-cold-smoke-and-cost-response.md` (decisions 
 - **Smokes:** the first stopped at 1,151 runs (the cap band's schema check; the boost-window scan); the second finished its 1,197 runs, stopped in the guards stage; the rerun (`runs/smoke-rerun`, from `5c434017`) and the second rerun (`runs/smoke-rerun-2`, from `dd03f515`, the harness with the cost response) finished, aggregates, scores, guards and grades identical byte for byte.
 - **The cost is carried** (decision 13): upper 50.33 h of 80 on the rerun's end stages, 50.35 h on the second rerun's; 273.5 GB of 319.6 — 200.1 GB runs, 73.4 GB the experiment's own files (decision 12 restated).
 - **The starvation net was reopened and settled the same day** (decisions 17, 20, 21): the 100 ms boot default's failures are the point's own; 인경민 confirmed the boost resetting the running task's allotment is what the simulator means. On the second rerun nothing reopens; only the 100 ms count and the two chain-scale lines are unavailable; the cap band's `c2_pair` rows exempt; the longest-wait line does not reopen.
-- **Harness change** `251eb50f`; suite 390 passed; both lints clean. Memo `docs/memos/2026-11-15-starvation-net-reopened.md` to 인경민.
+- **Harness change** `251eb50f`; suite 390 passed; both lints clean. Memo `docs/memos/2026-11-15-integration-gate-and-cold-smoke.md` to 인경민.
 - **The second rerun's runs took 16.5% more run-seconds than the rerun's** for the same work, spread through the run; still 0.94 of the second smoke's. The cause is not established.
 
 ## Next
