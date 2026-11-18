@@ -1,0 +1,1 @@
+verdict: fail — 6 of 19 judging files met the criterion (K = 10); 37863 invocation(s) executed, 987 from the cache; 0 run(s) of records from the results cache; report in /Users/jiohin/Desktop/future-of-sw/LLM_driven_shceduling/runs/rq0-gate/report.json

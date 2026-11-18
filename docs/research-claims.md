@@ -1,5 +1,5 @@
 # Research Claims and Questions
-> Status: normative · Created 2026-08-23 · Updated 2026-11-01
+> Status: normative · Created 2026-08-23 · Updated 2026-11-18
 
 What this project asserts, what would falsify it, and what it does not claim.
 
@@ -58,12 +58,23 @@ stay out of it.
 Links 1 through 3 are properties of the workload space rather than of language
 models. Phase 1's committed spec (`harness/experiments/rq0-gate.yaml`) tests
 links 1 and 2, by RQ0, before any prompt exists (its statement `claim-links`).
-Link 1 by its criterion: `random` against perfect recognition. Link 2 by its
+Link 1 by its criterion, `random` against perfect recognition: on the RQ0 run
+(2026-11-18, `rq0-run-record.md`) the verdict at the primary is fail, 6 of the
+19 judging files meeting g = 0.5 against K = 10, and provisional — the
+carried-half-width lines move a judging file across g, so the re-measurement
+contingency has fired and its entry is owed. The count ranges over g, 10 at
+0.25 to 4 at 0.67, and the verdict is a range over g: pass at 0.25, fail above.
+Over the boot-default sweep (3 to 9), the floor band (4 to 6), the cap band (6
+to 7), the venue factor (5 to 7), the first segment's length (6 to 7) and the
+carried half-widths (5 to 6) the count ranges and the verdict holds, fail. The
+chain scale and the sweep's 100 ms point are not read. Link 2 by its
 headroom-count line: a difference invisible to behavioural observation is, in
 RQ0's terms, headroom — the oracle improving on `fixed`, the boot default that
 schedules by behaviour alone, on a term the scoring spec defines — and link 2 is
 falsified when no judging file has headroom, `fixed` reaching the oracle's
-outcome on every term of every judging file. The two readings are separate: a
+outcome on every term of every judging file. On the RQ0 run 17 of the 19
+judging files have headroom under the primary, and link 2 stands
+(`rq0-run-record.md`). The two readings are separate: a
 file whose headroom `random` captures fails link 1's reading and not link 2's.
 Link 3 is held by how the dataset is built, and its limits are measured by the
 pre-committed misses: the segments shipped with `pre_committed_miss: true`

@@ -1,0 +1,4390 @@
+{
+ "experiment_dir": "/Users/jiohin/Desktop/future-of-sw/LLM_driven_shceduling/runs/rq0-gate",
+ "read": "2026-11-18T06:58:55+0900",
+ "runs": 19425,
+ "criterion_runs": 1938,
+ "clear": true,
+ "guard_table_criterion_runs": [
+  {
+   "condition": "fixed",
+   "guard": "c2_pair",
+   "not_applicable": 19
+  },
+  {
+   "condition": "fixed",
+   "guard": "config_age",
+   "not_applicable": 19
+  },
+  {
+   "condition": "fixed",
+   "guard": "determinism",
+   "pass": 19
+  },
+  {
+   "condition": "fixed",
+   "guard": "provenance_share",
+   "not_applicable": 19
+  },
+  {
+   "condition": "fixed",
+   "guard": "starvation_floor",
+   "pass": 19
+  },
+  {
+   "condition": "fixed",
+   "guard": "tick_count",
+   "pass": 19
+  },
+  {
+   "condition": "fixed",
+   "guard": "utilisation_sanity",
+   "pass": 19
+  },
+  {
+   "condition": "fixed",
+   "guard": "validation_matches_provenance",
+   "not_applicable": 19
+  },
+  {
+   "condition": "oracle",
+   "guard": "c2_pair",
+   "not_applicable": 15,
+   "pass": 4
+  },
+  {
+   "condition": "oracle",
+   "guard": "config_age",
+   "pass": 19
+  },
+  {
+   "condition": "oracle",
+   "guard": "determinism",
+   "pass": 19
+  },
+  {
+   "condition": "oracle",
+   "guard": "provenance_share",
+   "pass": 19
+  },
+  {
+   "condition": "oracle",
+   "guard": "starvation_floor",
+   "pass": 19
+  },
+  {
+   "condition": "oracle",
+   "guard": "tick_count",
+   "pass": 19
+  },
+  {
+   "condition": "oracle",
+   "guard": "utilisation_sanity",
+   "pass": 19
+  },
+  {
+   "condition": "oracle",
+   "guard": "validation_matches_provenance",
+   "pass": 19
+  },
+  {
+   "condition": "random",
+   "guard": "c2_pair",
+   "not_applicable": 1900
+  },
+  {
+   "condition": "random",
+   "guard": "config_age",
+   "pass": 1900
+  },
+  {
+   "condition": "random",
+   "guard": "determinism",
+   "pass": 1900
+  },
+  {
+   "condition": "random",
+   "guard": "provenance_share",
+   "pass": 1900
+  },
+  {
+   "condition": "random",
+   "guard": "starvation_floor",
+   "pass": 1900
+  },
+  {
+   "condition": "random",
+   "guard": "tick_count",
+   "pass": 1900
+  },
+  {
+   "condition": "random",
+   "guard": "utilisation_sanity",
+   "pass": 1900
+  },
+  {
+   "condition": "random",
+   "guard": "validation_matches_provenance",
+   "pass": 1900
+  }
+ ],
+ "invalidating": [],
+ "reopen_us": 15000000,
+ "reopen_left_out": [
+  "ostep-slice-100000us"
+ ],
+ "reopening": [],
+ "unread_waits_past_15s": [
+  {
+   "run": "c2-p1a/fixed+ostep-slice-100000us~focus",
+   "kind": "ready_open",
+   "wait_us": 38729296,
+   "task": "editor",
+   "criterion_run": false,
+   "judging": true,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-12~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-17~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-27~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-28~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-35~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-39~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-3~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-43~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-48~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-4~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-50~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-65~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-66~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-70~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-7~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-89~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.2/random-92~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-12~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-17~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-27~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-28~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-35~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-39~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-3~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-43~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-48~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-4~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-50~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-65~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-66~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-70~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-7~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-89~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2a@chain-x1.4/random-92~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-12~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-17~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-27~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-28~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-3~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-43~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-48~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-4~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-50~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-65~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-66~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-70~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-7~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.2/random-92~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-12~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-17~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-27~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-28~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-3~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-43~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-48~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-4~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-50~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-65~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-66~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-70~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-7~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c2-p2b@chain-x1.4/random-92~focus",
+   "kind": "ready_open",
+   "wait_us": 26382352,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/oracle~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-12~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-13~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-17~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-20~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-27~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-28~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-35~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-39~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-3~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-43~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-48~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-4~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-50~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-60~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-65~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-66~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-70~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-7~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-89~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c3-evening/random-92~focus",
+   "kind": "ready_open",
+   "wait_us": 239990421,
+   "task": "chat",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-100~focus",
+   "kind": "preempt_done",
+   "wait_us": 19799517,
+   "task": "build.j1822.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-10~focus",
+   "kind": "preempt_done",
+   "wait_us": 21690339,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-11~focus",
+   "kind": "preempt_done",
+   "wait_us": 21690339,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-12~focus",
+   "kind": "preempt_done",
+   "wait_us": 19463089,
+   "task": "build.j642.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-13~focus",
+   "kind": "preempt_done",
+   "wait_us": 19168932,
+   "task": "build.j2120.as",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-14~focus",
+   "kind": "preempt_done",
+   "wait_us": 19986545,
+   "task": "build.j2120.as",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-15~focus",
+   "kind": "preempt_done",
+   "wait_us": 22091473,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-16~focus",
+   "kind": "preempt_done",
+   "wait_us": 20691268,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-17~focus",
+   "kind": "preempt_done",
+   "wait_us": 19502186,
+   "task": "build.j1822.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-18~focus",
+   "kind": "preempt_done",
+   "wait_us": 21972722,
+   "task": "build.j2125.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-19~focus",
+   "kind": "preempt_done",
+   "wait_us": 20523745,
+   "task": "build.j531.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-1~focus",
+   "kind": "preempt_done",
+   "wait_us": 21776194,
+   "task": "build.j2125.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-20~focus",
+   "kind": "preempt_done",
+   "wait_us": 22273156,
+   "task": "build.j963.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-21~focus",
+   "kind": "preempt_done",
+   "wait_us": 20856314,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-22~focus",
+   "kind": "preempt_done",
+   "wait_us": 21908126,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-23~focus",
+   "kind": "preempt_done",
+   "wait_us": 21385256,
+   "task": "build.j2125.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-24~focus",
+   "kind": "preempt_done",
+   "wait_us": 21572720,
+   "task": "build.j2125.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-25~focus",
+   "kind": "preempt_done",
+   "wait_us": 20669526,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-26~focus",
+   "kind": "preempt_done",
+   "wait_us": 18491108,
+   "task": "build.j2901.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-27~focus",
+   "kind": "preempt_done",
+   "wait_us": 17391514,
+   "task": "build.j2126.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-28~focus",
+   "kind": "preempt_done",
+   "wait_us": 18375701,
+   "task": "build.j643.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-29~focus",
+   "kind": "preempt_done",
+   "wait_us": 20669527,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-2~focus",
+   "kind": "preempt_done",
+   "wait_us": 15968068,
+   "task": "build.j1823.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-30~focus",
+   "kind": "preempt_done",
+   "wait_us": 20615856,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-31~focus",
+   "kind": "preempt_done",
+   "wait_us": 19161980,
+   "task": "build.j963.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-32~focus",
+   "kind": "preempt_done",
+   "wait_us": 20324216,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-33~focus",
+   "kind": "preempt_done",
+   "wait_us": 22472720,
+   "task": "build.j963.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-34~focus",
+   "kind": "preempt_done",
+   "wait_us": 19463065,
+   "task": "build.j642.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-36~focus",
+   "kind": "preempt_done",
+   "wait_us": 19559632,
+   "task": "build.j2120.as",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-37~focus",
+   "kind": "preempt_done",
+   "wait_us": 22090423,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-38~focus",
+   "kind": "preempt_done",
+   "wait_us": 21690339,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-39~focus",
+   "kind": "preempt_done",
+   "wait_us": 19464757,
+   "task": "build.j642.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-3~focus",
+   "kind": "preempt_done",
+   "wait_us": 19377015,
+   "task": "build.j2120.as",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-40~focus",
+   "kind": "preempt_done",
+   "wait_us": 19217792,
+   "task": "build.j643.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-41~focus",
+   "kind": "preempt_done",
+   "wait_us": 21690339,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-42~focus",
+   "kind": "preempt_done",
+   "wait_us": 20670172,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-43~focus",
+   "kind": "preempt_done",
+   "wait_us": 19688967,
+   "task": "build.j1822.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-44~focus",
+   "kind": "preempt_done",
+   "wait_us": 21690413,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-45~focus",
+   "kind": "preempt_done",
+   "wait_us": 19023658,
+   "task": "build.j531.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-46~focus",
+   "kind": "preempt_done",
+   "wait_us": 21490409,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-47~focus",
+   "kind": "preempt_done",
+   "wait_us": 19053929,
+   "task": "build.j2901.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-48~focus",
+   "kind": "preempt_done",
+   "wait_us": 21774920,
+   "task": "build.j2125.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-49~focus",
+   "kind": "preempt_done",
+   "wait_us": 20856314,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-4~focus",
+   "kind": "preempt_done",
+   "wait_us": 19866814,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-50~focus",
+   "kind": "preempt_done",
+   "wait_us": 19364578,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-51~focus",
+   "kind": "preempt_done",
+   "wait_us": 18434281,
+   "task": "build.j643.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-52~focus",
+   "kind": "preempt_done",
+   "wait_us": 20691221,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-53~focus",
+   "kind": "preempt_done",
+   "wait_us": 19717815,
+   "task": "build.j963.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-54~focus",
+   "kind": "preempt_done",
+   "wait_us": 22667013,
+   "task": "build.j963.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-55~focus",
+   "kind": "preempt_done",
+   "wait_us": 17252688,
+   "task": "build.j215.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-56~focus",
+   "kind": "preempt_done",
+   "wait_us": 22472720,
+   "task": "build.j963.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-57~focus",
+   "kind": "preempt_done",
+   "wait_us": 21490411,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-58~focus",
+   "kind": "preempt_done",
+   "wait_us": 21691474,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-5~focus",
+   "kind": "preempt_done",
+   "wait_us": 19637224,
+   "task": "build.j1822.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-60~focus",
+   "kind": "preempt_done",
+   "wait_us": 20668975,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-61~focus",
+   "kind": "preempt_done",
+   "wait_us": 22073152,
+   "task": "build.j2125.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-62~focus",
+   "kind": "preempt_done",
+   "wait_us": 19495408,
+   "task": "build.j2125.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-63~focus",
+   "kind": "preempt_done",
+   "wait_us": 20670010,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-64~focus",
+   "kind": "preempt_done",
+   "wait_us": 19688879,
+   "task": "build.j643.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-65~focus",
+   "kind": "preempt_done",
+   "wait_us": 20670010,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-66~focus",
+   "kind": "preempt_done",
+   "wait_us": 20670172,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-67~focus",
+   "kind": "preempt_done",
+   "wait_us": 20523745,
+   "task": "build.j531.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-68~focus",
+   "kind": "preempt_done",
+   "wait_us": 20240643,
+   "task": "build.j531.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-69~focus",
+   "kind": "preempt_done",
+   "wait_us": 20856314,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-6~focus",
+   "kind": "preempt_done",
+   "wait_us": 20838482,
+   "task": "build.j1820.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-70~focus",
+   "kind": "preempt_done",
+   "wait_us": 17460563,
+   "task": "build.j2126.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-71~focus",
+   "kind": "preempt_done",
+   "wait_us": 17254487,
+   "task": "build.j215.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-72~focus",
+   "kind": "preempt_done",
+   "wait_us": 20523745,
+   "task": "build.j531.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-73~focus",
+   "kind": "preempt_done",
+   "wait_us": 20691221,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-74~focus",
+   "kind": "preempt_done",
+   "wait_us": 19555204,
+   "task": "build.j1822.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-75~focus",
+   "kind": "preempt_done",
+   "wait_us": 20670010,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-76~focus",
+   "kind": "preempt_done",
+   "wait_us": 19452570,
+   "task": "build.j642.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-77~focus",
+   "kind": "preempt_done",
+   "wait_us": 20691190,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-78~focus",
+   "kind": "preempt_done",
+   "wait_us": 19370064,
+   "task": "build.j2120.as",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-79~focus",
+   "kind": "preempt_done",
+   "wait_us": 20691190,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-7~focus",
+   "kind": "preempt_done",
+   "wait_us": 21494179,
+   "task": "build.j2125.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-80~focus",
+   "kind": "preempt_done",
+   "wait_us": 20691221,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-81~focus",
+   "kind": "preempt_done",
+   "wait_us": 19538524,
+   "task": "build.j642.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-82~focus",
+   "kind": "preempt_done",
+   "wait_us": 19431425,
+   "task": "build.j963.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-83~focus",
+   "kind": "preempt_done",
+   "wait_us": 20668366,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-84~focus",
+   "kind": "preempt_done",
+   "wait_us": 19023658,
+   "task": "build.j531.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-85~focus",
+   "kind": "preempt_done",
+   "wait_us": 20856314,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-86~focus",
+   "kind": "preempt_done",
+   "wait_us": 22475659,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-87~focus",
+   "kind": "preempt_done",
+   "wait_us": 20691190,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-88~focus",
+   "kind": "preempt_done",
+   "wait_us": 20134429,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-89~focus",
+   "kind": "preempt_done",
+   "wait_us": 20670010,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-8~focus",
+   "kind": "preempt_done",
+   "wait_us": 20660170,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-90~focus",
+   "kind": "preempt_done",
+   "wait_us": 19464255,
+   "task": "build.j642.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-91~focus",
+   "kind": "preempt_done",
+   "wait_us": 20691144,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-92~focus",
+   "kind": "preempt_done",
+   "wait_us": 22267043,
+   "task": "build.j963.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-93~focus",
+   "kind": "preempt_done",
+   "wait_us": 20668616,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-94~focus",
+   "kind": "preempt_done",
+   "wait_us": 16812475,
+   "task": "build.j217.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-95~focus",
+   "kind": "preempt_done",
+   "wait_us": 20669527,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-96~focus",
+   "kind": "preempt_done",
+   "wait_us": 20668616,
+   "task": "build.j1821.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-97~focus",
+   "kind": "preempt_done",
+   "wait_us": 20714888,
+   "task": "build.j964.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-98~focus",
+   "kind": "preempt_done",
+   "wait_us": 20856314,
+   "task": "build.j528.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-99~focus",
+   "kind": "preempt_done",
+   "wait_us": 20821908,
+   "task": "build.j1822.cc1",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c6-dual/random-9~focus",
+   "kind": "preempt_done",
+   "wait_us": 19574694,
+   "task": "build.j2120.as",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/oracle~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-100~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-13~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-1~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-20~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-22~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-23~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-30~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-45~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-52~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-54~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-5~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-60~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-73~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-77~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-79~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-80~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-82~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-84~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-87~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.2/random-95~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/oracle~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-100~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-13~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-1~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-20~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-22~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-23~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-30~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-45~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-52~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-54~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-5~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-60~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-73~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-77~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-79~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-80~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-82~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-84~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-87~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-gaming@chain-x1.4/random-95~focus",
+   "kind": "ready_open",
+   "wait_us": 26378555,
+   "task": "steam",
+   "criterion_run": false,
+   "judging": false,
+   "leads_to": "recorded with its run"
+  },
+  {
+   "run": "c7-ml-train/fixed+ostep-slice-100000us~focus",
+   "kind": "ready_open",
+   "wait_us": 205013317,
+   "task": "editor",
+   "criterion_run": false,
+   "judging": true,
+   "leads_to": "recorded with its run"
+  }
+ ],
+ "other_failed_guard_rows": {
+  "counts": [
+   {
+    "guard": "c2_pair",
+    "exempt": "exempt",
+    "rows": 8
+   },
+   {
+    "guard": "provenance_share",
+    "exempt": "exempt",
+    "rows": 1
+   },
+   {
+    "guard": "starvation_floor",
+    "exempt": "not exempt",
+    "rows": 110
+   },
+   {
+    "guard": "tick_count",
+    "exempt": "not exempt",
+    "rows": 101
+   }
+  ],
+  "rows": [
+   {
+    "run": "c1-ml-train/fixed+ostep-slice-100000us~focus",
+    "guard": "starvation_floor",
+    "value": "320318359.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "editor: max ready_wait 320318359 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": true
+   },
+   {
+    "run": "c1-transcode/fixed+ostep-slice-100000us~focus",
+    "guard": "starvation_floor",
+    "value": "167953453.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "video-editor: max ready_wait 167953453 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": true
+   },
+   {
+    "run": "c2-p1a/oracle@floor-0.2~focus",
+    "guard": "c2_pair",
+    "value": "",
+    "threshold": "",
+    "reason": "partner c2-p1b not in the run set (condition oracle, seed '', boot_default '', telemetry 'focus')",
+    "exempt": true,
+    "criterion_run": false,
+    "judging": true
+   },
+   {
+    "run": "c2-p1a/oracle@floor-0.333~focus",
+    "guard": "c2_pair",
+    "value": "",
+    "threshold": "",
+    "reason": "partner c2-p1b not in the run set (condition oracle, seed '', boot_default '', telemetry 'focus')",
+    "exempt": true,
+    "criterion_run": false,
+    "judging": true
+   },
+   {
+    "run": "c2-p1a/oracle@floor-0.5~focus",
+    "guard": "c2_pair",
+    "value": "",
+    "threshold": "",
+    "reason": "partner c2-p1b not in the run set (condition oracle, seed '', boot_default '', telemetry 'focus')",
+    "exempt": true,
+    "criterion_run": false,
+    "judging": true
+   },
+   {
+    "run": "c2-p2a/oracle@floor-0.333~focus",
+    "guard": "c2_pair",
+    "value": "",
+    "threshold": "",
+    "reason": "identical configuration sequences over [60000000, 86385000) under oracle: the configuration never changed between c2-p2a and c2-p2b (1 entry)",
+    "exempt": true,
+    "criterion_run": false,
+    "judging": true
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/oracle~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-1~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-100~focus",
+    "guard": "starvation_floor",
+    "value": "59999250.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59999250 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-13~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-20~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-22~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-23~focus",
+    "guard": "starvation_floor",
+    "value": "59999250.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59999250 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-30~focus",
+    "guard": "starvation_floor",
+    "value": "59999250.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59999250 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-45~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-5~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-52~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-54~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-60~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-73~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-77~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-79~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-80~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-82~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-84~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-87~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.2/random-95~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/oracle~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-1~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-100~focus",
+    "guard": "starvation_floor",
+    "value": "59996744.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59996744 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-13~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-20~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-22~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-23~focus",
+    "guard": "starvation_floor",
+    "value": "59996744.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59996744 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-30~focus",
+    "guard": "starvation_floor",
+    "value": "59996744.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59996744 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-45~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-5~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-52~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-54~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-60~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-73~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-77~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-79~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-80~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-82~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-84~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-87~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2a@chain-x1.4/random-95~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b/oracle@floor-0.333~focus",
+    "guard": "c2_pair",
+    "value": "",
+    "threshold": "",
+    "reason": "identical configuration sequences over [60000000, 86385000) under oracle: the configuration never changed between c2-p2b and c2-p2a (1 entry)",
+    "exempt": true,
+    "criterion_run": false,
+    "judging": true
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/oracle~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-1~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-100~focus",
+    "guard": "starvation_floor",
+    "value": "59996185.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59996185 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-13~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-20~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-22~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-23~focus",
+    "guard": "starvation_floor",
+    "value": "59996185.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59996185 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-30~focus",
+    "guard": "starvation_floor",
+    "value": "59996185.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59996185 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-45~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-5~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-52~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-54~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-60~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-73~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-77~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-79~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-80~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-82~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-84~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-87~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.2/random-95~focus",
+    "guard": "starvation_floor",
+    "value": "59997214.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997214 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/oracle~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-1~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-100~focus",
+    "guard": "starvation_floor",
+    "value": "59998892.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59998892 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-13~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-20~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-22~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-23~focus",
+    "guard": "starvation_floor",
+    "value": "59998892.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59998892 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-30~focus",
+    "guard": "starvation_floor",
+    "value": "59998892.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59998892 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-45~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-5~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-52~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-54~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-60~focus",
+    "guard": "starvation_floor",
+    "value": "86380441.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 86380441 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-73~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-77~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-79~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-80~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-82~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-84~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-87~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p2b@chain-x1.4/random-95~focus",
+    "guard": "starvation_floor",
+    "value": "59997725.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 59997725 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c2-p3a/oracle@floor-0.2~focus",
+    "guard": "c2_pair",
+    "value": "",
+    "threshold": "",
+    "reason": "partner c2-p3b not in the run set (condition oracle, seed '', boot_default '', telemetry 'focus')",
+    "exempt": true,
+    "criterion_run": false,
+    "judging": true
+   },
+   {
+    "run": "c2-p3a/oracle@floor-0.333~focus",
+    "guard": "c2_pair",
+    "value": "",
+    "threshold": "",
+    "reason": "partner c2-p3b not in the run set (condition oracle, seed '', boot_default '', telemetry 'focus')",
+    "exempt": true,
+    "criterion_run": false,
+    "judging": true
+   },
+   {
+    "run": "c2-p3a/oracle@floor-0.5~focus",
+    "guard": "c2_pair",
+    "value": "",
+    "threshold": "",
+    "reason": "partner c2-p3b not in the run set (condition oracle, seed '', boot_default '', telemetry 'focus')",
+    "exempt": true,
+    "criterion_run": false,
+    "judging": true
+   },
+   {
+    "run": "c3-creation/fixed+ostep-slice-100000us~focus",
+    "guard": "starvation_floor",
+    "value": "197331094.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "video-editor: max ready_wait 197331094 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/oracle~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-12~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-13~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-17~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-20~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-27~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-28~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-3~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-35~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-39~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-4~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-43~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-48~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-50~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-60~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-65~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-66~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-7~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-70~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-89~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c3-evening/random-92~focus",
+    "guard": "starvation_floor",
+    "value": "239999886.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "steam: max ready_wait 239999886 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-1~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008705 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-10~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30003399 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30003399 (index 3): hog build.j58.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-100~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60009149 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-11~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30003399 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30003399 (index 3): hog build.j58.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-12~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30009894 (index 3): hog build.j55.as had not received W_single = 30000 µs by the switch at index 4 (60019894); window clipped there; switch into MLFQ at t=30009894 (index 3): hog build.j58.as had not received W_single = 30000 µs by the switch at index 4 (60019894); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-13~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30009204 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30009204 (index 3): hog injected-renderers.1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-17~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30009894 (index 3): hog build.j55.as had not received W_single = 30000 µs by the switch at index 4 (60019894); window clipped there; switch into MLFQ at t=30009894 (index 3): hog build.j58.as had not received W_single = 30000 µs by the switch at index 4 (60019894); window clipped there; switch into MLFQ at t=30009894 (index 3): hog injected-renderers.1 had not received W_single = 30000 µs by the switch at index 4 (60019894); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-2~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60002178 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-20~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30000845 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30000845 (index 3): hog build.j58.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-22~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008907 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-24~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008817 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-26~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60009148 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=60009148 (index 4): hog build.j114.cc1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-27~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008705 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-28~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30000845 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30000845 (index 3): hog build.j58.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30000845 (index 3): hog injected-renderers.1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-3~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30000845 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30000845 (index 3): hog build.j58.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30000845 (index 3): hog injected-renderers.1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-33~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008817 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-34~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30003456 (index 3): hog build.j55.cc1 had not received W_single = 30000 µs by the switch at index 4 (60013456); window clipped there; switch into MLFQ at t=30003456 (index 3): hog build.j55.as had not received W_single = 30000 µs by the switch at index 4 (60013456); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-38~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30003399 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30003399 (index 3): hog build.j58.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-39~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30000845 (index 3): hog build.j55.as had not received W_single = 30000 µs by the switch at index 4 (60010845); window clipped there; switch into MLFQ at t=30000845 (index 3): hog build.j58.as had not received W_single = 30000 µs by the switch at index 4 (60010845); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-4~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30009894 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30009894 (index 3): hog build.j58.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-41~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30003399 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30003399 (index 3): hog build.j58.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-42~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60006893 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-48~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008817 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-50~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30009894 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30009894 (index 3): hog build.j58.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30009894 (index 3): hog injected-renderers.1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-53~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30009659 (index 3): hog build.j51.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30009659 (index 3): hog build.j53.cc1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30009659 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-54~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008817 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-56~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008817 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-57~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008907 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-58~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30001376 (index 3): hog build.j51.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30001376 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-6~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008704 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-61~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008817 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-65~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60009407 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-66~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60009148 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-7~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30006225 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30006225 (index 3): hog build.j58.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30006225 (index 3): hog injected-renderers.1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-70~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60009149 (index 4): hog build.j108.cc1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=60009149 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-75~focus",
+    "guard": "tick_count",
+    "value": "4.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60009148 (index 4): hog build.j99.cc1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=60009148 (index 4): hog build.j105.cc1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=60009148 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=60009148 (index 4): hog build.j112.cc1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-76~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30009659 (index 3): hog build.j51.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30009659 (index 3): hog build.j53.cc1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30009659 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-81~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30009659 (index 3): hog build.j51.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30009659 (index 3): hog build.j53.cc1 had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30009659 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-82~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008704 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-88~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60009148 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-89~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=60008714 (index 4): hog build.j111.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-90~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30001898 (index 3): hog build.j55.as had not received W_single = 30000 µs by the switch at index 4 (60011898); window clipped there; switch into MLFQ at t=30001898 (index 3): hog build.j58.as had not received W_single = 30000 µs by the switch at index 4 (60011898); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-92~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30009894 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30009894 (index 3): hog build.j58.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c4-compile/random-97~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=30003399 (index 3): hog build.j55.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there; switch into MLFQ at t=30003399 (index 3): hog build.j58.as had not received W_single = 30000 µs by T_end (1594000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/oracle~focus",
+    "guard": "provenance_share",
+    "value": "1.000000000000",
+    "threshold": "0.500000000000",
+    "reason": "fallback + held share 1 is not below 0.5",
+    "exempt": true,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-100~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=1376000210 (index 4): hog build.j957.cc1 had not received W_single = 30000 µs by the switch at index 7 (3440002658); window clipped there; switch into MLFQ at t=1376000210 (index 4): hog build.j1018.cc1 had not received W_single = 30000 µs by the switch at index 7 (3440002658); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-12~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=688000263 (index 3): hog build.j523.cc1 had not received W_single = 30000 µs by the switch at index 4 (1376000502); window clipped there; switch into MLFQ at t=2064000357 (index 5): hog build.j1467.cc1 had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there; switch into MLFQ at t=2064000357 (index 5): hog build.j1471.as had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-14~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2752005039 (index 6): hog build.j1962.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000663); window clipped there; switch into MLFQ at t=2752005039 (index 6): hog build.j1978.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000663); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-15~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=3440004633 (index 7): hog build.j2264.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000561); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-20~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=3440004633 (index 7): hog build.j2343.as had not received W_single = 30000 µs by the switch at index 11 (6192000119); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-21~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=3440009908 (index 7): hog build.j2362.as had not received W_single = 30000 µs by the switch at index 13 (7568000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-24~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=1376000337 (index 4): hog build.j943.cc1 had not received W_single = 30000 µs by the switch at index 7 (3440002659); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-25~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2064000357 (index 5): hog build.j1481.as had not received W_single = 30000 µs by the switch at index 7 (3440002658); window clipped there; switch into MLFQ at t=4128000136 (index 8): hog build had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-28~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=3440000355 (index 7): hog build.j2427.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000662); window clipped there; switch into MLFQ at t=3440000355 (index 7): hog build.j2429.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000662); window clipped there; switch into MLFQ at t=3440000355 (index 7): hog build.j2432.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000662); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-29~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2064000470 (index 5): hog build.j1481.as had not received W_single = 30000 µs by the switch at index 8 (4128000662); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-31~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2752005039 (index 6): hog build.j1809.as had not received W_single = 30000 µs by the switch at index 7 (3440002658); window clipped there; switch into MLFQ at t=2752005039 (index 6): hog build.j1824.as had not received W_single = 30000 µs by the switch at index 7 (3440002658); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-34~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2064000541 (index 5): hog build.j1481.as had not received W_single = 30000 µs by the switch at index 8 (4128000663); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-36~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2752000181 (index 6): hog build.j1992.cc1 had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-37~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=4128000136 (index 8): hog build.j2817.as had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-39~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2064000540 (index 5): hog build.j1481.as had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-4~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=688000263 (index 3): hog build.j523.cc1 had not received W_single = 30000 µs by the switch at index 6 (2752005565); window clipped there; switch into MLFQ at t=4128006259 (index 8): hog build.j2874.cc1 had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-40~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=3440002132 (index 7): hog build.j2435.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000663); window clipped there; switch into MLFQ at t=3440002132 (index 7): hog build.j2436.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000663); window clipped there; switch into MLFQ at t=3440002132 (index 7): hog build.j2443.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000663); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-41~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=4128000136 (index 8): hog build had not received W_single = 30000 µs by the switch at index 11 (6192000119); window clipped there; switch into MLFQ at t=4128000136 (index 8): hog build.j2892.cc1 had not received W_single = 30000 µs by the switch at index 11 (6192000119); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-42~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=1376000947 (index 4): hog build.j1000.cc1 had not received W_single = 30000 µs by the switch at index 6 (2752005565); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-44~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=4128001726 (index 8): hog build.j2817.as had not received W_single = 30000 µs by the switch at index 13 (7568000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-46~focus",
+    "guard": "tick_count",
+    "value": "4.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2752005039 (index 6): hog build.j1809.as had not received W_single = 30000 µs by the switch at index 7 (3440002658); window clipped there; switch into MLFQ at t=2752005039 (index 6): hog build.j1818.cc1 had not received W_single = 30000 µs by the switch at index 7 (3440002658); window clipped there; switch into MLFQ at t=2752005039 (index 6): hog build.j1824.as had not received W_single = 30000 µs by the switch at index 7 (3440002658); window clipped there; switch into MLFQ at t=4128000210 (index 8): hog build.j2817.as had not received W_single = 30000 µs by the switch at index 11 (6192000119); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-47~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=3440001325 (index 7): hog build.j2531.cc1 had not received W_single = 30000 µs by the switch at index 11 (6192000119); window clipped there; switch into MLFQ at t=3440001325 (index 7): hog build.j2538.as had not received W_single = 30000 µs by the switch at index 11 (6192000119); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-48~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=1376000947 (index 4): hog build.j1009.cc1 had not received W_single = 30000 µs by the switch at index 5 (2064000437); window clipped there; switch into MLFQ at t=1376000947 (index 4): hog build.j1010.cc1 had not received W_single = 30000 µs by the switch at index 5 (2064000437); window clipped there; switch into MLFQ at t=1376000947 (index 4): hog build.j1010.as had not received W_single = 30000 µs by the switch at index 5 (2064000437); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-5~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2064000203 (index 5): hog build.j1481.as had not received W_single = 30000 µs by the switch at index 16 (9632000196); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-50~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=4128000175 (index 8): hog build had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there; switch into MLFQ at t=4128000175 (index 8): hog build.j2881.cc1 had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-51~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2752001709 (index 6): hog build.j1809.as had not received W_single = 30000 µs by the switch at index 7 (3440011015); window clipped there; switch into MLFQ at t=2752001709 (index 6): hog build.j1824.as had not received W_single = 30000 µs by the switch at index 7 (3440011015); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-52~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=4128000136 (index 8): hog build.j2725.as had not received W_single = 30000 µs by T_end (12072000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-55~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2752000711 (index 6): hog build.j1981.cc1 had not received W_single = 30000 µs by the switch at index 7 (3440000390); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-57~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=1376000302 (index 4): hog build.j940.cc1 had not received W_single = 30000 µs by the switch at index 7 (3440002658); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-58~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=688000594 (index 3): hog build.j536.cc1 had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there; switch into MLFQ at t=688000594 (index 3): hog build.j537.as had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-6~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=3440002132 (index 7): hog build.j2339.cc1 had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there; switch into MLFQ at t=3440002132 (index 7): hog build.j2343.as had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-60~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2064000357 (index 5): hog build.j1556.as had not received W_single = 30000 µs by the switch at index 7 (3440002658); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-61~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2752000828 (index 6): hog build.j1900.cc1 had not received W_single = 30000 µs by the switch at index 7 (3440002450); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-63~focus",
+    "guard": "tick_count",
+    "value": "4.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2064000357 (index 5): hog build.j1473.cc1 had not received W_single = 30000 µs by the switch at index 6 (2752005565); window clipped there; switch into MLFQ at t=2064000357 (index 5): hog build.j1481.as had not received W_single = 30000 µs by the switch at index 6 (2752005565); window clipped there; switch into MLFQ at t=3440009064 (index 7): hog build.j2436.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000663); window clipped there; switch into MLFQ at t=3440009064 (index 7): hog build.j2445.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000663); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-65~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=1376000947 (index 4): hog build.j1006.cc1 had not received W_single = 30000 µs by the switch at index 6 (2752005565); window clipped there; switch into MLFQ at t=3440008334 (index 7): hog build.j2430.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000662); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-67~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=4128001539 (index 8): hog build had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-68~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=4128005334 (index 8): hog build had not received W_single = 30000 µs by the switch at index 15 (8944000645); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-71~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2064000357 (index 5): hog build.j1474.cc1 had not received W_single = 30000 µs by the switch at index 6 (2752005566); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-72~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=4128006390 (index 8): hog build.j2894.cc1 had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-73~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=3440001734 (index 7): hog build.j2343.as had not received W_single = 30000 µs by the switch at index 13 (7568000000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-74~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=3440009375 (index 7): hog build.j2351.cc1 had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-75~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=1376000843 (index 4): hog build.j957.cc1 had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-77~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=4128000136 (index 8): hog build.j2725.as had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-81~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2752000488 (index 6): hog build.j1903.cc1 had not received W_single = 30000 µs by the switch at index 7 (3440002659); window clipped there; switch into MLFQ at t=4128000136 (index 8): hog build had not received W_single = 30000 µs by the switch at index 11 (6192000119); window clipped there; switch into MLFQ at t=4128000136 (index 8): hog build.j2881.cc1 had not received W_single = 30000 µs by the switch at index 11 (6192000119); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-82~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=3440002132 (index 7): hog build.j2343.as had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-83~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2064000357 (index 5): hog build.j1539.cc1 had not received W_single = 30000 µs by the switch at index 8 (4128000515); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-84~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=4128003782 (index 8): hog build.j2735.cc1 had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-86~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2752005039 (index 6): hog build.j1809.as had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there; switch into MLFQ at t=2752005039 (index 6): hog build.j1824.as had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-87~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2752000542 (index 6): hog build.j1881.cc1 had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-89~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=1376000947 (index 4): hog build.j1006.cc1 had not received W_single = 30000 µs by the switch at index 6 (2752005565); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-90~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=688000063 (index 3): hog build.j532.cc1 had not received W_single = 30000 µs by the switch at index 4 (1376000502); window clipped there; switch into MLFQ at t=688000063 (index 3): hog build.j537.as had not received W_single = 30000 µs by the switch at index 4 (1376000502); window clipped there; switch into MLFQ at t=2064000357 (index 5): hog build.j1481.as had not received W_single = 30000 µs by the switch at index 7 (3440002658); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-91~focus",
+    "guard": "tick_count",
+    "value": "2.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2752000325 (index 6): hog build.j1809.as had not received W_single = 30000 µs by the switch at index 7 (3440002659); window clipped there; switch into MLFQ at t=2752000325 (index 6): hog build.j1824.as had not received W_single = 30000 µs by the switch at index 7 (3440002659); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-92~focus",
+    "guard": "tick_count",
+    "value": "3.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=688000263 (index 3): hog build.j523.cc1 had not received W_single = 30000 µs by the switch at index 7 (3440002659); window clipped there; switch into MLFQ at t=4128006012 (index 8): hog build.j2810.cc1 had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there; switch into MLFQ at t=4128006012 (index 8): hog build.j2817.as had not received W_single = 30000 µs by the switch at index 10 (5504000620); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-94~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=3440004632 (index 7): hog build.j2521.cc1 had not received W_single = 30000 µs by the switch at index 9 (4816000249); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-95~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2064000357 (index 5): hog build.j1481.as had not received W_single = 30000 µs by the switch at index 6 (2752006729); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-97~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=2752000487 (index 6): hog build.j1896.cc1 had not received W_single = 30000 µs by the switch at index 7 (3440002659); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c6-dual/random-98~focus",
+    "guard": "tick_count",
+    "value": "1.000000000000",
+    "threshold": "",
+    "reason": "switch into MLFQ at t=4128000136 (index 8): hog build.j2725.as had not received W_single = 30000 µs by the switch at index 17 (10320010000); window clipped there",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": false
+   },
+   {
+    "run": "c7-ml-train/fixed+ostep-slice-100000us~focus",
+    "guard": "starvation_floor",
+    "value": "300012533.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "editor: max ready_wait 300012533 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": true
+   },
+   {
+    "run": "c7-transcode/fixed+ostep-slice-100000us~focus",
+    "guard": "starvation_floor",
+    "value": "167949276.000000000000",
+    "threshold": "30000000.000000000000",
+    "reason": "video-editor: max ready_wait 167949276 exceeds 30000000",
+    "exempt": false,
+    "criterion_run": false,
+    "judging": true
+   }
+  ]
+ },
+ "wait_check_seconds": 2110.5
+}

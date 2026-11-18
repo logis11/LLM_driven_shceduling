@@ -1,6 +1,6 @@
 # Docs index
 
-> Status: normative · Created 2026-08-27 · Updated 2026-11-15
+> Status: normative · Created 2026-08-27 · Updated 2026-11-18
 
 Prose only, organized by domain — one `##` section per area below, the full index table at the bottom. Statuses: **normative** (states what is; kept current) · **draft** (content real, form not final) · **record** (append-only history; never rewritten) · **memo** (a point-in-time note; never rewritten, a later fact appended as a dated correction). The research guidebook (`guidebook/vol-*`) carries no status header; its rows in the full index give the state its README lists for each volume (완성 complete, 초고 draft). Decision history lives in `_dev/archive/`; machine-read files live outside `docs/` (see the placement rule in `CLAUDE.md`).
 
@@ -37,6 +37,7 @@ The project itself: what it proposes, what it claims, how it is positioned, and 
 - [research-proposal.md](research-proposal.md) — the system design, research questions, experimental design, milestones
 - [background-guide.md](background-guide.md) — self-contained onboarding for both builders: the experiment, the offline pipeline, the dataset, the vocabulary
 - [research-claims.md](research-claims.md) — what we claim and what would falsify it
+- [rq0-run-record.md](rq0-run-record.md) — the RQ0 run of 2026-11-16 to 18: the machine, the cost against the projection, N and the changelog entries behind it, the blind reading, the verdict (fail at the primary, 6 of 19 against K = 10; a range over g; provisional, the re-measurement contingency fired) and every reporting line, the report's and the hash manifest's paths
 - [related-work.md](related-work.md) — how we position against prior work
 - [references.md](references.md) — what we cite, in what form, for what claim — and the id-minting rule
 - [terminology.md](terminology.md) — what our words mean
@@ -110,6 +111,7 @@ Point-in-time notes. A memo's text is never rewritten: a later fact is appended 
 - [memos/2026-09-13-critical-findings.md](memos/2026-09-13-critical-findings.md) — the archetype sources read against their primary texts: the 2,430-process workload is a DynamoRio build, the 16.7 ms frame budget is absent from the LAVD slides, Roeser's fluent value is a log-scale location, Coetzee's short-lived processes are `cp`/`mkdir`, `ananicy-rules` types are prescriptions; plus declared-but-unrealised archetype params, a placeholder spread under a measurement tag, the 16-vs-8 concurrency unit, sampling granularity, and stale prose after the measurement fold-in. Closed: what each finding changed is in the dataset guidebook's vol 6, the current values and grounds in `dataset/archetypes.yaml`, `dataset/sources.yaml` and references.md
 - [memos/2026-09-13-dataset-rebuild-heads-up.md](memos/2026-09-13-dataset-rebuild-heads-up.md) — to 인경민, 박이안 (Korean): heads-up on the workload dataset rebuild — the findings in brief, what changes (dataset, the decisions built on it, citations outside it), what stays (the programs' input and output formats), what it means for each owner, and three executor questions to 인경민: LOTTERY's split when an editor's burst tail is batch-class, the EDF class of chain stages, a keystroke arriving while the editor runs. Closed: the format changes are in data-contracts §14, the rebuilt dataset in `dataset/README.md`; the three questions are answered
 - [memos/2026-10-07-timer-skip-rule-for-the-simulator.md](memos/2026-10-07-timer-skip-rule-for-the-simulator.md) — to 인경민: TIMER skips missed ticks on its grid — the rule, a worked example against backlog, the trace lines it emits, and what the simulator and the contract change. Closed: the skip rule is in the simulator since its stage Y (2026-10-23; conformance item (b)), with the zero-wait `ready` line since stage X (item (a)); the rule is in the interpretation contract's TIMER row, ratified in §6's wording, and the simulator guide §4, the harness's reading in metrics §6.2
+- [memos/2026-11-18-rq0-run-result.md](memos/2026-11-18-rq0-run-result.md) — to 인경민, 박이안 (Korean): the RQ0 run's result — FAIL at the primary, 6 of 19 against K = 10, provisional on the re-measurement contingency; PASS at g = 0.25; link 2 standing, 17 of 19 with headroom; what 인지오 does next — 10.6, then the failure procedure and the re-measurement in a later phase. Closed: no ask; the outcome is in `rq0-run-record.md`
 
 ## Full index
 
@@ -117,6 +119,7 @@ Point-in-time notes. A memo's text is never rewritten: a later fact is appended 
 |---|---|---|
 | [research-proposal.md](research-proposal.md) | what the project is, the system design, the experiment | draft |
 | [research-claims.md](research-claims.md) | what we claim and what would falsify it | normative |
+| [rq0-run-record.md](rq0-run-record.md) | the RQ0 run: its dates, machine, cost, blind reading, verdict and reporting lines | record |
 | [related-work.md](related-work.md) | how we position against prior work | draft |
 | [references.md](references.md) | what we cite, in what form, for what claim — and the id-minting rule | normative |
 | [terminology.md](terminology.md) | what our words mean | normative |
@@ -157,6 +160,7 @@ Point-in-time notes. A memo's text is never rewritten: a later fact is appended 
 | [memos/2026-10-30-harness-changes-for-the-simulator.md](memos/2026-10-30-harness-changes-for-the-simulator.md) | to 인경민 (Korean): the 2026-10-30 and 31 changes — what 인경민 is asked, what leaves the simulator as it is, how the harness reads the trace, the split of an application's own wakes by origin, the demotion edges and the sweep, the pins, the reduced RQ0 spec removed | memo (closed) |
 | [memos/2026-11-13-simulator-changes-by-jioh.md](memos/2026-11-13-simulator-changes-by-jioh.md) | to 인경민 (Korean): the 2026-11-13 changes 인지오 made in the simulator tree — stages AD and AE, what 인경민 is asked, what was checked and decided | memo (open) |
 | [memos/2026-11-15-integration-gate-and-cold-smoke.md](memos/2026-11-15-integration-gate-and-cold-smoke.md) | to 인경민 (Korean): the integration gate's result — what was added to the simulator tree, what passed, the pinned versions — and the cold smoke's starvation readings — what reopened the starvation net, its cause, what was decided | memo (open) |
+| [memos/2026-11-18-rq0-run-result.md](memos/2026-11-18-rq0-run-result.md) | to 인경민, 박이안 (Korean): the RQ0 run's result and what 인지오 does next | memo (closed) |
 | [memos/2026-09-10-coreset-before-and-after-phase-7.md](memos/2026-09-10-coreset-before-and-after-phase-7.md) | to 인경민, 박이안 (Korean): the coreset before and after the 2026-09-10 change — what changed, why, and what it means for each owner | memo (closed) |
 | [memos/2026-09-11-boot-default-from-ostep.md](memos/2026-09-11-boot-default-from-ostep.md) | to 인경민, 박이안 (Korean): the boot default from OSTEP — what changed, why, what it means for each owner, two rule questions for the simulator | memo (closed) |
 | [memos/2026-09-13-critical-findings.md](memos/2026-09-13-critical-findings.md) | what the archetype sources' primary texts contradict in the repository's citations, and the dataset/tooling gaps found alongside | memo (closed) |

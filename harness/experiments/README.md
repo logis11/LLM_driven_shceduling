@@ -4,6 +4,8 @@ A per-experiment spec is the pre-registration of one experiment as data the harn
 
 `rq0-gate.yaml` is the RQ0 gate spec, committed 2026-09-12. Only pre-registered experiments live here; the smoke run generates its spec in a temporary directory and discards it.
 
+`rq0-gate/` holds the RQ0 run's report (2026-11-18; `docs/rq0-run-record.md`): `report.json.gz`, the report gzipped; `report.md`, its rendering; `runs.sha256.csv`, every run's trace hash and records hash.
+
 ## Anatomy of a spec
 
 ```yaml
