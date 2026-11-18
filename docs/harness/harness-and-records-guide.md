@@ -1,6 +1,6 @@
 # Harness와 records 이해하기 — trace에서 논문의 숫자까지
 
-> Status: draft · Created 2026-09-08 · Updated 2026-11-01
+> Status: draft · Created 2026-09-08 · Updated 2026-11-18
 
 이 문서는 **공부용 문서**예요. Phase 5(primitive metrics and the records pipeline)를 직접 수행하기 위해, harness가 무엇을 읽고 무엇을 쓰는지, `records`의 row 하나가 무슨 뜻인지, 그리고 그 위에 어떤 score가 올라가는지를 OS/시스템 지식이 거의 없는 사람 기준으로 바닥부터 풀어 쓴 거예요. 규범적(normative)인 정의는 `docs/harness/metrics.md`(metrics doc)가 갖고, 이 문서는 그 문서를 읽을 수 있게 만드는 다리예요. 둘이 다르면 metrics doc이 맞아요.
 
@@ -31,7 +31,7 @@
 17. Layer 1 — recognition log를 채점하는 grader
 18. mock daemon과 mock simulator — invocation contract의 첫 구현
 19. per-experiment spec과 RQ0 gate evaluator — 판정을 데이터로
-20. runner와 execution cache — 13 668 run을 돌리는 법
+20. runner와 execution cache — 19 425 run을 돌리는 법
 21. harness tree — 지금 모습
 22. 용어 정리
 
@@ -1406,13 +1406,13 @@ simulator: --workload W.json --schedule S.json --out-trace TRACE.jsonl
 
 `C`는 daemon guide의 condition 이름 하나예요(mock daemon은 `fixed`·`oracle`·`random`만). `--telemetry`는 recognizer에게 보여줄 telemetry 모양이에요(2026-10-11부터 필수). 그래서 run 하나는 workload 하나 × condition 하나 × telemetry 모양 하나(× draw하는 condition이면 seed 하나)예요.
 
-실제 프로그램이 오기 전에 이 계약을 지키는 두 대역(`harness/tools/tests/mocks/`)이 있어요. 둘 다 test tree에 있고, Phase 10에서 runner의 machine 설정이 실제 프로그램을 가리키게 바뀌어요.
+이 계약을 지키는 두 대역(`harness/tools/tests/mocks/`)이 test tree에 있어요. 실제 프로그램이 오기 전에 harness 전체를 돌리려고 만든 것이고, 2026-11-14의 통합 gate(10.2)부터 runner의 machine 설정은 실제 프로그램 — `simulator/src/sim`과 `daemon/daemon.py` — 을 가리켜요. test suite는 계속 mock으로 돌아요.
 
 **mock daemon**은 `fixed`·`oracle`·`random`에 대해 **충실**해요. workload에서 visible projection(daemon이 실제로 보게 될 것: task마다 process 이름, `declared_class`, focus 구간)을 뽑고, 여섯 가지 telemetry 규칙으로 query point를 찾고(여섯 번째가 focus를 가진 process의 이름도 집합에 넣는 규칙이라 focus 이동도 query point예요), `oracle`이면 ground truth를, `random`이면 seed된 균등 draw로 table의 row 하나를, `fixed`면 아무것도 답하지 않고, contract에 맞는 schedule과 log를 써요. validator가 없어서 `unmodified`만 내고, `held`·`clamped`·LLM 경로는 없어요. oracle의 답이 정의되지 않는 곳(ambiguous segment, terminal snapshot)에서는 query가 `fallback`을 달고 schedule entry가 boot default를 반복해요 — `c6-dual`의 fallback 100%가 여기서 나와요.
 
 **mock simulator**는 두 가지예요. **generator**는 어떤 workload와 schedule에도 contract에 맞는 trace를 내지만, **scheduling을 전혀 모델하지 않아요**: 자극이 올 때마다 그 task가 ready가 되고 정확히 1 µs 돌고 끝나요. 한 task에 같은 순간 timer wake가 여럿 오면 첫 것은 task가 막혀 있던 `WAIT`를 완료하고, 둘째는 task가 막혀 있지 않을 때 왔으니 붙들려 같은 run 안에서 다음 `WAIT`를 완료하고, 셋째부터는 그 시각의 `wake_drop` line이 돼요. 등장 전에 온 timer wake도 처음 하나만 붙들고 나머지는 그 시각에 버려요(`mock-simulator@3`, 3.6). 첫 명령이 `WAIT`인 task(`LOOP`으로 시작하면 그 몸통의 첫 명령; `FORK`로 만든 자식 포함)는 예외예요. 그 `WAIT`에 쓸 wake가 등장 전에 와 있지 않으면 reference simulator처럼 등장하는 step에서 block되니(10.3), 등장은 자극이 아니고 `ready` line도 run도 없어요. 처음 도는 건 그 `WAIT`을 완료하는 wake에서예요. generator는 pinned wake와 tick과 chain stage 사이의 wake만 자극으로 내고 다른 task의 `WAKE` 명령은 모델하지 않아서, 형제의 `WAKE`로만 깨워지는 task(`c1-compile`의 job member 같은)는 mock에서 한 번도 돌지 않고 끝나지도 않아요. 그래서 core set 51개 파일 전부가 pipeline을 통과하지만, `fixed`·`oracle`·`random`의 점수가 같고, 모든 judging 파일이 no headroom으로 나와요. 이건 queue를 모델하지 않는 simulator의 **정상 결과**이지 결함이 아니에요. **replay**는 손으로 쓴 fixture trace를 그대로 복사해요 — 10–12장에서 손으로 계산한 값이 runner의 같은 경로로 흘러가게 하려고요.
 
-두 mock이 있어서 harness의 위쪽 절반 전체가 실제 프로그램 없이 test돼요. 전체 smoke(`make -C harness smoke`: scoring spec에 entry가 있는 core 파일 49개 전부를 mock으로)는 다시 지은 dataset 위에서 집 기계로 약 4시간 50분이 걸려서 요청할 때만 돌아요(`.github/workflows/harness-smoke.yml`). 대신 push마다 CI의 `make test`가 같은 smoke 경로를 파일 한 개에서 세 개까지로 돌려요(`harness/tools/tests/test_runner.py`). smoke의 판정은 만들 때부터 `invalid`예요 — smoke spec에는 guard 예외가 없어서 `c6-dual`의 `oracle` run이 fallback만으로 돌아 provenance guard에 걸리니까요. smoke는 판정이 아니라 배관을 확인해요. 인경민의 simulator와 박이안의 daemon이 오면 runner의 machine 설정(명령 prefix와 version 문자열)만 바뀌고 나머지는 그대로예요 — 두 프로그램이 invocation contract대로 실행되면요. simulator 쪽은 그게 RQ0 gate spec의 simulator-conformance 항목 (h)예요(19.1). 지금의 reference simulator는 workload와 config schedule을 위치 인자로 받고 trace를 stdout에 써요.
+두 mock이 있어서 harness의 위쪽 절반 전체가 실제 프로그램 없이 test돼요. 전체 smoke(`make -C harness smoke`: scoring spec에 entry가 있는 core 파일 49개 전부를 mock으로)는 다시 지은 dataset 위에서 집 기계로 약 4시간 50분이 걸려서 요청할 때만 돌아요(`.github/workflows/harness-smoke.yml`). 대신 push마다 CI의 `make test`가 같은 smoke 경로를 파일 한 개에서 세 개까지로 돌려요(`harness/tools/tests/test_runner.py`). smoke의 판정은 만들 때부터 `invalid`예요 — smoke spec에는 guard 예외가 없어서 `c6-dual`의 `oracle` run이 fallback만으로 돌아 provenance guard에 걸리니까요. smoke는 판정이 아니라 배관을 확인해요. 실제 프로그램으로 바꿀 때 바뀐 것은 runner의 machine 설정(명령 prefix와 version 문자열)뿐이에요 — 두 프로그램이 invocation contract대로 실행되니까요. simulator 쪽은 그게 RQ0 gate spec의 simulator-conformance 항목 (h)이고, 통합 gate가 binary에서 보였어요(19.1). `daemon/daemon.py`는 RQ0 gate spec의 run 목록 전체에서 mock daemon과 byte 단위로 같은 출력을 내요.
 
 ---
 
@@ -1422,8 +1422,8 @@ Phase 8 전체를 관통하는 원칙 하나: **evaluator가 적용하는 판단
 
 ### 19.1 spec에 무엇이 있나
 
-- **generic part** — 어떤 실험에나 필요한 것: condition 목록, telemetry 모양 목록(RQ0는 `focus` 하나), seed 수 N, boot default(primary와 alternatives), judging 파일·reporting 파일·sensitivity line이 읽는 variant 파일(그리고 generated set에서 축으로 고른 파일, 15.5), `pre_committed_miss`에서 **유도된** Layer-1 exclusion(lint가 실제 annotation과 맞는지 확인해요 — 손으로 고를 수 없어요), guard 예외(이유 필수), typed reporting line, 그리고 **pin** — scoring spec·guard spec(version 1.3)·driver table·dataset manifest·variants manifest의 SHA-256(generated 파일을 고르는 spec이면 그 manifest마다 하나 더).
-- **statements** — 숫자의 근거를 적은 글. evaluator가 보고서에 그대로 옮겨 적어요. RQ0 gate spec에는 열다섯 개가 있어요: 판정 set의 규칙, idle class 파일 여섯이 보고만 하는 이유, executor 가정(인경민의 2026-10-01 simulator 상태 memo와 9.11 결정 위에 둔 committed assumption. 그중 두 가지는 2026-10-08 memo가 요청한 대로 인경민이 구두로 확인, 2026-10-31 기록), simulator conformance(RQ0 run 전에 simulator가 hand fixture에서 보여야 할 아홉 항목 (a)–(i). (h)는 2026-10-17에 더해진 것으로, simulator가 runner가 부르는 대로 invocation contract에 따라 실행되는 것 — workload와 config schedule을 `--workload`·`--schedule`로, trace 경로를 `--out-trace`로 받고 trace를 그 파일에 쓰는 것(18장). (i)는 2026-10-21에 더해진 것으로, spawn table의 자식을 가리키는 WAKE가 그 자식에게 닿고, 자식이 태어나기 전에 온 wake는 보관했다가 태어날 때 넘기는 것. reference simulator는 (a)–(f)와 (i)를 하고 — (a) 가운데 빈 slot에 바로 들어간 FORK의 대기 0 line은 아직이에요 — (g)와 (h)가 남아 있어요), g·K·N의 근거, random condition의 정의, prior table의 중복 구조, boot-default sweep의 설계, sensitivity line들, 다시 측정할 조건, Layer-1 구간의 caveat, 실패 절차, held-out-rows 사전등록.
+- **generic part** — 어떤 실험에나 필요한 것: condition 목록, telemetry 모양 목록(RQ0는 `focus` 하나), seed 수 N, boot default(primary와 alternatives), judging 파일·reporting 파일·sensitivity line이 읽는 variant 파일(그리고 generated set에서 축으로 고른 파일, 15.5), `pre_committed_miss`에서 **유도된** Layer-1 exclusion(lint가 실제 annotation과 맞는지 확인해요 — 손으로 고를 수 없어요), guard 예외(이유 필수), typed reporting line, 그리고 **pin** — scoring spec·guard spec(version 1.4)·driver table과 cap band의 table 셋·dataset manifest·variants manifest의 SHA-256(generated 파일을 고르는 spec이면 그 manifest마다 하나 더), 그리고 통합 gate를 지난 두 프로그램의 version 문자열(`simulator@…`, `daemon@…`). machine 설정이 다른 version을 적으면 runner는 어떤 run도 시작하지 않아요.
+- **statements** — 숫자의 근거를 적은 글. evaluator가 보고서에 그대로 옮겨 적어요. RQ0 gate spec에는 열일곱 개가 있어요: 판정 set의 규칙, idle class 파일 여섯이 보고만 하는 이유, executor 가정(인경민의 2026-10-01 simulator 상태 memo와 9.11 결정 위에 둔 committed assumption. 그중 두 가지는 2026-10-08 memo가 요청한 대로 인경민이 구두로 확인, 2026-10-31 기록), simulator conformance(RQ0 run 전에 simulator가 보여야 할 열 항목 (a)–(j). (h)는 simulator가 runner가 부르는 대로 invocation contract에 따라 실행되는 것 — workload와 config schedule을 `--workload`·`--schedule`로, trace 경로를 `--out-trace`로 받고 trace를 그 파일에 쓰는 것(18장). (i)는 spawn table의 자식을 가리키는 WAKE가 그 자식에게 닿고, 자식이 태어나기 전에 온 wake는 보관했다가 태어날 때 넘기는 것. (j)는 program 자신의 wake를 channel 종류대로 붙드는 것 — `event`와 `input` channel은 깊이 있게, `timer` channel은 처음 하나만 붙들고 그사이 온 것은 그 시각의 `wake_drop` line으로 버리는 것(13장의 가정 2). 열 항목 모두 2026-11-11부터 simulator code에 있고, 2026-11-14의 통합 gate(10.2)가 hand fixture 재생과 `simulator/tests/`의 black-box unit test로 binary에서 보였어요), g·K·N의 근거, 각 읽기가 연구 주장 사슬의 어느 link를 시험하는가(`claim-links`), random condition의 정의(N = 100과 함께 박이안이 인지오에게 구두로 확인, 2026-11-15 기록), prior table의 중복 구조, cap band의 table 셋, boot-default sweep의 설계, sensitivity line들, 다시 측정할 조건, Layer-1 구간의 caveat, 실패 절차, held-out-rows 사전등록.
 - **criterion** — 실험별 판정 규칙. RQ0는 `k_of_n_gap`: judging 파일 19개 중 **K = 10개 이상**이 gap **g = 0.5 이상**이면 pass.
 
 ### 19.2 gap 하나 손으로
@@ -1460,37 +1460,37 @@ verdict는 primary boot default에서 한 번만 계산해요. 그 판정이 우
 | `variant_set` (8개) | 다시 지은 judging 파일 묶음을 primary boot default로 돌려 통과 개수를 다시 세요. variant 파일은 판정에 안 들어가요. `venue-x0.8`·`venue-x1.25`(19개 파일): 측정된 `RUN`을 chain 빼고 전부 1/1.25배·1.25배. 측정된 두 venue 효과 — training run의 huge page 비율 ×1.144와 tracing overhead ×1.02–1.16 — 를 담는 design bracket이고, 다른 CPU model은 담지 않아요. 다른 CPU는 프로그램마다 제 배율로 속도를 바꾸는데(Xeon Platinum 8573C는 EPYC 7763 대비 `cc1`을 0.72배, `fixdep`을 0.50배 시간에 돌렸어요) 공통 배율 하나로는 그걸 재현할 수 없어요. `chain-x1.2`·`chain-x1.4`(3개): 게임 chain의 `RUN`만 1.2배·1.4배. `seg1-30s`·`seg1-120s`(C2 4개): 첫 segment 60초를 30초·120초로. `corner-low`·`corner-high`(11개): 안정성 규칙의 예외로 실어 온 값들을 구간의 아래·위 끝으로 | variant 파일 78개(`trace_replay`의 4개 포함) × (`fixed` 1 + `oracle` 1 + `random` 100) |
 | `trace_replay` | judging 파일 넷(`c7-dev`, `c7-browsing`, `c7-meeting`, `c2-p1a`)을 compile된 stream 대신 측정된 repeat 하나의 stream으로 다시 지어 돌려요. stream의 종류는 entry를 따라 셋이에요: wake 순서(`wakes`: `code-editor`, `web-browser`, `renderer-hidden`), run과 그 뒤의 block(`runs`: `package-upgrade`, `cpu-batch`의 `python3`), cycle(`cycles`: `video-call`). 네 파일 모두 batch job의 run을 측정된 것으로 바꿔요(`c7-dev`·`c7-browsing`·`c7-meeting`은 upgrade, `c2-p1a`는 `python3`), `c7-meeting`은 통화의 cycle도요. 두 build에서 gap이 g의 같은 쪽에 있고 그 차이가 g band의 간격보다 작으면 일치 | 그 78개에 포함 |
 | `input_wake_count` | judging 파일의 interaction latency term마다 P99가 기대는 관측 수 — `input_latency` term이면 keystroke 수(26초짜리 counterpart는 약 100개, `c3-workday`의 browser는 7개라 P99가 상위 한두 개의 값이에요), `app_latency` term이면 그 task의 timer와 event wake 수 | 계산만 |
-| `longest_wait` | run마다 가장 긴 `ready_wait`를 30초 floor와 비교. 15초를 넘은 run이 하나라도 있으면 판정을 읽기 전에 executor의 안전망 문제를 인경민과 다시 열어요 | 계산만 |
+| `longest_wait` | run마다 가장 긴 `ready_wait`를 30초 floor와 비교. judging 파일의 run이 15초를 넘으면 — boot default `ostep-slice-100000us`(top slice 100 ms가 boost 간격과 같은 지점) 아래의 run은 빼고 — 판정을 읽기 전에 executor의 안전망 문제를 인경민과 다시 열어요. `starvation_floor`가 못 읽는 대기, 곧 끝까지 열려 있는 대기와 preemption 뒤의 대기는 `simulator/tools/wait_check.py`가 모든 trace에서 읽어요(`sensitivity-lines` 문장) | 계산만 |
 | `bounding_pair` | `c2-p2a`(download를 측정된 그대로 full standing으로)와 `c2-p2a-idle`(같은 download를 idle class로)의 판정을 각각 보고하고 그 차이를 적어요. 실제 desktop은 nice 10인 download를 그 사이에서 다뤄요 | 계산만 |
 | `flip_cost` | (RQ0 gate spec은 안 씀) recognizing run마다 configuration이 바뀐 횟수(`change_count`), 그중 config-incorrect로 채점된 query의 것(`wrong_change_count`), 그 틀린 MLFQ 전환들의 per-switch excess 합(`wrong_switch_excess_sum`)을 파일 점수 옆에 찍어요. hold-time plan의 no-rule measurement(그 plan의 step 1) — hold time도 hysteresis도 없이 flip이 얼마나 일어나고 얼마나 비싼지 재는 일 — 이 읽는 line이에요 | 계산만 |
 
-개수가 band나 sweep, variant 축 안에서 움직이면 결과를 점이 아니라 **범위**로 보고해요. 이게 "왜 0.5인가"에 대한 방어예요: 숫자 자체보다, 그 숫자를 바꿔도 결론이 안 바뀐다는 걸 보이는 것.
+line이 gap을 읽는 run에 예외 처리되지 않은 guard 실패가 있으면 그 line은 개수를 내지 않아요: **unavailable**로, 걸린 run을 이름으로 적어요(10.3). 개수가 band나 sweep, variant 축 안에서 움직이면 결과를 점이 아니라 **범위**로 보고해요. 이게 "왜 0.5인가"에 대한 방어예요: 숫자 자체보다, 그 숫자를 바꿔도 결론이 안 바뀐다는 걸 보이는 것.
 
 ### 19.5 report
 
-실험 run 하나당 machine-readable 보고서 하나(`report.json`, schema `harness/experiments/schema/report.schema.json`)가 진실이고, `report.md`는 거기서 렌더링만 한 것이라 손으로 고치지 않아요. 논문 표는 JSON에서 나와요. 안에는 verdict와 그 근거, 파일별 gap과 seed별 점수, 채점된 run 전부, run마다 provenance 비율(unmodified / clamped / held / fallback), guard 결과 전부, statements, line들이 있어요.
+실험 run 하나당 machine-readable 보고서 하나(`report.json`, schema `harness/experiments/schema/report.schema.json`)가 진실이고, `report.md`는 거기서 렌더링만 한 것이라 손으로 고치지 않아요. 논문 표는 JSON에서 나와요. RQ0 run의 보고서는 `harness/experiments/rq0-gate/`에 gzip으로 commit돼 있어요(`docs/rq0-run-record.md`). 안에는 verdict와 그 근거, 파일별 gap과 seed별 점수, 채점된 run 전부, run마다 provenance 비율(unmodified / clamped / held / fallback), guard 결과 전부, statements, line들이 있어요.
 
 ---
 
-## 20. runner와 execution cache — 13 668 run을 돌리는 법
+## 20. runner와 execution cache — 19 425 run을 돌리는 법
 
 **runner**(`harness/tools/harness/runner.py`, `tools/run.py`, 8.6)는 spec의 generic part를 **run matrix**로 펼치고, run마다 daemon과 simulator를 invocation contract로 실행하고, 위의 모든 단계를 순서대로 돌려 보고서까지 써요.
 
 ### 20.1 matrix
 
-listed 파일(judging + reporting) 하나마다: `fixed`를 primary boot default로 한 번, alternative마다 한 번씩; 다른 condition은 primary로; draw하는 condition(`random`)은 seed 1..N마다 한 번. variant 파일은 primary boot default로만 돌아요(`fixed` 한 번, 나머지 condition은 위와 같이). 그리고 이 전부를 spec의 `telemetry` 목록에 있는 모양마다 한 벌씩 돌려요. RQ0 gate spec은 `focus` 하나라 한 벌이에요. RQ0 gate spec으로는 51 × (1 + 10 + 1 + 100) + 78 × (1 + 1 + 100) = **13 668 run**이에요(`fixed` 639, `oracle` 129, `random` 12 900).
+listed 파일(judging + reporting) 하나마다: `fixed`를 primary boot default로 한 번, alternative마다 한 번씩; 다른 condition은 primary로; draw하는 condition(`random`)은 seed 1..N마다 한 번. variant 파일은 primary boot default로만 돌아요(`fixed` 한 번, 나머지 condition은 위와 같이). 그리고 이 전부를 spec의 `telemetry` 목록에 있는 모양마다 한 벌씩 돌려요. RQ0 gate spec은 `focus` 하나라 한 벌이에요. cap band의 table마다 judging 파일 19개의 `oracle` 1 + `random` N run이 그 table로 더 돌아요. RQ0 gate spec으로는 51 × (1 + 10 + 1 + 100) + 78 × (1 + 1 + 100) + 3 × 19 × (1 + 100) = **19 425 run**이에요(`fixed` 639, `oracle` 186, `random` 18 600).
 
 ### 20.2 두 번 실행, byte 일치
 
-run마다 daemon도 simulator도 **두 번** 실행해요. determinism guard가 rerun trace를 요구하기도 하고, contract의 행동 규칙("같은 입력 → 같은 출력")을 runner가 직접 확인하기도 해서예요. 두 실행의 출력이 다르면 그 run은 실패이고, 실패한 run은 출력이 없는 채로 남고 runner는 채점 전에 멈춰요(`failures.json`에 이름). trace는 압축 없이 요청해요 — gzip header에 timestamp가 있어서 `.gz`는 byte 단위로 안정적일 수 없거든요.
+run마다 daemon도 simulator도 **두 번** 실행해요. determinism guard가 rerun trace를 요구하기도 하고, contract의 행동 규칙("같은 입력 → 같은 출력")을 runner가 직접 확인하기도 해서예요. 두 실행의 출력이 다르면 그 run은 실패이고, 실패한 run은 출력이 없는 채로 남고 runner는 채점 전에 멈춰요(`failures.json`에 이름). trace는 압축 없이 요청해요 — gzip header에 timestamp가 있어서 `.gz`는 byte 단위로 안정적일 수 없거든요. 비교가 끝난 run은 trace를 한 번만 gzip으로 두고, 두 번째 실행의 trace는 SHA-256(`trace.rerun.sha256`)으로만 남겨요. records도 gzip으로 둬요.
 
 ### 20.3 cache
 
-모든 실행은 key로 cache돼요: 프로그램의 version 문자열, 명령 prefix, condition과 seed, telemetry 모양, 입력 파일들의 hash. 같은 key는 다시 실행하지 않고 두 실행의 출력과 stderr를 그대로 꺼내요. 실패한 실행은 cache되지 않아요. 그래서 spec의 파일 하나를 바꾸면 그 파일의 run만 다시 돌고, 프로그램 version이 바뀌면 전부 다시 돌아요 — 정확히 그래야 하는 만큼만이에요. 참고로 key에 seed가 들어 있어서, 두 seed가 같은 row를 뽑아 schedule이 같아도 simulator는 따로 돌아요.
+모든 실행은 key로 cache돼요: 프로그램의 version 문자열, 명령 prefix, condition과 seed, telemetry 모양, 입력 파일들의 hash. 같은 key는 다시 실행하지 않고 두 실행의 출력과 stderr를 그대로 꺼내요. 실패한 실행은 cache되지 않아요. 그래서 spec의 파일 하나를 바꾸면 그 파일의 run만 다시 돌고, 프로그램 version이 바뀌면 전부 다시 돌아요 — 정확히 그래야 하는 만큼만이에요. 참고로 key에 seed가 들어 있어서, 두 seed가 같은 row를 뽑아 schedule이 같아도 simulator는 따로 돌아요. 실행 cache 옆에는 **results cache**가 있어요: run마다 records, aggregates, 채점된 query를 두고, key에 harness package의 source hash가 들어가서 harness code가 바뀌면 다시 지어요. 같은 run을 다시 만나면 records를 다시 짓지 않아요.
 
 ### 20.4 machine 설정과 layout
 
-실험 모양(어떤 파일, 어떤 condition)은 spec에 있고, **이 기계에서 어떻게 돌리나**(명령 prefix, version, build 경로, runs·cache 디렉토리)는 uncommitted `runner.yaml`에 있어요. committed 예시 `runner.example.yaml`은 mock 둘을 가리켜요. 출력은 `runs/<experiment>/<workload>/<run>/`에 run별로 놓이고, run의 이름은 `<condition>[-seed][+boot]~<shape>`예요(예: `random-5~focus`, `fixed+ostep-slice-2000us~focus`). `aggregates.csv`·`scores.csv`·`guards.csv`·`grades.csv`·`report.json`·`report.md`는 experiment 수준에 놓여요. `make -C harness smoke`는 scoring spec에 entry가 있는 core 파일 49개로 throwaway spec을 만들어 이 경로 전체를 mock으로 돌려요. 다시 지은 dataset 위에서 집 기계로 약 4시간 50분이라 요청할 때만 돌고(`harness-smoke.yml`), push마다 도는 `make test`는 같은 경로를 파일 한 개에서 세 개까지로 돌려요(18장).
+실험 모양(어떤 파일, 어떤 condition)은 spec에 있고, **이 기계에서 어떻게 돌리나**(명령 prefix, version, build 경로, runs·cache 디렉토리)는 uncommitted `runner.yaml`에 있어요. committed 예시 `runner.example.yaml`은 mock 둘을 가리키고, 실제 프로그램 둘을 적는 법을 주석으로 보여줘요. `workers`는 동시에 돌리는 run 수이고, `heavy_mb` 이상인 workload 파일의 run은 `heavy_workers`개짜리 따로 된 pool에서 돌아요(RQ0 run은 4, 1, 50 MB). run 뒤의 experiment 수준 단계(aggregates와 scores, guards, grades, report)는 aggregates를 run 하나씩 읽어요. `run-times.csv`가 run마다 시간·최대 memory·disk byte를, `stage-times.csv`가 단계마다 시간을 적어요. 출력은 `runs/<experiment>/<workload>/<run>/`에 run별로 놓이고, run의 이름은 `<condition>[-seed][+boot]~<shape>`예요(예: `random-5~focus`, `fixed+ostep-slice-2000us~focus`). `aggregates.csv`·`scores.csv`·`guards.csv`·`grades.csv`·`report.json`·`report.md`는 experiment 수준에 놓여요. `make -C harness smoke`는 scoring spec에 entry가 있는 core 파일 49개로 throwaway spec을 만들어 이 경로 전체를 mock으로 돌려요. 다시 지은 dataset 위에서 집 기계로 약 4시간 50분이라 요청할 때만 돌고(`harness-smoke.yml`), push마다 도는 `make test`는 같은 경로를 파일 한 개에서 세 개까지로 돌려요(18장).
 
 ---
 

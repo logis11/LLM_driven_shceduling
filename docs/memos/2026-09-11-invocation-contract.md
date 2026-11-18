@@ -1,7 +1,7 @@
 # Invocation contract 안내 — harness가 daemon과 simulator를 실행하는 명령의 모양 (contract 10)
 
-> Status: memo · Created 2026-09-11 · Updated 2026-10-30
-> 열림 — 규범인 `docs/data-contracts.md` §11(contract 10)의 명령 모양대로 실행되는 두 프로그램이 남았어요: daemon은 2026-10-21부터 skeleton(`daemon/daemon.py`, `9a8d65c6`)이 있고 이 명령의 flag를 받아요. simulator는 2026-10-28부터(`8dab1176`) `--workload`, `--schedule`, `--out-trace`를 받아 trace를 그 파일에 쓰지만, trace header의 `sim`은 아직 고정 문자열 `src/sim`이고 runner의 machine configuration이 정한 version string이 아니에요(`simulator/src/sim.cpp`의 `main`). simulator 쪽은 RQ0 run 전에 끝나야 해요: RQ0 gate spec(`harness/experiments/rq0-gate.yaml`, statement `simulator-conformance`)에 2026-10-17 더해진 항목 (h)에 따라, simulator가 runner가 부르는 그대로 — `--workload`, `--schedule`, `--out-trace`로, 위치 인자 없이, trace를 그 파일에 쓰며 — 실행되는 걸 보여 주기 전에는 RQ0 run을 시작하지 않아요. 담당 인경민(simulator), 박이안(daemon).
+> Status: memo · Created 2026-09-11 · Updated 2026-11-18
+> 닫힘 — 두 프로그램 모두 `docs/data-contracts.md` §11(contract 10)의 명령 모양대로 실행돼요. simulator는 trace header의 `sim`에 version 문자열을 쓰는 것까지 인경민의 commit `2ee49785`(2026-11-11)로 들어왔고, 2026-11-14의 통합 gate(sub-task 10.2)가 RQ0 gate spec의 simulator-conformance 항목 (h)를 binary에서 보였어요(`simulator/tests/test_invocation.py`). daemon은 `daemon/daemon.py`가 이 명령의 flag를 받고, RQ0 gate spec의 run 목록 전체에서 harness의 mock daemon과 byte 단위로 같은 출력을 내요. RQ0 gate spec이 두 프로그램의 version 문자열을 pin해요.
 > From 인지오 to 인경민, 박이안. data contract 하나가 새로 생겼어요: **harness가 daemon과 simulator를 어떤 명령으로 실행하는가.** 이 memo는 그 명령의 모양과 규칙만 적어요. 두 프로그램의 입출력 파일 형식(config schedule, recognition log, trace)은 하나도 안 바뀌었어요. 규범 문서는 `docs/data-contracts.md` §11이고, 이 memo는 그걸 풀어 쓴 거예요. 급하면 §2와 §3만 읽어도 돼요.
 
 ## 1. 한 문단 요약

@@ -1,6 +1,6 @@
 # mocks
 
-Two test doubles that speak the invocation contract (`docs/data-contracts.md` §11) so the whole harness can run before the real daemon and the real simulator speak it: no daemon program is in the repository yet, and the reference simulator (`simulator/src/sim.cpp`) takes its two inputs positionally and prints the trace to standard output. Both live in the test tree on purpose, and Phase 10 (integration and the RQ0 run) swaps them for the real programs. Nothing here belongs in the daemon or simulator trees.
+Two test doubles that speak the invocation contract (`docs/data-contracts.md` §11), written so the whole harness could run before the real daemon and the real simulator spoke it. Since the integration gate (sub-task 10.2, 2026-11-14) the runner's machine configuration runs the real programs, `simulator/src/sim` and `daemon/daemon.py`; the mocks stay in the test tree, where the harness suite runs them, and `harness/runner.example.yaml` drives them. Nothing here belongs in the daemon or simulator trees.
 
 ## The mock daemon
 
@@ -28,4 +28,4 @@ The replay copies a hand-written fixture trace after checking that it belongs to
 
 ## Why they matter
 
-Both programs are the first implementations of the invocation contract. When 인경민's simulator and 박이안's daemon are run in their place, the runner's machine configuration changes and nothing else does.
+Both programs are the first implementations of the invocation contract. Running the real programs in their place changed the runner's machine configuration and nothing else; `daemon/daemon.py` writes byte for byte what the mock daemon writes on the RQ0 gate spec's whole run list.
