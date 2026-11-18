@@ -3,8 +3,8 @@
 `score` takes aggregate rows (any number of runs) and a scoring spec and
 returns two kinds of rows: one per term per run (the term's identity, its
 aggregate under `fixed`, `oracle`, and the run's condition, both improvements,
-the share, the weight, the `no_headroom` and `censored` marks) and one per run
-for the file's weighted score. Machine schema: `harness/scores/schema/`.
+the share, the weight, the `no_headroom`, `oracle_worse` and `censored` marks) and
+one per run for the file's weighted score. Machine schema: `harness/scores/schema/`.
 
 Pairing: a run's `fixed` baseline is the `fixed` run with the same
 `workload_id` and `boot_default` (`fixed` carries no table, so it is shared
@@ -16,7 +16,9 @@ itself; those score rows carry the alternative's `boot_default`.
 Rules fixed in the Phase 8 spec (decision 4) and the 8.2 spec (decision 4):
 a no-headroom term (the oracle's improvement below the aggregate's floor) keeps
 its weight and enters the file score as if the condition had captured all of
-it (share 1); a `turnaround` term whose task did not complete is scored on the
+it (share 1) — the improvement read with its sign, so an oracle worse than
+`fixed` by the floor or more is no headroom and carries the `oracle_worse` mark
+(11.1 spec, decisions 1 and 2); a `turnaround` term whose task did not complete is scored on the
 censored lower bound the aggregates carry (`turnaround_censored`) and marked;
 an `input_latency` or `app_latency` term is marked censored when its window
 holds a wake its task never served (`censored_count` above zero, metrics doc
@@ -48,8 +50,8 @@ COLUMNS = IDENTITY + ("level", "entity", "metric", "aggregate", "cause", "channe
                       "window_start_us", "window_end_us", "direction", "weight",
                       "value_fixed", "value_oracle", "value_condition",
                       "improvement_oracle", "improvement_condition", "share",
-                      "no_headroom", "censored",
-                      "score", "weight_sum", "n_terms", "n_no_headroom", "n_censored")
+                      "no_headroom", "oracle_worse", "censored",
+                      "score", "weight_sum", "n_terms", "n_no_headroom", "n_oracle_worse", "n_censored")
 
 
 PLACES = 6                           # decimal places in the scores file
@@ -174,7 +176,7 @@ def score_index(runs, spec, floors=None):
             for key in scored:
                 run = fixed if key[1] == "fixed" else runs[key]
                 identity = dict(zip(IDENTITY, key)); identity["boot_default"] = boot
-                total = Fraction(0); wsum = Fraction(0); n_nh = 0; n_c = 0
+                total = Fraction(0); wsum = Fraction(0); n_nh = 0; n_ow = 0; n_c = 0
                 for term in terms:
                     tk = _term_key(term)
                     v_fixed, _ = _lookup(fixed, tk, f"{workload} fixed")
@@ -183,12 +185,13 @@ def score_index(runs, spec, floors=None):
                     direction = term["direction"]
                     imp_o = _improve(direction, v_fixed, v_oracle)
                     imp_c = _improve(direction, v_fixed, v_cond)
-                    no_headroom = abs(imp_o) < floors[tk[2]]
+                    oracle_worse = imp_o <= -floors[tk[2]]        # the oracle worse than fixed past the floor
+                    no_headroom = imp_o < floors[tk[2]]           # under the floor, or oracle worse (11.1)
                     share = None if no_headroom else imp_c / imp_o
                     weight = Fraction(str(term["weight"]))
                     wsum += weight
                     total += weight * (Fraction(1) if no_headroom else share)
-                    n_nh += int(no_headroom); n_c += int(censored)
+                    n_nh += int(no_headroom); n_ow += int(oracle_worse); n_c += int(censored)
                     term_rows.append({**identity, "level": "term", "entity": tk[0], "metric": tk[1],
                                       "aggregate": tk[2], "cause": tk[3], "channel": tk[4],
                                       "window_start_us": tk[5], "window_end_us": tk[6],
@@ -197,15 +200,17 @@ def score_index(runs, spec, floors=None):
                                       "value_condition": fmt(v_cond),
                                       "improvement_oracle": fmt(imp_o), "improvement_condition": fmt(imp_c),
                                       "share": "" if share is None else fmt(share),
-                                      "no_headroom": int(no_headroom), "censored": int(censored),
-                                      "score": "", "weight_sum": "", "n_terms": "", "n_no_headroom": "", "n_censored": ""})
+                                      "no_headroom": int(no_headroom), "oracle_worse": int(oracle_worse),
+                                      "censored": int(censored),
+                                      "score": "", "weight_sum": "", "n_terms": "", "n_no_headroom": "",
+                                      "n_oracle_worse": "", "n_censored": ""})
                 file_rows.append({**identity, "level": "file", "entity": "", "metric": "", "aggregate": "",
                                   "cause": "", "channel": "", "window_start_us": "", "window_end_us": "", "direction": "",
                                   "weight": "", "value_fixed": "", "value_oracle": "", "value_condition": "",
                                   "improvement_oracle": "", "improvement_condition": "", "share": "",
-                                  "no_headroom": "", "censored": "",
+                                  "no_headroom": "", "oracle_worse": "", "censored": "",
                                   "score": fmt(total), "weight_sum": fmt(wsum), "n_terms": len(terms),
-                                  "n_no_headroom": n_nh, "n_censored": n_c})
+                                  "n_no_headroom": n_nh, "n_oracle_worse": n_ow, "n_censored": n_c})
     key = lambda r: (tuple(str(r[k]) for k in IDENTITY), r["level"] == "term", r["entity"], r["metric"],
                      r["aggregate"], r["cause"], r["channel"], str(r["window_start_us"]))
     return sorted(term_rows, key=key), sorted(file_rows, key=key)

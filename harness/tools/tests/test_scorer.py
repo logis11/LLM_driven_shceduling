@@ -6,6 +6,7 @@ scored against hand-written fixed and oracle records)."""
 import pathlib
 import subprocess
 import sys
+from fractions import Fraction
 
 import pytest
 
@@ -73,6 +74,36 @@ def test_the_index_kept_to_the_keys_the_scorer_reads_scores_as_the_rows_do():
     assert str(kept.value) == str(whole.value)
 
 
+def test_an_oracle_worse_than_fixed_past_the_floor_is_no_headroom_and_marked():
+    """11.1 decisions 1 and 2: the oracle's improvement is read with its sign. An oracle worse than fixed by the
+    floor or more is no headroom, at share 1, and marked `oracle_worse`; one worse by less than the floor is no
+    headroom unmarked; a condition the old reading would have given a sign-inverted share gets none."""
+    spec = _spec()
+    rows = _aggregate_all(sorted((MS / "records").glob("*.csv")), spec)
+    tk = scorer._term_key(spec["files"]["mock-score"]["terms"][0])      # the editor's P99, lower is better
+
+    def agg_row(condition):
+        return next(r for r in rows if r["condition"] == condition and r["boot_default"] == ""
+                    and (r["entity"], r["metric"], r["aggregate"], r["cause"], r.get("channel", ""),
+                         str(r["window_start_us"]), str(r["window_end_us"])) == tk)
+
+    fixed = Fraction(str(agg_row("fixed")["value"]))
+    assert scorer.FLOOR["p99"] == 1000
+    for worse_by, marked in ((5000, True), (1000, True), (999, False)):
+        agg_row("oracle")["value"] = str(fixed + worse_by)
+        term_rows, file_rows = scorer.score(rows, spec)
+        terms = [r for r in term_rows if r["boot_default"] == "" and r["entity"] == tk[0] and r["metric"] == tk[1]]
+        assert {r["condition"] for r in terms} == {"fixed", "oracle", "random"}
+        for r in terms:
+            assert r["improvement_oracle"] == scorer.fmt(Fraction(-worse_by))
+            assert r["no_headroom"] == 1 and r["share"] == "" and r["oracle_worse"] == int(marked)
+        for r in file_rows:
+            if r["boot_default"] == "":
+                assert r["n_no_headroom"] == 2 and r["n_oracle_worse"] == int(marked)
+    oracle_file = next(r for r in file_rows if r["condition"] == "oracle" and r["boot_default"] == "")
+    assert oracle_file["score"] == oracle_file["weight_sum"]          # every term at share 1 under the oracle
+
+
 def test_expected_files_validate_against_their_schemas():
     validate_rows(read_csv(MS / "expected-aggregates.csv", agg.COLUMNS), AGGREGATES_SCHEMA)
     validate_rows(read_csv(MS / "expected-scores.csv", scorer.COLUMNS), SCORES_SCHEMA)
@@ -128,9 +159,12 @@ def test_seam_records_writer_to_scorer(fixture_dir):
     assert llm["editor"]["value_condition"] == "2985.000000"
     assert llm["editor"]["value_fixed"] == "7960.000000" and llm["editor"]["value_oracle"] == "995.000000"
     assert llm["editor"]["share"] == "0.714286"
-    # hog progress: llm_vocab 65000/90000 against fixed 60000/90000 and oracle 50000/90000 → share −0.5
-    assert llm["hog"]["value_condition"] == "0.722222" and llm["hog"]["share"] == "-0.500000"
-    assert _file_row(file_rows, "llm_vocab", "", "")["score"] == "0.464286"
+    # hog progress: llm_vocab 65000/90000 against fixed 60000/90000 and oracle 50000/90000 — the oracle worse than
+    # fixed past the 0.01 floor, so no headroom, marked, share 1 (11.1; the old reading's ratio was −0.5)
+    assert llm["hog"]["value_condition"] == "0.722222" and llm["hog"]["improvement_oracle"] == "-0.111111"
+    assert llm["hog"]["share"] == "" and llm["hog"]["no_headroom"] == 1 and llm["hog"]["oracle_worse"] == 1
+    assert _file_row(file_rows, "llm_vocab", "", "")["score"] == "1.214286"
+    assert _file_row(file_rows, "llm_vocab", "", "")["n_oracle_worse"] == 1
 
 
 def test_cli_writes_both_files(tmp_path):

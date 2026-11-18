@@ -540,6 +540,42 @@ def test_the_headroom_count_line_counts_judging_files_with_headroom(tmp_path):
     assert "none has headroom: True" in render(_evaluate(spec=sp, scores=p))
 
 
+
+def test_the_oracle_worse_count_reaches_the_gap_rows_and_the_headroom_count(tmp_path):
+    """11.1 decision 2: the reference's count of oracle-worse terms on each per-file gap row and each headroom-count
+    row, printed in both tables; such a file with no other headroom has none."""
+    sp = _spec_with_lines(tmp_path, [{"type": "headroom_count", "reason": "link 2's reading"}])
+    rows = read_csv(MS / "expected-scores.csv", scorer.COLUMNS)
+    for r in rows:
+        if r["level"] == "file":
+            r["n_no_headroom"] = r["n_terms"]
+            r["n_oracle_worse"] = "2"
+    p = tmp_path / "scores.csv"
+    write_csv(rows, scorer.COLUMNS, p)
+    report = _evaluate(spec=sp, scores=p)
+    assert _gap(report)["n_oracle_worse"] == 2 and _gap(report)["all_no_headroom"] is True
+    (row,) = _line(report, "headroom_count")["rows"]
+    assert row["n_oracle_worse"] == 2 and row["has_headroom"] is False
+    md = render(report)
+    assert "| no headroom | oracle worse | random beats oracle |" in md
+    assert "| terms | no headroom | oracle worse | has headroom |" in md
+
+
+def test_a_post_hoc_reading_is_labelled_and_never_rendered_as_a_verdict():
+    """11.1 decision 5: a post hoc reading carries its label in the report and heads the rendering with it; its
+    count is never rendered as the verdict. A report without the label has no `post_hoc`."""
+    import jsonschema
+    paths = INPUTS
+    note = "The fixture re-read under another rule (harness/CHANGELOG.md)."
+    report = evaluate(FX / "experiment.yaml", paths["aggregates"], paths["scores"], paths["guards"], paths["grades"],
+                      REPO, post_hoc=note)
+    assert report["post_hoc"] == note
+    jsonschema.Draft202012Validator(json.loads(REPORT_SCHEMA.read_text())).validate(report)
+    md = render(report)
+    assert md.startswith("# Post hoc reading — mock-experiment\n\n> " + note + "\n")
+    assert "**Post hoc reading: pass**" in md and "Verdict" not in md
+    assert "post_hoc" not in _evaluate()
+
 ALT = "calibrated@x"      # the fixture's pinned table has role `calibrated`; `x` is the alternative's stem
 
 

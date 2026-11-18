@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "scores.schema.json",
   "title": "Scores row",
-  "description": "One row of the harness's scores file (docs/harness/metrics.md §9; sub-task 8.2): level `term` carries one scoring-spec term of one run with its aggregate under fixed, oracle, and the run's condition, both improvements, the share, and the no_headroom and censored marks; level `file` carries the run's weighted score. `boot_default` names the fixed baseline the row was scored against (empty = the primary). Empty CSV cells are absent here.",
+  "description": "One row of the harness's scores file (docs/harness/metrics.md §9; sub-task 8.2): level `term` carries one scoring-spec term of one run with its aggregate under fixed, oracle, and the run's condition, both improvements, the share, and the no_headroom, oracle_worse and censored marks; level `file` carries the run's weighted score with its counts of each mark. A term is no_headroom when the oracle's improvement, read with its sign, is under the aggregate's floor — under the floor in size, or the oracle worse than fixed by the floor or more, the latter also marked oracle_worse (11.1). `boot_default` names the fixed baseline the row was scored against (empty = the primary). Empty CSV cells are absent here.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -20,7 +20,8 @@
       "enum": [
         "fixed",
         "random",
-        "shipped_catalogue", "strongest_name_table",
+        "shipped_catalogue",
+        "strongest_name_table",
         "llm_vocab",
         "llm_algo",
         "llm_full",
@@ -41,7 +42,7 @@
       "minLength": 1
     },
     "telemetry": {
-      "description": "The telemetry shape the run's daemon showed the recognizer (data-contracts \u00a75, rule 6; 9.17): `focus`, the name \u2192 count multiset with the focus holder, or `names`, the multiset alone.",
+      "description": "The telemetry shape the run's daemon showed the recognizer (data-contracts §5, rule 6; 9.17): `focus`, the name → count multiset with the focus holder, or `names`, the multiset alone.",
       "type": "string",
       "enum": [
         "focus",
@@ -144,6 +145,14 @@
         1
       ]
     },
+    "oracle_worse": {
+      "type": "integer",
+      "enum": [
+        0,
+        1
+      ],
+      "description": "1 when the oracle is worse than fixed by the aggregate's floor or more: a no_headroom term, share 1 (11.1)"
+    },
     "censored": {
       "type": "integer",
       "enum": [
@@ -164,6 +173,10 @@
       "minimum": 1
     },
     "n_no_headroom": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "n_oracle_worse": {
       "type": "integer",
       "minimum": 0
     },
@@ -194,6 +207,7 @@
           "improvement_oracle",
           "improvement_condition",
           "no_headroom",
+          "oracle_worse",
           "censored"
         ]
       }
@@ -212,6 +226,7 @@
           "weight_sum",
           "n_terms",
           "n_no_headroom",
+          "n_oracle_worse",
           "n_censored"
         ]
       }

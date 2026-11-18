@@ -109,3 +109,34 @@ The verdict count beside the primary's 6 of 19:
 ## Reruns
 
 None.
+
+## Corrections
+
+### 2026-11-18 — the scorer's sign (sub-task 11.1)
+
+The run was scored with the oracle's improvement over `fixed` taken without its sign: a term was no headroom only when that improvement was under the aggregate's floor in size, so a term whose oracle was worse than `fixed` by the floor or more formed a share of inverted sign, and a condition better than `fixed` there scored below zero (`harness/CHANGELOG.md`, 2026-11-18). 58,140 of the run's 182,784 term rows are such terms; at the primary, a term of nine judging files. On `c7-ml-train` the editor's input-latency P99 is 7.194 s under `fixed` and 8.021 s under `oracle`; the `random` seeds' mean of −1.512 and the gap of 2.512 that met g are the inversion, `random` beating `oracle` there. On `c1-ml-train` the hog's turnaround is 2.958 s longer under `oracle` than under `fixed`.
+
+The verdict above stands as run: fail, 6 of 19, provisional (`_dev/docs/spec/jioh/phase-11-rq0-failure-procedure-diagnosis.md`, decision 2). The re-measurement contingency fired under the scorer as run, and the entry that moved `c7-ml-train` is found under that rule (the same spec, decision 6).
+
+**The post hoc reading**, not a verdict: `harness/experiments/rq0-gate/post-hoc/` — `report.json.gz` (its uncompressed bytes' SHA-256 `b4bc62393cd06e1497bd3d31d41fdf2503292e7496fb6e8ae945d6e933737753`) and `report.md` (`85469416ae6e0d4b5e5200668d8483cb2f495d5980280cd5bb3d197a07eb6a16`). The run's aggregates are re-scored under the fixed rule — a term whose oracle is worse than `fixed` by the floor or more is no headroom, at share 1, marked *oracle worse than fixed* — and the whole report rendered again with the run's own guards and grades.
+
+- **4 of 19** judging files meet g at the primary: `c2-p2a`, `c2-p2b`, `c7-browsing`, `c7-office`. `c7-ml-train` has no headroom, gap 0.000; `c1-ml-train`'s gap is 0.468, its hog term at share 1.
+- **12 of 19** have headroom. `c7-dev`, `c7-video-edit`, `c7-compile` and `c7-ml-train` have their one term oracle worse than fixed, and `c1-render` one of its two, the other under the floor; with `c7-photo` and `c7-render`, seven files have no headroom on any term.
+- `c2-p3a`, `c1-compile`, `c1-transcode` and `c1-ml-train` have one term oracle worse than fixed beside one with headroom. `random` still beats `oracle` on the first three — gaps −0.613, −0.071, −2.011; `c1-render` is no longer flagged.
+
+| line | the run | post hoc |
+|---|---|---|
+| g band, 0.25, 0.33, 0.5, 0.67 | 10, 8, 6, 4 | 8, 7, 4, 3 — fail at every point |
+| boot-default sweep, 0.5, 0.7, 1.2, 2, 5, 7, 12, 20, 30 ms | 4, 5, 5, 6, 3, 4, 9, 3, 6 | 4, 5, 5, 5, 3, 3, 7, 3, 3; 100 ms not read, as in the run |
+| floor band, 500, 1,000, 2,000, 5,000 µs | 6, 6, 6, 4 | 4, 4, 4, 2 |
+| cap band, 0.05, 0.2, 0.333, 0.5 | 6, 6, 7, 7 | 4, 4, 4, 5 |
+| venue factor, ×0.8, ×1.25 | 7, 5 | 5, 4 |
+| chain scale, ×1.2, ×1.4 | not read | not read, the same failed guards |
+| first segment's length, 30 s, 120 s | 6, 7 | 4, 5 |
+| carried half-widths, the lower bound, the upper bound | 5, 6 | 4, 4 — neither bound moves the count |
+| headroom count | 17 of 19 | 12 of 19 |
+| `random` beats `oracle` | `c2-p3a`, `c1-compile`, `c1-render`, `c1-transcode` | `c2-p3a`, `c1-compile`, `c1-transcode` |
+| trace replay | agreement false; `c7-dev` 0.254 against 0.000 | agreement false; `c7-dev` 0.000 against 0.000; `c7-browsing` 1.121 against 0.475, crossing g, as in the run |
+| seed standard error above 0.05, as a share of the reference | `c7-ml-train` 0.337, `c1-transcode` 0.219, `c7-browsing` 0.195, `c7-office` 0.141, `c2-p3a` 0.071, `c1-ml-train` 0.052 | `c1-transcode` 0.214, `c7-browsing` 0.195, `c7-office` 0.141, `c2-p3a` 0.072 |
+
+Unchanged: the guards, the longest wait, Layer 1, the exclusion accuracy and the input wake count, which read no score; the bounding pair (0.533, 0.000, −0.533), whose two files have no term oracle worse than fixed. The script and its summary: `_dev/research/jioh/task-11.1-the-scorers-sign-rule/`.

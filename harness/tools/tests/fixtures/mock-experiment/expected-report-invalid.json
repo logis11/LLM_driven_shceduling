@@ -81,6 +81,7 @@
    "meets_g": true,
    "all_no_headroom": false,
    "n_no_headroom": 1,
+   "n_oracle_worse": 0,
    "n_terms": 4,
    "random_beats_oracle": false,
    "available": false
@@ -105,6 +106,7 @@
    "meets_g": true,
    "all_no_headroom": false,
    "n_no_headroom": 1,
+   "n_oracle_worse": 0,
    "n_terms": 4,
    "random_beats_oracle": false,
    "available": false

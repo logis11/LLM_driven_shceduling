@@ -4,7 +4,7 @@ The scores file is where a run's aggregates become a comparison: how much of the
 
 ## What a row is
 
-Two levels. A `term` row is one scoring-spec term of one run: the aggregate's value under `fixed`, under `oracle`, and under the run's own condition; both improvements; the normalised `share`, which is the run's improvement over the oracle's, signed by the term's direction; the `weight`; and two marks, `no_headroom` when the oracle's own improvement fell below the aggregate's floor and `censored` when the underlying aggregate was. A `file` row is the run's weighted score: the sum of weight × share over its terms, with `weight_sum`, `n_terms`, `n_no_headroom`, `n_censored` beside it. The oracle's file score is therefore its weight sum, and the gap RQ0 measures is one minus a run's score over that. `schema/scores.schema.json` is the machine form; `docs/harness/metrics.md` §9 the definitions.
+Two levels. A `term` row is one scoring-spec term of one run: the aggregate's value under `fixed`, under `oracle`, and under the run's own condition; both improvements; the normalised `share`, which is the run's improvement over the oracle's, signed by the term's direction; the `weight`; and three marks: `no_headroom` when the oracle's own improvement, read with its sign, fell below the aggregate's floor — under it in size, or the oracle worse than `fixed` by the floor or more; `oracle_worse` on the second kind; `censored` when the underlying aggregate was. A `file` row is the run's weighted score: the sum of weight × share over its terms, with `weight_sum`, `n_terms`, `n_no_headroom`, `n_oracle_worse`, `n_censored` beside it. The oracle's file score is therefore its weight sum, and the gap RQ0 measures is one minus a run's score over that. `schema/scores.schema.json` is the machine form; `docs/harness/metrics.md` §9 the definitions.
 
 ## How runs are paired
 
@@ -12,7 +12,7 @@ A run's `fixed` baseline is the `fixed` run with the same workload, the same `bo
 
 ## Two rules to know before reading a score
 
-- A no-headroom term keeps its weight and enters the file score as if the run had captured all of the headroom, share 1. This keeps a file's score comparable across conditions when one of its terms has nothing to measure; the mark says which terms those were.
+- A no-headroom term keeps its weight and enters the file score as if the run had captured all of the headroom, share 1. This keeps a file's score comparable across conditions when one of its terms has nothing to measure; the mark says which terms those were, and `oracle_worse` which of them are terms the oracle lost to `fixed` on.
 - A judging file whose every term is no headroom counts, in RQ0, as not meeting the gap threshold. That is the RQ0 gate spec's rule, not the scorer's.
 
 ## How it is produced and read

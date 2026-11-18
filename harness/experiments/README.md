@@ -4,7 +4,7 @@ A per-experiment spec is the pre-registration of one experiment as data the harn
 
 `rq0-gate.yaml` is the RQ0 gate spec, committed 2026-09-12. Only pre-registered experiments live here; the smoke run generates its spec in a temporary directory and discards it.
 
-`rq0-gate/` holds the RQ0 run's report (2026-11-18; `docs/rq0-run-record.md`): `report.json.gz`, the report gzipped; `report.md`, its rendering; `runs.sha256.csv`, every run's trace hash and records hash.
+`rq0-gate/` holds the RQ0 run's report (2026-11-18; `docs/rq0-run-record.md`): `report.json.gz`, the report gzipped; `report.md`, its rendering; `runs.sha256.csv`, every run's trace hash and records hash. `rq0-gate/post-hoc/` holds the run's post hoc reading, not its verdict: the run's aggregates re-scored with the oracle's improvement read with its sign and the report rendered again, `report.json.gz` and `report.md` (sub-task 11.1; `../CHANGELOG.md`, 2026-11-18).
 
 ## Anatomy of a spec
 
@@ -45,13 +45,13 @@ Two more since 2026-11-01 (sub-task 10.1): `headroom_count` prints the number of
 
 ## The report
 
-`schema/report.schema.json` is the shape of the one machine-readable report per experiment run: header, verdict and its detail, per-file gaps with every per-seed score beside the mean, every scored run, the provenance breakdown, every guard result, the statements, and the lines. `report.md` beside it is rendered from the JSON and never edited by hand; paper tables come from the JSON.
+`schema/report.schema.json` is the shape of the one machine-readable report per experiment run: header, verdict and its detail, per-file gaps with every per-seed score beside the mean, every scored run, the provenance breakdown, every guard result, the statements, and the lines. `report.md` beside it is rendered from the JSON and never edited by hand; paper tables come from the JSON. A post hoc reading of a run already reported carries `post_hoc`, the reading it is and the changelog entry behind it, and its rendering heads with it in place of a verdict.
 
 ## Commands
 
 ```
 python3 tools/experiment_lint.py [--spec experiments/rq0-gate.yaml]      # schema, files against the build, terms, registries, pins
-python3 tools/evaluate.py --spec … --aggregates … --scores … --guards … --grades … --out-report report.json --out-render report.md
+python3 tools/evaluate.py --spec … --aggregates … --scores … --guards … --grades … --out-report report.json --out-render report.md [--post-hoc TEXT]
 python3 tools/run.py --spec experiments/rq0-gate.yaml --machine runner.yaml   # the whole matrix, then evaluate
 ```
 

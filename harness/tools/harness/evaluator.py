@@ -462,14 +462,14 @@ def _gap_rows(rs: _Set, g: Fraction, file_rows=None, boots=None, unavailable=(),
             scores = {seed: Fraction(r["score"]) for seed, r in sorted(cmp.items())}
             mean = sum(scores.values(), Fraction(0)) / len(scores)
             gap = 1 - mean / ref_score if ref_score else Fraction(0)
-            n_terms, n_nh = int(ref_row["n_terms"]), int(ref_row["n_no_headroom"])
+            n_terms, n_nh, n_ow = int(ref_row["n_terms"]), int(ref_row["n_no_headroom"]), int(ref_row["n_oracle_worse"])
             all_nh = n_terms > 0 and n_nh == n_terms
             rows.append({"workload_id": wid, "judging": wid in rs.judging, "boot_default": boot,
                          "reference_score": fmt(ref_score),
                          "compared_scores": [{"seed": s, "score": fmt(v)} for s, v in scores.items()],
                          "compared_mean": fmt(mean), "gap": fmt(gap),
                          "meets_g": bool(gap >= g and not all_nh),
-                         "all_no_headroom": all_nh, "n_no_headroom": n_nh, "n_terms": n_terms,
+                         "all_no_headroom": all_nh, "n_no_headroom": n_nh, "n_oracle_worse": n_ow, "n_terms": n_terms,
                          "random_beats_oracle": bool(mean > ref_score),
                          "available": (wid, boot) not in unavailable})
     return rows
@@ -801,8 +801,10 @@ def line_headroom_count(rs, params, ctx):
     zero, the condition the spec's statement names as falsifying link 2 of the claims chain (fixed, the boot
     default scheduling by behaviour alone, reaching the oracle's outcome on every term of every judging file).
     Read apart from the criterion's gap: a file whose headroom the compared condition captures fails link 1's
-    reading, not this one."""
+    reading, not this one. A term whose oracle is worse than fixed past the floor is no headroom, counted apart
+    in `n_oracle_worse` (11.1)."""
     rows = [{"workload_id": r["workload_id"], "n_terms": r["n_terms"], "n_no_headroom": r["n_no_headroom"],
+             "n_oracle_worse": r["n_oracle_worse"],
              "has_headroom": not r["all_no_headroom"], "available": r["available"]}
             for r in ctx["gaps"] if r["judging"] and r["boot_default"] == ""]
     available = all(r["available"] for r in rows)
@@ -849,7 +851,7 @@ LINES = {"sensitivity": line_sensitivity, "g_band": line_g_band, "seed_standard_
 
 # --------------------------------------------------------------- evaluate
 
-def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, root):
+def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, root, post_hoc=None):
     """The report for one experiment run, or a `GateError` refusal."""
     spec_path = pathlib.Path(spec_path)
     try:
@@ -906,7 +908,8 @@ def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, 
             "boot_defaults": spec["boot_defaults"], "criterion": shown,
             "verdict": verdict, "verdict_detail": detail, "gaps": gaps, "scores": scores_out,
             "provenance": prov_out, "guards": guard_report,
-            "statements": [dict(s) for s in spec.get("statements") or []], "lines": lines}
+            "statements": [dict(s) for s in spec.get("statements") or []], "lines": lines,
+            **({"post_hoc": post_hoc} if post_hoc else {})}
 
 
 def write_report(report, path):
@@ -962,8 +965,11 @@ def render(report) -> str:
     """The report as Markdown. Every number is copied from the report; none is computed here."""
     c = report["criterion"]
     d = report["verdict_detail"]
-    out = [f"# Report — {report['experiment']}", "",
-           f"**Verdict: {report['verdict']}** — {d['met']} of {d['judging']} judging files met the criterion "
+    post_hoc = report.get("post_hoc")
+    out = ([f"# Post hoc reading — {report['experiment']}", "", f"> {' '.join(post_hoc.split())}", ""] if post_hoc
+           else [f"# Report — {report['experiment']}", ""]) + [
+           f"**{'Post hoc reading' if post_hoc else 'Verdict'}: {report['verdict']}** — {d['met']} of {d['judging']} "
+           f"judging files met the criterion "
            f"(K = {d['k']}). Spec `{report['spec_sha256'][:12]}`. Telemetry shape judged: "
            f"`{report['telemetry'][0]}`" + (f" (also run: {', '.join(f'`{t}`' for t in report['telemetry'][1:])})"
                                             if len(report["telemetry"]) > 1 else "") + ".", ""]
@@ -980,11 +986,12 @@ def render(report) -> str:
               if report["statements"] else []),
             "## Per-file gaps", "",
             _table(["workload", "judging", "boot default", "reference", "compared (per seed)", "mean", "gap",
-                    "meets g", "no headroom", "random beats oracle", "available"],
+                    "meets g", "no headroom", "oracle worse", "random beats oracle", "available"],
                    [[r["workload_id"], r["judging"], r["boot_default"] or "(primary)", r["reference_score"],
                      ", ".join(f"{s['seed']}: {s['score']}" for s in r["compared_scores"]),
                      r["compared_mean"], r["gap"], r["meets_g"], f"{r['n_no_headroom']}/{r['n_terms']}"
-                     + (" (all)" if r["all_no_headroom"] else ""), r["random_beats_oracle"], r["available"]]
+                     + (" (all)" if r["all_no_headroom"] else ""), r["n_oracle_worse"], r["random_beats_oracle"],
+                     r["available"]]
                     for r in report["gaps"]]), ""]
     for line in report["lines"]:
         t = line["type"]
@@ -1013,9 +1020,9 @@ def render(report) -> str:
                        f"none has headroom: {line['none_has_headroom']}."
                        + (f" {line['reason'].strip()}" if line["reason"] else ""))
             out.append("")
-            out.append(_table(["workload", "terms", "no headroom", "has headroom", "available"],
-                              [[r["workload_id"], r["n_terms"], r["n_no_headroom"], r["has_headroom"], r["available"]]
-                               for r in line["rows"]]))
+            out.append(_table(["workload", "terms", "no headroom", "oracle worse", "has headroom", "available"],
+                              [[r["workload_id"], r["n_terms"], r["n_no_headroom"], r["n_oracle_worse"],
+                                r["has_headroom"], r["available"]] for r in line["rows"]]))
         elif t == "cap_band":
             out.append(_table(["table", "label", "unwanted rows' cap", "met", "judging", "verdict", "available",
                                "reason"],

@@ -28,10 +28,10 @@
 
 ## Per-file gaps
 
-| workload | judging | boot default | reference | compared (per seed) | mean | gap | meets g | no headroom | random beats oracle | available |
-|---|---|---|---|---|---|---|---|---|---|---|
-| mock-score | True | (primary) | 2.500000 | s1: 1.639359, s2: 0.433333 | 1.036346 | 0.585462 | True | 1/4 | False | True |
-| mock-score | True | alt | 2.500000 | s1: 1.533876, s2: 0.210172 | 0.872024 | 0.651190 | True | 1/4 | False | True |
+| workload | judging | boot default | reference | compared (per seed) | mean | gap | meets g | no headroom | oracle worse | random beats oracle | available |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| mock-score | True | (primary) | 2.500000 | s1: 1.639359, s2: 0.433333 | 1.036346 | 0.585462 | True | 1/4 | 0 | False | True |
+| mock-score | True | alt | 2.500000 | s1: 1.533876, s2: 0.210172 | 0.872024 | 0.651190 | True | 1/4 | 0 | False | True |
 
 ## Line: sensitivity
 

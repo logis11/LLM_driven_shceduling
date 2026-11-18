@@ -1,0 +1,28 @@
+scored 741057971 aggregate rows: 182784 term rows, 126888 file rows (1911.8 s)
+{
+ "aggregate_rows": 741057971,
+ "term_rows": 182784,
+ "file_rows": 126888,
+ "oracle_worse_terms": 58140,
+ "count": "fail",
+ "met": 4,
+ "judging": 19,
+ "k": 10,
+ "met_files": [
+  "c2-p2a",
+  "c2-p2b",
+  "c7-browsing",
+  "c7-office"
+ ],
+ "with_headroom": 12,
+ "sha256": {
+  "scores.csv": "1566d6665126b98e6e8b8c746c4aaefb2aa7177e99f0536bd5c094b346e9a8c5",
+  "report.json": "b4bc62393cd06e1497bd3d31d41fdf2503292e7496fb6e8ae945d6e933737753",
+  "report.md": "85469416ae6e0d4b5e5200668d8483cb2f495d5980280cd5bb3d197a07eb6a16"
+ },
+ "seconds": {
+  "scores": 1911.8,
+  "report": 2048.9
+ }
+}
+exit 0

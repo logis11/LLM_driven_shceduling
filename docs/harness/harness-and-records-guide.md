@@ -1227,7 +1227,9 @@ normalised = (fixed − condition) / (fixed − oracle)
 
 ### 14.3 floor — 분모가 0에 가까울 때
 
-`fixed − oracle`이 아주 작으면 ratio가 폭발해요. 그래서 aggregate마다 **절대 floor**가 그 aggregate의 단위로 정해져요. 예를 들어 `ready_wait` P95의 floor가 5 ms라면, fixed와 oracle의 P95 차이가 5 ms 미만인 파일에서는 그 aggregate의 normalised 값을 "undefined, no headroom"으로 보고하고 raw 값만 적어요.
+`fixed − oracle`이 아주 작으면 ratio가 폭발해요. 그래서 aggregate마다 **절대 floor**가 그 aggregate의 단위로 정해져요. 예를 들어 `ready_wait` P95의 floor가 5 ms라면, oracle이 fixed보다 5 ms 넘게 좋아지지 않은 파일에서는 그 aggregate의 normalised 값을 "undefined, no headroom"으로 보고하고 raw 값만 적어요.
+
+oracle의 개선은 부호까지 읽어요. oracle이 fixed보다 floor 이상 **나쁜** term도 no headroom이고, 따로 *oracle worse than fixed* 표시(`oracle_worse`)를 달아요. 2026-11-18(11.1) 전에는 개선의 크기만 봤어요. 그래서 oracle이 나쁜 term에서 ratio가 만들어졌고, 분모가 음수라 부호가 뒤집혔어요: fixed보다 나은 random seed가 음수 share를 받아 gap이 커졌어요. RQ0 run의 `c7-ml-train`이 그 경우예요(gap 2.512, 실제로는 random이 oracle보다 나음).
 
 floor를 절대값으로 두는 이유: 독자가 숫자를 보고 직접 확인할 수 있어요. 실제 latency floor는 1,000 µs(1 ms)이고 design 값이에요 — 두 configuration 사이의 1 ms 미만 latency 차이는 읽지 않는다는 선이고, 어떤 scheduler parameter에도 묶여 있지 않아요. 비율 aggregate(`over_threshold`, miss rate, progress)의 floor는 0.01(1%p)이에요. RQ0 gate spec은 floor를 0.5 / 1 / 2 / 5 ms로 바꿔 판정을 다시 세는 line을 미리 등록해뒀어요(19.4).
 
@@ -1436,7 +1438,7 @@ gap = 1 − mean_seeds(score_random) / score_oracle
 
 `score_oracle`은 그 파일의 weight 합이에요(oracle의 share는 term마다 1이니까). `mock-experiment` fixture의 숫자로: weight 합 2.5, random의 파일 점수가 seed 1에서 1.639359, seed 2에서 0.433333 → 평균 1.036346 → gap = 1 − 1.036346 / 2.5 = **0.585462**. g = 0.5보다 크니 이 파일은 "met". seed별 값은 전부 보고서에 평균 옆에 찍혀요.
 
-no headroom 규칙 둘. term 하나가 no headroom이면(oracle 자신의 개선이 floor 아래) 그 term은 random이 다 가져간 것처럼 share 1로 들어가요 — 이건 scorer의 research-wide 규칙이에요. judging 파일의 **모든** term이 no headroom이면 그 파일은 set에 남되 "g를 못 넘긴 것"으로 세요 — 이건 RQ0 gate spec의 규칙이에요.
+no headroom 규칙 둘. term 하나가 no headroom이면(oracle 자신의 개선이 floor 아래 — 크기가 floor 아래이거나, oracle이 fixed보다 floor 이상 나쁨) 그 term은 random이 다 가져간 것처럼 share 1로 들어가요 — 이건 scorer의 research-wide 규칙이에요. judging 파일의 **모든** term이 no headroom이면 그 파일은 set에 남되 "g를 못 넘긴 것"으로 세요 — 이건 RQ0 gate spec의 규칙이에요.
 
 ### 19.3 verdict는 셋
 
@@ -1540,7 +1542,7 @@ Phase 5 때의 tree 그림은 오래됐어요. 지금은 폴더마다 README가 
 | **`t_set_change`** | query point의 시각 |
 | **Layer 1 / Layer 2** | recognition accuracy / consumer performance |
 | **normalisation** | `(fixed − condition)/(fixed − oracle)`. headroom의 몇 %를 가져갔나 |
-| **floor** | normalisation의 분모가 이보다 작으면 "no headroom" |
+| **floor** | normalisation의 분모(oracle의 개선, 부호 포함)가 이보다 작으면 "no headroom" |
 | **guard** | score와 별개의 pass/fail 검사 |
 | **mock** | 손으로 쓴 run file + trace + expected records. 정의를 시험하고 code를 test함 |
 | **condition** | 어떤 recognizer로 돌렸나: `fixed`, `random`, `shipped_catalogue`, `strongest_name_table`, `llm_vocab`, `llm_algo`, `llm_full`, `oracle` |

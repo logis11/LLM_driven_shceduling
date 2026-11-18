@@ -3,12 +3,15 @@
 output files → the report and its rendering (sub-task 8.7).
 
     evaluate.py --spec EXPERIMENT.yaml --aggregates A.csv --scores S.csv --guards G.csv --grades R.csv
-                --out-report REPORT.json --out-render REPORT.md [--root REPO]
+                --out-report REPORT.json --out-render REPORT.md [--root REPO] [--post-hoc TEXT]
 
 Pins in the spec resolve against `--root` (default: the repository). A pin
 mismatch, an incomplete run set, or an unregistered type is a refusal: exit 1,
 nothing written. Otherwise both files are written and the exit code follows the
-verdict: 0 on pass, 2 on fail or invalid."""
+verdict: 0 on pass, 2 on fail or invalid. `--post-hoc` marks the report as a post
+hoc reading of a run already reported, TEXT saying which reading and why (11.1):
+the report carries it and the rendering heads with it, the verdict line read as
+the reading's count."""
 import argparse
 import pathlib
 import sys
@@ -30,9 +33,11 @@ def main():
     ap.add_argument("--out-report", required=True, dest="out_report")
     ap.add_argument("--out-render", required=True, dest="out_render")
     ap.add_argument("--root", default=str(REPO))
+    ap.add_argument("--post-hoc", dest="post_hoc", default=None)
     args = ap.parse_args()
     try:
-        report = evaluate(args.spec, args.aggregates, args.scores, args.guards, args.grades, args.root)
+        report = evaluate(args.spec, args.aggregates, args.scores, args.guards, args.grades, args.root,
+                          post_hoc=args.post_hoc)
         validate_report(report)
     except (GateError, OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -40,7 +45,7 @@ def main():
     write_report(report, args.out_report)
     pathlib.Path(args.out_render).write_text(render(report), encoding="utf-8")
     d = report["verdict_detail"]
-    print(f"verdict: {report['verdict']} — {d['met']} of {d['judging']} judging files met the criterion "
+    print(f"{'post hoc reading' if args.post_hoc else 'verdict'}: {report['verdict']} — {d['met']} of {d['judging']} judging files met the criterion "
           f"(K = {d['k']}); wrote {args.out_report} and {args.out_render}")
     return 0 if report["verdict"] == "pass" else 2
 
