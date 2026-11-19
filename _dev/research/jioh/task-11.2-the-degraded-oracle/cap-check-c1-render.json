@@ -1,0 +1,33 @@
+{
+ "workload_id": "c1-render",
+ "run": "oracle~focus",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 1815,
+  "parked_task_batch": 1815,
+  "nonbatch_runnable": 1815,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "fork_slot_waits": 0,
+ "ceiling": {
+  "capped_us": 12668482.0,
+  "in_class_us": 2075891.0,
+  "share": 0.16386264747425935,
+  "bound_us": 4228604.506,
+  "replayed_min_allow_us": 0.0,
+  "within": true
+ },
+ "latency": {
+  "metric": "turnaround",
+  "task": "bulk",
+  "rows_recomputed": 1,
+  "rows_recorded": 1,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 22089192.0,
+  "p50_us": 22089192.0
+ },
+ "ok": true
+}

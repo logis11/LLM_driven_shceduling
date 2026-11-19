@@ -6,7 +6,7 @@ The cases of the 11.2 spec (`_dev/docs/spec/jioh/task-11.2-the-degraded-oracle.m
 |---|---|---|---|---|---|---|---|---|
 | 1 | `c1-compile` | editor, input latency P99 | primary | 235,971,211.09 | 361,025,331.76 | unexplained | [1](#1-c1-compile) | |
 | 2 | `c1-ml-train` | hog, turnaround | primary | 1,596,272,585 | 1,599,230,869 | unexplained | | |
-| 3 | `c1-render` | bulk, turnaround | primary | 21,394,289 | 22,089,192 | unexplained | | |
+| 3 | `c1-render` | bulk, turnaround | primary | 21,394,289 | 22,089,192 | unexplained | [3](#3-c1-render) | |
 | 4 | `c1-transcode` | batch, turnaround | primary | 3,894,612,815 | 4,134,853,844 | unexplained | | |
 | 5 | `c2-p3a` | bulk, turnaround | primary | 22,482,188 | 23,119,499 | unexplained | | |
 | 6 | `c7-compile` | editor, input latency P99 | primary | 58,431,291 | 87,359,931 | unexplained | [6](#6-c7-compile) | |
@@ -79,3 +79,17 @@ The simulator's FORK that finds `fork_cap` reached blocks the task without reset
 **A defect** (decided 2026-11-19): B1's definition — the task giving the CPU back on its own — covers the fork-slot wait, and the simulator resets at the WAIT on the children, the same act. Fixed as the simulator's stage AF (`simulator@841dc81131cb`): the reset at the fork-slot wait; test (d) of `simulator/tests/test_batch_class.py`, failing on `simulator@0d323c84470a` (the parent parked at 46,620, 49,511 and 52,511 µs after its slot came at 46,000) and passing on the fix, with the mutant `fork-wait-keeps-burst` in `simulator/tests/mutants.py`; the batch-class memo's and the batch-class-and-cap memo's dated corrections. Against the RQ0 run's traces (`stage-regression-af.json`): under fixed all 129 files identical, under oracle 117 — the 12 differing are the files with a build.
 
 Before the fix, on a copy of the simulator with the reset added (the same change): the oracle's editor input latency P99 is 87,359,931 on `c7-compile`, unchanged, and 363,144,270.32 on `c1-compile`, against 361,025,331.76.
+
+## 3. `c1-render`
+
+**Configurations.** Fixed: the boot MLFQ, no cap. Oracle: the `render` / `background_wanted: true` row — LOTTERY, `batch_share` 0.333 and `batch_bandwidth_cap` 0.333, the 10 ms quantum — applied at 0 and again at 2,000,000 (the schedule's entries 1 and 2), the boot MLFQ from 60,000,000 (`runs/rq0-gate/c1-render/oracle~focus/schedule.json`).
+
+**Mechanism traced** (`run_profile.py`). The bulk task (the render) arrives at 2,000,000 and is delivered the same CPU under both, 16,545,000; it ends at 24,089,192 under the oracle against 23,394,289 under fixed. The editor is delivered 22,598,722 of CPU in the window against 21,962,695: the row's share and cap, the batch term's weight share of the file (0.5 against 1.0, `daemon/driver-table/prior.yaml`'s header), give the editor's work the lane before the render's, and the render finishes 694,903 later. The editor's own term reads no headroom (its app latency P99 535,735.06 under both), so the score carries the render's loss alone.
+
+**Programs on the path** (`cap-check-c1-render.json`):
+- The daemon: the schedule's entries are the row's algorithm, params and cap, for the ground truth's segment (`render`, `background_wanted: true`).
+- The row: wanted batch work — LOTTERY; its cap the batch term's share of the file's scoring weight, 0.5 / (1.0 + 0.5) = 0.333; `batch_share` equal to the cap; the boot quantum.
+- The simulator: 1,815 of 1,815 parks on a batch-class task while a task not in the batch class and not idle is runnable; no parked task runs; the batch class's CPU while capped 2,075,891 over 12,668,482, a share of 0.164, within the cap plus one slice.
+- The harness: the bulk task's `turnaround` recomputed by `docs/harness/metrics.md` §6.6 — its `task_end` minus its `task_arrive` — equals the run's record, 22,089,192, the scored value.
+
+**Counterfactual** (recorded before the run): the oracle on `c1-render` with the row's `batch_share` and `batch_bandwidth_cap` moved together from 0.333 to 0.95 in the schedule's entries 1 and 2, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the bulk task's turnaround moves down from 22,089,192 by at least the 1,000 µs floor.

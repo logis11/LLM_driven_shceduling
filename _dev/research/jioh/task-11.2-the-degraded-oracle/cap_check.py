@@ -12,7 +12,7 @@ Three checks, from the trace and the compiled workload alone:
 2. The ceiling. Over the capped config intervals, the CPU delivered to tasks while they are in the batch class,
    counted only while a non-batch task is runnable, is at most the cap times that time plus the bucket's depth,
    one slice (`simulator/memo/memo_261020.md` Part F, the token bucket of rate cap and depth one slice).
-3. The scored term. The task's `input_latency` rows (the metrics doc's §6.12) or `app_latency` rows (§6.13)
+3. The scored term. The task's `turnaround` row (the metrics doc's §6.6), or its `input_latency` rows (§6.12) or `app_latency` rows (§6.13)
    recomputed — the k-th wake of a channel served by the k-th WAIT's `ready` line, from the wake to that
    service's start; a dropped timer wake covered by the latest wake before it not dropped — against the run's
    `records.csv.gz`, and their P99 by the harness's own percentile.
@@ -61,7 +61,7 @@ def main():
     ap.add_argument("workload_id")
     ap.add_argument("--run", default="oracle~focus")
     ap.add_argument("--task", default="editor")
-    ap.add_argument("--metric", default="input_latency", choices=["input_latency", "app_latency"])
+    ap.add_argument("--metric", default="input_latency", choices=["input_latency", "app_latency", "turnaround"])
     ap.add_argument("--runs-dir", default=str(REPO / "runs" / "rq0-gate"))
     ap.add_argument("--build-dir", default=str(REPO / "dataset" / "build" / "coreset-single"))
     ap.add_argument("--out", default=None, help="the result's path (default cap-check-<workload_id>.json here)")
@@ -265,6 +265,12 @@ def main():
         ri += 1
     kinds = ("input",) if metric == "input_latency" else ("timer", "event")
     mine = []
+    if metric == "turnaround":                           # §6.6: task_end minus task_arrive, when it completed
+        arr = next((e["t"] for e in lines if e["event"] == "task_arrive" and e["task"] == task), None)
+        fin = next((e for e in lines if e["event"] == "task_end" and e["task"] == task), None)
+        if arr is not None and fin is not None and fin.get("reason") == "exit":
+            mine.append((fin["t"], "", fin["t"] - arr, 0, 0))
+        kinds = ()
     for ch, ts in wakes.items():
         kind = ch.split(":", 1)[0]
         if kind not in kinds:
@@ -292,7 +298,8 @@ def main():
         for r in csv.DictReader(f):
             if r["entity"] == task and r["metric"] == metric:
                 rec.append((int(r["t"]), r["channel"] if metric == "app_latency" else "", int(r["value"]),
-                            int(r["censored"] or 0), int(r["skipped"] or 0)))
+                            int(r["censored"] or 0) if metric != "turnaround" else 0,
+                            int(r["skipped"] or 0) if metric != "turnaround" else 0))
     rec.sort()
     mine.sort()
     vals = [x[2] for x in rec]

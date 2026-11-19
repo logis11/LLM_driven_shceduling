@@ -102,7 +102,9 @@ def main():
                     and r["table"] == args.table and not r["boot_default"]
                     and all(r[k] == want[k] for k in KEY)):
                 scored = r["value_oracle"]
-    result = {"workload_id": wid, "name": args.name, "sets": args.sets, "term": want,
+    with gzip.open(out / "trace.jsonl.gz", "rt") as f:
+        sim_version = json.loads(f.readline()).get("sim")
+    result = {"workload_id": wid, "name": args.name, "sim_version": sim_version, "sets": args.sets, "term": want,
               "scored_oracle": scored, "trace_sha256": trace_sha, "base_trace_rerun_sha256": base_sha,
               "trace_equal_base": trace_sha == base_sha,
               "counterfactual": [a["value"] for a in cf_term], "records_messages": messages}

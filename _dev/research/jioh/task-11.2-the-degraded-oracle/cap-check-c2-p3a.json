@@ -1,0 +1,33 @@
+{
+ "workload_id": "c2-p3a",
+ "run": "oracle~focus",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 1737,
+  "parked_task_batch": 1737,
+  "nonbatch_runnable": 1737,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "fork_slot_waits": 0,
+ "ceiling": {
+  "capped_us": 86616338.0,
+  "in_class_us": 3584592.0,
+  "share": 0.04138470966066471,
+  "bound_us": 30875498.163,
+  "replayed_min_allow_us": 0.0,
+  "within": true
+ },
+ "latency": {
+  "metric": "turnaround",
+  "task": "bulk",
+  "rows_recomputed": 1,
+  "rows_recorded": 1,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 23119499.0,
+  "p50_us": 23119499.0
+ },
+ "ok": true
+}
