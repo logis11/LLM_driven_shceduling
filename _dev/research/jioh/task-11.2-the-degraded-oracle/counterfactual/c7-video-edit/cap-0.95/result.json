@@ -1,0 +1,25 @@
+{
+ "workload_id": "c7-video-edit",
+ "name": "cap-0.95",
+ "sets": [
+  "1.batch_bandwidth_cap=0.95"
+ ],
+ "term": {
+  "entity": "editor",
+  "metric": "app_latency",
+  "aggregate": "p99",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "8090656.020000",
+ "trace_sha256": "bf12b2648aca7af2c17c3b626480fee7f6fad57d582950a6425eececfebafb74",
+ "base_trace_rerun_sha256": "f18a9deac11c2d3fcf3c1ac98df8b425becf2f937d19bf939cb8c0807de93fdb",
+ "trace_equal_base": false,
+ "counterfactual": [
+  "4755986.340000000000"
+ ],
+ "records_messages": [],
+ "moved_by": -3334669.6799999997
+}

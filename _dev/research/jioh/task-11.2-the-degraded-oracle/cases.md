@@ -12,7 +12,7 @@ The cases of the 11.2 spec (`_dev/docs/spec/jioh/task-11.2-the-degraded-oracle.m
 | 6 | `c7-compile` | editor, input latency P99 | primary | 58,431,291 | 87,359,931 | unexplained | | |
 | 7 | `c7-dev` | editor, input latency P99 | primary | 1,750,097.40 | 5,600,806.08 | property | [7](#7-c7-dev) | |
 | 8 | `c7-ml-train` | editor, input latency P99 | primary | 7,194,480.40 | 8,020,875.92 | unexplained | | |
-| 9 | `c7-video-edit` | editor, app latency P99 | primary | 4,750,232.68 | 8,090,656.02 | unexplained | [9](#9-c7-video-edit) | |
+| 9 | `c7-video-edit` | editor, app latency P99 | primary | 4,750,232.68 | 8,090,656.02 | property | [9](#9-c7-video-edit) | |
 | 10 | `c1-transcode` | video-editor, app latency P99 | 12 ms boot default, `prior` | 365,038.19 | 430,531.08 | unexplained | | |
 | 11 | `c2-p1a` | editor, input latency P99 | 7 ms boot default, `prior` | 7,512,775.33 | 8,227,009.39 | unexplained | | |
 | 12 | `c2-p3a` | editor, app latency P99 | 7 ms boot default, `prior` | 38,159.57 | 42,435.19 | unexplained | | |
@@ -51,3 +51,7 @@ The cases of the 11.2 spec (`_dev/docs/spec/jioh/task-11.2-the-degraded-oracle.m
 - The harness: the 9,523 `app_latency` rows recomputed by §6.13 equal the run's records row for row; their P99 is 8,090,656.02, the scored value.
 
 **Counterfactual** (recorded before the run): the oracle on `c7-video-edit` with the row's `batch_bandwidth_cap` moved from 0.05 to 0.95, everything else as the oracle's schedule. Predicted: the editor's app latency P99 moves down from 8,090,656.02 by at least the 1,000 µs floor.
+
+**Result** (2026-11-19, `counterfactual/c7-video-edit/cap-0.95/`): the editor's app latency P99 is 4,755,986.34, down 3,334,669.68 — the predicted direction, past the floor. The replay with nothing moved reproduces the run's trace hash and its P99. Under 0.95 the cap parks 25 times, each on a batch-class task while a non-batch task is runnable, and the 9,523 rows recompute equal to the counterfactual's records.
+
+**Class: property.** Every program follows its reference; as on `c7-dev`, the row's floor cap reaches the editor's burst tails, which B1 puts in the batch class, while the upgrade's short bursts keep it out.

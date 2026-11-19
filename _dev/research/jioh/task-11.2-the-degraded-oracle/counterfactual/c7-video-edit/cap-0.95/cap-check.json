@@ -1,0 +1,32 @@
+{
+ "workload_id": "c7-video-edit",
+ "run": "cap-0.95",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 25,
+  "parked_task_batch": 25,
+  "nonbatch_runnable": 25,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "ceiling": {
+  "capped_us": 5822806.0,
+  "in_class_us": 2624301.0,
+  "share": 0.4506935316065828,
+  "bound_us": 5541665.7,
+  "replayed_min_allow_us": 0.0,
+  "within": true
+ },
+ "latency": {
+  "metric": "app_latency",
+  "task": "editor",
+  "rows_recomputed": 9523,
+  "rows_recorded": 9523,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 4755986.34,
+  "p50_us": 2150716.0
+ },
+ "ok": true
+}

@@ -1,0 +1,23 @@
+{
+ "workload_id": "c7-video-edit",
+ "name": "replay",
+ "sets": [],
+ "term": {
+  "entity": "editor",
+  "metric": "app_latency",
+  "aggregate": "p99",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "8090656.020000",
+ "trace_sha256": "f18a9deac11c2d3fcf3c1ac98df8b425becf2f937d19bf939cb8c0807de93fdb",
+ "base_trace_rerun_sha256": "f18a9deac11c2d3fcf3c1ac98df8b425becf2f937d19bf939cb8c0807de93fdb",
+ "trace_equal_base": true,
+ "counterfactual": [
+  "8090656.020000000000"
+ ],
+ "records_messages": [],
+ "moved_by": 0.0
+}

@@ -18,7 +18,9 @@
   "replayed_min_allow_us": 0.0,
   "within": true
  },
- "input_latency": {
+ "latency": {
+  "metric": "input_latency",
+  "task": "editor",
   "rows_recomputed": 49,
   "rows_recorded": 49,
   "equal": true,

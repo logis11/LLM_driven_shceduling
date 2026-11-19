@@ -204,33 +204,27 @@ def main():
             k = next(i for i, x in enumerate(wakes[ch]) if x == td and i not in used)
             used.add(k)
             is_dropped.add((ch, k))
-    ready = [e["t"] for e in lines if e["event"] == "ready" and e["task"] == task and e.get("cause") == "wake"]
-    occupancy, s0 = [], None
+    # each ready(cause = wake) line's service start, in trace order: the line's own time when the task is on the
+    # lane at the line (a zero wait, or a line inside its occupancy), else the task's next run_start
+    ready, pending, on_lane = [], [], False
     for e in lines:
         if e.get("task") != task:
             continue
-        if e["event"] == "run_start":
-            s0 = e["t"]
+        if e["event"] == "ready" and e.get("cause") == "wake":
+            ready.append(e["t"] if on_lane else None)
+            if not on_lane:
+                pending.append(len(ready) - 1)
+        elif e["event"] == "run_start":
+            on_lane = True
+            for k in pending:
+                ready[k] = e["t"]
+            pending = []
         elif e["event"] == "run_end":
-            occupancy.append((s0, e["t"]))
-            s0 = None
+            on_lane = False
         elif e["event"] == "task_end":
             end = e["t"]
-    if s0 is not None:
-        occupancy.append((s0, t_end + 1))
     end = min(end if end is not None else t_end, t_end, arrive[task].get("depart") or t_end)
-    starts = sorted(a for a, _ in occupancy)
 
-    import bisect
-
-    def service_start(r):
-        i = bisect.bisect_right(starts, r) - 1           # the occupancy holding r, if any
-        if i >= 0 and occupancy_sorted[i][0] <= r < occupancy_sorted[i][1]:
-            return r
-        j = bisect.bisect_left(starts, r)
-        return starts[j] if j < len(starts) else None
-
-    occupancy_sorted = sorted(occupancy)
     served = {}                                          # (channel, k) -> service start, or None
     k_by_ch = defaultdict(int)
     ri = 0
@@ -244,7 +238,7 @@ def main():
             continue
         if ri >= len(ready):
             break
-        served[(ch, k)] = service_start(ready[ri])
+        served[(ch, k)] = ready[ri]
         ri += 1
     kinds = ("input",) if metric == "input_latency" else ("timer", "event")
     mine = []
