@@ -61,7 +61,7 @@ Before each counterfactual run, the case table records the knob, its new value a
 
 ### 6. The rerun
 
-After the last defect fix, the criterion's 1,938 runs — the 19 judging files, each under fixed, oracle and 100 random seeds, at the primary — are rerun once on the fixed programs. A judging file's runs change when any trace hash or records hash differs from the RQ0 run's hash manifest (`harness/experiments/rq0-gate/runs.sha256.csv`). The picks are taken from the rerun's scores under the fixed scorer.
+After the last defect fix, the criterion's 1,938 runs — the 19 judging files, each under fixed, oracle and 100 random seeds, at the primary — are rerun once on the fixed programs. A judging file's runs change when any run's trace, its header line left out, or its records, their `sim` column left out, differ from the RQ0 run's — the version stamp the two carry left out of the comparison. The picks are taken from the rerun's scores under the fixed scorer.
 
 ### 7. New and vanished cases
 
