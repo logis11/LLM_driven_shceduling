@@ -3,9 +3,9 @@
 
     python3 rerun_compare.py [--rerun runs/rq0-gate-rerun] [--run runs/rq0-gate] [--workers 4]
 
-Decision 6: every run of the rerun, its trace read line by line against the RQ0 run's with the header line — the
-version stamp — left out, and its records with their `sim` column left out; a judging file's runs change when any
-of them differs. Decision 7: the rerun's term rows at the primary boot default under the primary table on which
+Decision 6: every run of the rerun on a judging file (the RQ0 gate spec's `files.judging`), its trace read line by line against the RQ0 run's with the header line — the
+version stamp — left out, and its records with their `sim` column and their `source_sha256` column (the SHA-256 of
+the trace file, its header line in it) left out; a judging file's runs change when any of them differs. Decision 7: the rerun's term rows at the primary boot default under the primary table on which
 the oracle is worse than fixed by the floor or more (`oracle_worse`), against the RQ0 run's post hoc reading's
 (`runs/rq0-gate/post-hoc/scores.csv`): a new case is one the rerun shows and the RQ0 run did not, a vanished one
 the reverse. Writes `rerun-compare.json` beside this script."""
@@ -18,8 +18,11 @@ import pathlib
 import sys
 from multiprocessing import Pool
 
+import yaml
+
 REPO = pathlib.Path(__file__).resolve().parents[4]
 TERM = ("entity", "metric", "aggregate", "cause", "channel", "window_start_us", "window_end_us")
+STAMP = ("sim", "source_sha256")   # the version, and the hash of the trace whose header carries it
 
 
 def same_trace(a, b):
@@ -37,7 +40,7 @@ def same_trace(a, b):
 def records_rows(path):
     with gzip.open(path, "rt", newline="") as f:
         r = csv.DictReader(f)
-        cols = [c for c in r.fieldnames if c != "sim"]
+        cols = [c for c in r.fieldnames if c not in STAMP]
         return [tuple(row[c] for c in cols) for row in r]
 
 
@@ -68,7 +71,7 @@ def main():
     ap.add_argument("--workers", type=int, default=4)
     args = ap.parse_args()
     rerun_dir, run_dir = pathlib.Path(args.rerun), pathlib.Path(args.run)
-    judging = sorted(d.name for d in rerun_dir.iterdir() if d.is_dir())
+    judging = sorted(yaml.safe_load((REPO / "harness" / "experiments" / "rq0-gate.yaml").read_text())["files"]["judging"])
     jobs = [(rerun_dir, run_dir, w, r.name) for w in judging for r in sorted((rerun_dir / w).iterdir()) if r.is_dir()]
     with Pool(args.workers) as pool:
         rows = pool.map(one, jobs, chunksize=4)

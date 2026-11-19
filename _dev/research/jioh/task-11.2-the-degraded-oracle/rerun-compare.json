@@ -1,0 +1,117 @@
+{
+ "runs": 1938,
+ "files": 19,
+ "changed_files": [
+  "c1-compile",
+  "c7-compile"
+ ],
+ "per_file": {
+  "c1-compile": {
+   "runs": 102,
+   "changed": 101,
+   "changed_conditions": [
+    "oracle",
+    "random"
+   ]
+  },
+  "c1-ml-train": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c1-render": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c1-transcode": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c2-p1a": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c2-p2a": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c2-p2b": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c2-p3a": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c7-browsing": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c7-compile": {
+   "runs": 102,
+   "changed": 101,
+   "changed_conditions": [
+    "oracle",
+    "random"
+   ]
+  },
+  "c7-dev": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c7-gaming": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c7-meeting": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c7-ml-train": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c7-office": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c7-photo": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c7-render": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c7-transcode": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  },
+  "c7-video-edit": {
+   "runs": 102,
+   "changed": 0,
+   "changed_conditions": []
+  }
+ },
+ "cases_at_primary": {
+  "rq0_run": 9,
+  "rerun": 9,
+  "new": [],
+  "vanished": []
+ }
+}
