@@ -1,0 +1,30 @@
+{
+ "workload_id": "c7-dev",
+ "run": "oracle~focus",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 1211,
+  "parked_task_batch": 1211,
+  "nonbatch_runnable": 1211,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "ceiling": {
+  "capped_us": 3059550.0,
+  "in_class_us": 101326.0,
+  "share": 0.033117942181039695,
+  "bound_us": 162977.5,
+  "replayed_min_allow_us": 0.0,
+  "within": true
+ },
+ "input_latency": {
+  "rows_recomputed": 49,
+  "rows_recorded": 49,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 5600806.08,
+  "p50_us": 3005178.0
+ },
+ "ok": true
+}
