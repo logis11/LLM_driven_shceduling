@@ -1,0 +1,24 @@
+{
+ "workload_id": "c7-compile",
+ "name": "replay",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [],
+ "term": {
+  "entity": "editor",
+  "metric": "input_latency",
+  "aggregate": "p99",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "87359931.000000",
+ "trace_sha256": "bc81990c229e4e0bc1ad57c6d7ffccd53e187adcf842ed734d456f2aac5b4921",
+ "base_trace_rerun_sha256": "bc81990c229e4e0bc1ad57c6d7ffccd53e187adcf842ed734d456f2aac5b4921",
+ "trace_equal_base": true,
+ "counterfactual": [
+  "87359931.000000000000"
+ ],
+ "records_messages": [],
+ "moved_by": 0.0
+}

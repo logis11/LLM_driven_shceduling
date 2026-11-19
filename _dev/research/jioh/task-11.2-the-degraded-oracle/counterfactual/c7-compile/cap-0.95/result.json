@@ -1,0 +1,26 @@
+{
+ "workload_id": "c7-compile",
+ "name": "cap-0.95",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [
+  "1.batch_bandwidth_cap=0.95"
+ ],
+ "term": {
+  "entity": "editor",
+  "metric": "input_latency",
+  "aggregate": "p99",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "87359931.000000",
+ "trace_sha256": "fca666e0644086df3b518bb82db0d25ea11a399dec9b0c94862984c7d8623b8b",
+ "base_trace_rerun_sha256": "bc81990c229e4e0bc1ad57c6d7ffccd53e187adcf842ed734d456f2aac5b4921",
+ "trace_equal_base": false,
+ "counterfactual": [
+  "79761519.400000000000"
+ ],
+ "records_messages": [],
+ "moved_by": -7598411.599999994
+}

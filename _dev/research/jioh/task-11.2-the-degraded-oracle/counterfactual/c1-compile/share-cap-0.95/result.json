@@ -1,0 +1,29 @@
+{
+ "workload_id": "c1-compile",
+ "name": "share-cap-0.95",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [
+  "1.batch_bandwidth_cap=0.95",
+  "1.params.batch_share=0.95",
+  "2.batch_bandwidth_cap=0.95",
+  "2.params.batch_share=0.95"
+ ],
+ "term": {
+  "entity": "editor",
+  "metric": "input_latency",
+  "aggregate": "p99",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "361025331.760000",
+ "trace_sha256": "0ea4b8bbe106bd67527924d4507d8aec2e7943b517fe594404cd0fcf84981885",
+ "base_trace_rerun_sha256": "c455335ecce9d6f3166a6e67323b69e28b93e8a1866cf2aea3bf8a30b2a1e0ec",
+ "trace_equal_base": false,
+ "counterfactual": [
+  "358178804.330000000000"
+ ],
+ "records_messages": [],
+ "moved_by": -2846527.430000007
+}
