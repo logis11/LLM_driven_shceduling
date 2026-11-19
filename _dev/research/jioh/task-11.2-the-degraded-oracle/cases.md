@@ -14,11 +14,11 @@ The cases of the 11.2 spec (`_dev/docs/spec/jioh/task-11.2-the-degraded-oracle.m
 | 8 | `c7-ml-train` | editor, input latency P99 | primary | 7,194,480.40 | 8,020,875.92 | property | [8](#8-c7-ml-train) | |
 | 9 | `c7-video-edit` | editor, app latency P99 | primary | 4,750,232.68 | 8,090,656.02 | property | [9](#9-c7-video-edit) | |
 | 10 | `c1-transcode` | video-editor, app latency P99 | 12 ms boot default, `prior` | 365,038.19 | 430,531.08 | unexplained | | |
-| 11 | `c2-p1a` | editor, input latency P99 | 7 ms boot default, `prior` | 7,512,775.33 | 8,227,009.39 | unexplained | | |
-| 12 | `c2-p3a` | editor, app latency P99 | 7 ms boot default, `prior` | 38,159.57 | 42,435.19 | unexplained | | |
-| 13 | `c7-photo` | photo-editor, app latency P99 | 30 ms boot default, `prior` | 2,968,927.88 | 2,978,927.88 | unexplained | | |
-| 14 | `c7-render` | editor, app latency P99 | 7 ms boot default, `prior` | 3,360,537.49 | 5,750,451.47 | unexplained | | |
-| 15 | `c7-transcode` | video-editor, app latency P99 | primary boot default, `prior@floor-0.333` | 11,127,962 | 13,973,877 | unexplained | | |
+| 11 | `c2-p1a` | editor, input latency P99 | 7 ms boot default, `prior` | 7,512,775.33 | 8,227,009.39 | unexplained | [11](#11-c2-p1a) | |
+| 12 | `c2-p3a` | editor, app latency P99 | 7 ms boot default, `prior` | 38,159.57 | 42,435.19 | unexplained | [12](#12-c2-p3a) | |
+| 13 | `c7-photo` | photo-editor, app latency P99 | 30 ms boot default, `prior` | 2,968,927.88 | 2,978,927.88 | unexplained | [13](#13-c7-photo) | |
+| 14 | `c7-render` | editor, app latency P99 | 7 ms boot default, `prior` | 3,360,537.49 | 5,750,451.47 | unexplained | [14](#14-c7-render) | |
+| 15 | `c7-transcode` | video-editor, app latency P99 | primary boot default, `prior@floor-0.333` | 11,127,962 | 13,973,877 | unexplained | [15](#15-c7-transcode) | |
 
 ## 7. `c7-dev`
 
@@ -173,3 +173,37 @@ Before the fix, on a copy of the simulator with the reset added (the same change
 **Result** (2026-11-19, `counterfactual/c2-p3a/share-cap-0.95/`): the bulk task's turnaround is 19,484,568, down 3,634,931 — the predicted direction, past the floor. The replay with nothing moved reproduces the run's trace and its turnaround.
 
 **Class: property.** Every program follows its reference; the row's share and cap, set by the table's rule from the batch term's weight, give the foreground the lane first — its term gains — and the render's turnaround carries the cost.
+
+## The cases read at other combinations
+
+In cases 10 to 14 the oracle run is the primary one; the case is the boot MLFQ at another slice serving the term better than the oracle's row, which sits at the boot values by the table's header (the 10 ms slice and quantum). Fixed's term is jagged across the sweep's slices (`runs/rq0-gate/post-hoc/scores.csv`): `c7-render`'s editor 5.75 s at 10 ms and 30 ms, 3.42 s at most others; `c2-p1a`'s 12.95 s at 10 and 30 ms, 7.5–7.9 s at most others. Under OSTEP's rules at three queues and a 100 ms boost (`ostep` ch. 8, Rules 4 and 5; `simulator/src/sim.cpp`, `Mlfq`), two CPU-bound tasks each take up to slice × (1 + 2 + 4) of every boost interval: at 7 ms the two allotments, 49 ms each, fit in the interval and split it evenly; at 10 ms they do not, and the task leading after the boost takes 70 ms to the other's 30. LOTTERY never preempts the holder before its quantum ends (`Lottery::preempts`), so a woken foreground task waits out the holder's quantum before the next draw. In case 15 the oracle runs under the cap band's 0.333 table. Each counterfactual moves the oracle row's knob to the value the fixed run of the combination used, the 11.2 grill's choice.
+
+### 11. `c2-p1a`
+
+The term reads the window [60,000,000, 99,435,000), the `ml-train` / `background_wanted: true` segment: the oracle's entry 2, LOTTERY, `batch_share` and cap 0.333, the 10 ms quantum. In the window the editor's input latency P99 is 12,953.19 ms under fixed at 10 ms, 7,512.78 at 7 ms and 8,227.01 under the oracle; the editor is delivered 11.33 s of CPU in the window at 10 ms, 15.98 at 7 ms and 15.59 under the oracle. The boot MLFQ at 10 ms splits the lane 0.30 / 0.70 with the hog inside a boost interval and at 7 ms evenly; the oracle's LOTTERY row delivers the editor nearly the 7 ms share, and its keystrokes wait out the hog's quantum at each wake.
+
+**Counterfactual** (recorded before the run): the oracle on `c2-p1a` with entry 2's `timeslice_us` moved from 10,000 to 7,000, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the editor's input latency P99 in the window moves down from 8,227,009.39 by at least the 1,000 µs floor.
+
+### 12. `c2-p3a`
+
+The term reads the window [60,000,000, 326,000,000), the `render` / `background_wanted: true` segment: the oracle's entry 2, LOTTERY, `batch_share` and cap 0.333, the 10 ms quantum. In the window the editor's app latency P99 is 45.13 ms under fixed at 10 ms, 38.16 at 7 ms and 42.44 under the oracle, its CPU 84.44, 84.29 and 84.81 s — the editor's work is light, and the tail is the wait at its wakes: the boot MLFQ at 7 ms preempts with a shorter slice, the oracle's LOTTERY row makes a woken editor wait out the render's 10 ms quantum.
+
+**Counterfactual** (recorded before the run): the oracle on `c2-p3a` with entry 2's `timeslice_us` moved from 10,000 to 7,000, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the editor's app latency P99 in the window moves down from 42,435.19 by at least the 1,000 µs floor.
+
+### 13. `c7-photo`
+
+Oracle: the `photo` / `background_wanted: false` row, the boot MLFQ with cap 0.05, for the whole window. The photo editor's app latency P99 over its 193 wakes is 2,978,927.88 under fixed at 10 ms and under the oracle, 2,968,927.88 at 30 ms — one 10 ms slice less; its CPU 2.55 s under all three. The P99 sits at the 191st of the 193 wakes, the wake queued longest behind the upgrade, whose turn before it is one slice of the running config.
+
+**Counterfactual** (recorded before the run): the oracle on `c7-photo` with entry 1's `timeslice_us` moved from 10,000 to 30,000, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the photo editor's app latency P99 moves down from 2,978,927.88 by at least the 1,000 µs floor.
+
+### 14. `c7-render`
+
+Oracle: the `render` / `background_wanted: false` row, the boot MLFQ with cap 0.05, for the whole window. The editor's app latency P99 is 5,750.29 ms under fixed at 10 ms, 3,360.54 at 7 ms and 5,750.45 under the oracle; its CPU 4.02, 5.67 and 4.25 s. Beside the CPU-bound render the editor is in the batch class through its long bursts: at 10 ms the boost interval splits 0.30 / 0.70, at 7 ms evenly, and the oracle's cap, the row's one difference from fixed at 10 ms, barely moves it.
+
+**Counterfactual** (recorded before the run): the oracle on `c7-render` with entry 1's `timeslice_us` moved from 10,000 to 7,000, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the editor's app latency P99 moves down from 5,750,451.47 by at least the 1,000 µs floor.
+
+### 15. `c7-transcode`
+
+The cap band's 0.333 table moves the `transcode` / `background_wanted: false` row's cap from 0.05 to 0.333, nothing else (`daemon/driver-table/prior-floor-0.333.yaml`). The video editor's app latency P99 under the oracle is 1,500.32 ms at 0.05 and 0.2, 13,973.88 at 0.333 and 2,715.92 at 0.5, against 11,127.96 under fixed; its CPU 908.37 s at 0.05, 839.02 at 0.333, 699.55 under fixed. Its 0.333 oracle's schedule differs from the primary oracle's in that cap alone, so this counterfactual's schedule is the primary oracle's.
+
+**Counterfactual** (recorded before the run): the 0.333 table's oracle on `c7-transcode` with entry 1's `batch_bandwidth_cap` moved from 0.333 to 0.05, everything else as that oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the video editor's app latency P99 moves down from 13,973,877 by at least the 1,000 µs floor.
