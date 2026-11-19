@@ -69,7 +69,7 @@ A term the rerun shows oracle worse than fixed by the floor or more at the prima
 
 ### 8. The record
 
-`_dev/research/jioh/task-11.2-the-degraded-oracle/` holds the case table — one row per case: the file, the term, the combination, the class, the evidence and the fixing commit — with the trace readings, the fixtures' outputs, the counterfactual runs and the reruns' hash comparisons. Each fix is recorded where its program records changes: the harness changelog (`harness/CHANGELOG.md`); the simulator's steps and its version string; the daemon's version string; the RQ0 gate spec re-pinned. If any case is a defect, the RQ0 run record (`docs/rq0-run-record.md`) gains a dated correction under "Corrections". One dated memo goes to the owners whose programs had a fix, after the fixes land.
+`_dev/research/jioh/task-11.2-the-degraded-oracle/` holds the case table — one row per case: the file, the term, the combination, the class, the evidence and the fixing commit — with the trace readings, the fixtures' outputs, the counterfactual runs and the reruns' hash comparisons. Each fix is recorded where its program records changes: the harness changelog (`harness/CHANGELOG.md`); the simulator's steps and its version string; the daemon's version string. The RQ0 gate spec keeps the first run's pins; the rerun runs on a throwaway copy of it, linted and never committed, that pins the fixed versions, and Phase 12's second RQ0 gate spec pins them. If any case is a defect, the RQ0 run record (`docs/rq0-run-record.md`) gains a dated correction under "Corrections". One dated memo goes to the owners whose programs had a fix, after the fixes land.
 
 ### 9. The RQ0 run's outputs at the end
 
