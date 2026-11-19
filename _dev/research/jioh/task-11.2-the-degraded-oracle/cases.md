@@ -68,7 +68,7 @@ The three files below pass every check of `cap_check.py` — every park on a bat
 
 **Counterfactual** (recorded before the run): the oracle on `c1-compile` with the row's `batch_share` and `batch_bandwidth_cap` moved together from 0.5 to 0.95 in the schedule's entries 1 and 2, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source): the batch class, the editor in it, draws at 0.95 and is parked less. Predicted: the editor's input latency P99 moves down from 361,025,331.76 by at least the 1,000 µs floor.
 
-**Result** (2026-11-19, `counterfactual/c1-compile/share-cap-0.95/`): the editor's input latency P99 is 358,178,804.33, down 2,846,527.43 — the predicted direction, past the floor. It is 2.85 s of the 125.05 s by which the oracle trails fixed: the rest lies with the algorithm, LOTTERY's uniform draw inside the batch class against MLFQ's boost, which under fixed hands the editor a top-queue turn ahead of the compile jobs every 100 ms. The replay with nothing moved reproduces the run's trace and its P99.
+**Result** (2026-11-19, `counterfactual/c1-compile/share-cap-0.95/`): the editor's input latency P99 is 358,178,804.33, down 2,846,527.43 — the predicted direction, past the floor. It is 2.85 s of the 125.05 s by which the oracle trails fixed; this reading does not attribute the rest. The replay with nothing moved reproduces the run's trace and its P99.
 
 **Class: property.** Every program follows its reference — with the simulator's fork-slot rule as it was, the defect stage AF fixed, which moves this P99 by 2.1 s (above); the row treats the editor, in the batch class through the build, as the build's batch work.
 
