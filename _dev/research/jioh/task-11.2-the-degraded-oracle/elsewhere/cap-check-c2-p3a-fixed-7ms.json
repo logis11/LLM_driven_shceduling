@@ -1,0 +1,33 @@
+{
+ "workload_id": "c2-p3a",
+ "run": "fixed+ostep-slice-7000us~focus",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 0,
+  "parked_task_batch": 0,
+  "nonbatch_runnable": 0,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "fork_slot_waits": 0,
+ "ceiling": {
+  "capped_us": 0.0,
+  "in_class_us": 0.0,
+  "share": null,
+  "bound_us": 0.0,
+  "replayed_min_allow_us": 0.0,
+  "within": true
+ },
+ "latency": {
+  "metric": "app_latency",
+  "task": "editor",
+  "rows_recomputed": 73832,
+  "rows_recorded": 73832,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 816942.94,
+  "p50_us": 0.0
+ },
+ "ok": true
+}

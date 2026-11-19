@@ -1,0 +1,33 @@
+{
+ "workload_id": "c7-render",
+ "run": "oracle~focus",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 283,
+  "parked_task_batch": 283,
+  "nonbatch_runnable": 283,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "fork_slot_waits": 0,
+ "ceiling": {
+  "capped_us": 1492327.0,
+  "in_class_us": 44354.0,
+  "share": 0.02972136803797023,
+  "bound_us": 84616.35,
+  "replayed_min_allow_us": 0.0,
+  "within": true
+ },
+ "latency": {
+  "metric": "app_latency",
+  "task": "editor",
+  "rows_recomputed": 6452,
+  "rows_recorded": 6452,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 5750451.47,
+  "p50_us": 2569865.0
+ },
+ "ok": true
+}

@@ -14,10 +14,10 @@ The cases of the 11.2 spec (`_dev/docs/spec/jioh/task-11.2-the-degraded-oracle.m
 | 8 | `c7-ml-train` | editor, input latency P99 | primary | 7,194,480.40 | 8,020,875.92 | property | [8](#8-c7-ml-train) | |
 | 9 | `c7-video-edit` | editor, app latency P99 | primary | 4,750,232.68 | 8,090,656.02 | property | [9](#9-c7-video-edit) | |
 | 10 | `c1-transcode` | video-editor, app latency P99 | 12 ms boot default, `prior` | 365,038.19 | 430,531.08 | unexplained | | |
-| 11 | `c2-p1a` | editor, input latency P99 | 7 ms boot default, `prior` | 7,512,775.33 | 8,227,009.39 | unexplained | [11](#11-c2-p1a) | |
-| 12 | `c2-p3a` | editor, app latency P99 | 7 ms boot default, `prior` | 38,159.57 | 42,435.19 | unexplained | [12](#12-c2-p3a) | |
-| 13 | `c7-photo` | photo-editor, app latency P99 | 30 ms boot default, `prior` | 2,968,927.88 | 2,978,927.88 | unexplained | [13](#13-c7-photo) | |
-| 14 | `c7-render` | editor, app latency P99 | 7 ms boot default, `prior` | 3,360,537.49 | 5,750,451.47 | unexplained | [14](#14-c7-render) | |
+| 11 | `c2-p1a` | editor, input latency P99 | 7 ms boot default, `prior` | 7,512,775.33 | 8,227,009.39 | property | [11](#11-c2-p1a) | |
+| 12 | `c2-p3a` | editor, app latency P99 | 7 ms boot default, `prior` | 38,159.57 | 42,435.19 | property | [12](#12-c2-p3a) | |
+| 13 | `c7-photo` | photo-editor, app latency P99 | 30 ms boot default, `prior` | 2,968,927.88 | 2,978,927.88 | property | [13](#13-c7-photo) | |
+| 14 | `c7-render` | editor, app latency P99 | 7 ms boot default, `prior` | 3,360,537.49 | 5,750,451.47 | property | [14](#14-c7-render) | |
 | 15 | `c7-transcode` | video-editor, app latency P99 | primary boot default, `prior@floor-0.333` | 11,127,962 | 13,973,877 | unexplained | [15](#15-c7-transcode) | |
 
 ## 7. `c7-dev`
@@ -184,23 +184,51 @@ The term reads the window [60,000,000, 99,435,000), the `ml-train` / `background
 
 **Counterfactual** (recorded before the run): the oracle on `c2-p1a` with entry 2's `timeslice_us` moved from 10,000 to 7,000, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the editor's input latency P99 in the window moves down from 8,227,009.39 by at least the 1,000 µs floor.
 
+**Programs on the path** (`elsewhere/cap-check-c2-p1a-*.json`): the oracle run — 654 parks, each on a batch-class task while a task not in the batch class and not idle is runnable, no parked task running, the batch class's CPU while capped a share of 0.073 within the caps plus one slice; the 525 `input_latency` rows recomputed equal to the records. The fixed run at the combination (`fixed+ostep-slice-7000us~focus`) — no cap, the 525 rows recomputed equal. The daemon's schedule is the rows' algorithms, params and caps for the ground truth's segments, and the rows follow the table's rules: the boot params, the cap by the header's rule.
+
+**Result** (2026-11-19, `counterfactual/c2-p1a/slice-7ms/`): the term is 7,744,910.11, down 482,099.28 — the predicted direction, past the floor. The replay with nothing moved reproduces the run's trace and the scored value.
+
+**Class: property.** Every program follows its reference; the row's 10 ms quantum, which a woken editor waits out at each keystroke beside the hog, sets the window's tail.
+
+
 ### 12. `c2-p3a`
 
-The term reads the window [60,000,000, 326,000,000), the `render` / `background_wanted: true` segment: the oracle's entry 2, LOTTERY, `batch_share` and cap 0.333, the 10 ms quantum. In the window the editor's app latency P99 is 45.13 ms under fixed at 10 ms, 38.16 at 7 ms and 42.44 under the oracle, its CPU 84.44, 84.29 and 84.81 s — the editor's work is light, and the tail is the wait at its wakes: the boot MLFQ at 7 ms preempts with a shorter slice, the oracle's LOTTERY row makes a woken editor wait out the render's 10 ms quantum.
+The term reads the window [60,000,000, 326,000,000), the `render` / `background_wanted: true` segment: the oracle's entry 2, LOTTERY, `batch_share` and cap 0.333, the 10 ms quantum. In the window the editor's app latency P99 is 45.13 ms under fixed at 10 ms, 38.16 at 7 ms and 42.44 under the oracle, its CPU 84.44, 84.29 and 84.81 s — the editor's work is light and the term is the wait at its wakes; the oracle's LOTTERY row never preempts, so a woken editor waits out the holder's quantum (`Lottery::preempts`).
 
 **Counterfactual** (recorded before the run): the oracle on `c2-p3a` with entry 2's `timeslice_us` moved from 10,000 to 7,000, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the editor's app latency P99 in the window moves down from 42,435.19 by at least the 1,000 µs floor.
 
+**Programs on the path** (`elsewhere/cap-check-c2-p3a-*.json`): the oracle run — 1,737 parks, each on a batch-class task while a task not in the batch class and not idle is runnable, no parked task running, the batch class's CPU while capped a share of 0.041 within the caps plus one slice; the 73,832 `app_latency` rows recomputed equal to the records. The fixed run at the combination (`fixed+ostep-slice-7000us~focus`) — no cap, the 73,832 rows recomputed equal. The daemon's schedule is the rows' algorithms, params and caps for the ground truth's segments, and the rows follow the table's rules: the boot params, the cap by the header's rule.
+
+**Result** (2026-11-19, `counterfactual/c2-p3a/slice-7ms/`): the term is 40,209.97, down 2,225.22 — the predicted direction, past the floor. The replay with nothing moved reproduces the run's trace and the scored value.
+
+**Class: property.** Every program follows its reference; the row's 10 ms quantum, which a woken editor waits out beside the render, sets the window's tail.
+
+
 ### 13. `c7-photo`
 
-Oracle: the `photo` / `background_wanted: false` row, the boot MLFQ with cap 0.05, for the whole window. The photo editor's app latency P99 over its 193 wakes is 2,978,927.88 under fixed at 10 ms and under the oracle, 2,968,927.88 at 30 ms — one 10 ms slice less; its CPU 2.55 s under all three. The P99 sits at the 191st of the 193 wakes, the wake queued longest behind the upgrade, whose turn before it is one slice of the running config.
+Oracle: the `photo` / `background_wanted: false` row, the boot MLFQ with cap 0.05, for the whole window. The photo editor's app latency P99 over its 193 wakes is 2,978,927.88 under fixed at 10 ms and under the oracle, 2,968,927.88 at 30 ms — one 10 ms slice less; its CPU 2.55 s under all three. The P99 falls between the 191st and 192nd of the 193 wakes: wakes from 13.5 to 14.7 s queued behind the photo editor's own burst from 13.4 s, which shares the lane slice by slice with the CPU-bound upgrade; the burst reaches the WAITs that serve them at 16.74 s under fixed at 10 ms and 10 ms sooner at 30 ms (the four longest rows each 10,000 shorter).
 
 **Counterfactual** (recorded before the run): the oracle on `c7-photo` with entry 1's `timeslice_us` moved from 10,000 to 30,000, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the photo editor's app latency P99 moves down from 2,978,927.88 by at least the 1,000 µs floor.
 
+**Programs on the path** (`elsewhere/cap-check-c7-photo-*.json`): the oracle run — 17 parks, each on a batch-class task while a task not in the batch class and not idle is runnable, no parked task running, the batch class's CPU while capped a share of 0.004 within the caps plus one slice; the 193 `app_latency` rows recomputed equal to the records. The fixed run at the combination (`fixed+ostep-slice-30000us~focus`) — no cap, the 193 rows recomputed equal. The daemon's schedule is the rows' algorithms, params and caps for the ground truth's segments, and the rows follow the table's rules: the boot params, the cap by the header's rule.
+
+**Result** (2026-11-19, `counterfactual/c7-photo/slice-30ms/`): the term is 2,968,927.88, down 10,000 — the predicted direction, past the floor. The replay with nothing moved reproduces the run's trace and the scored value.
+
+**Class: property.** Every program follows its reference; the row's boot slice sets how fast the photo editor's burst moves against the upgrade, and the queued wakes wait for its end.
+
+
 ### 14. `c7-render`
 
-Oracle: the `render` / `background_wanted: false` row, the boot MLFQ with cap 0.05, for the whole window. The editor's app latency P99 is 5,750.29 ms under fixed at 10 ms, 3,360.54 at 7 ms and 5,750.45 under the oracle; its CPU 4.02, 5.67 and 4.25 s. Beside the CPU-bound render the editor is in the batch class through its long bursts: at 10 ms the boost interval splits 0.30 / 0.70, at 7 ms evenly, and the oracle's cap, the row's one difference from fixed at 10 ms, barely moves it.
+Oracle: the `render` / `background_wanted: false` row, the boot MLFQ with cap 0.05, for the whole window. The editor's app latency P99 is 5,750.29 ms under fixed at 10 ms, 3,360.54 at 7 ms and 5,750.45 under the oracle; its CPU 4.02, 5.67 and 4.25 s. Beside the CPU-bound render most of the editor's CPU is in long bursts, in the batch class by B1 — 3.06 s of 4.02 under fixed at 10 ms, 4.88 of 5.67 at 7 ms, 3.06 of 4.25 under the oracle — which share the lane with the render by the boost-interval split above; the oracle's cap, the row's one difference from fixed at 10 ms, moves the editor's CPU by 0.23 s.
 
 **Counterfactual** (recorded before the run): the oracle on `c7-render` with entry 1's `timeslice_us` moved from 10,000 to 7,000, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the editor's app latency P99 moves down from 5,750,451.47 by at least the 1,000 µs floor.
+
+**Programs on the path** (`elsewhere/cap-check-c7-render-*.json`): the oracle run — 283 parks, each on a batch-class task while a task not in the batch class and not idle is runnable, no parked task running, the batch class's CPU while capped a share of 0.030 within the caps plus one slice; the 6,452 `app_latency` rows recomputed equal to the records. The fixed run at the combination (`fixed+ostep-slice-7000us~focus`) — no cap, the 6,452 rows recomputed equal. The daemon's schedule is the rows' algorithms, params and caps for the ground truth's segments, and the rows follow the table's rules: the boot params, the cap by the header's rule.
+
+**Result** (2026-11-19, `counterfactual/c7-render/slice-7ms/`): the term is 3,323,032.74, down 2,427,418.73 — the predicted direction, past the floor. The replay with nothing moved reproduces the run's trace and the scored value.
+
+**Class: property.** Every program follows its reference; the row's boot slice sets the editor's share of each boost interval beside the CPU-bound render.
+
 
 ### 15. `c7-transcode`
 

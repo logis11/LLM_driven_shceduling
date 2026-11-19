@@ -1,0 +1,26 @@
+{
+ "workload_id": "c7-photo",
+ "name": "slice-30ms",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [
+  "1.params.timeslice_us=30000"
+ ],
+ "term": {
+  "entity": "photo-editor",
+  "metric": "app_latency",
+  "aggregate": "p99",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "2978927.880000",
+ "trace_sha256": "2eb82bd759fa1343656afb1641e1cdf0af1991e6f414d68212fe8f2c3874ab01",
+ "base_trace_rerun_sha256": "2bb96fc4dc9083f1c42925d3b27539aa91a47438a8659df0cef670cea868a56f",
+ "trace_equal_base": false,
+ "counterfactual": [
+  "2968927.880000000000"
+ ],
+ "records_messages": [],
+ "moved_by": -10000.0
+}

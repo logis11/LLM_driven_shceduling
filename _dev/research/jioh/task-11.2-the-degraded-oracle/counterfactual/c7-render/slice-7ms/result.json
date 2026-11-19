@@ -1,0 +1,26 @@
+{
+ "workload_id": "c7-render",
+ "name": "slice-7ms",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [
+  "1.params.timeslice_us=7000"
+ ],
+ "term": {
+  "entity": "editor",
+  "metric": "app_latency",
+  "aggregate": "p99",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "5750451.470000",
+ "trace_sha256": "9b470aa7ea01319c1671117e2ef7a4064ce52e808cdd43e88e410c6991f8dfac",
+ "base_trace_rerun_sha256": "5372c06f3f705d42ddeb130835601ff670a018841f2259d5c0030d66c6c899eb",
+ "trace_equal_base": false,
+ "counterfactual": [
+  "3323032.740000000000"
+ ],
+ "records_messages": [],
+ "moved_by": -2427418.7299999995
+}

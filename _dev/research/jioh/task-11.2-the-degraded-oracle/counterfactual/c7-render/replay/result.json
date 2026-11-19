@@ -1,0 +1,24 @@
+{
+ "workload_id": "c7-render",
+ "name": "replay",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [],
+ "term": {
+  "entity": "editor",
+  "metric": "app_latency",
+  "aggregate": "p99",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "5750451.470000",
+ "trace_sha256": "5372c06f3f705d42ddeb130835601ff670a018841f2259d5c0030d66c6c899eb",
+ "base_trace_rerun_sha256": "5372c06f3f705d42ddeb130835601ff670a018841f2259d5c0030d66c6c899eb",
+ "trace_equal_base": true,
+ "counterfactual": [
+  "5750451.470000000000"
+ ],
+ "records_messages": [],
+ "moved_by": 0.0
+}

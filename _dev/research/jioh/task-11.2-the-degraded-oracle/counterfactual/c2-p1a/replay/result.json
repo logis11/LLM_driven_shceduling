@@ -1,0 +1,24 @@
+{
+ "workload_id": "c2-p1a",
+ "name": "replay",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [],
+ "term": {
+  "entity": "editor",
+  "metric": "input_latency",
+  "aggregate": "p99",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "60000000",
+  "window_end_us": "99435000"
+ },
+ "scored_oracle": "8227009.390000",
+ "trace_sha256": "bd596918af7446acf4f727b12989e714097aecae16963af77966579a7540fcee",
+ "base_trace_rerun_sha256": "bd596918af7446acf4f727b12989e714097aecae16963af77966579a7540fcee",
+ "trace_equal_base": true,
+ "counterfactual": [
+  "8227009.390000000000"
+ ],
+ "records_messages": [],
+ "moved_by": 0.0
+}

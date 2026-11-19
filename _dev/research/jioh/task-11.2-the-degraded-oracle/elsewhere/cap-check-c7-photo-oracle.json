@@ -1,0 +1,33 @@
+{
+ "workload_id": "c7-photo",
+ "run": "oracle~focus",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 17,
+  "parked_task_batch": 17,
+  "nonbatch_runnable": 17,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "fork_slot_waits": 0,
+ "ceiling": {
+  "capped_us": 2098809.0,
+  "in_class_us": 8117.0,
+  "share": 0.003867431481378248,
+  "bound_us": 114940.45,
+  "replayed_min_allow_us": 0.0,
+  "within": true
+ },
+ "latency": {
+  "metric": "app_latency",
+  "task": "photo-editor",
+  "rows_recomputed": 193,
+  "rows_recorded": 193,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 2978927.88,
+  "p50_us": 2.0
+ },
+ "ok": true
+}
