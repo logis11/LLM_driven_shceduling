@@ -11,7 +11,7 @@ The cases of the 11.2 spec (`_dev/docs/spec/jioh/task-11.2-the-degraded-oracle.m
 | 5 | `c2-p3a` | bulk, turnaround | primary | 22,482,188 | 23,119,499 | property | [5](#5-c2-p3a) | |
 | 6 | `c7-compile` | editor, input latency P99 | primary | 58,431,291 | 87,359,931 | unexplained | [6](#6-c7-compile) | |
 | 7 | `c7-dev` | editor, input latency P99 | primary | 1,750,097.40 | 5,600,806.08 | property | [7](#7-c7-dev) | |
-| 8 | `c7-ml-train` | editor, input latency P99 | primary | 7,194,480.40 | 8,020,875.92 | unexplained | [8](#8-c7-ml-train) | |
+| 8 | `c7-ml-train` | editor, input latency P99 | primary | 7,194,480.40 | 8,020,875.92 | property | [8](#8-c7-ml-train) | |
 | 9 | `c7-video-edit` | editor, app latency P99 | primary | 4,750,232.68 | 8,090,656.02 | property | [9](#9-c7-video-edit) | |
 | 10 | `c1-transcode` | video-editor, app latency P99 | 12 ms boot default, `prior` | 365,038.19 | 430,531.08 | unexplained | | |
 | 11 | `c2-p1a` | editor, input latency P99 | 7 ms boot default, `prior` | 7,512,775.33 | 8,227,009.39 | unexplained | | |
@@ -73,6 +73,10 @@ The three files below pass every check of `cap_check.py` — every park on a bat
 `cap-check-c7-ml-train.json`: 9,579 parks, all but 11 the hog's; share while capped 0.040; 1,753 rows equal, P99 8,020,875.92. The editor is delivered the same CPU as under fixed (187,667,633 against 186,923,275), and its keystrokes wait 143 ms less on average under the oracle. The P99 is set by one cluster near 1,013 s: under fixed the editor's burst from 996.86 s blocked once, at 1,003.57 s; under the oracle, its timing moved by the hog's earlier parks, it runs on to 1,024.05 s at a 0.30 share, and the keystrokes queued behind it wait about 2.1 s longer. Inside an editor burst both tasks are batch class and the cap is off; MLFQ splits the lane 0.30 / 0.70 between them, the task leading after each 100 ms boost taking 10 + 20 + 40 of its milliseconds.
 
 **Counterfactual** (recorded before the run): the oracle on `c7-ml-train` with the row's `boost_interval_us` moved from 100,000 to 20,000 in the schedule's entry 1, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source): after each boost both tasks run their 10 ms in the top queue, so inside an editor burst the editor's share is about 0.5 in place of 0.30. Predicted: the editor's input latency P99 moves down from 8,020,875.92 by at least the 1,000 µs floor. Beside it, reported and not predicted: the oracle with the row's `batch_bandwidth_cap` moved from 0.05 to 0.95 in entry 1 — the cap's parks are what moved the timing, and the trace gives no direction for the P99 under fewer of them.
+
+**Result** (2026-11-19): with the boost interval at 20,000 (`counterfactual/c7-ml-train/boost-20ms/`) the editor's input latency P99 is 2,249,295.68, down 5,771,580.24 — the predicted direction, past the floor. Reported beside it: with the cap at 0.95 (`counterfactual/c7-ml-train/cap-0.95/`) the P99 is 7,194,480.40, fixed's value to the last digit — with the cap's parks fewer, the cluster near 1,013 s meets the editor's burst as under fixed. The replay with nothing moved reproduces the run's trace and its P99.
+
+**Class: property.** Every program follows its reference; the row's floor cap parks the hog when the editor is out of the batch class, which shifts the timing of one long editor burst against the boost grid, and MLFQ's boost order at the boot params gives the editor 0.30 of the lane inside it — the P99 of the file's 1,753 keystrokes is set by the cluster queued behind that burst, while the keystrokes wait 143 ms less on average.
 
 ## The fork-slot wait and rule B1
 

@@ -1,0 +1,26 @@
+{
+ "workload_id": "c7-ml-train",
+ "name": "boost-20ms",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [
+  "1.params.boost_interval_us=20000"
+ ],
+ "term": {
+  "entity": "editor",
+  "metric": "input_latency",
+  "aggregate": "p99",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "8020875.920000",
+ "trace_sha256": "375f2584cf538b9b1b6a8303a47898580dcd58c676cb3cb16a229276d159bbfd",
+ "base_trace_rerun_sha256": "c15b2eda3a761ce3b170968aa5023e5ae3181db10689faaea9d31f76821108e5",
+ "trace_equal_base": false,
+ "counterfactual": [
+  "2249295.680000000000"
+ ],
+ "records_messages": [],
+ "moved_by": -5771580.24
+}

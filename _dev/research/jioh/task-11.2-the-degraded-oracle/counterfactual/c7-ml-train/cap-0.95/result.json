@@ -1,0 +1,26 @@
+{
+ "workload_id": "c7-ml-train",
+ "name": "cap-0.95",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [
+  "1.batch_bandwidth_cap=0.95"
+ ],
+ "term": {
+  "entity": "editor",
+  "metric": "input_latency",
+  "aggregate": "p99",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "8020875.920000",
+ "trace_sha256": "d76f9c9bc611256bb86868bd0533b2a815041d5b9aa6082662509c56d1bc7daa",
+ "base_trace_rerun_sha256": "c15b2eda3a761ce3b170968aa5023e5ae3181db10689faaea9d31f76821108e5",
+ "trace_equal_base": false,
+ "counterfactual": [
+  "7194480.400000000000"
+ ],
+ "records_messages": [],
+ "moved_by": -826395.5199999996
+}
