@@ -50,6 +50,8 @@ def main():
     ap.add_argument("--set", action="append", default=[], dest="sets")
     ap.add_argument("--base-run", default="oracle~focus")
     ap.add_argument("--table", default="prior")
+    ap.add_argument("--sim", default=str(SIM), help="the simulator binary (default the pinned build)")
+    ap.add_argument("--out-root", default=None, help="where the run goes (default counterfactual/ here)")
     for k in ("entity", "metric", "aggregate", "cause", "channel", "window_start_us", "window_end_us"):
         ap.add_argument(f"--{k.replace('_', '-')}", dest=k, default="")
     args = ap.parse_args()
@@ -59,7 +61,7 @@ def main():
     spec = scoring.load_spec(REPO / pins["scoring_spec"]["path"])
     workload = BUILD / f"{wid}.workload.json"
     base_dir = RUNS / wid / args.base_run
-    out = pathlib.Path(__file__).parent / "counterfactual" / wid / args.name
+    out = (pathlib.Path(args.out_root) if args.out_root else pathlib.Path(__file__).parent / "counterfactual") / wid / args.name
     out.mkdir(parents=True, exist_ok=True)
 
     sched = json.load(open(base_dir / "schedule.json"))
@@ -76,7 +78,7 @@ def main():
 
     trace = out / "trace.jsonl"
     with open(out / "simulator.stderr.log", "w") as err:
-        subprocess.run([str(SIM), "--workload", str(workload), "--schedule", str(out / "schedule.json"),
+        subprocess.run([args.sim, "--workload", str(workload), "--schedule", str(out / "schedule.json"),
                         "--out-trace", str(trace)], check=True, stderr=err)
     aggs, messages = build(workload, out, spec, wid, args.table)
     with gzip.open(out / "trace.jsonl.gz", "wb") as g, open(trace, "rb") as f:

@@ -74,6 +74,15 @@ def main():
     for c in spawned:
         programs[c["id"]] = c["program"]
     periodic = periodic_tasks(programs)
+    # the op after each FORK of a spawning task, in program order: a block straight after a fork_slot ready is the
+    # next FORK finding the cap — a fork-slot wait, which the simulator does not count as a voluntary block (its
+    # FORK case leaves `burst`; SLEEP, a TIMER not yet due and a WAIT that blocks reset it) — unless that op is
+    # the WAIT on the children
+    fork_next = {}
+    for tid, prog in programs.items():
+        ops = [x["op"] for x in prog]
+        if "FORK" in ops:
+            fork_next[tid] = [ops[i + 1] if i + 1 < len(ops) else None for i, o in enumerate(ops) if o == "FORK"]
     idle = {k for k, e in arrive.items() if e.get("declared_class") == "idle"}
     idle |= {c["id"] for c in spawned if c.get("declared_class") == "idle"}
     sched = json.load(open(run_dir / "schedule.json"))["schedule"]
@@ -90,6 +99,9 @@ def main():
         return cfg
 
     burst = defaultdict(int)          # B1 counter, settled at run_end
+    last_own = {}                     # each task's own previous line
+    forks_done = defaultdict(int)
+    fork_waits = 0
     runnable, parked = set(), set()
     running, start = None, 0
     park_checks = {"parks": 0, "parked_task_batch": 0, "nonbatch_runnable": 0, "violations": []}
@@ -151,10 +163,14 @@ def main():
             if t > t_end:
                 break
             advance(t)
+            if task is not None and ev != "x_block":
+                last_own[task] = e
             if ev == "task_arrive":
                 pass
             elif ev == "ready":
                 runnable.add(task)
+                if e.get("cause") == "fork_slot":
+                    forks_done[task] += 1
             elif ev == "run_start":
                 if task in parked:
                     ran_while_parked.append(t)
@@ -164,7 +180,14 @@ def main():
                 running = None
             elif ev == "x_block":
                 runnable.discard(task)
-                burst[task] = 0
+                prev = last_own.get(task) or {}
+                fork_wait = (prev.get("event") == "run_end" and prev.get("blocked_on") == "fork_slot") or (
+                    prev.get("event") == "ready" and prev.get("cause") == "fork_slot"
+                    and fork_next.get(task, [None] * (forks_done[task]))[forks_done[task] - 1] == "FORK")
+                if fork_wait:
+                    fork_waits += 1
+                else:
+                    burst[task] = 0
             elif ev == "task_end":
                 runnable.discard(task)
             elif ev == "x_cap_park":
@@ -276,7 +299,7 @@ def main():
     out = {
         "workload_id": args.workload_id, "run": args.run,
         "periodic": sorted(periodic), "idle": sorted(idle),
-        "parks": park_checks, "parked_task_ran": len(ran_while_parked),
+        "parks": park_checks, "parked_task_ran": len(ran_while_parked), "fork_slot_waits": fork_waits,
         "ceiling": {"capped_us": float(capped_time), "in_class_us": float(in_class_capped),
                     "share": float(in_class_capped / capped_time) if capped_time else None,
                     "bound_us": float(bound + depth),

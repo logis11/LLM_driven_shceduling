@@ -1,0 +1,32 @@
+{
+ "workload_id": "c7-ml-train",
+ "run": "oracle~focus",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 9579,
+  "parked_task_batch": 9579,
+  "nonbatch_runnable": 9579,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "ceiling": {
+  "capped_us": 17139500.0,
+  "in_class_us": 689596.0,
+  "share": 0.040234312552874935,
+  "bound_us": 866975.0,
+  "replayed_min_allow_us": 0.0,
+  "within": true
+ },
+ "latency": {
+  "metric": "input_latency",
+  "task": "editor",
+  "rows_recomputed": 1753,
+  "rows_recorded": 1753,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 8020875.92,
+  "p50_us": 963248.0
+ },
+ "ok": true
+}

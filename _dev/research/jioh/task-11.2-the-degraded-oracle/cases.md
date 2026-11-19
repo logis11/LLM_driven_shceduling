@@ -4,14 +4,14 @@ The cases of the 11.2 spec (`_dev/docs/spec/jioh/task-11.2-the-degraded-oracle.m
 
 | # | file | term | combination | fixed | oracle | class | evidence | fixing commit |
 |---|---|---|---|---|---|---|---|---|
-| 1 | `c1-compile` | editor, input latency P99 | primary | 235,971,211.09 | 361,025,331.76 | unexplained | | |
+| 1 | `c1-compile` | editor, input latency P99 | primary | 235,971,211.09 | 361,025,331.76 | unexplained | [1](#1-c1-compile) | |
 | 2 | `c1-ml-train` | hog, turnaround | primary | 1,596,272,585 | 1,599,230,869 | unexplained | | |
 | 3 | `c1-render` | bulk, turnaround | primary | 21,394,289 | 22,089,192 | unexplained | | |
 | 4 | `c1-transcode` | batch, turnaround | primary | 3,894,612,815 | 4,134,853,844 | unexplained | | |
 | 5 | `c2-p3a` | bulk, turnaround | primary | 22,482,188 | 23,119,499 | unexplained | | |
-| 6 | `c7-compile` | editor, input latency P99 | primary | 58,431,291 | 87,359,931 | unexplained | | |
+| 6 | `c7-compile` | editor, input latency P99 | primary | 58,431,291 | 87,359,931 | unexplained | [6](#6-c7-compile) | |
 | 7 | `c7-dev` | editor, input latency P99 | primary | 1,750,097.40 | 5,600,806.08 | property | [7](#7-c7-dev) | |
-| 8 | `c7-ml-train` | editor, input latency P99 | primary | 7,194,480.40 | 8,020,875.92 | unexplained | | |
+| 8 | `c7-ml-train` | editor, input latency P99 | primary | 7,194,480.40 | 8,020,875.92 | unexplained | [8](#8-c7-ml-train) | |
 | 9 | `c7-video-edit` | editor, app latency P99 | primary | 4,750,232.68 | 8,090,656.02 | property | [9](#9-c7-video-edit) | |
 | 10 | `c1-transcode` | video-editor, app latency P99 | 12 ms boot default, `prior` | 365,038.19 | 430,531.08 | unexplained | | |
 | 11 | `c2-p1a` | editor, input latency P99 | 7 ms boot default, `prior` | 7,512,775.33 | 8,227,009.39 | unexplained | | |
@@ -55,3 +55,25 @@ The cases of the 11.2 spec (`_dev/docs/spec/jioh/task-11.2-the-degraded-oracle.m
 **Result** (2026-11-19, `counterfactual/c7-video-edit/cap-0.95/`): the editor's app latency P99 is 4,755,986.34, down 3,334,669.68 — the predicted direction, past the floor. The replay with nothing moved reproduces the run's trace hash and its P99. Under 0.95 the cap parks 25 times, each on a batch-class task while a non-batch task is runnable, and the 9,523 rows recompute equal to the counterfactual's records.
 
 **Class: property.** Every program follows its reference; as on `c7-dev`, the row's floor cap reaches the editor's burst tails, which B1 puts in the batch class, while the upgrade's short bursts keep it out.
+
+## Programs checked, mechanism open
+
+The three files below pass every check of `cap_check.py` — every park on a batch-class task while a task not in the batch class and not idle is runnable, no parked task running, the batch class's CPU while capped within the cap plus one slice, the scored latency rows recomputed equal to the records and their P99 the scored value — with the simulator's reading of a fork-slot wait (below). Their mechanism is not yet traced to a knob.
+
+### 1. `c1-compile`
+
+`cap-check-c1-compile.json`: 48,463 parks; the batch class's share while capped 0.367 under the 0.5 cap; 2,544 rows equal, P99 361,025,331.76. Oracle: LOTTERY, `batch_share` and cap 0.5, the `compile` / `background_wanted: true` row. The editor is delivered the same CPU as under fixed (253,348,583 against 253,566,630, `run_profile.py`); its longest burst without a voluntary block is 235,469,634 against 136,488,095 — keystrokes queued behind its own work complete their WAITs at zero wait, so the bursts merge.
+
+### 6. `c7-compile`
+
+`cap-check-c7-compile.json`: 24,299 parks; share while capped 0.0498 under the 0.05 cap; 398 rows equal, P99 87,359,931. The editor is delivered 19,240,992 of CPU against 25,289,134 under fixed; the parks fall on `make` (`build`) and the compile jobs' `cc1`.
+
+### 8. `c7-ml-train`
+
+`cap-check-c7-ml-train.json`: 9,579 parks, all but 11 the hog's; share while capped 0.040; 1,753 rows equal, P99 8,020,875.92. The editor is delivered the same CPU as under fixed (187,667,633 against 186,923,275), and its keystrokes wait 143 ms less on average under the oracle. The P99 is set by one cluster near 1,013 s: under fixed the editor's burst from 996.86 s blocked once, at 1,003.57 s; under the oracle, its timing moved by the hog's earlier parks, it runs on to 1,024.05 s at a 0.30 share, and the keystrokes queued behind it wait about 2.1 s longer. Inside an editor burst both tasks are batch class and the cap is off; MLFQ splits the lane 0.30 / 0.70 between them, the task leading after each 100 ms boost taking 10 + 20 + 40 of its milliseconds.
+
+## The fork-slot wait and rule B1
+
+The simulator's FORK that finds `fork_cap` reached blocks the task without resetting its B1 counter (`simulator/src/sim.cpp`, the FORK case: no `t.burst = 0`), where SLEEP, a TIMER not yet due, a WAIT on a channel and a WAIT on the children each reset it. The batch-class memo's B1 lists a WAIT that has to wait, a SLEEP and a TIMER not yet due as the voluntary blocks — "the task giving the CPU back on its own" — written before the spawn table and its FORK existed. No simulator memo or note records the fork-slot wait's place in B1. `make` (`build`) in `c1-compile` and `c7-compile` stays in the batch class across its fork-slot waits — 17,004 and 5,639 of them in the two oracle runs.
+
+Exploratory, on a copy of the simulator with the reset added at the fork-slot wait (not committed): the oracle's editor input latency P99 is 87,359,931 on `c7-compile`, unchanged, and 363,144,270.32 on `c1-compile`, against 361,025,331.76.

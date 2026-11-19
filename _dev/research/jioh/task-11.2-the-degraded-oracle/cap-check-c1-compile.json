@@ -1,0 +1,33 @@
+{
+ "workload_id": "c1-compile",
+ "run": "oracle~focus",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 48463,
+  "parked_task_batch": 48463,
+  "nonbatch_runnable": 48463,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "fork_slot_waits": 17004,
+ "ceiling": {
+  "capped_us": 110918647.0,
+  "in_class_us": 40662177.0,
+  "share": 0.3665945997339834,
+  "bound_us": 55469323.5,
+  "replayed_min_allow_us": 0.0,
+  "within": true
+ },
+ "latency": {
+  "metric": "input_latency",
+  "task": "editor",
+  "rows_recomputed": 2544,
+  "rows_recorded": 2544,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 361025331.76,
+  "p50_us": 165778593.5
+ },
+ "ok": true
+}
