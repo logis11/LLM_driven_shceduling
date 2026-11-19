@@ -22,6 +22,13 @@ control in each test, a task that is batch-class, must be parked, or the test pr
     stage AE): beside a runnable idle task alone, a batch-class task of the normal class is never
     parked, and the lane is never free while one of the two is runnable. Positive control: with a
     non-batch task of the normal class beside them, the same task is parked.
+(d) A fork-slot wait is a voluntary block (B1, the task giving the CPU back on its own; stage AF): a
+    parent whose FORK finds fork_cap reached and waits for a slot is out of the batch class after the
+    wait, as after a WAIT on its children. The parent runs 15 ms, forks a child that sleeps 30 ms,
+    forks again into the cap and waits for the slot, then runs 9 ms — under a slice, so never batch
+    class after the wait; it is never parked after the wait. Positive control: the parent is parked
+    in its first burst, a slice into it. Run under FIFO, as (b): under MLFQ the short task the cap
+    protects preempts the parent at every wake, so the parent never spends while capped.
 """
 import json
 import os
@@ -132,10 +139,31 @@ def test_c(sim):
             f"{len(parks(ctl, 'work'))}x with a non-batch normal task beside them")
 
 
+def test_d(sim):
+    end = 200_000
+    table = [{"id": "c1", "name": "c1", "program": [{"op": "SLEEP", "us": 30_000}, {"op": "EXIT"}]},
+             {"id": "c2", "name": "c2", "program": [{"op": "RUN", "us": 100}, {"op": "EXIT"}]}]
+    prog = [{"op": "RUN", "us": 15_000}, {"op": "FORK"}, {"op": "FORK"}, {"op": "RUN", "us": 9_000}, {"op": "EXIT"}]
+    ev = [{"op": "arrive", "t": 0, "id": "par", "name": "par", "fork_cap": 1, "spawn_table": table,
+           "program": prog}] + poke(end)
+    tr = run(sim, "batch-d", ev, algorithm="FIFO")   # nothing preempts the holder, so the cap bites (test (b))
+    waits = [e["t"] for e in tr if e["event"] == "run_end" and e["task"] == "par" and e.get("blocked_on") == "fork_slot"]
+    assert waits, "the parent never waited for a fork slot — the test does not reach the case"
+    slot = next(e["t"] for e in tr if e["event"] == "ready" and e["task"] == "par" and e.get("cause") == "fork_slot"
+                and e["t"] > waits[0])
+    pk = parks(tr, "par")
+    before = [t for t in pk if t <= waits[0]]
+    after = [t for t in pk if t > waits[0]]
+    assert before, "positive control: the parent is never parked in its first burst — the cap did not bite"
+    assert not after, f"the parent was parked at {after[:3]} after its fork-slot wait (slot at {slot} µs)"
+    return (f"parent parked {len(before)}x in its first burst, 0x after its fork-slot wait "
+            f"({waits[0]}–{slot} µs)")
+
+
 def main():
     sim = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "simulator", "src", "sim")
     ok = True
-    for name, t in (("a", test_a), ("b", test_b), ("c", test_c)):
+    for name, t in (("a", test_a), ("b", test_b), ("c", test_c), ("d", test_d)):
         try:
             print(f"test {name}: ok — {t(sim)}")
         except AssertionError as e:

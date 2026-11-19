@@ -1,6 +1,6 @@
 # batch class와 `batch_bandwidth_cap` — 정의와 cap 값의 기준
 
-> Status: memo · Created 2026-10-20 · Updated 2026-10-21
+> Status: memo · Created 2026-10-20 · Updated 2026-11-19
 > 닫힘 (2026-10-21) — 인경민이 conformance item (d), executor가 `batch_bandwidth_cap`을 batch class에 work-conserving 상한으로 적용하는 것을 simulator stage V에 구현했어요(2026-10-20, 커밋 `1074b14d`). 상한을 재는 window는 인경민의 decision D10이고 `simulator/memo/memo_261020.md` Part F에 적혀 있어요. 남은 것은 (d)에 기대는 문장들의 확인이에요(§4).
 > From 인지오 to 인경민.
 
@@ -78,3 +78,7 @@ prior table에 들어간 값이에요. 채점 비중은 `harness/scoring/scoring
 - conformance item (d)는 끝났어요(stage V, 2026-10-20). window는 decision D10으로 simulator 문서에 적혀 있어요.
 - 남은 것은 (d)에 기대는 문장들의 확인이에요(9.16 기록 `compiled/uncheckable-by-item.md`의 (d) "Check" 줄). `c7-browsing`, `c7-office`, `c7-dev`, `c7-photo`, `c7-video-edit`와 `c6-spoof`에서 foreground의 P99가 cap 0.05일 때 cap 0.5일 때보다 나쁘지 않은지, foreground가 runnable한 동안 batch class의 CPU가 cap 이하인지 봐요.
 - B1·B2는 simulator에 있는 그대로 적었어요. declared idle 규칙은 conformance item (e)로 따로 열려 있어요(declared-class memo). 다른 점이 있으면 알려 주세요.
+
+## 정정 (2026-11-19)
+
+- §1 표의 B1: voluntary block에는 `fork_cap`이 차서 slot을 기다리는 `FORK`도 들어가요. 자식들의 `WAIT`처럼 task가 스스로 CPU를 놓는 것이에요. simulator는 stage AF(`simulator@841dc81131cb`)부터 fork-slot 대기에서 counter를 다시 0으로 해요(batch-class memo, `2026-09-09-batch-class-rule-for-the-simulator.md`의 2026-11-19 정정). B2와 cap의 뜻은 그대로예요.

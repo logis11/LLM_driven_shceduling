@@ -1,0 +1,2144 @@
+{
+ "sim": "simulator/src/sim",
+ "summary": {
+  "fixed~focus": {
+   "runs": 129,
+   "identical": 129,
+   "differing": [],
+   "failed": []
+  },
+  "oracle~focus": {
+   "runs": 129,
+   "identical": 117,
+   "differing": [
+    "c1-compile",
+    "c1-compile@corner-high",
+    "c1-compile@corner-low",
+    "c1-compile@venue-x0.8",
+    "c1-compile@venue-x1.25",
+    "c3-workday",
+    "c4-compile",
+    "c7-compile",
+    "c7-compile@corner-high",
+    "c7-compile@corner-low",
+    "c7-compile@venue-x0.8",
+    "c7-compile@venue-x1.25"
+   ],
+   "failed": []
+  }
+ },
+ "rows": [
+  {
+   "workload_id": "c1-backup",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 368438,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-backup",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 337888,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-browsing",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 14133,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-browsing",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 14134,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-compile",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 848614,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-compile",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 792267,
+   "differing": 783307,
+   "first": {
+    "line": 8730,
+    "run": "{\"event\":\"x_cap_park\",\"t\":5754402,\"task\":\"build.j5.cc1\",\"in\":false,\"allow_us\":9240}",
+    "new": "{\"event\":\"x_cap_park\",\"t\":5753794,\"task\":\"build.j5.cc1\",\"in\":false,\"allow_us\":10000}"
+   }
+  },
+  {
+   "workload_id": "c1-compile@corner-high",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 847782,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-compile@corner-high",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 788619,
+   "differing": 779107,
+   "first": {
+    "line": 8681,
+    "run": "{\"event\":\"x_cap_park\",\"t\":5743882,\"task\":\"build.j5.cc1\",\"in\":false,\"allow_us\":10000}",
+    "new": "{\"event\":\"x_cap_park\",\"t\":5741754,\"task\":\"build.j5.cc1\",\"in\":false,\"allow_us\":10000}"
+   }
+  },
+  {
+   "workload_id": "c1-compile@corner-low",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 851624,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-compile@corner-low",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 792768,
+   "differing": 782833,
+   "first": {
+    "line": 8242,
+    "run": "{\"event\":\"x_cap_park\",\"t\":5559069,\"task\":\"build.j13.cc1\",\"in\":false,\"allow_us\":8676}",
+    "new": "{\"event\":\"x_cap_park\",\"t\":5559069,\"task\":\"build.j13.cc1\",\"in\":false,\"allow_us\":9740}"
+   }
+  },
+  {
+   "workload_id": "c1-compile@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 865250,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-compile@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 1017026,
+   "differing": 1007660,
+   "first": {
+    "line": 8574,
+    "run": "{\"event\":\"x_cap_park\",\"t\":5620194,\"task\":\"build.j11.cc1\",\"in\":false,\"allow_us\":9564}",
+    "new": "{\"event\":\"x_cap_park\",\"t\":5620194,\"task\":\"build.j11.cc1\",\"in\":false,\"allow_us\":9820}"
+   }
+  },
+  {
+   "workload_id": "c1-compile@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 926425,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-compile@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 825230,
+   "differing": 819426,
+   "first": {
+    "line": 3695,
+    "run": "{\"event\":\"x_cap_park\",\"t\":3447581,\"task\":\"build.j8.cc1\",\"in\":false,\"allow_us\":7100}",
+    "new": "{\"event\":\"x_cap_park\",\"t\":3447581,\"task\":\"build.j8.cc1\",\"in\":false,\"allow_us\":7233}"
+   }
+  },
+  {
+   "workload_id": "c1-dev",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 19655,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-dev",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 19656,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-gaming",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 307739,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-gaming",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 285197,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-idle",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 837,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-idle",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 838,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-indexing",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 116919,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-indexing",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 114793,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-mail",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 13569,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-mail",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 13570,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-media",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 16284,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-media",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 15075,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-meeting",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 30652,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-meeting",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 29325,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-ml-train",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 779066,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-ml-train",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 988758,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-ml-train@corner-high",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 778121,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-ml-train@corner-high",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 986697,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-ml-train@corner-low",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 774617,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-ml-train@corner-low",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 989755,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-ml-train@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 796469,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-ml-train@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 960043,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-ml-train@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 733150,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-ml-train@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 916521,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-office",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 13482,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-office",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 13483,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-photo",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 2382,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-photo",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 2383,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-render",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 47322,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-render",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 49644,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-render@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 50801,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-render@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 52926,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-render@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 43522,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-render@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 46296,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-transcode",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 3809325,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-transcode",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 4655543,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-transcode@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 4041477,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-transcode@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 4720480,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-transcode@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 3483096,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-transcode@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 4246014,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-video-edit",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 48087,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c1-video-edit",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 48088,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 83432,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 30175,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@corner-high",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 83300,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@corner-high",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 30522,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@corner-low",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 83685,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@corner-low",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 30870,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@replay",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 79717,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@replay",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 24528,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@seg1-120s",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 103681,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@seg1-120s",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 47859,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@seg1-30s",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 75756,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@seg1-30s",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 18002,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 75122,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 34175,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 96208,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1a@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 25565,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1b",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 115605,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p1b",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 115606,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 1296805,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 1251932,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a-idle",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 1331734,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a-idle",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 1258837,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@chain-x1.2",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 1190536,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@chain-x1.2",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 1184764,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@chain-x1.4",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 1150620,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@chain-x1.4",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 1140596,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@corner-high",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 1296521,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@corner-high",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 1251924,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@corner-low",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 1296625,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@corner-low",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 1251956,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@seg1-120s",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 1608400,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@seg1-120s",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 1535108,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@seg1-30s",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 1140082,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@seg1-30s",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 1110468,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 1290412,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 1252257,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 1303479,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2a@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 1251628,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 427426,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 415011,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@chain-x1.2",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 321792,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@chain-x1.2",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 348328,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@chain-x1.4",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 282870,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@chain-x1.4",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 304160,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@corner-high",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 427643,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@corner-high",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 415019,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@corner-low",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 427307,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@corner-low",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 415034,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@seg1-120s",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 739718,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@seg1-120s",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 698152,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@seg1-30s",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 270614,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@seg1-30s",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 273516,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 427624,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 415090,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 427103,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p2b@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 414889,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p3a",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 240460,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p3a",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 235584,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p3a@seg1-120s",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 285522,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p3a@seg1-120s",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 281165,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p3a@seg1-30s",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 217898,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p3a@seg1-30s",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 208279,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p3a@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 252970,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p3a@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 247562,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p3a@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 226308,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p3a@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 221152,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p3b",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 390574,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c2-p3b",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 372110,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c3-creation",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 238152,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c3-creation",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 126258,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c3-evening",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 627890,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c3-evening",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 824695,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c3-workday",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 818980,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c3-workday",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 1649784,
+   "differing": 1618082,
+   "first": {
+    "line": 30408,
+    "run": "{\"event\":\"x_cap_park\",\"t\":121785679,\"task\":\"build.j5.cc1\",\"in\":false,\"allow_us\":10000}",
+    "new": "{\"event\":\"x_cap_park\",\"t\":121785677,\"task\":\"build.j5.cc1\",\"in\":false,\"allow_us\":10000}"
+   }
+  },
+  {
+   "workload_id": "c4-compile",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 860397,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c4-compile",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 816676,
+   "differing": 806973,
+   "first": {
+    "line": 8903,
+    "run": "{\"event\":\"run_end\",\"t\":5933151,\"task\":\"build.j14.cc1\",\"reason\":\"preempt\"}",
+    "new": "{\"event\":\"x_cap_park\",\"t\":5931362,\"task\":\"build.j13.cc1\",\"in\":false,\"allow_us\":10000}"
+   }
+  },
+  {
+   "workload_id": "c4-gaming",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 311574,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c4-gaming",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 297111,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c4-office",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 14237,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c4-office",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 14258,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c5-t4",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 16284,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c5-t4",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 15075,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c5-t5",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 16284,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c5-t5",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 15075,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c6-alias",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 16284,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c6-alias",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 15075,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c6-dual",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 48166045,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c6-dual",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 48163190,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c6-fold",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 26828,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c6-fold",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 24498,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c6-spoof",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 17089,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c6-spoof",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 17490,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-backup",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 237636,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-backup",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 237637,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-browsing",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 23185,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-browsing",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 23448,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-browsing@corner-high",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 23182,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-browsing@corner-high",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 23428,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-browsing@corner-low",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 23188,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-browsing@corner-low",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 23449,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-browsing@replay",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 15333,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-browsing@replay",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 15379,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-browsing@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 22690,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-browsing@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 23019,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-browsing@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 23387,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-browsing@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 23665,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-compile",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 234088,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-compile",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 294861,
+   "differing": 292976,
+   "first": {
+    "line": 1887,
+    "run": "{\"event\":\"run_end\",\"t\":311565,\"task\":\"build.j22.cc1\",\"reason\":\"preempt\"}",
+    "new": "{\"event\":\"run_end\",\"t\":313705,\"task\":\"build.j22.cc1\",\"reason\":\"preempt\"}"
+   }
+  },
+  {
+   "workload_id": "c7-compile@corner-high",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 234374,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-compile@corner-high",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 295865,
+   "differing": 293980,
+   "first": {
+    "line": 1887,
+    "run": "{\"event\":\"run_end\",\"t\":311565,\"task\":\"build.j22.cc1\",\"reason\":\"preempt\"}",
+    "new": "{\"event\":\"run_end\",\"t\":313705,\"task\":\"build.j22.cc1\",\"reason\":\"preempt\"}"
+   }
+  },
+  {
+   "workload_id": "c7-compile@corner-low",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 233799,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-compile@corner-low",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 296328,
+   "differing": 294443,
+   "first": {
+    "line": 1887,
+    "run": "{\"event\":\"run_end\",\"t\":311565,\"task\":\"build.j22.cc1\",\"reason\":\"preempt\"}",
+    "new": "{\"event\":\"run_end\",\"t\":313705,\"task\":\"build.j22.cc1\",\"reason\":\"preempt\"}"
+   }
+  },
+  {
+   "workload_id": "c7-compile@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 230466,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-compile@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 313381,
+   "differing": 311243,
+   "first": {
+    "line": 2140,
+    "run": "{\"event\":\"run_end\",\"t\":308893,\"task\":\"build.j29.cc1\",\"reason\":\"preempt\"}",
+    "new": "{\"event\":\"x_mlfq_demote\",\"t\":310000,\"task\":\"build.j29.cc1\"}"
+   }
+  },
+  {
+   "workload_id": "c7-compile@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 246622,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-compile@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 291777,
+   "differing": 289808,
+   "first": {
+    "line": 1971,
+    "run": "{\"event\":\"run_end\",\"t\":408271,\"task\":\"build.j22.cc1\",\"reason\":\"preempt\"}",
+    "new": "{\"event\":\"x_mlfq_demote\",\"t\":411227,\"task\":\"build.j22.cc1\"}"
+   }
+  },
+  {
+   "workload_id": "c7-dev",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 26148,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-dev",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 28779,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-dev@corner-high",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 26116,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-dev@corner-high",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 28751,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-dev@corner-low",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 26182,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-dev@corner-low",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 28746,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-dev@replay",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 15618,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-dev@replay",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 16290,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-dev@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 26400,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-dev@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 26846,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-dev@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 25737,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-dev@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 29462,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 120059,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 139038,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming@chain-x1.2",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 84685,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming@chain-x1.2",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 118991,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming@chain-x1.4",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 74611,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming@chain-x1.4",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 104755,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming@corner-high",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 118281,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming@corner-high",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 138783,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming@corner-low",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 120650,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming@corner-low",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 138610,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 122182,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 138155,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 116978,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-gaming@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 138493,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-idle",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 10097,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-idle",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 10100,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-indexing",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 106234,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-indexing",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 106235,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-mail",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 23428,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-mail",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 23521,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-media",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 20561,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-media",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 19201,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-meeting",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 31791,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-meeting",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 31491,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-meeting@replay",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 26750,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-meeting@replay",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 25649,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-meeting@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 32507,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-meeting@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 32047,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-meeting@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 31068,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-meeting@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 31079,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-ml-train",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 669142,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-ml-train",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 719242,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-ml-train@corner-high",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 671166,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-ml-train@corner-high",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 719305,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-ml-train@corner-low",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 666313,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-ml-train@corner-low",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 721411,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-ml-train@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 704774,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-ml-train@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 761950,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-ml-train@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 633178,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-ml-train@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 657518,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-office",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 19970,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-office",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 20437,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-office@corner-high",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 19970,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-office@corner-high",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 20433,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-office@corner-low",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 19970,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-office@corner-low",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 20439,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-office@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 19523,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-office@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 19876,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-office@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 20190,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-office@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 20536,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-photo",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 11146,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-photo",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 11206,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-photo@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 11778,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-photo@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 12654,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-photo@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 11493,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-photo@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 11684,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-render",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 9679,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-render",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 11072,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-render@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 12647,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-render@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 13018,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-render@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 8410,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-render@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 9975,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-transcode",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 2448040,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-transcode",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 3332140,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-transcode@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 2691443,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-transcode@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 3471667,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-transcode@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 2207557,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-transcode@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 3131401,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-video-edit",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 31259,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-video-edit",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 31501,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-video-edit@venue-x0.8",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 35542,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-video-edit@venue-x0.8",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 32628,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-video-edit@venue-x1.25",
+   "run": "fixed~focus",
+   "exit": 0,
+   "lines": 28332,
+   "differing": 0,
+   "first": null
+  },
+  {
+   "workload_id": "c7-video-edit@venue-x1.25",
+   "run": "oracle~focus",
+   "exit": 0,
+   "lines": 29347,
+   "differing": 0,
+   "first": null
+  }
+ ]
+}

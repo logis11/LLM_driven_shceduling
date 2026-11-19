@@ -24,6 +24,7 @@
 //   AC the timer: mailbox holds one wake and drops the rest with a wake_drop line (conformance (j))
 //   AD a schedule entry at or after the workload's end is ignored (data-contracts §7, End)
 //   AE an idle-class task does not turn the cap on (recognition-vocabulary §2, 2026-11-13)
+//   AF a fork-slot wait is a voluntary block — B1's counter resets (batch-class memo §3, 2026-11-19)
 //
 // Design notes worth carrying:
 //   · gen (F): a preempted Lane reservation cannot be removed from a priority_queue, so
@@ -1091,7 +1092,8 @@ class Sim : public Trace, public Clock, public TaskView {
         case Op::FORK:
           if (t.spawn_next >= t.spawn_table.size()) { ++t.pc; break; }   // table exhausted
           if (t.live_children >= t.fork_cap) {   // cap >= 1, the loader checks
-            set_st(id, State::Blocked); t.blocked_by = 'f'; t.wait_chan = -1;  // wait for a slot
+            set_st(id, State::Blocked); t.blocked_by = 'f'; t.wait_chan = -1; t.burst = 0;  // wait for a slot
+            // AF: a voluntary block (batch-class memo §3, B1), as the WAIT on the children is
             return;                                                       // pc stays put
           }
           // AB (H4, memo_261023 Part H): the slot wait completed — at zero wait if it never
@@ -1488,7 +1490,7 @@ static void load_schedule(const std::string& path, Sim& s) {
 // written to that file (gzip when the path ends in `.gz`), standard output otherwise ignored,
 // exit 0 only once it is written. This is main()-level plumbing: the trace content is unchanged,
 // so it is not a ladder stage. Since 2026-11-11 the positional form is refused here, as the
-// contract says; it lives on in the ladder's last rung (steps/sim_ae: ./sim_ae W [S], trace on
+// contract says; it lives on in the ladder's last rung (steps/sim_af: ./sim_ae W [S], trace on
 // stdout), byte-identical to this binary but for the header's `sim`, which hand runs and the
 // fixture replay (tools/replay_fixtures.py) use.
 static const char* const kFlags[] = {"--workload", "--schedule", "--out-trace"};
@@ -1513,7 +1515,7 @@ int main(int argc, char** argv) {
   // (h): exactly the three flags, each once, each with its value — no positional argument, no
   // other option; anything else is refused before any input is read
   const char* usage = "usage: --workload W --schedule S --out-trace T (no positional argument;"
-                      " hand runs: steps/sim_ae W [S])";
+                      " hand runs: steps/sim_af W [S])";
   if (argc != 7) die(usage);
   for (int i = 1; i < argc; i += 2) {
     bool known = false, seen = false;
