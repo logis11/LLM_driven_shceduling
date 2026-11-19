@@ -1,0 +1,24 @@
+{
+ "workload_id": "c1-render",
+ "name": "replay",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [],
+ "term": {
+  "entity": "bulk",
+  "metric": "turnaround",
+  "aggregate": "turnaround",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "22089192.000000",
+ "trace_sha256": "891133a147198bf1b22d6530107c15e341f962b5d49fb8ccbfb9a793cfc68105",
+ "base_trace_rerun_sha256": "891133a147198bf1b22d6530107c15e341f962b5d49fb8ccbfb9a793cfc68105",
+ "trace_equal_base": true,
+ "counterfactual": [
+  "22089192.000000000000"
+ ],
+ "records_messages": [],
+ "moved_by": 0.0
+}
