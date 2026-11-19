@@ -1,0 +1,25 @@
+{
+ "workload_id": "c7-dev",
+ "name": "cap-0.95",
+ "sets": [
+  "1.batch_bandwidth_cap=0.95"
+ ],
+ "term": {
+  "entity": "editor",
+  "metric": "input_latency",
+  "aggregate": "p99",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "5600806.080000",
+ "trace_sha256": "31c8e254db2eebb20c432758ca671481e75f01bb8c8a011aab8564ee3e97cd41",
+ "base_trace_rerun_sha256": "e51af3ddf9c6802aa3afd93a41e06c977a58b5cb478150a5df85d93c41d7eb23",
+ "trace_equal_base": false,
+ "counterfactual": [
+  "2669474.240000000000"
+ ],
+ "records_messages": [],
+ "moved_by": -2931331.84
+}

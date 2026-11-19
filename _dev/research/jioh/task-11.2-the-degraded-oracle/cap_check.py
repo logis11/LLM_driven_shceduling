@@ -16,7 +16,7 @@ Three checks, from the trace and the compiled workload alone:
    keystroke served by the k-th input WAIT's `ready` line, from the wake to that service's start — against the
    run's `records.csv.gz`, and their P99 by the harness's own percentile.
 
-Writes `cap-check-<workload_id>.json` beside this script."""
+Writes `cap-check-<workload_id>.json` beside this script, or `--out`."""
 import argparse
 import csv
 import gzip
@@ -62,6 +62,7 @@ def main():
     ap.add_argument("--task", default="editor")
     ap.add_argument("--runs-dir", default=str(REPO / "runs" / "rq0-gate"))
     ap.add_argument("--build-dir", default=str(REPO / "dataset" / "build" / "coreset-single"))
+    ap.add_argument("--out", default=None, help="the result's path (default cap-check-<workload_id>.json here)")
     args = ap.parse_args()
     run_dir = pathlib.Path(args.runs_dir) / args.workload_id / args.run
     w = json.load(open(pathlib.Path(args.build_dir) / f"{args.workload_id}.workload.json"))
@@ -266,7 +267,7 @@ def main():
     out["ceiling"]["within"] = out["ceiling"]["in_class_us"] <= out["ceiling"]["bound_us"]
     out["ok"] = (park_checks["parks"] == park_checks["parked_task_batch"] == park_checks["nonbatch_runnable"]
                  and not ran_while_parked and out["ceiling"]["within"] and out["input_latency"]["equal"])
-    path = pathlib.Path(__file__).parent / f"cap-check-{args.workload_id}.json"
+    path = pathlib.Path(args.out) if args.out else pathlib.Path(__file__).parent / f"cap-check-{args.workload_id}.json"
     path.write_text(json.dumps(out, indent=1) + "\n")
     print(json.dumps(out, indent=1))
     return 0 if out["ok"] else 1

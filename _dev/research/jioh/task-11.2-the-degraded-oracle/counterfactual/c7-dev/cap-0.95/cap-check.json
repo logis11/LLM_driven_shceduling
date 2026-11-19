@@ -1,0 +1,30 @@
+{
+ "workload_id": "c7-dev",
+ "run": "cap-0.95",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 372,
+  "parked_task_batch": 372,
+  "nonbatch_runnable": 372,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "ceiling": {
+  "capped_us": 4613653.0,
+  "in_class_us": 1704064.0,
+  "share": 0.36935244154686103,
+  "bound_us": 4392970.35,
+  "replayed_min_allow_us": 0.0,
+  "within": true
+ },
+ "input_latency": {
+  "rows_recomputed": 49,
+  "rows_recorded": 49,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 2669474.24,
+  "p50_us": 1476291.0
+ },
+ "ok": true
+}
