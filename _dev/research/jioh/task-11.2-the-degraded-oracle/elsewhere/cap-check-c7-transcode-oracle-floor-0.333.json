@@ -1,0 +1,33 @@
+{
+ "workload_id": "c7-transcode",
+ "run": "oracle@floor-0.333~focus",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 94813,
+  "parked_task_batch": 94813,
+  "nonbatch_runnable": 94813,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "fork_slot_waits": 0,
+ "ceiling": {
+  "capped_us": 913275618.0,
+  "in_class_us": 281459134.0,
+  "share": 0.30818640994311536,
+  "bound_us": 304130780.794,
+  "replayed_min_allow_us": -0.298,
+  "within": true
+ },
+ "latency": {
+  "metric": "app_latency",
+  "task": "video-editor",
+  "rows_recomputed": 630201,
+  "rows_recorded": 630201,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 13973877.0,
+  "p50_us": 754.0
+ },
+ "ok": true
+}

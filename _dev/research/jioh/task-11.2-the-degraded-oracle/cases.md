@@ -18,7 +18,7 @@ The cases of the 11.2 spec (`_dev/docs/spec/jioh/task-11.2-the-degraded-oracle.m
 | 12 | `c2-p3a` | editor, app latency P99 | 7 ms boot default, `prior` | 38,159.57 | 42,435.19 | property | [12](#12-c2-p3a) | |
 | 13 | `c7-photo` | photo-editor, app latency P99 | 30 ms boot default, `prior` | 2,968,927.88 | 2,978,927.88 | property | [13](#13-c7-photo) | |
 | 14 | `c7-render` | editor, app latency P99 | 7 ms boot default, `prior` | 3,360,537.49 | 5,750,451.47 | property | [14](#14-c7-render) | |
-| 15 | `c7-transcode` | video-editor, app latency P99 | primary boot default, `prior@floor-0.333` | 11,127,962 | 13,973,877 | unexplained | [15](#15-c7-transcode) | |
+| 15 | `c7-transcode` | video-editor, app latency P99 | primary boot default, `prior@floor-0.333` | 11,127,962 | 13,973,877 | property | [15](#15-c7-transcode) | |
 
 ## 7. `c7-dev`
 
@@ -192,6 +192,8 @@ Oracle: the `transcode` / `background_wanted: true` row, LOTTERY, `batch_share` 
 
 **Second result** (2026-11-19, `counterfactual/c1-transcode/mlfq-cap-0.333/`): the video editor's app latency P99 is 314,490.78, down 116,040.30 — the predicted direction, past the floor, below fixed's at every slice.
 
+**Programs on the path** (`elsewhere/cap-check-c1-transcode-*.json`): the oracle run — 422,963 parks, each on a batch-class task while a task not in the batch class and not idle is runnable, no parked task running, the batch class's CPU while capped a share of 0.296 within the cap plus one slice; the 1,014,792 `app_latency` rows recomputed equal to the records. The fixed run at 12 ms — the rows recomputed equal. The daemon's schedule is the row's algorithm, params and cap, and the row follows the table's rules (wanted batch work, LOTTERY, the cap the batch term's weight share, `batch_share` equal to it, the boot quantum).
+
 **Class: property.** The LOTTERY row's uniform draw inside the batch class gives the video editor half the lane through its long burst beside the transcode, where the boot MLFQ's task-id order at the boost gives it most of it; the P99, the boundary of the 1 % queued behind that burst, follows.
 
 ### 11. `c2-p1a`
@@ -251,3 +253,9 @@ Oracle: the `render` / `background_wanted: false` row, the boot MLFQ with cap 0.
 The cap band's 0.333 table moves the `transcode` / `background_wanted: false` row's cap from 0.05 to 0.333, nothing else (`daemon/driver-table/prior-floor-0.333.yaml`). The video editor's app latency P99 under the oracle is 1,500.32 ms at 0.05 and 0.2, 13,973.88 at 0.333 and 2,715.92 at 0.5, against 11,127.96 under fixed; its CPU 908.37 s at 0.05, 839.02 at 0.333, 699.55 under fixed. Its 0.333 oracle's schedule differs from the primary oracle's in that cap alone, so this counterfactual's schedule is the primary oracle's.
 
 **Counterfactual** (recorded before the run): the 0.333 table's oracle on `c7-transcode` with entry 1's `batch_bandwidth_cap` moved from 0.333 to 0.05, everything else as that oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the video editor's app latency P99 moves down from 13,973,877 by at least the 1,000 µs floor.
+
+**Programs on the path** (`elsewhere/cap-check-c7-transcode-*.json`): the 0.333 table's oracle run — 94,813 parks, each on a batch-class task while a task not in the batch class and not idle is runnable, no parked task running, the batch class's CPU while capped a share of 0.308 within the cap plus one slice; the 630,201 `app_latency` rows recomputed equal to the records. The fixed run — the rows recomputed equal. The daemon's schedule is the table's row, and the table is the prior table with every unwanted row's cap at 0.333 and nothing else changed (the RQ0 gate spec's `cap-band` statement).
+
+**Result** (2026-11-19, `counterfactual/c7-transcode/cap-0.05/`): the video editor's app latency P99 is 1,500,322, down 12,473,555 — the predicted direction, past the floor, the primary oracle's value. The replay with nothing moved (`counterfactual/c7-transcode/replay-floor-0.333/`) reproduces the 0.333 table's run and its P99.
+
+**Class: property.** Every program follows its reference; the cap band's 0.333 cap on the unwanted row, the one difference from the primary table, gives the transcode a third of the lane while the video editor is out of the batch class, and the video editor is delivered 839.02 s against 908.37 at 0.05.

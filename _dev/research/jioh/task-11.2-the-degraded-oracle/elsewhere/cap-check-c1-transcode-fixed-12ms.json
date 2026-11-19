@@ -1,0 +1,33 @@
+{
+ "workload_id": "c1-transcode",
+ "run": "fixed+ostep-slice-12000us~focus",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 0,
+  "parked_task_batch": 0,
+  "nonbatch_runnable": 0,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "fork_slot_waits": 0,
+ "ceiling": {
+  "capped_us": 0.0,
+  "in_class_us": 0.0,
+  "share": null,
+  "bound_us": 0.0,
+  "replayed_min_allow_us": 0.0,
+  "within": true
+ },
+ "latency": {
+  "metric": "app_latency",
+  "task": "video-editor",
+  "rows_recomputed": 1014792,
+  "rows_recorded": 1014792,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 365038.19,
+  "p50_us": 305.0
+ },
+ "ok": true
+}

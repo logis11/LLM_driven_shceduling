@@ -10,6 +10,7 @@
   "violations": []
  },
  "parked_task_ran": 0,
+ "fork_slot_waits": 0,
  "ceiling": {
   "capped_us": 3059550.0,
   "in_class_us": 101326.0,
