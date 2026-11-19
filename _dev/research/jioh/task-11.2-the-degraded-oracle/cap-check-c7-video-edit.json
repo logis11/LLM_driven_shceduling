@@ -1,0 +1,32 @@
+{
+ "workload_id": "c7-video-edit",
+ "run": "oracle~focus",
+ "periodic": [],
+ "idle": [],
+ "parks": {
+  "parks": 1303,
+  "parked_task_batch": 1303,
+  "nonbatch_runnable": 1303,
+  "violations": []
+ },
+ "parked_task_ran": 0,
+ "ceiling": {
+  "capped_us": 4381034.0,
+  "in_class_us": 169850.0,
+  "share": 0.03876938640512719,
+  "bound_us": 229051.7,
+  "replayed_min_allow_us": 0.0,
+  "within": true
+ },
+ "latency": {
+  "metric": "app_latency",
+  "task": "editor",
+  "rows_recomputed": 9523,
+  "rows_recorded": 9523,
+  "equal": true,
+  "first_difference": null,
+  "p99_us": 8090656.02,
+  "p50_us": 3506504.0
+ },
+ "ok": true
+}

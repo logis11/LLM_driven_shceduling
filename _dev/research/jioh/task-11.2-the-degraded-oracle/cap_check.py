@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One run's trace read against the batch-class rule and the cap, and its input latency recomputed.
 
-    python3 cap_check.py <workload_id> [--run 'oracle~focus'] [--task editor]
+    python3 cap_check.py <workload_id> [--run 'oracle~focus'] [--task editor] [--metric input_latency|app_latency]
 
 Three checks, from the trace and the compiled workload alone:
 
@@ -12,9 +12,10 @@ Three checks, from the trace and the compiled workload alone:
 2. The ceiling. Over the capped config intervals, the CPU delivered to tasks while they are in the batch class,
    counted only while a non-batch task is runnable, is at most the cap times that time plus the bucket's depth,
    one slice (`simulator/memo/memo_261020.md` Part F, the token bucket of rate cap and depth one slice).
-3. The scored term. The task's `input_latency` rows recomputed by the metrics doc's §6.12 rule — the k-th
-   keystroke served by the k-th input WAIT's `ready` line, from the wake to that service's start — against the
-   run's `records.csv.gz`, and their P99 by the harness's own percentile.
+3. The scored term. The task's `input_latency` rows (the metrics doc's §6.12) or `app_latency` rows (§6.13)
+   recomputed — the k-th wake of a channel served by the k-th WAIT's `ready` line, from the wake to that
+   service's start; a dropped timer wake covered by the latest wake before it not dropped — against the run's
+   `records.csv.gz`, and their P99 by the harness's own percentile.
 
 Writes `cap-check-<workload_id>.json` beside this script, or `--out`."""
 import argparse
@@ -60,6 +61,7 @@ def main():
     ap.add_argument("workload_id")
     ap.add_argument("--run", default="oracle~focus")
     ap.add_argument("--task", default="editor")
+    ap.add_argument("--metric", default="input_latency", choices=["input_latency", "app_latency"])
     ap.add_argument("--runs-dir", default=str(REPO / "runs" / "rq0-gate"))
     ap.add_argument("--build-dir", default=str(REPO / "dataset" / "build" / "coreset-single"))
     ap.add_argument("--out", default=None, help="the result's path (default cap-check-<workload_id>.json here)")
@@ -68,11 +70,12 @@ def main():
     w = json.load(open(pathlib.Path(args.build_dir) / f"{args.workload_id}.workload.json"))
     arrive = {e["id"]: e for e in w["events"] if e["op"] == "arrive"}
     programs = {k: e["program"] for k, e in arrive.items()}
-    for s in w.get("spawn") or []:
-        programs[s["id"]] = s["program"]
+    spawned = [c for e in arrive.values() for c in (e.get("spawn_table") or [])]
+    for c in spawned:
+        programs[c["id"]] = c["program"]
     periodic = periodic_tasks(programs)
     idle = {k for k, e in arrive.items() if e.get("declared_class") == "idle"}
-    idle |= {s["id"] for s in (w.get("spawn") or []) if s.get("declared_class") == "idle"}
+    idle |= {c["id"] for c in spawned if c.get("declared_class") == "idle"}
     sched = json.load(open(run_dir / "schedule.json"))["schedule"]
     t_end = max(f["t_end"] for f in w["focus"])
 
@@ -95,6 +98,8 @@ def main():
     in_class_capped = Fraction(0)
     cap_allow = Fraction(0)
     min_allow = Fraction(0)
+    bound = Fraction(0)
+    depth = 0
     last_t = 0
     lines = []
 
@@ -106,7 +111,7 @@ def main():
 
     def advance(t):
         """Account [last_t, t]: the runnable set and the bursts of the waiting tasks are constant over it."""
-        nonlocal capped_time, in_class_capped, last_t, cap_allow, min_allow
+        nonlocal capped_time, in_class_capped, last_t, cap_allow, min_allow, bound, depth
         if t <= last_t:
             last_t = max(last_t, t)
             return
@@ -127,7 +132,10 @@ def main():
                     or run_nonbatch
                 if capped:
                     capped_time += b - a
-                    cap_allow += Fraction(b - a) * Fraction(round(cap * SHARE_DEN), SHARE_DEN)
+                    rate = Fraction(round(cap * SHARE_DEN), SHARE_DEN)
+                    bound += Fraction(b - a) * rate
+                    depth = max(depth, sl)
+                    cap_allow += Fraction(b - a) * rate
                     if run_batch:
                         in_class_capped += b - a
                         cap_allow -= b - a
@@ -174,28 +182,30 @@ def main():
                     parked.discard(task)
     advance(t_end)
 
-    # 3. input latency (metrics doc §6.12), by walking the task's program through its ready lines
-    task = args.task
+    # 3. the scored latency (metrics doc §6.12 input_latency, §6.13 app_latency), by walking the task's
+    # program through its ready lines: the k-th WAIT of a channel serves the channel's k-th wake, a WAIT whose
+    # timer wake was dropped passing with no line
+    task, metric = args.task, args.metric
+    end = None
     wakes = defaultdict(list)
     for e in w["events"]:
         if e["op"] == "wake" and e["target"] == task:
             wakes[e["channel"]].append(e["t"])
+    for ch in wakes:
+        wakes[ch].sort()
     dropped = defaultdict(list)
     for e in lines:
         if e["event"] == "wake_drop" and e["task"] == task:
             dropped[e["channel"]].append(e["t"])
-    fate = {}                                            # (channel, k) -> 'd' for a dropped timer wake
+    is_dropped = set()                                   # (channel, k) of a dropped timer wake
     for ch, ts in dropped.items():
-        pool = list(wakes[ch])
         used = set()
         for td in ts:
-            k = next(i for i, x in enumerate(pool) if x == td and i not in used)
+            k = next(i for i, x in enumerate(wakes[ch]) if x == td and i not in used)
             used.add(k)
-            fate[(ch, k)] = "d"
+            is_dropped.add((ch, k))
     ready = [e["t"] for e in lines if e["event"] == "ready" and e["task"] == task and e.get("cause") == "wake"]
-    occupancy = []                                       # the task's [run_start, run_end) intervals
-    s0 = None
-    task_end = None
+    occupancy, s0 = [], None
     for e in lines:
         if e.get("task") != task:
             continue
@@ -205,68 +215,87 @@ def main():
             occupancy.append((s0, e["t"]))
             s0 = None
         elif e["event"] == "task_end":
-            task_end = e["t"]
+            end = e["t"]
+    if s0 is not None:
+        occupancy.append((s0, t_end + 1))
+    end = min(end if end is not None else t_end, t_end, arrive[task].get("depart") or t_end)
     starts = sorted(a for a, _ in occupancy)
 
-    def service_start(r):
-        for a, b in occupancy:
-            if a <= r < b or (a == r):
-                return r
-        nxt = next((a for a in starts if a >= r), None)
-        return nxt
+    import bisect
 
+    def service_start(r):
+        i = bisect.bisect_right(starts, r) - 1           # the occupancy holding r, if any
+        if i >= 0 and occupancy_sorted[i][0] <= r < occupancy_sorted[i][1]:
+            return r
+        j = bisect.bisect_left(starts, r)
+        return starts[j] if j < len(starts) else None
+
+    occupancy_sorted = sorted(occupancy)
+    served = {}                                          # (channel, k) -> service start, or None
     k_by_ch = defaultdict(int)
     ri = 0
-    mine = []
     for p in programs[task]:
         if p["op"] != "WAIT":
             continue
         ch = p["channel"]
         k = k_by_ch[ch]
         k_by_ch[ch] += 1
-        if fate.get((ch, k)) == "d":
+        if (ch, k) in is_dropped:
             continue
         if ri >= len(ready):
-            if ch.startswith("input:") and k < len(wakes[ch]) and wakes[ch][k] < min(task_end or t_end, t_end):
-                mine.append((wakes[ch][k], min(task_end or t_end, t_end) - wakes[ch][k], 1))
-            continue
-        r = ready[ri]
+            break
+        served[(ch, k)] = service_start(ready[ri])
         ri += 1
-        if ch.startswith("input:"):
-            st = service_start(r)
-            wk = wakes[ch][k]
+    kinds = ("input",) if metric == "input_latency" else ("timer", "event")
+    mine = []
+    for ch, ts in wakes.items():
+        kind = ch.split(":", 1)[0]
+        if kind not in kinds:
+            continue
+        last_served = None
+        for k, wk in enumerate(ts):
+            if wk >= end:
+                continue
+            label = "" if metric == "input_latency" else kind
+            if (ch, k) in is_dropped:
+                st = last_served
+                if st is None or st > t_end:                 # still a dropped wake: skipped, and censored
+                    mine.append((wk, label, end - wk, 1, 1))
+                else:
+                    mine.append((wk, label, st - wk, 0, 1))
+                continue
+            st = served.get((ch, k))
+            last_served = st
             if st is None or st > t_end:
-                mine.append((wk, min(task_end or t_end, t_end) - wk, 1))
+                mine.append((wk, label, end - wk, 1, 0))
             else:
-                mine.append((wk, st - wk, 0))
+                mine.append((wk, label, st - wk, 0, 0))
     rec = []
     with gzip.open(run_dir / "records.csv.gz", "rt") as f:
         for r in csv.DictReader(f):
-            if r["entity"] == task and r["metric"] == "input_latency":
-                rec.append((int(r["t"]), int(r["value"]), int(r["censored"] or 0)))
+            if r["entity"] == task and r["metric"] == metric:
+                rec.append((int(r["t"]), r["channel"] if metric == "app_latency" else "", int(r["value"]),
+                            int(r["censored"] or 0), int(r["skipped"] or 0)))
     rec.sort()
     mine.sort()
-    vals = [v for _, v, _ in rec]
+    vals = [x[2] for x in rec]
     out = {
         "workload_id": args.workload_id, "run": args.run,
         "periodic": sorted(periodic), "idle": sorted(idle),
         "parks": park_checks, "parked_task_ran": len(ran_while_parked),
         "ceiling": {"capped_us": float(capped_time), "in_class_us": float(in_class_capped),
                     "share": float(in_class_capped / capped_time) if capped_time else None,
-                    "bound_us": float(capped_time * Fraction(round(
-                        (config_at(0).get("batch_bandwidth_cap") or 0) * SHARE_DEN), SHARE_DEN)),
+                    "bound_us": float(bound + depth),
                     "replayed_min_allow_us": float(min_allow)},
-        "input_latency": {"rows_recomputed": len(mine), "rows_recorded": len(rec), "equal": mine == rec,
+        "latency": {"metric": metric, "task": task, "rows_recomputed": len(mine), "rows_recorded": len(rec), "equal": mine == rec,
                           "first_difference": next(({"mine": a, "recorded": b} for a, b in zip(mine, rec)
                                                     if a != b), None),
                           "p99_us": float(aggregates.percentile(vals, 99)) if vals else None,
                           "p50_us": float(aggregates.percentile(vals, 50)) if vals else None},
     }
-    sl = slice_of(config_at(0))
-    out["ceiling"]["bound_us"] += sl
     out["ceiling"]["within"] = out["ceiling"]["in_class_us"] <= out["ceiling"]["bound_us"]
     out["ok"] = (park_checks["parks"] == park_checks["parked_task_batch"] == park_checks["nonbatch_runnable"]
-                 and not ran_while_parked and out["ceiling"]["within"] and out["input_latency"]["equal"])
+                 and not ran_while_parked and out["ceiling"]["within"] and out["latency"]["equal"])
     path = pathlib.Path(args.out) if args.out else pathlib.Path(__file__).parent / f"cap-check-{args.workload_id}.json"
     path.write_text(json.dumps(out, indent=1) + "\n")
     print(json.dumps(out, indent=1))
