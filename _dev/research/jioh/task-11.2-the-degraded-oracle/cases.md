@@ -13,7 +13,7 @@ The cases of the 11.2 spec (`_dev/docs/spec/jioh/task-11.2-the-degraded-oracle.m
 | 7 | `c7-dev` | editor, input latency P99 | primary | 1,750,097.40 | 5,600,806.08 | property | [7](#7-c7-dev) | |
 | 8 | `c7-ml-train` | editor, input latency P99 | primary | 7,194,480.40 | 8,020,875.92 | property | [8](#8-c7-ml-train) | |
 | 9 | `c7-video-edit` | editor, app latency P99 | primary | 4,750,232.68 | 8,090,656.02 | property | [9](#9-c7-video-edit) | |
-| 10 | `c1-transcode` | video-editor, app latency P99 | 12 ms boot default, `prior` | 365,038.19 | 430,531.08 | unexplained | [10](#10-c1-transcode) | |
+| 10 | `c1-transcode` | video-editor, app latency P99 | 12 ms boot default, `prior` | 365,038.19 | 430,531.08 | property | [10](#10-c1-transcode) | |
 | 11 | `c2-p1a` | editor, input latency P99 | 7 ms boot default, `prior` | 7,512,775.33 | 8,227,009.39 | property | [11](#11-c2-p1a) | |
 | 12 | `c2-p3a` | editor, app latency P99 | 7 ms boot default, `prior` | 38,159.57 | 42,435.19 | property | [12](#12-c2-p3a) | |
 | 13 | `c7-photo` | photo-editor, app latency P99 | 30 ms boot default, `prior` | 2,968,927.88 | 2,978,927.88 | property | [13](#13-c7-photo) | |
@@ -189,6 +189,10 @@ Oracle: the `transcode` / `background_wanted: true` row, LOTTERY, `batch_share` 
 **Second reading** (the 11.2 grill's choice after the failed prediction: one more reading and prediction, the failed one kept; a second failure goes back to the grill). Of the 10,147 slowest wakes — the 1 % above the P99 — 10,080 fall in the window's sixth tenth under the oracle, 10,081 under the 7 ms quantum. They are queued behind the video editor's own burst from 2,381.0 s, 12.6 to 12.8 s of CPU beside the CPU-bound transcode, both in the batch class: under the oracle it runs to 2,406.34 s at a 0.506 share of the lane, LOTTERY drawing uniformly inside the class (`Lottery::pick`); under fixed at 10 ms to 2,398.97 s at 0.70, at 12 ms to 2,400.79 s at 0.64 — MLFQ's boost rebuilds the queue in task-id order and the editor, the lower id, leads. The P99 is the boundary of that 1 %, so the editor's short bursts elsewhere enter it too: under fixed it is delivered 0.29 to 0.31 of the lane in them at 10 ms and 0.35 to 0.39 at 12 ms, under the oracle about 0.5. The 7 ms quantum, also B1's threshold under LOTTERY, puts 135.3 s more of the editor's CPU in the batch class (465.32 s against 330.02) and leaves the long burst at 0.497. No knob of the LOTTERY row moves the split inside the batch class; the row's algorithm does.
 
 **Second counterfactual** (recorded before the run): the oracle on `c1-transcode` with entries 1 and 2's algorithm moved from LOTTERY to MLFQ at the boot params (three queues, 10 ms slice, doubling, 100 ms boost), `batch_bandwidth_cap` 0.333 kept, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source): the editor leads its long burst as under fixed, and the cap holds the transcode to a third while the editor is out of the batch class. Predicted: the video editor's app latency P99 moves down from 430,531.08 by at least the 1,000 µs floor.
+
+**Second result** (2026-11-19, `counterfactual/c1-transcode/mlfq-cap-0.333/`): the video editor's app latency P99 is 314,490.78, down 116,040.30 — the predicted direction, past the floor, below fixed's at every slice.
+
+**Class: property.** The LOTTERY row's uniform draw inside the batch class gives the video editor half the lane through its long burst beside the transcode, where the boot MLFQ's task-id order at the boost gives it most of it; the P99, the boundary of the 1 % queued behind that burst, follows.
 
 ### 11. `c2-p1a`
 

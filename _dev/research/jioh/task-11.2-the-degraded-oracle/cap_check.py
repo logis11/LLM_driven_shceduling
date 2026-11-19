@@ -215,18 +215,18 @@ def main():
         if e["op"] == "wake" and e["target"] == task:
             wakes[e["channel"]].append(e["t"])
     for ch in wakes:
-        wakes[ch].sort()
+        wakes[ch].sort()                                 # stable: same-time wakes keep their file order
     dropped = defaultdict(list)
     for e in lines:
         if e["event"] == "wake_drop" and e["task"] == task:
             dropped[e["channel"]].append(e["t"])
     is_dropped = set()                                   # (channel, k) of a dropped timer wake
-    for ch, ts in dropped.items():
-        used = set()
+    for ch, ts in dropped.items():                       # a time's drops are its last wakes in file order: the
+        at = defaultdict(list)                           # first is held or served, a later one finds it held
+        for i, x in enumerate(wakes[ch]):
+            at[x].append(i)
         for td in ts:
-            k = next(i for i, x in enumerate(wakes[ch]) if x == td and i not in used)
-            used.add(k)
-            is_dropped.add((ch, k))
+            is_dropped.add((ch, at[td].pop()))
     # each ready(cause = wake) line's service start, in trace order: the line's own time when the task is on the
     # lane at the line (a zero wait, or a line inside its occupancy), else the task's next run_start
     ready, pending, on_lane = [], [], False
