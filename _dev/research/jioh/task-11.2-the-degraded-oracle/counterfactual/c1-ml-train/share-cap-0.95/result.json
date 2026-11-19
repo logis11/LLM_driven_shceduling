@@ -1,0 +1,29 @@
+{
+ "workload_id": "c1-ml-train",
+ "name": "share-cap-0.95",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [
+  "1.batch_bandwidth_cap=0.95",
+  "1.params.batch_share=0.95",
+  "2.batch_bandwidth_cap=0.95",
+  "2.params.batch_share=0.95"
+ ],
+ "term": {
+  "entity": "hog",
+  "metric": "turnaround",
+  "aggregate": "turnaround",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "1599230869.000000",
+ "trace_sha256": "404dbd4d7d1c05b7745d4657f2ff76337a96b1bda5b2f1996c8a85edb89595ef",
+ "base_trace_rerun_sha256": "a4b382ac02ea6787705de40bbf7bbae83cc06defdc70ca5fef0e0915e0bd10d8",
+ "trace_equal_base": false,
+ "counterfactual": [
+  "1595291798.000000000000"
+ ],
+ "records_messages": [],
+ "moved_by": -3939071.0
+}

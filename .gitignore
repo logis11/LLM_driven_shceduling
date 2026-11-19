@@ -23,3 +23,6 @@ _dev/research/jioh/2026-09-13-verification/meas/run_cli1/
 _dev/research/jioh/2026-09-13-verification/meas/run_cli3/
 _dev/research/jioh/2026-09-13-verification/meas/array.c
 _dev/research/jioh/2026-09-13-verification/meas/tar_*
+# 11.2's counterfactual runs: the trace and records local only, each reproducible from its schedule.json on the simulator its result.json names, the trace's hash there
+_dev/research/jioh/task-11.2-the-degraded-oracle/counterfactual/*/*/trace.jsonl.gz
+_dev/research/jioh/task-11.2-the-degraded-oracle/counterfactual/*/*/records.csv.gz

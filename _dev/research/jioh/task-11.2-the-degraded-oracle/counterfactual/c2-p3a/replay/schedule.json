@@ -1,0 +1,60 @@
+{
+ "workload_id": "c2-p3a",
+ "condition": "oracle",
+ "schedule": [
+  {
+   "t_us": 0,
+   "config": {
+    "algorithm": "MLFQ",
+    "params": {
+     "num_queues": 3,
+     "timeslice_us": 10000,
+     "timeslice_growth": 2,
+     "boost_interval_us": 100000
+    },
+    "batch_bandwidth_cap": null
+   },
+   "provenance": "fallback"
+  },
+  {
+   "t_us": 0,
+   "config": {
+    "algorithm": "MLFQ",
+    "batch_bandwidth_cap": 0.5,
+    "params": {
+     "boost_interval_us": 100000,
+     "num_queues": 3,
+     "timeslice_growth": 2,
+     "timeslice_us": 10000
+    }
+   },
+   "provenance": "unmodified"
+  },
+  {
+   "t_us": 60000000,
+   "config": {
+    "algorithm": "LOTTERY",
+    "batch_bandwidth_cap": 0.333,
+    "params": {
+     "batch_share": 0.333,
+     "timeslice_us": 10000
+    }
+   },
+   "provenance": "unmodified"
+  },
+  {
+   "t_us": 326000000,
+   "config": {
+    "algorithm": "MLFQ",
+    "params": {
+     "num_queues": 3,
+     "timeslice_us": 10000,
+     "timeslice_growth": 2,
+     "boost_interval_us": 100000
+    },
+    "batch_bandwidth_cap": null
+   },
+   "provenance": "fallback"
+  }
+ ]
+}

@@ -1,0 +1,29 @@
+{
+ "workload_id": "c1-transcode",
+ "name": "share-cap-0.95",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [
+  "1.batch_bandwidth_cap=0.95",
+  "1.params.batch_share=0.95",
+  "2.batch_bandwidth_cap=0.95",
+  "2.params.batch_share=0.95"
+ ],
+ "term": {
+  "entity": "batch",
+  "metric": "turnaround",
+  "aggregate": "turnaround",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "4134853844.000000",
+ "trace_sha256": "9d058b92c5c39155a9b47d2d3f5316feabe2f7c229e8529bd178e1145ef74579",
+ "base_trace_rerun_sha256": "8d9dd17a6f676c01d3973bf1b547b5f39f2f90ac7b6a905539de88a5618613ab",
+ "trace_equal_base": false,
+ "counterfactual": [
+  "3391719510.000000000000"
+ ],
+ "records_messages": [],
+ "moved_by": -743134334.0
+}

@@ -1,0 +1,24 @@
+{
+ "workload_id": "c1-ml-train",
+ "name": "replay",
+ "sim_version": "simulator@0d323c84470a",
+ "sets": [],
+ "term": {
+  "entity": "hog",
+  "metric": "turnaround",
+  "aggregate": "turnaround",
+  "cause": "",
+  "channel": "",
+  "window_start_us": "",
+  "window_end_us": ""
+ },
+ "scored_oracle": "1599230869.000000",
+ "trace_sha256": "a4b382ac02ea6787705de40bbf7bbae83cc06defdc70ca5fef0e0915e0bd10d8",
+ "base_trace_rerun_sha256": "a4b382ac02ea6787705de40bbf7bbae83cc06defdc70ca5fef0e0915e0bd10d8",
+ "trace_equal_base": true,
+ "counterfactual": [
+  "1599230869.000000000000"
+ ],
+ "records_messages": [],
+ "moved_by": 0.0
+}

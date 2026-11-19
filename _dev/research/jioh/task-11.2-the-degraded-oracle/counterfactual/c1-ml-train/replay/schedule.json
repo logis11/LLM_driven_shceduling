@@ -1,0 +1,58 @@
+{
+ "workload_id": "c1-ml-train",
+ "condition": "oracle",
+ "schedule": [
+  {
+   "t_us": 0,
+   "config": {
+    "algorithm": "MLFQ",
+    "params": {
+     "num_queues": 3,
+     "timeslice_us": 10000,
+     "timeslice_growth": 2,
+     "boost_interval_us": 100000
+    },
+    "batch_bandwidth_cap": null
+   },
+   "provenance": "fallback"
+  },
+  {
+   "t_us": 0,
+   "config": {
+    "algorithm": "LOTTERY",
+    "batch_bandwidth_cap": 0.333,
+    "params": {
+     "batch_share": 0.333,
+     "timeslice_us": 10000
+    }
+   },
+   "provenance": "unmodified"
+  },
+  {
+   "t_us": 2000000,
+   "config": {
+    "algorithm": "LOTTERY",
+    "batch_bandwidth_cap": 0.333,
+    "params": {
+     "batch_share": 0.333,
+     "timeslice_us": 10000
+    }
+   },
+   "provenance": "unmodified"
+  },
+  {
+   "t_us": 1612000000,
+   "config": {
+    "algorithm": "MLFQ",
+    "params": {
+     "num_queues": 3,
+     "timeslice_us": 10000,
+     "timeslice_growth": 2,
+     "boost_interval_us": 100000
+    },
+    "batch_bandwidth_cap": null
+   },
+   "provenance": "fallback"
+  }
+ ]
+}

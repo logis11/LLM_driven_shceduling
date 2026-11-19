@@ -5,10 +5,10 @@ The cases of the 11.2 spec (`_dev/docs/spec/jioh/task-11.2-the-degraded-oracle.m
 | # | file | term | combination | fixed | oracle | class | evidence | fixing commit |
 |---|---|---|---|---|---|---|---|---|
 | 1 | `c1-compile` | editor, input latency P99 | primary | 235,971,211.09 | 361,025,331.76 | unexplained | [1](#1-c1-compile) | |
-| 2 | `c1-ml-train` | hog, turnaround | primary | 1,596,272,585 | 1,599,230,869 | unexplained | [2](#2-c1-ml-train) | |
+| 2 | `c1-ml-train` | hog, turnaround | primary | 1,596,272,585 | 1,599,230,869 | property | [2](#2-c1-ml-train) | |
 | 3 | `c1-render` | bulk, turnaround | primary | 21,394,289 | 22,089,192 | property | [3](#3-c1-render) | |
-| 4 | `c1-transcode` | batch, turnaround | primary | 3,894,612,815 | 4,134,853,844 | unexplained | [4](#4-c1-transcode) | |
-| 5 | `c2-p3a` | bulk, turnaround | primary | 22,482,188 | 23,119,499 | unexplained | [5](#5-c2-p3a) | |
+| 4 | `c1-transcode` | batch, turnaround | primary | 3,894,612,815 | 4,134,853,844 | property | [4](#4-c1-transcode) | |
+| 5 | `c2-p3a` | bulk, turnaround | primary | 22,482,188 | 23,119,499 | property | [5](#5-c2-p3a) | |
 | 6 | `c7-compile` | editor, input latency P99 | primary | 58,431,291 | 87,359,931 | unexplained | [6](#6-c7-compile) | |
 | 7 | `c7-dev` | editor, input latency P99 | primary | 1,750,097.40 | 5,600,806.08 | property | [7](#7-c7-dev) | |
 | 8 | `c7-ml-train` | editor, input latency P99 | primary | 7,194,480.40 | 8,020,875.92 | unexplained | [8](#8-c7-ml-train) | |
@@ -112,6 +112,10 @@ Before the fix, on a copy of the simulator with the reset added (the same change
 
 **Counterfactual** (recorded before the run): the oracle on `c1-ml-train` with the row's `batch_share` and `batch_bandwidth_cap` moved together from 0.333 to 0.95 in the schedule's entries 1 and 2, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the hog task's turnaround moves down from 1,599,230,869 by at least the 1,000 µs floor.
 
+**Result** (2026-11-19, `counterfactual/c1-ml-train/share-cap-0.95/`): the hog task's turnaround is 1,595,291,798, down 3,939,071 — the predicted direction, past the floor. The replay with nothing moved reproduces the run's trace and its turnaround.
+
+**Class: property.** Every program follows its reference; the row's share and cap, set by the table's rule from the batch term's weight, give the foreground the lane first — its term gains — and the training run's turnaround carries the cost.
+
 ## 4. `c1-transcode`
 
 **Configurations.** Fixed: the boot MLFQ, no cap. Oracle: the `transcode` / `background_wanted: true` row — LOTTERY, `batch_share` and `batch_bandwidth_cap` 0.333, the 10 ms quantum — applied at 0 and again at 2,000,000 (entries 1 and 2), the boot MLFQ from 4,762,000,000.
@@ -126,6 +130,10 @@ Before the fix, on a copy of the simulator with the reset added (the same change
 
 **Counterfactual** (recorded before the run): the oracle on `c1-transcode` with the row's `batch_share` and `batch_bandwidth_cap` moved together from 0.333 to 0.95 in the schedule's entries 1 and 2, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the batch task's turnaround moves down from 4,134,853,844 by at least the 1,000 µs floor.
 
+**Result** (2026-11-19, `counterfactual/c1-transcode/share-cap-0.95/`): the batch task's turnaround is 3,391,719,510, down 743,134,334 — the predicted direction, past the floor. The replay with nothing moved reproduces the run's trace and its turnaround.
+
+**Class: property.** Every program follows its reference; the row's share and cap, set by the table's rule from the batch term's weight, give the foreground the lane first — its term gains — and the transcode's turnaround carries the cost.
+
 ## 5. `c2-p3a`
 
 **Configurations.** Fixed: the boot MLFQ, no cap. Oracle: the `video-edit` / `background_wanted: true` row — the boot MLFQ with `batch_bandwidth_cap` 0.5 — from 0, then the `render` / `background_wanted: true` row — LOTTERY, `batch_share` and `batch_bandwidth_cap` 0.333, the 10 ms quantum — from 60,000,000 (entry 2), the boot MLFQ from 326,000,000.
@@ -139,3 +147,7 @@ Before the fix, on a copy of the simulator with the reset added (the same change
 - The harness: the bulk task's `turnaround` recomputed by `docs/harness/metrics.md` §6.6 equals the run's record, 23,119,499, the scored value.
 
 **Counterfactual** (recorded before the run): the oracle on `c2-p3a` with the row's `batch_share` and `batch_bandwidth_cap` moved together from 0.333 to 0.95 in the schedule's entry 2, everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the bulk task's turnaround moves down from 23,119,499 by at least the 1,000 µs floor.
+
+**Result** (2026-11-19, `counterfactual/c2-p3a/share-cap-0.95/`): the bulk task's turnaround is 19,484,568, down 3,634,931 — the predicted direction, past the floor. The replay with nothing moved reproduces the run's trace and its turnaround.
+
+**Class: property.** Every program follows its reference; the row's share and cap, set by the table's rule from the batch term's weight, give the foreground the lane first — its term gains — and the render's turnaround carries the cost.
