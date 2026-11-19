@@ -184,6 +184,8 @@ Oracle: the `transcode` / `background_wanted: true` row, LOTTERY, `batch_share` 
 
 **Counterfactual** (recorded before the run; the 11.2 grill's choice for this case, since under LOTTERY a quantum longer than the boot one lengthens that wait): the oracle on `c1-transcode` with entries 1 and 2's `timeslice_us` moved from 10,000 to 7,000 — the slice of one of the case's read combinations — everything else as the oracle's schedule, on the RQ0 run's simulator (`simulator@0d323c84470a`, rebuilt from its source). Predicted: the video editor's app latency P99 moves down from 430,531.08 by at least the 1,000 µs floor.
 
+**Result** (2026-11-19, `counterfactual/c1-transcode/quantum-7ms/`): the video editor's app latency P99 is 474,393.15, **up** 43,862.07 — against the prediction. The replay with nothing moved (`counterfactual/c1-transcode/replay-app/`) reproduces the run's trace and its P99. The reading that the LOTTERY row's non-preemptive quantum sets the video editor's tail does not hold: the case stays **unexplained**.
+
 ### 11. `c2-p1a`
 
 The term reads the window [60,000,000, 99,435,000), the `ml-train` / `background_wanted: true` segment: the oracle's entry 2, LOTTERY, `batch_share` and cap 0.333, the 10 ms quantum. In the window the editor's input latency P99 is 12,953.19 ms under fixed at 10 ms, 7,512.78 at 7 ms and 8,227.01 under the oracle; the editor is delivered 11.33 s of CPU in the window at 10 ms, 15.98 at 7 ms and 15.59 under the oracle. The boot MLFQ at 10 ms splits the lane 0.30 / 0.70 with the hog inside a boost interval and at 7 ms evenly; the oracle's LOTTERY row delivers the editor nearly the 7 ms share, and its keystrokes wait out the hog's quantum at each wake.
