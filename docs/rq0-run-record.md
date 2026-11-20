@@ -172,7 +172,7 @@ The re-measurement the statement `re-measurement-contingency` names (`_dev/docs/
 
 The two controls reproduce the run's score rows and gap rows in every field. The training run's runs between voluntary blocks moves the file across g alone: `fixed` comes within 25.44 µs of `oracle`, under the 1,000 µs floor, and the term has no headroom. The entry found is `cpu-batch`'s `python3`.
 
-**The campaign**, `meas-ci:background:2026-11-20`: 107 fresh repeats of the 9.10 campaign's job, PyTorch's basic MNIST example, on the AMD EPYC 7763 — the count the stability rule projected at the pool as carried. The runners had moved to kernel `7.0.0-1017-azure`, transparent huge pages `madvise` by default, and the runner's agent `provjobd` ends thousands of the training run's waits a job; the job writes `always` before the run, and each wait the agent ends is folded into the run it interrupts (`_dev/research/jioh/task-11.3-the-re-measurement/campaign/method.md`, §5).
+**The campaign**, `meas-ci:background:2026-11-20`: 107 fresh repeats of the 9.10 campaign's job, PyTorch's basic MNIST example, on the AMD EPYC 7763 — the count the stability rule projected at the pool as carried. The runners had moved to kernel `7.0.0-1017-azure`, transparent huge pages `madvise` by default, and the runner's agent `provjobd` ends thousands of the training run's waits a job; the job writes `always` before the run, and each wait the agent ends is folded into the run it interrupts (`_dev/research/jioh/task-11.3-the-re-measurement/campaign/method.md`, §5). The raw records are the release `meas-ci-background-2026-11-20`.
 
 | value | the 9.10 campaign, 6 repeats | 11.3, 107 repeats |
 |---|---|---|
