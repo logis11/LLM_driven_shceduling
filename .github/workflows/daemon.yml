@@ -3,7 +3,7 @@ name: daemon
 on:
   push:
     branches: [main]
-    paths-ignore: [.github/campaign.json]   # a campaign trigger push starts the measurement only
+    paths-ignore: [.github/campaign.json, .github/campaign-background.json]   # a campaign trigger push starts the measurement only
   pull_request:
 
 jobs:

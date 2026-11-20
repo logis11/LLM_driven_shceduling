@@ -7,11 +7,12 @@ name: meas-background
 # repeats (one list for every program or a map program -> list), the CPU model,
 # the mode (dry | probe | full) and the run settings. Registry tag
 # meas-ci:background:<launch date of the first batch> (9.5 D27). One artifact
-# per (program, repeat).
+# per (program, repeat). Pushes to main start it too from 11.3's re-measurement
+# on (_dev/research/jioh/task-11.3-the-re-measurement/campaign/method.md).
 
 on:
   push:
-    branches: [jioh/dataset-rebuild]
+    branches: [jioh/dataset-rebuild, main]
     paths: [.github/campaign-background.json]
 
 permissions:
