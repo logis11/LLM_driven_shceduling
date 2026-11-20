@@ -26,3 +26,7 @@ _dev/research/jioh/2026-09-13-verification/meas/tar_*
 # 11.2's counterfactual runs: the trace and records local only, each reproducible from its schedule.json on the simulator its result.json names, the trace's hash there
 _dev/research/jioh/task-11.2-the-degraded-oracle/counterfactual/*/*/trace.jsonl.gz
 _dev/research/jioh/task-11.2-the-degraded-oracle/counterfactual/*/*/records.csv.gz
+# 11.3: the RQ0 run's programs extracted from commit 6086e7e1 (as_run.sh) and the finding step's library copies and
+# builds (finding_builds.py), each reproducible by its script, the builds' hashes in finding-builds.json
+_dev/research/jioh/task-11.3-the-re-measurement/as-run/
+_dev/research/jioh/task-11.3-the-re-measurement/finding/

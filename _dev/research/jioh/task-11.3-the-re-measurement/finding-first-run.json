@@ -1,0 +1,204 @@
+{
+  "what": "the finding step's first run (experiment rq0-gate-finding): every build under an id of its own; the controls read before any build",
+  "controls": {
+    "c7-ml-train": {
+      "reproduces": "c7-ml-train",
+      "score_rows": 204,
+      "rq0_score_rows": 204,
+      "score_rows_equal": true,
+      "gap_row_equal": true,
+      "gap": "2.512497",
+      "rq0_gap": "2.512497"
+    },
+    "c7-ml-train@all-four-low": {
+      "reproduces": "c7-ml-train@corner-low",
+      "score_rows": 204,
+      "rq0_score_rows": 204,
+      "score_rows_equal": false,
+      "gap_row_equal": true,
+      "gap": "0.000000",
+      "rq0_gap": "0.000000"
+    }
+  },
+  "differing_rows": [
+    {
+      "condition": "random",
+      "seed": "15",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2407681.800000",
+      "rq0_value_condition": "2347434.160000"
+    },
+    {
+      "condition": "random",
+      "seed": "35",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2249816.680000",
+      "rq0_value_condition": "2270953.320000"
+    },
+    {
+      "condition": "random",
+      "seed": "36",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2249816.680000",
+      "rq0_value_condition": "2270953.320000"
+    },
+    {
+      "condition": "random",
+      "seed": "37",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2407681.800000",
+      "rq0_value_condition": "2347434.160000"
+    },
+    {
+      "condition": "random",
+      "seed": "39",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2407681.800000",
+      "rq0_value_condition": "2347434.160000"
+    },
+    {
+      "condition": "random",
+      "seed": "40",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2249816.680000",
+      "rq0_value_condition": "2270953.320000"
+    },
+    {
+      "condition": "random",
+      "seed": "53",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2407681.800000",
+      "rq0_value_condition": "2347434.160000"
+    },
+    {
+      "condition": "random",
+      "seed": "55",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2407681.800000",
+      "rq0_value_condition": "2347434.160000"
+    },
+    {
+      "condition": "random",
+      "seed": "6",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2407681.800000",
+      "rq0_value_condition": "2347434.160000"
+    },
+    {
+      "condition": "random",
+      "seed": "68",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2249816.680000",
+      "rq0_value_condition": "2270953.320000"
+    },
+    {
+      "condition": "random",
+      "seed": "81",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2249816.680000",
+      "rq0_value_condition": "2270953.320000"
+    },
+    {
+      "condition": "random",
+      "seed": "86",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2247155.960000",
+      "rq0_value_condition": "2389547.280000"
+    },
+    {
+      "condition": "random",
+      "seed": "89",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2407681.800000",
+      "rq0_value_condition": "2347434.160000"
+    },
+    {
+      "condition": "random",
+      "seed": "9",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2249816.680000",
+      "rq0_value_condition": "2270953.320000"
+    },
+    {
+      "condition": "random",
+      "seed": "90",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2407681.800000",
+      "rq0_value_condition": "2347434.160000"
+    },
+    {
+      "condition": "random",
+      "seed": "91",
+      "level": "term",
+      "columns": [
+        "value_condition",
+        "improvement_condition"
+      ],
+      "value_condition": "2407681.800000",
+      "rq0_value_condition": "2347434.160000"
+    }
+  ],
+  "schedules_identical_but_the_id": true,
+  "cause": "the simulator seeds its lottery PRNG once per run from the FNV-1a hash of the workload id (simulator/src/sim.cpp at simulator@0d323c84470a: `lottery.seed(fnv1a(sim.workload_id()))`, the interpretation contract's \u00a71), so a run under a LOTTERY row draws other tickets under another id; the build ran as c7-ml-train@all-four-low against the run's c7-ml-train@corner-low",
+  "remedy": "each build run under the id of the file it stands for: nothing moved and each single-value build as c7-ml-train, all four moved as c7-ml-train@corner-low (finding_builds.py, finding_spec.sh); the builds of the first run never read"
+}

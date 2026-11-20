@@ -1,0 +1,126 @@
+{
+  "base": "c7-ml-train",
+  "library": "dataset/archetypes.yaml",
+  "library_sha256": "85570c57ac834dbfeef9ffdb88021ac56a489f3c3bbb24977e41542a3238a011",
+  "builds": [
+    {
+      "build": "nothing-moved",
+      "build_dir": "_dev/research/jioh/task-11.3-the-re-measurement/finding/build/controls",
+      "workload_id": "c7-ml-train",
+      "moved": [],
+      "library_sha256": "0e5e8365425a86bfc812705b71ab143c8f175922dd3c22dbecfc63bae4377af3",
+      "sha256": "0d252d79161e616673a8992459722da6783c03dd29a2b4dd3aee65f5dfa0e350",
+      "lint_errors": []
+    },
+    {
+      "build": "libuv-gap-low",
+      "build_dir": "_dev/research/jioh/task-11.3-the-re-measurement/finding/build/libuv-gap-low",
+      "workload_id": "c7-ml-train",
+      "moved": [
+        {
+          "entry": "code-editor",
+          "component": "utility/libuv-worker",
+          "table": "gap",
+          "half_width": 0.0563
+        }
+      ],
+      "library_sha256": "fbc927b3d26b51e064807eeedad5d7d8048e4b51c1add08f4357315c0652abb0",
+      "sha256": "a54ef84d5375ea8002e7d7884d928d105ef597ccacbea838fa0147e20c0d524c",
+      "lint_errors": []
+    },
+    {
+      "build": "libuv-run-low",
+      "build_dir": "_dev/research/jioh/task-11.3-the-re-measurement/finding/build/libuv-run-low",
+      "workload_id": "c7-ml-train",
+      "moved": [
+        {
+          "entry": "code-editor",
+          "component": "utility/libuv-worker",
+          "table": "run",
+          "half_width": 0.0236
+        }
+      ],
+      "library_sha256": "e276d2c3f20cf49667333d74025205365ea5b66a1df706b82834e9ea159a25c7",
+      "sha256": "805a9e337c99640e81cc587241d634d7acbc8452f1b118d03a05ce3e703e810a",
+      "lint_errors": []
+    },
+    {
+      "build": "python3-run-low",
+      "build_dir": "_dev/research/jioh/task-11.3-the-re-measurement/finding/build/python3-run-low",
+      "workload_id": "c7-ml-train",
+      "moved": [
+        {
+          "entry": "cpu-batch",
+          "program": "python3",
+          "table": "python3_run",
+          "half_width": 0.273
+        }
+      ],
+      "library_sha256": "97963ae0a41338c7e5bab829025f5df9679e54e4092b04940c10c0c807a8dfff",
+      "sha256": "82401dd7d90ff69b758bc82c069ec73cb184bfd0138f6e5a6a25ae3ef51ec441",
+      "lint_errors": []
+    },
+    {
+      "build": "python3-block-low",
+      "build_dir": "_dev/research/jioh/task-11.3-the-re-measurement/finding/build/python3-block-low",
+      "workload_id": "c7-ml-train",
+      "moved": [
+        {
+          "entry": "cpu-batch",
+          "program": "python3",
+          "table": "python3_block",
+          "half_width": 0.108
+        }
+      ],
+      "library_sha256": "259ebe6e471f219d53d6ec4d81bdf11eccc8c9a8d3aa52ac26999fe0888a72ee",
+      "sha256": "d6ba7991fe908f3a9edd89ccc90e1d5f6d5bf703dcf89dc67b4a04ad04a7965c",
+      "lint_errors": []
+    },
+    {
+      "build": "all-four-low",
+      "build_dir": "_dev/research/jioh/task-11.3-the-re-measurement/finding/build/controls",
+      "workload_id": "c7-ml-train@corner-low",
+      "moved": [
+        {
+          "entry": "code-editor",
+          "component": "utility/libuv-worker",
+          "table": "gap",
+          "half_width": 0.0563
+        },
+        {
+          "entry": "code-editor",
+          "component": "utility/libuv-worker",
+          "table": "run",
+          "half_width": 0.0236
+        },
+        {
+          "entry": "cpu-batch",
+          "program": "python3",
+          "table": "python3_run",
+          "half_width": 0.273
+        },
+        {
+          "entry": "cpu-batch",
+          "program": "python3",
+          "table": "python3_block",
+          "half_width": 0.108
+        }
+      ],
+      "library_sha256": "d9dc671ac6ec30e095b1c18d5f8d2841336767c6441eb527b3e1ee239b2ad65e",
+      "sha256": "f3ade028ae433d4bc9e1dd78b7a2dbaeeb03edda41020b66cb64b7ad4c761e7e",
+      "lint_errors": []
+    }
+  ],
+  "controls": {
+    "nothing-moved": {
+      "blessed": "dataset/build/coreset-single/c7-ml-train.workload.json",
+      "blessed_sha256": "0d252d79161e616673a8992459722da6783c03dd29a2b4dd3aee65f5dfa0e350",
+      "identical": true
+    },
+    "all-four-low": {
+      "blessed": "dataset/build/coreset-single/c7-ml-train@corner-low.workload.json",
+      "blessed_sha256": "f3ade028ae433d4bc9e1dd78b7a2dbaeeb03edda41020b66cb64b7ad4c761e7e",
+      "identical": true
+    }
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "g": 0.5,
+  "floor_us": 1000,
+  "scorer": "as run (commit 6086e7e1)",
+  "simulator": "simulator@0d323c84470a",
+  "controls_reproduce": true,
+  "controls": {
+    "nothing-moved": {
+      "workload_id": "c7-ml-train",
+      "experiment": "rq0-gate-finding-controls",
+      "reproduces": "c7-ml-train",
+      "score_rows": 204,
+      "rq0_score_rows": 204,
+      "score_rows_equal": true,
+      "gap_row_equal": true,
+      "gap": "2.512497",
+      "rq0_gap": "2.512497"
+    },
+    "all-four-low": {
+      "workload_id": "c7-ml-train@corner-low",
+      "experiment": "rq0-gate-finding-controls",
+      "reproduces": "c7-ml-train@corner-low",
+      "score_rows": 204,
+      "rq0_score_rows": 204,
+      "score_rows_equal": true,
+      "gap_row_equal": true,
+      "gap": "0.000000",
+      "rq0_gap": "0.000000"
+    }
+  },
+  "builds": [
+    {
+      "build": "nothing-moved",
+      "workload_id": "c7-ml-train",
+      "experiment": "rq0-gate-finding-controls",
+      "moved": [],
+      "term": "editor input_latency p99",
+      "fixed_p99_us": 7194480.4,
+      "oracle_p99_us": 8020875.92,
+      "oracle_minus_fixed_us": 826395.5199999996,
+      "no_headroom": false,
+      "random_mean_score": -1.512497,
+      "gap": 2.512497,
+      "meets_g": true,
+      "below_g": false
+    },
+    {
+      "build": "libuv-gap-low",
+      "workload_id": "c7-ml-train",
+      "experiment": "rq0-gate-finding-libuv-gap-low",
+      "moved": [
+        {
+          "entry": "code-editor",
+          "component": "utility/libuv-worker",
+          "table": "gap",
+          "half_width": 0.0563
+        }
+      ],
+      "term": "editor input_latency p99",
+      "fixed_p99_us": 7194480.4,
+      "oracle_p99_us": 8020866.04,
+      "oracle_minus_fixed_us": 826385.6399999997,
+      "no_headroom": false,
+      "random_mean_score": -1.496021,
+      "gap": 2.496021,
+      "meets_g": true,
+      "below_g": false
+    },
+    {
+      "build": "libuv-run-low",
+      "workload_id": "c7-ml-train",
+      "experiment": "rq0-gate-finding-libuv-run-low",
+      "moved": [
+        {
+          "entry": "code-editor",
+          "component": "utility/libuv-worker",
+          "table": "run",
+          "half_width": 0.0236
+        }
+      ],
+      "term": "editor input_latency p99",
+      "fixed_p99_us": 7194480.4,
+      "oracle_p99_us": 8020875.92,
+      "oracle_minus_fixed_us": 826395.5199999996,
+      "no_headroom": false,
+      "random_mean_score": -1.509309,
+      "gap": 2.509309,
+      "meets_g": true,
+      "below_g": false
+    },
+    {
+      "build": "python3-run-low",
+      "workload_id": "c7-ml-train",
+      "experiment": "rq0-gate-finding-python3-run-low",
+      "moved": [
+        {
+          "entry": "cpu-batch",
+          "program": "python3",
+          "table": "python3_run",
+          "half_width": 0.273
+        }
+      ],
+      "term": "editor input_latency p99",
+      "fixed_p99_us": 8020850.48,
+      "oracle_p99_us": 8020875.92,
+      "oracle_minus_fixed_us": 25.43999999947846,
+      "no_headroom": true,
+      "random_mean_score": 1.0,
+      "gap": 0.0,
+      "meets_g": false,
+      "below_g": true
+    },
+    {
+      "build": "python3-block-low",
+      "workload_id": "c7-ml-train",
+      "experiment": "rq0-gate-finding-python3-block-low",
+      "moved": [
+        {
+          "entry": "cpu-batch",
+          "program": "python3",
+          "table": "python3_block",
+          "half_width": 0.108
+        }
+      ],
+      "term": "editor input_latency p99",
+      "fixed_p99_us": 7194480.4,
+      "oracle_p99_us": 8020875.92,
+      "oracle_minus_fixed_us": 826395.5199999996,
+      "no_headroom": false,
+      "random_mean_score": -1.505678,
+      "gap": 2.505678,
+      "meets_g": true,
+      "below_g": false
+    },
+    {
+      "build": "all-four-low",
+      "workload_id": "c7-ml-train@corner-low",
+      "experiment": "rq0-gate-finding-controls",
+      "moved": [
+        {
+          "entry": "code-editor",
+          "component": "utility/libuv-worker",
+          "table": "gap",
+          "half_width": 0.0563
+        },
+        {
+          "entry": "code-editor",
+          "component": "utility/libuv-worker",
+          "table": "run",
+          "half_width": 0.0236
+        },
+        {
+          "entry": "cpu-batch",
+          "program": "python3",
+          "table": "python3_run",
+          "half_width": 0.273
+        },
+        {
+          "entry": "cpu-batch",
+          "program": "python3",
+          "table": "python3_block",
+          "half_width": 0.108
+        }
+      ],
+      "term": "editor input_latency p99",
+      "fixed_p99_us": 8020840.08,
+      "oracle_p99_us": 8020865.52,
+      "oracle_minus_fixed_us": 25.43999999947846,
+      "no_headroom": true,
+      "random_mean_score": 1.0,
+      "gap": 0.0,
+      "meets_g": false,
+      "below_g": true
+    }
+  ],
+  "moving_alone": [
+    "python3-run-low"
+  ]
+}
