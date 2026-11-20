@@ -111,6 +111,26 @@ def test_lint_cli(tmp_path):
     assert proc.returncode == 1 and "majority_vote" in proc.stdout
 
 
+def test_an_executed_specs_pins_read_as_its_runs_tree(tmp_path):
+    """A spec whose run record is committed beside it: a pin the tree no longer matches is a note, every other
+    error still an error; without the record the same pin is an error (the harness changelog, 2026-11-20)."""
+    lint = lambda p: subprocess.run([sys.executable, str(TOOLS / "experiment_lint.py"), "--spec", str(p),
+                                     "--build", str(BUILD)], capture_output=True, text=True)
+    moved = _broken(tmp_path, lambda s: s["pins"]["dataset"].update(sha256="0" * 64))
+    proc = lint(moved)
+    assert proc.returncode == 1 and "pins/dataset" in proc.stdout and "note:" not in proc.stdout
+    (tmp_path / "mock-experiment").mkdir()
+    (tmp_path / "mock-experiment" / "runs.sha256.csv").write_text("workload_id,run,sha256\n")
+    proc = lint(moved)
+    assert proc.returncode == 0, proc.stdout
+    assert "note: pins/dataset" in proc.stdout and "executed" in proc.stdout
+    (tmp_path / "spec.yaml").unlink()
+    both = _broken(tmp_path, lambda s: (s["pins"]["dataset"].update(sha256="0" * 64),
+                                        s["criterion"].update(type="majority_vote")))
+    proc = lint(both)
+    assert proc.returncode == 1 and "majority_vote" in proc.stdout and "note: pins/dataset" in proc.stdout
+
+
 # ------------------------------------------------- 8.8's added fields
 
 def test_lint_refuses_a_sensitivity_reason_naming_no_boot_default(tmp_path):

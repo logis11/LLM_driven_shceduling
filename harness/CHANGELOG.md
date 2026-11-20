@@ -2,6 +2,14 @@
 
 The harness tree's own record of what its committed data files and programs changed, newest first. The scoring spec (`scoring/scoring-spec.yaml`) and the guard spec (`guards/guard-spec.yaml`) are frozen here (Phase 8 spec, decision 19): a change to either after its freeze is an entry below before any run reads it, and the RQ0 gate spec (`experiments/rq0-gate.yaml`) pins the frozen bytes by hash. The metrics doc and the data contracts keep their own changelogs.
 
+## 2026-11-20 — an executed spec's pins read as the tree its run read (jioh)
+
+Decided by 인지오 on 2026-11-20, beside `_dev/docs/spec/jioh/task-11.3-the-re-measurement.md`, decision 10: the second bless rebuilds the dataset on the re-measured library, and the RQ0 gate spec is not edited, its dataset pins naming the first bless. No pinned file changes, and no pin moves; no output changes.
+
+- **Experiment lint**, `tools/experiment_lint.py`: a spec whose run record is committed beside it (`experiments/<experiment>/runs.sha256.csv`; the RQ0 gate spec's `experiments/rq0-gate/runs.sha256.csv`) is executed, and the lint says so; it is linted as every spec but for its pins, which name the tree its run read — a pin the working tree no longer matches is printed as a note, every other error still an error. A spec without a run record is linted as before, and the runner's lint (`tools/harness/evaluator.py`, `lint_spec`) checks every pin before a run as before.
+- **Tests**, `tools/tests/test_experiment_spec.py`: a moved dataset pin is an error without the run record, a note with it, and an error of another kind stays an error beside the note.
+- **Commands**, `Makefile`: the `lint` target's help line.
+
 ## 2026-11-18 — the oracle's improvement read with its sign; the *oracle worse than fixed* mark (jioh)
 
 Decided by 인지오 (`_dev/docs/spec/jioh/phase-11-rq0-failure-procedure-diagnosis.md`, decisions 2 and 3; `_dev/docs/spec/jioh/task-11.1-the-scorers-sign-rule.md`, decisions 1–6). The scorer marked a term no headroom only when the oracle's improvement, taken without its sign, was under the aggregate's floor, so an oracle worse than `fixed` past the floor formed a share of inverted sign: in the RQ0 run `c7-ml-train`'s gap of 2.512 is that inversion, `random` scoring above `oracle`. No pinned file changes, and no pin moves; the RQ0 gate spec is not edited. The aggregates, guards and grades are unchanged; the scores and the report change on a term whose oracle is worse than `fixed` by its floor or more, and gain the mark's columns.
