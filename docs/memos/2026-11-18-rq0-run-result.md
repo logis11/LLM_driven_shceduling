@@ -1,6 +1,6 @@
 # RQ0 run의 결과 — FAIL(잠정)과 다음에 할 일
 
-> Status: memo · Created 2026-11-18 · Updated 2026-11-18
+> Status: memo · Created 2026-11-18 · Updated 2026-11-21
 > 닫힘 — 두 분께 부탁하는 것은 없어요. run의 기록은 `docs/rq0-run-record.md`, report는 `harness/experiments/rq0-gate/`에 있어요.
 > From 인지오 to 인경민, 박이안.
 
@@ -37,3 +37,14 @@
   - g = 0.25에서도 8개라서 FAIL이에요.
   - random이 oracle보다 나은 파일은 셋이에요: `c1-transcode`, `c2-p3a`, `c1-compile`.
 - oracle이 fixed보다 나쁜 term은 judging 파일 9개에 있어요. Phase 11에서 그 run들의 trace를 읽고, 각 경우가 프로그램의 결함인지 configuration의 성질인지 가려요.
+
+## 정정 (2026-11-21)
+
+- re-measurement를 끝냈어요(sub-task 11.3). `c7-ml-train`을 움직인 값은 학습 run(`cpu-batch`의 `python3`)의 voluntary block 사이 run이었어요. `c7-ml-train`이 담은 네 값을 하나씩 구간의 아래 끝에 두고 run의 프로그램으로 돌렸더니, 그 값 하나만 gap을 2.51에서 0.00으로 떨어뜨렸어요.
+- 그 entry를 새 repeat 107개로 다시 쟀어요(`meas-ci:background:2026-11-20`). runner의 kernel이 `7.0.0-1017-azure`로 바뀌어서 transparent huge pages의 기본값이 `madvise`예요. job이 `always`를 써 넣고, runner의 agent(`provjobd`)가 끝낸 wait은 그 wait이 끊은 run에 접어 넣었어요.
+  - voluntary block 사이 run: 69.49 s ±27.3 % → 55.27 s ±5.89 %
+  - block 하나: 311.5 µs ±10.8 % → 403.96 µs ±2.15 %
+- 새 값으로 dataset을 다시 bless했어요(`harness/CHANGELOG.md`, 2026-11-21). library hash 말고도 바뀐 artifact는 `python3`을 담은 파일뿐이고, demand는 하나도 안 움직였어요.
+- 첫 verdict이 최종이 됐어요: **FAIL, 19개 중 5개**(K = 10). 다시 만든 세 파일(`c2-p1a`, `c1-ml-train`, `c7-ml-train`)만 run의 프로그램과 run의 scorer로 다시 돌렸어요. `c7-ml-train`은 headroom이 없어져서(gap 0.00) 빠졌고, 나머지 16개는 run의 값 그대로예요.
+- 고친 프로그램(`simulator@841dc81131cb`, 부호를 고친 scorer)으로 읽은 post hoc reading은 그대로 19개 중 4개예요: `c2-p2a`, `c2-p2b`, `c7-browsing`, `c7-office`. verdict은 아니에요.
+- 기록은 `docs/rq0-run-record.md`의 2026-11-21 정정에 있어요.

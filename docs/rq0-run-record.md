@@ -1,6 +1,6 @@
 # The RQ0 run
 
-> Status: record · Created 2026-11-18 · Updated 2026-11-20
+> Status: record · Created 2026-11-18 · Updated 2026-11-21
 
 The record of the RQ0 run: the full matrix of the RQ0 gate spec (`harness/experiments/rq0-gate.yaml`) on the gated simulator and the real daemon, run once, cold, and its verdict read after the blind reading (sub-task 10.5, `_dev/docs/spec/jioh/task-10.5-the-rq0-run.md`). A rerun is appended below.
 
@@ -154,3 +154,43 @@ The verdict above stands as run.
 - 4 of 19 meet g, the post hoc reading's four. Every gap is the post hoc reading's but `c1-compile`'s, −0.069 against −0.071.
 
 The comparison: `_dev/research/jioh/task-11.2-the-degraded-oracle/rerun-compare.json`.
+
+### 2026-11-21 — the re-measurement (sub-task 11.3)
+
+The re-measurement the statement `re-measurement-contingency` names (`_dev/docs/spec/jioh/task-11.3-the-re-measurement.md`): the entry whose carried value moved `c7-ml-train` across g found, re-measured at a count fixed before its campaign, and folded in by a harness changelog entry and a second bless (`harness/CHANGELOG.md`, 2026-11-21).
+
+**The finding**, on the run's programs — `simulator@0d323c84470a` and the harness of commit `6086e7e1`, the scorer as run. `c7-ml-train` was built with each of the four carried values it holds at the lower bound of its interval, one at a time, and given the criterion's 102 runs; the editor's input-latency P99 at the primary:
+
+| build | `fixed` P99 (µs) | `oracle` P99 (µs) | gap |
+|---|---|---|---|
+| nothing moved — the run's `c7-ml-train` | 7,194,480.40 | 8,020,875.92 | 2.512 |
+| `code-editor`'s `utility/libuv-worker` gap table at −5.63 % | 7,194,480.40 | 8,020,866.04 | 2.496 |
+| `code-editor`'s `utility/libuv-worker` run table at −2.36 % | 7,194,480.40 | 8,020,875.92 | 2.509 |
+| `cpu-batch`'s `python3` runs between voluntary blocks at −27.3 % | 8,020,850.48 | 8,020,875.92 | 0.000 |
+| `cpu-batch`'s `python3` block per run at −10.8 % | 7,194,480.40 | 8,020,875.92 | 2.506 |
+| all four moved — the run's `c7-ml-train@corner-low` | 8,020,840.08 | 8,020,865.52 | 0.000 |
+
+The two controls reproduce the run's score rows and gap rows in every field. The training run's runs between voluntary blocks moves the file across g alone: `fixed` comes within 25.44 µs of `oracle`, under the 1,000 µs floor, and the term has no headroom. The entry found is `cpu-batch`'s `python3`.
+
+**The campaign**, `meas-ci:background:2026-11-20`: 107 fresh repeats of the 9.10 campaign's job, PyTorch's basic MNIST example, on the AMD EPYC 7763 — the count the stability rule projected at the pool as carried. The runners had moved to kernel `7.0.0-1017-azure`, transparent huge pages `madvise` by default, and the runner's agent `provjobd` ends thousands of the training run's waits a job; the job writes `always` before the run, and each wait the agent ends is folded into the run it interrupts (`_dev/research/jioh/task-11.3-the-re-measurement/campaign/method.md`, §5).
+
+| value | the 9.10 campaign, 6 repeats | 11.3, 107 repeats |
+|---|---|---|
+| run between voluntary blocks | 69.49 s ±27.3 % | 55.27 s ±5.89 % |
+| block per run | 311.5 µs ±10.8 % | 403.96 µs ±2.15 % |
+
+Both values keep their exception class. The CPU total, held to the rule and carried as the 9.10 campaign measured it, read 1,413.843 s ±0.34 %, inside its interval. The second bless rebuilt the core set, the 78 sensitivity variants and the five generated sets; beyond the library's hash only files holding `python3` changed, and no demand moved.
+
+**The closing.** The three judging files that hold `python3` — `c2-p1a`, `c1-ml-train`, `c7-ml-train` — rebuilt on the re-measured library, each with the criterion's 102 runs on the run's programs under the scorer as run, through a throwaway copy of the RQ0 gate spec holding them and `c2-p1b`; every guard passes, and no wait reaches 30 s. The other 16 judging files' rows are the run's: their artifacts changed in nothing but the library's hash.
+
+| file | gap, the run | gap, re-measured |
+|---|---|---|
+| `c2-p1a` | 0.377 | 0.417 |
+| `c1-ml-train` | 0.610 | 0.527 |
+| `c7-ml-train` | 2.512 | 0.000 — `fixed` 8,020,850.48 µs against `oracle` 8,020,875.92, no headroom |
+
+**The verdict, final in place of provisional: fail — 5 of 19 judging files meet g, against K = 10**: `c2-p2a`, `c2-p2b`, `c1-ml-train`, `c7-browsing`, `c7-office`.
+
+**The post hoc reading at the re-measured value**, not a verdict: the same three files on the fixed programs — `simulator@841dc81131cb` and the scorer with its sign rule — beside the other 16 files' rows from the criterion's runs on those programs (the 2026-11-20 correction). 4 of 19 meet g, the post hoc reading's four: `c2-p2a`, `c2-p2b`, `c7-browsing`, `c7-office`. `c2-p1a` 0.377 → 0.417, `c1-ml-train` 0.468 → 0.390, `c7-ml-train` 0.000 → 0.000.
+
+The record: `_dev/research/jioh/task-11.3-the-re-measurement/` — the finding (`finding.json`), the campaign (`campaign/`), the bless's report (`bless-report.json`) and the closing (`closing.json`).
