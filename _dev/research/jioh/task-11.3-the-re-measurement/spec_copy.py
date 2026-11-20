@@ -7,15 +7,18 @@ is written out; never committed.
 
     python3 spec_copy.py --experiment NAME --harness DIR --simulator VERSION --sim-command PATH
         --build-dir DIR --judging ID[,ID…] [--reporting ID[,ID…]] [--variants ID[,ID…]]
-        [--machine harness/runner.yaml] [--out-dir runs]
+        [--repin] [--machine harness/runner.yaml] [--out-dir runs]
 
 `--harness` is the harness tree whose evaluator lints the copy: `as-run/harness` beside this script (the RQ0
 run's, commit 6086e7e1) or `harness` (the current one). Writes `<out-dir>/<NAME>.spec.yaml` and
 `<out-dir>/<NAME>.machine.yaml`. Taken out of the copy: the alternative boot defaults, the files not named, the
 cap band's alternative tables and the guard exemptions naming them or a file the copy does not hold, the Layer-1
-exclusions of files it does not hold, and every reporting line. Nothing else changes."""
+exclusions of files it does not hold, and every reporting line. With `--repin` the dataset and variants pins name
+the working tree's manifests — the second bless (decision 10), which the RQ0 gate spec's pins, naming the first,
+do not. Nothing else changes."""
 import argparse
 import copy
+import hashlib
 import importlib
 import pathlib
 import sys
@@ -40,6 +43,7 @@ def main():
     ap.add_argument("--judging", required=True)
     ap.add_argument("--reporting", default="")
     ap.add_argument("--variants", default="")
+    ap.add_argument("--repin", action="store_true", help="the dataset and variants pins on the working tree's manifests")
     ap.add_argument("--machine", default=str(REPO / "harness" / "runner.yaml"))
     ap.add_argument("--out-dir", default=str(REPO / "runs"))
     args = ap.parse_args()
@@ -58,6 +62,11 @@ def main():
     out["reporting_lines"] = []
     out["pins"].pop("driver_table_alternatives", None)
     out["pins"]["simulator"] = {"version": args.simulator}
+    if args.repin:
+        sha = lambda rel: hashlib.sha256((REPO / rel).read_bytes()).hexdigest()
+        out["pins"]["dataset"]["sha256"] = sha(out["pins"]["dataset"]["path"])
+        for pin in (out["pins"].get("variants") or {}).values():
+            pin["sha256"] = sha(pin["path"])
     od = pathlib.Path(args.out_dir)
     od.mkdir(parents=True, exist_ok=True)
     spec_path = od / f"{args.experiment}.spec.yaml"
