@@ -1,0 +1,55 @@
+{
+  "criterion": {
+    "thp_before": "[always] madvise never",
+    "blocks": [
+      11,
+      24
+    ],
+    "ended_by": "khugepaged, every block but the two sleeps at the start"
+  },
+  "repeats": [
+    {
+      "repeat": 2,
+      "run": "44731957133",
+      "kernel": "7.0.0-1017-azure",
+      "thp_default": "always [madvise] never",
+      "thp_before": "[always] madvise never",
+      "thp_fault_alloc": 169386,
+      "thp_collapse_alloc": 163,
+      "pid": "28830",
+      "blocks": 5058,
+      "start_sleeps": 2,
+      "wakers": {
+        "provjobd2559914": 5036,
+        "khugepaged": 20,
+        "swapper": 2
+      },
+      "cpu_total_s": 1438.395277,
+      "run_between_blocks_mean_s": 0.29457204119999997,
+      "block_per_run_mean_us": 56.0635,
+      "reproduces": false
+    },
+    {
+      "repeat": 5,
+      "run": "44732389731",
+      "kernel": "7.0.0-1017-azure",
+      "thp_default": "always [madvise] never",
+      "thp_before": "[always] madvise never",
+      "thp_fault_alloc": 180143,
+      "thp_collapse_alloc": 157,
+      "pid": "28291",
+      "blocks": 3694,
+      "start_sleeps": 2,
+      "wakers": {
+        "provjobd2522534": 3674,
+        "khugepaged": 18,
+        "swapper": 2
+      },
+      "cpu_total_s": 1401.887079,
+      "run_between_blocks_mean_s": 0.3933465429,
+      "block_per_run_mean_us": 54.9773,
+      "reproduces": false
+    }
+  ],
+  "form_reproduces": false
+}
