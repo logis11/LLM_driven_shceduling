@@ -13,6 +13,8 @@ The record of sub-task 11.3 (`_dev/docs/spec/jioh/task-11.3-the-re-measurement.m
 
 | `campaign/method.md` | decisions 5 to 7: the training run's fresh campaign — the original campaign's method, the tag, the count, the launch, the replacements, the differences the venue forces; its amendments: the stop and the probe |
 | `campaign/watch_loop.sh`, `campaign/probe_read.py` | the campaign's watch, restarted after each landing; the probe's reading — each repeat's blocks and what ended them, against the criterion |
+| `bless_report.py`, `bless-report.json` | decision 10: the second bless's report — over every manifest under `dataset/`, the artifacts changing beyond the library's hash against the first bless and the demands that move |
+| `campaign/results/` | the campaign at 107: the pooled record and its rendering, `pool_runs.py`'s output, every repeat's blocks and what ended them (`blocks-check.json`, `campaign/blocks_check.py`), the runs and draws |
 | `campaign/probe-2026-11-20/`, `campaign/fold-check.json` | the probe: the two landed repeats' pooled record, raw and with the fold, their reading (`probe.json`), the runs and draws; the fold checked on the original campaign's six repeats and the probe's two |
 | `campaign/stop-2026-11-20/` | the stop: the two landed repeats' pooled record and rendering, the runs and the draws |
 

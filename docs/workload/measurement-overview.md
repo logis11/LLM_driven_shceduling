@@ -1,5 +1,5 @@
 # How the Workload Dataset Is Measured
-> Status: draft · Created 2026-09-29 · Updated 2026-10-31
+> Status: draft · Created 2026-09-29 · Updated 2026-11-21
 
 > The 28 measured archetypes of §2 — every entry of the library but the game chain (`game-task-chain`, built on `lavd-ossna24`'s reported figures) — take every value from our own measurement of the real program on a CI runner. This document covers them: which programs they are, what each measurement job runs and why it resembles real use, how a run becomes a carried value, when the repeats stop, the exceptions, the checks, the literature behind the method, and what the values claim. The operational rules are in `_dev/research/jioh/measurement-campaign-workflow.md`; every campaign's repeats, values and machine draws are in `_dev/research/jioh/measurement-campaign-record.md`.
 
@@ -86,7 +86,7 @@ A value whose spread is the machine's, a session's, a sparse count's or a rare e
 
 | class | when it applies | carried in | how it is carried |
 |---|---|---|---|
-| Spread follows the machine | The value moves with the runner — its disk, its speed or its kernel's housekeeping — not the program: e.g. its run times move together across every thread of a repeat while wake rates hold within about 1 %. | `cpu-batch`'s `python3` runs between blocks and block per run (±27.3 %, ±10.8 %; the runner's `khugepaged`); `module-build-orchestrator`'s tail block per run (±8.35 %; dkms's progress loop and the runner's disk); `renderer-hidden`'s and `game-client`'s run means (±5.3–18.1 %) | With its half-width, range and count, over at least five repeats; only for a value no reported effect rests on |
+| Spread follows the machine | The value moves with the runner — its disk, its speed or its kernel's housekeeping — not the program: e.g. its run times move together across every thread of a repeat while wake rates hold within about 1 %. | `cpu-batch`'s `python3` runs between blocks and block per run (±5.89 %, ±2.15 % over 11.3's re-measurement at 107 repeats; ±27.3 %, ±10.8 % over the 9.10 campaign's 6; the runner's `khugepaged`); `module-build-orchestrator`'s tail block per run (±8.35 %; dkms's progress loop and the runner's disk); `renderer-hidden`'s and `game-client`'s run means (±5.3–18.1 %) | With its half-width, range and count, over at least five repeats; only for a value no reported effect rests on |
 | Varies between sessions | A window of the phase's length slid along one long run moves the value far less than it moves across repeats. | `code-editor`'s `utility/libuv-worker` (within one run ±10.6 %, across repeats ±39 %); `renderer-hidden`'s quiet threads `Chrome_ChildIOT`, `Compositor` and `PerfettoTrace` (±6.5–17.6 %); `service-manager`'s pid 1 run mean (±7.8 %); `message-bus`'s system bus (±11 %) | Its wake rate, gap mean and run mean together, with both spreads |
 | Sparse component | It wakes only a few times a phase, so the spread is its count's own. | `renderer-hidden`'s residual (5.0–7.2 wakes per renderer per phase) | Its three values together, with its wake count stated |
 | Rare event within a run | An event a repeat catches none, one or two times. | Chrome's `MemoryInfra` heavy pass (8 over 22,800 s of idle phase, about one per 47 min); the Steam client's HTTP burst | The event's runs above a stated threshold leave the component and are carried as separate events at their pooled rate |
@@ -124,7 +124,7 @@ A repeat index relaunched in more than one run can land more than once, and ever
 | `video-call` | 45 | the rule | — |
 | `build-orchestrator`, `compiler-child` | 14 | the rule | — |
 | `module-build-orchestrator`, `module-compiler-child` | 26 landings of 23 repeats | the rule | the tail's block per run (machine) |
-| `cpu-batch` | `python3` 6; `kdenlive_render` 30 | the rule | `python3`'s two block values (machine) |
+| `cpu-batch` | `python3` 6, its two block values re-measured at 107 (11.3); `kdenlive_render` 30 | the rule; the re-measurement at the count fixed before it | `python3`'s two block values (machine) |
 | `video-transcoder` | 5 | the rule, at the minimum | — |
 | `package-upgrade` | 9 | the rule | — |
 | `file-indexer` | 18 | the rule | — |

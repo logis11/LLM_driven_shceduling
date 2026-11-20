@@ -129,9 +129,9 @@ carried_values:
      source: "9.8 D17, D18: run mean 0.0574 ms ±8.8 %"}
   - {entry: game-client, component: "VizCompositorTh", table: run, half_width: 0.056,
      source: "9.8 D17, D18: run mean 0.0818 ms ±5.6 %"}
-  - {entry: cpu-batch, program: python3, table: python3_run, half_width: 0.273,
-     source: "9.10 D87, D88 (9.6 D29's exception): runs between voluntary blocks 69.49 s ±27.3 %, the runner's khugepaged"}
-  - {entry: cpu-batch, program: python3, table: python3_block, half_width: 0.108,
-     source: "9.10 D87, D88: block per run 311.5 µs ±10.8 %"}
+  - {entry: cpu-batch, program: python3, table: python3_run, half_width: 0.0589,
+     source: "11.3's re-measurement (meas-ci:background:2026-11-20; 9.10 D87, D88, 9.6 D29's exception): runs between voluntary blocks 55.27 s ±5.89 % over 107 repeats, the runner's khugepaged"}
+  - {entry: cpu-batch, program: python3, table: python3_block, half_width: 0.0215,
+     source: "11.3's re-measurement (meas-ci:background:2026-11-20; 9.10 D87, D88): block per run 404.0 µs ±2.15 % over 107 repeats"}
   - {entry: module-build-orchestrator, table: tail_block, half_width: 0.0835,
      source: "9.10 D58: the serial tail's block per run ±8.35 % over 26 landings, dkms's progress loop and the runner's disk"}

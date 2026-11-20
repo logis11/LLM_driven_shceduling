@@ -22,6 +22,7 @@ All on GitHub-hosted `ubuntu-24.04` runners, 4 vCPU, pinned to one CPU, AMD EPYC
 | `meas-ci:background:2026-10-01` | 9.10 | `meas-background.yml` | #100–#105, app `upgrade`; the dry run #99 is not a repeat | 2026-10-01 10:07 UTC |
 | `meas-ci:background:2026-10-02` | 9.10 | `meas-background.yml` | #108–#114, app `dkms`; the dry runs #106 and #107 are not repeats | 2026-10-02 08:36 UTC |
 | `meas-ci:costs:2026-10-08` | 9.12 | `meas-costs.yml` | 37860888052, 37861874535, 37864232540 (jobs `kernel` and `llm`); the dry run 37859640740 is not a repeat | 2026-10-08 23:42 UTC (2026-10-09 KST) |
+| `meas-ci:background:2026-11-20` | 11.3 | `meas-background.yml` | #229–#286, app `mnist`, `cpu-batch`'s `python3` two block values re-measured at 107 fresh repeats under kernel `7.0.0-1017-azure`, huge pages written `always`, the runner agent's waits folded (`_dev/research/jioh/task-11.3-the-re-measurement/campaign/method.md`); the stop's runs #199–#208 and the probe's #209–#228 are not repeats | 2026-11-20 13:05 UTC |
 
 ## 9.5 — nine archetypes measured
 
@@ -323,6 +324,18 @@ The entry carries `cpu-batch`'s batch-loop form for the program `python3` (9.10 
 
 Reported beside them: the job 1,294.0–1,455.9 s, saturation 0.9999; 11–24 voluntary blocks a landing, every one but the two sleeps at the start (99–110 µs) ended by `khugepaged` under the runner's `always` mode; 168k–249k huge pages fault-allocated and 133–145 collapsed in each phase. The check under the desktop kernel's `madvise` mode (D87, D88), five jobs, pooled apart: CPU total 1,589.654 s ±2.01 %, ×1.144 the campaign's (95 % Welch interval ×1.102–×1.185), no block but the two start sleeps. Pooled in `task-9.10-scenarios-timelines/campaign/mnist/results/` (`pooled.json`, `results.md`; the check's `madvise-pooled.json`, `madvise-results.md`).
 
+## 11.3 — `cpu-batch`'s `python3`, its two block values re-measured
+
+Repeats 1–107 on the AMD EPYC 7763 under kernel `7.0.0-1017-azure`, 107 landings, every one valid by the original method's checks, `enabled` `[always] madvise never` before the phase as the job writes it (the image's default `madvise`); a count fixed before the launch (the 11.3 spec, decision 5), every repeat fresh. In each job's batch loop the waits the runner's agent `provjobd` ended are folded into the runs they interrupt (method §5, the fold): 529,991 waits, 2,890–8,343 a landing.
+
+| archetype | value | landings | mean | 95 % half-width | stopped by |
+|---|---|---|---|---|---|
+| `cpu-batch` (`python3`) | run between voluntary blocks | 107 | 55.27 s | ±5.89 % | the count; carried with its half-width, its spread `khugepaged`'s (9.10 D87) |
+| `cpu-batch` (`python3`) | block per run | 107 | 403.96 µs | ±2.15 % | the count; carried with its half-width (9.10 D87), within the rule |
+| `cpu-batch` (`python3`) | CPU total | 107 | 1,413.843 s | ±0.34 % | the count; within the rule — reported, the carried value the 9.10 campaign's |
+
+Reported beside them: the job 1,344.8–1,487.6 s; 11–46 voluntary blocks a landing after the fold, every one ended by the kernel — 9–44 by `khugepaged`, the two sleeps at the start in 91 landings and none in 16, one by `migration/1` in repeat 104. Against the library: the run between voluntary blocks inside the 9.10 campaign's carried interval, the block per run above it, the CPU total inside its interval.
+
 ## 9.10 — `video-transcoder`, HandBrakeCLI on CpsMark+'s transcode
 
 Repeats 1–5 on the AMD EPYC 7763, 5 landings, every one valid. The method's checks:
@@ -547,6 +560,8 @@ The untraced control of 9.5, 9.8 and 9.9, complete (9.5 D82, 9.8 D32, 9.9 D40): 
 The 9.10 Tracker campaign, complete: 38 jobs — 18 landed on the AMD EPYC 7763 (47.4 %, all pooled), 20 stopped by the machine gate: AMD EPYC 9V74 16, Intel Xeon Platinum 8573C 1, Intel Xeon Platinum 8370C 1, AMD EPYC 9V45 1, Intel Xeon 6973P-C 1. Its three dry runs (#118, #119, #121) drew the EPYC 7763 after four stops; its first batch (12 jobs, 7 landed) and its cold batch (8 jobs, 5 landed) were not pooled.
 
 The 9.10 MNIST campaign, complete: 8 jobs — 6 landed on the AMD EPYC 7763 (75.0 %, all pooled), 2 stopped by the machine gate: Intel Xeon 6973P-C 1, AMD EPYC 9V45 1. Its dry run (#142) drew the EPYC 7763 after one stop (AMD EPYC 9V45). Its `madvise` check (D87), never a repeat: 9 jobs, 5 landed, 4 stopped (AMD EPYC 9V45 2, AMD EPYC 9V74 2).
+
+The 11.3 re-measurement, complete (runs #229–#286): 680 jobs — 107 landed on the AMD EPYC 7763 (15.7 %, all pooled), 573 stopped by the machine gate: Intel Xeon 6975P-C 378, AMD EPYC 9V74 106, AMD EPYC 9V45 49, Intel Xeon Platinum 8573C 25, Intel Xeon Platinum 8370C 10, Intel Xeon 6973P-C 5. Before it, its stop (runs #199–#208; 2 landed, 121 stopped by the gate, the rest cancelled) and its probe (runs #209–#228; 2 landed, 28 stopped by the gate, 3 cancelled), never repeats.
 
 The 9.10 HandBrakeCLI campaign, complete: 9 jobs — 5 landed on the AMD EPYC 7763 (55.6 %, all pooled), 4 stopped by the machine gate: AMD EPYC 9V74 4. Its probe (D93), never a repeat, took 3 jobs, 2 landed and 1 stopped (Intel Xeon Platinum 8370C). Its two dry runs (#152, superseded by D95; #153) drew the EPYC 7763.
 

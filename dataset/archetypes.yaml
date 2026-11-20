@@ -1254,9 +1254,9 @@ archetypes:
         - EXIT: {}
     params:                        # D21, D22, D25: per bound program, pooled over its threads
       python3_run:
-        {dist: quantiles, p: [14, 112, 132, 188, 228276, 43515311, 238567291, 348129382, 876756180, 997987710], min: 12, max: 1006372964, means: [12.333, 14.208, 124.5, 155.5, 37075.867, 16396865, 121974151.611, 300343245.333, 553154227, 993324015.481, 1006372964], sampling: per-iteration, source: "meas-ci:background:2026-10-03"}
+        {dist: quantiles, p: [14, 141, 155, 191, 1223, 20473778, 204750672, 334780629, 759669393, 1177733035], min: 7, max: 1297955204, means: [12.94, 55.879, 148.35, 173.241, 362.215, 8575767.071, 84607538.445, 245655847.234, 466206878.931, 915601926.927, 1265961370.015], sampling: per-iteration, source: "meas-ci:background:2026-11-20"}
       python3_block:
-        {dist: quantiles, p: [32, 46, 99, 216, 350, 404, 478, 516, 548, 560], min: 12, max: 561, means: [14.333, 35.605, 67.702, 118.854, 309.368, 380.421, 428.877, 500.632, 531.741, 559.363, 561], sampling: per-iteration, source: "meas-ci:background:2026-10-03"}
+        {dist: quantiles, p: [9, 71, 102, 330, 446, 521, 591, 629, 713, 799], min: 1, max: 1109, means: [6.871, 33.477, 94.354, 195.561, 404.28, 479.166, 554.762, 608.346, 660.129, 741.728, 928.589], sampling: per-iteration, source: "meas-ci:background:2026-11-20"}
       kdenlive_render_run:
         {dist: quantiles, p: [4, 5, 6, 6, 9, 41, 2809, 3034, 5156, 13338], min: 4, max: 11553331, means: [4, 4.994, 5.218, 6, 7.497, 18.236, 1526.62, 2912.762, 3620.477, 5975.115, 1350900.31], sampling: per-iteration, source: "meas-ci:background:2026-10-03c"}
       kdenlive_render_block:
@@ -1266,10 +1266,11 @@ archetypes:
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "background:2026-10-03 (python3, 9.10 D82-D88); repeats [1-6]; runs 37091275421, 37091313419, 37093607991. background:2026-10-03c (kdenlive_render, 9.10 D101-D109); repeats [1-30]; runs 37124818629, 37124854279, 37125022331, 37125789856, 37125847561, 37126020125, 37126535233, 37127200770, 37127738977, 37127913545"
+      run: "background:2026-10-03 (python3, 9.10 D82-D88); repeats [1-6]; runs 37091275421, 37091313419, 37093607991. background:2026-11-20 (python3's run between voluntary blocks and block per run, re-measured, 11.3); repeats [1-107]; runs 44741312673, 44741522070, 44742117724, 44742759744, 44743491921, 44745112293, 44745519892, 44746310650, 44747455826, 44748569524, 44749316419, 44749604948, 44751132569, 44751898746, 44752551681, 44753728919, 44754373904, 44755845827, 44756481252, 44757031046, 44758105752, 44759053227, 44760132071, 44761580156, 44763248039, 44763662832, 44765878981, 44766217652, 44766843054, 44768185698, 44768819145, 44774719544, 44775351590, 44776328855, 44777193025, 44778012109, 44778296061, 44778882030, 44779180515, 44782199528, 44782679594. background:2026-10-03c (kdenlive_render, 9.10 D101-D109); repeats [1-30]; runs 37124818629, 37124854279, 37125022331, 37125789856, 37125847561, 37126020125, 37126535233, 37127200770, 37127738977, 37127913545"
       stats: ["saturation over the job: python3 0.99988-0.99991, kdenlive_render 0.9920-0.9946",
               "python3 CPU total 1,389.885 s +-4.04 % over 6 repeats (1,293.8-1,455.8 s), one process with one thread, shown as `python` (9.10 D85)",
-              "python3 runs between blocks 69.49 s +-27.3 % (53.9-114.9 s a repeat) and block per run 311.5 us +-10.8 % (268-370 us), over 6 repeats, carried with their half-widths: 11-24 blocks a repeat, every one but the two sleeps at the start ended by khugepaged (9.10 D87)",
+              "python3 runs between blocks 55.27 s +-5.89 % (30.6-121.2 s a repeat) and block per run 404.0 us +-2.15 % (233-504 us), over 107 repeats of 11.3's re-measurement, carried with their half-widths: 11-46 blocks a repeat, every one ended by the kernel — khugepaged's 9-44, the two sleeps at the start in 91 repeats, one migration wakeup — the runner's agent provjobd's 2,890-8,343 waits a repeat folded into the runs (11.3); over the 9.10 campaign's 6 repeats 69.49 s +-27.3 % and 311.5 us +-10.8 %, 11-24 blocks a repeat, every one but the two sleeps at the start ended by khugepaged (9.10 D87)",
+              "python3 CPU total over 11.3's 107 repeats 1,413.843 s +-0.34 % (1,344.8-1,487.6 s), inside the carried value's interval; the carried value the 9.10 campaign's",
               "python3 under the desktop kernel's transparent-hugepage default, madvise, five jobs beside the campaign: CPU total 1,589.654 s +-2.01 %, x1.144 (95 % interval x1.102-x1.185), no block but the two at the start (9.10 D88)",
               "kdenlive_render CPU total 16.545 s +-0.8 % over 30 repeats (16.055-17.305 s), run between voluntary blocks 1.932 ms +-0.8 %, block per run 4.593 us +-13.1 %, within the 1 us floor (9.10 D105, D109)",
               "kdenlive_render's tree: `kdenlive_render` and the `melt-7` it starts, 4 processes of 14 threads; `melt-7` holds 0.9960-0.9963 of the CPU, its busiest thread 0.682-0.691, the next 0.183-0.192 (9.10 D105)",
@@ -1284,7 +1285,12 @@ archetypes:
         24.04's English default layer built at 2026-09-22T17:00Z, started warm with the dataset local; the files show
         an actual training run and do not claim that desktop users train MNIST, and GPU training is unobservable on
         the runner (9.10 D12). The runner's kernel runs transparent huge pages in `always` mode; the desktop
-        kernel's default is `madvise` (9.10 D87, D88). `kdenlive_render` (9.10 D10, D101-D109): Kdenlive 23.08.5 as Ubuntu 24.04 packages it (MLT
+        kernel's default is `madvise` (9.10 D87, D88). Its run between voluntary blocks and block per run are 11.3's
+        re-measurement (`meas-ci:background:2026-11-20`; `_dev/research/jioh/task-11.3-the-re-measurement/`): 107
+        repeats of the same job on the same CPU model under kernel 7.0.0-1017-azure, whose image defaults transparent
+        huge pages to `madvise` — the job writes `always` before the run — and whose runner agent `provjobd` ends
+        thousands of the run's waits, each folded into the run it interrupts, as a preemption is; every other value
+        of the program is the 9.10 campaign's. `kdenlive_render` (9.10 D10, D101-D109): Kdenlive 23.08.5 as Ubuntu 24.04 packages it (MLT
         7.22.0, FFmpeg 6.1.1, x264 0.164.3108) exporting the `video-editor` project through its render dialog
         with its shipped default profile, MP4-H264/AAC (x264 `veryfast`, CRF 23, a GOP of 15, AAC at 160 kb/s,
         one processing thread) — 9.5's 20 s 1920 x 1080 30 fps H.264 clip (synthetic content, design) with an
@@ -1296,7 +1302,9 @@ archetypes:
         from one voluntary block to the next, pooled over the program's threads; the block after a run is the
         program's off-CPU time that followed it, zero when another thread ran on (D22, D25). `python3`'s two block
         values follow the runner's `khugepaged` rather than the program and are carried with their half-widths
-        instead of the 5 % tolerance (D29; 9.10 D87); its blocks are under 0.001 % of its job's time. No reported result may rest on a difference in such a value smaller than its stated half-width.
+        instead of the 5 % tolerance (D29; 9.10 D87), as 11.3 measured them over 107 repeats: the run between
+        voluntary blocks ±5.89 % (30.6-121.2 s a repeat), the block per run ±2.15 % (233-504 µs); its blocks are
+        under 0.001 % of its job's time. No reported result may rest on a difference in such a value smaller than its stated half-width.
         Under the desktop kernel's `madvise` default the same run takes x1.144 the CPU (x1.102-x1.185) and blocks
         only at its start (9.10 D88). Values are this
         software on this machine, not desktop truth (9.5 D10).

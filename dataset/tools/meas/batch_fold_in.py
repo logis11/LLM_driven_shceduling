@@ -3,7 +3,7 @@
 
 batch_fold_in.py [--check]
 
-`cpu-batch` (its `python3` program from 9.10's MNIST campaign, its `kdenlive_render` program from 9.10's Kdenlive export campaign), `compiler-child` and `build-orchestrator` (9.6), `file-archiver` and `game-download`
+`cpu-batch` (its `python3` program from 9.10's MNIST campaign, the run between voluntary blocks and the block per run from 11.3's re-measurement of it, its `kdenlive_render` program from 9.10's Kdenlive export campaign), `compiler-child` and `build-orchestrator` (9.6), `file-archiver` and `game-download`
 (9.7), `package-upgrade` (9.10), `module-build-orchestrator` and `module-compiler-child` (9.10), `file-indexer`, `video-transcoder` and `incremental-backup` (9.10) carry the quantile tables, each one pooled table of the campaign's record: a program's runs between voluntary
 blocks and the block after each run (9.6 D21, D22, D25; 9.7 D29), the object job's per-(role, step) CPU (9.6 D19,
 D20), make's dispatch run. Each is written in the library's table form (distribution.yaml_table: the ten quantiles,
@@ -30,7 +30,8 @@ POOLS = {"build": os.path.join(RESEARCH, "task-9.6-compile", "campaign", "result
          "upgrade": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "upgrade", "results", "pooled.json"),
          "dkms": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "dkms", "results", "pooled.json"),
          "tracker": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "tracker", "results", "pooled.json"),
-         "mnist": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "mnist", "results", "pooled.json"),
+         # 11.3: the training run's two exception-carried values re-measured at 107 fresh repeats (meas-ci:background:2026-11-20)
+         "mnist": os.path.join(RESEARCH, "task-11.3-the-re-measurement", "campaign", "results", "pooled.json"),
          "handbrake": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "handbrake", "results", "pooled.json"),
          "kdenlive": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "kdenlive", "results", "pooled.json"),
          "dejadup": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "dejadup", "results", "pooled.json")}
@@ -43,7 +44,7 @@ for _role, _steps in (("sh", 4), ("gcc", 3), ("cc1", 1), ("as", 1), ("fixdep", 1
     for _n in range(1, _steps + 1):
         TABLES[("compiler-child", f"{_role}_step_{_n}")] = (
             "build", ("phases", "build-j8-warm", "object_members", "step_cpu_us", f"{_role} {_n}/{_steps}"))
-# 9.10 D85: `python3` re-measured as PyTorch's basic MNIST example, from the MNIST campaign's record
+# 9.10 D85: `python3` re-measured as PyTorch's basic MNIST example; its two tables from 11.3's re-measurement's record
 TABLES[("cpu-batch", "python3_run")] = ("mnist", ("runs", "mnist", "phases", "mnist-train", "all", "batch_run_us"))
 TABLES[("cpu-batch", "python3_block")] = ("mnist", ("runs", "mnist", "phases", "mnist-train", "all", "batch_block_us"))
 # 9.10 D105, D106: `kdenlive_render`, Kdenlive's export of the video-editor project, from the export campaign's record
