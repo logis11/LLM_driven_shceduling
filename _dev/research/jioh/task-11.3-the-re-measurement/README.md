@@ -11,7 +11,9 @@ The record of sub-task 11.3 (`_dev/docs/spec/jioh/task-11.3-the-re-measurement.m
 | `finding-first-run.json` | the finding step's first run, every build under an id of its own (`c7-ml-train@<build>`): the control with all four moved did not reproduce the RQ0 run — 16 of its 100 `random` runs' P99 differed, every score and the gap equal, the schedules identical but the id. The simulator seeds its lottery draw from the FNV-1a hash of the workload id (`simulator/src/sim.cpp`, `lottery.seed(fnv1a(sim.workload_id()))`; the interpretation contract's §1), so a run under a LOTTERY row draws other tickets under another id. The builds of that run were never read; its outputs deleted |
 | `finding_read.py`, `finding.json` | decisions 2 and 3: the controls' score rows and gap rows against the RQ0 run's, then each build's `fixed` and `oracle` P99 and its gap under the scorer as run, and the builds below g |
 
-| `campaign/method.md` | decisions 5 to 7: the training run's fresh campaign — the original campaign's method, the tag, the count, the launch, the replacements, the differences the venue forces |
+| `campaign/method.md` | decisions 5 to 7: the training run's fresh campaign — the original campaign's method, the tag, the count, the launch, the replacements, the differences the venue forces; its amendments: the stop and the probe |
+| `campaign/watch_loop.sh`, `campaign/probe_read.py` | the campaign's watch, restarted after each landing; the probe's reading — each repeat's blocks and what ended them, against the criterion |
+| `campaign/stop-2026-11-20/` | the stop: the two landed repeats' pooled record and rendering, the runs and the draws |
 
 **The controls** (2026-11-20): the build with nothing moved, as `c7-ml-train`, and the build with all four moved, as `c7-ml-train@corner-low`, each byte-identical to its blessed artifact; on the RQ0 run's programs each reproduces the RQ0 run's 204 score rows and its gap row in every field.
 

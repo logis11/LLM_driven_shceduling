@@ -898,9 +898,14 @@ mn_job() {
   local r="$WORK/chroot"
   UPG_T0="${MEAS_MNIST_T0:-20260922T170000Z}"; UPG_EXTRA=python3-venv   # D82: D64's T0
   sudo rm -rf "$r"; upg_build "$r"; upg_mount "$r"; mn_state "$r"; mn_warm "$r"
-  # mnist-madvise: D87's check, never a repeat — the desktop kernel's transparent-hugepage mode (S2-50) for the phase
+  # mnist-madvise: D87's check, never a repeat — the desktop kernel's transparent-hugepage mode (S2-50) for the phase.
+  # mnist: the campaign's runner mode, `always` (D87), written where the image's default is another — 11.3's
+  # re-measurement, the runners' default `madvise` from kernel 7.0.0-1017-azure on; the default recorded first
+  rec thp.default.enabled "$(cat /sys/kernel/mm/transparent_hugepage/enabled 2>/dev/null)"
   if [ "$APP" = mnist-madvise ]; then
     echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/enabled > /dev/null; rec mnist.thp_set.rc "$?"
+  elif [ "$APP" = mnist ]; then
+    echo always | sudo tee /sys/kernel/mm/transparent_hugepage/enabled > /dev/null; rec mnist.thp_set.rc "$?"
   fi
   mn_thp before
   export MEAS_PIN=none
