@@ -1,6 +1,6 @@
 # The RQ0 run
 
-> Status: record · Created 2026-11-18 · Updated 2026-11-18
+> Status: record · Created 2026-11-18 · Updated 2026-11-20
 
 The record of the RQ0 run: the full matrix of the RQ0 gate spec (`harness/experiments/rq0-gate.yaml`) on the gated simulator and the real daemon, run once, cold, and its verdict read after the blind reading (sub-task 10.5, `_dev/docs/spec/jioh/task-10.5-the-rq0-run.md`). A rerun is appended below.
 
@@ -140,3 +140,17 @@ The verdict above stands as run: fail, 6 of 19, provisional (`_dev/docs/spec/jio
 | seed standard error above 0.05, as a share of the reference | `c7-ml-train` 0.337, `c1-transcode` 0.219, `c7-browsing` 0.195, `c7-office` 0.141, `c2-p3a` 0.071, `c1-ml-train` 0.052 | `c1-transcode` 0.214, `c7-browsing` 0.195, `c7-office` 0.141, `c2-p3a` 0.072 |
 
 Unchanged: the guards, the longest wait, Layer 1, the exclusion accuracy and the input wake count, which read no score; the bounding pair (0.533, 0.000, −0.533), whose two files have no term oracle worse than fixed. The script and its summary: `_dev/research/jioh/task-11.1-the-scorers-sign-rule/`.
+
+### 2026-11-20 — the fork-slot wait (sub-task 11.2)
+
+The run's simulator, `simulator@0d323c84470a`, kept rule B1's counter across a fork-slot wait — B1 puts a task in the batch class from one full slice of CPU since its last voluntary block to its next one. A FORK that found `fork_cap` reached blocked its task without resetting that count, where a WAIT on its children resets it (`docs/memos/2026-09-09-batch-class-rule-for-the-simulator.md`, its 2026-11-19 correction). An orchestrator stayed in the batch class across those waits — `make` in `c1-compile` and `c7-compile`, 17,004 and 5,639 of them in the two files' `oracle` runs. Fixed as the simulator's stage AF, `simulator@841dc81131cb` (`docs/memos/2026-11-19-simulator-changes-by-jioh.md`). None of 11.2's fifteen cases — a judging file's term on which `oracle` is worse than `fixed` by the floor or more — is a defect; each is a property of the configuration (`_dev/research/jioh/task-11.2-the-degraded-oracle/cases.md`).
+
+The verdict above stands as run.
+
+**The criterion's 1,938 runs on the fixed simulator**, not a rerun of this run: a throwaway copy of the RQ0 gate spec pinning `simulator@841dc81131cb`, the criterion's runs with `c2-p1b` and `c2-p3b` beside them, which the C2 pair guard on `c2-p1a` and `c2-p3a` reads, scored under the fixed sign rule.
+
+- `c1-compile` and `c7-compile` change, 101 of each file's 102 runs — the `oracle` run and the 100 `random` seeds. Their `fixed` runs and the other 17 files' runs are identical to this run's: the traces with the header line left out, the records with `sim` and `source_sha256` left out.
+- At the primary the same nine terms have `oracle` worse than `fixed`; none new, none vanished. `c1-compile`'s editor input-latency P99 under `oracle` is 363.144 s against 361.025 s.
+- 4 of 19 meet g, the post hoc reading's four. Every gap is the post hoc reading's but `c1-compile`'s, −0.069 against −0.071.
+
+The comparison: `_dev/research/jioh/task-11.2-the-degraded-oracle/rerun-compare.json`.
