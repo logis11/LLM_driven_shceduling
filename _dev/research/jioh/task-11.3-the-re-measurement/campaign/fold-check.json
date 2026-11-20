@@ -1,0 +1,55 @@
+{
+  "what": "the fold of the runner's agent's waits (dataset/tools/meas/background/analyze.py, agent_woken) checked before the campaign's launch",
+  "original": {
+    "campaign": "meas-ci:background:2026-10-03",
+    "repeats": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "folded_waits": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0
+    },
+    "batch_run_us_equal": true,
+    "batch_block_us_equal": true
+  },
+  "probe": {
+    "repeats": [
+      "2",
+      "5"
+    ],
+    "folded_waits": {
+      "2": 4860,
+      "5": 3543
+    },
+    "blocks": {
+      "2": 22,
+      "5": 20
+    },
+    "ended_by_khugepaged": {
+      "2": 20,
+      "5": 18
+    },
+    "start_sleeps": {
+      "2": 2,
+      "5": 2
+    },
+    "run_between_blocks_mean_s": {
+      "2": 62.539,
+      "5": 66.757
+    },
+    "block_per_run_mean_us": {
+      "2": 460.3,
+      "5": 352.7
+    },
+    "form_reproduces_under_the_fold": true
+  }
+}

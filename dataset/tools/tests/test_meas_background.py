@@ -705,3 +705,30 @@ def test_the_page_counts_the_machine_gate_and_the_network_gate_apart():
     assert "; stopped by the machine gate 2, by the network gate 1; other-model repeats 0." in pool.render(out)
     out["gated_out"] = out["gated_out"][:2]
     assert "; stopped by the machine gate 2; other-model repeats 0." in pool.render(out)
+
+
+# ---- 11.3: the runner's agent's waits folded into the training run's runs ------------------
+
+def _py_seg(t_in, t_end, state, tid=7):
+    return Seg(t_in=t_in, t_wake=t_in, t_end=t_end, run=(t_end - t_in) * 1000.0, comm="python", tid=tid, pid=tid,
+               state=state, cpu=3)
+
+
+def test_a_wait_the_agent_ends_is_folded_and_one_khugepaged_ends_is_not():
+    rows = [_py_seg(1.000000, 1.000100, "D"), _py_seg(1.000500, 1.000600, "D"), _py_seg(1.001200, 1.001300, "D"),
+            _py_seg(1.001310, 1.001313, "D"), _py_seg(1.001320, 1.001400, "R")]
+    wakers = {7: [(1.000400, "khugepaged"), (1.001100, "provjobd3296120"),
+                  (1.001310, "provjobd3296120"),   # stamped on the next schedule-in itself
+                  (1.001318, "provjobd3296120")]}
+    # the first wait khugepaged ends: a block of the program; the next three the agent ends: folded
+    assert analyze.agent_woken(rows, wakers) == {(7, 1.000500), (7, 1.001200), (7, 1.001310)}
+
+
+def test_the_burst_fallback_folds_only_where_every_near_row_is_the_agents():
+    rows = [_py_seg(2.000000, 2.000003, "D"), _py_seg(2.000009, 2.000012, "D"), _py_seg(2.000500, 2.000600, "R")]
+    # no row between the first wait's schedule-ins: the rows within 25 µs decide
+    agent_only = {7: [(2.000000, "provjobd1"), (2.000020, "provjobd1")]}
+    mixed = {7: [(2.000000, "provjobd1"), (2.000030, "khugepaged")]}
+    assert analyze.agent_woken(rows, agent_only) == {(7, 2.000000), (7, 2.000009)}
+    assert (7, 2.000000) not in analyze.agent_woken(rows, mixed)
+    assert analyze.agent_woken(rows, {}) == set()             # no row near: never folded

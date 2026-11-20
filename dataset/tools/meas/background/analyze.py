@@ -415,6 +415,70 @@ def bytes_per_wake(intervals, calls_by_tid):
     return out, unknown
 
 
+# ---- the runner's agent ------------------------------------------------------------
+# 11.3's re-measurement (_dev/research/jioh/task-11.3-the-re-measurement/campaign/method.md, §5, 2026-11-20): on the
+# runners of kernel 7.0.0-1017-azure the runner's agent `provjobd` (comm provjobd<N>, outside the measured tree, on
+# the harness CPUs) ends thousands of the training run's waits a job, about 55 µs each, where in the original campaign
+# it ended none. In the mnist job's batch loop — the runs between voluntary blocks and the block after each — such a
+# wait is no voluntary block of the program: it is folded into the run it interrupts, as a preemption is (the campaign
+# workflow's one-wake rule), and counted per repeat. The per-wake tables keep every wake as observed.
+AGENT = re.compile(r"^provjobd\d*$")
+AGENT_FOLD_JOBS = ("mnist",)
+_WAKE_ROW = re.compile(r"^\s*(\d+\.\d+)\s+\[(\d+)\]\s+(.*?)\s+awakened:\s+(.*?)\s*$")
+_TASK_ID = re.compile(r"^(.*)\[(\d+)(?:/\d+)?\]$")
+
+
+def load_wakers(path):
+    """tid -> sorted (time, waker comm) over the wakeup rows (the rows load_wakeups reads, with their waker)."""
+    out = defaultdict(list)
+    with gzip.open(path, "rt", errors="replace") as handle:
+        for line in handle:
+            m = _WAKE_ROW.match(line)
+            if not m:
+                continue
+            km = _TASK_ID.match(m.group(4).strip())
+            if not km:
+                continue
+            wm = _TASK_ID.match(m.group(3).strip())
+            out[int(km.group(2))].append((float(m.group(1)), (wm.group(1) if wm else m.group(3)).strip()))
+    for v in out.values():
+        v.sort()
+    return out
+
+
+AGENT_WAKE_TOLERANCE_S = 25e-6   # the rows' resolution, 1 µs, the clocks of the waker's and the sleeper's CPUs, and the
+# agent's bursts, a row every 9–20 µs; a wait khugepaged ends lasts 233–677 µs
+
+
+def agent_woken(rows, wakers, agent=AGENT, tol=AGENT_WAKE_TOLERANCE_S):
+    """{(tid, t_in)} of the segments in `rows` that ended asleep (S or D) and whose wake came from the agent: the
+    last wakeup row of the thread after the segment's schedule-in and at or before the thread's next schedule-in
+    (sched_waking may precede the sleeper's own switch-out, so the row can fall inside the segment); where there is
+    none — in a burst of the agent's wakeups the rows are stamped on the waker's CPU, a microsecond or more either
+    side of the sleeper's schedule-ins — when the thread's rows within `tol` of the wait are the agent's, one or
+    more, and no other waker's."""
+    by_tid = defaultdict(list)
+    for s in rows:
+        by_tid[s.tid].append(s)
+    out = set()
+    for tid, ss in by_tid.items():
+        ss.sort(key=lambda s: s.t_in)
+        ws = wakers.get(tid, [])
+        times = [t for t, _ in ws]
+        for s, n in zip(ss, ss[1:]):
+            if s.state[:1] not in shapes.VOLUNTARY:
+                continue
+            i = bisect_left(times, n.t_in + 1e-9) - 1
+            if i >= 0 and times[i] > s.t_in:
+                if agent.match(ws[i][1]):
+                    out.add((tid, s.t_in))
+                continue
+            near = [c for t, c in ws[bisect_left(times, s.t_end - tol):bisect_left(times, n.t_in + tol + 1e-9)]]
+            if near and all(agent.match(c) for c in near):
+                out.add((tid, s.t_in))
+    return out
+
+
 # ---- one phase -------------------------------------------------------------------
 
 def analyze_phase(D, phase, meas_cpu, edges, kv=None):
@@ -497,6 +561,11 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
     # the program-level off-CPU time from that run's voluntary block, zero when another thread of the program runs on
     # or is runnable — each block kept with the thread whose run it follows, so "all" is the threads' concatenation
     prog_rows = sorted((s for s in rows if tid2pid.get(s.tid, s.tid) in prog_set), key=lambda s: s.t_in)
+    agent_folded = None
+    if job in AGENT_FOLD_JOBS:   # 11.3: a wait the runner's agent ends is folded into the run, as a preemption is
+        folded = agent_woken(prog_rows, load_wakers(wk))
+        prog_rows = [s._replace(state="R") if (s.tid, s.t_in) in folded else s for s in prog_rows]
+        agent_folded = len(folded)
     batch_run, batch_block = defaultdict(list), defaultdict(list)
     for s_ in prog_rows:
         batch_run[s_.tid]   # every program thread with a row has a (possibly empty) list
@@ -559,6 +628,7 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
            "cmd_wall_s": round(e["cmd_wall_s"], 3) if e.get("cmd_wall_s") is not None else None, "rc": e.get("rc"),
            "phase_span_s": round(span_s, 3) if span_s else None,
            "segments_in_tree": len(rows), "resumes_merged": merged, "wake_rule_row_disagrees": wake_check,
+           **({"agent_folded_waits": agent_folded} if agent_folded is not None else {}),
            "disk_rule": "per-wait (sched_stat_iowait)" if iowait is not None else "process total (taskstats)",
            "iowait_rows_in_tree": sum(len(v) for t, v in (iowait or {}).items() if t in tree),
            "taskstats_rows": len(ts_rows), "taskstats_trailer": trailer,

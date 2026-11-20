@@ -409,6 +409,8 @@ def pool_app(app, reps, jobs=1):
              "outside_on_measured_cpu": {k: dict(list(A[k]["outside_on_measured_cpu"].items())[:5]) for k in have}}
         if any("cached_fraction" in A[k] for k in have):
             P["cached_fraction"] = {k: A[k].get("cached_fraction") for k in have}
+        if any("agent_folded_waits" in A[k] for k in have):   # 11.3: the runner's agent's waits folded into the runs
+            P["agent_folded_waits"] = {k: A[k].get("agent_folded_waits") for k in have}
         if any("network" in A[k] for k in have):
             P["network"] = {k: A[k].get("network") for k in have}
         keys = sorted({t for k in have for t in A[k]["_threads"]},
