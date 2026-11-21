@@ -1,0 +1,528 @@
+[
+ {
+  "workload_id": "c7-transcode",
+  "check": "fixed",
+  "point": "mlfq-s10000-b100000-q3-x2-cnone",
+  "reference": "runs/rq0-gate-rerun/c7-transcode/fixed~focus",
+  "reference_trace_sha256": "baa09d099fa5fb5c3dd438b13f59e9b92859a1eb4e48f460a99e9210bbd05bc6",
+  "reference_pinned": true,
+  "point_trace_sha256": "bcf0f692613f335412ccb886b9d3cdfa375aa282ff1647ce8e95b295adfd5c0e",
+  "lines": {
+   "equal": true,
+   "lines_point": 2448039,
+   "lines_reference": 2448039,
+   "first_difference": null
+  },
+  "restarted_boosts_set_aside": [],
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "video-editor",
+    "metric": "app_latency",
+    "aggregate": "p99",
+    "point": "11127962.000000",
+    "reference": "11127962.000000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-transcode",
+  "check": "oracle",
+  "point": "mlfq-s10000-b100000-q3-x2-c0.05",
+  "reference": "runs/rq0-gate-rerun/c7-transcode/oracle~focus",
+  "reference_trace_sha256": "09cd6a36d200268a16405bae36212de03949d255f0defedfd678b4de5bba6173",
+  "reference_pinned": true,
+  "point_trace_sha256": "09cd6a36d200268a16405bae36212de03949d255f0defedfd678b4de5bba6173",
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "video-editor",
+    "metric": "app_latency",
+    "aggregate": "p99",
+    "point": "1500322.000000",
+    "reference": "1500322.000000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-gaming",
+  "check": "fixed",
+  "point": "mlfq-s10000-b100000-q3-x2-cnone",
+  "reference": "runs/rq0-gate-rerun/c7-gaming/fixed~focus",
+  "reference_trace_sha256": "bf804f042fc88f1b097dc5660513e151af1994105495d45f343e43f8441dadd5",
+  "reference_pinned": true,
+  "point_trace_sha256": "72edae578e802714d88311f1f4ad6383a7e65864d7209d90caba8e35daa1df1e",
+  "lines": {
+   "equal": true,
+   "lines_point": 120058,
+   "lines_reference": 120058,
+   "first_difference": null
+  },
+  "restarted_boosts_set_aside": [],
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "game.chain.1",
+    "metric": "job",
+    "aggregate": "miss_rate",
+    "point": "1.000000",
+    "reference": "1.000000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-gaming",
+  "check": "oracle",
+  "point": "edf-s10000-c0.05",
+  "reference": "runs/rq0-gate-rerun/c7-gaming/oracle~focus",
+  "reference_trace_sha256": "a7e73d7f637a4f5184aa4ea040dd600036d65b8b123865cadc48a89551a97d4b",
+  "reference_pinned": true,
+  "point_trace_sha256": "a7e73d7f637a4f5184aa4ea040dd600036d65b8b123865cadc48a89551a97d4b",
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "game.chain.1",
+    "metric": "job",
+    "aggregate": "miss_rate",
+    "point": "0.000000",
+    "reference": "0.000000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c1-transcode",
+  "check": "fixed",
+  "point": "mlfq-s10000-b100000-q3-x2-cnone",
+  "reference": "runs/rq0-gate-rerun/c1-transcode/fixed~focus",
+  "reference_trace_sha256": "2fd7e0346806e426e418d6a5f1304efaec5b82406970e6b58f39637a1df3cc28",
+  "reference_pinned": true,
+  "point_trace_sha256": "8ed3f42cb73a83623b02d2127464dd731e967bea54114645ae41467a4c8dc318",
+  "lines": {
+   "equal": true,
+   "lines_point": 3809323,
+   "lines_reference": 3809323,
+   "first_difference": null
+  },
+  "restarted_boosts_set_aside": [
+   2000000
+  ],
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "video-editor",
+    "metric": "app_latency",
+    "aggregate": "p99",
+    "point": "447969.180000",
+    "reference": "447969.180000",
+    "equal": true
+   },
+   {
+    "entity": "batch",
+    "metric": "turnaround",
+    "aggregate": "turnaround",
+    "point": "3894612815.000000",
+    "reference": "3894612815.000000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c1-transcode",
+  "check": "oracle",
+  "point": "lottery-s10000-w0.333-c0.333",
+  "reference": "runs/rq0-gate-rerun/c1-transcode/oracle~focus",
+  "reference_trace_sha256": "949ce31c891e7a2a26ff38c8587e84840fa30bb6dbc86f43cf9be6db55e67345",
+  "reference_pinned": true,
+  "point_trace_sha256": "949ce31c891e7a2a26ff38c8587e84840fa30bb6dbc86f43cf9be6db55e67345",
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "video-editor",
+    "metric": "app_latency",
+    "aggregate": "p99",
+    "point": "430531.080000",
+    "reference": "430531.080000",
+    "equal": true
+   },
+   {
+    "entity": "batch",
+    "metric": "turnaround",
+    "aggregate": "turnaround",
+    "point": "4134853844.000000",
+    "reference": "4134853844.000000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-dev",
+  "check": "fixed",
+  "point": "mlfq-s10000-b100000-q3-x2-cnone",
+  "reference": "runs/rq0-gate-rerun/c7-dev/fixed~focus",
+  "reference_trace_sha256": "0bfab3897c8ddc9ed6b8a0ec0630eee1f49c65f2df94760a2d99e47f431a6dc4",
+  "reference_pinned": true,
+  "point_trace_sha256": "1b15b43d23e03bf3b8759e274b5d64d4bfb0faf24d4baf256a0cb9d923f002f7",
+  "lines": {
+   "equal": true,
+   "lines_point": 26147,
+   "lines_reference": 26147,
+   "first_difference": null
+  },
+  "restarted_boosts_set_aside": [],
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "editor",
+    "metric": "input_latency",
+    "aggregate": "p99",
+    "point": "1750097.400000",
+    "reference": "1750097.400000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-dev",
+  "check": "oracle",
+  "point": "mlfq-s10000-b100000-q3-x2-c0.05",
+  "reference": "runs/rq0-gate-rerun/c7-dev/oracle~focus",
+  "reference_trace_sha256": "b1c3a40d3d6b47b5acc8c3e61409059b8abe7e0328f25e7b3c2faf400bef43af",
+  "reference_pinned": true,
+  "point_trace_sha256": "b1c3a40d3d6b47b5acc8c3e61409059b8abe7e0328f25e7b3c2faf400bef43af",
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "editor",
+    "metric": "input_latency",
+    "aggregate": "p99",
+    "point": "5600806.080000",
+    "reference": "5600806.080000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-video-edit",
+  "check": "fixed",
+  "point": "mlfq-s10000-b100000-q3-x2-cnone",
+  "reference": "runs/rq0-gate-rerun/c7-video-edit/fixed~focus",
+  "reference_trace_sha256": "26552ddfc6ec91b8a25d70d47889ee17441bea013bc7a0e794d2661278af221f",
+  "reference_pinned": true,
+  "point_trace_sha256": "01e634288d7129dffe8b94f3029da9cb29bd94accc3761f05ce5d901386fcafe",
+  "lines": {
+   "equal": true,
+   "lines_point": 31258,
+   "lines_reference": 31258,
+   "first_difference": null
+  },
+  "restarted_boosts_set_aside": [],
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "editor",
+    "metric": "app_latency",
+    "aggregate": "p99",
+    "point": "4750232.680000",
+    "reference": "4750232.680000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-video-edit",
+  "check": "oracle",
+  "point": "mlfq-s10000-b100000-q3-x2-c0.05",
+  "reference": "runs/rq0-gate-rerun/c7-video-edit/oracle~focus",
+  "reference_trace_sha256": "a31e1d8451d955ff51c15d542e394b63fdd072f142ed0afcc87ea12c419d6835",
+  "reference_pinned": true,
+  "point_trace_sha256": "a31e1d8451d955ff51c15d542e394b63fdd072f142ed0afcc87ea12c419d6835",
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "editor",
+    "metric": "app_latency",
+    "aggregate": "p99",
+    "point": "8090656.020000",
+    "reference": "8090656.020000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-compile",
+  "check": "fixed",
+  "point": "mlfq-s10000-b100000-q3-x2-cnone",
+  "reference": "runs/rq0-gate-rerun/c7-compile/fixed~focus",
+  "reference_trace_sha256": "3db69ad7435b1ed894d8b59cf69e44ea1ceec8e7e322f2199d2cf349db774ea3",
+  "reference_pinned": true,
+  "point_trace_sha256": "ebb8ad6f70685bc1228214827098a996324790a100804e94527138ea9061a23b",
+  "lines": {
+   "equal": true,
+   "lines_point": 234087,
+   "lines_reference": 234087,
+   "first_difference": null
+  },
+  "restarted_boosts_set_aside": [],
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "editor",
+    "metric": "input_latency",
+    "aggregate": "p99",
+    "point": "58431291.000000",
+    "reference": "58431291.000000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-compile",
+  "check": "oracle",
+  "point": "mlfq-s10000-b100000-q3-x2-c0.05",
+  "reference": "runs/rq0-gate-rerun/c7-compile/oracle~focus",
+  "reference_trace_sha256": "39e2c253fa08456bee98f25925f30f485f6234702e70f31bd178c4d43d56dc2f",
+  "reference_pinned": true,
+  "point_trace_sha256": "39e2c253fa08456bee98f25925f30f485f6234702e70f31bd178c4d43d56dc2f",
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "editor",
+    "metric": "input_latency",
+    "aggregate": "p99",
+    "point": "87359931.000000",
+    "reference": "87359931.000000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c1-render",
+  "check": "fixed",
+  "point": "mlfq-s10000-b100000-q3-x2-cnone",
+  "reference": "runs/rq0-gate-rerun/c1-render/fixed~focus",
+  "reference_trace_sha256": "fa3e0deb8e16a96c8b6ad8e8f75af2b59b4fc55c6476a669a9aa37fffa9f3f33",
+  "reference_pinned": true,
+  "point_trace_sha256": "e6e33a2b25c48e844455a31b4d169130dc4176632f050c9e1d9779bd23250d17",
+  "lines": {
+   "equal": true,
+   "lines_point": 47320,
+   "lines_reference": 47320,
+   "first_difference": null
+  },
+  "restarted_boosts_set_aside": [
+   2000000
+  ],
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "editor",
+    "metric": "app_latency",
+    "aggregate": "p99",
+    "point": "535735.060000",
+    "reference": "535735.060000",
+    "equal": true
+   },
+   {
+    "entity": "bulk",
+    "metric": "turnaround",
+    "aggregate": "turnaround",
+    "point": "21394289.000000",
+    "reference": "21394289.000000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c1-render",
+  "check": "oracle",
+  "point": "lottery-s10000-w0.333-c0.333",
+  "reference": "runs/rq0-gate-rerun/c1-render/oracle~focus",
+  "reference_trace_sha256": "9e8d84213962343953adf78c7cff4028e006a1a513efeaf3b46330dfce16eb9e",
+  "reference_pinned": true,
+  "point_trace_sha256": "9e8d84213962343953adf78c7cff4028e006a1a513efeaf3b46330dfce16eb9e",
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "editor",
+    "metric": "app_latency",
+    "aggregate": "p99",
+    "point": "535735.060000",
+    "reference": "535735.060000",
+    "equal": true
+   },
+   {
+    "entity": "bulk",
+    "metric": "turnaround",
+    "aggregate": "turnaround",
+    "point": "22089192.000000",
+    "reference": "22089192.000000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-photo",
+  "check": "fixed",
+  "point": "mlfq-s10000-b100000-q3-x2-cnone",
+  "reference": "runs/rq0-gate-rerun/c7-photo/fixed~focus",
+  "reference_trace_sha256": "0356dac298593b7d01f1ab3b0f714c1452a07069701e3a53072dcd0ddcfb8a91",
+  "reference_pinned": true,
+  "point_trace_sha256": "2ee3549350cd60ccf478d64cc8d8cfe9c2ed7493c428f0d2e55581f53aee2ab5",
+  "lines": {
+   "equal": true,
+   "lines_point": 11145,
+   "lines_reference": 11145,
+   "first_difference": null
+  },
+  "restarted_boosts_set_aside": [],
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "photo-editor",
+    "metric": "app_latency",
+    "aggregate": "p99",
+    "point": "2978927.880000",
+    "reference": "2978927.880000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-photo",
+  "check": "oracle",
+  "point": "mlfq-s10000-b100000-q3-x2-c0.05",
+  "reference": "runs/rq0-gate-rerun/c7-photo/oracle~focus",
+  "reference_trace_sha256": "74074fc82fa439728843cac4556a891c429ef122b43eb1b7e8fb7c12bd4499dc",
+  "reference_pinned": true,
+  "point_trace_sha256": "74074fc82fa439728843cac4556a891c429ef122b43eb1b7e8fb7c12bd4499dc",
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "photo-editor",
+    "metric": "app_latency",
+    "aggregate": "p99",
+    "point": "2978927.880000",
+    "reference": "2978927.880000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-ml-train",
+  "check": "fixed",
+  "point": "mlfq-s10000-b100000-q3-x2-cnone",
+  "reference": "runs/rq0-gate-11-3-current/c7-ml-train/fixed~focus",
+  "reference_trace_sha256": "c5c0463a8f58b3f22a3ad7868937282c6e89437f3833c62938ff1e7ce6b734df",
+  "reference_pinned": true,
+  "point_trace_sha256": "7218c7ecf1c6e9e463b52001d9efb5865709fcd0a9d7d0503f011792c066c457",
+  "lines": {
+   "equal": true,
+   "lines_point": 664691,
+   "lines_reference": 664691,
+   "first_difference": null
+  },
+  "restarted_boosts_set_aside": [],
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "editor",
+    "metric": "input_latency",
+    "aggregate": "p99",
+    "point": "8020850.480000",
+    "reference": "8020850.480000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-ml-train",
+  "check": "oracle",
+  "point": "mlfq-s10000-b100000-q3-x2-c0.05",
+  "reference": "runs/rq0-gate-11-3-current/c7-ml-train/oracle~focus",
+  "reference_trace_sha256": "cda6ba7a0fd8c617a84ee5d31ccbbb09df28f4fe7e172a25eb5d8d0e25538415",
+  "reference_pinned": true,
+  "point_trace_sha256": "cda6ba7a0fd8c617a84ee5d31ccbbb09df28f4fe7e172a25eb5d8d0e25538415",
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "editor",
+    "metric": "input_latency",
+    "aggregate": "p99",
+    "point": "8020875.920000",
+    "reference": "8020875.920000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-render",
+  "check": "fixed",
+  "point": "mlfq-s10000-b100000-q3-x2-cnone",
+  "reference": "runs/rq0-gate-rerun/c7-render/fixed~focus",
+  "reference_trace_sha256": "ca1523e58444db008a67573a37c9f76d829bace95a006b1c4f8f5b437adb7462",
+  "reference_pinned": true,
+  "point_trace_sha256": "3f6ae71c1f3a511d6f4d04d6667293663a0c4e098643c63572a120803aebf8c5",
+  "lines": {
+   "equal": true,
+   "lines_point": 9678,
+   "lines_reference": 9678,
+   "first_difference": null
+  },
+  "restarted_boosts_set_aside": [],
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "editor",
+    "metric": "app_latency",
+    "aggregate": "p99",
+    "point": "5750294.660000",
+    "reference": "5750294.660000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ },
+ {
+  "workload_id": "c7-render",
+  "check": "oracle",
+  "point": "mlfq-s10000-b100000-q3-x2-c0.05",
+  "reference": "runs/rq0-gate-rerun/c7-render/oracle~focus",
+  "reference_trace_sha256": "bd5a76e9bdbf615e49ad47a86e1413b650b0dc1610a160a1515d85aa581d4ef9",
+  "reference_pinned": true,
+  "point_trace_sha256": "bd5a76e9bdbf615e49ad47a86e1413b650b0dc1610a160a1515d85aa581d4ef9",
+  "trace_equal": true,
+  "terms": [
+   {
+    "entity": "editor",
+    "metric": "app_latency",
+    "aggregate": "p99",
+    "point": "5750451.470000",
+    "reference": "5750451.470000",
+    "equal": true
+   }
+  ],
+  "reproduced": true
+ }
+]

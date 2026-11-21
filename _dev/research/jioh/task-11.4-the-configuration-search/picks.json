@@ -1,0 +1,527 @@
+{
+ "g": 0.5,
+ "meets_g": 4,
+ "fail": 15,
+ "picks": [
+  {
+   "rule": "the largest oracle improvement among the failing files with headroom, duplicate-heavy",
+   "workload_id": "c7-transcode",
+   "improvement": 0.865175492152112,
+   "gap": 0.12323484
+  },
+  {
+   "rule": "the largest oracle improvement among the failing files with headroom, low-duplicate",
+   "workload_id": "c7-gaming",
+   "improvement": 1.0,
+   "gap": 0.42698692
+  },
+  {
+   "rule": "the failing file whose gap fell furthest below g",
+   "workload_id": "c1-transcode",
+   "improvement": 0.0053895149487548505,
+   "gap": -2.01072738
+  }
+ ],
+ "no_headroom_on_every_term": [
+  {
+   "workload_id": "c1-render",
+   "oracle_worse_terms": [
+    "bulk"
+   ]
+  },
+  {
+   "workload_id": "c7-dev",
+   "oracle_worse_terms": [
+    "editor"
+   ]
+  },
+  {
+   "workload_id": "c7-photo",
+   "oracle_worse_terms": []
+  },
+  {
+   "workload_id": "c7-video-edit",
+   "oracle_worse_terms": [
+    "editor"
+   ]
+  },
+  {
+   "workload_id": "c7-compile",
+   "oracle_worse_terms": [
+    "editor"
+   ]
+  },
+  {
+   "workload_id": "c7-ml-train",
+   "oracle_worse_terms": []
+  },
+  {
+   "workload_id": "c7-render",
+   "oracle_worse_terms": []
+  }
+ ],
+ "files": [
+  {
+   "workload_id": "c2-p1a",
+   "runs": "rq0-gate-11-3-current",
+   "class": "low-duplicate",
+   "n_random": 100,
+   "gap": 0.4166148333333333,
+   "meets_g": false,
+   "all_no_headroom": false,
+   "terms": [
+    {
+     "entity": "editor",
+     "metric": "input_latency",
+     "value_fixed": "12953195.000000",
+     "value_oracle": "7442063.070000",
+     "no_headroom": 0,
+     "oracle_worse": 0,
+     "against_floor": "better"
+    },
+    {
+     "entity": "hog",
+     "metric": "cpu_delivered",
+     "value_fixed": "0.020220",
+     "value_oracle": "0.016853",
+     "no_headroom": 1,
+     "oracle_worse": 0,
+     "against_floor": "under"
+    }
+   ],
+   "improvement": 0.2836433755018228
+  },
+  {
+   "workload_id": "c2-p2a",
+   "runs": "rq0-gate-rerun",
+   "class": "low-duplicate",
+   "n_random": 100,
+   "gap": 0.5333333333333333,
+   "meets_g": true,
+   "all_no_headroom": false,
+   "terms": [
+    {
+     "entity": "download",
+     "metric": "cpu_delivered",
+     "value_fixed": "0.004144",
+     "value_oracle": "0.001492",
+     "no_headroom": 1,
+     "oracle_worse": 0,
+     "against_floor": "under"
+    },
+    {
+     "entity": "game.chain.1",
+     "metric": "job",
+     "value_fixed": "1.000000",
+     "value_oracle": "0.000000",
+     "no_headroom": 0,
+     "oracle_worse": 0,
+     "against_floor": "better"
+    }
+   ],
+   "improvement": 0.6666666666666666
+  },
+  {
+   "workload_id": "c2-p2b",
+   "runs": "rq0-gate-rerun",
+   "class": "low-duplicate",
+   "n_random": 100,
+   "gap": 0.8,
+   "meets_g": true,
+   "all_no_headroom": false,
+   "terms": [
+    {
+     "entity": "game.chain.1",
+     "metric": "job",
+     "value_fixed": "1.000000",
+     "value_oracle": "0.000000",
+     "no_headroom": 0,
+     "oracle_worse": 0,
+     "against_floor": "better"
+    }
+   ],
+   "improvement": 1.0
+  },
+  {
+   "workload_id": "c2-p3a",
+   "runs": "rq0-gate-rerun",
+   "class": "low-duplicate",
+   "n_random": 100,
+   "gap": -0.61315956,
+   "meets_g": false,
+   "all_no_headroom": false,
+   "terms": [
+    {
+     "entity": "bulk",
+     "metric": "turnaround",
+     "value_fixed": "22482188.000000",
+     "value_oracle": "23119499.000000",
+     "no_headroom": 1,
+     "oracle_worse": 1,
+     "against_floor": "worse"
+    },
+    {
+     "entity": "editor",
+     "metric": "app_latency",
+     "value_fixed": "45133.120000",
+     "value_oracle": "42435.190000",
+     "no_headroom": 0,
+     "oracle_worse": 0,
+     "against_floor": "better"
+    }
+   ],
+   "improvement": 0.030402319114791264
+  },
+  {
+   "workload_id": "c1-compile",
+   "runs": "rq0-gate-rerun",
+   "class": "low-duplicate",
+   "n_random": 100,
+   "gap": -0.068714735,
+   "meets_g": false,
+   "all_no_headroom": false,
+   "terms": [
+    {
+     "entity": "build",
+     "metric": "turnaround",
+     "value_fixed": "1495877689.000000",
+     "value_oracle": "1469132514.000000",
+     "no_headroom": 0,
+     "oracle_worse": 0,
+     "against_floor": "better"
+    },
+    {
+     "entity": "editor",
+     "metric": "input_latency",
+     "value_fixed": "235971211.090000",
+     "value_oracle": "363144270.320000",
+     "no_headroom": 1,
+     "oracle_worse": 1,
+     "against_floor": "worse"
+    }
+   ],
+   "improvement": -0.26052769272607734
+  },
+  {
+   "workload_id": "c1-ml-train",
+   "runs": "rq0-gate-11-3-current",
+   "class": "low-duplicate",
+   "n_random": 100,
+   "gap": 0.3901597,
+   "meets_g": false,
+   "all_no_headroom": false,
+   "terms": [
+    {
+     "entity": "editor",
+     "metric": "input_latency",
+     "value_fixed": "7976744.220000",
+     "value_oracle": "2343187.770000",
+     "no_headroom": 0,
+     "oracle_worse": 0,
+     "against_floor": "better"
+    },
+    {
+     "entity": "hog",
+     "metric": "turnaround",
+     "value_fixed": "1596104170.000000",
+     "value_oracle": "1599272357.000000",
+     "no_headroom": 1,
+     "oracle_worse": 1,
+     "against_floor": "worse"
+    }
+   ],
+   "improvement": 0.4701700823924118
+  },
+  {
+   "workload_id": "c1-render",
+   "runs": "rq0-gate-rerun",
+   "class": "low-duplicate",
+   "n_random": 100,
+   "gap": 0.0,
+   "meets_g": false,
+   "all_no_headroom": true,
+   "terms": [
+    {
+     "entity": "bulk",
+     "metric": "turnaround",
+     "value_fixed": "21394289.000000",
+     "value_oracle": "22089192.000000",
+     "no_headroom": 1,
+     "oracle_worse": 1,
+     "against_floor": "worse"
+    },
+    {
+     "entity": "editor",
+     "metric": "app_latency",
+     "value_fixed": "535735.060000",
+     "value_oracle": "535735.060000",
+     "no_headroom": 1,
+     "oracle_worse": 0,
+     "against_floor": "under"
+    }
+   ],
+   "improvement": -0.0108269236399178
+  },
+  {
+   "workload_id": "c1-transcode",
+   "runs": "rq0-gate-rerun",
+   "class": "low-duplicate",
+   "n_random": 100,
+   "gap": -2.01072738,
+   "meets_g": false,
+   "all_no_headroom": false,
+   "terms": [
+    {
+     "entity": "batch",
+     "metric": "turnaround",
+     "value_fixed": "3894612815.000000",
+     "value_oracle": "4134853844.000000",
+     "no_headroom": 1,
+     "oracle_worse": 1,
+     "against_floor": "worse"
+    },
+    {
+     "entity": "video-editor",
+     "metric": "app_latency",
+     "value_fixed": "447969.180000",
+     "value_oracle": "430531.080000",
+     "no_headroom": 0,
+     "oracle_worse": 0,
+     "against_floor": "better"
+    }
+   ],
+   "improvement": 0.0053895149487548505
+  },
+  {
+   "workload_id": "c7-browsing",
+   "runs": "rq0-gate-rerun",
+   "class": "duplicate-heavy",
+   "n_random": 100,
+   "gap": 1.12076054,
+   "meets_g": true,
+   "all_no_headroom": false,
+   "terms": [
+    {
+     "entity": "browser",
+     "metric": "input_latency",
+     "value_fixed": "7303.000000",
+     "value_oracle": "4784.970000",
+     "no_headroom": 0,
+     "oracle_worse": 0,
+     "against_floor": "better"
+    }
+   ],
+   "improvement": 0.3447939203067233
+  },
+  {
+   "workload_id": "c7-office",
+   "runs": "rq0-gate-rerun",
+   "class": "duplicate-heavy",
+   "n_random": 100,
+   "gap": 1.17645073,
+   "meets_g": true,
+   "all_no_headroom": false,
+   "terms": [
+    {
+     "entity": "writer",
+     "metric": "input_latency",
+     "value_fixed": "8978.000000",
+     "value_oracle": "6941.000000",
+     "no_headroom": 0,
+     "oracle_worse": 0,
+     "against_floor": "better"
+    }
+   ],
+   "improvement": 0.22688794831811093
+  },
+  {
+   "workload_id": "c7-dev",
+   "runs": "rq0-gate-rerun",
+   "class": "duplicate-heavy",
+   "n_random": 100,
+   "gap": 0.0,
+   "meets_g": false,
+   "all_no_headroom": true,
+   "terms": [
+    {
+     "entity": "editor",
+     "metric": "input_latency",
+     "value_fixed": "1750097.400000",
+     "value_oracle": "5600806.080000",
+     "no_headroom": 1,
+     "oracle_worse": 1,
+     "against_floor": "worse"
+    }
+   ],
+   "improvement": -2.2002824985626512
+  },
+  {
+   "workload_id": "c7-photo",
+   "runs": "rq0-gate-rerun",
+   "class": "duplicate-heavy",
+   "n_random": 100,
+   "gap": 0.0,
+   "meets_g": false,
+   "all_no_headroom": true,
+   "terms": [
+    {
+     "entity": "photo-editor",
+     "metric": "app_latency",
+     "value_fixed": "2978927.880000",
+     "value_oracle": "2978927.880000",
+     "no_headroom": 1,
+     "oracle_worse": 0,
+     "against_floor": "under"
+    }
+   ],
+   "improvement": 0.0
+  },
+  {
+   "workload_id": "c7-meeting",
+   "runs": "rq0-gate-rerun",
+   "class": "low-duplicate",
+   "n_random": 100,
+   "gap": 0.27929373,
+   "meets_g": false,
+   "all_no_headroom": false,
+   "terms": [
+    {
+     "entity": "voice",
+     "metric": "job",
+     "value_fixed": "0.199697",
+     "value_oracle": "0.057219",
+     "no_headroom": 0,
+     "oracle_worse": 0,
+     "against_floor": "better"
+    }
+   ],
+   "improvement": 0.7134709084262658
+  },
+  {
+   "workload_id": "c7-gaming",
+   "runs": "rq0-gate-rerun",
+   "class": "low-duplicate",
+   "n_random": 100,
+   "gap": 0.42698692,
+   "meets_g": false,
+   "all_no_headroom": false,
+   "terms": [
+    {
+     "entity": "game.chain.1",
+     "metric": "job",
+     "value_fixed": "1.000000",
+     "value_oracle": "0.000000",
+     "no_headroom": 0,
+     "oracle_worse": 0,
+     "against_floor": "better"
+    }
+   ],
+   "improvement": 1.0
+  },
+  {
+   "workload_id": "c7-video-edit",
+   "runs": "rq0-gate-rerun",
+   "class": "duplicate-heavy",
+   "n_random": 100,
+   "gap": 0.0,
+   "meets_g": false,
+   "all_no_headroom": true,
+   "terms": [
+    {
+     "entity": "editor",
+     "metric": "app_latency",
+     "value_fixed": "4750232.680000",
+     "value_oracle": "8090656.020000",
+     "no_headroom": 1,
+     "oracle_worse": 1,
+     "against_floor": "worse"
+    }
+   ],
+   "improvement": -0.7032125718944783
+  },
+  {
+   "workload_id": "c7-compile",
+   "runs": "rq0-gate-rerun",
+   "class": "duplicate-heavy",
+   "n_random": 100,
+   "gap": 0.0,
+   "meets_g": false,
+   "all_no_headroom": true,
+   "terms": [
+    {
+     "entity": "editor",
+     "metric": "input_latency",
+     "value_fixed": "58431291.000000",
+     "value_oracle": "87359931.000000",
+     "no_headroom": 1,
+     "oracle_worse": 1,
+     "against_floor": "worse"
+    }
+   ],
+   "improvement": -0.49508815405088347
+  },
+  {
+   "workload_id": "c7-ml-train",
+   "runs": "rq0-gate-11-3-current",
+   "class": "duplicate-heavy",
+   "n_random": 100,
+   "gap": 0.0,
+   "meets_g": false,
+   "all_no_headroom": true,
+   "terms": [
+    {
+     "entity": "editor",
+     "metric": "input_latency",
+     "value_fixed": "8020850.480000",
+     "value_oracle": "8020875.920000",
+     "no_headroom": 1,
+     "oracle_worse": 0,
+     "against_floor": "under"
+    }
+   ],
+   "improvement": 0.0
+  },
+  {
+   "workload_id": "c7-render",
+   "runs": "rq0-gate-rerun",
+   "class": "duplicate-heavy",
+   "n_random": 100,
+   "gap": 0.0,
+   "meets_g": false,
+   "all_no_headroom": true,
+   "terms": [
+    {
+     "entity": "editor",
+     "metric": "app_latency",
+     "value_fixed": "5750294.660000",
+     "value_oracle": "5750451.470000",
+     "no_headroom": 1,
+     "oracle_worse": 0,
+     "against_floor": "under"
+    }
+   ],
+   "improvement": 0.0
+  },
+  {
+   "workload_id": "c7-transcode",
+   "runs": "rq0-gate-rerun",
+   "class": "duplicate-heavy",
+   "n_random": 100,
+   "gap": 0.12323484,
+   "meets_g": false,
+   "all_no_headroom": false,
+   "terms": [
+    {
+     "entity": "video-editor",
+     "metric": "app_latency",
+     "value_fixed": "11127962.000000",
+     "value_oracle": "1500322.000000",
+     "no_headroom": 0,
+     "oracle_worse": 0,
+     "against_floor": "better"
+    }
+   ],
+   "improvement": 0.865175492152112
+  }
+ ]
+}

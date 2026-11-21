@@ -1,0 +1,51 @@
+{
+ "simulator": "simulator@841dc81131cb",
+ "files": [
+  {
+   "workload_id": "c1-compile",
+   "reference": "runs/rq0-gate-rerun/c1-compile/fixed~focus",
+   "re_applied_at": [
+    2000000
+   ],
+   "strict": {
+    "equal": false,
+    "lines_point": 848612,
+    "lines_reference": 848613,
+    "first_difference": {
+     "line": 905,
+     "point": "{\"event\":\"ready\",\"t\":2000229,\"task\":\"build\",\"cause\":\"fork_slot\"}",
+     "reference": "{\"event\":\"x_mlfq_boost\",\"t\":2000000}"
+    }
+   },
+   "restarted_boost_set_aside": {
+    "equal": true,
+    "lines_point": 848612,
+    "lines_reference": 848612,
+    "first_difference": null
+   }
+  },
+  {
+   "workload_id": "c1-ml-train",
+   "reference": "runs/rq0-gate-11-3-current/c1-ml-train/fixed~focus",
+   "re_applied_at": [
+    2000000
+   ],
+   "strict": {
+    "equal": false,
+    "lines_point": 773663,
+    "lines_reference": 773664,
+    "first_difference": {
+     "line": 867,
+     "point": "{\"event\":\"run_end\",\"t\":2000241,\"task\":\"hog\",\"reason\":\"block\",\"blocked_on\":\"sleep\"}",
+     "reference": "{\"event\":\"x_mlfq_boost\",\"t\":2000000}"
+    }
+   },
+   "restarted_boost_set_aside": {
+    "equal": true,
+    "lines_point": 773663,
+    "lines_reference": 773663,
+    "first_difference": null
+   }
+  }
+ ]
+}

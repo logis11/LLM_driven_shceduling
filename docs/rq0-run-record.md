@@ -194,3 +194,50 @@ Both values keep their exception class. The CPU total, held to the rule and carr
 **The post hoc reading at the re-measured value**, not a verdict: the same three files on the fixed programs — `simulator@841dc81131cb` and the scorer with its sign rule — beside the other 16 files' rows from the criterion's runs on those programs (the 2026-11-20 correction). 4 of 19 meet g, the post hoc reading's four: `c2-p2a`, `c2-p2b`, `c7-browsing`, `c7-office`. `c2-p1a` 0.377 → 0.417, `c1-ml-train` 0.468 → 0.390, `c7-ml-train` 0.000 → 0.000.
 
 The record: `_dev/research/jioh/task-11.3-the-re-measurement/` — the finding (`finding.json`), the campaign (`campaign/`), the bless's report (`bless-report.json`) and the closing (`closing.json`).
+
+## The failure procedure
+
+### 2026-11-21 — the configuration search (sub-task 11.4)
+
+The configuration search the statement `failure-procedure` names, after the fail (`_dev/docs/spec/jioh/task-11.4-the-configuration-search.md`): the search spec `harness/experiments/rq0-config-search.yaml`, committed before any search run (`79608bff`), run by the search tool `harness/tools/search.py` (`harness/CHANGELOG.md`, 2026-11-21). A point is one configuration applied where the oracle applies its row, the labels ignored: 470 configurations — MLFQ 288, LOTTERY 110, EDF 66, FIFO 6 — on ten files, 4,700 runs. The files: the three picks by the statement's rule on the corrected runs — `c7-transcode`, `c7-gaming`, `c1-transcode` — and the seven judging files with no headroom on every term, the statement's additional trigger for the table check.
+
+**Route: the table is rewritten.** 8 of the 10 files are at finding 3, spread the prior table missed. The route is the same at every g of the band, 0.25 to 0.67, and under each of the ten alternative boot defaults.
+
+| | |
+|---|---|
+| machine | the home M1 Pro; `workers` 4, `heavy_workers` 3, `heavy_mb` 50; an execution cache of its own |
+| commit | `79608bff` |
+| search spec | SHA-256 `a849e4dc453b…`; the pins as the report lists them — the second bless's dataset manifest, the prior table, the scoring spec, guard spec 1.4 |
+| programs | `simulator@841dc81131cb`, `daemon@62c71f0d2de0` |
+| runs | 4,700, every one built; no failed run |
+| started | 2026-11-21T10:20:08+0900 |
+| the checks | the twenty, reproduced by 10:22 |
+| finished | 2026-11-21T15:41:35+0900 — 5 h 21 min of wall time; 71,112 s of runs summed |
+| disk | `runs/rq0-config-search` 31 GB, its execution cache 9.8 GB |
+
+**The checks.** Before the grid was read, on each file, the boot default's point reproduced the file's corrected `fixed` run and the row's point its corrected `oracle` run — 20 of 20. The row's point's trace is the `oracle` run's byte for byte. The boot default's point's trace is the `fixed` run's line for line with the configuration's own lines set aside (`meta`, `config_applied`, `x_config_pending`), and on `c1-transcode` and `c1-render`, whose oracle applies its row again at 2 s, the `x_mlfq_boost` line at that instant: a same-algorithm MLFQ entry restarts the boost timer (`docs/harness/metrics.md` §11 item 9). The scored terms equal the corrected scores' to six places.
+
+**A point's quantity**: per scored term, its improvement over `fixed` divided by `fixed`'s value, signed, zero under the term's floor (1,000 µs for latency-type aggregates, 0.01 for fraction-type), weighted over the file's terms by the scoring spec's weights. **The findings**: 1, no two read points differ on a scored term by the floor or more; 3, the row's quantity is at most (1 − g) of the best point's, g = 0.5, and the best point is better than the row on a term by the floor or more; 2, neither.
+
+| file | kind | finding | under the g band | under the boot defaults | row's quantity | best point | best's quantity | points out of the reading |
+|---|---|---|---|---|---|---|---|---|
+| `c7-transcode` | pick | 2 | 2 | 2–3 | 0.865 | `fifo-c0.2` | 0.988 | 20 |
+| `c7-gaming` | pick | 2 | 2 | 2 | 1.000 | the row, `edf-s10000-c0.05` | 1.000 | 0 |
+| `c1-transcode` | pick | 3 | 3 | 3 | 0.005 | `mlfq-s20000-b10000-q3-x2-c0.5` | 0.562 | 16 |
+| `c7-dev` | the row worse | 3 | 3 | 3 | −2.200 | `mlfq-s10000-b10000-q3-x2-c0.95` | 0.684 | 0 |
+| `c7-video-edit` | the row worse | 3 | 3 | 3 | −0.703 | `mlfq-s10000-b10000-q3-x2-c0.333` | 0.809 | 0 |
+| `c7-compile` | the row worse | 3 | 3 | 3 | −0.495 | `mlfq-s100000-b100000-q3-x2-cnone` | 0.974 | 32 |
+| `c1-render` | the row worse | 3 | 3 | 2–3 | −0.011 | `mlfq-s30000-b10000-q3-x2-c0.95` | 0.053 | 0 |
+| `c7-photo` | the row changing nothing | 3 | 3 | 2–3 | 0.000 | `fifo-c0.333` | 0.356 | 0 |
+| `c7-ml-train` | the row changing nothing | 3 | 3 | 3 | 0.000 | `fifo-c0.95` | 0.898 | 7 |
+| `c7-render` | the row changing nothing | 3 | 3 | 3 | 0.000 | `mlfq-s10000-b10000-q3-x2-c0.05` | 0.944 | 0 |
+
+A point's name gives its configuration: `mlfq-s<top slice, µs>-b<boost interval, µs>-q<queue count>-x<slice growth>-c<cap>`, `edf-s<residual slice>-c<cap>`, `lottery-s<slice>-w<batch share>-c<cap>`, `fifo-c<cap>`; `cnone` no cap.
+
+- **The two files at finding 2.** On `c7-gaming` the row reaches a frame miss rate of 0 against `fixed`'s 1; all 66 EDF points reach it and no point of another algorithm. 3 of the prior table's 8 distinct configurations have a quantity at least the row's. On `c7-transcode` 23 of the 450 read points are above the row, the best 0.988; of the prior table's 8, the row alone.
+- **Under the boot defaults**, a finding changes on three files: `c7-transcode` at finding 3 under the 30 ms top slice; `c1-render` at finding 2 under 100 ms; `c7-photo` at finding 2 under 0.5, 0.7, 1.2, 2, 5, 7 and 20 ms. Under 100 ms, `c7-transcode`, `c1-transcode` and `c7-ml-train` have no reading: the boot default's point there is out of the reading, as those files' `fixed` runs under `ostep-slice-100000us` failed `starvation_floor` in the RQ0 run.
+- **Out of the reading**, 75 points on four files, each listed in the report with what it failed: on `c7-transcode` and `c1-transcode`, 7 each failing `starvation_floor` and the wait check and 13 and 9 the wait check alone — the video editor waiting 119 to 168 s, all MLFQ with the 10 ms boost interval or the 100 ms top slice, and FIFO; on `c7-compile`, 32 the wait check alone, a build job waiting 31.6 to 152.2 s under a cap; on `c7-ml-train`, 7 failing `starvation_floor` and the wait check, the editor waiting 288.0 s under no cap.
+- **LOTTERY's draw.** With the LOTTERY points removed, the row's own kept, no file's finding changes.
+- **The limits.** MLFQ's queue count and slice growth were moved one at a time, at the boot slice and boost interval under each cap, not crossed. The search ran at the primary boot default alone; no variant file was searched. The search is read-only: nothing it found is written into a table.
+
+The report and the files beside it: `harness/experiments/rq0-config-search/` — `report.json` and `report.md`, `points.csv` (every term of every point, the file the report is read from again), `runs.sha256.csv` (every run's trace hash and records hash, 4,700 lines). The run's operational record and the scripts that read the results: `_dev/research/jioh/task-11.4-the-configuration-search/`.
