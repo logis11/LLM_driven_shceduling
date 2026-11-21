@@ -26,3 +26,12 @@ def test_the_backlog_at_the_arrival_counts_a_run_released_before_it():
 def test_the_fixed_point_counts_only_what_is_released_before_it():
     # 2 + 4 + 1 + 1 (the backlog) = 8 ms; the 3 ms wake's 2 ms makes 10 ms, and the 9 ms wake's 2 ms 12 ms
     assert end_bound.end_bound(_artifact(), "bulk")["fixed_point"] == 12000
+
+
+def test_a_wait_no_wake_answers_blocks_the_task_for_good():
+    # a segment-bound program ends on a blocking instruction no wake answers (9.23 D16): the editor waits there
+    # until it departs, and nothing after it is released; the bound is the one without that last WAIT
+    art = _artifact()
+    art["events"][0]["program"].append({"op": "WAIT", "channel": "timer:editor"})
+    r = end_bound.end_bound(art, "bulk")
+    assert (r["others_after"], r["bound"], r["fixed_point"]) == (4000, 11000, 12000)

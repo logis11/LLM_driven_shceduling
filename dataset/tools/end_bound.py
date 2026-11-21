@@ -23,7 +23,10 @@ def releases(task, wakes):
         if op["op"] == "WAIT":
             k = seen.get(op["channel"], 0)
             seen[op["channel"]] = k + 1
-            t = wakes[(task["id"], op["channel"])][k]
+            on_channel = wakes.get((task["id"], op["channel"]), [])
+            if k >= len(on_channel):   # no wake answers it: the task blocks here for good (9.23 D16)
+                break
+            t = on_channel[k]
         elif op["op"] == "RUN":
             out.append((t, op["us"]))
         elif op["op"] != "EXIT":
