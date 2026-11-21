@@ -109,6 +109,15 @@ Wave 1: K1–K4. Wave 2: K5–K8. Wave 3: K9, its index lines read against the e
 - About a dozen targeted guidebook commits between 2026-10-20 and 2026-11-01 are not named in the guidebook's lists of correction passes. Each fixed one change rather than re-reading a volume.
 - Chapter 7 §2.8 shows the 2026-10-17 library hash and pins as an example of the variants manifest's structure. Left as an example of that build; chapter 3's first example and chapter 7's first are dated in place.
 
+## Outside items resolved (2026-11-21, on 인지오's request)
+
+- **The later blesses' Linux runs** — on record after all: dataset runs 41190176937 (`b24f8c89`, core `d80f06e0…`), 41197142459 (`84ce79bf`, `27d347bc…`) and 44833335792 (`2487ba27`, `9f30ea8f…`), each green from `lint` to `check`. The dataset guidebook's chapters 1 and 7 name them, and chapter 7's run table has their step times (`356ac556`).
+- **The rebuild memo's regression check** — answered by 인경민's `src/sim == steps/sim_y` 129/129 on the rebuilt core set and variants (`simulator/memo/memo_261023.md` Part C, 2026-10-23). The memo's status line and its index line keep the EDF re-measurement open (`356ac556`).
+- **인경민's Backlog intro** names stage AF (`356ac556`).
+- **The daemon's first milestone** — shown on all 51 core files: `fixed`, `oracle` and `random` (seed 1) under both telemetry shapes, 306 runs, each byte-identical to the mock daemon and to its own rerun, on `daemon@62c71f0d2de0` (`daemon_milestone_check.py`, `daemon-milestone-check.json`). The daemon guide states it; `daemon/README.md` gains the check, and its validator sentence now matches what `daemon.py` does for `fixed` (`356ac556`). 박이안 to be told.
+- **The harness changelog's 2026-11-14 cap-band test** — a new entry restates it to the mocks, with the second cold smoke as where the label held on the real programs (`356ac556`).
+- **`dataset/tools/end_bound.py`** — a `WAIT` no wake answers now blocks its task for good. It had crashed on every segment-bound file since 9.23 D16 (2026-10-15). The fix carries a test, and `make -C dataset test` passes, 564 passed and 1 skipped (`c50967b7`).
+
 ## Rows by file
 
 | file | apply | waits on a question | left |
