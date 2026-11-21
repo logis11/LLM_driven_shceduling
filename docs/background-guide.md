@@ -1,5 +1,5 @@
 # Background Guide — everything to know before building your part
-> Status: normative · Created 2026-08-28 · Updated 2026-10-31
+> Status: normative · Created 2026-08-28 · Updated 2026-11-21
 
 This is the shared first half of onboarding for both builders — the simulator (인경민) and the daemon (박이안) — written for a reader who has skimmed the research proposal once and has general CS knowledge but no OS background. It is deliberately self-contained: it re-explains everything it needs, in plain language, so you can read it top to bottom without opening another document. The component-specific second halves — what your program must do — are `simulator/simulator-guide.md` and `daemon/daemon-guide.md`, each of which assumes you've read this one.
 
@@ -68,7 +68,7 @@ What does a recognizer's answer actually look like? Two parts, fixed by the rati
 
 The executor's side of the bargain is a **configuration**: a small bundle of scheduler settings like "use the MLFQ algorithm with these queue parameters" or "switch to deadline-first scheduling and cap background work at 12% of the CPU." A fixed lookup table — the **driver table**, living on the daemon side — maps (mode, attributes) to configuration; the recognizer's only job is to land on the right row. (In the most permissive LLM variant the model proposes the configuration itself — that's variant C — but the table is the default path.)
 
-And before any LLM enters the picture, there's a cheap kill-check called **RQ0**: run just `fixed`, `random` and `oracle` first. If perfect recognition barely beats random guessing, then recognition quality doesn't matter on these workloads — the experiment is dead and no prompt engineering can revive it. That check needs no model, no API key, just the simulator. It's the first real experiment the simulator will run.
+And before any LLM enters the picture, there's a cheap kill-check called **RQ0**: run just `fixed`, `random` and `oracle` first. If perfect recognition barely beats random guessing, then recognition quality doesn't matter on these workloads — the experiment is dead and no prompt engineering can revive it. That check needs no model, no API key, just the simulator. It was the first real experiment the simulator ran (2026-11-16 to 2026-11-18).
 
 One more mindset note: **a negative result is a real result here.** "The LLM reads situations correctly but scheduling doesn't improve" is a publishable finding — it means the ordinary scheduler's behavioral heuristics were already good enough. We are set up so that honest failure is informative, not embarrassing.
 
@@ -113,7 +113,7 @@ Since every experiment stands on MLFQ (Multi-Level Feedback Queue), it's worth s
 - A task that gives up the CPU before using up its allotment, to wait for a keystroke or the disk, stays at its level — but the CPU it used still counts. Without that count a task could game the scheduler by blocking just before its slice ends (Rule 4 again).
 - Every boost interval, everything returns to the top queue, so no task starves forever (Rule 5).
 
-Watch it run on our two customers, as measured on the dataset's machine. The editor — LibreOffice Writer's `soffice.bin`, typed into by SWELL-KW's recorded keystrokes — runs a median 0.046 ms between blocks (a few milliseconds at the 99th percentile), so it gives up a 10 ms slice almost at once: it stays in the top queue, and the next keystroke gets served almost instantly. The compiler's `cc1` runs a median 368 ms of CPU from its start to its exit, unblocked in 99.4 % of object jobs, so it uses every slice: demoted; demoted again; and it settles at the bottom, where it runs in long uninterrupted stretches whenever nothing interactive is awake. Nobody told MLFQ which task was which — three or four observations were enough. That's why MLFQ is the honest baseline: it's *genuinely good*, and any claimed improvement has to beat this self-tuning behavior, not a strawman. It's also why the project's sharpest workloads are ones where behavior-watching cannot settle the question. A wanted training run and an unwanted indexer, each beside an editor, are two real jobs with opposite correct policies that differ in behaviour and in declared class: PyTorch's basic MNIST example on the CPU runs 69.49 s between voluntary blocks at nice 0, nearly all its CPU past any slice; Tracker's first index of a home runs 0.844–0.849 of its CPU past a 10 ms slice and sets `SCHED_IDLE`, nice 19 and the idle I/O class on itself. The pair tests what recognition adds over a baseline that already honours the indexer's declared class — on the indexer's side, nothing, so the gate experiment judges the training run's file and reports the indexer's — and only something that knows what the software *is* can tell whether the training run is wanted.
+Watch it run on our two customers, as measured on the dataset's machine. The editor — LibreOffice Writer's `soffice.bin`, typed into by SWELL-KW's recorded keystrokes — runs a median 0.046 ms between blocks (a few milliseconds at the 99th percentile), so it gives up a 10 ms slice almost at once: it stays in the top queue, and the next keystroke gets served almost instantly. The compiler's `cc1` runs a median 368 ms of CPU from its start to its exit, unblocked in 99.4 % of object jobs, so it uses every slice: demoted; demoted again; and it settles at the bottom, where it runs in long uninterrupted stretches whenever nothing interactive is awake. Nobody told MLFQ which task was which — three or four observations were enough. That's why MLFQ is the honest baseline: it's *genuinely good*, and any claimed improvement has to beat this self-tuning behavior, not a strawman. It's also why the project's sharpest workloads are ones where behavior-watching cannot settle the question. A wanted training run and an unwanted indexer, each beside an editor, are two real jobs with opposite correct policies that differ in behaviour and in declared class: PyTorch's basic MNIST example on the CPU runs 55.27 s between voluntary blocks at nice 0, nearly all its CPU past any slice; Tracker's first index of a home runs 0.844–0.849 of its CPU past a 10 ms slice and sets `SCHED_IDLE`, nice 19 and the idle I/O class on itself. The pair tests what recognition adds over a baseline that already honours the indexer's declared class — on the indexer's side, nothing, so the gate experiment judges the training run's file and reports the indexer's — and only something that knows what the software *is* can tell whether the training run is wanted.
 
 Because the scripts are fixed and the simulator has no randomness of its own (more on that below), two runs with the same workload and same scheduler produce **byte-identical** timetables. Perfect reproducibility is the reason we simulate instead of using a real machine, where thermal throttling and background noise would drown the effect we're measuring.
 
@@ -129,7 +129,7 @@ The whole experiment's raw material is a directory of **canonical workload files
     "id": "c2-p1a",
     // the hashes after @ are the source files' git blobs; they move with each file's bytes
     "derived_from": "dataset/timelines/coreset/c2-p1a.timeline.yaml@a0effee…",
-    "sampled": { "seed": 201, "archetypes": "archetypes.yaml@c78d8cf…" }
+    "sampled": { "seed": 201, "archetypes": "archetypes.yaml@a25178d…" }
   },
 
   "ground_truth": [
@@ -155,8 +155,8 @@ The whole experiment's raw material is a directory of **canonical workload files
     // …11,293 wakes for the editor in all: 525 keystrokes, the rest its own wakes — 10,740 on timer:editor, 28 on event:editor
     { "op": "arrive", "t": 60000000, "id": "hog", "name": "python", "declared_class": "normal",
       "program": [
-        { "op": "RUN", "us": 192 },
-        { "op": "SLEEP", "us": 378 }
+        { "op": "RUN", "us": 191 },
+        { "op": "SLEEP", "us": 472 }
         // …until its measured 1,389.885 s of CPU is spent, then EXIT: it runs on past the file's end
       ] }
   ]

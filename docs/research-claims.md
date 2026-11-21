@@ -1,5 +1,5 @@
 # Research Claims and Questions
-> Status: normative · Created 2026-08-23 · Updated 2026-11-18
+> Status: normative · Created 2026-08-23 · Updated 2026-11-21
 
 What this project asserts, what would falsify it, and what it does not claim.
 
@@ -59,22 +59,38 @@ Links 1 through 3 are properties of the workload space rather than of language
 models. Phase 1's committed spec (`harness/experiments/rq0-gate.yaml`) tests
 links 1 and 2, by RQ0, before any prompt exists (its statement `claim-links`).
 Link 1 by its criterion, `random` against perfect recognition: on the RQ0 run
-(2026-11-18, `rq0-run-record.md`) the verdict at the primary is fail, 6 of the
-19 judging files meeting g = 0.5 against K = 10, and provisional — the
-carried-half-width lines move a judging file across g, so the re-measurement
-contingency has fired and its entry is owed. The count ranges over g, 10 at
+(2026-11-18, `rq0-run-record.md`) the verdict at the primary stands as run:
+fail, 6 of the 19 judging files meeting g = 0.5 against K = 10, and
+provisional — the carried-half-width lines moved a judging file across g, so
+the re-measurement contingency fired. As run, the count ranges over g, 10 at
 0.25 to 4 at 0.67, and the verdict is a range over g: pass at 0.25, fail above.
 Over the boot-default sweep (3 to 9), the floor band (4 to 6), the cap band (6
 to 7), the venue factor (5 to 7), the first segment's length (6 to 7) and the
 carried half-widths (5 to 6) the count ranges and the verdict holds, fail. The
-chain scale and the sweep's 100 ms point are not read. Link 2 by its
-headroom-count line: a difference invisible to behavioural observation is, in
-RQ0's terms, headroom — the oracle improving on `fixed`, the boot default that
-schedules by behaviour alone, on a term the scoring spec defines — and link 2 is
-falsified when no judging file has headroom, `fixed` reaching the oracle's
-outcome on every term of every judging file. On the RQ0 run 17 of the 19
-judging files have headroom under the primary, and link 2 stands
-(`rq0-run-record.md`). The two readings are separate: a
+chain scale and the sweep's 100 ms point are not read. The contingency's
+entry, `cpu-batch`'s `python3`, was re-measured at 107 repeats (campaign
+`meas-ci:background:2026-11-20`) and folded in by a harness changelog entry and
+a second bless; on the re-measured library and the run's programs the verdict
+is final in place of provisional (2026-11-21): fail, 5 of the 19 judging files
+meeting g against K = 10. On the programs as fixed after the run — the scorer
+reading the oracle's improvement over `fixed` with its sign, the simulator at
+`simulator@841dc81131cb` — the post hoc reading gives 4 of 19, not a verdict.
+After the fail, the failure procedure's configuration search (2026-11-21, the
+same record) named the route: the prior driver table is rewritten — 8 of the
+10 files searched have spread the prior table missed, `c7-transcode` and
+`c7-gaming` spread the row holds. The rewrite, a second RQ0 gate spec pinned
+before its run and the second RQ0 run with its own verdict come next, in
+Phase 12 (the Phase 11 spec, decision 1:
+`_dev/docs/spec/jioh/phase-11-rq0-failure-procedure-diagnosis.md`). Link 2 by
+its headroom-count line: a difference invisible to behavioural observation is,
+in RQ0's terms, headroom — the oracle improving on `fixed`, the boot default
+that schedules by behaviour alone, on a term the scoring spec defines — and
+link 2 is falsified when no judging file has headroom, `fixed` reaching the
+oracle's outcome on every term of every judging file. On the RQ0 run, as run,
+17 of the 19 judging files have headroom under the primary, and link 2 stands
+(`rq0-run-record.md`); the post hoc reading of the run's scores, a term whose
+oracle is worse than `fixed` by the floor or more read as no headroom, gives
+12 of 19, not a verdict (2026-11-18). The two readings are separate: a
 file whose headroom `random` captures fails link 1's reading and not link 2's.
 Link 3 is held by how the dataset is built, and its limits are measured by the
 pre-committed misses: the segments shipped with `pre_committed_miss: true`
@@ -280,7 +296,7 @@ The paper does not rest on the matrix. It rests on one pair.
 Two real jobs beside an editor, with opposite correct policies. They differ in
 behaviour — the training run (`c2-p1a`, PyTorch's basic MNIST example on the
 CPU, an actual training run that does not claim desktop users train MNIST) is
-one thread, 69.49 s ±27.3 % between voluntary blocks, at nice 0; Tracker's
+one thread, 55.27 s ±5.89 % between voluntary blocks, at nice 0; Tracker's
 first index of a home (`c2-p1b`) is five processes, 1.876 ms between voluntary
 blocks, 0.844–0.849 of its CPU past a 10 ms slice — and in declared class: the
 indexer sets `SCHED_IDLE`, nice 19 and the idle I/O class on itself. The pair
