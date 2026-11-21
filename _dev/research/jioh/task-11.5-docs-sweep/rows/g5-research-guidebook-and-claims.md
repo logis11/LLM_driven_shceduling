@@ -265,3 +265,15 @@ Beyond the term list, each volume was also searched for `RQ0`, the training run'
 - **The README's own lines**: line 42 ("RQ0 너머의 계획은 대개 제안 또는 미실행으로 표시됩니다") and vol 13's 예정 status still hold.
 - **vol-05 2596** counts the vocabulary's six changes since ratification. Those are §1 label-side changes. Item 3's 2026-11-13 entry in `docs/recognition-vocabulary.md` changes §2 (the cap beside the idle class), so it is not a member of that list.
 - **Other passages that stand**: the hold-time passages (research-claims 226, proposal 309 and 736, vol-03 488, 1974 and 3243) give no timing for step 1, so item 14 makes none of them false. The mentions of the mock generator (proposal 756, 782) describe ownership and milestones, not the runner.
+
+## Added while editing (K5's editor, 2026-11-21)
+
+### g5-44 · `docs/guidebook/vol-03-the-research.md:2195` · A · item 1 (the RQ0 gate spec's pre-run lines)
+- **Now:** "| RQ0 | 이 workload들에서 설정이 결과를 바꾸기는 하나 | link 1 |"
+- **Becomes:** the link column reads link 1과 link 2 — the criterion reads link 1, the headroom-count line link 2 (2026-11-01)
+- **From:** `harness/experiments/rq0-gate.yaml`, statement `claim-links`; `harness/CHANGELOG.md`, 2026-11-01
+
+### g5-45 · `docs/guidebook/vol-03-the-research.md:2686` · A · item 1 (the RQ0 gate spec's pre-run lines)
+- **Now:** "RQ0이 link 1, RQ1이 link 4, RQ2가 link 5, RQ4가 link 6을 재고, …"
+- **Becomes:** "RQ0이 link 1과 link 2, …"
+- **From:** `harness/experiments/rq0-gate.yaml`, statement `claim-links`
