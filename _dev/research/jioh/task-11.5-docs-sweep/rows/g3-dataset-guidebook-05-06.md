@@ -142,3 +142,10 @@
 - **Now:** "9. **순서와 동시 깨어남.** compile된 흐름은 component의 빈도와 분포를 재현하나 gap의 순서와 함께 깨어남은 재현하지 않음(`measurement-overview.md` §8의 위협 진술; trace-replay check로 경계)."
 - **Becomes:** 괄호의 "trace-replay check로 경계"를 바꿈: RQ0 run(2026-11-16–18)의 trace-replay check는 일치하지 않았고(`c7-browsing`이 g를 넘음), verdict 옆에 ordering threat로 진술됨.
 - **From:** `docs/rq0-run-record.md`, "The reporting lines", the trace replay bullet
+
+## Added at the second search (2026-11-21)
+
+### g3-26 · `docs/guidebook/dataset/06-grounding-measurement-verification.md:1691` · A · item 2 (the integration gate passed)
+- **Now:** "decision 6, simulator를 기다리는 진술. reference simulator가 아직 구현하지 않은 executor 규칙에 참이 기대는 진술은, …"
+- **Becomes:** the clause dated to the decision, "그때(2026-10-17) reference simulator가 …", as chapter 8's paraphrase of the same decision is (g2-39); the box under it (g3-24) carries the current state
+- **From:** `_dev/docs/spec/jioh/task-9.16-exit-audits.md`, decision 6; `harness/CHANGELOG.md`, 2026-11-14 "the integration gate passed"

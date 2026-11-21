@@ -189,3 +189,10 @@ Read against item 9 (stage AF) as the brief asked: `docs/simulator/simulator-gui
 - **Now:** "The campaigns' counts run 5 to 77, most below its 30" (`cochran-st77`'s role)
 - **Becomes:** "5 to 107, most below its 30" — 11.3's 107 is the one campaign above 30
 - **From:** as g7-33
+
+## Added at the second search (2026-11-21)
+
+### g7-35 · `docs/workload/coreset-guide.md:399` · A · item 10 (the second bless)
+- **Now:** `"sampled": { "archetypes": "archetypes.yaml@c78d8cf9…", "seed": 201 }` — in §6, whose program lines (g7-05) and whose source line 5 (g7-01) now name the second bless's build
+- **Becomes:** `archetypes.yaml@a25178d1…`
+- **From:** `dataset/build/coreset-single/c2-p1a.workload.json`, `meta.sampled` (its SHA-256 `0678efa6…` is the entry in `dataset/build.manifest.json`)

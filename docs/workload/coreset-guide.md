@@ -396,7 +396,7 @@ simulator와 harness가 읽는 유일한 형식. `dataset/build/coreset-single/<
 "meta": {
   "id": "c2-p1a",
   "derived_from": "dataset/timelines/coreset/c2-p1a.timeline.yaml@a0effee9…",
-  "sampled": { "archetypes": "archetypes.yaml@c78d8cf9…", "seed": 201 }
+  "sampled": { "archetypes": "archetypes.yaml@a25178d1…", "seed": 201 }
 }
 ```
 

@@ -1688,7 +1688,7 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 - **decision 3, 넘겨받은 항목은 최종 상태만.** 중간 pin(9.17, 9.18, 9.22, 9.19, 9.20, 9.21의 pin)을 이름 짓는 항목은 집에서 돌리는 dataset gate 한 번과 최종 build의 CI run 한 번으로 닫고, 지금도 유효한 내용의 항목은 적힌 대로 돌립니다. 9.15가 넘긴 두 계산(burstiness와 시간 창 다시 읽기, stability ledger)도 9.16에서 합니다.
 - **decision 4, 찾은 것은 9.16 안에서 고침.** 9.15의 순서대로 code와 data를 먼저(rebuild는 많아야 한 번), 그다음 문서와 memo를 고치고, 판단이 필요한 것은 인지오에게 한 질문씩 가져갑니다.
 - **decision 5, compile된 숫자 감사의 범위.** prior driver table, 짝 검토, scoring spec, guard spec, RQ0 gate spec, 열림 줄을 단 memo, 최종 memo. 닫힌 memo와 9.15가 정리한 문서와 guidebook은 다시 감사하지 않습니다.
-- **decision 6, simulator를 기다리는 진술.** reference simulator가 아직 구현하지 않은 executor 규칙에 참이 기대는 진술은, 그 문서가 RQ0 gate spec의 어느 conformance 항목을 기다리는지 이름 지으면 해결된 것으로 봅니다. exit 기록이 그런 진술을 항목별로 적어, 인경민이 각 항목이 들어왔을 때 돌릴 확인으로 삼습니다.
+- **decision 6, simulator를 기다리는 진술.** 그때(2026-10-17) reference simulator가 아직 구현하지 않은 executor 규칙에 참이 기대는 진술은, 그 문서가 RQ0 gate spec의 어느 conformance 항목을 기다리는지 이름 지으면 해결된 것으로 봅니다. exit 기록이 그런 진술을 항목별로 적어, 인경민이 각 항목이 들어왔을 때 돌릴 확인으로 삼습니다.
 
 **무엇을 찾았나.** 9.16 기록(`_dev/research/jioh/task-9.16-exit-audits/README.md`)의 표를 옮깁니다. blind 다시 읽기와 compile된 숫자 감사의 판정 어휘는 4장의 것입니다. 주장 감사의 다섯 판정은 9.16의 주장 감사가 쓴 것으로, 기준을 갖춘 읽기 기록까지 추적됨, 기록은 있으나 문구가 구절이 말하는 범위 밖, 기록이 결정 1의 기준(원문 그대로의 구절, 위치, 읽은 사본)에 못 미침, 기록 없음, 그리고 출처가 말하지 않는 값에 꼬리표(2.6절)가 붙음입니다.
 
