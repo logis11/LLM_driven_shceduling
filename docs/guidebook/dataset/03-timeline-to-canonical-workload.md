@@ -1093,7 +1093,7 @@ canonical 파일은 JSON object 하나이고, key가 정확히 네 개입니다.
 "meta": {
   "derived_from": "dataset/timelines/coreset/c2-p1a.timeline.yaml@a0effee93e945b3d39f8aa3501475f31896d58d8",
   "id": "c2-p1a",
-  "sampled": {"archetypes": "archetypes.yaml@c78d8cf911ecd820413602226ea8adb71945edd1", "seed": 201}
+  "sampled": {"archetypes": "archetypes.yaml@a25178d113f04f0ee2b03aa3d1228f02c2880186", "seed": 201}
 }
 ```
 

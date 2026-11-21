@@ -1,5 +1,5 @@
 # Terminology
-> Status: normative · Created 2026-08-23 · Updated 2026-10-31
+> Status: normative · Created 2026-08-23 · Updated 2026-11-21
 
 Terms this project uses for its own parts. Operating systems vocabulary —
 MLFQ, EDF, preemption, turnaround time — is in Appendix A of
@@ -139,7 +139,7 @@ event to the next, never in real time, and never executes any real work. It
 draws the timetable a computer would have produced. See `docs/background-guide.md`.
 
 **Executor** — the part of the simulator that applies a config: assigning
-processes to classes and enforcing the batch class's cap (to be implemented).
+processes to classes and enforcing the batch class's cap (since 2026-10-20; shown on the binary by the integration gate of 2026-11-14).
 It has no starvation window: the starvation floor is a harness guard,
 `starvation_floor`, 30 s (design: the bound sched_ext's watchdog enforces at
 most and by default), which makes a run invalid when any task waits longer. It

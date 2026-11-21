@@ -290,3 +290,8 @@
 - **Now:** "compile된 숫자에 관한 문장 가운데 참인지가 reference simulator가 아직 구현하지 않은 executor 규칙에 달린 것은, …"
 - **Becomes:** the clause dated to the decision: "…참인지가 그때(2026-10-17) reference simulator가 아직 구현하지 않은 executor 규칙에 달린 것은, …" — the box under it (g2-08) carries the current state
 - **From:** `_dev/docs/spec/jioh/task-9.16-exit-audits.md`, decision 6; `harness/CHANGELOG.md`, 2026-11-14 "the integration gate passed"
+
+### g2-40 · `docs/guidebook/dataset/03-timeline-to-canonical-workload.md:1096` · A · item 10 (the second bless)
+- **Now:** `"sampled": {"archetypes": "archetypes.yaml@c78d8cf911ecd820413602226ea8adb71945edd1", "seed": 201}` in §7.2's `c2-p1a` meta, whose training job §6.2 now gives after the second bless (g2-31)
+- **Becomes:** `archetypes.yaml@a25178d113f04f0ee2b03aa3d1228f02c2880186`
+- **From:** `dataset/build/coreset-single/c2-p1a.workload.json`, `meta.sampled` (its SHA-256 the entry in `dataset/build.manifest.json`); found at the second-search review
