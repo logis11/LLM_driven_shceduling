@@ -15,10 +15,10 @@ A semantic recognition layer for operating systems, validated on CPU scheduling.
 
 ## Using the dataset without building it
 
-`dataset/build/` and `dataset/generated/` are not committed; `make dataset variants generated` writes them ([`dataset/README.md`](dataset/README.md)). The [`dataset-build-2026-10-26`](https://github.com/logis11/LLM_driven_shceduling/releases/tag/dataset-build-2026-10-26) release holds both, built at `6dec33a0`. Download `dataset-build-2026-10-26.tar.gz` from it and, from the repo root at that commit or a later one whose manifests are unchanged:
+`dataset/build/` and `dataset/generated/` are not committed; `make dataset variants generated` writes them ([`dataset/README.md`](dataset/README.md)). The [`dataset-build-2026-11-21`](https://github.com/logis11/LLM_driven_shceduling/releases/tag/dataset-build-2026-11-21) release holds both, built at `2e3fade3`. Download `dataset-build-2026-11-21.tar.gz` from it and, from the repo root at that commit or a later one whose manifests are unchanged:
 
 ```
-tar -xzf dataset-build-2026-10-26.tar.gz -C dataset
+tar -xzf dataset-build-2026-11-21.tar.gz -C dataset
 make -C dataset check PY=python3.12
 ```
 

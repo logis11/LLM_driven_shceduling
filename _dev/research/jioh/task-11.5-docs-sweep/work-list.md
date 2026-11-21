@@ -116,6 +116,8 @@ Wave 1: K1–K4. Wave 2: K5–K8. Wave 3: K9, its index lines read against the e
 - **인경민's Backlog intro** names stage AF (`356ac556`).
 - **The daemon's first milestone** — shown on all 51 core files: `fixed`, `oracle` and `random` (seed 1) under both telemetry shapes, 306 runs, each byte-identical to the mock daemon and to its own rerun, on `daemon@62c71f0d2de0` (`daemon_milestone_check.py`, `daemon-milestone-check.json`). The daemon guide states it; `daemon/README.md` gains the check, and its validator sentence now matches what `daemon.py` does for `fixed` (`356ac556`). 박이안 to be told.
 - **The harness changelog's 2026-11-14 cap-band test** — a new entry restates it to the mocks, with the second cold smoke as where the label held on the real programs (`356ac556`).
+- **The build release** — `dataset-build-2026-11-21`, the second bless's `build/` and `generated/` at `2e3fade3`: `make -C dataset check` → `build verified (3304 files, 7 manifests)`, the archive unpacked into an empty folder with every one of its 3,304 build files at the hash the seven manifests pin, the uploaded asset's digest `2e645817…` equal to the local archive's. The root README points to it.
+- **`dataset/archetypes.yaml`'s `cpu-batch` scope** — left for the next change to the library (인지오, 2026-11-21), a Backlog line naming it; a change now would re-bless every manifest.
 - **`dataset/tools/end_bound.py`** — a `WAIT` no wake answers now blocks its task for good. It had crashed on every segment-bound file since 9.23 D16 (2026-10-15). The fix carries a test, and `make -C dataset test` passes, 564 passed and 1 skipped (`c50967b7`).
 
 ## Rows by file
