@@ -1,6 +1,6 @@
 # 5권 · Generated layer: 열여섯 task set으로 만든 1,562개 파일
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-31
+> Status: draft · Created 2026-10-14 · Updated 2026-11-21
 
 **왜 손으로 쓴 core set 옆에 생성한 층이 있고, 그 파일들은 어떤 규칙으로 만들어지며 어떻게 점수를 받나.**
 
@@ -758,7 +758,7 @@ grids.yaml ─lint_grids─▶ cells ─write_timelines─▶ generated/<set>/*.
 
 `compile_generated_one`은 core set의 `compile.py`에 있는 `compile_one`을 거의 그대로 흉내 낸 함수입니다. docstring: "One generated timeline in every mode — `compile.compile_one` over the generated root." 같은 library(`archetypes.yaml`), 같은 schema, 같은 `compile_timeline`, 같은 `lint_canonical`을 씁니다. 다른 점은 timeline을 `dataset/timelines/`가 아니라 `dataset/generated/`에서 읽는다는 것뿐입니다.
 
-왜 core의 `compile_one`을 고쳐 쓰지 않고 흉내 냈는지는 `generate.py`의 docstring 마지막 문장이 말합니다. "The compile mirrors `compile.compile_one` over a different root so the core compiler and the core set's manifest stay as they are (spec invariant)." core set의 manifest(`dataset/build.manifest.json`)는 `inputs`에 `dataset/tools/compile.py`와 `dataset/tools/wlc/*.py`를 내용 hash로 못 박습니다. 이 파일들을 한 글자라도 고치면 core manifest가 바뀌고, 그것을 pin하는 variants manifest와 RQ0 gate spec(`harness/experiments/rq0-gate.yaml`, RQ0 run의 판정 기준과 파일 목록을 미리 등록해 둔 실험 spec)의 pin이 줄줄이 따라 움직입니다. generated layer가 그 연쇄를 일으키지 않도록 새 코드는 모두 `generate.py`와 `gen/` 아래에 두었습니다. 9.21에서 같은 이유로 coverage 표 코드도 `wlc/grid.py`가 아니라 `gen/coverage.py`에 들어갔습니다(14장).
+왜 core의 `compile_one`을 고쳐 쓰지 않고 흉내 냈는지는 `generate.py`의 docstring 마지막 문장이 말합니다. "The compile mirrors `compile.compile_one` over a different root so the core compiler and the core set's manifest stay as they are (spec invariant)." core set의 manifest(`dataset/build.manifest.json`)는 `inputs`에 `dataset/tools/compile.py`와 `dataset/tools/wlc/*.py`를 내용 hash로 못 박습니다. 이 파일들을 한 글자라도 고치면 core manifest가 바뀌고, 그것을 pin하는 variants manifest가 따라 움직입니다. RQ0 gate spec(`harness/experiments/rq0-gate.yaml`, RQ0 run의 판정 기준과 파일 목록을 미리 등록해 둔 실험 spec)은 RQ0 run(2026-11-16–18)을 마친 실행된 spec이라, 그 pin은 run이 읽은 tree를 이름 짓고 따라 움직이지 않습니다. experiment lint는 working tree와 맞지 않는 그 pin을 오류가 아니라 note로 출력합니다(harness changelog, 2026-11-20). 2026-11-21의 두 번째 bless에서도 RQ0 gate spec은 고쳐지지 않았고, 그 dataset pin과 variants pin은 RQ0 run이 읽은 첫 bless를 이름 짓습니다. generated layer가 그 연쇄를 일으키지 않도록 새 코드는 모두 `generate.py`와 `gen/` 아래에 두었습니다. 9.21에서 같은 이유로 coverage 표 코드도 `wlc/grid.py`가 아니라 `gen/coverage.py`에 들어갔습니다(14장).
 
 "every mode"라는 말은 compile mode를 뜻합니다. 지금 compile mode는 `single` 하나뿐입니다(`wlc.compiler.MODES`; 9.13이 2026-10-09에 `native` mode를 없앴습니다). `single`은 lane 하나(CPU 한 개)에 맞춘 compile입니다. 그래서 출력 디렉터리 이름이 `<set>-single`입니다.
 
@@ -1112,7 +1112,7 @@ batch 작업이 있는 A와 2 s 가운데가 만나는 경우입니다(테스트
 5. **Freeze.** 고른 N과 K를 RQ4 experiment spec에 미리 등록한다.
 6. **Report as a sweep.** 결과를 N(과 K)의 범위에 걸쳐 보고한다.
 
-계획의 "When" 표는 이 단계들이 언제 도는지를 적습니다. step 3은 9.19의 spec 세션에서 했고(아래 9.2), "the need measured with no rule"은 Phase 10의 통합 직후 RQ0 run의 pipeline 안에서, `oracle`과 `random`만으로(LLM 없이) 하며, 나머지 단계는 RQ4 experiment spec 세션에서 합니다. `_dev/TODO.md`의 backlog에 이 두 덩어리가 각각 한 줄씩 있습니다.
+계획의 "When" 표는 이 단계들이 언제 도는지를 적습니다. step 3은 9.19의 spec 세션에서 했고(아래 9.2), "the need measured with no rule"은 Phase 12의 두 번째 RQ0 run 뒤에, 그 run이 쓰는 table과 program으로, `oracle`과 `random`만으로(LLM 없이) 하며(Phase 11 spec decision 10), 나머지 단계는 RQ4 experiment spec 세션에서 합니다. `_dev/TODO.md`의 backlog에 이 두 덩어리가 각각 한 줄씩 있습니다.
 
 계획 파일 안에서 단계 번호가 어긋났습니다. "When" 표는 "need measured with no rule"을 **step 0**이라 부르고 나중 단계를 "1, 2, 4, 5, 6"이라고 적지만, 아래의 "Steps" 목록은 같은 측정을 **1.** 로 번호 매깁니다. 인지오가 2026-10-16에 "Steps" 목록의 번호, 곧 **step 1**로 정했습니다(9.15 작업 목록 W-0481). 그래서 문서들은 이 측정을 step 1로 부릅니다. daemon guide §9.3은 "the hold-time plan's no-rule measurement (its step 1)", `docs/harness/metrics.md` §8의 flip count and cost 행은 "read by the hold-time plan's no-rule measurement, its step 1"이라고 적고, research proposal과 research-claims의 RQ4 문장도 같은 번호를 씁니다. `_dev/TODO.md`의 backlog 두 줄도 "step 1"과 "steps 2, 4, 5, 6"으로 고쳤습니다. 계획 파일의 "When" 표(`0`과 `1, 2, 4, 5, 6`)는 개발 이력이라 손대지 않았으므로, 그 표의 번호만 남은 어긋남입니다. 이 권은 "규칙 없이 필요성을 재는 측정(계획의 step 1)"이라고 부릅니다.
 
@@ -1210,13 +1210,13 @@ flap-stress의 split은 return grid와 다릅니다. 쌍을 나누지 않고, **
 
 | 쓰임 | 언제 | 무엇이 준비되어 있나 |
 |---|---|---|
-| 규칙 없이 필요성 재기(계획의 step 1) | Phase 10 통합 직후, RQ0 run의 pipeline 안 | flap-stress set(9.19), C4 파일(저작된 `c4-*`), 그리고 9.21이 만든 `flip_cost` 보고 줄 |
+| 규칙 없이 필요성 재기(계획의 step 1) | Phase 12의 두 번째 RQ0 run 뒤, 그 run이 쓰는 table과 program으로 | flap-stress set(9.19), C4 파일(저작된 `c4-*`), 그리고 9.21이 만든 `flip_cost` 보고 줄 |
 | N, K를 tuning 반에서 고르기 | RQ4 experiment spec 세션 | flap-stress의 `split: tuning`, return grid의 `split: tuning` |
 | 고른 값을 measurement 반에서 재고 sweep으로 보고 | RQ4 run | `split: measurement` 쪽 |
 
 9.21 decision 7이 첫 줄의 재료를 마저 채웠습니다. "The flip count and its cost are one reporting line over the rows that exist." `flip_cost`라는 보고 줄이 파일과 condition마다 세 숫자와 점수를 찍습니다. daemon이 적용한 설정 변경의 수, 그 가운데 grader가 `config_correct`를 거짓으로 매긴 물음에서 나온 것의 수, 그리고 그 틀린 변경 가운데 MLFQ로 바뀐 경우들의 per-switch excess(바뀐 직후 짧은 창에서 상호작용 task의 대기가 평소보다 얼마나 늘었는지) 합입니다. 새 primitive나 records column은 만들지 않았습니다. 이 줄은 13장에서 다시 봅니다.
 
-9.21 spec은 이 sub-task가 "The hold-time plan's step-1 material — the flap-stress set split by seed, the return grid split by pair — is confirmed present"라고 적었고, 계획 파일의 "Dataset prerequisites"에도 두 set이 "confirmed present in 9.21"로 적혀 있습니다. 데이터셋 쪽 준비는 끝났고, 실제 측정은 Phase 10 이후의 일입니다.
+9.21 spec은 이 sub-task가 "The hold-time plan's step-1 material — the flap-stress set split by seed, the return grid split by pair — is confirmed present"라고 적었고, 계획 파일의 "Dataset prerequisites"에도 두 set이 "confirmed present in 9.21"로 적혀 있습니다. 데이터셋 쪽 준비는 끝났고, 실제 측정은 Phase 12의 두 번째 RQ0 run 뒤의 일입니다.
 
 # 10장 · `distractor-grid`: 272개 파일
 
@@ -2009,9 +2009,11 @@ generated layer가 생긴 뒤의 CI run을 순서대로 적습니다. 모두 `ji
 | 고친 것 | 다시 돌릴 것 | 다시 commit할 것 |
 |---|---|---|
 | `grids.yaml`, `generate.py`, `gen/*.py` | `make generated`, `make dataset`(coverage 표), `make check` | 다섯 generated manifest, `coverage-grid.json` |
-| C1 timeline 하나 | `make dataset variants generated`, `make check` | core manifest, variants manifest, 다섯 generated manifest, `coverage-grid.json`, (pin이 움직이면) RQ0 gate spec |
+| C1 timeline 하나 | `make dataset variants generated`, `make check` | core manifest, variants manifest, 다섯 generated manifest, `coverage-grid.json`, (pin이 움직이면) 그것을 pin하는 실험 spec 가운데 아직 실행되지 않은 것 |
 | `archetypes.yaml`, stream, compiler(`compile.py`, `wlc/*.py`) | `make dataset variants generated`, `make check` | 모든 manifest |
-| `harness/scoring/scoring-spec.yaml`의 C1 entry | harness의 lint | scoring spec (다시 frozen), 그것을 pin하는 실험 spec |
+| `harness/scoring/scoring-spec.yaml`의 C1 entry | harness의 lint | scoring spec (다시 frozen), 그것을 pin하는 실험 spec 가운데 아직 실행되지 않은 것 |
+
+실행된 spec, 곧 옆에 run record가 commit된 RQ0 gate spec(`harness/experiments/rq0-gate/runs.sha256.csv`)과 옆에 report가 commit된 configuration search의 search spec(`harness/experiments/rq0-config-search.yaml`; report는 `harness/experiments/rq0-config-search/report.json`)은 다시 commit하지 않습니다. 그 pin은 run이 읽은 tree를 이름 짓고, experiment lint는 working tree와 맞지 않는 pin을 오류가 아니라 note로 출력합니다(harness changelog, 2026-11-20과 2026-11-21).
 
 README의 문장: "If you edit any timeline, variant file, `archetypes.yaml`, a stream or the compiler, run `make dataset variants generated` and commit every manifest, derived timeline and the coverage grid with it; if you edit `grids.yaml`, the generator or a C1 timeline, `make generated` and the generated manifests, one per set — otherwise `check` fails." C1 파일은 core set의 일부이면서 generated layer의 입력이라 두 줄 모두에 해당합니다. scoring spec의 C1 entry를 고치면 generated 파일 1,562개의 term이 함께 바뀐다는 점도 기억해 둘 만합니다. 규칙이 C1 entry를 그대로 펼치기 때문입니다.
 
@@ -2059,7 +2061,7 @@ README의 문장: "If you edit any timeline, variant file, `archetypes.yaml`, a 
 
 | 무엇 | 언제 | 기록 |
 |---|---|---|
-| 규칙 없이 flap의 필요성 재기(계획의 step 1; flap-stress set과 저작된 C4 파일 `c4-*`, `oracle`과 `random`) | Phase 10 통합 직후 | hold-time 계획; backlog |
+| 규칙 없이 flap의 필요성 재기(계획의 step 1; flap-stress set과 저작된 C4 파일 `c4-*`, `oracle`과 `random`) | Phase 12의 두 번째 RQ0 run 뒤, 그 run이 쓰는 table과 program으로 | hold-time 계획; Phase 11 spec decision 10; backlog |
 | generated 파일을 쓰는 첫 run | RQ1·RQ4 run | — |
 
 다섯 generated manifest의 hash와 CI run의 재현 확인(`_dev/TODO.md` 9.16 줄)은 2026-10-17에 9.16에서 끝났습니다(12.8).
