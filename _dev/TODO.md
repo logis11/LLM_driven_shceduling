@@ -20,6 +20,9 @@ Each phase's full section, its sub-tasks and what landed, as it closed: `_dev/TO
 - **Phase 10 — Integration and the RQ0 run** · done 2026-11-18 · spec `_dev/docs/spec/jioh/phase-10-integration-and-the-rq0-run.md`
 - **Phase 11 — The RQ0 failure procedure: diagnosis** · done 2026-11-21 · spec `_dev/docs/spec/jioh/phase-11-rq0-failure-procedure-diagnosis.md`
 
+### Phase 12 — The table rewrite and the second RQ0 run
+The route the configuration search named (`docs/rq0-run-record.md`, the failure procedure, 2026-11-21): the driver table rewritten, the second RQ0 gate spec pinned before its run, the second RQ0 run and its verdict (Phase 11 spec, decision 1).
+
 ### Backlog
 - Naturalistic generator + generalset + full condition matrix — its prerequisite is a source for Linux-desktop co-occurrence and transition frequency, which 9.10's search did not find (audit record 2026-10-11)
 - Hold time and hysteresis, step 1 (`_dev/docs/plan/jioh/hold-time-and-hysteresis.md`, its Steps list; its When table numbers it 0): the need measured with no rule — the flap-stress set and the C4 files under `oracle` and `random`, the wrong-flip count and its Layer 2 cost — after Phase 12's second RQ0 run, on the table and programs that run uses (Phase 11 spec, decision 10); no LLM needed. If the cost is below the floor the plan ends there and daemon guide §9.3 records the measurement
