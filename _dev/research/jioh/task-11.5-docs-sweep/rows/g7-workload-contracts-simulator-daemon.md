@@ -177,3 +177,15 @@ Read against item 9 (stage AF) as the brief asked: `docs/simulator/simulator-gui
 - **Now:** "The [`dataset-build-2026-10-26`](…) release holds both, built at `6dec33a0`. Download `dataset-build-2026-10-26.tar.gz` from it and, from the repo root at that commit or a later one whose manifests are unchanged:"
 - **Why left:** the manifests changed on 2026-10-31, and the release list already holds a later `dataset-build-2026-10-31` (built at `84ce79bf`) that the README does not name. Since the second bless (item 10), neither release matches the committed manifests. The sentence is conditional and so not false.
 - **Flags:** for 인지오: no build release holds the second bless's build.
+
+## Added at K8's review (2026-11-21)
+
+### g7-33 · `docs/references.md:129` · A · item 10 (the re-measurement)
+- **Now:** "… a width fixed at 5 % of the mean and a count of 5 to 77" (`chow-aoms65`'s role)
+- **Becomes:** "… a count of 5 to 107"
+- **From:** `docs/rq0-run-record.md`, Corrections, 2026-11-21, "The campaign" (107 fresh repeats); as g0-16
+
+### g7-34 · `docs/references.md:134` · A · item 10 (the re-measurement)
+- **Now:** "The campaigns' counts run 5 to 77, most below its 30" (`cochran-st77`'s role)
+- **Becomes:** "5 to 107, most below its 30" — 11.3's 107 is the one campaign above 30
+- **From:** as g7-33

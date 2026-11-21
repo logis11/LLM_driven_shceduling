@@ -1,5 +1,5 @@
 # Archetype Library — Writing Plan
-> Status: normative · Created 2026-08-25 · Updated 2026-10-31
+> Status: normative · Created 2026-08-25 · Updated 2026-11-21
 
 > Expands §2 of docs/workload/building-plan.md, the archetype library, into a buildable specification for `dataset/archetypes.yaml`. Normative for the archetype library. Source ids reference `dataset/sources.yaml`; citations live in docs/references.md; execution semantics live in docs/simulator/interpretation-contract.md. Every value, scope and modeling note is the library's own; §4 names its entries.
 
@@ -80,7 +80,7 @@ One task carries the program's whole process tree: its threads' own wakes (`comp
 
 | Entry | The program measured | Campaign (`meas-ci:`) | Shown as |
 |---|---|---|---|
-| `cpu-batch` | one dominant thread runnable for its whole job; the `program` binding chooses its tables — `python3`, PyTorch's basic MNIST example training on the CPU; `kdenlive_render`, Kdenlive's export with its `melt-7`; `spoof`, one uninterrupted RUN by construction (design) | `background:2026-10-03`, `background:2026-10-03c` | `python`, `kdenlive_render`; `chrome` in `c6-spoof` |
+| `cpu-batch` | one dominant thread runnable for its whole job; the `program` binding chooses its tables — `python3`, PyTorch's basic MNIST example training on the CPU; `kdenlive_render`, Kdenlive's export with its `melt-7`; `spoof`, one uninterrupted RUN by construction (design) | `background:2026-10-03` (the run between voluntary blocks and block per run `2026-11-20`), `background:2026-10-03c` | `python`, `kdenlive_render`; `chrome` in `c6-spoof` |
 | `file-archiver` | 7-Zip archiving a 10 GB file set, eight threads | `background:2026-09-19` | `7z` |
 | `game-download` | SteamCMD's fresh install of a dedicated-server depot, Team Fortress 2's | `background:2026-09-19` | `steam` |
 | `game-download-idle` | `game-download`'s tables under the declared class `idle`, for `c2-p2a-idle` alone | `background:2026-09-19` | `steam` |

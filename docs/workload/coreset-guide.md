@@ -1,8 +1,8 @@
 # Coreset 안내 — 51개 workload를 하나씩 뜯어보기
 
-> Status: draft · Created 2026-09-08 · Updated 2026-10-31
+> Status: draft · Created 2026-09-08 · Updated 2026-11-21
 
-이 문서는 **공부용 문서**예요. dataset이 무엇이고, 어떻게 만들어지고, 51개 coreset 파일 각각이 무슨 상황을 담고 있으며 어떤 숫자를 갖고 있는지를 OS/시스템 지식이 거의 없는 사람 기준으로 풀어 써요. 설계의 규범적 근거는 building-plan(`docs/workload/building-plan.md`), archetype의 규범적 정의는 archetype-plan(`docs/workload/archetype-plan.md`), 실행 semantics는 interpretation contract(`docs/simulator/interpretation-contract.md`)에 있어요. 이 문서는 그 셋을 읽을 수 있게 만드는 다리이고, 숫자는 `dataset/build.manifest.json`이 hash로 고정한 `coreset-single`의 51개 파일(2026-10-16에 re-bless된 build)과 그 manifest의 `demand` 기록, 그리고 timeline과 `dataset/archetypes.yaml`에서 직접 읽은 값이에요.
+이 문서는 **공부용 문서**예요. dataset이 무엇이고, 어떻게 만들어지고, 51개 coreset 파일 각각이 무슨 상황을 담고 있으며 어떤 숫자를 갖고 있는지를 OS/시스템 지식이 거의 없는 사람 기준으로 풀어 써요. 설계의 규범적 근거는 building-plan(`docs/workload/building-plan.md`), archetype의 규범적 정의는 archetype-plan(`docs/workload/archetype-plan.md`), 실행 semantics는 interpretation contract(`docs/simulator/interpretation-contract.md`)에 있어요. 이 문서는 그 셋을 읽을 수 있게 만드는 다리이고, 숫자는 `dataset/build.manifest.json`이 hash로 고정한 `coreset-single`의 51개 파일(2026-11-21의 두 번째 bless로 다시 만든 build. 이 bless가 library의 hash 말고도 바꾼 core 파일은 `cpu-batch`의 `python3`을 담은 셋 — `c1-ml-train`, `c2-p1a`, `c7-ml-train` — 이고, demand는 하나도 안 움직였어요)과 그 manifest의 `demand` 기록, 그리고 timeline과 `dataset/archetypes.yaml`에서 직접 읽은 값이에요.
 
 읽는 규칙: term은 영어 그대로, 다른 문서는 절 번호 대신 내용으로 가리켜요.
 
@@ -140,7 +140,7 @@ TIMER — 주기와 deadline이 있는 periodic job — 를 쓰는 건 playback�
 - `event:<task id>`: 역시 run file의 `wake` event가 깨워요. 측정된 앱의 thread가 스스로 깨던 것 가운데 사슬이 그 밖 — 측정의 입력, 다른 process, kernel thread — 에서 시작한 것(component의 event part)이에요. deadline이 없고, keystroke처럼 기다리지 않을 때 온 것을 모두 쌓아요(2026-10-31, `docs/data-contracts.md` §14).
 - `chain:<task id>`: game chain의 앞 멤버가 `WAKE`로 깨워요.
 - `job:<task id>`: build의 job 하나 안에서 멤버들이 job의 부모-자식 순서대로 서로 `WAKE`해요(5.4절).
-- `children:<task id>`: orchestrator(`make`, `dkms`)가 마지막 `FORK` 뒤에 기다리는 channel. orchestrator가 spawn한 자식이 모두 끝났을 때 executor가 이 WAIT를 완료시킨다(그때 살아 있는 자식이 없으면 막지 않고 바로)는 규칙이 interpretation contract의 FORK·WAIT에 적혀 있고, 인경민이 구두로 동의해 효력이 있어요(2026-10-16 제안, 2026-10-31 기록, `docs/data-contracts.md` §14). reference simulator(`simulator/src/sim.cpp`)는 아직 구현하지 않아서 그 simulator에서는 `make`가 run 끝까지 거기서 막혀 있어요(12장).
+- `children:<task id>`: orchestrator(`make`, `dkms`)가 마지막 `FORK` 뒤에 기다리는 channel. orchestrator가 spawn한 자식이 모두 끝났을 때 executor가 이 WAIT를 완료시킨다(그때 살아 있는 자식이 없으면 막지 않고 바로)는 규칙이 interpretation contract의 FORK·WAIT에 적혀 있고, 인경민이 구두로 동의해 효력이 있어요(2026-10-16 제안, 2026-10-31 기록, `docs/data-contracts.md` §14). reference simulator(`simulator/src/sim.cpp`)도 이 규칙대로 그 WAIT를 완료해요. conformance 항목 (g)이고, 2026-11-14의 integration gate가 binary에서 보였어요(`fix-object`·`fix-tree` fixture의 재생과 black-box unit test `simulator/tests/test_spawn_children.py`, `harness/CHANGELOG.md` 2026-11-14).
 
 **operation.** 측정된 앱 넷은 사용자가 시킨 일 하나를 측정해서 들고 있어요: `web-browser`의 page-load(측정 길이 중앙값 약 0.47 s), `image-editor`의 unsharp mask(약 2.36 s), `video-editor`의 preview-render(약 11.4 s), `mail-client`의 send(약 2.9 s). timeline의 `operations` track이 `{at, task, name}`으로 시작 시각만 정하고, compiler가 측정된 길이표에서 길이를 뽑아 그 구간 동안 operation의 component가 task의 다른 wake를 대신하게 해요(그 구간에는 keystroke도 안 생겨요). 구간이 시작하는 순간에는 측정한 조작마다 가장 큰 run의 표에서 run 하나를 뽑아 `event:` wake로 실어요 — unsharp mask의 필터처럼 조작마다 하나씩 있던 큰 run이 창마다 반드시 들어가게요(2026-10-31, timer-wakes-by-origin spec 결정 17). operation은 그 task의 input window 안에서만 시작하고 window 하나에 하나예요(design). 60 s C1 base에서는 2–58 s window의 30 s(mail의 send는 40 s), 길이를 바꾸거나 자른 파일에서는 window 안의 같은 비율 자리에 놓여요(예: `c7-browsing`의 2–24.385 s window에서 13.1925 s, `c1-transcode`의 2–4,760 s window에서 2,381 s). C2와 C3의 파일은 각자의 표에 적힌 시각에 놓여요. operation은 event op가 아니라 task의 WAIT/RUN stream 안으로 compile되고, compile report(`build/coreset-single/<id>.report.json`의 `operations`)가 시각과 길이를 적어요.
 
@@ -283,7 +283,7 @@ chain 밖의 game thread는 없어요. slide는 game이 도는 동안 system 전
 | `renderer-hidden` | `meas-ci:desktop:2026-10-05b` | component | segment-bound | normal | `chrome` | 10 |
 | `chat-client` | `meas-ci:desktop:2026-09-20` | component | segment-bound | normal | `element-desktop` | 2 |
 | `game-client` | `meas-ci:desktop:2026-09-20` | component + heavy event | segment-bound | normal | `steam` | 7 |
-| `cpu-batch` | `meas-ci:background:2026-10-03`, `-10-03c` | batch loop | finite | normal | `python`, `kdenlive_render`, `chrome`(spoof) | 7 |
+| `cpu-batch` | `meas-ci:background:2026-10-03`, `-11-20`, `-10-03c` | batch loop | finite | normal | `python`, `kdenlive_render`, `chrome`(spoof) | 7 |
 | `compiler-child` | `meas-ci:build:2026-09-18` | object job 멤버(WAIT/RUN/WAKE) | spawned | normal | `sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm` | 4 |
 | `build-orchestrator` | `meas-ci:build:2026-09-18` | (RUN, FORK ×6)×N, WAIT, EXIT | finite | normal | `make` | 4 |
 | `module-build-orchestrator` | `meas-ci:background:2026-10-02` | job 순서대로 FORK, WAIT, tail batch loop, EXIT | finite | normal | `dkms` | 1 |
@@ -351,7 +351,7 @@ run file에는 wake마다 `wake` event
 ### 5.3 finite job의 compile (batch loop)
 
 batch loop는 `total_work`를 다 쓸 때까지 run과 block을 뽑아 펼쳐요(4.4절). 예:
-- `c2-p1a`의 `python`: RUN 28개 / SLEEP 27개로 1,389.885 s. 측정된 training은 자발적 block 사이를 평균 69.49 s(±27.3 %) 달려서 RUN 하나가 수십 초예요.
+- `c2-p1a`의 `python`: RUN 48개 / SLEEP 47개로 1,389.885 s. 측정된 training은 자발적 block 사이를 평균 55.27 s(±5.89 %, 11.3의 재측정 107 repeat) 달려서 RUN 하나가 수십 초예요.
 - `c2-p2a`의 download: RUN 211,121개 / SLEEP 211,120개로 727.170 s.
 - `c1-indexing`의 indexer: RUN 19,070개 / SLEEP 19,069개로 39.435 s.
 - `c4-office`의 7z: RUN 하나 6 s(7-Zip의 block은 측정에서 모든 분위수가 0이라 run이 하나로 합쳐져요).
@@ -438,8 +438,8 @@ op는 딱 둘. `arrive`와 `wake`.
 
 // finite batch task: depart 없음 (c2-p1a)
 { "op": "arrive", "t": 60000000, "id": "hog", "name": "python", "declared_class": "normal",
-  "program": [ { "op": "RUN", "us": 192 }, { "op": "SLEEP", "us": 378 }, /* … */
-               { "op": "RUN", "us": 6407092 }, { "op": "EXIT" } ] }
+  "program": [ { "op": "RUN", "us": 191 }, { "op": "SLEEP", "us": 472 }, /* … */
+               { "op": "RUN", "us": 15491555 }, { "op": "EXIT" } ] }
 
 // orchestrator: spawn_table과 fork_cap (c1-compile)
 { "op": "arrive", "t": 2000000, "id": "build", "name": "make", "declared_class": "normal", "fork_cap": 48,
@@ -765,7 +765,7 @@ VS Code에 타이핑하다가 60초에 PyTorch의 기본 MNIST 예제를 CPU에�
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
 | editor | code | code-editor | 0 → 99.435 | input 2–97.435 s: keystroke 525개 + timer wake 10,740개 + event wake 28개, RUN 합 52.4 s |
-| hog | python | cpu-batch (`program: python3`) | 60 → finite | RUN 28 / SLEEP 27, `total_work` 1,389.885 s (`meas-ci:background:2026-10-03`; program `[pytorch-examples, meas-ci:background:2026-10-03]`) |
+| hog | python | cpu-batch (`program: python3`) | 60 → finite | RUN 48 / SLEEP 47, `total_work` 1,389.885 s (`meas-ci:background:2026-10-03`; program `[pytorch-examples, meas-ci:background:2026-10-03]`) |
 
 recognizer: 0 s `code`. 60 s `code, python`. 99.435 s `python`. focus는 계속 `code`.
 
@@ -790,7 +790,7 @@ recognizer: 60 s `code, tracker-miner-f`. 99.435 s `tracker-miner-f`.
 
 harness: editor의 input P99 하나(원하지 않은 일에는 term이 없어요). reporting-only. utilization 0.9238(segment 1에서 1.5272).
 
-**P1의 두 job은 행동도 class도 달라요.** training 쪽은 thread 하나, 자발적 block 사이 run이 평균 69.49 s(±27.3 %), 기본 policy nice 0. indexer 쪽은 process 다섯, block 사이 1.876 ms, program이 스스로 건 SCHED_IDLE·nice 19·idle I/O class, job 동안 saturation 약 0.66이고, dataset의 indexer는 CPU의 0.844–0.849를 10 ms slice를 넘는 run에서 써요. 맞는 policy가 반대인 두 실제 job이고, 이 쌍은 indexer의 declared class를 이미 존중하는 baseline 위에 recognition이 무엇을 더하나를 물어요. LLM은 `python`과 `tracker-miner-f`의 의미를 알아야 둘을 구분할 수 있어요. 이름 표 condition(`shipped_catalogue`: CachyOS가 ananicy-cpp와 함께 까는 catalogue를 그대로; `strongest_name_table`: 그 catalogue의 설계로 dataset이 아는 software를 다 덮은 rule 목록)은 이름마다 정해진 rule 하나로 답하는데, `tracker-miner-f`라는 이름은 사용자가 시킨 reindex(`c1-indexing`)와 여기서 같아요.
+**P1의 두 job은 행동도 class도 달라요.** training 쪽은 thread 하나, 자발적 block 사이 run이 평균 55.27 s(±5.89 %), 기본 policy nice 0. indexer 쪽은 process 다섯, block 사이 1.876 ms, program이 스스로 건 SCHED_IDLE·nice 19·idle I/O class, job 동안 saturation 약 0.66이고, dataset의 indexer는 CPU의 0.844–0.849를 10 ms slice를 넘는 run에서 써요. 맞는 policy가 반대인 두 실제 job이고, 이 쌍은 indexer의 declared class를 이미 존중하는 baseline 위에 recognition이 무엇을 더하나를 물어요. LLM은 `python`과 `tracker-miner-f`의 의미를 알아야 둘을 구분할 수 있어요. 이름 표 condition(`shipped_catalogue`: CachyOS가 ananicy-cpp와 함께 까는 catalogue를 그대로; `strongest_name_table`: 그 catalogue의 설계로 dataset이 아는 software를 다 덮은 rule 목록)은 이름마다 정해진 rule 하나로 답하는데, `tracker-miner-f`라는 이름은 사용자가 시킨 reindex(`c1-indexing`)와 여기서 같아요.
 
 #### `c2-p2a` — 게임 + 내가 시작한 다운로드
 
@@ -1199,13 +1199,11 @@ core set 밖의 파생도 있어요: `build/coreset-single/`의 sensitivity vari
 - spawn 자식은 부모와 함께 보여요(`make`: 여섯 이름 ×2,908; `dkms`: 여덟 이름, 10장의 C7 참고).
 - focus만 바뀌는 query point는 `c6-dual`의 17개뿐이에요.
 
-**reference simulator가 아직 못 하는 것**
-- orchestrator가 spawn한 자식이 모두 끝났을 때 `WAIT children:<id>`를 완료하지 않아요(3장). `c1-compile`의 build turnaround term(판정, weight 1.0)이 읽히려면 필요해요.
-
 **결정된 것과 남은 것**
+- **`WAIT children:<id>`**(2026-11-14): reference simulator는 orchestrator가 spawn한 자식이 모두 끝나면 `WAIT children:<id>`를 완료해요(3장). conformance 항목 (g)이고, 2026-11-14의 integration gate가 binary에서 보였어요(`harness/CHANGELOG.md`, 2026-11-14). `c1-compile`의 build turnaround term(판정, weight 1.0)이 읽히려면 필요한 규칙이에요.
 - **pre_committed_miss**(2026-09-10): 이름·행동으로는 label에 닿을 수 없는 segment에 붙는 annotation. core set에서 여덟 파일이에요: attribute 쪽 `c1-indexing`, `c7-ml-train`, `c7-render`, `c7-transcode`, `c7-backup`; C6의 `c6-alias`(전체), `c6-fold`(30 s부터의 meeting segment), `c6-spoof`(20 s부터). coverage grid가 이걸 읽어 cell을 "채워졌지만 recognition-limited"로 표시하고, RQ0 gate spec의 `layer1_exclusions`가 이 여덟을 recognition 정확도에서 빼요(lint가 compiled 파일에서 같은 목록을 끌어내 검사해요). 그중 셋(`c7-ml-train`, `c7-render`, `c7-transcode`)은 scheduling 판정에는 들어가요 — gate에 필요한 건 label이지 알아볼 수 있음이 아니니까요.
 - familiarity annotation은 C5 둘과 generated familiarity ladder에만 있어요. 나머지 segment의 tier는 coverage grid가 이름표로 계산해요(10장 C5).
-- `random` condition은 driver table의 32 row에서 uniform하게 뽑아요(`harness/tools/tests/mocks/daemon.py`).
+- `random` condition은 driver table의 32 row에서 uniform하게 뽑아요(`daemon/daemon.py`의 `recognize_random`. 2026-11-14의 integration gate부터 runner가 돌리는 daemon이에요).
 
 ---
 

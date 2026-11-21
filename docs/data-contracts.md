@@ -1,5 +1,5 @@
 # Data Contracts — every format in the project, with examples
-> Status: normative · Created 2026-08-28 · Updated 2026-11-01
+> Status: normative · Created 2026-08-28 · Updated 2026-11-21
 
 Everything the three of us build talks to everything else through data — a file one side writes and another side reads. Each such format is a **contract**: as long as both sides honor it, we can work independently and integration stays boring. This document lists every contract in the project, shows what each one looks like with examples — real where the dataset's files hold them (§2–§4), illustrative elsewhere — and explains every example in plain sentences. Same audience as `background-guide.md`: general CS knowledge is enough, no OS background needed.
 
@@ -92,11 +92,11 @@ cpu-batch:
       - EXIT: {}
   params:                        # one table pair per bound program
     python3_run:
-      {dist: quantiles, p: [14, 112, 132, 188, 228276, 43515311, 238567291, 348129382, 876756180, 997987710],
-       min: 12, max: 1006372964, means: […], sampling: per-iteration, source: "meas-ci:background:2026-10-03"}
+      {dist: quantiles, p: [14, 141, 155, 191, 1223, 20473778, 204750672, 334780629, 759669393, 1177733035],
+       min: 7, max: 1297955204, means: […], sampling: per-iteration, source: "meas-ci:background:2026-11-20"}
     python3_block:
-      {dist: quantiles, p: [32, 46, 99, 216, 350, 404, 478, 516, 548, 560],
-       min: 12, max: 561, means: […], sampling: per-iteration, source: "meas-ci:background:2026-10-03"}
+      {dist: quantiles, p: [9, 71, 102, 330, 446, 521, 591, 629, 713, 799],
+       min: 1, max: 1109, means: […], sampling: per-iteration, source: "meas-ci:background:2026-11-20"}
     kdenlive_render_run:   {dist: quantiles, …, source: "meas-ci:background:2026-10-03c"}
     kdenlive_render_block: {dist: quantiles, …, source: "meas-ci:background:2026-10-03c"}
   lifetime: finite
@@ -539,7 +539,7 @@ What the lint enforces, beyond the schema's shape: all 32 rows present, none dup
 
 ## 11. Invocation — how the runner calls the daemon and the simulator (contract 10)
 
-**Frozen 2026-09-11 (jioh 8.5). Not a file: the command line each program is started with. Flows runner → daemon and runner → simulator, once per run. The mock daemon and the mock simulator under `harness/tools/tests/mocks/` are its first two implementations; 인경민's simulator and 박이안's daemon meet it when they deliver.**
+**Frozen 2026-09-11 (jioh 8.5). Not a file: the command line each program is started with. Flows runner → daemon and runner → simulator, once per run. The mock daemon and the mock simulator under `harness/tools/tests/mocks/` are its first two implementations; the simulator (`simulator/src/sim`) and the daemon (`daemon/daemon.py`) meet it, and the runner has run them since the integration gate passed on 2026-11-14 (`simulator@0d323c84470a`, `daemon@62c71f0d2de0`).**
 
 ```sh
 # the daemon — one run: one workload × one condition, × one seed where the condition draws

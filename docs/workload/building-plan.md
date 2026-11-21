@@ -1,5 +1,5 @@
 # Workload Dataset Building Plan
-> Status: normative · Created 2026-08-25 · Updated 2026-10-31
+> Status: normative · Created 2026-08-25 · Updated 2026-11-21
 
 > Consolidates the dataset methodology decided across Q7 (segments, canonicalization, caches), source-vetting (per-source verdicts and extracted parameters), the scenario catalog (`docs/workload/scenario-catalog.md`: S1–S18, names-only schema, the existence-only source column), the archetype plan (`docs/workload/archetype-plan.md`, the archetype library), docs/references.md + dataset/sources.yaml (citation index and machine registry), and docs/simulator/interpretation-contract.md (simulator-facing semantics). Those documents are normative for their own content; this plan defines how their pieces compose into the dataset and in what order it gets built. Decision record: `_dev/archive/2026-08-26-workload-generation-grill.md`.
 
@@ -76,7 +76,7 @@ An archetype is a named, sourced behavior specification for one kind of program.
 
 | archetype id | what it is | source | bound as (scenario) |
 |---|---|---|---|
-| `cpu-batch` | a batch loop — a measured run, then the block after it — whose tables the `program` binding chooses: `python3` (PyTorch's basic MNIST example), `kdenlive_render` (Kdenlive's export); `spoof`, one uninterrupted RUN by construction (design) | `meas-ci:background:2026-10-03`, `:2026-10-03c` | `python` (S12), `kdenlive_render` (S7); `chrome` in `c6-spoof` (S2) |
+| `cpu-batch` | a batch loop — a measured run, then the block after it — whose tables the `program` binding chooses: `python3` (PyTorch's basic MNIST example), `kdenlive_render` (Kdenlive's export); `spoof`, one uninterrupted RUN by construction (design) | `meas-ci:background:2026-10-03`, `python3`'s run between voluntary blocks and block per run `:2026-11-20`, `:2026-10-03c` | `python` (S12), `kdenlive_render` (S7); `chrome` in `c6-spoof` (S2) |
 | `file-archiver` | 7-Zip archiving a 10 GB set with eight threads | `meas-ci:background:2026-09-19` | `7z` (S16) |
 | `game-download`, `game-download-idle` | SteamCMD's fresh install of a depot, normal and idle class | `meas-ci:background:2026-09-19` | `steam` (S10) |
 | `package-upgrade` | the stock Ubuntu 24.04 unattended upgrade's install stage | `meas-ci:background:2026-10-01` | `unattended-upgr` (S17) |
@@ -222,7 +222,10 @@ Role: ecological validity, and the **query-economics numbers** — novel canonic
 (4a) generated layer                                   grids.yaml + generator → five sets, 1,562 files [done, 9.19–9.21]
 (5) simulator Phase 0 built to the contract            DES core, MLFQ executor, canonical loader
                                                        → first integration test: one C1 workload end-to-end
+                                                       [done: the integration gate passed 2026-11-14, simulator@0d323c84470a, daemon@62c71f0d2de0]
 (6) RQ0 gate                                           the prior driver table, random vs oracle against fixed, on the RQ0 gate spec's 19 judging files (harness/experiments/rq0-gate.yaml)
+                                                       [run 2026-11-16 to 2026-11-18: fail, final 2026-11-21, 5 of 19 against K = 10 on the run's programs;
+                                                        the configuration search's route, the table rewritten; the rewrite and the second RQ0 run are Phase 12's]
 (∥) meas-ci workflows                                  independent track from (0) [done: every entry measured or sourced]
 (7) on gate pass: the full condition matrix; the naturalistic set in the backlog (§4)
 ```

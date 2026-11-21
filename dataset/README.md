@@ -27,7 +27,7 @@ build/                 # compiled artifacts — NOT committed; verified via the 
   coreset-single/      # the core set's 51 workloads, compiled single-lane (the RQ0 experiments run on these), the 78 sensitivity variants (<base>@<set>) beside them, each core artifact's compile report
   transition-grid-single/, return-grid-single/, flap-stress-single/, distractor-grid-single/, familiarity-ladder-single/   # the generated sets, compiled the same way
 build.manifest.json    # lockfile: hashes of the last blessed build — its inputs (library, schema, compiler sources, streams), its artifacts and their compile reports — + the static demand per file and per ground-truth segment (utilization, demand_class): offered demand, not the lane's load (Rules of the tree)
-build.variants.manifest.json   # the variants' lockfile: each variant's hash, its base's hash, its transform and its utilization (the RQ0 gate spec pins it)
+build.variants.manifest.json   # the variants' lockfile: each variant's hash, its base's hash, its transform and its utilization — the second bless's (2026-11-21); the RQ0 gate spec pins the first bless's (2026-10-31), the tree its run read, a pin the experiment lint reads as a note since the spec has been run
 build.<set>.manifest.json   # one per generated set: the same sections, its inputs also the definition, the generator and the C1 timelines, plus `grid` — each file's coordinates and split, its placements and its segments' labels
 coverage-grid.json     # driver-table cell (mode × background_wanted) × tier coverage grid over all core segments, all 32 cells instanced (CI-enforced); plus one table per generated set, from its manifest's segment labels
 meas/                  # measurement-campaign records; the compile and the lint read none of them:
@@ -85,7 +85,7 @@ One `*.workload.json` per workload, validated by `schema/workload.schema.json`, 
     { "op": "wake", "t": 2090485, "channel": "input:editor", "target": "editor" },   // the first keystroke
     /* … */
     { "op": "arrive", "t": 60000000, "id": "hog", "name": "python", "declared_class": "normal",
-      "program": [ { "op": "RUN", "us": 192 }, { "op": "SLEEP", "us": 378 }, /* … */ { "op": "EXIT" } ] }
+      "program": [ { "op": "RUN", "us": 191 }, { "op": "SLEEP", "us": 472 }, /* … */ { "op": "EXIT" } ] }
   ]
 }
 ```
@@ -125,7 +125,7 @@ What the core files leave out. The desktop's session processes — GNOME Shell, 
 
 ### Sensitivity variants
 
-`make variants` builds the RQ0 gate spec's sensitivity variants from the blessed artifacts and the pinned library (`variants.yaml`, `tools/variants.py`; 9.14 decisions 10 and 12): 78 files, each `<base>@<set>.workload.json` in `build/coreset-single/`, recorded with its base's hash, its transform and its utilization in `build.variants.manifest.json`, which the RQ0 gate spec pins. A variant's `meta.id` is `<base>@<set>`; it keeps its base's `meta.derived_from` and `meta.sampled` (the workload contract has no slot for a transform), so the manifest is the provenance.
+`make variants` builds the RQ0 gate spec's sensitivity variants from the blessed artifacts and the pinned library (`variants.yaml`, `tools/variants.py`; 9.14 decisions 10 and 12): 78 files, each `<base>@<set>.workload.json` in `build/coreset-single/`, recorded with its base's hash, its transform and its utilization in `build.variants.manifest.json`. The RQ0 gate spec pins the manifest its run read, the first bless's (2026-10-31); the committed manifest is the second bless's (2026-11-21), and the experiment lint reads the executed spec's pin as a note. A variant's `meta.id` is `<base>@<set>`; it keeps its base's `meta.derived_from` and `meta.sampled` (the workload contract has no slot for a transform), so the manifest is the provenance.
 
 | Sets | Transform | Files |
 |---|---|---|
