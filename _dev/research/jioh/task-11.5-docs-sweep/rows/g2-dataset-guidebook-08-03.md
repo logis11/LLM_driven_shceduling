@@ -283,3 +283,10 @@
 - **Becomes:** | `RQ0` | project | 첫 관문 실험. 판정 파일 K개 이상에서 `random` seed 평균과 `oracle` 사이의 gap이 g 이상인지 묻는 것. headroom(oracle이 `fixed`보다 나음)은 따로 셈(1.2) |
 - **From:** `harness/experiments/rq0-gate.yaml`, `criterion` and statement `claim-links`
 - **Flags:** for 인지오: same caveat as g2-28.
+
+## Added at K2's review (2026-11-21)
+
+### g2-39 · `docs/guidebook/dataset/08-decision-chronicle.md:1849` · A · item 2 (the integration gate passed)
+- **Now:** "compile된 숫자에 관한 문장 가운데 참인지가 reference simulator가 아직 구현하지 않은 executor 규칙에 달린 것은, …"
+- **Becomes:** the clause dated to the decision: "…참인지가 그때(2026-10-17) reference simulator가 아직 구현하지 않은 executor 규칙에 달린 것은, …" — the box under it (g2-08) carries the current state
+- **From:** `_dev/docs/spec/jioh/task-9.16-exit-audits.md`, decision 6; `harness/CHANGELOG.md`, 2026-11-14 "the integration gate passed"

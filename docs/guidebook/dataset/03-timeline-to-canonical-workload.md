@@ -1,6 +1,6 @@
 # 3권 · Timeline에서 canonical workload로: 포맷과 compiler
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-31
+> Status: draft · Created 2026-10-14 · Updated 2026-11-21
 
 **사람이 쓴 timeline 파일 하나가 어떤 규칙으로 simulator가 읽는 workload JSON이 되나.**
 
@@ -8,7 +8,7 @@
 
 이 연구의 workload dataset은 세 층으로 되어 있습니다. 맨 아래에는 **archetype** library(`dataset/archetypes.yaml`)가 있습니다. archetype은 "어떤 종류의 프로그램이 CPU를 어떻게 쓰는가"를 적어 둔 행동 모형이고, 29개 중 28개가 CI runner에서 직접 측정한 값입니다(나머지 하나, 게임 chain은 발표 자료에 기댑니다). 이름도, 개수도, 그 프로그램이 무슨 의미인지도 모릅니다. 그 위에 **timeline**(`dataset/timelines/coreset/*.timeline.yaml`)이 있습니다. timeline은 사람이 쓰는 연출 대본입니다. 어떤 이름의 process가 언제 등장해 언제 퇴장하는지, 그 순간 사용자가 실제로 무엇을 하고 있는지(정답 label), 사용자가 어느 창을 보고 어디에 타자를 치는지를 적습니다. 맨 위에는 **canonical workload**(`dataset/build/coreset-single/*.workload.json`)가 있습니다. 이것은 simulator, recognizer를 돌리는 daemon, 채점하는 harness가 실제로 먹는 파일입니다. 확률분포는 하나도 남아 있지 않고, 모든 값이 정수 microsecond로 확정되어 있습니다.
 
-이 권은 가운데와 위 사이, 즉 **timeline이 canonical workload가 되는 길**을 다룹니다. 두 포맷의 field 하나하나가 무슨 뜻인지, 그리고 둘 사이를 잇는 compiler **wlc**(workload compiler, `dataset/tools/wlc/`)가 어떤 순서로 무엇을 하는지를 설명합니다. archetype이 어떻게 측정되었는지는 archetype library를 다루는 권에서, 51개 coreset 파일이 각각 어떤 질문에 답하는지는 coreset 파일을 하나씩 다루는 권에서, 1,562개의 generated 파일은 generated layer를 다루는 권에서, 민감도 variant와 build gate의 CI 운영은 각각 그 주제를 다루는 권에서 설명합니다. 이 권은 그 모든 권이 공유하는 "문법책"에 해당합니다. 설명하는 것은 2026-10-14 기준의 tree이고, 그 뒤 2026-10-17까지 바뀐 것(sub-task 9.23이 더한 canonical lint 셋과 program의 끝 규칙, launch stream의 고정, sub-task 9.15 안에서 지운 compiler 경로, timeline 머리 주석의 생략 문장, schema의 설명과 compiler·loader의 docstring)은 해당 절에 반영했습니다. 포맷과 compiler는 2026-08-27(Phase 2, 처음 compiler를 만든 날)부터 2026-10-17(sub-task 9.15 안에서 정한 dataset 수정이 두 번째 rebuild로 들어간 날)까지 여러 번 바뀌었고, 각 변화가 언제 왜 일어났는지는 15장에, 문서와 tree가 어긋나는 곳은 16장에 모았습니다.
+이 권은 가운데와 위 사이, 즉 **timeline이 canonical workload가 되는 길**을 다룹니다. 두 포맷의 field 하나하나가 무슨 뜻인지, 그리고 둘 사이를 잇는 compiler **wlc**(workload compiler, `dataset/tools/wlc/`)가 어떤 순서로 무엇을 하는지를 설명합니다. archetype이 어떻게 측정되었는지는 archetype library를 다루는 권에서, 51개 coreset 파일이 각각 어떤 질문에 답하는지는 coreset 파일을 하나씩 다루는 권에서, 1,562개의 generated 파일은 generated layer를 다루는 권에서, 민감도 variant와 build gate의 CI 운영은 각각 그 주제를 다루는 권에서 설명합니다. 이 권은 그 모든 권이 공유하는 "문법책"에 해당합니다. 설명하는 것은 2026-10-14 기준의 tree이고, 그 뒤 2026-10-17까지 바뀐 것(sub-task 9.23이 더한 canonical lint 셋과 program의 끝 규칙, launch stream의 고정, sub-task 9.15 안에서 지운 compiler 경로, timeline 머리 주석의 생략 문장, schema의 설명과 compiler·loader의 docstring)과, 2026-10-31에 측정된 프로그램 자신의 wake를 시작점에 따라 나눈 re-bless, 2026-11-21의 second bless 뒤의 `c2-p1a` 학습 job은 해당 절에 반영했습니다. 포맷과 compiler는 2026-08-27(Phase 2, 처음 compiler를 만든 날)부터 2026-10-17(sub-task 9.15 안에서 정한 dataset 수정이 두 번째 rebuild로 들어간 날)까지 여러 번 바뀌었고, 각 변화가 언제 왜 일어났는지는 15장에, 문서와 tree가 어긋나는 곳은 16장에 모았습니다.
 
 웹 개발자의 세계에 비유하면 이렇습니다. timeline은 사람이 손으로 쓰는 `package.json`이고, canonical workload는 기계가 만든 `package-lock.json`입니다. lockfile에는 "대략 이 버전쯤"이 없고 정확한 해시가 박혀 있듯, canonical workload에는 "평균 5 ms쯤"이 없고 `{"op":"RUN","us":4832}` 같은 확정된 숫자만 있습니다. 그리고 같은 `package.json`과 같은 registry 상태에서 같은 lockfile이 나와야 하듯, 같은 timeline과 같은 archetype library와 같은 seed에서는 바이트 하나까지 같은 workload가 나와야 합니다. 이 결정성이 왜 실험의 생명줄인지, compiler가 그것을 어떻게 지키는지가 이 권의 중심 이야기입니다.
 
@@ -72,7 +72,7 @@
 
 > **왜 이렇게 정했나.** 2026-08-26 grill의 D10은 lifetime을 이 원칙으로 나눴습니다. 사용자가 닫는 task는 `depart`를 가지고, 끝이 있는 job은 `depart` 없이 program의 `EXIT`로 끝납니다. 기각된 대안이 함께 기록되어 있습니다. "fully pinned arrive+depart trace — open-loop, deletes the good-vs-bad config divergence RQ0 measures"(도착과 퇴장을 모두 박은 trace는 open-loop가 되어, RQ0가 재려는 좋은 설정과 나쁜 설정의 차이를 지운다). D11은 같은 이유로 `FORK`를 run-time primitive로 남겼습니다. 기각된 대안은 "compile-time spawn expansion — pins cc1 arrivals, so a bad scheduler faces the same fork-storm pace as a good one"(자식 process를 compile 때 펼치면 `cc1`의 도착이 박혀서, 나쁜 scheduler도 좋은 scheduler와 같은 속도의 fork 폭풍을 맞는다)입니다.
 
-`RQ0` — 이 연구의 첫 번째 관문 질문, Measurability입니다. 이 workload들에서 scheduler 설정의 선택이 측정할 만큼 결과를 바꾸는지를, 완벽한 인식(oracle)과 무작위 인식을 비교해 묻습니다(`docs/research-proposal.md`의 RQ0 절). 그 차이를 headroom이라고 부릅니다. 판정 규칙은 `harness/experiments/rq0-gate.yaml`(RQ0 gate spec)에 고정되어 있습니다.
+`RQ0` — 이 연구의 첫 번째 관문 질문, Measurability입니다. 이 workload들에서 scheduler 설정의 선택이 측정할 만큼 결과를 바꾸는지를, 완벽한 인식(oracle)과 무작위 인식을 비교해 묻습니다(`docs/research-proposal.md`의 RQ0 절). 판정은 판정 파일마다 `random` seed 평균과 `oracle` 사이의 gap을 읽고, gap이 g 이상인 파일이 K개 이상이면 통과입니다. headroom은 그 gap과 따로, oracle이 boot default(`fixed`)보다 나은 것을 부르는 말입니다(RQ0 gate spec의 statement `claim-links`, 2026-11-01). 2026-11-18부터 scorer는 그 개선을 부호와 함께 읽어, oracle이 `fixed`보다 floor 이상 나쁜 term도 headroom이 없는 것으로 보고 `oracle_worse`로 표시합니다(`harness/CHANGELOG.md`의 2026-11-18 항목). 판정 규칙은 `harness/experiments/rq0-gate.yaml`(RQ0 gate spec)에 고정되어 있습니다.
 
 ## 1.3 파이프라인 한 장
 
@@ -154,7 +154,10 @@ timeline에서 소비자까지 가는 길을 그림으로 보면 이렇습니다
 | 9.19–9.21 | generated layer | spec과 changelog |
 | 9.22 | build 시간. `jsonschema-rs`, 병렬 compile | spec과 changelog |
 | 9.23 | 이 guidebook이 찾은 어긋남(2026-10-14–15). `c6-fold`·`c6-spoof`의 label, launch stream 고정, `check`의 파생 파일 비교, canonical lint 셋, 의존성 고정, program의 끝 | `_dev/research/jioh/task-9.23-guidebook-findings/changelog.md` |
-| memo 2026-10-07, 2026-10-08 | TIMER skip 규칙, declared scheduling class | `docs/memos/` |
+| 9.24, timer-wakes-by-origin spec 결정 1–18 | 측정된 프로그램 자신의 wake를 wake 사슬의 시작점에 따라 `timer:`와 `event:`로 나눈 결정(2026-10-31) | `_dev/docs/spec/jioh/timer-wakes-by-origin.md` |
+| 10.2 | 통합 gate. simulator 적합성 항목 (a)–(j)를 binary 위에서 보임(2026-11-14) | `_dev/docs/spec/jioh/task-10.2-integration-gate.md`, `_dev/research/jioh/task-10.2-integration-gate/` |
+| 11.3 | 재측정과 second bless. `cpu-batch`의 `python3`(2026-11-20–21) | `_dev/docs/spec/jioh/task-11.3-the-re-measurement.md`, `_dev/research/jioh/task-11.3-the-re-measurement/` |
+| memo 2026-10-07, 2026-10-08, 2026-11-15 | TIMER skip 규칙, declared scheduling class, 통합 gate와 cold smoke의 starvation 읽기 | `docs/memos/` |
 | 2026-10-10 audit, A1–A4 | 9.15 전에 dataset 전체를 점검한 기록 | `_dev/docs/audit/jioh/2026-10-10-dataset-audit-before-9.15.md` |
 
 "9.10 D17" 같은 표기는 "sub-task 9.10의 changelog에 적힌 17번째 결정"이라는 뜻이고, "9.14의 결정 4"는 "sub-task 9.14의 spec에 적힌 locked decision 4"라는 뜻입니다. spec의 결정은 grill에서 정한 방향이고, changelog의 D 번호는 그것을 구현하면서 남긴 기록입니다.
@@ -488,7 +491,7 @@ tree의 library에서 `idle`인 entry는 세 개입니다. `file-indexer`(GNOME 
 
 `SCHED_IDLE` — Linux의 scheduling 정책 중 하나로, 다른 정책의 task가 실행 가능하지 않을 때만 CPU를 받습니다. 이 dataset의 `idle` class가 이것입니다. `nice` — normal 정책 안에서 task들 사이의 몫을 조정하는 가중치(−20부터 19)입니다. class를 바꾸지 않습니다. `LOTTERY` — 이 연구의 scheduler가 고를 수 있는 네 알고리즘(MLFQ, EDF, LOTTERY, FIFO) 중 하나로, 추첨권 수에 비례해 CPU를 줍니다.
 
-simulator 쪽 규칙도 memo §2에 있습니다. `idle` task는 다른 class의 task가 하나도 실행 가능하지 않을 때만 돌고, 다른 class의 task가 깨어나면 즉시 밀려납니다. 이 규칙은 네 알고리즘 모두에서 알고리즘의 결정 **아래에** 적용됩니다. 기아(starvation)를 막는 안전망은 simulator가 만들지 않고, harness의 `starvation_floor` guard가 모든 task의 대기를 30 s로 제한합니다.
+simulator 쪽 규칙도 memo §2에 있습니다. `idle` task는 다른 class의 task가 하나도 실행 가능하지 않을 때만 돌고, 다른 class의 task가 깨어나면 즉시 밀려납니다. 이 규칙은 네 알고리즘 모두에서 알고리즘의 결정 **아래에** 적용됩니다. 기아(starvation)를 막는 안전망은 simulator가 만들지 않습니다. harness의 `starvation_floor` guard는 어떤 task든 ready로 30 s를 넘게 기다린 run을 실패로 둡니다. guard가 읽지 못하는 대기 둘, 곧 workload나 task의 끝에 아직 열린 대기와 선점 뒤의 대기는 `simulator/tools/wait_check.py`가 trace에서 읽습니다(RQ0 gate spec의 statement `sensitivity-lines`). 2026-11-15에 cold smoke의 starvation 읽기가 이 안전망의 질문을 다시 열었고, 인지오는 계약을 그대로 두기로 정했습니다. 안전망도 simulator의 변경도 없습니다(`docs/memos/2026-11-15-integration-gate-and-cold-smoke.md` §7).
 
 ---
 
@@ -980,10 +983,10 @@ compile 후 `hog`의 arrive event는 이렇습니다(앞부분).
 
 ```json
 {"declared_class": "normal", "id": "hog", "name": "python", "op": "arrive", "t": 60000000,
- "program": [{"op": "RUN", "us": 192}, {"op": "SLEEP", "us": 378}, {"op": "RUN", "us": 135}, {"op": "SLEEP", "us": 359}, …, {"op": "EXIT"}]}
+ "program": [{"op": "RUN", "us": 191}, {"op": "SLEEP", "us": 472}, {"op": "RUN", "us": 159}, {"op": "SLEEP", "us": 450}, …, {"op": "EXIT"}]}
 ```
 
-`depart`가 없고, program이 `EXIT`로 끝납니다. 명령어는 56개뿐입니다(RUN 28, SLEEP 27, EXIT 1). 23분짜리 job이 56개 명령어인 것은, 측정된 MNIST 학습이 거의 쉬지 않고 CPU를 쓰기 때문입니다. compiler는 "측정된 run 하나 → 그 뒤의 block 하나"를 반복해 뽑는데, block이 0으로 나오면(쉬지 않고 계속 돌았다는 측정값) 앞뒤 run을 하나로 합칩니다(11.6절). 그래서 RUN 하나가 685,714,830 µs, 약 11.4분짜리도 있습니다. RUN 28개를 모두 더하면 정확히 1,389,885,000 µs, 즉 `total_work`입니다.
+`depart`가 없고, program이 `EXIT`로 끝납니다. 명령어는 96개뿐입니다(RUN 48, SLEEP 47, EXIT 1). 23분짜리 job이 96개 명령어인 것은, 측정된 MNIST 학습이 voluntary block 사이에 오래 쉬지 않고 CPU를 쓰기 때문입니다. compiler는 "측정된 run 하나 → 그 뒤의 block 하나"를 반복해 뽑고(11.6절), `python3`의 run 표(`python3_run`)는 p90이 204,750,672 µs, max가 1,297,955,204 µs입니다. 그래서 RUN 하나가 560,069,421 µs, 약 9.3분짜리도 있습니다. block 표(`python3_block`)는 min이 1 µs라서 0이 나오지 않고, block이 0일 때 앞뒤 run을 하나로 합치는 규칙은 이 job에서 쓰이지 않습니다. RUN 48개를 모두 더하면 정확히 1,389,885,000 µs, 즉 `total_work`입니다. 이 program은 2026-11-21의 second bless 뒤의 것입니다. `python3`의 run 표와 block 표는 sub-task 11.3의 재측정(`meas-ci:background:2026-11-20`, 107 repeats)에서 왔고, CPU 총량은 위 `source`가 가리키는 2026-10-03 campaign의 값 그대로입니다(`dataset/archetypes.yaml`의 `cpu-batch` scope).
 
 ```yaml
 input:
@@ -1210,13 +1213,13 @@ contract는 primitive를 여섯 개라고 셉니다(`FORK`와 `EXIT`를 한 줄�
 | `input:<task id>` | 재생한 키 입력 | 외부 `wake` event(박힌 시각) | `input:writer` |
 | `chain:<member id>` | 게임 chain의 구성원 | 앞 구성원의 `WAKE` 명령어 | `chain:game.wineserver` |
 | `job:<job member id>` | 빌드 object job의 구성원 | 같은 job의 다른 구성원의 `WAKE` | `job:build.j1.gcc` |
-| `children:<task id>` | 빌드 orchestrator가 모든 자식을 낳은 뒤 | 파일 안에는 깨우는 것이 없음. 자식이 모두 끝났을 때 executor가 완료(제안된 규칙, 아래) | `children:build` |
+| `children:<task id>` | 빌드 orchestrator가 모든 자식을 낳은 뒤 | 파일 안에는 깨우는 것이 없음. 자식이 모두 끝났을 때 executor가 완료(conformance 항목 (g); 2026-11-11 stage AA로 구현, 아래) | `children:build` |
 
 `timer:`와 `input:`을 나눈 것은 9.5 D74의 hand-off입니다. "the harness tells an input wake from a timer wake by channel". harness는 키 입력에 대한 반응 시간을 `input:` channel의 wake event, 곧 키 입력 하나하나에서부터 잽니다(`input_latency`: 키가 온 순간부터 그 키가 끝낸 WAIT의 처리가 시작될 때까지). 사용자가 느끼는 지연은 키를 누른 뒤의 지연이기 때문입니다. `event:`는 2026-10-31에 더해졌습니다(timer-wakes-by-origin spec 결정 4, 사슬이 timer 밖에서 시작한 wake를 키 입력처럼 쌓는 channel). 키 입력 stream이 없는 task의 반응 시간은 그 task의 `timer:`와 `event:` wake event에서부터 잽니다(`app_latency`).
 
 tree에서 세면 core set 51개 파일의 wake event는 모두 4,504,773개입니다(`"op":"wake"`를 channel 접두어별로 세었습니다: `timer:` 4,146,411개, `event:` 332,617개, `input:` 25,745개). 키 입력 channel은 그중 작은 부분입니다. 편집기 하나만 보아도 `c1-dev`에서 timer wake가 6,443개, event wake가 19개, 키 입력이 186개입니다. "편집기 program = 키 입력 기다림과 CPU 사용의 반복"이라는 README와 data-contracts의 그림은 단순화이고, 실제 측정된 편집기는 사용자가 없어도 자기 thread들의 timer로 훨씬 자주 깨어납니다.
 
-> **열린 자리.** `children:<id>` channel을 깨우는 사건은 canonical 파일에 없습니다. 이 channel의 뜻은 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 그 orchestrator가 낳은 자식이 모두 끝났을 때 완료하고, WAIT에 닿았을 때 살아 있는 자식이 없으면 막지 않고 곧바로 완료합니다(대기 0의 `ready` 줄). 데이터는 바뀌지 않습니다. 이 규칙은 interpretation contract의 §3 `WAIT(channel)` 행과 §5 FORK 문단, `docs/data-contracts.md` §4 예제 B와 §14의 2026-10-16 기록에 "proposed"로 적혔습니다. 동결된 계약의 변경이라 simulator 담당 인경민의 동의가 필요했고(`docs/data-contracts.md` §13의 동결 규칙), 인경민이 구두로 동의해 효력을 가졌습니다(2026-10-31 기록, `docs/data-contracts.md` §14). 지금의 reference simulator는 이 channel을 보통 channel로 다루어(`simulator/src/sim.cpp`의 `on_task_end`는 fork 자리만 돌려줍니다), 자식이 다 끝나도 orchestrator가 막힌 채로 남습니다. 그래서 `c1-compile`의 build turnaround를 재려면 이 구현이 먼저 있어야 하고, RQ0 gate spec은 이것을 simulator 적합성 항목 (g)로 적습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
+`children:<id>` channel을 깨우는 사건은 canonical 파일에 없습니다. 이 channel의 뜻은 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 그 orchestrator가 낳은 자식이 모두 끝났을 때 완료하고, WAIT에 닿았을 때 살아 있는 자식이 없으면 막지 않고 곧바로 완료합니다(대기 0의 `ready` 줄). 데이터는 바뀌지 않습니다. 이 규칙은 interpretation contract의 §3 `WAIT(channel)` 행과 §5 FORK 문단, `docs/data-contracts.md` §4 예제 B와 §14의 2026-10-16 기록에 "proposed"로 적혔습니다. 동결된 계약의 변경이라 simulator 담당 인경민의 동의가 필요했고(`docs/data-contracts.md` §13의 동결 규칙), 인경민이 구두로 동의해 효력을 가졌습니다(2026-10-31 기록, `docs/data-contracts.md` §14). RQ0 gate spec은 이것을 simulator 적합성 항목 (g)로 적습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`). 인경민이 2026-11-11에 reference simulator의 stage AA로 구현했습니다. orchestrator의 WAIT는 마지막 자식의 `task_end` 바로 뒤에 `ready(wake)` 줄로 끝나고, WAIT에 닿았을 때 살아 있는 자식이 없으면 대기 0으로 끝납니다. 그래서 `c1-compile`의 `build`가 끝나고(stage AA의 점검에서 1,514,650,775 µs), 전에는 censored였던 그 build turnaround를 잴 수 있습니다(`simulator/memo/memo_261111.md` Part B). 2026-11-14의 통합 gate(sub-task 10.2)가 그것을 `simulator@0d323c84470a`의 binary 위에서 보였습니다. fixture `fix-object`와 `fix-tree`의 재생과, black-box unit test `simulator/tests/test_spawn_children.py`입니다(`harness/CHANGELOG.md`의 2026-11-13, 2026-11-14 항목).
 
 ## 7.8 spawn table과 `fork_cap`
 
@@ -1302,7 +1305,7 @@ projection의 규칙 몇 가지가 recognizer가 보는 세계를 정합니다.
 - **class를 보여 줌.** 9.13의 결정 3, "on the standing that a real machine exposes a process's class as it exposes its name"(실제 기계에서 `sched_getattr`로 class를 읽을 수 있으므로).
 - **focus를 보여 줌.** 9.17의 결정 3, task 항목에 그 task의 focus 구간을 붙입니다.
 
-> **코드로.** 이 규칙의 참조 구현은 harness의 mock daemon입니다(`harness/tools/tests/mocks/daemon.py`의 `projection`). 각 `arrive` event에서 `name`, `declared_class`, `t`를 꺼내 `t_arrive`로 쓰고, `depart`가 있으면 `t_depart`로 쓰고, `focus` 목록에서 그 id의 구간을 모아 붙이고, spawn table이 있으면 `(name, declared_class)`로 세어 `children`을 만듭니다. `ground_truth`는 건드리지 않습니다.
+> **코드로.** 이 규칙을 구현하는 것은 `daemon/daemon.py`의 `projection`입니다(RQ0 run이 쓴 daemon, `daemon@62c71f0d2de0`). harness의 test가 쓰는 mock daemon(`harness/tools/tests/mocks/daemon.py`의 `projection`)도 같은 규칙을 구현하고, 2026-11-14의 통합 gate에서 두 daemon은 RQ0 gate spec의 run 19,425개 모두에서 schedule과 log가 byte까지 같았습니다(`harness/CHANGELOG.md`의 2026-11-14 항목). 각 `arrive` event에서 `name`, `declared_class`, `t`를 꺼내 `t_arrive`로 쓰고, `depart`가 있으면 `t_depart`로 쓰고, `focus` 목록에서 그 id의 구간을 모아 붙이고, spawn table이 있으면 `(name, declared_class)`로 세어 `children`을 만듭니다. `ground_truth`는 건드리지 않습니다.
 
 **oracle과 채점자 — `ground_truth`.** 정답을 읽는 것은 둘뿐입니다. oracle recognizer 조건은 projection 대신 `ground_truth`를 읽어 정답 label을 냅니다. 이것이 "맞힐 수 있는 최선"의 기준선입니다. Layer 1 채점자(grader)는 recognizer의 답을 `ground_truth`와 비교해 정확도를 셉니다. `familiarity`도 채점자만 읽고, 정확도를 tier별로 나누는 열쇠로 씁니다(schema, "A reporting split key for the grader, never a recognizer input").
 
@@ -1670,7 +1673,7 @@ TIMER의 의미는 contract §3의 절대 격자입니다. task의 t₀(첫 TIME
 3. block이 1 µs 이상이면 그동안 모은 run을 `RUN` 하나로 내보내고 `SLEEP(block)`을 붙입니다. block이 0이면 run을 내보내지 않고 다음 run과 합칩니다.
 4. 마지막에 남은 run을 `RUN`으로 내보내고 `EXIT`를 붙입니다.
 
-`c2-p1a`의 학습 job이 56 명령어인 이유가 3단계입니다(6.2절). MNIST 학습의 측정 block 표는 0이 많아서, 대부분의 run이 합쳐져 수 분짜리 RUN이 됩니다.
+`c2-p1a`의 학습 job은 96 명령어(RUN 48, SLEEP 47, EXIT 1)입니다(6.2절). 명령어가 적은 이유는 3단계가 아니라 측정 run 표입니다. MNIST 학습의 run 표(`python3_run`, `meas-ci:background:2026-11-20`)는 voluntary block 사이의 긴 run을 담고 있어(p90 204,750,672 µs, max 1,297,955,204 µs) RUN이 수 분짜리가 됩니다. block 표(`python3_block`)는 0을 담지 않으므로(min 1 µs) 이 job에서는 3단계의 합치기가 일어나지 않습니다.
 
 `c6-spoof`의 가짜 `chrome`(`program: spoof`)은 예외입니다. 측정표가 없고, `RUN(total_work)` 하나와 `EXIT`입니다. 코드 주석은 "the chrome spoof is one uninterrupted RUN by construction (D7)"이라고 적습니다.
 
@@ -2237,7 +2240,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 
 **1. launch stream의 고정 — 닫힘.** 9.23 D11(2026-10-15)이 `dataset/launch/*.json.gz` 10개를 manifest의 `inputs`에 더했습니다(13.5절).
 
-**2. `children:<id>` channel을 누가 깨우나 — 규칙은 정해졌고 동의됨, 구현을 기다림.** 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 자식이 모두 끝났을 때 완료하고, 살아 있는 자식이 없으면 곧바로 완료합니다. 이 규칙은 interpretation contract와 `docs/data-contracts.md`에 "proposed"로 적혔고, 동결된 계약의 변경이라 인경민의 동의가 필요했습니다(`docs/data-contracts.md` §13의 동결 규칙). 인경민이 구두로 동의해 효력을 가졌습니다(2026-10-31 기록). 구현될 때까지 reference simulator에서는 `c1-compile`의 build turnaround를 잴 수 없고, RQ0 gate spec이 그 구현을 simulator 적합성 항목 (g)로 요구합니다(7.7절). 인경민의 구현 대기.
+**2. `children:<id>` channel을 누가 깨우나 — 닫힘.** 2026-10-16에 인지오가 정했습니다. executor는 orchestrator의 `WAIT children:<id>`를 자식이 모두 끝났을 때 완료하고, 살아 있는 자식이 없으면 곧바로 완료합니다. 이 규칙은 interpretation contract와 `docs/data-contracts.md`에 "proposed"로 적혔고, 동결된 계약의 변경이라 인경민의 동의가 필요했습니다(`docs/data-contracts.md` §13의 동결 규칙). 인경민이 구두로 동의해 효력을 가졌습니다(2026-10-31 기록). RQ0 gate spec이 그 구현을 simulator 적합성 항목 (g)로 요구했고, 인경민이 2026-11-11에 simulator의 stage AA로 구현했으며, 2026-11-14의 통합 gate가 그것을 binary 위에서 보였습니다(7.7절).
 
 **3. 파일보다 오래 사는 job의 demand — 닫힘.** 잘라 내지 않고, 문서들이 offered demand라고 문장으로 범위를 밝힙니다(12.4절).
 
@@ -2249,7 +2252,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 
 **7. Python 버전과 결정성 — 닫힘.** 2026-10-16에 인지오가 Python 3.12로 정했고, 직접 의존성은 9.23 D15가 정확한 version으로 고정했습니다. 다른 Python version에서 같은 byte가 나오는지는 확인하지 않았습니다(10.6절).
 
-**8. 종료 감사 — 닫힘.** 이 권이 설명한 compile 경로의 재현(artifact, report, variant가 timeline에서 다시 만들어지는가)과 묶인 값의 출처가 정말 그 값을 받치는지는 9.16(종료 감사)이 2026-10-17에 확인했습니다. 재현은 9.15의 마지막 판(`2b080333`)에서 집의 dataset gate(372 s)와 dataset run 39014790007이, 9.16이 고친 data로 다시 build한 판(`17f28d7f`)에서 dataset run 39030123144가 통과했습니다. 그 재build에서 모든 artifact의 byte는 `meta`에서만 바뀌었고 compile된 workload(task, event, ground truth)는 어디서도 바뀌지 않았으며, RQ0 gate spec이 dataset을 `8e1eb753…`, variant를 `8e2948b1…`로 다시 pin했습니다(`_dev/research/jioh/task-9.16-exit-audits/README.md`, `logs/D.md`). 출처 쪽의 결과는 14.4절에 적었습니다. simulator가 구현해야 확인되는 문장은 RQ0 gate spec의 simulator 적합성 항목별로 같은 폴더의 `compiled/uncheckable-by-item.md`에 모였고, 각 항목이 구현될 때 인경민이 돌릴 확인입니다. 위의 2(`children:<id>` channel, 항목 (g))는 그대로 열려 있고, 4(TIMER skip 규칙, 항목 (b))는 2026-10-23에 구현되었습니다. (b)에 기대는 문장의 확인은 기록에 아직 없습니다.
+**8. 종료 감사 — 닫힘.** 이 권이 설명한 compile 경로의 재현(artifact, report, variant가 timeline에서 다시 만들어지는가)과 묶인 값의 출처가 정말 그 값을 받치는지는 9.16(종료 감사)이 2026-10-17에 확인했습니다. 재현은 9.15의 마지막 판(`2b080333`)에서 집의 dataset gate(372 s)와 dataset run 39014790007이, 9.16이 고친 data로 다시 build한 판(`17f28d7f`)에서 dataset run 39030123144가 통과했습니다. 그 재build에서 모든 artifact의 byte는 `meta`에서만 바뀌었고 compile된 workload(task, event, ground truth)는 어디서도 바뀌지 않았으며, RQ0 gate spec이 dataset을 `8e1eb753…`, variant를 `8e2948b1…`로 다시 pin했습니다(`_dev/research/jioh/task-9.16-exit-audits/README.md`, `logs/D.md`). 출처 쪽의 결과는 14.4절에 적었습니다. simulator가 구현해야 확인되는 문장은 RQ0 gate spec의 simulator 적합성 항목별로 같은 폴더의 `compiled/uncheckable-by-item.md`에 모였고, 각 항목이 구현될 때 인경민이 돌릴 확인입니다. 위의 4(TIMER skip 규칙, 항목 (b))는 2026-10-23에, 2(`children:<id>` channel, 항목 (g))는 2026-11-11에 구현되었고, 2026-11-14의 통합 gate가 두 항목을 binary 위에서 보였습니다. (b)와 (g)에 기대는 문장의 확인(`compiled/uncheckable-by-item.md`의 "Check" 줄)은 기록에 아직 없고, 그 확인은 인경민의 몫입니다.
 
 ---
 
@@ -2359,7 +2362,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 | telemetry shape | project | `focus`(focus 이름 포함) 또는 `names`(빼고). query point는 같음(4.4) |
 | `query point` / `snapshot` | project | telemetry가 바뀌어 다시 묻는 시점 / 그때 보여 주는 한 장(4.4) |
 | `information asymmetry` | project | 부품마다 알아도 되는 정보를 다르게 정하고, loader가 parse 경계에서 나머지를 버리게 하는 원칙(8.1) |
-| `RQ0` | project | 첫 관문 실험. oracle과 무작위 조건 사이에 headroom이 있는지 묻는 것(1.2) |
+| `RQ0` | project | 첫 관문 실험. 판정 파일 K개 이상에서 `random` seed 평균과 `oracle` 사이의 gap이 g 이상인지 묻는 것. headroom(oracle이 `fixed`보다 나음)은 따로 셈(1.2) |
 | `audit` | project | 2026-10-10에 dataset 전체를 점검한 기록. A1–A4가 class-A 지적(3.5) |
 | 9.x | project | Phase 9(dataset 재건)의 sub-task 번호. 9.10은 timeline 연구, 9.13은 재건 build 등(1.6) |
 | `Wine` / `wineserver` / `Proton` | project | Windows 프로그램을 Linux에서 돌리는 호환 계층 / 그 조정 process, chain의 둘째 구성원 / Steam의 Wine 기반 계층(6.3) |
