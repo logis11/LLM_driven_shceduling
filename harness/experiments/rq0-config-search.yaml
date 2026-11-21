@@ -1,0 +1,264 @@
+# The configuration search — the RQ0 gate spec's failure procedure (harness/experiments/rq0-gate.yaml,
+# statement `failure-procedure`) after the RQ0 run's fail, as data the search tool executes
+# (tools/search.py; sub-task 11.4, _dev/docs/spec/jioh/task-11.4-the-configuration-search.md, decisions 1–15,
+# decided 2026-11-21). Committed before any search run (Phase 11 spec, decision 8); nothing here changes after a
+# search run begins except by an entry in harness/CHANGELOG.md made before any further run. The tool runs what this
+# file says and its report carries this file's SHA-256.
+#
+# Committed 2026-11-21 by 인지오.
+
+search: rq0-config-search
+
+# The ten files (decisions 1 and 2). The three picks are taken on the corrected runs — 11.2's rerun of the
+# criterion's runs on the fixed simulator (runs/rq0-gate-rerun) for sixteen judging files and 11.3's runs on the
+# current programs (runs/rq0-gate-11-3-current) for c2-p1a, c1-ml-train and c7-ml-train — on which 4 of 19 judging
+# files meet g = 0.5 and 15 fail; the improvement is the oracle's over fixed as a fraction of fixed's value, weighted
+# over the file's terms. The seven are the judging files with no headroom on every term there, the statement's
+# fourth item.
+files:
+  - workload: c7-transcode
+    kind: pick
+    reason: "the failing file with headroom and the largest oracle improvement in the nine-file duplicate-heavy class: 0.865, gap 0.123"
+  - workload: c7-gaming
+    kind: pick
+    reason: "the same in the low-duplicate class: 1.000, gap 0.427"
+  - workload: c1-transcode
+    kind: pick
+    reason: "the failing file whose gap fell furthest below g: gap −2.011"
+  - workload: c7-dev
+    kind: no_headroom
+    reason: "the row worse than the boot default by the floor or more on a term"
+  - workload: c7-video-edit
+    kind: no_headroom
+    reason: "the row worse than the boot default by the floor or more on a term"
+  - workload: c7-compile
+    kind: no_headroom
+    reason: "the row worse than the boot default by the floor or more on a term"
+  - workload: c1-render
+    kind: no_headroom
+    reason: "the row worse than the boot default by the floor or more on a term: its turnaround term; its latency term equal"
+  - workload: c7-photo
+    kind: no_headroom
+    reason: "the row changing nothing past the floor"
+  - workload: c7-ml-train
+    kind: no_headroom
+    reason: "the row changing nothing past the floor"
+  - workload: c7-render
+    kind: no_headroom
+    reason: "the row changing nothing past the floor"
+
+# Decision 3: a point is one configuration applied where the oracle applies its row, the labels ignored — the
+# oracle condition under a table whose every row is the point's configuration, so the daemon stamps the point's
+# configuration at each of the oracle's entries and falls back where the oracle falls back. The table's rows are the
+# pinned prior table's (mode, background_wanted) pairs; its role is the prior table's, and the run's rows carry
+# `<role>@<point>` in the `table` column, as an alternative table's do (10.1).
+point:
+  condition: oracle
+  telemetry: focus
+
+# Decision 4: fixed is the file's run under the primary boot default — the boot default's point, which decision 10
+# checks against the file's fixed run. Decision 12: each of the gate's ten alternative boot defaults is a point of
+# the grid, MLFQ with no cap at that slice; each file's finding is recomputed with that point in place of fixed.
+boot_defaults:
+  primary: ostep
+  alternatives: [ostep-slice-500us, ostep-slice-700us, ostep-slice-1200us, ostep-slice-2000us,
+                 ostep-slice-5000us, ostep-slice-7000us, ostep-slice-12000us, ostep-slice-20000us,
+                 ostep-slice-30000us, ostep-slice-100000us]
+
+# Decision 8: algorithm, cap, slice and MLFQ's boost interval crossed; MLFQ's queue count and slice growth moved one
+# at a time, at the boot slice and boost interval, under each cap; LOTTERY's batch share following the cap. Each
+# block is the product of its `cross` axes, each combination once per entry of `with`; a key other than
+# batch_bandwidth_cap is a param. The blocks in order are the grid's order.
+#   algorithm — MLFQ, EDF, LOTTERY, FIFO: the menu (docs/recognition-vocabulary.md §2)
+#   batch bandwidth cap — none the boot default; 0.05 and 0.95 the schema's bounds; 0.2, 0.333 and 0.5 the prior
+#     table's wanted-row values (statement `cap-band`)
+#   slice (MLFQ's top slice, EDF's residual slice, LOTTERY's slice) — 10 ms the boot default; the other ten the
+#     gate's boot-default sweep (statement `boot-default-sweep`)
+#   MLFQ boost interval — 10 ms and 10 s the schema's bounds; 100 ms the boot default (OSTEP Figure 8.4); 1 s the
+#     Solaris Time-Sharing class raising every process's priority once a second (the Arpaci-Dusseau handout's entry
+#     in docs/references.md)
+#   MLFQ queue count — 2 and 8 the schema's bounds, 3 the boot default
+#   MLFQ slice growth — 1 and 8 the schema's bounds, 2 the boot default
+#   LOTTERY batch share — equal to the cap, the prior table's rule that a LOTTERY row's share equals its cap; 0.9
+#     under cap 0.95, the schema's maximum share; under no cap 0.05, 0.2, 0.333, 0.5 and 0.9
+# The cap and the slice are crossed on 11.2's trace of the cap reaching a task only while it is in the batch class,
+# which a task enters after one full slice of CPU since its last voluntary block
+# (_dev/research/jioh/task-11.2-the-degraded-oracle/cases.md, the c7-dev case); the slice and the boost interval on
+# the demotion rule, a task demoted when its CPU within a boost interval reaches the slice (statement
+# `boot-default-sweep`). Queue count and slice growth are not crossed.
+grid:
+  points: 470                    # MLFQ 288, LOTTERY 110, EDF 66, FIFO 6; the tool refuses another count
+  blocks:
+    - algorithm: MLFQ            # 264: cap × slice × boost interval
+      cross:
+        batch_bandwidth_cap: [null, 0.05, 0.2, 0.333, 0.5, 0.95]
+        timeslice_us: [500, 700, 1200, 2000, 5000, 7000, 10000, 12000, 20000, 30000, 100000]
+        boost_interval_us: [10000, 100000, 1000000, 10000000]
+        num_queues: [3]
+        timeslice_growth: [2]
+    - algorithm: MLFQ            # 12: the queue count moved, under each cap
+      cross:
+        batch_bandwidth_cap: [null, 0.05, 0.2, 0.333, 0.5, 0.95]
+        timeslice_us: [10000]
+        boost_interval_us: [100000]
+        num_queues: [2, 8]
+        timeslice_growth: [2]
+    - algorithm: MLFQ            # 12: the slice growth moved, under each cap
+      cross:
+        batch_bandwidth_cap: [null, 0.05, 0.2, 0.333, 0.5, 0.95]
+        timeslice_us: [10000]
+        boost_interval_us: [100000]
+        num_queues: [3]
+        timeslice_growth: [1, 8]
+    - algorithm: EDF             # 66: cap × residual slice
+      cross:
+        batch_bandwidth_cap: [null, 0.05, 0.2, 0.333, 0.5, 0.95]
+        residual_timeslice_us: [500, 700, 1200, 2000, 5000, 7000, 10000, 12000, 20000, 30000, 100000]
+    - algorithm: LOTTERY         # 110: slice × the ten (cap, share) pairs
+      cross:
+        timeslice_us: [500, 700, 1200, 2000, 5000, 7000, 10000, 12000, 20000, 30000, 100000]
+      with:
+        - {batch_bandwidth_cap: 0.05, batch_share: 0.05}
+        - {batch_bandwidth_cap: 0.2, batch_share: 0.2}
+        - {batch_bandwidth_cap: 0.333, batch_share: 0.333}
+        - {batch_bandwidth_cap: 0.5, batch_share: 0.5}
+        - {batch_bandwidth_cap: 0.95, batch_share: 0.9}
+        - {batch_bandwidth_cap: null, batch_share: 0.05}
+        - {batch_bandwidth_cap: null, batch_share: 0.2}
+        - {batch_bandwidth_cap: null, batch_share: 0.333}
+        - {batch_bandwidth_cap: null, batch_share: 0.5}
+        - {batch_bandwidth_cap: null, batch_share: 0.9}
+    - algorithm: FIFO            # 6: the cap alone
+      cross:
+        batch_bandwidth_cap: [null, 0.05, 0.2, 0.333, 0.5, 0.95]
+  # The grid holds the boot default, each alternative boot default and each of the prior table's 8 distinct
+  # configurations; the tool refuses a grid that does not.
+
+# Decisions 4–6 and 9: how a file's points are read.
+reading:
+  # Decision 4: per scored term, the point's improvement over fixed divided by fixed's value — signed, zero when the
+  # improvement is under the term's floor — weighted over the file's terms by the scoring spec's weights (the
+  # weighted mean). Every term's raw value and its reading against the floor are recorded beside the quantity.
+  # The floors are the metrics doc's (docs/harness/metrics.md §10): latency-type aggregates, turnaround among them,
+  # and fraction-type aggregates.
+  floors: {latency_us: 1000, fraction: 0.01}
+  # Decision 5: g is the gate's stated minimum effect of interest (statement `g-grounding`); no source grounds a
+  # value. Decision 6: each file's finding printed under the gate's g band beside the primary; a finding that
+  # changes inside the band is reported as a range over g.
+  g: 0.5
+  g_band: [0.25, 0.33, 0.5, 0.67]
+  # The best point is the read point with the highest quantity; among points of equal quantity it is the row when
+  # the row is one of them, otherwise the first in the grid's order.
+  best_tie: row_then_grid_order
+  # Decision 9: a point whose run fails a guard of the pinned guard spec, or holds a wait over 30 s that
+  # simulator/tools/wait_check.py finds (any of its four readings), is out of every reading — not a candidate for
+  # the best point, not counted toward spread — and is listed in the report with what it failed (statement
+  # `sensitivity-lines`: a failed guard on a run makes the gap that reads it unavailable).
+  out_of_reading:
+    guards: true
+    longest_wait_us: 30000000
+  # Decision 11: the simulator seeds the lottery from the workload's id, so a LOTTERY point has one draw sequence per
+  # file, each point run once under the file's own id; the report flags any finding that would change with the
+  # LOTTERY points removed, the row's own point kept where the row is LOTTERY.
+  lottery_flag: true
+
+# Decision 10: before the grid is read, on each file, the boot default's point reproduces the file's fixed run and
+# the row's point reproduces its oracle run, both on the corrected runs (decision 1). A check that does not reproduce
+# its run stops the search before the rest of the grid runs. The row's point reproduces the oracle run when its trace
+# is byte-identical to the oracle run's (`trace_sha256`). The boot default's point reproduces the fixed run when the
+# two traces hold the same lines in the same order but for the header and the lines the boot default's point's own
+# schedule entries write (`set_aside`), and the scored terms' values equal the corrected run's scores. Where the
+# oracle applies its row again after t = 0 — c1-transcode and c1-render, at 2 s — the boot default's point holds a
+# same-algorithm MLFQ entry there that the fixed run does not, and an applied MLFQ entry restarts the boost timer at
+# its applied instant (docs/harness/metrics.md §11 item 9; decided 2026-10-17 in 9.15), so the boost due at that
+# instant is voided and the next falls a boost interval later, on the fixed run's grid when the instant is on it: the
+# `x_mlfq_boost` line at each such instant is set aside on both traces (`restarted_boost`; decided by 인지오
+# 2026-11-21). On c1-compile and c1-ml-train, outside the search, that line is the one difference: 848,612 and
+# 773,663 lines otherwise identical.
+checks:
+  set_aside: [meta, config_applied, x_config_pending]
+  restarted_boost: true
+  scores:
+    runs/rq0-gate-rerun: runs/rq0-gate-rerun/scores.csv
+    runs/rq0-gate-11-3-current: runs/rq0-gate-11-3-current/scores.csv
+  runs:
+    c7-transcode:
+      fixed:  {run: runs/rq0-gate-rerun/c7-transcode/fixed~focus, trace_sha256: baa09d099fa5fb5c3dd438b13f59e9b92859a1eb4e48f460a99e9210bbd05bc6}
+      oracle: {run: runs/rq0-gate-rerun/c7-transcode/oracle~focus, trace_sha256: 09cd6a36d200268a16405bae36212de03949d255f0defedfd678b4de5bba6173}
+    c7-gaming:
+      fixed:  {run: runs/rq0-gate-rerun/c7-gaming/fixed~focus, trace_sha256: bf804f042fc88f1b097dc5660513e151af1994105495d45f343e43f8441dadd5}
+      oracle: {run: runs/rq0-gate-rerun/c7-gaming/oracle~focus, trace_sha256: a7e73d7f637a4f5184aa4ea040dd600036d65b8b123865cadc48a89551a97d4b}
+    c1-transcode:
+      fixed:  {run: runs/rq0-gate-rerun/c1-transcode/fixed~focus, trace_sha256: 2fd7e0346806e426e418d6a5f1304efaec5b82406970e6b58f39637a1df3cc28}
+      oracle: {run: runs/rq0-gate-rerun/c1-transcode/oracle~focus, trace_sha256: 949ce31c891e7a2a26ff38c8587e84840fa30bb6dbc86f43cf9be6db55e67345}
+    c7-dev:
+      fixed:  {run: runs/rq0-gate-rerun/c7-dev/fixed~focus, trace_sha256: 0bfab3897c8ddc9ed6b8a0ec0630eee1f49c65f2df94760a2d99e47f431a6dc4}
+      oracle: {run: runs/rq0-gate-rerun/c7-dev/oracle~focus, trace_sha256: b1c3a40d3d6b47b5acc8c3e61409059b8abe7e0328f25e7b3c2faf400bef43af}
+    c7-video-edit:
+      fixed:  {run: runs/rq0-gate-rerun/c7-video-edit/fixed~focus, trace_sha256: 26552ddfc6ec91b8a25d70d47889ee17441bea013bc7a0e794d2661278af221f}
+      oracle: {run: runs/rq0-gate-rerun/c7-video-edit/oracle~focus, trace_sha256: a31e1d8451d955ff51c15d542e394b63fdd072f142ed0afcc87ea12c419d6835}
+    c7-compile:
+      fixed:  {run: runs/rq0-gate-rerun/c7-compile/fixed~focus, trace_sha256: 3db69ad7435b1ed894d8b59cf69e44ea1ceec8e7e322f2199d2cf349db774ea3}
+      oracle: {run: runs/rq0-gate-rerun/c7-compile/oracle~focus, trace_sha256: 39e2c253fa08456bee98f25925f30f485f6234702e70f31bd178c4d43d56dc2f}
+    c1-render:
+      fixed:  {run: runs/rq0-gate-rerun/c1-render/fixed~focus, trace_sha256: fa3e0deb8e16a96c8b6ad8e8f75af2b59b4fc55c6476a669a9aa37fffa9f3f33}
+      oracle: {run: runs/rq0-gate-rerun/c1-render/oracle~focus, trace_sha256: 9e8d84213962343953adf78c7cff4028e006a1a513efeaf3b46330dfce16eb9e}
+    c7-photo:
+      fixed:  {run: runs/rq0-gate-rerun/c7-photo/fixed~focus, trace_sha256: 0356dac298593b7d01f1ab3b0f714c1452a07069701e3a53072dcd0ddcfb8a91}
+      oracle: {run: runs/rq0-gate-rerun/c7-photo/oracle~focus, trace_sha256: 74074fc82fa439728843cac4556a891c429ef122b43eb1b7e8fb7c12bd4499dc}
+    c7-ml-train:
+      fixed:  {run: runs/rq0-gate-11-3-current/c7-ml-train/fixed~focus, trace_sha256: c5c0463a8f58b3f22a3ad7868937282c6e89437f3833c62938ff1e7ce6b734df}
+      oracle: {run: runs/rq0-gate-11-3-current/c7-ml-train/oracle~focus, trace_sha256: cda6ba7a0fd8c617a84ee5d31ccbbb09df28f4fe7e172a25eb5d8d0e25538415}
+    c7-render:
+      fixed:  {run: runs/rq0-gate-rerun/c7-render/fixed~focus, trace_sha256: ca1523e58444db008a67573a37c9f76d829bace95a006b1c4f8f5b437adb7462}
+      oracle: {run: runs/rq0-gate-rerun/c7-render/oracle~focus, trace_sha256: bd5a76e9bdbf615e49ad47a86e1413b650b0dc1610a160a1515d85aa581d4ef9}
+
+# Decision 7: a file at finding 1 or finding 2 points to workload redesign, a file at finding 3 to the table rewrite;
+# the route is one — the table is rewritten if any of the ten files is at finding 3, otherwise workload redesign.
+# For a file at finding 2 the report states how many of the prior table's 8 distinct configurations have a quantity
+# at least the row's.
+route:
+  table_rewrite: "the table is rewritten"
+  workload_redesign: "workload redesign"
+
+statements:
+  - id: findings
+    text: >
+      Over a file's read points. Finding 1 — no spread: no two points differ on a scored term by the term's floor
+      or more; the floor is the value below which a difference between two configurations is not read (metrics
+      doc §10). Finding 3 — spread the prior table missed: the row's quantity is at most (1 − g) of the quantity
+      of the best point, g = 0.5, and the best point is better than the row on a scored term by the floor or more.
+      The row is the configuration the oracle applies; the best point is the read point with the highest
+      quantity. Read on the table, the row captures at most half of the improvement the best point reaches over
+      fixed. Finding 2 — spread the prior table's row holds: neither of the two.
+  - id: route-known
+    text: >
+      The route rule is fixed after the RQ0 run's data were seen. On the runs on disk the four files of decision
+      2's first kind are at finding 3 before any search run — the boot default is a point of the grid and their
+      row is worse than it by the floor or more — so the route is known before the search: the table is
+      rewritten. On c7-gaming the row reaches a frame miss rate of 0 against fixed's 1, so no point can beat it;
+      on c7-transcode the row's quantity is 0.865; on c1-transcode the row's quantity is 0.005, and 62 of the
+      file's 100 random runs exceed it by more than 0.01, the best at 0.153. The search runs as the statement
+      failure-procedure requires, and its per-file findings are what Phase 12 is designed from.
+  - id: boot-default-limit
+    text: >
+      The search runs at the primary alone: the blessed files, fixed at the primary boot default. Each of the
+      gate's ten alternative boot defaults is a point of the grid, so each file's finding is recomputed with that
+      point in place of fixed; a finding that changes is reported as a range over the boot default. No variant
+      file was searched.
+  - id: read-only
+    text: >
+      The search is read-only: nothing it finds is written into a table (_dev/docs/rq0-preparation-notes.md
+      §4.3: ignore labels, sweep the configuration space, observe the spread).
+
+# SHA-256 of the files the search reads, at its commit (decision 13): the dataset manifest is the second bless
+# (harness/CHANGELOG.md, 2026-11-21); the prior table, the scoring spec and the guard spec the RQ0 gate spec's pins.
+# The two program versions are the fixed simulator (stage AF, 11.2) and the daemon the RQ0 run used; the runner
+# refuses a machine configuration naming others.
+pins:
+  dataset:      {path: dataset/build.manifest.json, sha256: 9f30ea8f3a991caeccb85a2c9640ddae40a9d84ccab46d17f81afff2d85807f3}
+  driver_table: {path: daemon/driver-table/prior.yaml, sha256: f693bfbee5b261782ca27f0fcd8f4f4f7302e835b6a27246d2cb906542f22e9d}
+  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 4f3e34c180b26f932b1583ba16e3e928e31dd56806f3032fb1cbb214d159bb68}
+  guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.4", sha256: 7d79201d5f6c61e5eb05f8d7d9155afb3be4660f6924f24b4775a4f274382372}
+  simulator:    {version: simulator@841dc81131cb}
+  daemon:       {version: daemon@62c71f0d2de0}

@@ -1,0 +1,65 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "search-report.schema.json",
+ "title": "Search report",
+ "description": "The one machine-readable report of a configuration search (tools/search.py; sub-task 11.4, decisions 13 and 14): the search spec's hash and pins, the grid's size, the boot default's point, the prior table's distinct configurations, decision 10's checks, per file its finding at the primary, under the g band and under each boot default, the best point, the count of the prior table's configurations at least the row's for a file at finding 2, the points out of the reading with what they failed, the flag of a finding that would change with the LOTTERY points removed — and the route. report.md beside it is rendered from this JSON and never edited by hand.",
+ "type": "object",
+ "required": ["search", "spec", "spec_sha256", "read", "pins", "points", "points_by_algorithm", "files_searched",
+              "runs", "g", "g_band", "floors", "boot_default", "prior_configurations", "checks", "files", "route",
+              "statements"],
+ "properties": {
+  "search": {"type": "string"},
+  "spec": {"type": "string"},
+  "spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+  "read": {"type": "string"},
+  "pins": {"type": "object"},
+  "points": {"type": "integer"},
+  "points_by_algorithm": {"type": "object", "additionalProperties": {"type": "integer"}},
+  "files_searched": {"type": "integer"},
+  "runs": {"type": "integer"},
+  "g": {"type": "number"},
+  "g_band": {"type": "array", "items": {"type": "number"}},
+  "floors": {"type": "object"},
+  "boot_default": {
+   "type": "object",
+   "required": ["primary", "point", "alternatives"],
+   "properties": {"primary": {"type": "string"}, "point": {"type": "string"}, "alternatives": {"type": "object"}}
+  },
+  "prior_configurations": {"type": "array", "items": {"type": "string"}},
+  "checks": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": ["workload_id", "check", "point", "reference", "reference_pinned", "trace_equal", "terms", "reproduced"],
+    "properties": {"check": {"enum": ["fixed", "oracle"]}, "reproduced": {"type": "boolean"}}
+   }
+  },
+  "files": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": ["workload_id", "kind", "reason", "row", "fixed", "points", "read", "out", "finding"],
+    "properties": {
+     "finding": {"enum": [1, 2, 3, null]},
+     "out": {
+      "type": "array",
+      "items": {"type": "object", "required": ["point", "failed"],
+                "properties": {"failed": {"type": "array", "items": {"type": "string"}}}}
+     },
+     "g_band": {"type": "object", "additionalProperties": {"enum": [1, 2, 3, null]}},
+     "boot_defaults": {
+      "type": "object",
+      "additionalProperties": {"type": "object", "required": ["point", "finding"],
+                               "properties": {"finding": {"enum": [1, 2, 3, null]}}}
+     }
+    }
+   }
+  },
+  "route": {
+   "type": "object",
+   "required": ["route", "files_at_3", "g_band", "boot_defaults"],
+   "properties": {"route": {"type": ["string", "null"]}}
+  },
+  "statements": {"type": "array"}
+ }
+}

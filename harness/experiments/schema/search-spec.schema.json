@@ -1,0 +1,181 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "search-spec.schema.json",
+ "title": "Search spec",
+ "description": "One configuration search's pre-registered description (the RQ0 gate spec's statement failure-procedure; sub-task 11.4, decision 13): the files searched, how a point is run, the boot defaults, the grid as blocks whose axes are crossed, how a file's points are read, the two checks run before the grid, the route rule, statements echoed into the report, and the pins of the files the search reads and of the two programs. The search tool (tools/search.py) reads the whole file; its lint checks what the schema cannot: the files against the compiled build and the pinned scoring spec's terms, the grid's count and every point a legal configuration, the boot defaults and the prior table's distinct configurations among the points, each file's oracle applying one configuration, and the pins against the files' bytes.",
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["search", "files", "point", "boot_defaults", "grid", "reading", "checks", "route", "pins"],
+ "$defs": {
+  "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+  "pin": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["path", "sha256"],
+   "properties": {
+    "path": {"type": "string", "minLength": 1},
+    "sha256": {"$ref": "#/$defs/sha256"},
+    "version": {"type": "string", "minLength": 1}
+   }
+  },
+  "version": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["version"],
+   "properties": {"version": {"type": "string", "pattern": "^[a-z]+@[0-9a-f]{12}$"}}
+  },
+  "axis_value": {"type": ["number", "null"]},
+  "reference": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["run", "trace_sha256"],
+   "properties": {
+    "run": {"type": "string", "minLength": 1},
+    "trace_sha256": {"$ref": "#/$defs/sha256"}
+   }
+  }
+ },
+ "properties": {
+  "search": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+  "files": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["workload", "kind", "reason"],
+    "properties": {
+     "workload": {"type": "string", "minLength": 1},
+     "kind": {"enum": ["pick", "no_headroom"]},
+     "reason": {"type": "string", "minLength": 1}
+    }
+   }
+  },
+  "point": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["condition", "telemetry"],
+   "properties": {
+    "condition": {"const": "oracle"},
+    "telemetry": {"enum": ["focus", "names"]}
+   }
+  },
+  "boot_defaults": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["primary", "alternatives"],
+   "properties": {
+    "primary": {"type": "string", "minLength": 1},
+    "alternatives": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+   }
+  },
+  "grid": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["points", "blocks"],
+   "properties": {
+    "points": {"type": "integer", "minimum": 1},
+    "blocks": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "cross"],
+      "properties": {
+       "algorithm": {"enum": ["MLFQ", "EDF", "LOTTERY", "FIFO"]},
+       "cross": {
+        "type": "object",
+        "additionalProperties": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/axis_value"}}
+       },
+       "with": {
+        "type": "array",
+        "minItems": 1,
+        "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/axis_value"}}
+       }
+      }
+     }
+    }
+   }
+  },
+  "reading": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["floors", "g", "g_band", "best_tie", "out_of_reading", "lottery_flag"],
+   "properties": {
+    "floors": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": ["latency_us", "fraction"],
+     "properties": {
+      "latency_us": {"type": "number", "exclusiveMinimum": 0},
+      "fraction": {"type": "number", "exclusiveMinimum": 0}
+     }
+    },
+    "g": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+    "g_band": {"type": "array", "minItems": 1, "items": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1}},
+    "best_tie": {"const": "row_then_grid_order"},
+    "out_of_reading": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": ["guards", "longest_wait_us"],
+     "properties": {
+      "guards": {"type": "boolean"},
+      "longest_wait_us": {"type": "integer", "minimum": 0}
+     }
+    },
+    "lottery_flag": {"type": "boolean"}
+   }
+  },
+  "checks": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["set_aside", "scores", "runs"],
+   "properties": {
+    "set_aside": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "restarted_boost": {"type": "boolean"},
+    "scores": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+    "runs": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fixed", "oracle"],
+      "properties": {"fixed": {"$ref": "#/$defs/reference"}, "oracle": {"$ref": "#/$defs/reference"}}
+     }
+    }
+   }
+  },
+  "route": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["table_rewrite", "workload_redesign"],
+   "properties": {
+    "table_rewrite": {"type": "string", "minLength": 1},
+    "workload_redesign": {"type": "string", "minLength": 1}
+   }
+  },
+  "statements": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "text"],
+    "properties": {"id": {"type": "string", "minLength": 1}, "text": {"type": "string", "minLength": 1}}
+   }
+  },
+  "pins": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["dataset", "driver_table", "scoring_spec", "guard_spec", "simulator", "daemon"],
+   "properties": {
+    "dataset": {"$ref": "#/$defs/pin"},
+    "driver_table": {"$ref": "#/$defs/pin"},
+    "scoring_spec": {"$ref": "#/$defs/pin"},
+    "guard_spec": {"$ref": "#/$defs/pin"},
+    "simulator": {"$ref": "#/$defs/version"},
+    "daemon": {"$ref": "#/$defs/version"}
+   }
+  }
+ }
+}
