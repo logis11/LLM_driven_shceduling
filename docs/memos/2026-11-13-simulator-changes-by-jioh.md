@@ -1,6 +1,7 @@
 # 2026-11-13의 변동 사항 — 인지오가 simulator tree에서 바꾼 것
 
-> Status: memo · Created 2026-11-13 · Updated 2026-11-14
+> Status: memo · Created 2026-11-13 · Updated 2026-11-21
+> 열림 — 단계 AD와 AE를 읽는 일(§1의 2). 다시 build하는 일(§1의 1)은 2026-11-19 memo §1이 `simulator@841dc81131cb`로 이어받아요. batch-class 메모 §7의 항목 5(§1의 3)는 그 메모가 열어 둬요. 담당 인경민.
 > From 인지오 to 인경민.
 
 ## TL;DR

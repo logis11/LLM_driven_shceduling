@@ -102,3 +102,15 @@ g7 read the overview and found no row; g3 (g3-16, g3-17) and g4 (g4-26) pointed 
 - **Now:** "Both later blocks are on the Phase 10 backlog in `_dev/TODO.md`."
 - **Becomes:** both blocks are on 인지오's Backlog in `_dev/TODO.md`
 - **From:** `_dev/TODO.md`, 인지오's `### Backlog`, lines 32–33
+
+## Added at K9's review (2026-11-21)
+
+### g0-18 · `docs/README.md:116` · A · item 13 (the configuration search and its route)
+- **Now:** "the route, the driver table rewritten, 8 of 10 files at finding 3 at every g of the band and under every boot default"
+- **Becomes:** "the route, the driver table rewritten — 8 of 10 files at finding 3 — the same at every g of the band and under every boot default"
+- **From:** `docs/rq0-run-record.md`, "The failure procedure", lines 204 and 238 (the route the same under the boot defaults; a finding changing on three files)
+
+### g0-19 · `docs/README.md:22` · B · Q1 (a list of the guidebook's correction passes)
+- **Now:** "every count checked against the tree when written (2026-10-14), and in the docs-correction task (9.15) each volume's corrections checked against the 2026-10-17 tree"
+- **Becomes:** the three later passes as the dataset guidebook's README states them (after 9.16 and Phase 9's end, against the 2026-10-20 tree; 2026-10-31; 2026-11-21)
+- **From:** `docs/guidebook/dataset/README.md`, line 7 (made whole in K4, g4-27)

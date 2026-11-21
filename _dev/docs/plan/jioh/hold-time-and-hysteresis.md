@@ -9,10 +9,10 @@
 | step | when | needs |
 |---|---|---|
 | 3, the precedent search | sub-task 9.19's spec session; its range sets the flap-stress intervals | nothing |
-| 0, the need measured with no rule | right after Phase 10's integration, in the RQ0 run's pipeline | the flap-stress set (9.19), the C4 files, the flip count and its cost — the `flip_cost` reporting line over the flip aggregates (delivered in 9.21: the configuration changes applied, those on a query graded config-incorrect, the per-switch excess summed over the wrong switches into MLFQ, the file's score beside them; metrics doc §8) — the real simulator and daemon; `oracle` and `random` only, no LLM |
+| 0, the need measured with no rule | after Phase 12's second RQ0 run, on the table and programs that run uses (Phase 11 spec, decision 10) | the flap-stress set (9.19), the C4 files, the flip count and its cost — the `flip_cost` reporting line over the flip aggregates (delivered in 9.21: the configuration changes applied, those on a query graded config-incorrect, the per-switch excess summed over the wrong switches into MLFQ, the file's score beside them; metrics doc §8) — the real simulator and daemon; `oracle` and `random` only, no LLM |
 | 1, 2, 4, 5, 6 | the RQ4 experiment spec's session, after step 0 and before any LLM condition runs | step 0's result |
 
-Both later blocks are on the Phase 10 backlog in `_dev/TODO.md`.
+Both later blocks are on 인지오's Backlog in `_dev/TODO.md`.
 
 ## Terms
 
