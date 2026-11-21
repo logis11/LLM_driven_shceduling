@@ -1281,6 +1281,9 @@ README는 디스크를 "`build/` holds 6.8 GB, `coreset-single/`'s 1.6 GB among 
 | 38722678829 | 2026-10-15 | harness | `d5cc7711` | 성공 | build와 check, harness lint 5:03, harness test 36:15 | | | | | | 1:00:40 |
 | 39014790007 | 2026-10-17 | dataset | `2b080333` | 성공 | 2 s | 3:06 | 5:28 | 10:20 | 4:09 | 7 s | 23:26 |
 | 39030123144 | 2026-10-17 | dataset | `17f28d7f` | 성공 | 2 s | 2:11 | 4:02 | 7:25 | 3:11 | 6 s | 17:09 |
+| 41190176937 | 2026-10-31 | dataset | `b24f8c89` | 성공 | 2 s | 3:21 | 5:56 | 10:59 | 4:53 | 8 s | 25:33 |
+| 41197142459 | 2026-10-31 | dataset | `84ce79bf` | 성공 | 2 s | 2:10 | 4:03 | 7:24 | 4:04 | 9 s | 18:02 |
+| 44833335792 | 2026-11-21 | dataset | `2487ba27` | 성공 | 2 s | 1:45 | 3:32 | 6:05 | 3:28 | 6 s | 15:17 |
 
 각 run이 무엇을 확인했는지 짧게 적습니다.
 
@@ -1295,8 +1298,10 @@ README는 디스크를 "`build/` holds 6.8 GB, `coreset-single/`'s 1.6 GB among 
 - **38722675475, 38722678829** — 9.23 changelog D18. 9.23 D17이 다시 bless한 tree(`d5cc7711`)를 손으로 돌린 두 run이고, runner가 고정된 버전(6.8)을 설치했습니다. dataset run은 `make lint`(`--freeze`)부터 `check`까지 초록이고("build verified (3304 files, 7 manifests)"), `make test`는 534 passed, 1 skipped입니다. 일곱 manifest, 파생 timeline, coverage grid가 Linux에서 바이트 단위로 재현되었습니다. harness run은 harness lint와 `make test`(296 passed, 2 deselected)가 초록입니다.
 - **39014790007** — 9.16 기록(`_dev/research/jioh/task-9.16-exit-audits/README.md`의 "Dataset gate and CI" 줄)은 이 run을 "9.15's last state"의 초록 run으로 적습니다. 9.16을 시작한 커밋 `2b080333`을 손으로(`workflow_dispatch`) 돌렸고, 이 커밋은 `_dev/TODO.md`만 바꿨으므로 manifest는 9.15의 두 번째 rebuild가 쓴 것(core `0f0af422…`, variants `cdc14319…`, 3.7)입니다. runner는 고정된 버전(`PyYAML-6.0.1`, `jsonschema-rs-0.29.1`, `numpy-1.26.4`, `pytest-8.3.4`)을 설치했고, `make lint`는 "lint clean", `make test`는 544 passed, 1 skipped, `check`는 "verified — 67 segments on the grid"와 "build verified (3304 files, 7 manifests)"입니다(`gh run view 39014790007 --log`). 같은 커밋에서 집의 dataset gate도 372초에 통과했습니다(9.16 기록의 같은 줄).
 - **39030123144** — 9.16 기록의 같은 줄이 "green on `17f28d7f` (about 17 min)"이라고 적습니다. 출구 감사가 찾은 data의 수정을 rebuild하고 bless한 커밋 `17f28d7f`를 손으로 돌린 run이고, 그때의 manifest 일곱 개(3.7의 9.16 행과 열), 파생 timeline, coverage grid가 Linux에서 바이트 단위로 재현되었습니다. 지금의 manifest는 2026-11-21의 두 번째 bless(커밋 `2e3fade3`)가 쓴 것입니다. runner는 같은 고정 버전을 설치했고, `make test`는 551 passed, 1 skipped, `check`는 "build verified (3304 files, 7 manifests)"입니다(`gh run view 39030123144 --log`). 9.16 spec decision 3은 넘겨받은 항목 가운데 중간 pin을 이름 짓는 것들을 집의 dataset gate 한 번과 최종 build의 CI run 한 번으로 닫게 했고, 그 CI run이 이것입니다(6.12).
+- **41190176937, 41197142459** — 9.24(측정된 프로그램 자신의 wake를 wake 사슬의 시작점에 따라 나눈 rebuild, 2026-10-31)의 두 bless를 담은 커밋을 push가 돌린 run입니다. 앞의 것은 첫 bless(core `d80f06e0…`, 커밋 `b24f8c89`), 뒤의 것은 operation마다 가장 큰 run을 한 번 실은 둘째 bless(core `27d347bc…`, 커밋 `84ce79bf`)입니다. 뒤의 것이 RQ0 run이 읽은 판이고, release `dataset-build-2026-10-31`이 묶은 commit입니다. 둘 다 `lint`부터 `check`까지 초록입니다.
+- **44833335792** — 11.3의 둘째 bless(core `9f30ea8f…`, variants `3438be7f…`, 커밋 `2e3fade3`)를 담은 커밋 `2487ba27`을 push가 돌린 run이고, `lint`부터 `check`까지 초록입니다. 지금의 manifest는 이 run이 Linux에서 재현한 것입니다.
 
-두 run의 단계별 시간과 합계는 9.16 기록에 없습니다. 표의 값은 `gh run view <id>`가 주는 각 step의 시작과 끝 시각(초 단위)의 차이이고, 합계는 job의 시작에서 끝까지입니다(2026-10-21 조회). 같은 방식으로 재면 run 38243554308의 값이 9.20 changelog D11의 값(dataset 1:36, variants 2:48, generated 5:13, test 2:05, check 5 s, 합계 12:04)과 같습니다.
+두 run의 단계별 시간과 합계는 9.16 기록에 없습니다. 표의 값은 `gh run view <id>`가 주는 각 step의 시작과 끝 시각(초 단위)의 차이이고, 합계는 job의 시작에서 끝까지입니다(2026-10-21 조회; 마지막 세 run은 2026-11-21에 같은 방식으로 조회). 같은 방식으로 재면 run 38243554308의 값이 9.20 changelog D11의 값(dataset 1:36, variants 2:48, generated 5:13, test 2:05, check 5 s, 합계 12:04)과 같습니다.
 
 > **코드로.** 같은 step이라도 run마다 시간이 두 배 가까이 다릅니다. 9.19 changelog D7은 38135623993에 대해 "This runner ran the unchanged steps about 1.9× slower than run 38131040159's (`dataset` 1 min 34 s, `variants` 2 min 49 s there), so the generated step's share on a runner of that speed is about 4 min"이라고 적습니다. 9.21의 38387283407(dataset 3:02, generated 10:02)과 38396745220(build 18:32)도 changelog가 "a slower runner"라고 적습니다. GitHub가 어떤 하드웨어에 job을 배정하느냐에 따라 같은 `ubuntu-latest`도 속도가 다르다는 것입니다. 그래서 이 권의 runner 시간은 범위로 읽어야 합니다. 대략 "빠른 runner에서 12분, 느린 runner에서 20분 이상"입니다.
 
@@ -1373,7 +1378,7 @@ smoke도 같은 크기의 문제를 만났습니다. `harness-smoke.yml`은 2026
 - **2026-10-14, run 38547043521** — marker로 나눈 harness test(296개)가 Linux에서 통과.
 - **2026-10-15, run 38722675475와 38722678829** — 9.23 D17의 manifest 일곱 개, 파생 timeline, `coverage-grid.json`이 고정된 도구 버전으로 Linux에서 재현됨. dataset test suite, harness lint, harness test도 Linux에서 통과.
 
-9.15의 2026-10-16 rebuild와 2026-10-17 첫 rebuild가 쓴 manifest를 Linux에서 재현한 run은 기록에 없습니다. 9.15의 두 번째 rebuild 뒤의 판(커밋 `2b080333`)은 dataset run 39014790007이, 9.16의 rebuild가 쓴 그때의 manifest(커밋 `17f28d7f`, 3.7의 9.16 행과 열)는 dataset run 39030123144(약 17분)가 초록으로 통과했습니다(9.16 기록 `_dev/research/jioh/task-9.16-exit-audits/README.md`). 2026-10-31의 두 bless와 2026-11-21의 두 번째 bless가 쓴 manifest를 Linux에서 재현한 run은 기록에 없습니다.
+9.15의 2026-10-16 rebuild와 2026-10-17 첫 rebuild가 쓴 manifest를 Linux에서 재현한 run은 기록에 없습니다. 9.15의 두 번째 rebuild 뒤의 판(커밋 `2b080333`)은 dataset run 39014790007이, 9.16의 rebuild가 쓴 그때의 manifest(커밋 `17f28d7f`, 3.7의 9.16 행과 열)는 dataset run 39030123144(약 17분)가 초록으로 통과했습니다(9.16 기록 `_dev/research/jioh/task-9.16-exit-audits/README.md`). 2026-10-31의 두 bless가 쓴 manifest는 dataset run 41190176937(커밋 `b24f8c89`)과 41197142459(`84ce79bf`)가, 2026-11-21의 두 번째 bless가 쓴 manifest는 dataset run 44833335792(`2487ba27`)가 초록으로 통과했습니다(`gh run view`, 2026-11-21 조회).
 
 이 기록들은 sub-task 9.16(최종 audit)의 TODO 줄에 "hands to 9.16"으로 넘겨졌습니다. 예를 들어 "CI run 38243554308 reproduces the seven manifests on Linux (D11)"가 그 줄에 있습니다. 9.16은 이 run들이 대는 중간 pin을 다시 확인하지 않고, 그 항목들을 집에서 한 번 돌린 dataset gate와 최종 build의 CI run으로 닫았습니다. 각 중간 pin은 최종 상태의 pin으로 대체되었습니다(9.16 spec decision 3; 9.16 기록 `handed/checks.md`).
 

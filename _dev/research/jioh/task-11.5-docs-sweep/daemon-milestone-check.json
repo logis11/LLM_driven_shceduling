@@ -1,0 +1,10 @@
+{
+ "files": 51,
+ "runs": 306,
+ "identical_to_mock": 306,
+ "rerun_identical": 306,
+ "differing_from_mock": [],
+ "rerun_differing": [],
+ "wall_seconds": 63.8,
+ "daemon_version": "daemon@62c71f0d2de0"
+}

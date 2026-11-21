@@ -2,6 +2,10 @@
 
 The harness tree's own record of what its committed data files and programs changed, newest first. The scoring spec (`scoring/scoring-spec.yaml`) and the guard spec (`guards/guard-spec.yaml`) are frozen here (Phase 8 spec, decision 19): a change to either after its freeze is an entry below before any run reads it, and the RQ0 gate spec (`experiments/rq0-gate.yaml`) pins the frozen bytes by hash. The metrics doc and the data contracts keep their own changelogs.
 
+## 2026-11-21 — the 2026-11-14 entry's cap-band test runs on the mocks (jioh)
+
+The entry of 2026-11-14 "the rows' table column takes a cap-band run's label" says its test runs "under the pinned `floor-0.2` table on `c7-mail` through the real programs to the report". The test, `test_a_cap_band_run_goes_through_to_the_report_with_its_label_in_every_row` in `tools/tests/test_runner.py`, builds its machine from `runner.example.yaml`, which drives the mock daemon and the mock simulator: it runs the runner's whole pipeline on the mocks. The label on the real programs is shown by the second cold smoke of 2026-11-14, on `simulator@0d323c84470a` and `daemon@62c71f0d2de0`, whose 1,197 runs — the 153 under the three alternative tables that had failed the first smoke's schema check among them — finished with none failed (`_dev/research/jioh/task-10.4-cold-smoke-and-cost-response/README.md`, "The second smoke"). No code, test or pin changes.
+
 ## 2026-11-21 — the configuration search: the search spec and the search tool (jioh)
 
 Decided by 인지오 (`_dev/docs/spec/jioh/task-11.4-the-configuration-search.md`, decisions 1–13; the Phase 11 spec, decision 8), the RQ0 gate spec's statement `failure-procedure`: the search is a harness tool that reads a committed search spec, a data file as the RQ0 gate spec is, committed before any search run. No pinned file changes, and no pin moves; the RQ0 gate spec is not edited. The runner, the records, the aggregates, the scorer, the guards and the evaluator are unchanged, and so is every output they write.

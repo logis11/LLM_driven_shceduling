@@ -54,15 +54,18 @@ the seat is `RECOGNIZERS`, a map from condition name to a function from one tele
 snapshot to a proposal.
 
 **Not here**: no LLM client, no record/replay store, no hold time or hysteresis, and no
-clamping path — the three conditions above compose their configurations from the driver
-table, so they are valid by construction and only `unmodified` and `fallback` are ever
-emitted. The validator seat exists and they pass through it; a `clamped` or `held` entry
-needs a recognizer that can produce one.
+clamping path — `oracle` and `random` compose their configurations from the driver table,
+so they are valid by construction, and `fixed` emits the boot default alone; only
+`unmodified` and `fallback` are ever emitted. The validator seat exists and the configurations
+`oracle` and `random` compose pass through it; a `clamped` or `held` entry needs a recognizer
+that can produce one.
 
 **Verified** (2026-10-20): byte-identical to the harness's reference mock
 (`harness/tools/tests/mocks/daemon.py`, faithful for these three conditions by the Phase 8
 spec) over 25 workloads × 3 conditions × 2 telemetry shapes, 150/150 — schedules and logs
-both. End to end into the simulator: `fixed` and `oracle` schedules on `c2-p1a`,
+both. Again on 2026-11-21, on `daemon@62c71f0d2de0`: every one of the 51 core files × the three
+conditions (`random` at seed 1) × both telemetry shapes, 306/306 byte-identical to the mock and
+to their own rerun (`_dev/research/jioh/task-11.5-docs-sweep/daemon-milestone-check.json`). End to end into the simulator: `fixed` and `oracle` schedules on `c2-p1a`,
 `c1-gaming` and `c2-p2b` run through `simulator/src/sim`, every entry reaching a
 `config_applied` line. `tools/tests/test_daemon.py` pins the contract invariants: the
 telemetry rules that place the query points, one schedule entry per query point, the log's
