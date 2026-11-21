@@ -1,6 +1,6 @@
 # 1권 · 데이터셋의 큰 그림
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-31
+> Status: draft · Created 2026-10-14 · Updated 2026-11-21
 
 **이 데이터셋은 무엇이고, 연구에서 어떤 일을 맡으며, 왜 이런 모양인가.**
 
@@ -141,7 +141,7 @@ RQ0 문지기 실험의 실행은 사전 등록 파일 하나로 고정되어 �
 - **judging file**은 19개입니다. "label이 다른 짝의 한쪽이고, 채점 항목이 driver table 행들의 차이를 설계상 드러내는" 파일만 판정에 들어갑니다(statement `judging-set`). C2 intent pair group의 normal-class 쪽 넷(`c2-p1a`, `c2-p2a`, `c2-p2b`, `c2-p3a`), C1 calibration group 가운데 batch 작업이 행의 몫 차이에 닿는 넷(`c1-compile`, `c1-ml-train`, `c1-render`, `c1-transcode`), C7 attribute counterpart group의 열한 개입니다.
 - **reporting file**은 32개입니다. 나머지 core set 파일 전부로, 돌리고 보고하지만 판정에는 들어가지 않습니다. 19 + 32 = 51로 core set 전체입니다.
 - **판정 기준**은 `k_of_n_gap`입니다. 한 파일의 점수는 그 파일의 채점 항목들을 (fixed − condition) / (fixed − oracle)로 정규화한 몫의 가중합입니다. 즉 `oracle`이 `fixed`보다 얼마나 나아지는지를 1로 놓고, 비교 대상 condition이 그중 얼마를 차지하는지를 봅니다. g = 0.5는 "인식이 얻을 수 있는 개선의 적어도 절반을 설명한다", 다시 말해 `random`이 `oracle`의 여유분 가운데 절반 이하만 차지한다는 뜻입니다(statement `g-grounding`; 기록은 "어떤 출처도 이 값을 뒷받침하지 않는, 실행 전에 고정한 최소 효과"라고 적습니다). K = 10은 judging file 19개의 과반입니다(statement `k-grounding`). 판정은 이 조건을 만족하는 judging file의 개수를 세고, 그 개수가 K 이상이면 문을 통과한 것으로 읽습니다(spec의 표현으로 "보고서는 K가 무엇이든 개수를 출력하고, K는 통과선을 긋는다").
-- **pin**: spec은 데이터셋을 SHA-256으로 못 박습니다. `pins.dataset`은 `dataset/build.manifest.json`의 hash `8e1eb753…`이고, `pins.variants.all`은 `dataset/build.variants.manifest.json`의 hash `8e2948b1…`입니다(출구 감사 9.16의 2026-10-17 re-pin, `harness/CHANGELOG.md`의 2026-10-17 항목 가운데 dataset을 마지막으로 다시 pin한 것). 2026-10-17에 두 파일의 hash를 계산해 보았고, 둘 다 pin과 같았습니다.
+- **pin**: spec은 데이터셋을 SHA-256으로 못 박습니다. `pins.dataset`은 `dataset/build.manifest.json`의 hash `27d347bc…`이고, `pins.variants.all`은 `dataset/build.variants.manifest.json`의 hash `de9802e7…`입니다(2026-10-31의 re-pin, `harness/CHANGELOG.md`의 2026-10-31 항목 가운데 dataset을 마지막으로 다시 pin한 "each measured operation's largest run"). RQ0 run(2026-11-16–18)이 읽은 판이 이것입니다. 2026-11-21의 두 번째 bless(sub-task 11.3이 `cpu-batch`의 `python3` 두 값을 다시 잰 뒤의 재빌드) 뒤 지금의 두 파일은 hash가 `9f30ea8f…`, `3438be7f…`라 pin과 다릅니다. RQ0 gate spec은 실행된 spec(옆에 run record가 commit된 spec)이라 다시 pin하지 않았고, experiment lint가 맞지 않는 두 pin을 note로 읽습니다. 지금의 core manifest는 configuration search spec(`harness/experiments/rq0-config-search.yaml`)이 pin합니다.
 
 > **왜 이렇게 정했나.** judging file 수와 K는 2026-10-09에 다시 정해졌습니다(9.14 decision 2, 재구축된 데이터 위에서 소비자 쪽 결정을 다시 한 sub-task의 두 번째 결정). 그 전 spec은 25개 judging file과 K = 13이었습니다. `harness/experiments/rq0-gate.yaml`의 statement `k-grounding`은 "K = 10은 19개 judging file의 과반으로 읽는다(2026-10-09까지는 같은 읽기로 25개 중 13개)"라고 적습니다. 바뀐 이유는 judging 규칙 자체가 아니라 재구축된 파일들에 그 규칙을 다시 적용한 결과입니다. 예를 들어 idle class 작업을 품은 여섯 파일은 executor 규칙상 어떤 행도 배경 작업에 닿지 못해서 reporting으로 옮겨졌습니다(statement `idle-class-files`). `docs/terminology.md`의 "RQ0 gate spec" 항목도 19개 judging file과 K = 10을 적습니다.
 
@@ -669,7 +669,7 @@ focus:    [{from: 0s, to: 60s, task: editor}]
 
 **1단계 — 읽고 검사합니다.** `Timeline` loader(`dataset/tools/wlc/timeline.py`)가 시간을 microsecond로 바꾸고 구조를 검사합니다. archetype `code-editor`가 library에 있는가, segment-bound이므로 `depart`가 있는가, `bind`가 `binding_params`와 정확히 맞는가(여기서는 둘 다 비어 있음), input 창이 task의 수명 안에 있고 focus 구간 안에 있는가, 등입니다.
 
-**2단계 — `meta`를 씁니다.** `id`는 그대로, `derived_from`은 `dataset/timelines/coreset/c1-dev.timeline.yaml@7450b5e9…`, `sampled`는 `{"seed": 107, "archetypes": "archetypes.yaml@aa2f8842…"}`가 됩니다. `@` 뒤의 두 hex는 git이 그 파일 내용에 매기는 blob hash입니다. 2026-10-17에 `git rev-parse HEAD:<경로>`로 두 파일의 blob hash를 계산해 보았고, 두 값이 그대로 나왔습니다. 두 값 모두 2026-10-16에 바뀌었습니다. 그날 9.15의 재빌드가 timeline의 머리 주석과 library의 주석·`modeling_notes`를 고쳤기 때문입니다(그 전에는 `@cbf1349a…`와 `@46e10504…`). library의 값은 2026-10-17에 세 번 더 바뀌었습니다. 9.15의 두 번째 재빌드가 library의 머리 주석과 `modeling_notes`를 고쳐 `@818b41b8…`가 `@143e2f4b…`가 되었고, 같은 날 세 번째 재빌드가 측정 entry의 trace 범위 문장과 `video-editor`의 idle probe 문장을 고쳐 `@803395dc…`가 되었고, 출구 감사 9.16의 재빌드가 library의 문장과 꼬리표를 감사의 기록대로 고쳐 `@c78d8cf9…`가 되었습니다. 2026-10-31의 재빌드가 측정된 프로그램 자신의 wake를 측정된 wake 사슬의 시작점에 따라 나눠 component마다 timer part와 event part를 실으면서 `@6267dbde…`가 되었고, 같은 날 operation마다 측정한 조작별 가장 큰 run을 따로 싣는 재빌드(timer-wakes-by-origin spec 결정 17, 18)가 지금의 `@aa2f8842…`로 바꾸었습니다(2026-10-31에 `git hash-object`로 확인). 그러니 파일의 숫자 하나를 보고 "어느 대본의 어느 판, 어느 library의 어느 판에서 나왔는가"를 정확히 되짚을 수 있습니다.
+**2단계 — `meta`를 씁니다.** `id`는 그대로, `derived_from`은 `dataset/timelines/coreset/c1-dev.timeline.yaml@7450b5e9…`, `sampled`는 `{"seed": 107, "archetypes": "archetypes.yaml@a25178d1…"}`가 됩니다. `@` 뒤의 두 hex는 git이 그 파일 내용에 매기는 blob hash입니다. 2026-11-21에 `git rev-parse HEAD:<경로>`로 두 파일의 blob hash를 계산해 보았고, 두 값이 그대로 나왔습니다. 두 값 모두 2026-10-16에 바뀌었습니다. 그날 9.15의 재빌드가 timeline의 머리 주석과 library의 주석·`modeling_notes`를 고쳤기 때문입니다(그 전에는 `@cbf1349a…`와 `@46e10504…`). library의 값은 2026-10-17에 세 번 더 바뀌었습니다. 9.15의 두 번째 재빌드가 library의 머리 주석과 `modeling_notes`를 고쳐 `@818b41b8…`가 `@143e2f4b…`가 되었고, 같은 날 세 번째 재빌드가 측정 entry의 trace 범위 문장과 `video-editor`의 idle probe 문장을 고쳐 `@803395dc…`가 되었고, 출구 감사 9.16의 재빌드가 library의 문장과 꼬리표를 감사의 기록대로 고쳐 `@c78d8cf9…`가 되었습니다. 2026-10-31의 재빌드가 측정된 프로그램 자신의 wake를 측정된 wake 사슬의 시작점에 따라 나눠 component마다 timer part와 event part를 실으면서 `@6267dbde…`가 되었고, 같은 날 operation마다 측정한 조작별 가장 큰 run을 따로 싣는 재빌드(timer-wakes-by-origin spec 결정 17, 18)가 `@aa2f8842…`로 바꾸었습니다(2026-10-31에 `git hash-object`로 확인). 2026-11-21의 두 번째 bless(sub-task 11.3이 `cpu-batch`의 `python3` 두 값을 107 repeat로 다시 재어 library에 넣은 뒤의 재빌드)가 지금의 `@a25178d1…`로 바꾸었습니다. 그러니 파일의 숫자 하나를 보고 "어느 대본의 어느 판, 어느 library의 어느 판에서 나왔는가"를 정확히 되짚을 수 있습니다.
 
 **3단계 — 정답과 focus를 옮깁니다.** 구간 하나가 `{"t_start": 0, "t_end": 60000000, "mode": "dev", "attributes": {"background_wanted": true}}`가 됩니다. `scenario` tag는 compiler가 무시하므로 옮겨지지 않습니다. focus는 `[{"t_start": 0, "t_end": 60000000, "task": "editor"}]`가 됩니다.
 
@@ -683,7 +683,7 @@ focus:    [{from: 0s, to: 60s, task: editor}]
   "utilization": 0.3319032 } ], "per_task": { "editor": 19914194 }, "utilization": 0.3319032 }
 ```
 
-**6단계 — lockfile에 적습니다.** 모든 파일을 compile한 뒤 `build.manifest.json`에 이 파일의 hash(`9b657fb1…`), report의 hash(`42b34a07…`), 그리고 수요 기록(`calibration`, utilization 0.3319)을 적습니다. 2026-10-31에 디스크의 `c1-dev.workload.json`을 `shasum -a 256`으로 계산해 보았고, manifest의 값과 같았습니다.
+**6단계 — lockfile에 적습니다.** 모든 파일을 compile한 뒤 `build.manifest.json`에 이 파일의 hash(`fe5c4407…`), report의 hash(`42b34a07…`), 그리고 수요 기록(`calibration`, utilization 0.3319)을 적습니다. 2026-11-21에 디스크의 `c1-dev.workload.json`을 `shasum -a 256`으로 계산해 보았고, manifest의 값과 같았습니다.
 
 > **코드로.** 위 4단계에서 키 입력 조각의 시작점은 `dataset/tools/wlc/compiler.py`의 `offset = round(sampling.uniform(seed, iid, "stimulus", outer["index"]) * max(0, span - (outer["to"] - outer["from"]))) + …`로 계산됩니다. 여기서 `outer`는 보통 그 창 자신이지만, 파생 파일의 창이 원본 창의 일부(`slice_of`)이면 원본 창입니다. 그래서 C7 attribute counterpart group의 파일처럼 원본을 앞부분만 잘라 만든 파일은 원본과 같은 시작점을 받아, 잘린 구간 안의 키 입력이 원본과 byte 단위로 같습니다(9.18 spec 결정 1).
 
@@ -721,7 +721,7 @@ TIMELINES           task들이 시간 속에 어떻게 놓이나          (*.tim
 4. **출처의 hash.** `meta.derived_from`과 `meta.sampled.archetypes`에 git blob hash가 들어가므로, timeline의 주석 한 글자만 바뀌어도 파일의 byte가 바뀝니다. 이것은 의도된 성질입니다. 대본이 바뀌었는데 결과가 같은 척하지 않습니다.
 5. **lockfile과 CI.** compile된 파일 자체는 저장소에 넣지 않습니다. 대신 hash 목록인 manifest를 넣고, CI가 매번 처음부터 다시 compile해서 hash를 비교합니다(4장).
 
-> **마지막 bless의 runner 재현.** 2026-10-10 감사는 결정론에 남은 위험 하나를 "PLAUSIBLE"로 적었습니다. 분포에서 값을 뽑을 때 쓰는 수학 함수(`pow`, `exp`, `log`)가 반올림 전에 platform마다 미세하게 다를 수 있다는 것입니다. 감사는 이 위험이 "Linux CI 실행 한 번으로 닫힌다"고 적었고, 2026-10-12의 실행이 그것을 닫았습니다. 9.20(C4 distractor grid와 C5 familiarity ladder를 만든 sub-task)의 changelog D11은 CI run 38243554308이 Linux runner에서 일곱 manifest(core set, variants, generated 다섯)를 재현했다고 적습니다. 걸린 시간은 모두 12분 04초였고, 그 가운데 `dataset` 1분 36초, `variants` 2분 48초, `generated` 5분 13초, `test` 2분 05초, `check` 5초였습니다. 그 뒤 다시 bless된 판도 runner에서 재현되었습니다. 2026-10-15의 9.23 D18은 dataset run 38722675475가 9.23 D17이 bless한 일곱 manifest와 파생 timeline, coverage grid를 byte 단위로 재현했다고 적습니다. 2026-10-16에 한 번, 2026-10-17에 두 번, 9.15의 세 재빌드가 일곱 manifest를 다시 bless했고(core manifest `b6017a10…`, `d52e7bd4…`, 그다음 `0f0af422…`), 같은 날 출구 감사 sub-task 9.16의 재빌드가 한 번 더 bless했습니다(`8e1eb753…`). `gh run list`에서 9.15의 마지막 판(커밋 `2b080333`)은 dataset run 39014790007(2026-10-17)이 `lint`부터 `check`까지 초록이었고, 9.15의 앞의 두 판은 runner에서 돌지 않았습니다. 9.16의 판(커밋 `17f28d7f`)은 dataset run 39030123144(2026-10-17, 약 17분)가 `lint`부터 `check`까지 초록이었습니다. 이 권은 두 run의 log를 직접 열어 보지 않았고, `gh run list`의 결과를 옮겼습니다.
+> **마지막 bless의 runner 재현.** 2026-10-10 감사는 결정론에 남은 위험 하나를 "PLAUSIBLE"로 적었습니다. 분포에서 값을 뽑을 때 쓰는 수학 함수(`pow`, `exp`, `log`)가 반올림 전에 platform마다 미세하게 다를 수 있다는 것입니다. 감사는 이 위험이 "Linux CI 실행 한 번으로 닫힌다"고 적었고, 2026-10-12의 실행이 그것을 닫았습니다. 9.20(C4 distractor grid와 C5 familiarity ladder를 만든 sub-task)의 changelog D11은 CI run 38243554308이 Linux runner에서 일곱 manifest(core set, variants, generated 다섯)를 재현했다고 적습니다. 걸린 시간은 모두 12분 04초였고, 그 가운데 `dataset` 1분 36초, `variants` 2분 48초, `generated` 5분 13초, `test` 2분 05초, `check` 5초였습니다. 그 뒤 다시 bless된 판도 runner에서 재현되었습니다. 2026-10-15의 9.23 D18은 dataset run 38722675475가 9.23 D17이 bless한 일곱 manifest와 파생 timeline, coverage grid를 byte 단위로 재현했다고 적습니다. 2026-10-16에 한 번, 2026-10-17에 두 번, 9.15의 세 재빌드가 일곱 manifest를 다시 bless했고(core manifest `b6017a10…`, `d52e7bd4…`, 그다음 `0f0af422…`), 같은 날 출구 감사 sub-task 9.16의 재빌드가 한 번 더 bless했습니다(`8e1eb753…`). `gh run list`에서 9.15의 마지막 판(커밋 `2b080333`)은 dataset run 39014790007(2026-10-17)이 `lint`부터 `check`까지 초록이었고, 9.15의 앞의 두 판은 runner에서 돌지 않았습니다. 9.16의 판(커밋 `17f28d7f`)은 dataset run 39030123144(2026-10-17, 약 17분)가 `lint`부터 `check`까지 초록이었습니다. 그 뒤 2026-10-31의 두 재빌드가 일곱 manifest를 두 번 다시 bless했고(core manifest `d80f06e0…`, 그다음 `27d347bc…`), 2026-11-21에 sub-task 11.3의 두 번째 bless가 한 번 더 bless했습니다(`9f30ea8f…`, 커밋 `2e3fade3`). 지금의 마지막 bless는 이것이고, 이 세 판을 runner에서 재현한 run은 기록에 없습니다. 이 권은 두 run의 log를 직접 열어 보지 않았고, `gh run list`의 결과를 옮겼습니다.
 
 ---
 
@@ -768,7 +768,7 @@ dataset/
 
 **`archetypes.yaml`** — 3장에서 본 행동 library입니다. compiler, linter, test가 읽고, 모든 manifest가 그 내용을 hash로 고정합니다.
 
-이 파일의 머리 주석은 2026-10-17부터 자신을 "the archetype library (v0.2)"라고 부릅니다. version은 `dataset/README.md`, `docs/data-contracts.md` §1·§2와 같습니다. 그 전의 "(v0.1)"은 2026-10-09의 9.13 spec 결정 9("library의 표기 version을 v0.1에서 v0.2로 올린다")가 data-contracts §2와 README만 고치고 남긴 것이었고, 2026-10-10 감사가 문서 정리 목록에 올린 뒤 9.15의 재빌드(commit `37c2e233`, 2026-10-16)에서 고쳐졌습니다. 그 뒤에도 남아 있던 "Layer 1"은 데이터셋의 층에 번호를 붙이던 옛 이름이었고(1.3의 용어 상자), 9.15의 두 번째 재빌드(commit `7b024003`, 2026-10-17)에서 빠졌습니다. 이 파일은 모든 manifest의 입력이라 주석 한 줄을 고쳐도 일곱 manifest가 다시 bless되고 RQ0 gate spec이 다시 pin됩니다. 두 재빌드 모두 그랬습니다.
+이 파일의 머리 주석은 2026-10-17부터 자신을 "the archetype library (v0.2)"라고 부릅니다. version은 `dataset/README.md`, `docs/data-contracts.md` §1·§2와 같습니다. 그 전의 "(v0.1)"은 2026-10-09의 9.13 spec 결정 9("library의 표기 version을 v0.1에서 v0.2로 올린다")가 data-contracts §2와 README만 고치고 남긴 것이었고, 2026-10-10 감사가 문서 정리 목록에 올린 뒤 9.15의 재빌드(commit `37c2e233`, 2026-10-16)에서 고쳐졌습니다. 그 뒤에도 남아 있던 "Layer 1"은 데이터셋의 층에 번호를 붙이던 옛 이름이었고(1.3의 용어 상자), 9.15의 두 번째 재빌드(commit `7b024003`, 2026-10-17)에서 빠졌습니다. 이 파일은 모든 manifest의 입력이라 주석 한 줄을 고쳐도 일곱 manifest가 다시 bless되고, 그 manifest를 pin한 실험 사양이 실행 전이면 다시 pin됩니다. 두 재빌드 모두 그랬습니다. 실행된 RQ0 gate spec(옆에 run record가 commit된 spec)은 다시 pin되지 않습니다. 2026-11-21의 두 번째 bless에서 그 pin은 RQ0 run이 읽은 판에 남았고, experiment lint가 맞지 않는 pin을 note로 읽었습니다.
 
 **`sources.yaml`** — 데이터셋이 값이나 구조를 끌어오는 출처의 기계용 목록입니다. 2026-10-17에 19개 id가 있고, 종류는 scholarly 5개, deployed-system 11개, talk·학회 초록·뉴스 보도 1개(`lavd-ossna24`), measurement 2개입니다(tree에서 센 값). 2026-10-16에 데이터셋 파일 어디도 인용하지 않는 id 열한 개가 빠졌습니다(그 전에는 30개).
 
@@ -901,7 +901,7 @@ flowchart LR
 
 | 고친 것 | 다시 돌릴 것 | commit할 것 | 번지는 범위 |
 |---|---|---|---|
-| core timeline, recipe, `archetypes.yaml`, `stimulus/`·`replay/`·`launch/` 흐름, compiler(`compile.py`, `wlc/*.py`) | `make dataset variants generated` | 모든 manifest | core manifest가 바뀌면 variants manifest의 `inputs`가 바뀌고, 둘 다 RQ0 gate spec이 hash로 고정하므로 spec의 pin도 다시 맞춰야 합니다(harness의 changelog 항목과 함께) |
+| core timeline, recipe, `archetypes.yaml`, `stimulus/`·`replay/`·`launch/` 흐름, compiler(`compile.py`, `wlc/*.py`) | `make dataset variants generated` | 모든 manifest | core manifest가 바뀌면 variants manifest의 `inputs`가 바뀌고, 둘을 hash로 고정한 실험 사양이 실행 전이면 그 pin도 다시 맞춰야 합니다(harness의 changelog 항목과 함께). 실행된 RQ0 gate spec은 다시 맞추지 않고, experiment lint가 맞지 않는 pin을 note로 읽습니다(2026-11-21의 두 번째 bless) |
 | `grids.yaml`, generator(`generate.py`, `gen/*.py`), C1 calibration group의 timeline | `make generated` | generated manifest 다섯 개 | C1 calibration group의 timeline은 core set의 일부이기도 하므로 위 줄도 함께 해당합니다 |
 | 문서만 | 없음 | 문서 | 없음 |
 
@@ -1083,8 +1083,11 @@ generated 파일도 pre-committed miss를 가질 수 있습니다. distractor gr
 | 2026-10-11 | 9.17, 9.18, 9.22, 9.19 | focus track과 telemetry, bound value의 `source`, build 시간 단축, generated layer의 첫 세 집합 |
 | 2026-10-12 | 9.20 | distractor grid와 familiarity ladder, `c5-t3` → `c6-alias` |
 | 2026-10-13 | 9.21 | generated layer의 소비자 작업(채점 규칙, coverage 표, CI 전략) |
+| 2026-10-14 – 15 | 9.23 | guidebook을 쓰며 찾은 것을 고침: `c6-fold`와 `c6-spoof`를 pre-committed miss로, segment에 묶인 program이 떠나는 시각 전에 끝나지 않게 함, launch stream을 manifest의 `inputs`에 고정, 두 번의 재빌드(core manifest `c5f7fa5a…`, `81d3213d…`) |
 | 2026-10-14 – 10-17 | 9.15 | 문서·memo·guidebook 정정 |
 | 2026-10-17 – 18 | 9.16 출구 감사, Phase 9 끝 | 주장·측정·compile된 숫자의 세 감사를 최종 상태에서 다시 돌리고 발견을 고침, 한 번의 재빌드(core manifest `8e1eb753…`), 최종 build의 전체 smoke exit 0 |
+| 2026-10-31 | 9.24 측정된 프로그램 자신의 wake를 시작점에 따라 나눔 | 측정된 wake 사슬이 timer에서 시작하는 wake는 `timer:`, 그 밖의 wake는 `event:` channel로 나눈 재빌드(core manifest `d80f06e0…`), 같은 날 operation마다 가장 큰 run을 따로 싣는 재빌드(`27d347bc…`) |
+| 2026-11-21 | 11.3 재측정과 두 번째 bless | `cpu-batch`의 `python3` 두 값(voluntary block 사이의 run, run마다의 block)을 campaign `meas-ci:background:2026-11-20`의 107 repeat로 다시 잼, core set·variant 78개·generated 다섯 집합을 다시 bless(core manifest `9f30ea8f…`), library hash 너머로는 `python3`를 품은 파일만 바뀌고 수요는 그대로 |
 
 재구축의 이유와 기준은 6장에서 봅니다.
 
@@ -1211,7 +1214,9 @@ Phase 9는 영역별 조사와 측정(9.4 gaming, 9.5 interactive와 typing, 9.6
 
 > **출구 감사(9.16)의 결과.** 9.16은 2026-10-17에 세 감사를 최종 상태에서 다시 돌렸습니다(`_dev/research/jioh/task-9.16-exit-audits/README.md`). 주장 감사는 데이터셋 쪽 주장 221개와 데이터셋 밖 주장 353개를 출처의 기록까지 따라갔고, 표본과 `docs/references.md`에만 구절이 있던 출처는 비교 전에 원문을 따로 다시 읽어(blind re-read) 188개 주장을 대조했습니다. 131개가 원문과 맞았고, 41개는 문장을 고쳤고, 3개는 원문과 어긋났고, 4개는 원문에 없었고, 9개는 원문에 닿지 못해 이전 기록이 그대로 남았습니다(CpsMark+의 전문, Field & Welsh 2007, 세 구절). 측정 감사에서는 data 쪽 수정 뒤 60개 행의 모든 값이 그 release에서 재현되었고, `archetypes.yaml`의 `meas-ci` 값 304개가 무엇인지 하나씩 읽으니 300개가 측정, 4개가 측정에서 계산한 파생, convention은 0개였습니다. compile된 숫자의 감사는 88개가 맞고, 45개가 낡았고, 3개가 틀렸습니다(`c7-gaming`의 `tick_count` guard, `c2-p3b`의 backup, batch-class memo의 예). 발견은 9.16 안에서 고쳤습니다. harness 쪽(`3fbb7c25`: 인지오의 결정 D3에 따라 `tick_count` guard가 창 규칙, 곧 `T_end`에 아직 도는 반복은 오류가 아니라는 metrics 문서 §4의 규칙을 따르게 함, guard spec 1.2), code와 data 쪽(`17f28d7f`: 측정 도구의 수정과 한 번의 재빌드, dataset `8e1eb753…`, variants `8e2948b1…`), 그리고 문서(`1a092508`, 이 guidebook 포함) 순서입니다. 최종 build의 전체 smoke(`make -C harness smoke`)는 2026-10-18에 exit 0으로 끝났습니다. 16,313초(4시간 32분)였지만 392번의 호출 가운데 250번은 cache에서 왔으므로 cold run의 시간이 아니고, 판정 `invalid`는 mock이 만드는 구조상의 결과입니다(smoke는 배관을 검사합니다; `gate/smoke-status.txt`).
 
-> **열린 자리.** 출구 감사는 compile된 숫자의 문장 가운데 simulator가 아직 보이지 않은 동작에 기대는 것들을 RQ0 gate spec의 statement `simulator-conformance` 항목별로 모았습니다(`_dev/research/jioh/task-9.16-exit-audits/compiled/uncheckable-by-item.md`). (b) TIMER의 skip 규칙, (d) `batch_bandwidth_cap`을 behavioural batch class에 work-conserving 상한으로 적용하는 것, (e) 엄격한 idle class, (g) orchestrator의 `WAIT children:<id>`가 자신이 띄운 자식이 모두 끝나면 완료되는 것입니다. 이 목록은 각 항목이 simulator에 들어올 때 인경민이 돌릴 확인이고(9.16 spec 결정 6), 그때까지 이 문장들은 확인되지 않은 채 열려 있습니다. (d)는 2026-10-20에 인경민이 simulator stage V에 구현했습니다(커밋 `1074b14d`; 상한을 재는 window는 인경민의 decision D10, rate가 cap이고 깊이가 slice 하나인 token bucket; `simulator/memo/memo_261020.md` Part F). (b)는 2026-10-23에 stage Y로(커밋 `a62c10b0`; `simulator/memo/memo_261023.md` Part G), (e)는 2026-10-28에 stage Z로(커밋 `8dab1176`; `simulator/src/notes.md`의 Z 항목) 들어왔습니다. 세 항목에 기대는 문장들의 확인은 기록에 아직 없습니다. 항목 (a)(막는 primitive가 끝날 때마다 ready 줄을 쓰는 것)는 ready 줄에서 읽는 모든 항의 바탕이고, (h)(runner가 부르는 invocation 계약대로 simulator를 돌리는 것)는 호출의 모양이라, 특정 문장에 매이지 않습니다. (a)는 2026-10-23에 stage X로 들어왔고(커밋 `d6d35808`; 같은 memo Part B), (h)는 (g)와 함께 simulator 담당이 아직 갚을 항목이며, 항목마다 보여지기 전에는 RQ0 run이 시작되지 않습니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
+출구 감사는 compile된 숫자의 문장 가운데 그때의 simulator가 아직 보이지 않은 동작에 기대는 것들을 RQ0 gate spec의 statement `simulator-conformance` 항목별로 모았습니다(`_dev/research/jioh/task-9.16-exit-audits/compiled/uncheckable-by-item.md`). (b) TIMER의 skip 규칙, (d) `batch_bandwidth_cap`을 behavioural batch class에 work-conserving 상한으로 적용하는 것, (e) 엄격한 idle class, (g) orchestrator의 `WAIT children:<id>`가 자신이 띄운 자식이 모두 끝나면 완료되는 것입니다. (d)는 2026-10-20에 인경민이 simulator stage V에 구현했습니다(커밋 `1074b14d`; 상한을 재는 window는 인경민의 decision D10, rate가 cap이고 깊이가 slice 하나인 token bucket; `simulator/memo/memo_261020.md` Part F). (b)는 2026-10-23에 stage Y로(커밋 `a62c10b0`; `simulator/memo/memo_261023.md` Part G), (e)는 2026-10-28에 stage Z로(커밋 `8dab1176`; `simulator/src/notes.md`의 Z 항목) 들어왔습니다. 항목 (a)(막는 primitive가 끝날 때마다 ready 줄을 쓰는 것)는 ready 줄에서 읽는 모든 항의 바탕이고, (h)(runner가 부르는 invocation 계약대로 simulator를 돌리는 것)는 호출의 모양이라, 특정 문장에 매이지 않습니다. (a)는 2026-10-23에 stage X로 들어왔습니다(커밋 `d6d35808`; 같은 memo Part B). 2026-11-14에 통합 gate가 `simulator@0d323c84470a`와 `daemon@62c71f0d2de0`에서 통과해, statement `simulator-conformance`의 항목 (a)부터 (j)까지가 binary 위에서 보여졌습니다. 손으로 쓴 fixture를 binary로 재생해 (a), (b), (c), (g), (i), (j)를, `simulator/tests/`의 black-box unit test로 (d), (e), (f), (g), (i), (h)를 보였습니다(`harness/CHANGELOG.md`의 2026-11-14 통합 gate 항목). RQ0 run은 그 두 program으로 2026-11-16부터 2026-11-18까지 돌았습니다(`docs/rq0-run-record.md`).
+
+> **열린 자리.** 위 목록은 각 항목이 simulator에 들어올 때 인경민이 돌릴, 항목에 기대는 문장들의 확인입니다(9.16 spec 결정 6). (b), (d), (e), (g)는 모두 simulator에 들어왔고 binary 위에서 보여졌지만, 그 문장들을 확인했다는 기록은 없습니다. `simulator/memo/memo_261021.md`의 행 M은 (d)의 확인을 인경민이 갚을 항목으로 적습니다. 이 확인은 인경민의 몫으로 열려 있습니다.
 
 ## 6.7 숫자가 주장하는 것과 주장하지 않는 것
 
@@ -1342,15 +1347,15 @@ c1-office:
 - **원치 않는 작업에는 항목이 없습니다**(attribute coverage를 채운 Phase 7의 spec 결정 10). label이 `background_wanted: false`로 뒤집힌 counterpart는 원본의 항목에서 batch 항목(turnaround, progress)을 뺀 것을 씁니다.
 - generated layer의 파일에는 항목이 없습니다. harness가 실행할 때 규칙 하나로 만듭니다. generated manifest의 `placements`가 "이 파일의 어느 구간에 어느 mode의 C1 calibration group task 묶음이 어떤 id 꼬리(`-s0`, `-s1`)로 놓였는가"를 적고, harness는 그 mode의 `c1-<mode>` 항목을 가져와 entity에 꼬리를 붙이고 그 구간으로 창을 좁힙니다(9.21 결정 1–3). 키 입력 창이 없는 놓임(4초 이하 구간)은 `input_latency` 항목만 뺍니다.
 
-**manifest.** harness는 manifest도 읽습니다. RQ0 gate spec은 core manifest와 variants manifest를 hash로 고정하고(7.5), 앞으로의 experiment spec은 generated manifest의 `grid` 축(쌍, 꼴, tier, tuning·measurement 구분 등)으로 파일을 골라 `pins.generated`로 고정할 수 있습니다(9.21 결정 5–6). generated 파일의 축은 records에 열로 들어가지 않고, 필요할 때 manifest와 join합니다.
+**manifest.** harness는 manifest도 읽습니다. RQ0 gate spec은 core manifest와 variants manifest를 hash로 고정하고(7.5), configuration search spec(`harness/experiments/rq0-config-search.yaml`)은 2026-11-21의 두 번째 bless의 core manifest(`9f30ea8f…`)를 고정하며, search 도구(`harness/tools/search.py`)의 lint가 그 spec의 파일 열 개를 compiled core set과 채점 항목에 대조합니다. 앞으로의 experiment spec은 generated manifest의 `grid` 축(쌍, 꼴, tier, tuning·measurement 구분 등)으로 파일을 골라 `pins.generated`로 고정할 수 있습니다(9.21 결정 5–6). generated 파일의 축은 records에 열로 들어가지 않고, 필요할 때 manifest와 join합니다.
 
 > **용어.** `records`는 harness의 중간 파일로, trace나 recognition log에서 계산한 관찰 하나를 한 줄로 적은 CSV입니다(`docs/terminology.md`). 집계는 저장하지 않고, 채점은 records만 읽습니다. `term`(채점 항목)은 파일 하나의 점수를 이루는 한 줄로, 어느 task의 어떤 지표를 어떻게 모으고 어느 방향이 좋은지와 가중치를 적습니다.
 
 ## 7.5 RQ0 gate spec의 pin과 re-pin의 사슬
 
-RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)의 `pins`는 다섯 파일을 SHA-256으로 고정합니다. 채점 spec, guard spec, prior driver table, 그리고 데이터셋의 두 manifest입니다. 머리 주석의 규칙은 "실행이 시작된 뒤에는, 어떤 실행보다 먼저 만든 `harness/CHANGELOG.md`의 항목 없이는 아무것도 바뀌지 않는다"입니다.
+RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)의 `pins`는 여덟 파일을 SHA-256으로 고정합니다. 채점 spec, guard spec, prior driver table, cap band의 세 table(prior table에서 unwanted 행 열여섯의 cap만 0.2, 0.333, 0.5로 바꾼 `daemon/driver-table/prior-floor-0.2.yaml`, `prior-floor-0.333.yaml`, `prior-floor-0.5.yaml`, 2026-11-01), 그리고 데이터셋의 두 manifest입니다. 그리고 두 program의 version(`simulator@0d323c84470a`, `daemon@62c71f0d2de0`, 2026-11-14)을 고정하고, runner는 machine configuration이 다른 version을 이름 지으면 run 전에 거부합니다. 머리 주석의 규칙은 "실행이 시작된 뒤에는, 어떤 실행보다 먼저 만든 `harness/CHANGELOG.md`의 항목 없이는 아무것도 바뀌지 않는다"입니다.
 
-데이터셋 쪽에서 이것이 뜻하는 바는 이렇습니다. core set의 artifact 하나라도 byte가 바뀌면 `build.manifest.json`의 hash가 바뀌고, 그러면 RQ0 gate spec의 `pins.dataset`이 더는 맞지 않습니다. harness는 고정된 hash와 실제 파일을 대조하므로, 데이터셋을 바꾼 사람은 manifest를 다시 commit하고(re-bless), harness changelog에 항목을 쓰고, spec의 pin을 다시 맞춰야(re-pin) 합니다. 재구축 이후 이 사슬은 여러 번 돌았습니다. 기록에 남은 dataset pin만 해도 9.17(focus track)의 `625e431f…`, 9.18(bound value의 출처와 build gate)의 `976a943c…`, 9.22(build 시간)의 `d10bcd42…`, 9.20(distractor grid와 familiarity ladder)의 `fad7192d…`, 9.23(guidebook을 쓰며 찾은 것을 고친 sub-task)의 `c5f7fa5a…`(2026-10-14)와 `81d3213d…`(2026-10-15), 9.15의 첫 재빌드(2026-10-16)가 남긴 `b6017a10…`, 9.15의 두 번째 재빌드(2026-10-17)가 남긴 `d52e7bd4…`를 거쳐, 같은 날 세 번째 재빌드가 남긴 `0f0af422…`를 지나, 출구 감사 9.16의 재빌드(2026-10-17)가 남긴 `8e1eb753…`이 지금의 값입니다(`harness/CHANGELOG.md`, `harness/experiments/rq0-gate.yaml`의 `pins.dataset`).
+데이터셋 쪽에서 이것이 뜻하는 바는 이렇습니다. core set의 artifact 하나라도 byte가 바뀌면 `build.manifest.json`의 hash가 바뀌고, 그러면 RQ0 gate spec의 `pins.dataset`이 더는 맞지 않습니다. harness는 고정된 hash와 실제 파일을 대조하므로, 데이터셋을 바꾼 사람은 manifest를 다시 commit하고(re-bless), harness changelog에 항목을 쓰고, 실행 전의 spec이면 그 pin을 다시 맞춰야(re-pin) 합니다. 재구축 이후 이 사슬은 여러 번 돌았습니다. 기록에 남은 dataset pin만 해도 9.17(focus track)의 `625e431f…`, 9.18(bound value의 출처와 build gate)의 `976a943c…`, 9.22(build 시간)의 `d10bcd42…`, 9.20(distractor grid와 familiarity ladder)의 `fad7192d…`, 9.23(guidebook을 쓰며 찾은 것을 고친 sub-task)의 `c5f7fa5a…`(2026-10-14)와 `81d3213d…`(2026-10-15), 9.15의 첫 재빌드(2026-10-16)가 남긴 `b6017a10…`, 9.15의 두 번째 재빌드(2026-10-17)가 남긴 `d52e7bd4…`를 거쳐, 같은 날 세 번째 재빌드가 남긴 `0f0af422…`, 출구 감사 9.16의 재빌드(2026-10-17)가 남긴 `8e1eb753…`, 2026-10-31에 sub-task 9.24의 첫 재빌드가 남긴 `d80f06e0…`를 지나, 같은 날 둘째 재빌드가 남긴 `27d347bc…`이 RQ0 gate spec의 지금 값입니다. RQ0 run(2026-11-16–18)이 읽은 판이 이것입니다. 2026-11-21의 두 번째 bless는 core manifest를 `9f30ea8f…`로 바꾸었지만, 실행된 RQ0 gate spec(옆에 run record가 commit된 spec)은 다시 pin되지 않았고 experiment lint가 맞지 않는 pin을 note로 읽습니다. 그 값은 configuration search spec이 pin합니다(`harness/CHANGELOG.md`, `harness/experiments/rq0-gate.yaml`과 `harness/experiments/rq0-config-search.yaml`의 `pins.dataset`).
 
 > **용어.** `pin`은 사전 등록 파일이 다른 파일의 SHA-256을 적어 "이 실험은 정확히 이 파일 위에서 돈다"고 고정하는 것입니다. `re-pin`은 고정된 파일이 바뀐 뒤 그 hash를 새 값으로 다시 적는 일입니다.
 
@@ -1359,8 +1364,9 @@ timeline 한 줄 편집
   → artifact의 byte 변화 (meta.derived_from의 blob hash만 바뀌어도)
     → build.manifest.json 변화                 (make dataset, commit = re-bless)
       → build.variants.manifest.json의 inputs 변화 (make variants)
-        → rq0-gate.yaml pins.dataset / pins.variants 불일치
-          → harness/CHANGELOG.md 항목 + re-pin
+        → 그 manifest를 pin한 spec의 pins.dataset / pins.variants 불일치
+          → 실행 전의 spec: pin 오류 → harness/CHANGELOG.md 항목 + re-pin
+          → 실행된 spec(RQ0 gate spec): experiment lint의 note, pin은 run이 읽은 tree로 남음
 ```
 
 이 사슬은 번거롭지만 의도된 것입니다. RQ0 문지기 실험의 결과가 어떤 파일 위에서 나왔는지를 hash 하나로 말할 수 있게 하려는 것입니다.
@@ -1434,7 +1440,7 @@ timeline 한 줄 편집
 
 이 권의 4장이 "무엇을 위한 것인가"까지만 말한 build 장치를 엽니다. 왜 같은 byte가 필요한지, manifest 일곱 개의 해부, bless와 pin(누가 무엇을 고정하는가), 문지기인 `make check`와 네 개의 `--check`, `make` target의 순서와 시간과 병렬화, GitHub runner 위의 CI, test suite가 지키는 불변식, 그리고 "Rules of the tree"의 각 규칙과 그 이유를 다룹니다.
 
-**이럴 때 펴세요**: CI가 실패했을 때, 데이터를 고친 뒤 무엇을 다시 돌리고 commit해야 하는지 확인할 때(이 권의 4.10 표의 근거), RQ0 gate spec의 pin을 다시 맞춰야 할 때.
+**이럴 때 펴세요**: CI가 실패했을 때, 데이터를 고친 뒤 무엇을 다시 돌리고 commit해야 하는지 확인할 때(이 권의 4.10 표의 근거), 실험 사양의 pin을 다시 맞춰야 할 때(실행된 RQ0 gate spec은 다시 맞추지 않습니다).
 
 ## 8.7 8권 · 의사결정 연대기: 2026-08-23부터 지금까지
 
@@ -1459,7 +1465,7 @@ timeline 한 줄 편집
 
 이 시리즈 전체에서 기록을 인용할 때 같은 꼴의 이름표가 반복됩니다. 이름표마다 무엇을 가리키는지 정리해 둡니다. 이름표를 쓸 때는 언제나 그 뜻을 함께 적는 것이 이 시리즈의 규칙이지만, 꼴 자체를 알아 두면 기록 파일을 직접 열 때도 도움이 됩니다.
 
-- **Phase N** — `_dev/TODO.md`의 인지오 절에 있는 작업 단계 번호입니다. 데이터셋과 직접 관련된 것은 Phase 1(기초), 2(첫 생성), 3(검증과 동결), 7(attribute coverage), 9(재구축)입니다. Phase마다 spec이 `_dev/docs/spec/jioh/phase-<N>-*.md`에 있습니다.
+- **Phase N** — `_dev/TODO.md`의 인지오 절에 있는 작업 단계 번호입니다. 데이터셋과 직접 관련된 것은 Phase 1(기초), 2(첫 생성), 3(검증과 동결), 7(attribute coverage), 9(재구축), 11(RQ0 실패 절차의 진단: sub-task 11.3이 `cpu-batch`의 `python3`를 다시 재어 두 번째 bless를 함)입니다. Phase마다 spec이 `_dev/docs/spec/jioh/phase-<N>-*.md`에 있습니다.
 - **sub-task N.M** — Phase N의 M번째 하위 작업입니다. 예: 9.10은 Phase 9의 "scenario와 timeline" 조사, 9.13은 재구축, 9.17은 focus를 telemetry에 넣은 작업. 많은 sub-task가 자기 spec(`_dev/docs/spec/jioh/task-<N.M>-*.md`)과 changelog(`_dev/research/jioh/task-<N.M>-*/changelog.md`)를 가집니다.
 - **"spec 결정 k"** — 그 phase나 sub-task의 spec 파일에 "Locked decisions"로 적힌 k번째 결정입니다.
 - **"N.M Dk"** — sub-task N.M의 changelog에 `## Dk`로 적힌 k번째 결정입니다. 예: 9.10 D44는 9.10 changelog의 44번째 결정("잘린 counterpart는 원본의 배치를 비례로 유지한다")으로, generated layer가 "하나뿐인 re-timing 규칙"으로 쓰는 규칙입니다.
