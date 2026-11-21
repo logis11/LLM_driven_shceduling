@@ -1,0 +1,20 @@
+# K7 review — harness
+
+**FINDINGS** — 1.
+
+Read: the task spec, the work list (R1–R7, Q1–Q7, "Rows by file"), `rows/g6-harness.md`, `logs/K7.md`, the editor brief, and `git diff` of the eight files (`harness/guards/README.md` untouched, as g6-12 is left). Checked against: `harness/Makefile` (seven targets, their help lines); `harness/tools/search.py` (flags, outputs, exit paths) and `harness/tools/harness/search.py` (docstring; `search()`: a failed check run, a check not reproduced and a failed grid run each set `stopped`, so exit 1; `plan()` and the program-pin check raise `SearchError`, so exit 1); `harness/tools/experiment_lint.py` (docstring and `run_record`, `lint_search`: a search spec by `search.lint_spec`, its `pins/` errors notes once `<search>/report.json` exists); `ls` of `harness/`, `tools/`, `tools/harness/`, `experiments/`, `experiments/schema/` (four schemas), `experiments/rq0-config-search/` (`points.csv`, `report.json`, `report.md`, `runs.sha256.csv` with `trace_sha256`, `records_sha256`); `git show 79608bff` (2026-11-21, adds the search spec, both schemas, both search modules); `git log` of `simulator/steps/sim_ab.cpp` (`2ee49785`, 2026-11-11); `harness/CHANGELOG.md`, 2026-11-13, 2026-11-14 (gate), 2026-11-18, 2026-11-20, 2026-11-21 (search); `docs/rq0-run-record.md`, "The failure procedure"; `simulator/steps/README.md`, the aa and ab rows; `harness/runner.example.yaml`; `harness/tools/tests/test_runner.py` (`_machine` loads the example); `mock-scores/worked.md`, seam case, and `expected-scores.csv` (32 term rows `oracle_worse` 0, 8 file rows `n_oracle_worse` 0); the harness guide's mock section (line 1411); the 2026-10-30 "the simulator's conformance as it stands" entry of `metrics.md` §13.
+
+Coverage: the sixteen rows due — g6-01, 03, 04, 05, 07, 08, 09, 11, 13–20 — are applied; g6-02 (Q3), g6-06, g6-10, g6-12 (Q4) and g6-21 – g6-24 (D) are untouched. Scope: every hunk maps to a row; the `metrics.md` §13 entry goes with g6-03. Both status headers read `Updated 2026-11-21`. The `metrics.md` §13 entry follows the 2026-10-30 entry's form — the no-change sentence, "§11 item 1 states as the reference simulator's behaviour what it stated as owed", the stage and its date, the conformance item, the harness changelog's dates — and states only that change.
+
+## Findings
+
+1. **`harness/tools/tests/fixtures/README.md:23`** — truth of the passage (item 7, the scorer's sign rule and the mark `oracle_worse`). The passage still says `scoring-spec.yaml` is "a four-term spec shaped to hit every scorer rule", and the sentence the edit adds ends "no term of the four-term spec marked". Since 2026-11-18 the scorer has a rule the four-term spec does not hit: the second kind of no headroom, marked *oracle worse than fixed*. The editor's log says the clause was added so that "every scorer rule" is not read as covering the new rule. That leaves the overtaken claim in place and contradicts it two sentences later. **Record:** `harness/CHANGELOG.md`, 2026-11-18, "Scorer" (the second kind carries the mark) and "Tests" ("The mock fixtures gain the new columns, no other value changing"); `expected-scores.csv`, every term row `oracle_worse` 0. **Fix:** "a four-term spec shaped to hit every scorer rule but the *oracle worse than fixed* mark (a windowed P99, …)". The trailing "no term of the four-term spec marked" may then go, or stay as it is.
+
+## Noted, not findings
+
+- `harness/tools/README.md:19` reads "And three lints plus one checker", over four lint rows (`lint.py`, `scoring_lint.py`, `guards_lint.py`, `experiment_lint.py`). It has read this way since `f66351ea` (2026-09-12) and is outside the fifteen items. For the work list's separate part, if 인지오 wants it.
+- `harness/README.md:45`'s `make lint` comment says "experiment specs". The experiment lint also lints the search spec, and the Makefile's help line names neither. This is not false as it stands.
+
+## Main session, 2026-11-21
+
+The finding applied at `harness/tools/tests/fixtures/README.md:23`: "shaped to hit every scorer rule but the *oracle worse than fixed* mark".

@@ -8,6 +8,7 @@ reader ──► primitives ──► records ──► aggregates ──► sco
 guards ◄── outputs ◄──────────────────────────────────────────┤
 grader (with drivertable) ─────────────────────────────────────┘
 runner: invokes the programs and drives all of the above
+search: a search spec's points run through the runner, read per file, the route
 ```
 
 ## Module by module
@@ -25,6 +26,7 @@ runner: invokes the programs and drives all of the above
 - **`evaluator.py`** is the RQ0 gate evaluator: it lints a per-experiment spec, verifies its pins, expands its selections from the generated layer's manifests, checks the run set is complete, applies the criterion and the reporting lines, echoes the spec's statements, and renders the report to Markdown. The registries of criterion types and line types live here; adding a line type is one function and one schema branch.
 - **`runner.py`** expands a spec into the run matrix, invokes the daemon and the simulator through the invocation contract, twice each with byte-identical outputs required, caches every invocation, and drives every stage above to the report. A spec that pins the two programs' version strings is refused before any run when the machine configuration names others. The configuration's `workers` spreads the runs over processes, the heavy files in a pool of their own; each run's records, aggregates and graded queries are kept in a results cache beside the execution cache, so a run met again is not rebuilt. A finished run keeps the simulator's trace once, gzipped, the second execution's as its SHA-256, and the records gzipped; `run-times.csv` records each run's wall time, peak memory and bytes on disk, `stage-times.csv` the wall time of each stage after the runs.
 - **`integration.py`** is the integration gate (10.2): the four parts `integration_gate.py` runs on the machine configuration's programs — the simulator's unit tests and mutants, the fixture replay through the invocation contract with the lines and the records compared, the daemon against the mock daemon on the run list `runner.expand` gives for the RQ0 gate spec, the short run through the smoke tool — each writing its result with the version strings it checked, and the status over them.
+- **`search.py`** is the configuration search (11.4): it lints a search spec and expands its grid, gives each point its table — every row the point's configuration, the oracle condition run under it — and runs each point through the runner's `process_run` with the guards and the wait check beside it, checks the boot default's and the row's points against the corrected runs before the rest of the grid, reads every point per file at the primary, under the g band and under each alternative boot default, gives the route, and renders the report.
 
 ## Where the definitions are
 

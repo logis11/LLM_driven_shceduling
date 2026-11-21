@@ -1,6 +1,6 @@
 # tools
 
-All of the harness's code: the `harness` Python package, one command-line tool per stage, the tests, and the two mocks that stand in for the daemon and the simulator until the real programs land. Python 3.12; dependencies in `requirements.txt`. Every command runs from the `harness/` directory and takes named flags only.
+All of the harness's code: the `harness` Python package, one command-line tool per stage, the tests, and the two mocks that stand in for the daemon and the simulator in the suite and in `make smoke` (`../runner.example.yaml`). Since the integration gate of 2026-11-14 (10.2) the runner's machine configuration runs the real programs, `simulator/src/sim` and `daemon/daemon.py`. Python 3.12; dependencies in `requirements.txt`. Every command runs from the `harness/` directory and takes named flags only.
 
 ## The commands, in pipeline order
 
@@ -14,6 +14,7 @@ All of the harness's code: the `harness` Python package, one command-line tool p
 | `run.py` | a per-experiment spec and a machine configuration → every run invoked, every stage above, the report | 1 a failed run, else the verdict's |
 | `smoke.py` | a generated throwaway spec over the compiled coreset, run through `run.py`'s path with the mocks | 0 once a report is written |
 | `integration_gate.py` | the machine configuration's simulator and daemon → the integration gate's four parts (unit tests and mutants, fixture replay, daemon against the mock daemon on the RQ0 gate spec's run list, a short run) and their results; `--status` reads them against the gate spec's version pins (10.2) | 0 every part passed, else 1 |
+| `search.py` | a search spec and a machine configuration → the boot default's and the row's points run and checked against the corrected runs, then every point of the grid on every file the spec names, the reading and the route; `report.json` and `report.md` under `runs/<search>/`, and with `--out-dir` in that directory too (the committed copy beside the spec); `--checks-only`, `--read-only` (11.4) | 1 a refused spec, a failed run or a check that did not reproduce its run, else 0 |
 
 And three lints plus one checker that is not part of the harness:
 
@@ -22,7 +23,7 @@ And three lints plus one checker that is not part of the harness:
 | `lint.py` | every fixture pair under the frozen contracts, its expected files against the schemas, every boot-default file against its schema |
 | `scoring_lint.py` | the scoring spec against its schema, the compiled coreset, and the dataset's recipes |
 | `guards_lint.py` | the guard spec against its schema, the code's guard registry, and the C2 pair recipe |
-| `experiment_lint.py` | every per-experiment spec against its schema, the build, the pinned scoring spec's terms, the registries, and its pins |
+| `experiment_lint.py` | every per-experiment spec against its schema, the build, the pinned scoring spec's terms, the registries, and its pins — on an executed spec, one whose run record is committed beside it, a pin the working tree no longer matches is a note, not an error; a search spec (a top-level `search` key) by the search's own lint, its pins read as an executed spec's once its report is committed beside it |
 | `check_mlfq_levels.py` | the `x_mlfq_level` trace lines the readers skip, against each switch window; a diagnostic for the simulator, not a harness stage |
 
 `--help` on any command prints its flags. `make lint`, `make test-quick`, `make test`, `make test-full`, and `make smoke` in the parent directory run the lints, the suite without its slow tests, the suite as CI runs it, the whole suite, and the smoke; `make gate` and `make gate-status` run the integration gate on `runner.yaml` and read its results.
@@ -36,4 +37,4 @@ And three lints plus one checker that is not part of the harness:
 
 - The harness never imports the daemon's or the dataset's modules. Where it must reproduce their logic, a test pins the two: the driver-table composition against the daemon's, the OSTEP boot default against the config schema's defaults.
 - Numbers are integers or exact fractions until they are formatted for a file, and files carry decimal strings, never floats. Two runs of the same input produce byte-identical files.
-- Every judgement is data: the scoring spec, the guard spec, and the per-experiment spec. A constant in code is a bug.
+- Every judgement is data: the scoring spec, the guard spec, the per-experiment spec, and the search spec. A constant in code is a bug.

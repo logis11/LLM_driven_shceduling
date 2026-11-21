@@ -30,10 +30,10 @@ If you are new, read `docs/background-guide.md`, then `docs/harness/harness-and-
 | `guards/` | the guard spec, frozen, and the schema of the guards file: the checks a run must pass before its numbers are read | [guards/README.md](guards/README.md) |
 | `grades/` | the schema of the grades file: Layer-1 recognition accuracy, pooled | [grades/README.md](grades/README.md) |
 | `boot-defaults/` | the boot-default configurations the runner hands the daemon: the primary and the sweep | [boot-defaults/README.md](boot-defaults/README.md) |
-| `experiments/` | the per-experiment specs and the report schema; `rq0-gate.yaml` is the RQ0 gate spec | [experiments/README.md](experiments/README.md) |
+| `experiments/` | the per-experiment specs and the search spec, with their schemas, spec and report each; `rq0-gate.yaml` is the RQ0 gate spec and `rq0-config-search.yaml` the configuration search's search spec, each with its committed report in the folder of its name | [experiments/README.md](experiments/README.md) |
 | `tools/` | the code: the `harness` package, the command-line tools, the tests, the mocks | [tools/README.md](tools/README.md) |
 
-Beside the folders: `CHANGELOG.md`, the harness tree's own changelog, where the scoring spec and the guard spec were frozen on 2026-09-12 and every later change to a committed data file or a program is recorded; `Makefile`, the three targets below; `runner.example.yaml`, the machine configuration that drives the mocks.
+Beside the folders: `CHANGELOG.md`, the harness tree's own changelog, where the scoring spec and the guard spec were frozen on 2026-09-12 and every later change to a committed data file or a program is recorded; `Makefile`, the seven targets below; `runner.example.yaml`, the machine configuration that drives the mocks.
 
 ## Running it
 
@@ -47,6 +47,8 @@ make test-quick                   # the suite without the tests marked slow (the
 make test                         # the suite without the two coreset-wide mock tests, what CI runs; about 20 min after the build
 make test-full                    # the whole suite; the two coreset-wide tests hold about 10 GB resident, more than a 16 GB CI runner
 make smoke                        # the whole pipeline on the mocks over every scored coreset file, 4 h 50 min on the home machine (9.14 D14)
+make gate                         # the integration gate (10.2) on runner.yaml's real programs: unit tests and mutants, fixture replay, daemon comparison, short run
+make gate-status                  # the integration gate's parts against the RQ0 gate spec's version pins
 ```
 
 `make smoke` generates a throwaway experiment spec over the files as they are, runs it through the runner with the mock daemon and mock simulator, writes everything under `runs/`, and discards the spec. To run a real experiment, copy `runner.example.yaml` to `runner.yaml` (git-ignored), point it at the real programs, and run:
@@ -69,7 +71,7 @@ python3 tools/evaluate.py --spec experiments/rq0-gate.yaml --aggregates … --sc
 
 ## What is frozen, and what changes how
 
-Three files are data the code obeys and never a constant in code: the scoring spec, the guard spec, and the per-experiment spec. The first two are frozen; the RQ0 gate spec pins their bytes by SHA-256 along with the prior driver table and the dataset build manifest, and the evaluator refuses to judge if any pin no longer matches. A change to a frozen file is an entry in `CHANGELOG.md` made before any run reads it, and a new pin. The reasons behind every number in the RQ0 gate spec are written in that file, beside the number.
+Four files are data the code obeys and never a constant in code: the scoring spec, the guard spec, the per-experiment spec, and the search spec, which the search tool reads, committed before any search run. The first two are frozen; the RQ0 gate spec pins their bytes by SHA-256 along with the prior driver table and the dataset build manifest, and the evaluator refuses to judge if any pin no longer matches. A change to a frozen file is an entry in `CHANGELOG.md` made before any run reads it, and a new pin. The reasons behind every number in the RQ0 gate spec are written in that file, beside the number.
 
 CI runs `make lint` and `make test` on every push (`.github/workflows/harness.yml`; `make test-full` runs at home, since the two coreset-wide mock tests exceed the runner's memory) and the smoke on demand (`harness-smoke.yml`); `make test` runs the smoke path over a few files (`test_runner.py`).
 

@@ -2,9 +2,9 @@
 
 A per-experiment spec is the pre-registration of one experiment as data the harness executes: which conditions, how many seeds, which boot defaults, which files judge and which only report, which guard failures are exempt and why, which reporting lines the report carries, which bytes of the scoring spec, guard spec, driver table, and dataset it was written against, and the criterion that turns scores into a verdict. The runner reads the generic part as its run matrix; the RQ0 gate evaluator reads the whole file. Every judgement the evaluator applies is in the spec, never a constant in code.
 
-`rq0-gate.yaml` is the RQ0 gate spec, committed 2026-09-12. Only pre-registered experiments live here; the smoke run generates its spec in a temporary directory and discards it.
+`rq0-gate.yaml` is the RQ0 gate spec, committed 2026-09-12. `rq0-config-search.yaml` is the configuration search's search spec, the search the RQ0 gate spec's statement `failure-procedure` names, committed 2026-11-21 before any search run (`79608bff`); its schema is `schema/search-spec.schema.json`, and `tools/search.py` runs it. Only pre-registered experiments live here; the smoke run generates its spec in a temporary directory and discards it.
 
-`rq0-gate/` holds the RQ0 run's report (2026-11-18; `docs/rq0-run-record.md`): `report.json.gz`, the report gzipped; `report.md`, its rendering; `runs.sha256.csv`, every run's trace hash and records hash. `rq0-gate/post-hoc/` holds the run's post hoc reading, not its verdict: the run's aggregates re-scored with the oracle's improvement read with its sign and the report rendered again, `report.json.gz` and `report.md` (sub-task 11.1; `../CHANGELOG.md`, 2026-11-18).
+`rq0-gate/` holds the RQ0 run's report (2026-11-18; `docs/rq0-run-record.md`): `report.json.gz`, the report gzipped; `report.md`, its rendering; `runs.sha256.csv`, every run's trace hash and records hash. `rq0-gate/post-hoc/` holds the run's post hoc reading, not its verdict: the run's aggregates re-scored with the oracle's improvement read with its sign and the report rendered again, `report.json.gz` and `report.md` (sub-task 11.1; `../CHANGELOG.md`, 2026-11-18). `rq0-config-search/` holds the search's report (2026-11-21; `docs/rq0-run-record.md`, "The failure procedure"): `report.json` and `report.md`, its schema `schema/search-report.schema.json`; `points.csv`, every term of every point, the file the report is read from again; `runs.sha256.csv`, every run's trace hash and records hash.
 
 ## Anatomy of a spec
 
@@ -50,9 +50,10 @@ Two more since 2026-11-01 (sub-task 10.1): `headroom_count` prints the number of
 ## Commands
 
 ```
-python3 tools/experiment_lint.py [--spec experiments/rq0-gate.yaml]      # schema, files against the build, terms, registries, pins
+python3 tools/experiment_lint.py [--spec experiments/rq0-gate.yaml]      # schema, files against the build, terms, registries, pins — an executed spec's as notes; a search spec by the search's lint
 python3 tools/evaluate.py --spec … --aggregates … --scores … --guards … --grades … --out-report report.json --out-render report.md [--post-hoc TEXT]
 python3 tools/run.py --spec experiments/rq0-gate.yaml --machine runner.yaml   # the whole matrix, then evaluate
+python3 tools/search.py --spec experiments/rq0-config-search.yaml --machine runner.yaml [--checks-only | --read-only]   # the checks, every point, the reading, the route, the report
 ```
 
 `evaluate` exits 0 on pass, 2 on fail or invalid, and 1 on a refusal: a pin mismatch or an incomplete run set writes nothing. Changing a frozen file means a new pin here and an entry in `../CHANGELOG.md` first.

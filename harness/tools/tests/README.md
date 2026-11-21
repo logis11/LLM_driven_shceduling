@@ -24,4 +24,4 @@ The tests then come in three kinds:
 
 ## Mocks
 
-`mocks/` holds the mock daemon and the mock simulator, each a library module plus a command that speaks the invocation contract. They are what `make smoke` and the runner tests invoke, and they are discarded when the real programs land. [mocks/README.md](mocks/README.md).
+`mocks/` holds the mock daemon and the mock simulator, each a library module plus a command that speaks the invocation contract. They are what `make smoke` and the runner tests invoke, through `runner.example.yaml`. Since the integration gate of 2026-11-14 (10.2) the runner's machine configuration runs the real programs, and the mocks stay in the test tree; the gate compared `daemon/daemon.py` with the mock daemon on the RQ0 gate spec's run list, byte for byte. [mocks/README.md](mocks/README.md).
