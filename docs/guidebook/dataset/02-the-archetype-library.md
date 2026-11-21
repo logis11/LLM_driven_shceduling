@@ -1,6 +1,6 @@
 # 2권 · Archetype library: 프로그램 한 종류를 scheduler의 눈으로 적기
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-31
+> Status: draft · Created 2026-10-14 · Updated 2026-11-21
 
 **`archetypes.yaml`의 29개 항목은 각각 무엇을 어떻게 흉내 내고, 그 숫자들은 어디서 왔나.**
 
@@ -436,7 +436,7 @@ talk·학회 초록·뉴스 보도 type은 9.12 D113이 정했고, 2026-10-16에
 
 `meas-ci`의 locator 정규식은 `^[a-z0-9_-]+:(\d+|\d{4}-\d{2}-\d{2}[a-z]?)$`입니다. 날짜 대신 숫자가 오는 꼴(`meas-ci:cli:3`)은 campaign 형식이 정해지기 전(2026-09-18 이전)의 한 번짜리 run을 가리키는데, 지금 library에는 그런 tag가 남아 있지 않습니다. 이 형식은 9.5 D27(2026-09-18, "the `meas-ci` locator names the campaign")이 정했고, 기록된 이유는 campaign 하나가 여러 run에 걸치게 되었기 때문입니다("first batch, repeats added one at a time, retries after the machine gate").
 
-library에 쓰인 workflow는 여섯입니다. `interactive`(9.5의 typing·편집 application), `playback`(9.5의 재생·통화), `build`(9.6의 kernel build), `background`(9.7과 9.10의 batch job들), `desktop`(9.8의 browser 조각·comms, 9.10의 launch와 tab 수), `session`(9.9의 desktop session process).
+library에 쓰인 workflow는 여섯입니다. `interactive`(9.5의 typing·편집 application), `playback`(9.5의 재생·통화), `build`(9.6의 kernel build), `background`(9.7과 9.10의 batch job들, 11.3의 `cpu-batch` `python3` 재측정), `desktop`(9.8의 browser 조각·comms, 9.10의 launch와 tab 수), `session`(9.9의 desktop session process).
 
 **design, convention, arithmetic.** 출처가 말하지 않은 값은 source tag를 달지 않고, 그 값이 무엇인지 이름표를 붙입니다. Phase 9 decision 1(검증 기준, 2026-09-13)의 문장입니다. "A value no source states carries no source tag and is labelled for what it is: convention, arithmetic, placeholder, or design." 다만 데이터셋에는 `placeholder` 이름표가 없습니다. 측정을 기다리는 값은 `meas-pending` tag를 달고 freeze가 그것을 거부합니다(2.10절; 2026-10-16, 인지오의 결정). archetype library에서는 이 이름표가 field가 아니라 `modeling_notes`나 `scope` 산문 안에 적힙니다(예: `game-task-chain`의 "16667 us is 1/60 s arithmetic — design, ours"). timeline 쪽에서는 bound value마다 `source:` 지도에 tag 또는 이름표(`design`, `convention`, `arithmetic`)를 직접 적고, linter가 확인합니다(9.10 D32, linter의 `BOUND_LABELS`). 예를 들어 `c1-compile`은 `source: {spawn_count: "meas-ci:build:2026-09-18", parallelism_cap: convention, child_name: "meas-ci:build:2026-09-18"}`라고 적습니다.
 
@@ -594,7 +594,7 @@ archetype 항목이 가리키거나, archetype 측정과 관련된 파일들이 
 
 # 3장 · 숫자는 어떻게 얻었나 — tag를 읽을 만큼만
 
-이 장은 "`meas-ci:interactive:2026-09-18`이라는 tag 뒤에 무엇이 있나"에 답합니다. 28개 항목의 숫자가 모두 이런 tag를 달고 있으므로, tag가 무엇을 약속하고 무엇을 약속하지 않는지 알아야 4장부터의 숫자를 바르게 읽을 수 있습니다. 측정 방법 전체와 검증 기준(값이 원 자료에서 다시 나오는지, 출처가 원문과 맞는지)은 측정 방법을 다루는 6권이 자세히 다룹니다. 이 장은 tag를 읽는 데 필요한 만큼만 설명합니다. 기준 문서는 `docs/workload/measurement-overview.md`(측정 개요; status draft, 2026-09-29 작성, 2026-10-17 갱신)와 `dataset/sources.yaml`의 `meas-ci` notes입니다. measurement-overview의 항목 표(§2)는 2026-10-17에 9.15가 다시 써서 지금 library의 measured 항목 28개를 담습니다. 이 권을 처음 쓴 2026-10-14에는 그 표가 2026-09-28에서 멈춰 23개 항목을 세고, `file-backup`, `renderer-visible`처럼 이미 없는 항목을 담고 있었습니다.
+이 장은 "`meas-ci:interactive:2026-09-18`이라는 tag 뒤에 무엇이 있나"에 답합니다. 28개 항목의 숫자가 모두 이런 tag를 달고 있으므로, tag가 무엇을 약속하고 무엇을 약속하지 않는지 알아야 4장부터의 숫자를 바르게 읽을 수 있습니다. 측정 방법 전체와 검증 기준(값이 원 자료에서 다시 나오는지, 출처가 원문과 맞는지)은 측정 방법을 다루는 6권이 자세히 다룹니다. 이 장은 tag를 읽는 데 필요한 만큼만 설명합니다. 기준 문서는 `docs/workload/measurement-overview.md`(측정 개요; status draft, 2026-09-29 작성, 2026-11-21 갱신)와 `dataset/sources.yaml`의 `meas-ci` notes입니다. measurement-overview의 항목 표(§2)는 2026-10-17에 9.15가 다시 써서 지금 library의 measured 항목 28개를 담습니다. 이 권을 처음 쓴 2026-10-14에는 그 표가 2026-09-28에서 멈춰 23개 항목을 세고, `file-backup`, `renderer-visible`처럼 이미 없는 항목을 담고 있었습니다.
 
 ## 3.1 CI runner 측정 한 번의 모양
 
@@ -632,7 +632,7 @@ measurement-overview §5가 정의를 모읍니다.
 ## 3.3 repeat, campaign, machine gate
 
 - **repeat**: 새 runner에서 도는 job 하나 전체. measurement-overview §3: "the level at which the largest random variation enters, and so the unit the rule counts." 같은 job 안의 표본이 아니라 job 하나가 반복 단위입니다.
-- **campaign**: 한 측정의 모든 repeat. tag `meas-ci:<workflow>:<첫 batch를 띄운 날짜>`가 campaign을 가리킵니다. campaign의 원 자료는 GitHub release로 공개합니다(예: release `meas-ci-2026-09-18`, `meas-ci-background-2026-10-04`). `dataset/meas-releases.yaml`이 데이터가 인용하는 campaign 23개마다 그 release(하나 이상)와 각 asset의 SHA-256을 적고, `make lint`가 지도에 없는 tag를 실패시킵니다(2026-10-16). release는 campaign을 모을 때 손으로 만들고, GitHub이 workflow의 artifact를 지우는 90일이 지나기 전에 만듭니다(`gh-artifact-retention`).
+- **campaign**: 한 측정의 모든 repeat. tag `meas-ci:<workflow>:<첫 batch를 띄운 날짜>`가 campaign을 가리킵니다. campaign의 원 자료는 GitHub release로 공개합니다(예: release `meas-ci-2026-09-18`, `meas-ci-background-2026-10-04`). `dataset/meas-releases.yaml`이 데이터가 인용하는 campaign 24개마다 그 release(하나 이상)와 각 asset의 SHA-256을 적고, `make lint`가 지도에 없는 tag를 실패시킵니다(2026-10-16). release는 campaign을 모을 때 손으로 만들고, GitHub이 workflow의 artifact를 지우는 90일이 지나기 전에 만듭니다(`gh-artifact-retention`).
 - **landing**: 일부 기록(특히 DKMS campaign)은 job이 목표 machine에 내려앉아 완료된 것을 landing이라 부릅니다. 같은 repeat 번호가 두 번 landing한 경우도 모두 pool에 넣었습니다(9.10 D58: "repeats 7, 10 and 11 landed twice, every landing pooled").
 - **machine gate**: runner의 CPU 모델이 AMD EPYC 7763이 아니면 job을 약 20초 안에, 아무것도 설치하기 전에 멈추는 장치입니다(`dataset/tools/meas/machine_gate.sh`). 멈춘 job은 repeat로 세지 않습니다.
 
@@ -657,7 +657,7 @@ repeat를 몇 번 할지는 **stability rule**이 정합니다. 문장은 `sourc
 
 | class | 언제 | 예 |
 |---|---|---|
-| machine 따라 흩어짐 | runner의 디스크나 속도를 따라 움직임. 한 repeat 안의 모든 thread run 시간이 함께 움직이고 wake 비율은 1 % 안에서 유지됨 | `game-client`, `renderer-hidden`의 run 평균; `cpu-batch` `python3`의 block 값(9.6 D29, 9.10 D87) |
+| machine 따라 흩어짐 | runner의 디스크나 속도를 따라 움직임. 한 repeat 안의 모든 thread run 시간이 함께 움직이고 wake 비율은 1 % 안에서 유지됨 | `game-client`, `renderer-hidden`의 run 평균; `cpu-batch` `python3`의 block 값 둘(9.6 D29, 9.10 D87; 2026-11-21에 11.3이 107 repeat로 다시 재어 ±5.89 %, ±2.15 %, class는 그대로) |
 | session 사이에서 변함 | phase 길이만 한 창을 긴 run 하나 위에서 밀면 거의 안 변하는데 repeat 사이에선 크게 변함 | `code-editor`의 `utility/libuv-worker`(9.5 D57), `service-manager`의 pid 1, `message-bus`의 system bus |
 | sparse component | phase당 몇 번밖에 안 깨어 흩어짐이 개수 자체의 것 | `renderer-hidden`의 residual(9.8 D27) |
 | run 안의 드문 사건 | repeat 하나가 0–2번 잡는 사건 | `web-browser`의 `MemoryInfra`, `game-client`의 HTTP burst(heavy event로 따로 실음) |
@@ -1010,25 +1010,25 @@ warm 캐시만 싣습니다. 캐시를 비운(cold) 상태에서는 `cc1`이 중
 | program 셋 | `python3`(PyTorch MNIST 학습, 이름 `python`), `kdenlive_render`(Kdenlive export), `spoof`(이름만 `chrome`인 hog, design) |
 | 재현하는 행동 | 거의 쉬지 않고 CPU를 씀; 프로그램마다 다른 "쉬지 않고 쓰는 길이"와 짧은 멈춤 |
 | binding | `total_work`, `program` |
-| tag | `meas-ci:background:2026-10-03`(`python3`), `meas-ci:background:2026-10-03c`(`kdenlive_render`) |
+| tag | `meas-ci:background:2026-11-20`(`python3`의 run·block table, 11.3), `meas-ci:background:2026-10-03`(`python3`의 CPU 총량, timeline이 묶음), `meas-ci:background:2026-10-03c`(`kdenlive_render`) |
 
 `cpu-batch`는 batch-loop(2.5절) 항목인데, table 묶음이 프로그램마다 따로 있습니다. timeline이 `program`으로 고릅니다.
 
-**`python3` — PyTorch의 기본 MNIST 예제.** PyTorch 공식 `pytorch/examples`(commit `acc295d`)의 "Basic MNIST Example"을 기본값 그대로(`python main.py --save-model`: batch 64로 14 epoch, epoch마다 test pass, checkpoint 저장), `torch` 2.14.0의 CPU build로, intra-op thread 하나로 돌렸습니다. process 하나, thread 하나이고 이름은 `python`입니다(venv가 실행하는 이름, 9.10 D84). 6 repeat.
+**`python3` — PyTorch의 기본 MNIST 예제.** PyTorch 공식 `pytorch/examples`(commit `acc295d`)의 "Basic MNIST Example"을 기본값 그대로(`python main.py --save-model`: batch 64로 14 epoch, epoch마다 test pass, checkpoint 저장), `torch` 2.14.0의 CPU build로, intra-op thread 하나로 돌렸습니다. process 하나, thread 하나이고 이름은 `python`입니다(venv가 실행하는 이름, 9.10 D84). job 전체 CPU와 포화도는 9.10 campaign(`meas-ci:background:2026-10-03`)의 6 repeat입니다. voluntary block 사이 run과 run당 block은 11.3이 같은 job을 같은 CPU 모델에서 107 repeat 돌려 다시 잰 값입니다(`meas-ci:background:2026-11-20`). 그때의 runner는 kernel 7.0.0-1017-azure였고, runner의 agent `provjobd`가 job마다 학습 run의 대기를 수천 번 끝냈는데, 그런 대기는 그것이 끊은 run에 합쳐 셌습니다.
 
 | 값 | 측정 |
 |---|---|
 | job 전체 CPU | 1,389.885 s ±4.04 %(1,293.8–1,455.8 s) |
 | 포화도 | 0.99988–0.99991 |
-| voluntary block 사이 run | 평균 69.49 s ±27.3 %(repeat당 53.9–114.9 s) |
-| run당 block | 311.5 μs ±10.8 % |
-| block 수 | repeat당 11–24개; 처음 두 번의 sleep 말고는 모두 `khugepaged`가 끝냄 |
+| voluntary block 사이 run | 평균 55.27 s ±5.89 %(repeat당 30.6–121.2 s) |
+| run당 block | 403.96 μs ±2.15 %(233–504 μs) |
+| block 수 | repeat당 11–46개; 모두 커널이 끝냄(`khugepaged` 9–44개, 91 repeat에서 시작의 두 sleep, migration wakeup 하나). `provjobd`가 끝낸 대기 repeat당 2,890–8,343개는 run에 합쳐 셈 |
 
-`python3_run` table의 중간값은 228 ms이지만 p75가 43.5초, 최대가 1,006초입니다. 학습은 몇십 초씩 끊김 없이 돌고, 가끔 커널의 huge page 정리(`khugepaged`)가 잠깐 막을 때만 멈춥니다. 그래서 block 값 둘은 "machine 따라 흩어짐" 예외로 반폭과 함께 실립니다.
+`python3_run` table의 중간값은 1.2 ms(1,223 μs)이지만 p75가 20.5초, 최대가 1,298초입니다. 학습은 몇십 초씩 끊김 없이 돌고, 가끔 커널의 huge page 정리(`khugepaged`)가 잠깐 막을 때만 멈춥니다. 그래서 block 값 둘은 "machine 따라 흩어짐" 예외로 반폭(±5.89 %, ±2.15 %)과 함께 실립니다.
 
 > **왜 이렇게 정했나 — MNIST(9.10 D12, 2026-10-01).** 예전 `python3`는 "a PyTorch 2.14 CPU training loop of 300 steps over synthetic images"였습니다. 9.6 D32는 그것이 실제 학습이 아니라 CPU를 포화시키는 batch task의 대역이라고 범위를 좁혔고, 9.10 D12가 PyTorch 자신의 예제로 바꿨습니다. 기록된 이유: 관측된 desktop ML 학습 workload를 찾지 못했고(Procyon은 inference를 잼), "A definition that is not ours". 주장하지 않는 것도 적었습니다. desktop 사용자가 MNIST를 학습한다는 주장은 하지 않고, GPU 학습은 runner에서 관측할 수 없습니다. `sources.yaml`의 `pytorch-examples` notes: "Identifies the job; no claim about what or how often desktop users train."
 
-> **왜 이렇게 정했나 — huge page 설정은 runner의 것(9.10 D87, D88, 2026-10-03).** runner의 커널은 transparent huge pages(THP, 큰 memory page를 자동으로 쓰는 기능)를 `always` 모드로 돌리는데, Ubuntu desktop 커널의 기본값은 `madvise`입니다. 9.10 D87은 runner의 모드를 그대로 두고 측정하되, `madvise`로 다섯 job을 따로 돌려 보기로 했습니다. 결과(D88): `madvise`에서 같은 학습이 CPU를 1.144배(95 % 구간 ×1.102–×1.185) 더 썼고, 시작의 두 sleep 말고는 block이 없었습니다. 결정은 "D87 kept"입니다. 실린 값은 runner(`always`)의 것이고, desktop 기본 설정이면 job이 약 14 % 더 길다는 것이 scope에 한계로 적혀 있습니다. `video-transcoder`의 scope도 같은 THP 차이를 적습니다.
+> **왜 이렇게 정했나 — huge page 설정은 runner의 것(9.10 D87, D88, 2026-10-03).** 9.10 campaign 때 runner의 커널(6.17.0-1022-azure)은 transparent huge pages(THP, 큰 memory page를 자동으로 쓰는 기능)를 `always` 모드로 돌렸는데, Ubuntu desktop 커널의 기본값은 `madvise`입니다. 9.10 D87은 runner의 모드를 그대로 두고 측정하되, `madvise`로 다섯 job을 따로 돌려 보기로 했습니다. 결과(D88): `madvise`에서 같은 학습이 CPU를 1.144배(95 % 구간 ×1.102–×1.185) 더 썼고, 시작의 두 sleep 말고는 block이 없었습니다. 결정은 "D87 kept"입니다. 실린 값은 runner(`always`)의 것이고, desktop 기본 설정이면 job이 약 14 % 더 길다는 것이 scope에 한계로 적혀 있습니다. `video-transcoder`의 scope도 같은 THP 차이를 적습니다. 11.3의 campaign(`meas-ci:background:2026-11-20`)에서는 runner가 kernel 7.0.0-1017-azure로 바뀌어 image의 기본값이 `madvise`였으므로, job이 run 전에 `always`를 써서 같은 모드로 쟀습니다. 실린 값은 여전히 `always` 아래의 값입니다.
 
 **`kdenlive_render` — Kdenlive의 export.** `video-editor` 항목의 project(20초 1920×1080 30 fps H.264 clip에 unsharp 효과)를 Kdenlive의 render dialog로, 기본 profile MP4-H264/AAC(x264 `veryfast`, CRF 23, GOP 15, AAC 160 kb/s, processing thread 하나)로 내보내는 job입니다. dialog가 띄우는 `kdenlive_render`와 그것이 돌리는 `melt-7`의 tree이고, task 이름은 tree의 뿌리인 `kdenlive_render`입니다. 30 repeat.
 
@@ -1451,6 +1451,7 @@ decision 2의 직접적인 결과는, 거의 모든 항목이 우리 CI 측정�
 | 2026-10-05 | 열 항목에 launch phase; `video-editor` idle 다시 잼; `renderer-hidden`을 Chrome 154로 다시 잼 | 9.10 D140, D146, D156 |
 | 2026-10-09 | 모든 항목에 `declared_class`; `game-download-idle` 들어옴 | 9.13 D2, D4 |
 | 2026-10-31 | 측정된 모든 component를 측정된 wake 사슬의 시작점에 따라 timer part와 event part(`channel: event`)로 나눔, channel마다 coverage cut과 residual; launch와 trace-replay stream에 wake마다 channel | timer-wakes-by-origin spec 결정 6, 8, 10, 13 |
+| 2026-11-21 | `cpu-batch` `python3`의 voluntary block 사이 run과 run당 block을 107 repeat로 다시 잼(`meas-ci:background:2026-11-20`); 둘째 bless | 11.3 spec 결정 5–10 |
 
 ## 11.5 이름이 사라진 것들
 
@@ -1488,7 +1489,7 @@ runner는 실제 desktop이 아닙니다. 항목들의 scope가 적는 venue 한
 
 - **화면, GPU, 소리 없음.** Xvfb 또는 headless session, vsync 없음, `--disable-gpu`로 CPU rasterize, 소리 장치 없음(null 출력). Chromium 계열의 compositor는 60 Hz 주기지만 위상이 다르고, rasterize thread의 run은 GPU desktop보다 길게 잡힙니다(양은 출처 없음). Kdenlive의 렌더 경로는 wake가 과대평가됩니다. llvmpipe thread는 뺐습니다(5.1절, 5.7절).
 - **CPU 하나에 고정, runner agent와 공유.** 측정한 tree는 CPU 하나에서 돌았고, runner 자신의 agent process가 그 CPU를 함께 썼습니다. 여러 thread 프로그램(7-Zip 여덟 thread, `make -j8`)은 실제 desktop이라면 여러 core에서 나란히 돌 일을 한 core에서 나눠 돌았습니다. 기록된 크기: 7-Zip 여덟 thread가 byte당 CPU 1.04–1.10배, `make -j8`가 `-j1` 대비 compile당 CPU 약 1.1배.
-- **CPU 모델 하나, 시기 하나.** AMD EPYC 7763 하나만, 2026-09-18부터 2026-10-05 사이에. runner 커널(6.17.0-1022-azure)은 THP `always`이고 desktop 기본은 `madvise`입니다(학습 job 1.144배).
+- **CPU 모델 하나, 시기 둘.** AMD EPYC 7763 하나만, 2026-09-18부터 2026-10-05 사이에, 그리고 2026-11-20–21의 11.3 재측정(`cpu-batch` `python3`의 block 값 둘). 2026-10-05까지의 runner 커널(6.17.0-1022-azure)은 THP `always`였고, 11.3의 runner(7.0.0-1017-azure)는 기본값이 `madvise`라 job이 `always`를 쓰고 쟀습니다. desktop 기본은 `madvise`입니다(학습 job 1.144배).
 - **tracing 비용.** `perf sched record`가 일부 thread의 run을 길게 만들었고(untraced control의 run 평균 비율 0.72–0.98), SteamCMD의 `perf trace`는 CPU를 약 2.5 % 더 쓰게 했습니다. 실린 값은 traced 값입니다.
 - **사람 없음.** 입력은 2012년 Windows 녹화의 재생이고(key만), 이미지·영상 편집은 script입니다.
 

@@ -1,6 +1,6 @@
 # 4권 · 51개의 coreset: 파일마다 어떤 질문에 답하나
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-31
+> Status: draft · Created 2026-10-14 · Updated 2026-11-21
 
 **core set의 파일 하나하나는 무슨 상황을 적고, 어떤 label을 달고, 어떤 질문에 답하나.**
 
@@ -12,7 +12,7 @@ core set의 조직 원리는 한 문장입니다. building plan(`docs/workload/b
 
 웹 개발자의 세계에 빗대면 core set은 snapshot test 모음과 비슷합니다. 각 test는 하나의 동작을 고정된 입력으로 확인하고, test 이름만 봐도 무엇을 지키는지 알 수 있어야 합니다. core set의 파일 이름(`c1-office`, `c7-dev`, `c2-p1b`)도 그렇게 읽히도록 지어졌습니다. 다만 여기서 "기대값"은 scheduler의 출력이 아니라, 파일 안에 적힌 정답 label(`ground_truth`)입니다. recognizer는 그 정답을 보지 못한 채 process 이름만 보고 상황을 맞혀야 하고, scheduler 실험은 그 정답을 그대로 읽는 oracle 조건과 무작위 조건을 비교합니다.
 
-이 권은 2026-10-14의 tree를 기준으로 썼고, 2026-10-17에 그 뒤의 변화(sub-task 9.23이 정한 `c6-fold`·`c6-spoof`의 label과 program 끝의 규칙, sub-task 9.15가 timeline 머리 주석에 더한 생략 문장)에 맞춰 다시 셌습니다. 파일 수, segment 수, compile된 event 수, byte 수, utilization은 모두 tree에서 shell 명령과 짧은 Python으로 직접 세었고, 셀 때마다 어디서 셌는지 적었습니다. 2026-10-14에 Phase 9 재구축 이전의 dataset을 묘사하던 문서들은 9.15가 고쳤습니다(13.8절).
+이 권은 2026-10-14의 tree를 기준으로 썼고, 2026-10-17에 그 뒤의 변화(sub-task 9.23이 정한 `c6-fold`·`c6-spoof`의 label과 program 끝의 규칙, sub-task 9.15가 timeline 머리 주석에 더한 생략 문장)에 맞춰 다시 셌습니다. 2026-10-31에는 그날의 두 rebuild(측정된 program 자신의 wake를 wake 사슬의 시작점에 따라 `timer:`와 `event:` channel로 나눈 것, 측정된 operation마다 가장 큰 run을 operation 창마다 한 번 싣는 것) 뒤의 build에서 파일별 수, 크기, utilization을 다시 읽었고, 날짜를 붙여 적은 수는 그대로 두었습니다. 2026-11-21에는 `cpu-batch` `python3`의 block 값 둘을 다시 잰 뒤의 rebuild로 byte 수가 바뀐 세 파일의 byte 수와, RQ0 run과 그 뒤의 기록이 낡게 만든 대목을 그날의 tree와 기록에 대조해 고쳤습니다. 파일 수, segment 수, compile된 event 수, byte 수, utilization은 모두 tree에서 shell 명령과 짧은 Python으로 직접 세었고, 셀 때마다 어디서 셌는지 적었습니다. 2026-10-14에 Phase 9 재구축 이전의 dataset을 묘사하던 문서들은 9.15가 고쳤습니다(13.8절).
 
 ---
 
@@ -212,7 +212,7 @@ core set의 파일은 "데스크톱은 보통 이렇게 쓰인다"고 주장하�
 
 ## 1.11 judging set과 전체 set: RQ0 gate spec의 19개 파일
 
-core set 51개가 모두 같은 무게로 쓰이는 것은 아닙니다. 가장 먼저 돌 실험인 RQ0 gate에서는 19개만 판정에 쓰입니다.
+core set 51개가 모두 같은 무게로 쓰이는 것은 아닙니다. 가장 먼저 돈 실험인 RQ0 run(2026-11-16–18, RQ0 gate spec의 full matrix 19,425 run을 cold로 한 번)에서는 19개만 판정에 쓰였습니다. 판정은 fail이고, 2026-11-21에 provisional에서 final이 되었습니다. RQ0 run의 program 위에서 gap이 g 이상인 판정 파일은 19개 중 5개(`c2-p2a`, `c2-p2b`, `c1-ml-train`, `c7-browsing`, `c7-office`)로 K = 10에 못 미칩니다. 실행 당시의 판정은 fail, 19개 중 6개, provisional이었습니다(`docs/rq0-run-record.md`).
 
 - **RQ0** — 연구 제안서(`docs/research-proposal.md`)의 첫 질문 "Measurability"입니다. 모델을 넣기 전에, scheduler 설정의 선택이 이 workload들에서 결과를 측정할 만큼 바꾸는지를 묻습니다. 완벽한 recognizer(oracle)와 무작위 recognizer(random)를 비교합니다. 둘이 비슷하면 어떤 recognizer도 무언가를 보여 줄 수 없으니, 뒤의 질문들이 모두 무의미해집니다.
 - **RQ0 gate spec** — `harness/experiments/rq0-gate.yaml`. RQ0 실행을 실행 전에 데이터로 고정해 둔 사전 등록 문서입니다. 판정 파일, 보고 파일, 기준(K, g, N), 민감도 line, 각 숫자의 이유를 담습니다.
@@ -790,13 +790,14 @@ segment 0–1,594 s `compile`, `true`, `[S11]`. input 2–1,592 s, focus 0–1,5
 
 segment 0–1,612 s `ml-train`, `true`, `[S11, S12]`. input 2–1,610 s, focus 0–1,612 s.
 
-**compile된 모양.** arrive 2개, wake 184,268개(timer 181,454, event 830, input 1,984), 24,217,560 byte, utilization 0.9982.
+**compile된 모양.** arrive 2개, wake 184,268개(timer 181,454, event 830, input 1,984), 24,217,608 byte, utilization 0.9982.
 
 **짝과 파생.** `c7-ml-train`(같은 job에 label만 뒤집은 pre-committed miss).
 
 **정한 결정.**
 - 9.10 D12(training job은 PyTorch의 기본 MNIST 예제를 CPU에서 기본값으로라는 결정, 2026-10-01). 이유: 관찰된 데스크톱 ML training workload를 찾지 못했고, Procyon은 inference만 잽니다. changelog는 "A definition that is not ours"라고 적습니다. 남이 정의한 workload를 쓴다는 뜻입니다. 데스크톱 사용자가 MNIST를 training한다고 주장하지 않습니다.
 - 9.10 D85(training run은 `cpu-batch`의 `python3` program을 다시 측정한 것), D90(campaign `meas-ci:background:2026-10-03`이 반복 6회에서 안정, CPU 총량 1,389.885 s ±4.04 %, 2026-10-03). task 이름 `python`은 venv의 `bin/python`이 comm이기 때문입니다(D84).
+- 11.3(RQ0 run의 carried half-width line에서 `c7-ml-train`을 g 너머로 옮긴 값을 다시 잰 Phase 11 sub-task, 2026-11-21): training run의 voluntary block 사이 run과 run당 block을 같은 job의 107 repeat로 다시 쟀습니다(campaign `meas-ci:background:2026-11-20`). 55.27 s ±5.89 %와 403.96 µs ±2.15 %이고, 둘 다 예외 class는 그대로입니다. CPU 총량은 9.10 campaign의 1,389.885 s 그대로입니다(107 repeat에서는 1,413.843 s ±0.34 %로 읽혀 실린 값의 구간 안). 이 파일은 그 값으로 다시 build되었습니다.
 - segment 1,612 s는 2.6절의 산술(머리 주석: 2 + 1,389.885 + 0.012 + 219.263 = 1,611.161 s)입니다.
 
 **RQ0에서.** 판정 파일. 편집기 P99(1.0)와 job turnaround(0.5).
@@ -979,7 +980,7 @@ RQ0 gate spec의 민감도 line 가운데 `seg1-30s`와 `seg1-120s`는 네 판�
 
 input은 editor 2–97.435 s, focus는 editor 0–99.435 s. `meta.demand`는 적혀 있지 않아 기본값 `oversubscribed`입니다. seed 201.
 
-**compile된 모양.** arrive 2개, wake 11,293개(timer 10,740, event 28, input 525), 1,471,142 byte. utilization은 파일 14.505, segment 0 0.5272, segment 1 35.7721입니다. 2.5절에서 말했듯 segment 1의 숫자는 1,389.885 s짜리 job의 CPU 전체를 39.435 s에 몰아 센 정적 추정이지, 실제로 lane 35개를 쓴다는 뜻이 아닙니다. 9.14 D4는 이 segment의 demand를 "35.77 lanes (second segment)"로 기록합니다. query point는 0 s, 60 s, 99.435 s입니다.
+**compile된 모양.** arrive 2개, wake 11,293개(timer 10,740, event 28, input 525), 1,472,070 byte. utilization은 파일 14.505, segment 0 0.5272, segment 1 35.7721입니다. 2.5절에서 말했듯 segment 1의 숫자는 1,389.885 s짜리 job의 CPU 전체를 39.435 s에 몰아 센 정적 추정이지, 실제로 lane 35개를 쓴다는 뜻이 아닙니다. 9.14 D4는 이 segment의 demand를 "35.77 lanes (second segment)"로 기록합니다. query point는 0 s, 60 s, 99.435 s입니다.
 
 **정한 결정.**
 - 9.10 D12와 D85, D90: training은 PyTorch MNIST 예제, CPU 총량 1,389.885 s(4.15절과 같은 job).
@@ -1568,7 +1569,7 @@ segment는 하나, 0–12,072 s `ambiguous`, `attributes: {dual_active: true}`, 
 
 **채점.** chain miss rate(1.0)와 편집기 P99(input, 1.0). 정답 mode가 없으니 recognition 정확도에서는 빠지고, Layer 2 합산에서도 빠집니다.
 
-> **열린 자리.** 이 파일은 시뮬레이션 비용이 큽니다. 9.14 D13–D14와 그 handoff는 `c6-dual` 한 run의 records build가 mock trace에서 약 40분(trace 4,200만 줄)이 걸리고, 한 run의 memory 최고점이 1,450만 행이라 여유 memory가 약 8 GB 아래인 기계에서는 swap이 생긴다고 적습니다. `random` 조건의 seed 100개를 이 파일 하나에 돌리면 약 67시간입니다. 2026-10-16에 인지오는 대응을 지금 고르지 않고 Phase 10에서 실제 simulator의 측정된 비용을 보고 정하기로 했습니다. 더 싼 records 경로, RQ0 gate spec의 `n-grounding` statement에 따른 N의 변경(어느 run보다 먼저 harness changelog에 기록), 또는 비용을 그대로 지는 것 가운데 하나입니다(`_dev/TODO.md`의 Phase 10 줄). 이 파일은 보고 파일입니다.
+이 파일은 시뮬레이션 비용이 큽니다. 9.14 D13–D14와 그 handoff는 `c6-dual` 한 run의 records build가 mock trace에서 약 40분(trace 4,200만 줄)이 걸리고, 한 run의 memory 최고점이 1,450만 행이라 여유 memory가 약 8 GB 아래인 기계에서는 swap이 생긴다고 적었습니다. 2026-10-16에 인지오는 대응을 Phase 10에서 실제 simulator의 측정된 비용을 보고 정하기로 했습니다. Phase 10의 cold smoke와 비용 대응(sub-task 10.4, 2026-11-14–15)에서 trace로 records를 만드는 길이 바뀌어, `c6-dual`의 `fixed` run은 records build 213 s, 쓰기 110 s, aggregates 124 s, memory 최고점 9.4 GB가 되었습니다. 그 전에는 15 GB를 넘어 16 GB의 home machine에서 swap이 생겼습니다. runner는 이 파일처럼 큰 workload 파일의 run을 한 번에 하나씩 돌립니다(`heavy_workers` 1). 비용은 N = 100 그대로 지기로 했습니다(2026-11-15). 전체 run의 위쪽 추정 50.33시간 가운데 `c6-dual`의 112 run이 30.59시간이었고, RQ0 run(2026-11-16–18)은 45시간 26분에 끝났습니다(`_dev/research/jioh/task-10.4-cold-smoke-and-cost-response/README.md`, `docs/rq0-run-record.md`). 이 파일은 보고 파일입니다.
 
 ---
 
@@ -1821,9 +1822,9 @@ job은 바뀌지 않습니다. 같은 `file-indexer`, 같은 이름 `tracker-min
 
 ### `c7-ml-train`
 
-base `c1-ml-train`의 앞 C = 1,389.885 s. training(`python`, `cpu-batch` `python3`)이 0 s에 도착하고 편집기가 1,389.885 s에 떠납니다. segment `ml-train`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S11, S12]`. input 2–1,387.885 s(`slice_of` 2–1,610 s). arrive 2개, wake 158,589개(timer 156,109, event 727, input 1,753), 20,825,630 byte, utilization 1.1405. query point 0 s, 1,389.885 s.
+base `c1-ml-train`의 앞 C = 1,389.885 s. training(`python`, `cpu-batch` `python3`)이 0 s에 도착하고 편집기가 1,389.885 s에 떠납니다. segment `ml-train`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S11, S12]`. input 2–1,387.885 s(`slice_of` 2–1,610 s). arrive 2개, wake 158,589개(timer 156,109, event 727, input 1,753), 20,825,678 byte, utilization 1.1405. query point 0 s, 1,389.885 s.
 
-C는 9.10 D90의 CPU 총량이고, 길이 형식은 recipe가 적듯 "D78's form"입니다. 편집기 P99(input) 하나로 채점됩니다. RQ0 판정 파일이며 `layer1_exclusions`에 들어 있습니다. venue 둘, corner 둘의 variant가 붙고, corner는 training run의 두 block 값(`python3_run` ±27.3 %, `python3_block` ±10.8 %)을 움직입니다.
+C는 9.10 D90의 CPU 총량이고, 길이 형식은 recipe가 적듯 "D78's form"입니다. 편집기 P99(input) 하나로 채점됩니다. RQ0 판정 파일이며 `layer1_exclusions`에 들어 있습니다. venue 둘, corner 둘의 variant가 붙고, corner는 training run의 두 block 값(`python3_run` ±5.89 %, `python3_block` ±2.15 %, 2026-11-21에 11.3이 107 repeat로 다시 잰 반폭)을 움직입니다.
 
 ### `c7-render`
 
@@ -1931,7 +1932,7 @@ variant가 필요한 이유는 dataset의 값 가운데 일부가 불확실하�
 - **stability rule** — 측정값을 실을 때의 기준입니다. 반복들 사이의 평균에 대한 95 % 구간의 반폭이 평균의 5 % 이하(또는 1 µs 이하)이고 반복이 다섯 번 이상이어야 합니다(`docs/workload/measurement-overview.md` §6).
 - **exception-carried value** — 이 기준을 통과하지 못했지만, 퍼짐이 프로그램이 아니라 기계나 세션에서 온다는 이유로 반폭을 명시한 채 실린 값입니다.
 
-`variants.yaml`의 `carried_values`는 이런 값을 표 단위로 열아홉 줄, 반폭과 함께 적습니다. 한 줄이 entry 하나의 component나 program 하나에 딸린 표(gap, run 또는 block의 표) 하나입니다. 2026-10-17에 `renderer-hidden`의 `Compositor`와 `PerfettoTrace`가 gap과 run 표 둘씩 더해져 열다섯 줄에서 열아홉 줄이 되었습니다(9.15 작업 목록에서 `carried_values`가 그 두 thread를 빠뜨렸다고 적은 항목 W-0898). 두 thread의 값은 `meas-ci:desktop:2026-10-05b`부터 session 사이에서 변하는 값으로 실렸지만(9.10 D156), 그 전까지 corner set이 훑지 않았습니다.
+`variants.yaml`의 `carried_values`는 이런 값을 표 단위로 열아홉 줄, 반폭과 함께 적습니다. 한 줄이 entry 하나의 component나 program 하나에 딸린 표(gap, run 또는 block의 표) 하나입니다. 2026-10-17에 `renderer-hidden`의 `Compositor`와 `PerfettoTrace`가 gap과 run 표 둘씩 더해져 열다섯 줄에서 열아홉 줄이 되었습니다(9.15 작업 목록에서 `carried_values`가 그 두 thread를 빠뜨렸다고 적은 항목 W-0898). 두 thread의 값은 `meas-ci:desktop:2026-10-05b`부터 session 사이에서 변하는 값으로 실렸지만(9.10 D156), 그 전까지 corner set이 훑지 않았습니다. 2026-11-21에는 `cpu-batch` `python3`의 두 줄이 11.3의 재측정 값으로 바뀌었습니다(줄 수는 열아홉 그대로).
 
 | entry | component / 표 | 반폭 | 출처 결정 |
 |---|---|---|---|
@@ -1951,8 +1952,8 @@ variant가 필요한 이유는 dataset의 값 가운데 일부가 불확실하�
 | `game-client` | `steam` run | 10.1 % | 같음 |
 | `game-client` | `IPC:CSteamEngin` run | 8.8 % | 같음 |
 | `game-client` | `VizCompositorTh` run | 5.6 % | 같음 |
-| `cpu-batch` (`python3`) | `python3_run` | 27.3 % | 9.10 D87, D88 |
-| `cpu-batch` (`python3`) | `python3_block` | 10.8 % | 같음 |
+| `cpu-batch` (`python3`) | `python3_run` | 5.89 % | 11.3의 재측정(`meas-ci:background:2026-11-20`; 9.10 D87, D88, 9.6 D29의 예외) |
+| `cpu-batch` (`python3`) | `python3_block` | 2.15 % | 11.3의 재측정(`meas-ci:background:2026-11-20`; 9.10 D87, D88) |
 | `module-build-orchestrator` | `tail_block` | 8.35 % | 9.10 D58 |
 
 `variants.yaml` 주석은 이 목록에 없는 예외 값도 적습니다. 세션 daemon의 PID 1과 system bus 값(9.9 D48)은 그 값을 담은 파일이 모두 보고 파일이라 sweep하지 않습니다. 이 주석은 2026-10-16까지 Tracker indexer의 block(9.6 D29)도 그런 값으로 적었지만, 지금의 `file-indexer`는 세 값 모두에서 stability rule을 지키므로(항목의 scope: "the stability rule holds on all three values") 그 구절은 2026-10-17에 주석에서 빠졌습니다.
@@ -1965,7 +1966,7 @@ RQ0 gate spec의 `files.variants`가 78개를 모두 이름으로 나열하고, 
 
 variant는 base의 term으로 채점됩니다. 9.14 D11(variant 파일은 base의 term으로, 자기 segment 위의 window로 채점된다는 결정, 2026-10-09)이 `scoring.with_variants`를 만들었습니다. 기록된 계기는 "a variant run … would have been aggregated without its windows and never scored — every sensitivity line reading an empty gap"입니다. 이것이 없었다면 variant run은 window 없이 합산되어 채점되지 않았고, 모든 민감도 line이 빈 gap을 읽었을 것이라는 뜻입니다. `segment-length` variant는 segment 경계가 옮겨지므로 window도 variant 자신의 segment를 따라갑니다.
 
-pin은 RQ0 gate spec의 `pins.variants.all`입니다. 2026-10-17의 값은 `8e2948b18812a546375ccd1f67d61604ee06c51d87060b8a1a48f5aa6cd0f1a4`이고(출구 감사 9.16의 re-pin, `harness/CHANGELOG.md`의 2026-10-17 항목 가운데 dataset을 마지막으로 다시 pin한 것), `shasum -a 256 dataset/build.variants.manifest.json`이 같은 값을 냅니다. 이 pin은 9.14 D12(2026-10-09)에 처음 걸렸고 그 뒤 9.17, 9.18, 9.22, 9.20, 9.23(D10, D17), 9.15(2026-10-16의 rebuild, 2026-10-17의 묶은 data rebuild와 같은 날의 두 번째 data rebuild), 9.16(2026-10-17, 출구 감사의 data rebuild)을 거치며 다시 걸렸습니다. core manifest가 바뀌면 variants manifest의 `inputs`도 바뀌기 때문입니다.
+pin은 RQ0 gate spec의 `pins.variants.all`입니다. 2026-10-17의 값은 `8e2948b18812a546375ccd1f67d61604ee06c51d87060b8a1a48f5aa6cd0f1a4`이고(출구 감사 9.16의 re-pin, `harness/CHANGELOG.md`의 2026-10-17 항목 가운데 dataset을 마지막으로 다시 pin한 것), 그때 `shasum -a 256 dataset/build.variants.manifest.json`이 같은 값을 냈습니다. 이 pin은 9.14 D12(2026-10-09)에 처음 걸렸고 그 뒤 9.17, 9.18, 9.22, 9.20, 9.23(D10, D17), 9.15(2026-10-16의 rebuild, 2026-10-17의 묶은 data rebuild와 같은 날의 두 번째 data rebuild), 9.16(2026-10-17, 출구 감사의 data rebuild), 그리고 2026-10-31의 두 data rebuild(측정된 program 자신의 wake를 출처에 따라 `timer:`와 `event:` channel로 나눈 rebuild, 측정된 operation마다 가장 큰 run을 창마다 한 번 싣는 rebuild)를 거치며 다시 걸렸습니다. core manifest가 바뀌면 variants manifest의 `inputs`도 바뀌기 때문입니다. 지금의 값은 2026-10-31의 두 번째 re-pin이 건 `de9802e787cfdb6af1568134dffc28ddf78713e57ab2e3fee41880f073ee4205`이고, RQ0 run(2026-11-16–18)이 읽은 variants manifest가 이것입니다. 2026-11-21에 11.3이 `cpu-batch` `python3`의 block 값 둘을 다시 잰 뒤의 rebuild(둘째 bless)가 variant 78개를 다시 build해(library의 hash 말고도 바뀐 것은 `python3`를 담은 열네 개), 지금의 `dataset/build.variants.manifest.json`은 이 pin과 hash가 같지 않습니다. 실행된 RQ0 gate spec은 고치지 않으므로 그 dataset pin과 variants pin은 RQ0 run이 읽은 build를 가리킨 채 남고, experiment lint는 실행된 spec의 pin을 그 run이 읽은 tree로 읽어 어긋난 pin을 오류가 아니라 note로 찍습니다(2026-11-20부터).
 
 ---
 
@@ -2341,13 +2342,22 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 |---|---|
 | Phase 2 / task-2.3, task-2.4 | dataset 첫 생성(2026-08-27/28). timeline compiler와 첫 core timeline 24개 |
 | Phase 3 | 검증과 protocol 동결(2026-09-06). demand를 manifest에, telemetry 규칙 동결 |
+| 3.2 | `c6-dual` 점검. oracle과 validator가 `mode: ambiguous`와 `dual_active`를 어떻게 다루는지 |
 | Phase 5 | 기본 지표와 records(2026-09-07/08). `familiarity`를 `ground_truth`까지 옮김 |
 | Phase 6 | driver table 초안과 scoring spec, pair review(2026-09-08/09) |
 | Phase 7 / 7.1–7.7 | core set의 attribute coverage(2026-09-09→11). 24 → 50, C7 신설, 판정 파일 27 |
+| Phase 8 | harness의 위쪽 절반과 사전 등록. records에서 판정까지 mock 위에서, RQ0 gate spec commit까지 |
 | 8.8 | RQ0 gate spec 첫 commit(2026-09-12). 판정 파일 25, K 13 |
 | Phase 9 | 측정 위의 dataset 재구축(2026-09-13 → 2026-10-18) |
+| 9.4 | gaming의 연구와 결정. `game-task-chain`을 LAVD 자료 하나 위에, `wineserver`를 chain member로 |
+| 9.5 | interactive와 typing의 연구와 결정(D1–D99). `desktop-interactive`, `audio-playback`, `video-playback`을 측정한 application별 항목 아홉으로 |
+| 9.6 | compile의 연구와 결정(D1–D38). campaign `meas-ci:build:2026-09-18` |
+| 9.7 | background와 IO의 연구와 결정(D1–D41). `io-stream`/`network-bulk`를 `file-backup`, `file-archiver`, `game-download`로 |
+| 9.8 | browser와 comms의 연구와 결정(D1–D38). `electron-comms`를 네 항목으로, Steam 계정 쓰지 않음 |
+| 9.9 | daemon과 session process의 연구와 결정(D1–D48). `system-daemon`을 idle Ubuntu 24.04 session의 네 항목으로 |
 | 9.10 | scenario와 timeline(2026-10-01→07). 결정 D1–D174 |
 | 9.11 | scheduler 쪽 상수와 근거. declared class, nice |
+| 9.12 | related work와 proposal 문장의 연구와 결정 |
 | 9.13 | 재build(2026-10-09). native 폐지, `declared_class`, `c2-p2a-idle`, bless |
 | 9.14 | 소비자 쪽 재작업(2026-10-09/10). demand window 폐지, 판정 19, variant 78 |
 | 9.15 | docs·memo·guidebook 수정(2026-10-15부터)과 그 안에서 정한 dataset 수정(머리 주석의 생략 문장) |
@@ -2355,7 +2365,12 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 | 9.17 | focus를 telemetry에(2026-10-11). `input`/`focus` 분리 |
 | 9.18 | compiler, schema, build gate(2026-10-11). `slice_of`, `source` |
 | 9.19 / 9.20 / 9.21 | generated layer와 그 소비자 쪽(2026-10-11→13). `c5-t3` → `c6-alias` |
+| 9.22 | build 시간. CI 한 번이 set을 한 번만 compile, artifact는 그대로 |
 | 9.23 | 이 guidebook이 찾은 어긋남(2026-10-14/15). `c6-fold`·`c6-spoof`의 pre-committed miss, segment 67개, program 끝의 WAIT·TIMER |
+| Phase 10 | 통합과 RQ0 run(2026-11-01 → 2026-11-18). 실제 simulator와 daemon 위의 RQ0 run(2026-11-16–18) |
+| 10.4 | cold smoke와 비용 대응(2026-11-14/15). records 경로, worker 설정, 비용을 N = 100에서 짐 |
+| Phase 11 | RQ0 실패 절차: 진단(2026-11-18부터) |
+| 11.3 | 재측정과 둘째 bless(2026-11-20/21). `cpu-batch` `python3`의 block 값 둘을 107 repeat로 |
 
 ## 14.8 OS와 scheduling 용어
 
