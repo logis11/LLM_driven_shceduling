@@ -43,7 +43,7 @@ and every hit's passage read; files under 400 lines read whole. The research gui
 - **Q6 — the memo to 인경민 and 박이안** (decision 15). No row changes what either does: the rows with a teammate side restate asks already sent (R1, Q5). **Decided (인지오, 2026-11-21): no memo.**
 - **Q7 — the chunks and waves** below. **Decided (인지오, 2026-11-21): as drafted.**
 
-Under Q1, the lists of the phases "directly related to the dataset" (g1-40, g2-01, g2-24) gain Phase 10 — the 2026-10-31 rebuilds are its item ("The Phase 10 item 'Timer wakes that find their task behind'", `_dev/docs/spec/jioh/timer-wakes-by-origin.md`, line 3) — and Phase 11 (11.3's re-measurement and second bless).
+Under Q1, the lists of the phases "directly related to the dataset" (g1-40, g2-01, g2-24) gain Phase 11 (11.3's re-measurement and second bless) alone. The 2026-10-31 rebuilds are Phase 9's sub-task 9.24: commit `14b96641` (2026-11-01) moved "the three done items under Phase 10 … to Phase 9 as 9.24 (timer wakes by origin) and 9.25", and `_dev/TODO-done.md` files them so (line 186); the timer-wakes spec's "The Phase 10 item" (`_dev/docs/spec/jioh/timer-wakes-by-origin.md`, line 3) predates the move. A list made whole names those rebuilds by date and content, or as 9.24.
 
 ## Outside the sweep, for 인지오
 
@@ -73,6 +73,41 @@ A chunk owns its files; no two chunks share one. An editing agent applies the ch
 | K9 · Index, memo status lines, hold-time plan file | `docs/README.md`, the memos' status lines, `_dev/docs/plan/jioh/hold-time-and-hysteresis.md` | g0-01 – g0-14 |
 
 Wave 1: K1–K4. Wave 2: K5–K8. Wave 3: K9, its index lines read against the edits before it; then the TODO closed (decision 8) and the second search.
+
+## Outcome (2026-11-21)
+
+**258 rows: 210 applied, 48 left.** The 246 rows of the list and 12 added on the way:
+
+- **Found while editing or reviewing:** g2-39 (chapter 8's paraphrase of 9.16 decision 6, dated); g5-44 and g5-45 (volume 3's RQ-to-link table and summary, RQ0 measuring link 2 too); g7-33 and g7-34 (the references' two counts, 5 to 107); g0-18 and g0-19 (the index's search-memo line and the guidebook's five checking passes).
+- **Found by the second search:** g7-35 (the coreset guide's `c2-p1a` meta); g3-26 (chapter 6's paraphrase of 9.16 decision 6, dated).
+- **Found by the not-yet search:** g5-46 and g5-47 (volume 3 on the cap and volume 4 on the declared class, shown on the binary by the integration gate).
+- **Found at the second search's review:** g2-40 (chapter 3 §7.2's `c2-p1a` meta). The same review moved three D rows to applied for consistency with g5-46: g5-03, g5-31 and g5-36, the cap "not yet" enforced, overtaken by the integration gate with the earlier fact (stage V, 2026-10-20) included.
+
+**Applied:** 198 of the list's 246 (its 170, Q1's 16, Q2's 6, Q5's 2, g5-12's verb, and the three D rows above) and the 12.
+
+**Left, 48:** 25 D rows, Q1's 4 dated lists, Q3's 10, Q4's 8, and g4-26 outside the sweep.
+
+**Commits**, one per chunk, each on its reviewer's pass after the review's findings were applied: K3 `fc001f90`, K4 `a2bc3702`, K7 `751f5ab6`, K6 `3d0d2bd1`, K1 `333b5c00`, K2 `ff550ee3`, K5 `9cb3c46c`, K8 `b500beba` (with `docs/references.md`'s two rows), K9 `f6575e70`. The second search's rows: `219aee71`, `f8f070e2`, `d7e4643b`, and its review's findings `0d04abed`.
+
+**The end checks:**
+
+- **Every row applied or marked left.** The chunk logs under `logs/` give each row's outcome.
+- **The second search over the same terms is clean.** The files the sweep did not edit hold the hit lines the first search read. Every hit the edited files gained is an added line in a reviewed hunk.
+- **The search for the replaced values found two rows** (g7-35, g3-26). It covered `69.49`, `27.3 %`, `5 to 77`, `40–83`, the old pins and library hash, "provisional", "6 of 19", "17 of 19", the Phase 10 timing, and more. Every other hit is dated, an as-run figure kept as the run's own, or unrelated.
+- **The search for the Korean 아직 found two rows** (g5-46, g5-47). The term list lacked the word; the 96 lines no term caught were read.
+- **The dates and the index are in line.** Every edited doc with a status header reads `Updated 2026-11-21`, and no doc changed status or name.
+- **The suites that read a touched file pass.** `make -C dataset lint` (which reads `docs/references.md`) is clean, its 63 lint tests pass, and `make -C harness lint` is clean, with the RQ0 gate spec's two pins as notes. All three ran under `python3.12`; the default `python3` lacks `jsonschema_rs`.
+
+**Left for 인지오, besides the list's "Outside the sweep":**
+
+- `daemon/README.md` line 59 says all three model-free conditions pass through the validator. `daemon.py` returns `fixed`'s boot-default schedule without it.
+- The daemon guide's first milestone names the 51 core files. `daemon/README.md` records the `names` run over 25 workloads, while `daemon.py`'s docstring says the core set. The milestone is left unmarked.
+- Chapter 8 §12.5 counts five dataset Backlog lines. The Layer 1 and RQ4 line, moved there by Phase 10 spec decision 9, may make six.
+- Chapter 8 §12.4 item 8 dates its cold-smoke TODO line 2026-10-20, while the phrase appears in the history from 2026-09-19. Unverified.
+- `harness/tools/tests/README.md:15` says "six mock trace pairs"; the fixtures README counts seven.
+- Chapter 6 §9.3 says the workflow doc was revised to 2026-09-24; its last commit is 2026-10-01.
+- About a dozen targeted guidebook commits between 2026-10-20 and 2026-11-01 are not named in the guidebook's lists of correction passes. Each fixed one change rather than re-reading a volume.
+- Chapter 7 §2.8 shows the 2026-10-17 library hash and pins as an example of the variants manifest's structure. Left as an example of that build; chapter 3's first example and chapter 7's first are dated in place.
 
 ## Rows by file
 
