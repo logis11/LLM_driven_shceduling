@@ -277,3 +277,15 @@ Beyond the term list, each volume was also searched for `RQ0`, the training run'
 - **Now:** "RQ0이 link 1, RQ1이 link 4, RQ2가 link 5, RQ4가 link 6을 재고, …"
 - **Becomes:** "RQ0이 link 1과 link 2, …"
 - **From:** `harness/experiments/rq0-gate.yaml`, statement `claim-links`
+
+## Added at the second search (2026-11-21)
+
+### g5-46 · `docs/guidebook/vol-03-the-research.md:640` · A · item 2 (the integration gate passed), with Q2's earlier fact
+- **Now:** "실행부가 집행해야 하는 값인데, 시뮬레이터는 아직 이 값을 읽지 않습니다. 구현해야 할 항목입니다."
+- **Becomes:** the simulator reads and enforces the cap since 2026-10-20, and the integration gate of 2026-11-14 showed it on the binary (conformance item (d))
+- **From:** `docs/memos/2026-09-09-batch-class-rule-for-the-simulator.md`, its status line ("is in it since stage V (2026-10-20)"); `harness/CHANGELOG.md`, 2026-11-14 "the integration gate passed"; `docs/memos/2026-11-15-integration-gate-and-cold-smoke.md`, the `test_cap_ceiling.py` row
+
+### g5-47 · `docs/guidebook/vol-04-experiment-design.md:1111` · A · item 2 (the integration gate passed), with Q2's earlier fact
+- **Now:** "지금의 참조 시뮬레이터(`simulator/src/sim.cpp`)는 아직 선언된 등급을 읽지 않습니다. RQ0 gate spec은 RQ0을 돌리기 전에 시뮬레이터가 이 규칙을 보여야 한다고 적어두고, …"
+- **Becomes:** the simulator reads the declared class and keeps the rule since 2026-10-28; the integration gate of 2026-11-14 showed it on the binary (conformance item (e))
+- **From:** `docs/memos/2026-10-08-declared-scheduling-class.md`, its status line ("in the simulator since its stage Z (2026-10-28, commit `8dab1176`)"); `harness/CHANGELOG.md`, 2026-11-14 "the integration gate passed"; `docs/memos/2026-11-15-integration-gate-and-cold-smoke.md`, the `test_idle_class.py` row
